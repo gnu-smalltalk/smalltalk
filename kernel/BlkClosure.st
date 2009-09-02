@@ -319,8 +319,7 @@ creation of Processes from blocks.'>
     ]
 
     whileTrue: aBlock [
-	"Evaluate the receiver. If it returns true, evaluate aBlock and re-
-	 start"
+	"Evaluate the receiver. If it returns true, evaluate aBlock and restart"
 
 	"When the receiver is a block expression, whileTrue: is optimized
 	 by the compiler"
@@ -331,8 +330,7 @@ creation of Processes from blocks.'>
     ]
 
     whileFalse: aBlock [
-	"Evaluate the receiver. If it returns false, evaluate aBlock and re-
-	 start"
+	"Evaluate the receiver. If it returns false, evaluate aBlock and restart"
 
 	"When the receiver is a block expression, whileFalse: is optimized
 	 by the compiler"

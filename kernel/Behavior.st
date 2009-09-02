@@ -292,16 +292,16 @@ method dictionary, and iterating over the class hierarchy.'>
     ]
 
     compileAllSubclasses: aNotifier [
-	"Recompile all selector of all subclasses. Notify aNotifier by sen-
-	 ding #error: messages if something goes wrong."
+	"Recompile all selector of all subclasses. Notify aNotifier by sending
+	#error: messages if something goes wrong."
 
 	<category: 'method dictionary'>
 	self allSubclassesDo: [:subclass | subclass compileAll: aNotifier]
     ]
 
     compileAllSubclasses [
-	"Recompile all selector of all subclasses. Notify aNotifier by sen-
-	 ding #error: messages if something goes wrong."
+	"Recompile all selector of all subclasses. Notify aNotifier by sending
+	#error: messages if something goes wrong."
 
 	<category: 'method dictionary'>
 	self allSubclassesDo: [:subclass | subclass compileAll]
@@ -388,8 +388,8 @@ method dictionary, and iterating over the class hierarchy.'>
     ]
 
     compileAll: aNotifier [
-	"Recompile all selectors in the receiver. Notify aNotifier by sen-
-	 ding #error: messages if something goes wrong."
+	"Recompile all selectors in the receiver. Notify aNotifier by sending
+	#error: messages if something goes wrong."
 
 	<category: 'method dictionary'>
 	self methodDictionary notNil 

@@ -1,3 +1,14 @@
+2009-09-02  Lee Duhem  <lee.duhem@gmail.com>
+
+	* kernel/ArrayColl.st: Remove unnecessary manual hyphenations.
+	* kernel/Behavior.st: Ditto.
+	* kernel/BlkClosure.st: Ditto.
+	* kernel/CharArray.st: Ditto.
+	* kernel/Object.st: Ditto.
+	* kernel/RunArray.st: Ditto.
+	* kernel/SeqCollect.st: Ditto.
+	* kernel/ValueAdapt.st: Ditto.
+
 2009-09-01  Lee Duhem  <lee.duhem@gmail.com>
 
 	* scripts/Remote.st: Fix typo in help message

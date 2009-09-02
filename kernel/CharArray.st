@@ -162,10 +162,9 @@ accessing and manipulation methods for strings.'>
     indexOf: aCharacterArray matchCase: aBoolean startingAt: anIndex [
 	"Answer an Interval of indices in the receiver which match the aCharacterArray
 	 pattern. # in aCharacterArray means 'match any character', * in aCharacterArray means
-	 'match any sequence of characters'. The first item of the returned in-
-	 terval is >= anIndex. If aBoolean is false, the search is case-insen-
-	 sitive, else it is case-sensitive.
-	 If no Interval matches the pattern, answer nil."
+	 'match any sequence of characters'. The first item of the returned interval
+	 is >= anIndex. If aBoolean is false, the search is case-insensitive, 
+	 else it is case-sensitive. If no Interval matches the pattern, answer nil."
 
 	<category: 'comparing'>
 	| result |

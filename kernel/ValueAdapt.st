@@ -124,8 +124,8 @@ ValueAdaptor subclass: ValueHolder [
     | value |
     
     <category: 'Language-Data types'>
-    <comment: 'I store my value in a variable. For example, you can use me to pass num-
-bers by reference. Just instance me before calling a method and ask for
+    <comment: 'I store my value in a variable. For example, you can use me to pass
+numbers by reference. Just instance me before calling a method and ask for
 my value after that method. There are a lot of other creative uses for
 my intances, though.'>
 
@@ -366,10 +366,10 @@ PluggableAdaptor subclass: DelayedAdaptor [
     | value delayed |
     
     <category: 'Language-Data types'>
-    <comment: 'I can be used where many expensive updates must be performed. My in-
-stances buffer the last value that was set, and only actually set the
-value when the #trigger message is sent. Apart from this, I''m equi-
-valent to PluggableAdaptor.'>
+    <comment: 'I can be used where many expensive updates must be performed. My
+instances buffer the last value that was set, and only actually set the
+value when the #trigger message is sent. Apart from this, I''m equivalent
+to PluggableAdaptor.'>
 
     trigger [
 	"Really set the value of the receiver."

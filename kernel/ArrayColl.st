@@ -309,8 +309,8 @@ externally; I will not rearrange the order of the elements.'>
     ]
 
     with: aSequenceableCollection collect: aBlock [
-	"Evaluate aBlock for each pair of elements took respectively from the re-
-	 ceiver and from aSequenceableCollection; answer a collection of the same
+	"Evaluate aBlock for each pair of elements took respectively from the receiver
+	 and from aSequenceableCollection; answer a collection of the same
 	 kind of the receiver, made with the block's return values. Fail if the
 	 receiver has not the same size as aSequenceableCollection."
 

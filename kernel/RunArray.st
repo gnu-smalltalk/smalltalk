@@ -131,8 +131,8 @@ behave like an ArrayedCollection.'>
     ]
 
     addAllLast: aCollection [
-	"Add all the elements of aCollection at the end of the receiver. If aCol-
-	 lection is unordered, its elements could be added in an order which is not
+	"Add all the elements of aCollection at the end of the receiver. If aCollection
+	is unordered, its elements could be added in an order which is not
 	 the #do: order"
 
 	<category: 'adding'>
@@ -211,8 +211,8 @@ behave like an ArrayedCollection.'>
 
     at: anIndex splitAndPut: anObject decrementBy: i [
 	"Private - Split the run at index anIndex (say it's made of n elements)
-	 into two runs for a total of n-i elements; between them, put a one ele-
-	 ment run for anObject. Answer anObject"
+	 into two runs for a total of n-i elements; between them, put a one element
+	 run for anObject. Answer anObject"
 
 	<category: 'private'>
 	| run |
@@ -411,9 +411,9 @@ Collection extend [
     ]
 
     asRunArrayMap [
-	"Private - Answer the receiver converted to an OrderedCollection of Asso-
-	 ciations whose keys are the actual objects and whose values are the number
-	 of consecutive copies of them"
+	"Private - Answer the receiver converted to an OrderedCollection of
+	Associations whose keys are the actual objects and whose values are
+	the number of consecutive copies of them"
 
 	"Bags can be easily packed, because they are made of runs of unordered
 	 elements like RunArrays. As the #do: order of non-sequenceable collections
@@ -430,9 +430,9 @@ Collection extend [
 Bag extend [
 
     asRunArrayMap [
-	"Private - Answer the receiver converted to an OrderedCollection of Asso-
-	 ciations whose keys are the actual objects and whose values are the number
-	 of consecutive copies of them"
+	"Private - Answer the receiver converted to an OrderedCollection of
+	Associations whose keys are the actual objects and whose values are
+	the number of consecutive copies of them"
 
 	<category: 'private'>
 	| map |
@@ -448,9 +448,9 @@ Bag extend [
 SequenceableCollection extend [
 
     asRunArrayMap [
-	"Private - Answer the receiver converted to an OrderedCollection of Asso-
-	 ciations whose keys are the actual objects and whose values are the number
-	 of consecutive copies of them"
+	"Private - Answer the receiver converted to an OrderedCollection of
+	Associations whose keys are the actual objects and whose values are
+	the number of consecutive copies of them"
 
 	<category: 'private'>
 	| map prev startIndex |

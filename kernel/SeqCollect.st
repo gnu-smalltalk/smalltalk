@@ -954,9 +954,9 @@ some access and manipulation methods.'>
     ]
 
     with: aSequenceableCollection do: aBlock [
-	"Evaluate aBlock for each pair of elements took respectively from the re-
-	 ceiver and from aSequenceableCollection. Fail if the receiver has not
-	 the same size as aSequenceableCollection."
+	"Evaluate aBlock for each pair of elements took respectively from
+	 the receiver and from aSequenceableCollection. Fail if the receiver
+	 has not the same size as aSequenceableCollection."
 
 	<category: 'enumerating'>
 	self size = aSequenceableCollection size 
@@ -966,10 +966,10 @@ some access and manipulation methods.'>
     ]
 
     with: aSequenceableCollection collect: aBlock [
-	"Evaluate aBlock for each pair of elements took respectively from the re-
-	 ceiver and from aSequenceableCollection; answer a collection of the same
-	 kind of the receiver, made with the block's return values. Fail if the
-	 receiver has not the same size as aSequenceableCollection."
+	"Evaluate aBlock for each pair of elements took respectively from
+	 the receiver and from aSequenceableCollection; answer a collection of
+	 the same kind of the receiver, made with the block's return values. 
+	 Fail if the receiver has not the same size as aSequenceableCollection."
 
 	<category: 'enumerating'>
 	| newCollection |
