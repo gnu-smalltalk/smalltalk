@@ -1,3 +1,7 @@
+2009-09-02  Lee Duhem  <lee.duhem@gmail.com>
+
+	* Texinfo.st: Handle correctly #something in comments at end-of-line.
+
 2009-01-08  Paolo Bonzini  <bonzini@gnu.org>
 
         * Publish.st: Extract parts...

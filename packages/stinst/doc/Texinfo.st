@@ -266,7 +266,7 @@ Classes documented in this manual are @b{boldfaced}.
 		    [j := i.
 		    
 		    [j := j + 1.
-		    j > comment size or: [',''.() ;' includes: (comment at: j)]] 
+		    j > comment size or: [#($, $' $. $( $) $ $; $<10>) includes: (comment at: j)]]
 			    whileFalse.
 		    i + 1 < j 
 			ifTrue: 
