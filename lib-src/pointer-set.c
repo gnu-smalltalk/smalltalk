@@ -100,7 +100,7 @@ pointer_set_contains (struct pointer_set_t *pset, void *p)
 {
   size_t n = hash1 (p, pset->n_slots, pset->log_slots);
 
-  while (true)
+  for (;;)
     {
       if (pset->slots[n] == p)
        return 1;
@@ -121,7 +121,7 @@ static inline size_t
 insert_aux (void *p, void **slots, size_t n_slots, size_t log_slots)
 {
   size_t n = hash1 (p, n_slots, log_slots);
-  while (true)
+  for (;;)
     {
       if (slots[n] == p || slots[n] == 0)
 	return n;
@@ -233,7 +233,7 @@ pointer_map_contains (struct pointer_map_t *pmap, void *p)
 {
   size_t n = hash1 (p, pmap->n_slots, pmap->log_slots);
 
-  while (true)
+  for (;;)
     {
       if (pmap->keys[n] == p)
 	return &pmap->values[n];

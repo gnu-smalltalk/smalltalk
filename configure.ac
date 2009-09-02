@@ -223,6 +223,7 @@ AC_CHECK_ALIGNOF(double)
 AC_CHECK_ALIGNOF(long double)
 AC_CHECK_SIZEOF(off_t)
 AC_CHECK_SIZEOF(int)
+AC_CHECK_SIZEOF(long)
 AC_CHECK_SIZEOF(wchar_t, , [[
 #include <wchar.h>]])
 AC_CHECK_SIZEOF(OOP, , [[
