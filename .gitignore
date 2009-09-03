@@ -6,3 +6,4 @@ config.h.in
 configure
 INSTALL
 Makefile.in
+.svn

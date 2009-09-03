@@ -4,3 +4,4 @@ prims.inl
 prims.stamp
 vm.inl
 vm.stamp
+*.output
