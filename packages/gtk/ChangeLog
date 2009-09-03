@@ -1,5 +1,11 @@
 2009-09-03  Paolo Bonzini  <bonzini@gnu.org>
 
+	* GtkImpl.st: Declare more functions from VisualGST.
+	* MoreFuncs.st: Likewise.
+	* MoreStructs.st: Likewise.
+
+2009-09-03  Paolo Bonzini  <bonzini@gnu.org>
+
 	* GtkImpl.st: Make GdkDrawable polymorphic with CairoContextProvider.
 	* MoreFuncs.st: Declare gdk_cairo_create.
 	* package.xml: Make Cairo a prerequisite.

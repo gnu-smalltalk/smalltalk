@@ -130,3 +130,10 @@ CStruct subclass: GdkEventConfigure [
     <declaration: #(#(#type #uint ) #(#window #(#ptr #CObject ) ) #(#sendEvent #byte ) #(#x #int ) #(#y #int ) #(#width #int ) #(#height #int ) )>
 ]
 
+
+CStruct subclass: GdkEventKey [
+
+    <category: 'GTK'>
+    <comment: nil>
+    <declaration: #(#(#type #uint ) #(#window #(#ptr #CObject ) ) #(#sendEvent #byte ) #(#time #uint ) #(#state #uint ) #(#keyval #uint ) #(#length #int ) #(#string #string ) #(#hardwareKeycode #short ) #(#group #byte ) #(#isModifier #byte ) )>
+]

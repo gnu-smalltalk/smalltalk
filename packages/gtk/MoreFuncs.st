@@ -342,10 +342,11 @@ GtkAdjustment extend [
 
 
 
+"FIXME: funcs.awk is broken for these."
+
 GdkPixbufLoader extend [
 
     write: buf count: count error: error [
-	"FIXME: funcs.awk is broken for this."
 
 	<category: 'C call-outs'>
 	<cCall: 'gdk_pixbuf_loader_write' returning: #boolean
@@ -355,6 +356,36 @@ GdkPixbufLoader extend [
 
 ]
 
+
+GtkFileChooserDialog extend [
+    getFilename [
+	<category: 'C call-outs'>
+        <cCall: 'gtk_file_chooser_get_filename' returning: #string args: #( #self )>
+    ]
+
+    getCurrentFolder [
+	<category: 'C call-outs'>
+        <cCall: 'gtk_file_chooser_get_current_folder' returning: #string args: #( #self )>
+    ]
+]
+
+
+GtkContainer extend [
+
+    getFocusChild [
+	<category: 'C call-outs'>
+        <cCall: 'gtk_container_get_focus_child' returning: #{GtkWidget}
+        args: #( #self )>
+    ]
+]
+
+GTK.GtkNotebook extend [
+
+    pageNum: aGtkWidget [
+        <category: 'C call-outs'>
+        <cCall: 'gtk_notebook_page_num' returning: #int args: #( #self #cObject )>
+    ]
+]
 
 
 Eval [

@@ -466,11 +466,538 @@ Gtk class extend [
 
 
 
-"Finish initialization.  This will be done upon #returnFromSnapshot on
- subsequent image loads."
+GtkAccelGroup class extend [
+
+    acceleratorParse: accelerator [
+	<category: 'C call-outs'>
+
+	| cAccKey cAccMod |
+	cAccKey := CInt gcValue: 0.
+	cAccMod := CInt gcValue: 0.
+	GTK.Gtk acceleratorParse: accelerator acceleratorKey: cAccKey acceleratorMods: cAccMod.
+	^ {cAccKey value. cAccMod value}
+    ]
+
+    acceleratorGroup: aGtkAccelGroup accelerator: aString path: aPathString [
+	<category: 'C call-outs'>
+
+	| result |
+	result := self acceleratorParse: aString.
+	GTK.GtkAccelMap addEntry: aPathString accelKey: result first accelMods: result second
+    ]
+]
+
+
+GtkAccelGroup extend [
+
+    append: anArray [
+        <category: 'accessing'>
+
+        anArray do: [ :each |
+            self class
+                acceleratorGroup: self
+                accelerator: each first
+                path: each second ]
+    ]
+]
 
 
 
+GtkButton class extend [
+
+    label: aString onPressedSend: aSymbol to: anObject [
+    <category: 'instance creation'>
+
+    ^ (GTK.GtkButton newWithLabel: aString)
+        connectSignal: 'pressed' to: anObject selector: aSymbol userData: nil;
+        yourself
+    ]
+]
+
+
+GtkContainer extend [
+
+    focusChildFor: aGtkWindow [
+	<category: '*VisualGST'>
+
+	| child parent |
+	parent := child := self.
+	[ (child := parent getFocusChild) isNil not ] whileTrue: [
+	    parent := child ].
+	^ aGtkWindow getFocus = parent
+    ]
+]
+
+
+GTK.GtkDialog extend [
+    | codeblock destroy |
+
+    runNonBlocking [
+    <category: 'services'>
+
+    destroy := false.
+    self
+        setModal: true;
+        connectSignal: 'response' to: self selector: #onDialog:response: userData: nil;
+        run 
+    ]
+
+    runNonBlockingAndDo: aCodeblock [
+    <category: 'services'>
+
+    destroy := false.
+    codeblock :=  aCodeblock.
+    self runNonBlocking
+    ]
+    
+    runNonBlockingAndDestroy [
+    <category: 'services'>
+
+    destroy := true.
+    self runNonBlocking
+    ]
+
+    runBlocking [
+    <category: 'services'>
+
+    destroy := false.
+    self
+        setModal: false;
+        connectSignal: 'response' to: self selector: #onDialog:response: userData: nil;
+            run
+    ]
+
+    runBlockingAndDo: aCodeblock [
+    <category: 'services'>
+
+    destroy := false.
+    codeblock := aCodeblock.
+    self runBlocking
+    ]
+
+    runBlockingAndDestroy [
+        <category: 'services'>
+
+        destroy := true.
+        self
+            setModal: false;
+            connectSignal: 'response' to: self selector: #onDialog:response: userData: nil;
+            run
+    ]
+
+    onDialog: aGtkDialog response: anInteger [
+    <category: 'events'>
+
+    destroy ifTrue: [ self destroy ].
+    codeblock isNil ifFalse: [ codeblock value: aGtkDialog value: anInteger ]
+    ]
+]
+
+
+GTK.GtkFileChooserDialog class extend [
+
+    for: aGtkFileChooserAction title: aString parent: aGtkWidget button: aGtkStock  [
+        <category: 'instance creation'>
+
+        ^ self
+            new: aString
+            parent: aGtkWidget
+            action: aGtkFileChooserAction
+            varargs: {GTK.Gtk gtkStockCancel.
+                    GTK.Gtk gtkResponseCancel.
+                    aGtkStock.
+                    GTK.Gtk gtkResponseAccept.
+                    nil}
+    ]
+
+    save: aString parent: aGtkWidget [
+        <category: 'instance creation'>
+
+        ^ self
+            for: GTK.Gtk gtkFileChooserActionSave
+            title: aString
+            parent: aGtkWidget
+            button: GTK.Gtk gtkStockSave
+    ]
+
+    load: aString parent: aGtkWidget [
+        <category: 'instance creation'>
+
+        ^ self
+            for: GTK.Gtk gtkFileChooserActionOpen
+            title: aString
+            parent: aGtkWidget
+            button: GTK.Gtk gtkStockOpen
+    ]
+
+    selectFolder: aString parent: aGtkWidget [
+        <category: 'instance creation'>
+
+        ^ self
+            for: GTK.Gtk gtkFileChooserActionSelectFolder
+            title: aString
+            parent: aGtkWidget
+            button: GTK.Gtk gtkStockOpen    
+    ]
+]
+
+
+GTK.GtkListStore extend [
+
+    appendItem: anArray [
+	<category: 'accessing'>
+   
+	| iter |
+	iter := self append.
+	self at: iter put: anArray.
+	^ iter
+    ]
+
+    prependItem: anArray [
+        <category: 'accessing'>
+
+        | iter |
+        iter := self prepend.
+        self at: iter put: anArray.
+        ^ iter
+    ]
+
+    itersDo: aBlock [
+	<category: 'accessing'>
+
+	| iter |
+	((iter := self getIterFirst) isNil or: [ (self iterIsValid: iter) not ] ) ifTrue: [ ^ nil ].
+	aBlock value: iter.
+	[ self iterNext: iter ] whileTrue: [ aBlock value: iter ]
+    ]
+   
+    do: aBlock [
+	<category: 'accessing'>
+
+	self itersDo: [ :iter |
+	    aBlock value: (self at: iter) value: iter ]
+    ]
+
+    lastIter [
+	<category: 'accessing'>
+
+	| lastIter iter path |
+	iter := lastIter := GTK.GtkTreeIter new.
+	path := GTK.GtkTreePath newFirst.
+	[ self getIter: iter path: path ] whileTrue: [
+	    lastIter := iter.
+	    iter := GTK.GtkTreeIter new.
+            path next ].
+	^ lastIter
+    ]
+]
+
+
+GTK.GtkMenuItem class extend [
+
+    menuItem: aString connectTo: anObject selector: aSymbol userData: userData [
+	<category: 'instance creation'>
+
+	^ (self newWithLabel: aString)
+	    connectSignal: 'activate' to: anObject selector: aSymbol userData: userData;
+	    yourself
+    ]
+
+    menuItem: aString connectTo: anObject selector: aSymbol [
+        <category: 'instance creation'>
+
+        ^ self menuItem: aString connectTo: anObject selector: aSymbol userData: nil 
+    ]
+
+    menuItem: aString accelPath: anAccelPathString [
+	<category: 'instance creation'>
+
+	^ (self newWithLabel: aString)
+	    setAccelPath: anAccelPathString;
+	    yourself
+    ]
+
+    menuItem: aString accelPath: anAccelPathString connectTo: anObject selector: aSymbol [
+        <category: 'instance creation'>
+
+        ^ (self menuItem: aString accelPath: anAccelPathString)
+            connectSignal: 'activate' to: anObject selector: aSymbol userData: nil;
+            yourself
+    ]
+]
+
+
+GTK.GtkMenu extend [
+
+    appendSeparator [
+    <category: 'accessing'>
+
+    self append: GTK.GtkMenuItem new
+    ]
+
+    appendMenuItems: anArray [
+    <category: 'accessing'>
+
+    anArray do: [ :each |
+        self append: 
+	(each isEmpty 
+	    ifTrue: [ GTK.GtkMenuItem new ]
+	    ifFalse: [ (GTK.GtkMenuItem newWithLabel: (each at: 1))
+		connectSignal: 'activate' to: (each at: 2) selector: (each at: 3) userData: nil;
+		yourself ]) ]
+    ]
+]
+
+
+GTK.GtkScrolledWindow class extend [
+
+    withChild: aGtkWidget [
+    <category: 'instance creation'>
+
+    ^ (GTK.GtkScrolledWindow new: nil vadjustment: nil)
+        add: aGtkWidget;
+        setPolicy: GTK.Gtk gtkPolicyAutomatic vscrollbarPolicy: GTK.Gtk gtkPolicyAutomatic;
+        yourself
+    ]
+]
+
+
+GTK.GtkTextBuffer extend [
+
+    text [
+    <category: 'accessing'>
+
+    ^ self getText: self getStartIter end: self getEndIter includeHiddenChars: false
+    ]
+
+    applyTagByName: aSymbol startOffset: aStartInteger endOffset: anEndInteger [
+    <category: 'accessing'>
+
+    | end start |
+    start := GTK.GtkTextIter new.
+        end := GTK.GtkTextIter new.
+        self getIterAtOffset: start charOffset: aStartInteger.
+        self getIterAtOffset: end charOffset: anEndInteger.
+        self applyTagByName: aSymbol start: start end: end
+    ]
+
+    getIterAtOffset: offset [
+    <category: 'accessing'>
+
+    | result |
+    result := GTK.GtkTextIter new.
+    self getIterAtOffset: result charOffset: offset.
+    ^ result
+    ]
+
+    iterOfSelectedText [
+        <category: 'text accessing'>
+
+        | iter |
+        self getHasSelection
+                ifTrue: [ iter := self getSelectionBounds ifNil: [ ^ self ].
+                        (iter at: 1) getOffset > ((iter at: 2) getOffset)
+                            ifTrue: [ iter swap: 1 with: 2 ] ]
+                ifFalse: [ iter := {self getStartIter. self getEndIter} ].
+        ^ iter
+    ]
+
+    selectedText [
+        <category: 'text accessing'>
+
+        | iter |
+        iter := self iterOfSelectedText.
+        ^ self getText: (iter at: 1) end: (iter at: 2) includeHiddenChars: false
+    ]
+]
+
+
+GTK.GtkTreeModel extend [
+
+    at: aGtkTreeIter [
+        <category: 'accessing'>
+
+        | values |
+        aGtkTreeIter ifNil: [ ^ nil ].
+        values := OrderedCollection new.
+        0 to: self getNColumns - 1 do: [ :column |
+            values add: (self at: aGtkTreeIter column: column) ].
+        ^ values
+    ]
+
+    at: aGtkTreeIter column: anInteger [
+        <category: 'accessing'>
+
+        ^ self getOop: aGtkTreeIter column: anInteger
+    ]
+
+    at: aGtkTreeIter column: anInteger put: anObject [
+        <category: 'accessing'>
+
+        self setOop: aGtkTreeIter column: anInteger value: anObject
+    ]
+
+    at: aGtkTreeIter put: anArray [
+        <category: 'accessing'>
+
+        1 to: anArray size do: [ :i |
+            self at: aGtkTreeIter column: i - 1 put: (anArray at: i) ]
+    ]
+
+    at: aGtkTreeIter do: aBlock [
+	<category: 'accessing'>
+
+	(self at: aGtkTreeIter) do: aBlock
+    ]
+
+    itersDo: aBlock iter: aGtkTreeIter [
+	<category: 'accessing'>
+
+	| childIter |
+	childIter := GTK.GtkTreeIter new.
+	aBlock value: aGtkTreeIter.
+	(self iterChildren: childIter parent: aGtkTreeIter) ifTrue: [ self itersDo: aBlock iter: childIter ].
+	[ self iterNext: aGtkTreeIter ] whileTrue: [
+	    aBlock value: aGtkTreeIter.
+            (self iterChildren: childIter parent: aGtkTreeIter) ifTrue: [ self itersDo: aBlock iter: childIter ] ]
+    ]
+
+    itersDo: aBlock [
+	<category: 'accessing'>
+
+	| iter child |
+	((iter := self getIterFirst) isNil or: [ (self iterIsValid: iter) not ] ) ifTrue: [ ^ nil ].
+	self itersDo: aBlock iter: iter
+    ]
+
+    do: aBlock [
+        <category: 'accessing'>
+
+        self itersDo: [ :iter |
+            aBlock value: (self at: iter) value: iter ]
+    ]
+]
+
+
+GTK.GtkTreeStore extend [
+
+    itersDo: aBlock iter: aGtkTreeIter [
+	<category: 'accessing'>
+
+	| childIter |
+	childIter := GTK.GtkTreeIter new.
+	aBlock value: aGtkTreeIter.
+	(self iterChildren: childIter parent: aGtkTreeIter) ifTrue: [ self itersDo: aBlock iter: childIter ].
+	[ self iterNext: aGtkTreeIter ] whileTrue: [
+	    aBlock value: aGtkTreeIter.
+            (self iterChildren: childIter parent: aGtkTreeIter) ifTrue: [ self itersDo: aBlock iter: childIter ] ]
+    ]
+
+    itersDo: aBlock [
+	<category: 'accessing'>
+
+	| iter child |
+	((iter := self getIterFirst) isNil or: [ (self iterIsValid: iter) not ] ) ifTrue: [ ^ nil ].
+	self itersDo: aBlock iter: iter
+    ]
+
+    do: aBlock [
+        <category: 'accessing'>
+
+        self itersDo: [ :iter |
+            aBlock value: (self at: iter) value: iter ]
+    ]
+
+    appendItem: anArray [
+	<category: 'accessing'>
+
+	^ self append: nil item: anArray
+    ]
+
+    append: aGtkTreeIter item: anArray [
+	<category: 'accessing'>
+
+        | iter |
+        iter := GTK.GtkTreeIter new.
+        self 
+	    append: iter parent: aGtkTreeIter;
+	    at: iter put: anArray.
+	^ iter
+    ]
+]
+
+
+GTK.GtkTreeView class extend [
+
+    newWithTextColumn: aGtkModel title: aString [
+        <category: 'user interface'>
+
+        | view col render |
+        view := self new
+	    setModel: aGtkModel;
+	    yourself.
+        col := (GtkTreeViewColumn new)
+	    packStart: (render := GTK.GtkCellRendererText new) expand: true;
+	    addAttribute: render attribute: 'text' column: 0;
+	    setTitle: aString;
+	    yourself.
+        view insertColumn: col position: -1.
+    ^ view
+    ]
+
+    newWithSortedTextColumn: aGtkModel title: aString [
+    <category: 'instance creation'>
+
+        | view col render |
+        view := self new
+                    setModel: aGtkModel;
+                    yourself.
+        col := (GtkTreeViewColumn new)
+                packStart: (render := GtkCellRendererText new) expand: true;
+                addAttribute: render attribute: 'text' column: 0;
+                setTitle: aString;
+                setSortIndicator: true;
+                setSortColumnId: 0;
+                setSortOrder: Gtk gtkSortAscending;
+                yourself.
+        view
+            insertColumn: col position: -1.
+    ^ view
+    ]
+]
+
+GTK.GtkTreeView extend [
+
+    hasSelectedItem [
+	<category: 'accessing'>
+
+	^ self getSelection getSelected isNil not
+    ]
+
+    numberOfItems [
+	<category: 'accessing'>
+
+	^ self getModel iterNChildren: nil
+    ]
+
+    selectedIter [
+	<category: 'accessing'>
+
+	^ self getSelection getSelected
+    ]
+
+    selectedIndex [
+	<category: 'accessing'>
+
+	self hasSelectedItem ifFalse: [ self error: 'Nothing is selected' ].
+	^ (self getModel getPath: self selectedIter) getIndices value + 1
+    ]
+]
+
+
+"Finish initialization.  This will be done upon #returnFromSnapshot on
+ subsequent image loads."
+
 Eval [
     GLib registerAllTypes
 ]
