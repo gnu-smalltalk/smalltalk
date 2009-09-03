@@ -1,0 +1,123 @@
+Object subclass: GtkCategoryModel [
+    GtkCategoryModel class [ | current | ]
+
+    GtkCategoryModel class >> currentOn: aClass [
+	<category: 'accessing'>
+
+	current ifNil: [ current := Dictionary new ].
+	^ current at: aClass ifAbsentPut: [ self on: aClass ]
+    ]
+
+    GtkCategoryModel class >> on: aClass [
+	<category: 'instance creation'>
+
+        ^ (self new)
+	    initialize;
+	    classOrMeta: aClass;
+	    yourself
+    ]
+
+    | model classOrMeta sorted |
+
+    initialize [
+        <category: 'initialize-release'>
+
+        sorted := false
+    ]
+
+    isSorted [
+        <category: 'testing'>
+
+        ^ sorted
+    ]
+
+    sorted: aBoolean [
+        <category: 'accessing'>
+
+        sorted := aBoolean
+    ]
+
+    classOrMeta [
+	<category: 'accessing'>
+    
+	^ classOrMeta
+    ]
+
+    classOrMeta: aClass [
+	<category: 'accessing'>
+
+	classOrMeta := aClass.
+	self refreshModel
+    ]
+
+    model [
+	<category: 'accessing'>
+
+	^ model ifNil: [
+	    model := GTK.GtkListStore new: 1 varargs: {GTK.GValue gTypeString} ]
+    ]
+
+    clearModel [
+	<category: 'accessing'>
+
+	self model clear
+    ]
+
+    refreshModel [
+	<category: 'events'>
+   
+	self model clear.
+	self classOrMeta isNil ifTrue: [ ^ self ].
+	self buildCategory do: [ :each |
+	    self appendCategory: each ]
+    ]
+
+    buildCategory [
+	<category: 'model builder'>
+
+	| category set |
+	set := Set new.
+	set add: '*'.
+	self classOrMeta selectors do: [ :each |
+	    category := (self classOrMeta compiledMethodAt: each) methodCategory.
+	    set add: category ].
+	^ set
+    ]
+
+    hasCategory: aString [
+        <category: 'item selection'>
+
+        | iter stack parent path pathString number |
+        iter := GTK.GtkTreeIter new.
+        path := GTK.GtkTreePath newFirst.
+        [self model getIter: iter path: path] whileTrue: [
+            self model getIter: iter path: path.
+            (aString = (self model getOop: iter column: 0))
+                ifTrue: [ ^ true  ].
+            path next ].
+        ^ false
+    ]
+
+    findIterInACategory: aString [
+        <category: 'item selection'>
+
+	self model do: [ :elem :iter |
+	    elem first = aString ifTrue: [ ^ iter ] ].
+	self error: 'Category not found'
+    ]
+
+    appendCategory: aString [
+	<category: 'model builder'>
+    
+	self model appendItem: {aString}
+    ]
+
+    removeCategory: aString [
+        <category: 'model builder'>
+
+        | iter |
+	iter := self findIterInACategory: aString.
+        self model remove: iter
+    ]
+]
+
