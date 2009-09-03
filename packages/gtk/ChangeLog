@@ -1,3 +1,9 @@
+2009-09-03  Paolo Bonzini  <bonzini@gnu.org>
+
+	* GtkImpl.st: Make GdkDrawable polymorphic with CairoContextProvider.
+	* MoreFuncs.st: Declare gdk_cairo_create.
+	* package.xml: Make Cairo a prerequisite.
+
 2009-08-18  Paolo Bonzini  <bonzini@gnu.org>
 
 	* Makefile: Build libs.def instead of Libs.st.

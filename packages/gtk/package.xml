@@ -1,6 +1,9 @@
 <package>
   <name>GTK</name>
   <namespace>GTK</namespace>
+
+  <prereq>Cairo</prereq>
+
   <filein>GtkDecl.st</filein>
   <filein>Structs.st</filein>
   <filein>MoreStructs.st</filein>

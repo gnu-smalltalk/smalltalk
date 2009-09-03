@@ -1,3 +1,7 @@
+2009-09-03  Paolo Bonzini  <bonzini@gnu.org>
+
+	* CairoContext.st: Add creation from CObject, as in VisualGST.
+
 2008-06-05  Paolo Bonzini  <bonzini@gnu.org>
 
 	* CairoPattern.st: Rewrite #cachedPattern.

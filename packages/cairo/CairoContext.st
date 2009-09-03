@@ -45,12 +45,26 @@ CairoContextProvider subclass: CairoContext [
 
     <comment: 'I provide the means to draw on a CairoSurface.'>
 
+    CairoContext class >> context: aCObject [
+	"Creates a new context pointing to the given C cairo_t pointer."
+
+	<category: 'instance creation'>
+	^ self new initializeContext: aCObject
+    ]
+
     CairoContext class >> on: aCairoSurface [
 	"Creates a new context with all graphics state parameters set
 	 to default values and with target as a target surface."
 
 	<category: 'instance creation'>
 	^ self new initialize: aCairoSurface
+    ]
+
+    initializeContext: aCObject [
+	<category: 'private'>
+	context := aCObject.
+	depth := 0.
+	self addToBeFinalized
     ]
 
     initialize: aCairoSurface [
@@ -63,8 +77,9 @@ CairoContextProvider subclass: CairoContext [
 
     rebuildContext [
 	<category: 'private-persistence'>
-	context := Cairo create: surface cairoSurface.
-	self addToBeFinalized.
+	surface isNil ifFalse: [
+	    context := Cairo create: surface cairoSurface.
+	    self addToBeFinalized].
     ]
 
     update: aspect [

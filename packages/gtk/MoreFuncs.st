@@ -158,6 +158,14 @@ GtkObject extend [
 
 ]
 
+GTK.GdkDrawable extend [
+
+    cairoCreate [
+        <category: 'C call-outs'>
+        <cCall: 'gdk_cairo_create' returning: #cObject args: #( #self )>
+    ]
+]
+
 
 GtkWidget extend [
 

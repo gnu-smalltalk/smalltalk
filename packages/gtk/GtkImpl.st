@@ -1,3 +1,17 @@
+GdkDrawable extend [
+
+    withContextDo: aBlock [
+	"Execute aBlock passing a valid Cairo context for the
+	 window.  The context is invalidated after aBlock returns."
+
+	<category: 'accessing'>
+	| context |
+	[ aBlock value: (context := Cairo.CairoContext context: self cairoCreate) ]
+	    ensure: [ context isNil ifFalse: [ context release ] ]
+    ]
+
+]
+
 GtkWidget extend [
 
     getSizeRequest [

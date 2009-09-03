@@ -373,6 +373,10 @@ GST_PACKAGE_ENABLE([GDBM], [gdbm],
    [ac_cv_header_gdbm_h],
    [Makefile], [gdbm.la])
 GST_PACKAGE_ENABLE([Glorp], [glorp])
+GST_PACKAGE_ENABLE([Cairo], [cairo],
+  [GST_HAVE_LIB(cairo, cairo_save)],
+  [ac_cv_lib_cairo_cairo_save])
+
 GST_PACKAGE_ENABLE([GTK], [gtk], [
   AC_ARG_ENABLE(gtk,
   [  --enable-gtk={yes,no,blox}
@@ -392,7 +396,7 @@ GST_PACKAGE_ENABLE([GTK], [gtk], [
       ])
     ], [], gobject)
   fi],
-  [enable_gtk],
+  [enable_gtk ac_cv_lib_cairo_cairo_save],
   [Makefile], [gst-gtk.la])
 GST_PACKAGE_ENABLE([BloxGTK], [blox/gtk],, [enable_gtk])
 GST_PACKAGE_ENABLE([Blox], [blox/tests],
@@ -433,10 +437,6 @@ GST_PACKAGE_ENABLE([GLUT], [glut],
    [GST_HAVE_GLUT],
    [gst_cv_glut_libs],
    [Makefile], [gstglut.la])
-
-GST_PACKAGE_ENABLE([Cairo], [cairo],
-  [GST_HAVE_LIB(cairo, cairo_save)],
-  [ac_cv_lib_cairo_cairo_save])
 
 GST_PACKAGE_ENABLE([LibSDL], [sdl/libsdl],
   [PKG_CHECK_MODULES(SDL, sdl >= 1.2.0, [gst_cv_sdl=yes], [gst_cv_sdl=no])
