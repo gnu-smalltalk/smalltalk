@@ -126,6 +126,10 @@ Eval [ #(#-123) size ]
 
 Eval [ BugTest c ]
 
+"Also used to crash."
+Object subclass: A [
+    B := C.
+]
 
 "Compiling a method should not capture the current temporaries dictionary."
 Eval [

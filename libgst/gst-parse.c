@@ -761,8 +761,10 @@ parse_class_definition (gst_parser *p, OOP classOOP, mst_Boolean extend)
 	          result = _gst_execute_statements (NULL, stmt, UNDECLARED_NONE,
 						    true);
 
-	          assert (result);
-		  DICTIONARY_AT_PUT (class_var_dict, name, result);
+	          if (result)
+		    DICTIONARY_AT_PUT (class_var_dict, name, result);
+		  else
+		    _gst_had_error = true;
 		}
 
 	      if (token (p, 0) != ']')

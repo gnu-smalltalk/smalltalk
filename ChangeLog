@@ -1,3 +1,8 @@
+2009-09-03  Paolo Bonzini  <bonzini@gnu.org>
+
+	* tests/compiler.st: Add regression test.
+	* tests/compiler.ok: Regenerate
+
 2009-09-02  Lee Duhem  <lee.duhem@gmail.com>
 
 	* kernel/ArrayColl.st: Remove unnecessary manual hyphenations.

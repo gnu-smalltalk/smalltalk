@@ -1,3 +1,7 @@
+2009-09-03  Paolo Bonzini  <bonzini@gnu.org>
+
+	* gst-parse.c: Fix crash on invalid class variable definitions.
+
 2009-08-26  Paolo Bonzini  <bonzini@gnu.org>
 
 	Complete transition from events.c to sysdep/*/events.c, moving
