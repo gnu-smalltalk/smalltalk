@@ -37,7 +37,7 @@ quiet := false.
 verbose := false.
 force := false.
 test := false.
-startMessage := Message selector: #fileIn arguments: #().
+startMessage := nil.
 wasVerbose := FileStream verbose: false.
 packages := OrderedCollection new.
 sunit := ''.
@@ -121,7 +121,7 @@ force ifTrue: [
 	    ^self ].
 
     packages do: [ :each |
-	each perform: startMessage.
+	each fileIn.
         sunit := sunit, ' ', each sunitScript ] ]
     ifCurtailed: [ ObjectMemory quit: 1 ].
 
@@ -154,7 +154,10 @@ test
     ifFalse: [
 	snapshot ifTrue: [ ObjectMemory snapshot ] ].
 
-(startMessage selector ~= #fileIn and: [ 
+(startMessage notNil and: [ 
     packages anySatisfy: [ :pkg | pkg startScript notNil ]])
-	ifTrue: [ Processor activeProcess suspend ]!
+	ifFalse: [ ObjectMemory quit ].
+
+packages do: [ :each | each perform: startMessage ].
+Processor activeProcess suspend!
 

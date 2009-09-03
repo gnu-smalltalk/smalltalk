@@ -1,5 +1,9 @@
 2009-09-03  Paolo Bonzini  <bonzini@gnu.org>
 
+	* scripts/Load.st: Save image before starting packages.
+
+2009-09-03  Paolo Bonzini  <bonzini@gnu.org>
+
 	* tests/compiler.st: Add regression test.
 	* tests/compiler.ok: Regenerate
 
