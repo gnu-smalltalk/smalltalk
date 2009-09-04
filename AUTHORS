@@ -7,9 +7,8 @@ GNU Smalltalk development starting with version 1.6 by:
     Paolo Bonzini <bonzini@gnu.org>
 
 GUI development:
-    Brad Diller (browser)
-    Steve Byrne (original X toolkit version)
-    Paolo Bonzini (Tcl/Tk version)
+    Gwenael Casaccio (VisualGST)
+    Brad Diller and Steve Byrne (BLOX)
 
 superops program:
     Parts by Douglas C. Schmidt and Bruno Haible.
@@ -26,11 +25,16 @@ GNU Smalltalk tutorial by:
 --------------------------------------- Other goodies ------------
 
     Cincom Inc. (part of network toolkit, XML packages) <www.cincom.com>
+    Mike Anderson (PostgreSQL driver)
+    Tony Garnock-Jones, Brad Watson (Cairo and LibSDL bindings)
+    Olivier Blanc (OpenGL bindings)
     Federico G. Stilman (STT)
+    Daniele Sciascia (SQLite driver)
     Josh Miller (MySQL driver)
     Ken Treis, Travis Griggs and others (WikiWorks)
     Janko Mivsek and others (Swazoo)
     Avi Bryant, Philippe Marshall, Lukas Renggli and others (Seaside)
+    Ramon Leon (SandstoneDb)
     Kazuki Yasumatsu (part of network toolkit)
     Aoki Atsushi (Lisp and Prolog interpreters)
     Didier Besset (Numerical methods library)

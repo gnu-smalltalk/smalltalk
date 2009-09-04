@@ -1,6 +1,7 @@
 prefix = @prefix@
 exec_prefix = @exec_prefix@
 libdir = @libdir@
+moduledir = @moduledir@
 includedir = @includedir@
 
 Name: gnu-smalltalk

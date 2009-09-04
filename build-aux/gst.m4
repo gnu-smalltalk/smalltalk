@@ -31,6 +31,8 @@ gst_prefix="$withval", gst_prefix="")
     PKG_CHECK_MODULES(GST, [gnu-smalltalk[]m4_if([$1],[],[],[ >= $1])],
 	[gstlibdir=`$PKG_CONFIG --variable=libdir gnu-smalltalk`
 	 gstdatadir=`$PKG_CONFIG --variable=datadir gnu-smalltalk`
+	 gstmoduledir=`$PKG_CONFIG --variable=moduledir gnu-smalltalk`
+         gstmoduleexecdir='${gstmoduledir}'
 	 have_gst=yes],
 	[have_gst=no])
 
@@ -40,4 +42,6 @@ gst_prefix="$withval", gst_prefix="")
     AS_IF([test $have_gst = yes], [$2], [$3])
     AC_SUBST(gstlibdir)
     AC_SUBST(gstdatadir)
+     AC_SUBST(gstmoduledir)
+     AC_SUBST(gstmoduleexecdir)
 ])

@@ -143,7 +143,7 @@ Features:
 * Special objects::     Methods to assign particular properties to objects.
 
 Packages
-* Blox, BloxTK, and Browser:             Blox.
+* GTK and VisualGST:                     GUI.
 * Parser, STInST, Compiler:              Smalltalk-in-Smalltalk.
 * DBI:                                   Database.
 * I18N:                                  Locales.
@@ -226,8 +226,8 @@ easy-to-use nature of the programming environment (did you know that the
 first GUIs ever ran under Smalltalk?).  The availability of a large body of
 system classes, once you master them, makes it pretty easy to write complex
 programs which are usually a task for the so called @dfn{scripting
-languages}.  Therefore, even though we have a nice GUI environment including
-a class browser (@pxref{Blox}), the goal of the @gst{} project is
+languages}.  Therefore, even though we have a @sc{gui} environment based
+on GTK (@pxref{GUI, , GTK and VisualGST}), the goal of the @gst{} project is
 currently to produce a complete system to be used to write your scripts in a
 clear, aesthetically pleasing, and philosophically appealing programming
 language.
@@ -664,7 +664,7 @@ ObjectMemory quit
 exits from the system.  You can also type a @kbd{C-d} to exit from
 Smalltalk if it's reading statements from standard input.
 
-GNU Smalltalk provides three extensions to the language that make it
+@gst{} provides three extensions to the language that make it
 simpler to write complete programs in an editor.  However, it is also
 compatible with the @dfn{file out} syntax as shown in the @dfn{Green Book}
 (also known as @cite{Smalltalk-80: Bits of History, Words of Advice}
@@ -1354,8 +1354,9 @@ Finally, @code{Object} defines four other methods: @code{print} and
 @code{printNl}, @code{store} and @code{storeNl}.  These do a @code{printOn:} or
 @code{storeOn:} to the ``Transcript'' object; this object, which is the sole
 instance of class @code{TextCollector}, normally delegates write
-operations to @code{stdout}.  If you load the Blox @sc{gui}, instead,
-the Transcript Window will be attached to the Transcript object (@pxref{Blox}).
+operations to @code{stdout}.  If you load the VisualGST @sc{gui}, instead,
+the Transcript Window will be attached to the Transcript object (@pxref{GUI, ,
+GTK and VisualGST}).
 
 The @code{fileIn:} message sent to the FileStream class, with a file
 name as a string argument, will cause that file to be loaded into
@@ -1482,9 +1483,10 @@ Returns nil if no object is associated to the given index.
 @end defmethod
 
 Other methods in ByteArray and Memory allow to read various C types
-(@code{doubleAt:}, @code{ucharAt:}, etc.).  For examples of using
-@code{asOop} and @code{asObject}, look at the Blox source code in
-@file{blox-tk/BloxBasic.st}.
+(@code{doubleAt:}, @code{ucharAt:}, etc.).  These are mostly obsoleted
+by @code{CObject} which, in newer versions of @gst{}, supports
+manually managed heap-backed memory as well as garbage collected
+ByteArray-backed memory.
 
 Another interesting class is ObjectMemory.  This provides a few methods
 that enable one to tune the virtual machine's usage of memory; many
@@ -1881,25 +1883,27 @@ first way is to use the PackageLoader's @code{fileInPackage:} and
 @code{fileInPackages:} methods.  For example:
 
 @example
-    PackageLoader fileInPackages: #('Blox' 'Browser').
-    PackageLoader fileInPackage: 'Compiler'.
+    PackageLoader fileInPackages: #('DBD-MySQL' 'DBD-SQLite').
+    PackageLoader fileInPackage: 'Sockets'.
 @end example
 
 The second way is to use the @file{gst-load} script which is installed
 together with the virtual machine.  For example, you can do:
 
-@t{@ @ @ @ gst-load Browser Blox Compiler}
+@t{@ @ @ @ gst-load DBD-MySQL DBD-SQLite DBI}
 
 @noindent
 and @gst{} will automatically file in:
 
 @itemize @bullet
-@bulletize BloxTK, needed by Blox
-@bulletize Blox, loaded first because Browser needs it
-@bulletize Parser, not specified, but needed by Browser and Compiler
-@bulletize Browser
-@bulletize Compiler (Blox is skipped because it has already been loaded)
+@bulletize DBI, loaded first because it is needed by the other two packages
+@bulletize Sockets and Digest, not specified, but needed by DBD-MySQL
+@bulletize DBD-MySQL
+@bulletize DBD-SQLite
 @end itemize
+
+@noindent
+Notice how DBI has already been loaded.
 
 Then it will save the Smalltalk image, and finally exit.
 
@@ -1949,49 +1953,64 @@ To provide support for this system, you have to give away with your @gst{}
 goodies a small file (usually called @file{package.xml}) which looks like
 this:
 @example
-<packages>
 <package>
-  <name>BloxGTK</name>
-  <namespace>BLOX</namespace>
-  <directory>blox-gtk</directory>
+  <name>DBD-SQLite</name>
+  <namespace>DBI.SQLite</namespace>
 
   <!-- @i{@r{The @code{prereq} tag identifies packages that
        must be loaded before this one.}} -->
-  <prereq>GTK</prereq>
+  <prereq>DBI</prereq>
 
-  <!-- @i{@r{The @code{provides} tag identifies packages that
-       need not be loaded once this one is.}} -->
-  <provides>BLOX</provides>
-  
+  <!-- @i{@r{The @code{module} tag loads a dynamic shared object
+       and calls the @code{gst_initModule} function in it.  Modules
+       can register functions so that Smalltalk code can call them,
+       and can interact with or manipulate Smalltalk objects.}} -->
+  <module>dbd-sqlite3</module>
+
+  <!-- @i{@r{A separate subpackage can be defined for testing purposes.
+       The @code{SUnit} package is implicitly made a prerequisite of the
+       testing subpackage, and the default value of @code{namespace}
+       is the one given for the outer package.}} -->
+  <test>
+    <!-- @i{@r{Specifies a testing script that @file{gst-sunit} (@pxref{SUnit})
+         will run in order to test the package.  If this is specified outside
+         the testing subpackage, the package should list @code{SUnit} among
+         the prerequisites.}} -->
+    <sunit>DBI.SQLite.SQLiteTestSuite</sunit>
+    <filein>SQLiteTests.st</filein>
+  </test>
+
   <!-- @i{@r{The @code{filein} tag identifies files that
        compose this package and that should be loaded in the
        image in this order.}} -->
-  <filein>BloxBasic.st</filein>
-  <filein>BloxWidgets.st</filein>
-  <filein>BloxText.st</filein>
-  <filein>BloxExtend.st</filein>
-  <filein>Blox.st</filein>
-  
+  <filein>SQLite.st</filein>
+  <filein>Connection.st</filein>
+  <filein>ResultSet.st</filein>
+  <filein>Statement.st</filein>
+  <filein>Row.st</filein>
+  <filein>ColumnInfo.st</filein>
+  <filein>Table.st</filein>
+  <filein>TableColumnInfo.st</filein>
+
   <!-- @i{@r{The @code{file} tag identifies files that
        compose this package's distribution.}} -->
-  <file>Blox.st</file>
-  <file>BloxBasic.st</file>
-  <file>BloxWidgets.st</file>
-  <file>BloxText.st</file>
-  <file>BloxExtend.st</file>
+  <file>SQLite.st</file>
+  <file>Connection.st</file>
+  <file>ResultSet.st</file>
+  <file>Statement.st</file>
+  <file>Row.st</file>
+  <file>ColumnInfo.st</file>
+  <file>Table.st</file>
+  <file>TableColumnInfo.st</file>
+
+  <!-- @i{@r{Test files or extra files can also be included.}} -->
+  <file>SQLiteTests.st</file>
+  <file>ChangeLog</file>
 </package>
-</packages>
 @end example
 
 Other tags exist:
 @table @code
-@item module
-Loads a dynamic shared object and calls the @code{gst_initModule}
-function in it.  Modules can register functions so that Smalltalk
-code can call them, and can interact with or manipulate Smalltalk
-objects.  The @code{Sockets} package uses a module to provide a bridge
-to the socket functions.
-
 @item library
 Loads a dynamic shared object and registers the functions in it
 so that they can all be called from Smalltalk code.  The @code{GTK}
@@ -2001,11 +2020,6 @@ bindings can use them.
 @item callout
 Instructs to load the package only if the C function whose name is
 within the tag is available to be called from Smalltalk code.
-
-@item sunit
-Specifies a testing script that @file{gst-sunit} (@pxref{SUnit}) will
-run in order to test the package.  If this is specified, the package
-should list @code{SUnit} among the prerequisites.
 
 @item start
 Specifies a Smalltalk script that @file{gst-load} and @file{gst-remote}
@@ -2023,9 +2037,14 @@ with either @code{nil} or a String literal.
 Specifies a subpackage that is only loaded by @file{gst-sunit} in order
 to test the package.  The subpackage may include arbitrary tags (including
 @code{file}, @code{filein} and @code{sunit}) but not @code{name}.
-The @code{SUnit} package is implicitly made a prerequisite
-of the testing subpackage, and the default value of @code{directory} and
-@code{namespace} is the one given for the outer package.
+
+@item provides
+In some cases, a single functionality can be provided by multiple
+modules.  For example, @gst{} includes two browsers but only one
+should be loaded at any time.  To this end, a dummy package @code{Browser}
+is created pointing to the default browser (@code{VisualGST}), but
+both browsers use @code{provides} so that if the old BLOX browser
+is in the image, loading @code{Browser} will have no effect.
 @end table
 
 To install your package, you only have to do
@@ -2040,8 +2059,8 @@ placed in the system-wide package directory; you can use the option
 @option{--target-directory} to create the @file{.star} file elsewhere.
 
 Alternatively, @code{gst-package} can be used to create a skeleton
-GNU style source tree.  This includes a @file{configure.ac} that will
-find the installation path of GNU Smalltalk, and a @file{Makefile.am}
+@gnu{} style source tree.  This includes a @file{configure.ac} that will
+find the installation path of @gst{}, and a @file{Makefile.am}
 to support all the standard Makefile targets (including @command{make
 install} and @command{make dist}).  To do so, go in the directory that
 is to become the top of the source tree and type.
@@ -2058,7 +2077,7 @@ packages and to prepare the distribution tarballs.
 The rest of this chapter discusses some of the packages provided with @gst{}.
 
 @menu
-* Blox, BloxTK, and Browser:             Blox.
+* GTK and VisualGST:                     GUI.
 * Parser, STInST, Compiler:              Smalltalk-in-Smalltalk.
 * DBI:                                   Database.
 * I18N:                                  Locales.
@@ -2070,37 +2089,19 @@ The rest of this chapter discusses some of the packages provided with @gst{}.
 * Other packages:                        Other packages.
 @end menu
 
-@node Blox
-@section Blox
+@node GUI
+@section GTK and VisualGST
 
-Blox is a GUI building block tool kit.  It is an abstraction on top of
-the a platform's native GUI toolkit that is common across all platforms.
-Writing to the Blox interface means your GUI based application will be
-portable to any platform where Blox is supported.
-
-The Blox classes, which reside in the @code{BLOX} namespace and are
-fully documented in @ref{BLOX, , Graphical users interfaces with BLOX,
-gst-libs, the @gst{} Library Reference}, act as wrappers around other toolkits,
-which constitute the required portability layer; currently the only one
-supported is Tcl/Tk but alternative versions of Blox, for example based
-on Gtk+ and GNOME, have been considered and might even replace Tcl/Tk
-in the future@footnote{The Gtk+ bindings for @gst{} are
-    in an embryonic state; you can find them in the @code{GTK}
-    package if you have Gtk+ 2.0 or later installed}.  Instead of
-having to rewrite widgets and support for each platform, Blox simply
-asks the other toolkit to do so (currently, it hands valid Tcl code
-to a standard Tcl 8.0 environment); the abstraction from the operating
-system being used is then extracted out of @gst{}.
-
-Together with the toolkit, there is a browsing system in the
-@file{browser} directory that will allow the programmer to view the
-source code for existing classes, to modify existing classes and methods,
-to get detailed information about the classes and methods, and to evaluate
-code within the browser.  In addition, some simple debugging tools are
-provided.  An Inspector window allows the programmer to graphically
-inspect and modify the representation of an object and a walkback
-inspector was designed which will display a backtrace when the program
-encounters an error.
+@gst{} comes with GTK bindings and with a browser based on it.  The system
+can be started as @command{gst-browser} and will allow the programmer to
+view the source code for existing classes, to modify existing classes and
+methods, to get detailed information about the classes and methods, and to
+evaluate code within the browser.  In addition, simple debugging and unit
+testing tools are provided.  An Inspector window allows the programmer
+to graphically inspect and modify the representation of an object and
+a walkback inspector was designed which will display a backtrace when
+the program encounters an error.  SUnit tests (@pxref{SUnit}) can be
+run from the browser in order to easily support test driven development.
 
 The Transcript global object is redirected to print to the
 transcript window instead of printing to stdout, and the transcript
@@ -2112,31 +2113,15 @@ loop, support variables that live across multiple evaluations:
     a + 2    "Print-it: 4 will be shown"
 @end example
 
-This browser evolved from an Xt-based version developed around 1993
-written by Brad Diller (@mailto{bdiller@@docent.com}). Because of legal
-concerns about possible copyright infringement because his initial
-implementation used parts of ParcPlace's Model-View-Controller (MVC)
-message interface, he and Richard Stallman devised a new window update
-scheme which is more flexible and powerful than MVC's dependency
-mechanism, and allowed him to purge all the MVC elements from the
-implementation.
-
-The code was then further improved to employ a better class design
-(for example, Brad used Dictionaries for classes still to be fleshed
-out), to be aesthetically more appealing (taking advantage of the
-new Blox text widget, the code browsers were enhanced with
-syntax highlighting), and to be more complete (adding multiple ``views''
-to the inspector, namespace support and a complete debugger).
-
 To start the browser you can simply type:
 
 @example
-    gst-blox
+    gst-browser
 @end example
 
 This will load any requested packages, then, if all goes well, a
-worksheet window with a menu named @dfn{Smalltalk} will appear in the
-top-left corner of the screen.
+@emph{launcher} window combining all the basic tools
+will appear on your display.
 
 @node Smalltalk-in-Smalltalk
 @section The Smalltalk-in-Smalltalk library
@@ -2197,15 +2182,14 @@ which are specific to @gst{}.  The first is a compiler for Smalltalk
 methods written in Smalltalk itself, whose source code provides good
 insights into the @gst{} virtual machine.
 
-The second is the automatic documentation extractor, contained in two
-files, @file{packages/stinst/compiler/STLoader.st} and
-@file{packages/stinst/compiler/STLoaderObjs.st}.  To be able to create
-Texinfo files even if the library cannot be loaded (for example,
-@code{BLOX} requires a running X server). Smalltalk source code is
-interpreted and objects for the classes and methods being read in are
-created; then, polymorphism allows one to treat these exactly like usual
-classes which can be fed to @gst{}'s @code{ClassPublisher} (found in
-@file{packages/stinst/doc/Publish.st}).
+The second is the automatic documentation extractor.  @code{gst-doc} is able
+to create documentation even if the library cannot be loaded (for example,
+if loading it requires a running X server).  To do so
+it uses @file{packages/stinst/parser/STLoader.st} and
+@file{packages/stinst/parser/STLoaderObjs.st} to load and interpret
+Smalltalk source code, creating objects for the classes and methods being
+read in; then, polymorphism allows one to treat these exactly like usual
+classes.
 
 @node Database
 @section Database connectivity
@@ -2526,7 +2510,7 @@ $ gst-load --start@i{[=@var{ARG}]} Swazoo
 @end example
 
 @noindent
-or loaded into a background GNU Smalltalk virtual machine with
+or loaded into a background @gst{} virtual machine with
 @example
 $ gst-remote --start=Swazoo@i{[:@var{ARG}]}
 @end example
@@ -3023,17 +3007,14 @@ DLD addLibrary: 'libc'
 is often used to use the standard C library functions from Smalltalk.
 
 However, if you want to provide a more intimate link between C and Smalltalk,
-as is the case with Blox, you should use the @code{dynamic module
-linking} system.  This section explains what to do, taking the Blox
+as is the case with for example the GTK bindings, you should use the @code{dynamic module
+linking} system.  This section explains what to do, taking the Digest
 library as a guide.
 
-Modules are searched for in the @file{smalltalk} subdirectory of the
-system library path, or in the directory that the
-@env{SMALLTALK_MODULES} environment variable points to.  A module is
-distinguished from a standard shared library because it has a function
-which Smalltalk calls to initialize the module; the name of this
-function must be @code{gst_initModule}.  Here is the initialization
-function used by Blox:
+A module is distinguished from a standard shared library because it has
+a function which Smalltalk calls to initialize the module; the name of
+this function must be @code{gst_initModule}.  Here is the initialization
+function used by Digest:
 
 @example
 void
@@ -3041,16 +3022,19 @@ gst_initModule(proxy)
      VMProxy *proxy;
 @{
   vmProxy = proxy;
-  vmProxy->defineCFunc("Tcl_Eval", Tcl_Eval);
-  vmProxy->defineCFunc("Tcl_GetStringResult", Tcl_GetStringResult);
-  vmProxy->defineCFunc("tclInit", tclInit);
-  vmProxy->defineCFunc("bloxIdle", bloxIdle);
+  vmProxy->defineCFunc ("MD5AllocOOP", MD5AllocOOP);
+  vmProxy->defineCFunc ("MD5Update", md5_process_bytes);
+  vmProxy->defineCFunc ("MD5Final", md5_finish_ctx);
+
+  vmProxy->defineCFunc ("SHA1AllocOOP", SHA1AllocOOP);
+  vmProxy->defineCFunc ("SHA1Update", sha1_process_bytes);
+  vmProxy->defineCFunc ("SHA1Final", sha1_finish_ctx);
 @}
 @end example
 
 Note that the @code{defineCFunc} function is called through a function
-pointer in @code{gst_initModule}, and that Blox saves the value of its
-parameter to be used elsewhere in its code.  This is not strictly
+pointer in @code{gst_initModule}, and that the value of its parameter
+is saved in order to use it elsewhere in its code.  This is not strictly
 necessary on many platforms, namely those where the module is
 effectively @emph{linked with the Smalltalk virtual machine} at
 run-time; but since some@footnote{The most notable are @sc{aix} and
@@ -3061,76 +3045,54 @@ link with @file{libgst.a} should not call these functions directly, but
 through a @code{VMProxy} exported by @file{libgst.a} and accessible
 through the @code{gst_interpreter_proxy} variable.
 
-First of all, you have to build your package as a shared library; using
-@gnu{} Automake and @code{libtool}, this is as easy as changing your
-@file{Makefile.am} file so that it reads like this
+Modules are shared libraries; the default directory in which modules
+are searched for is stored in a @file{gnu-smalltalk.pc} file that is
+installed by @gst{} so that it can be used with @command{pkg-config}.
+An Autoconf macro @code{AM_PATH_GST} is also installed that will put the
+directory in the @code{gstmoduledir} Autoconf substitution.  When using
+@gnu{} Automake and Libtool, you can then build modules by including
+something like this in @file{Makefile.am}:
 
 @example
-pkglib_LTLIBRARIES = libblox.la
-libblox_la_LDFLAGS = -module -no-undefined @dfn{... more flags ...}
-libblox_la_SOURCES = @dfn{... your source files ...}
+gstmodule_LTLIBRARIES = libdigest.la
+libdigest_la_LDFLAGS = -module -no-undefined @dfn{... more flags ...}
+libdigest_la_SOURCES = @dfn{... your source files ...}
 @end example
-
-@noindent
-instead of reading like this
-
-@example
-pkglib_LIBRARIES = libblox.a
-libblox_a_LDFLAGS = @dfn{... more flags ...}
-libblox_a_SOURCES = @dfn{... your source files ...}
-@end example
-
-As you see, you only have to change @file{.a} extensions to @file{.la},
-@code{LIBRARIES} targets to @code{LTLIBRARIES}, and add appropriate
-options to @code{LDFLAGS}@footnote{Specifying @option{-no-undefined} is
-not necessary, but it does perform that the portability conditions
-explained above (no reference to symbols in the virtual machine) are
-satisfied}.  You will also have to run @code{libtoolize} and follow its
-instruction, but this is really simpler than it looks.
-
-Note that this example uses @file{pkglib} because @sc{Blox} is installed
-together with Smalltalk, but in general this is not necessary.  You can
-install the library wherever you want; @code{libtool} will even generate
-appropriate warnings to the installer if @code{ldconfig} (or an
-equivalent program) has to be re-run.
 
 While you can use @code{DLD class>>#addModule:} to link a module into
 the virtual machine at run time, usually bindings that require a module
-are complex enough to be packaged
-Finally, you will have to add the name of the module in a package file
+are complex enough to be packaged as @file{.star} files.  In this case,
+you will have to add the name of the module in a package file
 (@pxref{Packages}).  In this case, the relevant entry in the file will be
 
 @example
 <package>
-  <name>BloxTK</name>
-  <namespace>BLOX</namespace>
-  <filein>BloxBasic.st</filein>
-  <filein>BloxWidgets.st</filein>
-  <filein>BloxText.st</filein>
-  <filein>BloxCanvas.st</filein>
-  <filein>BloxExtend.st</filein>
-  <filein>Blox.st</filein>
-  <module>blox-tk</module>
-  <directory>blox-tk</directory>
+  <name>Digest</name>
+  <filein>digest.st</filein>
+  <filein>md5.st</filein>
+  <filein>sha1.st</filein>
+  <module>digest</module>
 
-  <file>Blox.st</file>
-  <file>BloxBasic.st</file>
-  <file>BloxWidgets.st</file>
-  <file>BloxText.st</file>
-  <file>BloxCanvas.st</file>
-  <file>BloxExtend.st</file>
-  <file>colors.txt</file>
+  <test>
+   <sunit>MD5Test SHA1Test</sunit>
+   <filein>mdtests.st</filein>
+  </test>
+
+  <file>digest.st</file>
+  <file>md5.st</file>
+  <file>sha1.st</file>
+  <file>mdtests.st</file>
 </package>
 @end example
 
 There is also a third case, in which the bindings are a mixture of
 code written specially for @gst{}, and the normal C library.  In this
 case, you can use a combination of dynamic shared libraries and dynamic
-modules.  To do this, you can specify both @code{<library>} and
-@code{<module>} tags in the @file{package.xml} file.
+modules.
 
-Alternatively, the following functions allow you to call @code{DLD
-class>>#addLibrary:} from within a module.
+To do this, you can specify both @code{<library>} and @code{<module>} tags
+in the @file{package.xml} file; alternatively, the following functions
+allow you to call @code{DLD class>>#addLibrary:} from within a module.
 
 @deftypefun mst_Boolean dlOpen (void *filename, int module)
 Open the library pointed to by with @var{filename} (which need not include
@@ -3348,7 +3310,7 @@ passed as @code{long double}
 C object value passed as @code{void *}.
 
 Any class with non-pointer indexed instance variables can be passed as
-a @code{#cObject}, and GNU Smalltalk will pass the address of the first indexed
+a @code{#cObject}, and @gst{} will pass the address of the first indexed
 instance variable.  This however should never be done for functions that
 allocate objects, call back into Smalltalk code or otherwise may cause
 a garbage collection: after a GC, pointers passed as @code{#cObject} may be
