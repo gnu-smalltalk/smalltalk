@@ -6,6 +6,12 @@
 </package>
 
 <package>
+  <name>Browser</name>
+  <prereq>VisualGST</prereq>
+  <start>(PackageLoader packageAt: 'VisualGST') start</start>
+</package>
+
+<package>
   <name>TCP</name>
   <prereq>Sockets</prereq>
 </package>

@@ -341,7 +341,7 @@ GST_PACKAGE_ENABLE([BloxTK], [blox/tk],
    [GST_HAVE_TCLTK],
    [gst_cv_tcltk_libs],
    [Makefile], [blox-tk.la])
-GST_PACKAGE_ENABLE([Browser], [browser])
+GST_PACKAGE_ENABLE([BLOXBrowser], [blox/browser])
 GST_PACKAGE_ENABLE([Complex], [complex])
 GST_PACKAGE_ENABLE([Continuations], [continuations])
 GST_PACKAGE_ENABLE([CParser], [cpp])

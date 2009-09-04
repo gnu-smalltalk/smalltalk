@@ -31,7 +31,7 @@
 
 "
 (Smalltalk includesKey: #BLOX) ifFalse: [
-    PackageLoader fileInPackage: 'Browser'.
+    PackageLoader fileInPackage: 'BLOXBrowser'.
     ObjectMemory snapshot
 ]!
 

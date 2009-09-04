@@ -1,5 +1,7 @@
 <package>
-  <name>Browser</name>
+  <name>BLOXBrowser</name>
+  <provides>Browser</provides>
+
   <namespace>BLOX.BLOXBrowser</namespace>
 
   <prereq>Blox</prereq>

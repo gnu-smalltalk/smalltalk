@@ -5,6 +5,8 @@
   <prereq>Parser</prereq>
   <prereq>SUnit</prereq>
   <prereq>DebugTools</prereq>
+
+  <provides>Browser</provides>
   <namespace>VisualGST</namespace>
 
   <start>
