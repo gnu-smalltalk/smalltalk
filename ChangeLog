@@ -1,3 +1,9 @@
+2009-09-04  Paolo Bonzini  <bonzini@gnu.org>
+
+	* gst-tool.c: Add gst-browser, support passing multiple implicit
+	arguments.
+	* scripts/Browser: Delete.
+
 2009-09-03  Paolo Bonzini  <bonzini@gnu.org>
 
 	* scripts/Load.st: Save image before starting packages.

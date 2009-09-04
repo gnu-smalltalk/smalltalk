@@ -79,29 +79,30 @@ struct tool {
   const char *script;
   const char *options;
   const char *force_opt;
+  mst_Boolean allow_other_arguments;
 };
 
-struct tool tools[] = {
+const struct tool tools[] = {
   {
     "gst-convert", "scripts/Convert.st",
     "-h|--help --version -q|--quiet -v|-V|--verbose -C|--class: -r|--rule: \
         -c|--category: -f|--format: -o|--output: -I|--image-file: \
         -F|--output-format: --kernel-directory:",
-    NULL
+    NULL, true
   },
   {
     "gst-load", "scripts/Load.st",
     "-h|--help --version -q|--quiet -v|-V|--verbose -n|--dry-run -f|--force \
 	--start:: -t|--test -I|--image-file: --kernel-directory: \
 	-i|--rebuild-image",
-    NULL
+    NULL, true
   },
   {
     "gst-reload", "scripts/Load.st",
     "-h|--help --version -q|--quiet -v|-V|--verbose -n|--dry-run -f|--force \
 	--start:: -t|--test -I|--image-file: --kernel-directory: \
 	-i|--rebuild-image",
-    "--force"
+    "--force\0", true
   },
   {
     "gst-package", "scripts/Package.st",
@@ -109,40 +110,45 @@ struct tool tools[] = {
         --prepare --test -t|--target-directory: --list-files: --list-packages \
         --srcdir: --distdir|--destdir: --copy --all-files --vpath \
         -n|--dry-run -I|--image-file: --kernel-directory:",
-    NULL
+    NULL, true
   },
   {
     "gst-sunit", "scripts/Test.st",
     "-h|--help --version -q|--quiet -v|-V|--verbose -f|--file: -p|--package: \
 	-I|--image-file: --kernel-directory:",
-    NULL
+    NULL, true
   },
   {
-    "gst-blox", "scripts/Browser.st",
+    "gst-browser", "scripts/Load.st",
     "-I|--image-file: --kernel-directory:",
-    NULL
+    "--start\0Browser\0", false
+  },
+  {
+    "gst-blox", "scripts/Load.st",
+    "-I|--image-file: --kernel-directory:",
+    "--start\0BLOXBrowser\0", false
   },
   {
     "gst-doc", "scripts/GenDoc.st",
     "-h|--help --version -p|--package: -f|--file: -I|--image-file: \
         -n|--namespace: -o|--output: --kernel-directory: -F|--output-format:",
-    NULL
+    NULL, true
   },
   {
     "gst-remote", "scripts/Remote.st",
     "-h|--help --version --daemon --server -p|--port: -f|--file: -e|--eval: \
  	-l|--login: --package: --start: --stop: --pid --kill --snapshot:: \
 	-I|--image-file: --kernel-directory:",
-    NULL
+    NULL, true
   },
   {
     "gst-profile", "scripts/Profile.st",
     "-f|--file: -e|--eval: -o|--output: -h|--help --version \
 	--no-separate-blocks",
-    NULL
+    NULL, true
   },
 
-  { NULL, NULL, NULL, NULL }
+  { NULL, NULL, NULL, NULL, false }
 };
 
 /* An option parser compatible with the one in the Getopt class.
@@ -161,6 +167,7 @@ struct long_option {
 
 char short_opts[1 << (sizeof (char) * 8)];
 struct long_option *long_opts;
+const struct tool *tool;
 
 void
 option_error (const char *s, ...)
@@ -251,6 +258,12 @@ setup_options (const char *str)
 void
 parse_option (int short_opt, const char *long_opt, const char *arg)
 {
+  if (!short_opt && !long_opt && !tool->allow_other_arguments)
+    {
+      option_error ("invalid argument '%s'", arg);
+      return;
+    }
+
   if (short_opt == 'I'
       || (long_opt && !strcmp (long_opt, "image-file")))
     {
@@ -481,7 +494,8 @@ main(int argc, const char **argv)
     else if (!strcmp (tools[i].name, program_name))
       break;
 
-  setup_options (tools[i].options);
+  tool = &tools[i];
+  setup_options (tool->options);
   parse_options (&argv[1]);
 
 #ifdef HAVE_FORK
@@ -489,17 +503,23 @@ main(int argc, const char **argv)
     fork_daemon ();
 #endif
 
-  if (tools[i].force_opt)
+  if (tool->force_opt)
     {
-      smalltalk_argv = alloca (sizeof (const char *) * (argc + 1));
-      smalltalk_argc = argc;
-      smalltalk_argv[0] = tools[i].force_opt;
-      memcpy (&smalltalk_argv[1], &argv[1], argc * sizeof (char *));
+      const char *p;
+      int n;
+      for (p = tool->force_opt, n = 0; *p; p += strlen (p) + 1)
+	n++;
+
+      smalltalk_argc = argc + n - 1;
+      smalltalk_argv = alloca (sizeof (char *) * smalltalk_argc);
+      for (p = tool->force_opt, n = 0; *p; p += strlen (p) + 1)
+	smalltalk_argv[n++] = p;
+      memcpy (&smalltalk_argv[n], &argv[1], argc * sizeof (char *));
     }
   else
     {
-      smalltalk_argv = argv + 1;
       smalltalk_argc = argc - 1;
+      smalltalk_argv = argv + 1;
     }
 
 #ifdef CMD_LN_S
@@ -522,9 +542,9 @@ main(int argc, const char **argv)
   if (result != 0)
     exit (result < 0 ? 1 : result);
     
-  if (!gst_process_file (tools[i].script, GST_DIR_KERNEL_SYSTEM))
+  if (!gst_process_file (tool->script, GST_DIR_KERNEL_SYSTEM))
     fprintf (stderr, "%s: Couldn't open kernel file `%s': %s\n",
-	     executable_name, tools[i].script, strerror (errno));
+	     executable_name, tool->script, strerror (errno));
 
   gst_invoke_hook (GST_ABOUT_TO_QUIT);
   exit (0);

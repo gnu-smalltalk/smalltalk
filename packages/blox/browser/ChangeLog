@@ -1,3 +1,7 @@
+2009-09-04  Paolo Bonzini  <bonzini@gnu.org>
+
+	* package.xml: Add <start> tag.
+
 2008-04-07  Paolo Bonzini  <bonzini@gnu.org>
 
 	* ClassHierBrow.st: Use #name after accessing variables.

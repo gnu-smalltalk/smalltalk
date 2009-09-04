@@ -4,6 +4,8 @@
 
   <namespace>BLOX.BLOXBrowser</namespace>
 
+  <start>BLOX.BLOXBrowser.BrowserMain new initialize</start>
+
   <prereq>Blox</prereq>
   <prereq>Parser</prereq>
   <prereq>DebugTools</prereq>
