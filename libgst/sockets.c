@@ -423,7 +423,10 @@ getSoError (int fd)
 {
   int error;
   int size = sizeof (error);
-  if (myGetsockopt (fd, SOL_SOCKET, SO_ERROR, (char *)&error, &size) == -1)
+  if ((error = _gst_get_fd_error (fd)) != 0)
+    ;
+
+  else if (myGetsockopt (fd, SOL_SOCKET, SO_ERROR, (char *)&error, &size) == -1)
     {
 #ifdef _WIN32
       error = WSAGetLastError ();
@@ -432,18 +435,15 @@ getSoError (int fd)
 #endif
     }
 
+  /* When we get one of these, we don't return an error.  However,
+     the primitive still fails and the file/socket is closed by the
+     Smalltalk code.  */
+  if (error == ESHUTDOWN || error == ECONNRESET
+      || error == ECONNABORTED || error == ENETRESET
+      || error == EPIPE)
+    return 0;
   else
-    {
-      /* When we get one of these, we don't return an error.  However,
-         the primitive still fails and the file/socket is closed by the
-         Smalltalk code.  */
-      if (error == ESHUTDOWN || error == ECONNRESET
-	  || error == ECONNABORTED || error == ENETRESET
-	  || error == EPIPE)
-	return 0;
-    }
-
-  return error;
+    return error;
 }
 
 

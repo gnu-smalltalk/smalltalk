@@ -495,6 +495,21 @@ _gst_remove_fd_polling_handlers (int fd)
   fhev_unref (fhev_delete (fh));
 }
 
+int
+_gst_get_fd_error (int fd)
+{
+  HANDLE fh = _get_osfhandle (fd);
+  struct handle_events *ev = fhev_find (fh);
+  int error;
+ 
+  if (!ev)
+    return 0;
+
+  error = ev->error;
+  fhev_unref (ev);
+  return error;
+}
+
 void
 _gst_pause (void)
 {

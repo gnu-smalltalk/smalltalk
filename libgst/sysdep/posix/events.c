@@ -319,6 +319,12 @@ signal_polled_files (int fd, mst_Boolean try_again)
   while (more && num_used_pollfds);
 }
 
+int
+_gst_get_fd_error (int fd)
+{
+  return 0;
+}
+
 void
 _gst_remove_fd_polling_handlers (int fd)
 {

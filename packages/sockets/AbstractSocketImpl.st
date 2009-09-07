@@ -434,7 +434,8 @@ this can be changed by class methods on SocketAddress sublcasses.'>
 	self 
 	    fileOp: 14
 	    with: 0
-	    with: Semaphore new.
+	    with: Semaphore new
+	    ifFail: [[File checkError: self soError] ensure: [^self close]].
 	self 
 	    fileOp: 13
 	    with: 0
@@ -454,7 +455,8 @@ this can be changed by class methods on SocketAddress sublcasses.'>
 	self 
 	    fileOp: 14
 	    with: 1
-	    with: Semaphore new.
+	    with: Semaphore new
+	    ifFail: [[File checkError: self soError] ensure: [^self close]].
 	self 
 	    fileOp: 13
 	    with: 1
@@ -471,7 +473,8 @@ this can be changed by class methods on SocketAddress sublcasses.'>
 	self 
 	    fileOp: 14
 	    with: 2
-	    with: Semaphore new.
+	    with: Semaphore new
+	    ifFail: [[File checkError: self soError] ensure: [^self close]].
 	self 
 	    fileOp: 13
 	    with: 2

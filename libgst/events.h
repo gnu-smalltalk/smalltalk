@@ -84,6 +84,11 @@ extern mst_Boolean _gst_is_timeout_programmed (void)
   ATTRIBUTE_PURE 
   ATTRIBUTE_HIDDEN;
 
+/* Check for asynchronously reported error conditions related to file
+   descriptor FD.  */
+extern int _gst_get_fd_error (int fd)
+  ATTRIBUTE_HIDDEN;
+
 /* Fire and remove all I/O handlers for file descriptor FD.  */
 extern void _gst_remove_fd_polling_handlers (int fd)
   ATTRIBUTE_HIDDEN;
