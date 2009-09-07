@@ -73,7 +73,7 @@ struct handle_events
   enum fhev_kind kind;
   HANDLE handle;
   OOP semaphoreOOP;
-  LONG lEvents;
+  int error;
   struct semaphore_list *list;
   struct handle_events *next;
 };
@@ -193,6 +193,50 @@ fhev_new (HANDLE handle, enum fhev_kind kind)
   return ev;
 }
 
+int
+fhev_poll (struct handle_events *ev)
+{
+  static struct timeval tv0 = { 0, 0 };
+  SOCKET s;
+  fd_set rfds, wfds, xfds;
+
+  if (ev->error)
+    return FD_CLOSE;
+
+  switch (ev->kind)
+    {
+    case EV_TTY:
+      if (poll_console_input (ev->handle))
+	return FD_READ | FD_WRITE;
+      else
+	return FD_WRITE;
+
+    case EV_SOCKET:
+      s = (SOCKET) ev->handle;
+      FD_ZERO (&rfds);
+      FD_ZERO (&wfds);
+      FD_ZERO (&xfds);
+      FD_SET (s, &rfds);
+      FD_SET (s, &wfds);
+      FD_SET (s, &xfds);
+      select (0, &rfds, &wfds, &xfds, &tv0);
+      return
+	((FD_ISSET (s, &rfds) ? FD_READ : 0)
+	 | (FD_ISSET (s, &wfds) ? FD_WRITE : 0)
+	 | (FD_ISSET (s, &xfds) ? FD_OOB : 0));
+
+    case EV_PASSIVE_SOCKET:
+      s = (SOCKET) ev->handle;
+      FD_ZERO (&rfds);
+      FD_SET (s, &rfds);
+      select (0, &rfds, NULL, NULL, &tv0);
+      return FD_ISSET (s, &rfds) ? FD_ACCEPT : 0;
+
+    default:
+      return FD_READ | FD_WRITE;
+    }
+}
+
 
 /* thread for precise alarm callbacks */
 static unsigned WINAPI
@@ -217,11 +261,11 @@ alarm_thread (LPVOID unused)
 }
 
 static void
-signal_semaphores (struct handle_events *ev)
+signal_semaphores (struct handle_events *ev, LONG lEvents)
 {
   struct semaphore_list *node, **pprev;
   for (node = ev->list, pprev = &ev->list; node; node = *pprev)
-    if (ev->lEvents & node->mask)
+    if (ev->error || (lEvents & node->mask) != 0)
       {
 	_gst_async_signal_and_unregister (node->semaphoreOOP);
 	*pprev = node->next;
@@ -283,59 +327,45 @@ polling_thread (LPVOID unused)
 	}
 
       h = &handles[ret - WAIT_OBJECT_0];
+      EnterCriticalSection (&handle_events_cs);
       if (h == &hSocketEvent)
 	{
-	  EnterCriticalSection (&handle_events_cs);
 	  for (ev = head; ev; ev = ev->next)
 	    {
 	      SOCKET s = (SOCKET) ev->handle;
-	      static struct timeval tv0 = { 0, 0 };
 	      WSANETWORKEVENTS nev;
-	      fd_set rfds, wfds, xfds;
+	      int i;
 	      if (ev->kind != EV_SOCKET && ev->kind != EV_PASSIVE_SOCKET)
 		continue;
-	      if (ev->lEvents & FD_CLOSE)
+	      if (ev->error)
 		continue;
 	      
 	      WSAEnumNetworkEvents (s, NULL, &nev);
 	      if (nev.lNetworkEvents & FD_CLOSE)
-		{
-		  ev->lEvents = FD_CLOSE;
-		  continue;
-		}
+		ev->error = WSAESHUTDOWN;
+	      else
+		for (i = 0; i < FD_CLOSE_BIT; i++)
+		  if (nev.lNetworkEvents & (1 << i)
+		      && nev.iErrorCode[i] != 0)
+		    {
+		      ev->error = nev.iErrorCode[i];
+		      break;
+		    }
 
-	      /* TODO: combine select into one.  Or alternatively, see if
-		 there is some condition such that we can use edge-triggered
-		 info provided by WSAEnumNetworkEvents directly.  */
-	      FD_ZERO (&rfds);
-	      FD_SET (s, &rfds);
-	      if (ev->kind == EV_SOCKET)
-		{
-		  FD_ZERO (&wfds);
-		  FD_ZERO (&xfds);
-		  FD_SET (s, &wfds);
-		  FD_SET (s, &xfds);
-		  select (0, &rfds, &wfds, &xfds, &tv0);
-		  ev->lEvents =
-		    ((FD_ISSET (s, &rfds) ? FD_READ : 0)
-		     | (FD_ISSET (s, &wfds) ? FD_WRITE : 0)
-		     | (FD_ISSET (s, &xfds) ? FD_OOB : 0));
-		}
+	      if (ev->error)
+		signal_semaphores (ev, 0);
 	      else
 		{
-		  select (0, &rfds, NULL, NULL, &tv0);
-		  ev->lEvents = FD_ISSET (s, &rfds) ? FD_ACCEPT : 0;
+		  int r = fhev_poll (ev);
+		  if (r)
+		    signal_semaphores (ev, r);
 		}
-
-	      signal_semaphores (ev);
 	    }
-	  LeaveCriticalSection (&handle_events_cs);
 	}
 
       else if (h == &hAlarmEvent)
 	{
 	  ev = fhev_find (*h);
-	  EnterCriticalSection (&handle_events_cs);
 	  assert (ev->list == NULL);
 	  semOOP = ev ? ev->semaphoreOOP : NULL;
 	  if (semOOP)
@@ -344,7 +374,6 @@ polling_thread (LPVOID unused)
 	      ev->semaphoreOOP = NULL;
 	    }
 	  fhev_unref (ev);
-	  LeaveCriticalSection (&handle_events_cs);
 	}
 
       else
@@ -356,11 +385,10 @@ polling_thread (LPVOID unused)
 
 	  ev = fhev_find (*h);
 	  assert (ev);
-	  EnterCriticalSection (&handle_events_cs);
-	  signal_semaphores (ev);
+	  signal_semaphores (ev, FD_READ | FD_WRITE);
 	  fhev_unref (ev);
-	  LeaveCriticalSection (&handle_events_cs);
 	}
+      LeaveCriticalSection (&handle_events_cs);
     }
   return 0;
 }
@@ -375,8 +403,7 @@ _gst_init_async_events (void)
   /* Starts as non-signaled, so alarm_thread will wait */
   InitializeCriticalSection (&handle_events_cs);
 
-  hSocketEvent = WSACreateEvent ();
-
+  hSocketEvent = CreateEvent (NULL, FALSE, FALSE, NULL);
   hNewWaitEvent = CreateEvent (NULL, FALSE, FALSE, NULL);
   hAlarmEvent = CreateEvent (NULL, FALSE, FALSE, NULL);
   fhev_unref (fhev_new (hAlarmEvent, EV_EVENT));
@@ -435,6 +462,7 @@ _gst_sync_file_polling (int fd,
 {
   HANDLE fh = _get_osfhandle (fd);
   struct handle_events *ev;
+  LONG lEvents;
 
   if (cond < 0 || cond > 2)
     return -1;
@@ -444,17 +472,19 @@ _gst_sync_file_polling (int fd,
   if (!ev)
     return (GetFileType (fh) != 0 || GetLastError () != NO_ERROR) ? 1 : -1;
       
-  if (ev->lEvents & FD_CLOSE)
+  EnterCriticalSection (&handle_events_cs);
+  lEvents = fhev_poll (ev);
+  LeaveCriticalSection (&handle_events_cs);
+  if (lEvents & FD_CLOSE)
     {
+      _gst_set_errno (ev->error);
       fhev_unref (ev);
-      errno = 0;
       return -1;
     }
   else
     {
-      int r = (ev->lEvents & masks[cond]) != 0;
       fhev_unref (ev);
-      return r;
+      return (lEvents & masks[cond]) != 0;
     }
 }
 
@@ -491,6 +521,8 @@ _gst_async_file_polling (int fd,
   HANDLE fh = _get_osfhandle (fd);
   struct handle_events *ev;
   struct semaphore_list *node;
+  LONG lEvents;
+
   if (cond < 0 || cond > 2)
     return -1;
 
@@ -500,13 +532,14 @@ _gst_async_file_polling (int fd,
     return (GetFileType (fh) != 0 || GetLastError () != NO_ERROR) ? 1 : -1;
       
   EnterCriticalSection (&handle_events_cs);
-  if (ev->lEvents & FD_CLOSE)
+  lEvents = fhev_poll (ev);
+  if (lEvents & FD_CLOSE)
     {
+      _gst_set_errno (ev->error);
       fhev_unref (ev);
-      errno = 0;
       return -1;
     }
-  else if ((ev->lEvents & masks[cond]) != 0)
+  else if ((lEvents & masks[cond]) != 0)
     {
       fhev_unref (ev);
       return 1;

@@ -1,3 +1,10 @@
+2009-09-07  Paolo Bonzini  <bonzini@gnu.org>
+
+	* sysdep/win32/events.c: Extract select-based polling from
+	poll_thread, use it in _gst_sync_file_polling and
+	_gst_async_file_polling, save error conditions returned
+	by WSAEnumNetworkEvents.
+
 2009-09-03  Paolo Bonzini  <bonzini@gnu.org>
 
 	* gst-parse.c: Fix crash on invalid class variable definitions.
