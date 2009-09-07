@@ -422,6 +422,13 @@ the class category.'>
 		'Extensions'}
     ]
 
+    inheritShape [
+	"Answer whether subclasses will have by default the same shape as
+	 this class.  The default is false."
+	<category: 'instance creation'>
+	^false
+    ]
+
     subclass: classNameString [
 	"Define a subclass of the receiver with the given name.  If the class
 	 is already defined, don't modify its instance or class variables
@@ -452,7 +459,7 @@ the class category.'>
 	    environment: Namespace current
 	    subclassOf: self
 	    instanceVariableNames: stringInstVarNames
-	    shape: nil
+	    shape: (self inheritShape ifTrue: [ #inherit ])
 	    classVariableNames: stringOfClassVarNames
 	    poolDictionaries: stringOfPoolNames
 	    category: categoryNameString

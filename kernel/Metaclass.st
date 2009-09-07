@@ -177,7 +177,7 @@ it should be...the Smalltalk metaclass system is strange and complex.'>
 	 class variable names and pool dictionaries are left untouched."
 
 	<category: 'basic'>
-	| aClass variableArray |
+	| aClass variableArray inheritedShape |
 	variableArray := theSuperclass notNil 
 		    ifTrue: [theSuperclass allInstVarNames]
 		    ifFalse: [#()].
@@ -191,7 +191,9 @@ it should be...the Smalltalk metaclass system is strange and complex.'>
 		    environment: aNamespace
 		    subclassOf: theSuperclass
 		    instanceVariableArray: variableArray
-		    shape: nil
+		    shape: (theSuperclass isNil
+				ifTrue: [ nil ]
+				ifFalse: [ theSuperclass inheritShape ifTrue: [ #inherit ] ])
 		    classPool: BindingDictionary new
 		    poolDictionaries: #()
 		    category: nil].

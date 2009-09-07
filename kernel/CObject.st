@@ -49,13 +49,11 @@ into their corresponding C values for use in external routines.'>
 	
     ]
 
-    CObject class >> subclass: aSymbol [
-	"Create a subclass with the given name."
-
-	<category: 'subclassing'>
-	^(super subclass: aSymbol)
-	    shape: #word;
-	    yourself
+    CObject class >> inheritShape [
+	"Answer whether subclasses will have by default the same shape as
+	 this class.  The default is true for the CObject hierarchy."
+	<category: 'subclass creation'>
+	^true
     ]
 
     CObject class >> alloc: nBytes type: cTypeObject [
@@ -495,7 +493,6 @@ into their corresponding C values for use in external routines.'>
 
 CObject subclass: CScalar [
     
-    <shape: #word>
     <category: 'Language-C interface'>
     <comment: nil>
 
@@ -570,7 +567,6 @@ CObject subclass: CScalar [
 
 CScalar subclass: CSmalltalk [
     
-    <shape: #word>
     <category: 'Language-C interface'>
     <comment: nil>
 
@@ -621,7 +617,6 @@ CScalar subclass: CSmalltalk [
 
 CScalar subclass: CLong [
     
-    <shape: #word>
     <category: 'Language-C interface'>
     <comment: nil>
 
@@ -672,7 +667,6 @@ CScalar subclass: CLong [
 
 CScalar subclass: CULong [
     
-    <shape: #word>
     <category: 'Language-C interface'>
     <comment: nil>
 
@@ -723,7 +717,6 @@ CScalar subclass: CULong [
 
 CScalar subclass: CInt [
     
-    <shape: #word>
     <category: 'Language-C interface'>
     <comment: nil>
 
@@ -774,7 +767,6 @@ CScalar subclass: CInt [
 
 CScalar subclass: CUInt [
     
-    <shape: #word>
     <category: 'Language-C interface'>
     <comment: nil>
 
@@ -825,7 +817,6 @@ CScalar subclass: CUInt [
 
 CScalar subclass: CShort [
     
-    <shape: #word>
     <category: 'Language-C interface'>
     <comment: nil>
 
@@ -876,7 +867,6 @@ CScalar subclass: CShort [
 
 CScalar subclass: CUShort [
     
-    <shape: #word>
     <category: 'Language-C interface'>
     <comment: nil>
 
@@ -927,7 +917,6 @@ CScalar subclass: CUShort [
 
 CScalar subclass: CChar [
     
-    <shape: #word>
     <category: 'Language-C interface'>
     <comment: nil>
 
@@ -1000,7 +989,6 @@ CScalar subclass: CChar [
 
 CScalar subclass: CUChar [
     
-    <shape: #word>
     <category: 'Language-C interface'>
     <comment: nil>
 
@@ -1051,7 +1039,6 @@ CScalar subclass: CUChar [
 
 CScalar subclass: CFloat [
     
-    <shape: #word>
     <category: 'Language-C interface'>
     <comment: nil>
 
@@ -1102,7 +1089,6 @@ CScalar subclass: CFloat [
 
 CScalar subclass: CDouble [
     
-    <shape: #word>
     <category: 'Language-C interface'>
     <comment: nil>
 
@@ -1153,7 +1139,6 @@ CScalar subclass: CDouble [
 
 CScalar subclass: CLongDouble [
     
-    <shape: #word>
     <category: 'Language-C interface'>
     <comment: nil>
 
@@ -1204,7 +1189,6 @@ CScalar subclass: CLongDouble [
 
 CObject subclass: CAggregate [
     
-    <shape: #word>
     <category: 'Language-C interface'>
     <comment: nil>
 
@@ -1238,7 +1222,6 @@ CObject subclass: CAggregate [
 
 CAggregate subclass: CArray [
     
-    <shape: #word>
     <category: 'Language-C interface'>
     <comment: nil>
 
@@ -1288,7 +1271,6 @@ CAggregate subclass: CArray [
 
 CAggregate subclass: CPtr [
     
-    <shape: #word>
     <category: 'Language-C interface'>
     <comment: nil>
 
@@ -1338,7 +1320,6 @@ CAggregate subclass: CPtr [
 
 CPtr subclass: CString [
     
-    <shape: #word>
     <category: 'Language-C interface'>
     <comment: 'Technically, CString is really a pointer to CChar.  However, it can be
 very useful as a distinct datatype because it is a separate datatype
@@ -1414,7 +1395,6 @@ method returns a Smalltalk String, as you would expect for a scalar datatype.
 
 CUChar subclass: CByte [
     
-    <shape: #word>
     <category: 'Language-C interface'>
     <comment: 'You know what a byte is, don''t you?!?'>
 
@@ -1462,7 +1442,6 @@ CUChar subclass: CByte [
 
 CByte subclass: CBoolean [
     
-    <shape: #word>
     <category: 'Language-C interface'>
     <comment: 'I return true if a byte is not zero, false otherwise.'>
 

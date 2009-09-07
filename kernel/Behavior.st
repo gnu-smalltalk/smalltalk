@@ -1056,7 +1056,9 @@ method dictionary, and iterating over the class hierarchy.'>
 	shape = #word 
 	    ifTrue: 
 		[realShape := CSymbols.CLongSize = 4 ifTrue: [#uint] ifFalse: [#uint64]].
-	shape = #inherit ifTrue: [realShape := self superclass shape].
+	shape = #inherit
+	    ifTrue:
+		[realShape := self superclass isNil ifTrue: [nil] ifFalse: [self superclass shape]].
 	self shape == realShape ifTrue: [^false].
 	realShape isNil ifTrue: [
             self updateInstanceVars: self allInstVarNames shape: nil ].
@@ -1347,11 +1349,15 @@ method dictionary, and iterating over the class hierarchy.'>
 
     setInstanceSpec: shape instVars: anIntegerSize [
 	<category: 'private'>
+	| realShape |
 	instanceSpec := anIntegerSize bitShift: 12.
 	shape isNil 
 	    ifFalse: 
-		[instanceSpec := instanceSpec bitOr: 15 
-				    + (self shapes indexOf: shape ifAbsent: [self error: 'invalid shape value'])]
+		[realShape := shape = #inherit
+		    ifTrue: [self superclass isNil ifTrue: [nil] ifFalse: [self superclass shape]]
+		    ifFalse: [shape].
+		instanceSpec := instanceSpec bitOr: 15 
+				    + (self shapes indexOf: realShape ifAbsent: [self error: 'invalid shape value'])]
     ]
 
     sharedPoolDictionaries [

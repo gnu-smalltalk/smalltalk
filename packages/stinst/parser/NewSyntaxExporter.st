@@ -102,7 +102,7 @@ FileOutExporter subclass: NewSyntaxExporter [
     ]
 
     fileOutClassDeclaration: aBlock [
-        | aSet superclassName |
+        | aSet superclassName inheritedShape |
         
         outClass isMetaclass ifTrue: [ ^outClass ].
         
@@ -123,15 +123,18 @@ FileOutExporter subclass: NewSyntaxExporter [
             outStream space; nextPut: $|; nl; space: 4
         ].
             
-	    "shape"
-	    (outClass shape notNil)
-	        ifTrue: [ (outClass superclass isNil not)
-	    	    ifTrue: [ outStream nl; space: 4;
-	    	      		  nextPutAll: '<shape: ';
-				          store: outClass shape;
-				          nextPut: $> ] ].
+	"shape"
+	inheritedShape := outClass superclass isNil
+				ifTrue: [ nil ]
+				ifFalse: [ outClass superclass shape ].
+	outClass shape ~~
+	    (outClass inheritShape ifTrue: [ inheritedShape ] ifFalse: [ nil ])
+	    	ifTrue: [ outStream nl; space: 4;
+	    	  		  nextPutAll: '<shape: ';
+			          store: outClass shape;
+			          nextPut: $> ].
 				          
-		"sharedPools"
+	"sharedPools"
         (aSet := outClass sharedPools) do: [ :element | 
             outStream nl; space: 4; nextPutAll: '<import: '.
             outStream nextPutAll: element.
