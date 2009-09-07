@@ -58,11 +58,8 @@
 
 #include "gstpriv.h"
 
-#define DISABLED_MASK ((-1) ^ (1 << SIGSEGV) ^ (1 << SIGILL) ^ (1 << SIGABRT))
-
-
 static long pending_sigs = 0;
-static SigHandler saved_handlers[8 * sizeof (long)];
+static SigHandler saved_handlers[NSIG];
 
 static RETSIGTYPE
 dummy_signal_handler (int sig)
@@ -82,9 +79,9 @@ _gst_disable_interrupts (mst_Boolean from_signal_handler)
   if (_gst_signal_count++ == 0)
     {
       __sync_synchronize ();
-      for (i = 0; i < 8 * sizeof (long); i++)
-	if (DISABLED_MASK & (1 << i))
-  	  saved_handlers[i] = signal (i, dummy_signal_handler);
+      saved_handlers[SIGINT] = signal (SIGINT, dummy_signal_handler);
+      saved_handlers[SIGBREAK] = signal (SIGBREAK, dummy_signal_handler);
+      saved_handlers[SIGTERM] = signal (SIGTERM, dummy_signal_handler);
     }
 }
 
@@ -98,9 +95,9 @@ _gst_enable_interrupts (mst_Boolean from_signal_handler)
   if (--_gst_signal_count == 0)
     {
       __sync_synchronize ();
-      for (i = 0; i < 8 * sizeof (long); i++)
-      	if (DISABLED_MASK & (1 << i))
-	  signal (i, saved_handlers[i]);
+      signal (SIGINT, saved_handlers[SIGINT]);
+      signal (SIGBREAK, saved_handlers[SIGBREAK]);
+      signal (SIGTERM, saved_handlers[SIGTERM]);
       local_pending_sigs = pending_sigs;
       pending_sigs = 0;
       for (i = 0; local_pending_sigs; local_pending_sigs >>= 1, i++)

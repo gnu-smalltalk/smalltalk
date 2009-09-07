@@ -1,5 +1,9 @@
 2009-09-07  Paolo Bonzini  <bonzini@gnu.org>
 
+	* sysdep/win32/signals.c: Simplify given known set of valid signals.
+
+2009-09-07  Paolo Bonzini  <bonzini@gnu.org>
+
 	* events.h: Add _gst_get_fd_error.
 	* sysdep/win32/events.c: Implement it.
 	* sysdep/posix/events.c: Implement it as a stub.
