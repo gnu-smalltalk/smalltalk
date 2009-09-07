@@ -76,14 +76,14 @@ CompiledMethod extend [
 Class extend [
     fileOutHeaderOn: aFileStream [
         | now |
-        outStream 
+        aFileStream 
             nextPutAll: '"Filed out from ';
             nextPutAll: Smalltalk version;
             nextPutAll: ' on '.
             
         now := Date dateAndTimeNow.
         
-        outStream
+        aFileStream
             print: now asDate;
             space;
             print: now asTime;
