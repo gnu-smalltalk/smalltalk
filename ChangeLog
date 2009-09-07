@@ -1,5 +1,9 @@
 2009-09-07  Paolo Bonzini  <bonzini@gnu.org>
 
+	* scripts/Convert.st: Remove #fileOutHeader override.
+
+2009-09-07  Paolo Bonzini  <bonzini@gnu.org>
+
 	* kernel/Behavior.st: Add shape == #inherit support in nil subclasses
 	and in #setInstanceSpec:instVars:.
 	* kernel/CObject.st: Define #inheritShape instead of #subclass:.

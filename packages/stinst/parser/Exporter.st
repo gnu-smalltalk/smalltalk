@@ -107,7 +107,6 @@ Object subclass: FileOutExporter [
     ]
 
     fileOut [                   
-        self fileOutHeader.
         self fileOutDeclaration: [ self fileOutMethods ].
         completeFileOut
 	        ifFalse: [ self fileOutInitialize ]
@@ -117,23 +116,6 @@ Object subclass: FileOutExporter [
 	self subclassResponsibility
     ]
 
-    fileOutHeader [
-        | now |
-        outStream 
-            nextPutAll: '"Filed out from ';
-            nextPutAll: Smalltalk version;
-            nextPutAll: ' on '.
-            
-        now := Date dateAndTimeNow.
-        
-        outStream
-            print: now asDate;
-            space;
-            print: now asTime;
-            nextPutAll: '"';
-            nl; nl
-    ]
-    
     fileOutDeclaration: aBlock [
 	self subclassResponsibility
     ]

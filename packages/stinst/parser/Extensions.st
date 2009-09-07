@@ -74,9 +74,27 @@ CompiledMethod extend [
 
 
 Class extend [
+    fileOutHeaderOn: aFileStream [
+        | now |
+        outStream 
+            nextPutAll: '"Filed out from ';
+            nextPutAll: Smalltalk version;
+            nextPutAll: ' on '.
+            
+        now := Date dateAndTimeNow.
+        
+        outStream
+            print: now asDate;
+            space;
+            print: now asTime;
+            nextPutAll: '"';
+            nl; nl
+    ]
+    
     fileOutDeclarationOn: aFileStream [
 	"File out class definition to aFileStream.  Requires package Parser."
 	<category: 'filing'>
+	self fileOutHeaderOn: aFileStream.
         (STInST.FileOutExporter defaultExporter on: self to: aFileStream)
             fileOutDeclaration: [ ]
     ]
@@ -85,6 +103,7 @@ Class extend [
 	"File out complete class description:  class definition, class and
 	 instance methods.  Requires package Parser."
 	<category: 'filing'>
+	self fileOutHeaderOn: aFileStream.
         STInST.FileOutExporter defaultExporter
 	    fileOut: self to: aFileStream
     ]
@@ -95,6 +114,7 @@ ClassDescription extend [
         "File out all the methods belonging to the method category,
 	 category, to aFileStream.  Requires package Parser."
 	
+	self fileOutHeaderOn: aFileStream.
         STInST.FileOutExporter defaultExporter
 	    fileOutSelector: aSymbol of: self to: aFileStream
     ]
@@ -103,6 +123,7 @@ ClassDescription extend [
         "File out all the methods belonging to the method category,
 	 category, to aFileStream.  Requires package Parser."
 	
+	self fileOutHeaderOn: aFileStream.
         STInST.FileOutExporter defaultExporter
 	    fileOutCategory: category of: self to: aFileStream
     ]

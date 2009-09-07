@@ -32,10 +32,6 @@
 
 PackageLoader fileInPackage: #Parser.
 
-STInST.FileOutExporter extend [
-    fileOutHeader [ ]
-]
-
 STInST.OldSyntaxExporter class extend [
     emitEval: aBlock to: aStream for: namespace [
         namespace isNil
