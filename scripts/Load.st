@@ -114,8 +114,9 @@ force ifTrue: [
 [
     packages := packages collect: [ :each | PackageLoader packageAt: each ].
 
-    (startMessage selector == #start: and: [
-	(packages count: [ :each | each startScript notNil ]) > 1]) ifTrue: [
+    (startMessage notNil and: [
+	startMessage selector == #start: and: [
+	(packages count: [ :each | each startScript notNil ]) > 1]]) ifTrue: [
 	    stderr nextPutAll: 'gst-load: Cannot pass start argument to multiple packages
 '.
 	    ^self ].

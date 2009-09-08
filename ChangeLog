@@ -1,3 +1,7 @@
+2009-09-08  Paolo Bonzini  <bonzini@gnu.org>
+
+	* scripts/Load.st: Fix "gst-load --start A B".
+
 2009-09-07  Paolo Bonzini  <bonzini@gnu.org>
 
 	* scripts/Convert.st: Remove #fileOutHeader override.
