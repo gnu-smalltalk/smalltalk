@@ -94,6 +94,12 @@ GtkConcreteWidget subclass: GtkClassWidget [
 	    connectSignal: 'changed' to: anObject selector: aSelector userData: nil
     ]
 
+    selectionMode: aSelectionMode [
+	<category: 'user interface'>
+
+	classesTree getSelection setMode: aSelectionMode.
+    ]
+
     selectedNamespace [
 	<category: 'accessing'>
 

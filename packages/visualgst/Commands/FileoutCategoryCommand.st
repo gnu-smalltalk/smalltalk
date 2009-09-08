@@ -1,18 +1,43 @@
 Command subclass: FileoutCategoryCommand [
+    | class |
+
+    FileoutCategoryCommand class >> on: aClass categorized: aSymbol [
+	<category: 'instance creation'>
+
+	^ (self new)
+	    target: aSymbol;
+	    classOrMeta: aClass;
+	    execute;
+	    yourself
+    ]
+
+    classOrMeta: aClass [
+	<category: 'accessing'>
+
+	class := aClass
+    ]
 
     execute [
 	<category: 'command'>
+
+	self chooseFile
     ]
 
-    fileoutCategory: aFile [
+    chooseFile [
+
+        | file |
+        (GTK.GtkFileChooserDialog save: 'Save Smalltalk category as...' parent: nil)
+            runNonBlockingAndDo: [ :dlg :res |
+                res = GTK.Gtk gtkResponseAccept ifTrue: [ self fileoutCategory: dlg getFilename ].
+                dlg destroy ]
+    ]
+
+    fileoutCategory: aString [
         <category: 'class events'>
 
-        | categoryWidget stream |
-        classWidget hasSelectedClass ifFalse: [ ^ self ].
-        categoryWidget := self viewedCategoryWidget.
-        categoryWidget hasSelectedCategory ifFalse: [ ^ self ].
-        stream := FileStream open: aFile mode: FileStream write.
-        (CategorySource write: categoryWidget selectedCategory of: self classOrMetaSelected on: stream)
+        | stream |
+        stream := FileStream open: aString mode: FileStream write.
+        (CategorySource write: target of: class on: stream)
             source
     ]
 ]

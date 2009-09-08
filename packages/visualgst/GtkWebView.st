@@ -1,6 +1,4 @@
 GTK.GtkWidget subclass: GtkWebView [
-    <shape: #uint64>
-
     GtkWebView class >> registerDLD [
 	DLD addLibrary: 'libwebkit-1.0'
     ]

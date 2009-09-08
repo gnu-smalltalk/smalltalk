@@ -195,6 +195,7 @@ THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.';
 
 	classWidget := GtkClassSUnitWidget showAll 
 				whenSelectionChangedSend: #onClassChanged to: self;
+				selectionMode: GTK.Gtk gtkSelectionMultiple
 				yourself.
 	^ classWidget mainWidget
     ]
@@ -258,7 +259,7 @@ THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.';
 
         classWidget hasSelectedClass ifFalse: [ ^ self ].
         class := classWidget selectedClass.
-        methodWidget class: class withCategory: '*'.
+	methodWidget class: class first withCategory: '*'.
     ]
 
     onMethodChanged [
@@ -273,11 +274,11 @@ THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.';
 
 	| suite results |
 	classWidget hasSelectedClass ifFalse: [ ^ self ].
-	suite := TestSuite named: class name asString.
-	class selectors do: [ :each |
-	    (each matchRegex: 'test' from: 1 to: 4)
-		ifTrue: [ suite addTest: (class selector: each) ]
-	].
+	suite := TestSuite named: class first name asString.
+	class do: [ :elem |
+	    elem selectors do: [ :each |
+		(each matchRegex: 'test' from: 1 to: 4)
+		    ifTrue: [ suite addTest: (elem selector: each) ] ] ].
 	suite logPolicy: TestBacktraceLog new.
 	results := suite run.
 

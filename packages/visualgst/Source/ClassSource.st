@@ -74,16 +74,18 @@ Object subclass: ClassSource [
     outputShape [
 	<category: 'printing'>
 
-	printClass shape isNil ifTrue: [ ^ self ].
-        printClass superclass isNil ifTrue: [ ^ self ].
-	stream
-	    nl;
-	    space: 4;
-            nextPutAll: '<shape: #';
-	    nextPutAll: printClass shape;
-	    nextPut: $>;
-	    nl;
-	    space: 4 
+	| inheritedShape |
+	inheritedShape := printClass superclass isNil ifTrue: [ nil ] ifFalse: [ printClass superclass shape ].
+	printClass shape ~~ (printClass inheritShape ifTrue: [ inheritedShape ] ifFalse: [ nil ])
+		ifTrue: [ 
+		stream
+		    nl;
+		    space: 4;
+		    nextPutAll: '<shape: #';
+		    nextPutAll: printClass shape;
+		    nextPut: $>;
+		    nl;
+		    space: 4 ]
     ]
 
     outputSharedPool [

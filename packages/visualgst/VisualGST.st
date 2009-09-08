@@ -722,6 +722,12 @@ THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.';
         centralBrowser inspectClass
     ]
 
+    fileoutClass [
+        <category: 'class events'>
+
+        centralBrowser fileoutClass
+    ]
+
     newCategory [
         <category: 'category events'>
 

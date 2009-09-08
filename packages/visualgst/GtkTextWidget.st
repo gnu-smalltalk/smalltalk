@@ -1,6 +1,4 @@
 GTK.GtkTextView subclass: GtkTextWidget [
-    <shape: #uint64>
-
     | userAction undoStack lastCommand cut textSaved lastSavedCommand |
 
     GtkTextWidget class >> new [

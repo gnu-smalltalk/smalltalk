@@ -3,11 +3,23 @@ Command subclass: FileoutClassCommand [
     execute [
 	<category: 'command'>
 
-        | class stream |
-        classWidget hasSelectedClass ifFalse: [ ^ self ].
-        class := classWidget selectedClass.
-        stream := FileStream open: aFile mode: FileStream write.
-        (ClassSource write: class on: stream)
+	self chooseFile
+    ]
+
+    chooseFile [
+
+        | file |
+        (GTK.GtkFileChooserDialog save: 'Save Smalltalk class as...' parent: nil)
+            runNonBlockingAndDo: [ :dlg :res |
+                res = GTK.Gtk gtkResponseAccept ifTrue: [ self fileoutClass: dlg getFilename ].
+                dlg destroy ]
+    ]
+
+    fileoutClass: aString [
+
+        | stream |
+        stream := FileStream open: aString mode: FileStream write.
+        (ClassSource write: target on: stream)
             source
     ]
 ]

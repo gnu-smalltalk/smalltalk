@@ -1,5 +1,5 @@
 Object subclass: Author [
-    | firstname lastname |
+    | firstname lastname email |
 
     Author class >> firstname: aString lastname: aString2 [
 	<category: 'instance creation'>
@@ -32,5 +32,18 @@ Object subclass: Author [
 
 	lastname := aString
     ]
+
+    email: aString [
+	<category: 'accessing'>
+
+	email := aString
+    ]
+
+    email [
+	<category: 'accessing'>
+
+	^ email
+    ]
+
 ]
 

@@ -374,6 +374,13 @@ GtkConcreteWidget subclass: GtkClassBrowserWidget [
         ^ self acceptClassDefinitionOn: aState namespace 
     ]
 
+    fileoutNamespace [
+	<category: 'namespace events'>
+
+	namespaceWidget hasSelectedNamespace ifFalse: [ ^ self ].
+	FileoutNamespaceCommand on: namespaceWidget selectedNamespace
+    ]
+
     fileoutNamespace: aDirectory [
 	<category: 'namespace events'>
 
@@ -447,6 +454,13 @@ GtkConcreteWidget subclass: GtkClassBrowserWidget [
 
 	namespaceWidget hasSelectedNamespace ifFalse: [ ^ self ].
 	GtkInspector openOn: namespaceWidget selectedNamespace
+    ]
+
+    fileoutClass [
+	<category: 'class events'>
+    
+        classWidget hasSelectedClass ifFalse: [ ^ self ].
+	FileoutClassCommand on: classWidget selectedClass
     ]
 
     fileoutClass: aFile [
@@ -551,8 +565,18 @@ GtkConcreteWidget subclass: GtkClassBrowserWidget [
             ifFalse: [ GtkCategoryModel currentOn: classWidget selectedClass class ]
     ]
 
+    fileoutCategory [
+        <category: 'category events'>
+
+        | categoryWidget |
+        classWidget hasSelectedClass ifFalse: [ ^ self ].
+        categoryWidget := self viewedCategoryWidget.
+        categoryWidget hasSelectedCategory ifFalse: [ ^ self ].
+	FileoutCategoryCommand on: self classOrMetaSelected categorized: categoryWidget selectedCategory
+    ]
+
     fileoutCategory: aFile [
-        <category: 'class events'>
+        <category: 'category events'>
 
         | categoryWidget stream |
         classWidget hasSelectedClass ifFalse: [ ^ self ].
@@ -657,6 +681,15 @@ GtkConcreteWidget subclass: GtkClassBrowserWidget [
 	classWidget hasSelectedClass ifFalse: [ ^ self ].
 	methodWidget := self viewedMethodWidget.
         GtkInspector openOn: methodWidget selectedMethod
+    ]
+
+    fileoutMethod [
+	<category: 'method events'>
+
+        | methodWidget stream |
+        classWidget hasSelectedClass ifFalse: [ ^ self ].
+        methodWidget := self viewedMethodWidget.
+	FileoutMethodCommand on: methodWidget selectedMethod
     ]
 
     fileoutMethod: aFile [

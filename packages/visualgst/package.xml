@@ -1,23 +1,22 @@
 <package>
   <name>VisualGST</name>
+  <namespace>VisualGST</namespace>
   <prereq>GTK</prereq>
   <prereq>Cairo</prereq>
   <prereq>Parser</prereq>
   <prereq>SUnit</prereq>
   <prereq>DebugTools</prereq>
-
   <provides>Browser</provides>
-  <namespace>VisualGST</namespace>
-
-  <start>
-    VisualGST.VisualGST open.
-    GTK.Gtk main
-  </start>
-
-  <filein>Tests/ExtractLiteralsTest.st</filein>
-
-  <filein>GtkTextWidget.st</filein>
-
+  <test>
+    <filein>Tests/ExtractLiteralsTest.st</filein>
+    <filein>Tests/EmptyTest.st</filein>
+    <file>Tests/ExtractLiteralsTest.st</file>
+    <file>Tests/EmptyTest.st</file>
+    <sunit>
+      VisualGST.ExtractLiteralsTest
+      VisualGST.EmptyTest
+    </sunit>
+  </test>
   <filein>Notification/AbstractEvent.st</filein>
   <filein>Notification/AddedEvent.st</filein>
   <filein>Notification/CommentedEvent.st</filein>
@@ -30,38 +29,37 @@
   <filein>Notification/ReorganizedEvent.st</filein>
   <filein>Notification/SystemChangeNotifier.st</filein>
   <filein>Notification/SystemEventManager.st</filein>
-
   <filein>Commands/Command.st</filein>
   <filein>Commands/UndoableCommand.st</filein>
+  <filein>Commands/FileoutNamespaceCommand.st</filein>
   <filein>Commands/AddNamespaceCommand.st</filein>
   <filein>Commands/DeleteNamespaceCommand.st</filein>
   <filein>Commands/RenameNamespaceCommand.st</filein>
+  <filein>Commands/FileoutClassCommand.st</filein>
   <filein>Commands/AddClassCommand.st</filein>
   <filein>Commands/DeleteClassCommand.st</filein>
   <filein>Commands/RenameClassCommand.st</filein>
+  <filein>Commands/FileoutCategoryCommand.st</filein>
   <filein>Commands/AddCategoryCommand.st</filein>
   <filein>Commands/DeleteCategoryCommand.st</filein>
   <filein>Commands/RenameCategoryCommand.st</filein>
+  <filein>Commands/FileoutMethodCommand.st</filein>
   <filein>Commands/AddMethodCommand.st</filein>
   <filein>Commands/DeleteMethodCommand.st</filein>
-
+  <filein>GtkTextWidget.st</filein>
   <filein>GtkMainWindow.st</filein>
   <filein>VisualGST.st</filein>
   <filein>GtkConcreteWidget.st</filein>
   <filein>GtkTranscriptWidget.st</filein>
-  
   <filein>Debugger/GtkContextModel.st</filein>
   <filein>Debugger/GtkContextWidget.st</filein>
   <filein>Debugger/GtkDebugger.st</filein>
-
   <filein>Project/Author.st</filein>
-
   <filein>BrowserState.st</filein>
   <filein>NamespaceState.st</filein>
   <filein>ClassState.st</filein>
   <filein>CategoryState.st</filein>
   <filein>MethodState.st</filein>
-
   <filein>GtkWorkspaceWidget.st</filein>
   <filein>GtkNamespaceWidget.st</filein>
   <filein>GtkClassWidget.st</filein>
@@ -109,9 +107,7 @@
   <filein>SyntaxHighlighter.st</filein>
   <filein>Undo/Text/InsertTextCommand.st</filein>
   <filein>Undo/Text/DeleteTextCommand.st</filein>
-
   <filein>Clock/GtkClock.st</filein>
-
   <filein>Inspector/GtkInspectorSourceWidget.st</filein>
   <filein>Inspector/GtkInspectorBrowserWidget.st</filein>
   <filein>Inspector/GtkInspectorWidget.st</filein>
@@ -120,19 +116,14 @@
   <filein>Inspector/GtkCharacterInspectorView.st</filein>
   <filein>Inspector/GtkIntegerInspectorView.st</filein>
   <filein>Inspector/GtkFloatInspectorView.st</filein>
-
   <filein>Implementors/GtkImageModel.st</filein>
   <filein>Implementors/GtkImplementor.st</filein>
-
   <filein>Senders/GtkSender.st</filein>
-
   <filein>Notification/Kernel/AbstractNamespace.st</filein>
   <filein>Notification/Kernel/Metaclass.st</filein>
   <filein>Notification/Kernel/MethodDictionary.st</filein>
-
   <filein>Debugger/GtkStackInspectorView.st</filein>
   <filein>Debugger/GtkStackInspector.st</filein>
-
   <filein>Tetris/HighScores.st</filein>
   <filein>Tetris/Score.st</filein>
   <filein>Tetris/TetrisPieceWidget.st</filein>
@@ -147,7 +138,6 @@
   <filein>Tetris/TetrisPieceT.st</filein>
   <filein>Tetris/TetrisPieceZ.st</filein>
   <filein>Tetris/Tetris.st</filein>
-
   <filein>SUnit/TestBacktraceLog.st</filein>
   <filein>SUnit/GtkSUnitResultWidget.st</filein>
   <filein>GtkClassSUnitWidget.st</filein>
@@ -155,9 +145,6 @@
   <filein>GtkMethodSUnitWidget.st</filein>
   <filein>GtkMethodSUnitModel.st</filein>
   <filein>SUnit/GtkSUnit.st</filein>
-
-  <file>GtkTextWidget.st</file>
-
   <file>Notification/AbstractEvent.st</file>
   <file>Notification/AddedEvent.st</file>
   <file>Notification/CommentedEvent.st</file>
@@ -170,30 +157,38 @@
   <file>Notification/ReorganizedEvent.st</file>
   <file>Notification/SystemChangeNotifier.st</file>
   <file>Notification/SystemEventManager.st</file>
-  <file>Notification/Kernel/AbstractNamespace.st</file>
-  <file>Notification/Kernel/Metaclass.st</file>
-  <file>Notification/Kernel/MethodDictionary.st</file>
-
   <file>Commands/Command.st</file>
   <file>Commands/UndoableCommand.st</file>
+  <file>Commands/FileoutNamespaceCommand.st</file>
   <file>Commands/AddNamespaceCommand.st</file>
   <file>Commands/DeleteNamespaceCommand.st</file>
   <file>Commands/RenameNamespaceCommand.st</file>
+  <file>Commands/FileoutClassCommand.st</file>
   <file>Commands/AddClassCommand.st</file>
   <file>Commands/DeleteClassCommand.st</file>
   <file>Commands/RenameClassCommand.st</file>
+  <file>Commands/FileoutCategoryCommand.st</file>
   <file>Commands/AddCategoryCommand.st</file>
   <file>Commands/DeleteCategoryCommand.st</file>
   <file>Commands/RenameCategoryCommand.st</file>
+  <file>Commands/FileoutMethodCommand.st</file>
   <file>Commands/AddMethodCommand.st</file>
   <file>Commands/DeleteMethodCommand.st</file>
-
+  <file>GtkTextWidget.st</file>
   <file>GtkMainWindow.st</file>
   <file>VisualGST.st</file>
   <file>GtkConcreteWidget.st</file>
   <file>GtkTranscriptWidget.st</file>
+  <file>Debugger/GtkContextModel.st</file>
+  <file>Debugger/GtkContextWidget.st</file>
+  <file>Debugger/GtkDebugger.st</file>
+  <file>Project/Author.st</file>
+  <file>BrowserState.st</file>
+  <file>NamespaceState.st</file>
+  <file>ClassState.st</file>
+  <file>CategoryState.st</file>
+  <file>MethodState.st</file>
   <file>GtkWorkspaceWidget.st</file>
-  <file>GtkClassBrowserWidget.st</file>
   <file>GtkNamespaceWidget.st</file>
   <file>GtkClassWidget.st</file>
   <file>GtkCategoryWidget.st</file>
@@ -240,7 +235,7 @@
   <file>SyntaxHighlighter.st</file>
   <file>Undo/Text/InsertTextCommand.st</file>
   <file>Undo/Text/DeleteTextCommand.st</file>
-
+  <file>Clock/GtkClock.st</file>
   <file>Inspector/GtkInspectorSourceWidget.st</file>
   <file>Inspector/GtkInspectorBrowserWidget.st</file>
   <file>Inspector/GtkInspectorWidget.st</file>
@@ -249,30 +244,14 @@
   <file>Inspector/GtkCharacterInspectorView.st</file>
   <file>Inspector/GtkIntegerInspectorView.st</file>
   <file>Inspector/GtkFloatInspectorView.st</file>
-
-  <file>Clock/GtkClock.st</file>
-
   <file>Implementors/GtkImageModel.st</file>
   <file>Implementors/GtkImplementor.st</file>
-
   <file>Senders/GtkSender.st</file>
-
-  <file>Debugger/GtkDebugger.st</file>
-  <file>Debugger/GtkContextWidget.st</file>
-  <file>Debugger/GtkContextModel.st</file>
-  <file>Debugger/GtkStackInspector.st</file>
+  <file>Notification/Kernel/AbstractNamespace.st</file>
+  <file>Notification/Kernel/Metaclass.st</file>
+  <file>Notification/Kernel/MethodDictionary.st</file>
   <file>Debugger/GtkStackInspectorView.st</file>
-
-  <file>Project/Author.st</file>
-
-  <file>BrowserState.st</file>
-  <file>NamespaceState.st</file>
-  <file>ClassState.st</file>
-  <file>CategoryState.st</file>
-  <file>MethodState.st</file>
-
-  <file>Tests/ExtractLiteralsTest.st</file>
-
+  <file>Debugger/GtkStackInspector.st</file>
   <file>Tetris/HighScores.st</file>
   <file>Tetris/Score.st</file>
   <file>Tetris/TetrisPieceWidget.st</file>
@@ -287,7 +266,6 @@
   <file>Tetris/TetrisPieceT.st</file>
   <file>Tetris/TetrisPieceZ.st</file>
   <file>Tetris/Tetris.st</file>
-
   <file>SUnit/TestBacktraceLog.st</file>
   <file>SUnit/GtkSUnitResultWidget.st</file>
   <file>GtkClassSUnitWidget.st</file>
@@ -295,4 +273,6 @@
   <file>GtkMethodSUnitWidget.st</file>
   <file>GtkMethodSUnitModel.st</file>
   <file>SUnit/GtkSUnit.st</file>
+  <start>VisualGST.VisualGST open.
+    GTK.Gtk main</start>
 </package>

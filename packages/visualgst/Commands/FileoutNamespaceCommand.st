@@ -3,10 +3,20 @@ Command subclass: FileoutNamespaceCommand [
     execute [
 	<category: 'command'>
 
-        | namespace stream |
-        namespaceWidget hasSelectedNamespace ifFalse: [ ^ self ].
-        namespace := namespaceWidget selectedNamespace.
-        self fileoutNamespace: namespace on: (File name: aDirectory) / namespace name
+	self chooseDirectory
+    ]
+
+    chooseDirectory [
+	| file |
+        (GTK.GtkFileChooserDialog selectFolder: 'Save namespace as...' parent: nil)
+            runNonBlockingAndDo: [ :dlg :res |
+                res = GTK.Gtk gtkResponseAccept ifTrue: [ self fileoutNamespace: dlg getCurrentFolder ].
+                dlg destroy ].
+    ]
+
+    fileoutNamespace: aDirectory [
+
+        self fileoutNamespace: target on: (File name: aDirectory) / target name
     ]
 
     fileoutNamespace: aNamespace on: aDirectory [
@@ -21,11 +31,7 @@ Command subclass: FileoutNamespaceCommand [
             (each isNil not and: [ each isClass and: [ each environment = aNamespace ] ])
                     ifTrue: [ stream := FileStream open: (aDirectory / ((each name asString) , '.st')) asString mode: FileStream write.
                             (ClassSource write: each on: stream)
-                                source ] ].
-        aNamespace allSubspacesDo: [ :space |
-            | dir |
-            dir := (aDirectory / space name).
-            self fileoutNamespace: space on: dir ]
+                                source ] ]
     ]
 ]
 

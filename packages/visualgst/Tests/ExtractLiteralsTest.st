@@ -16,7 +16,7 @@ Smalltalk.TestCase subclass: ExtractLiteralsTest [
 	<category: 'testing'>
 
 	self assert: #'at:put:' hasLiterals.
-	self assert: #'at:put:' symbolFromliterals = {#'at:put:'}
+	self assert: #'at:put:' symbolFromliterals asArray = {#'at:put:'}
     ]
 
     testArray [
@@ -24,6 +24,6 @@ Smalltalk.TestCase subclass: ExtractLiteralsTest [
 
 	self assert: #(1 2 3) hasLiterals = false.
 	self assert: #(1 'foo' #'at:put:') hasLiterals = true.
-	self assert: #(1 'foo' #'at:put:') symbolFromliterals = {#'at:put:'}
+	self assert: #(1 'foo' #'at:put:') symbolFromliterals asArray = {#'at:put:'}
     ]
 ]
