@@ -71,7 +71,6 @@ FileOutExporter subclass: OldSyntaxExporter [
     ] 
 
     fileOutSelectors: selectors classSelectors: classSelectors [
-        self fileOutHeader.
         self fileOutDeclaration: [
             self fileOutSource: classSelectors class: outClass asMetaclass.
             self fileOutSource: selectors class: outClass.

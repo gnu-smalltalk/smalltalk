@@ -1,3 +1,8 @@
+2009-09-10  Paolo Bonzini  <bonzini@gnu.org>
+
+	* NewSyntaxExporter.st: Remove #fileOutHeader calls.
+	* OldSyntaxExporter.st: Remove #fileOutHeader calls.
+
 2009-09-07  Paolo Bonzini  <bonzini@gnu.org>
 
 	* Extensions.st: Fix pasto.

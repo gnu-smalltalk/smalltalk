@@ -54,7 +54,6 @@ FileOutExporter subclass: NewSyntaxExporter [
     ]
       
     fileOutSelectors: selectors classSelectors: classSelectors [
-        self fileOutHeader.
         self fileOutDeclaration: [
             classSelectors do: [ :each | self fileOutSource: each class: true ].
             selectors do: [ :each | self fileOutSource: each class: false ].
