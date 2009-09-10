@@ -56,7 +56,7 @@ OldSyntaxExporter subclass: SqueakSyntaxExporter [
             print: outClass;
             nextPutAll: ' commentStamp: ''<historical>'' prior: 0!'.
 
-	self fileOutChunk: outClass comment.
+	self fileOutChunk: (outClass comment ifNil: [ '' ]).
 	outStream nl; nl.
     ] 
 
