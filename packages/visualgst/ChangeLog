@@ -1,6 +1,12 @@
 2009-09-11  Paolo Bonzini  <bonzini@gnu.org>
 
 	* Debugger/GtkDebugger.st, GtkAssistant.st, GtkClassBrowser.st,
+	GtkNotebookWidget.st, GtkWebBrowser.st, VisualGST.st,
+	package.xml: Update from r213.
+
+2009-09-11  Paolo Bonzini  <bonzini@gnu.org>
+
+	* Debugger/GtkDebugger.st, GtkAssistant.st, GtkClassBrowser.st,
 	GtkClassBrowserWidget.st, GtkClassHierarchyWidget.st,
 	GtkClassModel.st, GtkMethodWidget.st, GtkProjectDialog.st,
 	GtkNotebookWidget.st, GtkOutputNotebookWidget.st,

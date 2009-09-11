@@ -46,13 +46,11 @@
   <filein>Commands/FileoutMethodCommand.st</filein>
   <filein>Commands/AddMethodCommand.st</filein>
   <filein>Commands/DeleteMethodCommand.st</filein>
-  <filein>GtkExtends/GtkTextBuffer.st</filein>
   <filein>GtkTextWidget.st</filein>
   <filein>GtkMainWindow.st</filein>
   <filein>VisualGST.st</filein>
   <filein>GtkConcreteWidget.st</filein>
   <filein>GtkNotebookWidget.st</filein>
-  <filein>GtkOutputNotebookWidget.st</filein>
   <filein>GtkTranscriptWidget.st</filein>
   <filein>Debugger/GtkContextModel.st</filein>
   <filein>Debugger/GtkContextWidget.st</filein>
@@ -174,13 +172,11 @@
   <file>Commands/FileoutMethodCommand.st</file>
   <file>Commands/AddMethodCommand.st</file>
   <file>Commands/DeleteMethodCommand.st</file>
-  <file>GtkExtends/GtkTextBuffer.st</file>
   <file>GtkTextWidget.st</file>
   <file>GtkMainWindow.st</file>
   <file>VisualGST.st</file>
   <file>GtkConcreteWidget.st</file>
   <file>GtkNotebookWidget.st</file>
-  <file>GtkOutputNotebookWidget.st</file>
   <file>GtkTranscriptWidget.st</file>
   <file>Debugger/GtkContextModel.st</file>
   <file>Debugger/GtkContextWidget.st</file>

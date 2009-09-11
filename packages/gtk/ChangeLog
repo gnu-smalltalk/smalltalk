@@ -1,3 +1,7 @@
+2009-09-11  Paolo Bonzini  <bonzini@gnu.org>
+
+	* GtkImpl.st: Sync with VisualGST.
+
 2009-09-08  Paolo Bonzini  <bonzini@gnu.org>
 
 	* GtkImpl.st: Sync with VisualGST.

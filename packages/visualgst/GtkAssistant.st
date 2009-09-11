@@ -157,7 +157,6 @@ THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.';
             #('Edit' #createEditMenus).
             #('Smalltalk' #createSmalltalkMenus).
             #('Tools' #createToolsMenus).
-            #('Windows' #createWindowsMenus).
             #('Help' #createHelpMenus)}
     ]
 
@@ -181,13 +180,6 @@ THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.';
 	    appendToolItem: (GTK.GtkToolButton newFromStock: 'gtk-paste');
 	    appendSeparator;
 	    appendToolItem: (GTK.GtkToolButton newFromStock: 'gtk-execute')
-    ]
-
-    createWindowsMenus [
-        <category: 'user interface'>
-
-        ^ windowsMenu := self createNewMenuEntry: {GTK.GtkMenuItem menuItem: 'Arrange' connectTo: self selector: #arrangeWindows .
-            GTK.GtkMenuItem menuItem: 'Close all' connectTo: self selector: #closeAllWindows}
     ]
 
     cut [

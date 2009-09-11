@@ -23,13 +23,23 @@ GtkConcreteWidget subclass: GtkNotebookWidget [
     addWidget: aWidget labeled: aString [
 	<category: 'user interface'>
 
+	self addWidget: aWidget labelWidget: (self buildLabelWidget: aString withIcon: GTK.Gtk gtkStockClose at: aWidget)
+    ]
+
+    addPermanentWidget: aWidget labeled: aString [
+        <category: 'user interface'>
+
+	self addWidget: aWidget labelWidget: (GTK.GtkLabel new: aString)
+    ]
+
+    addWidget: aWidget labelWidget: aLabelWidget [
+	<category: 'user interface'>
+
 	currentWidget ifNil: [ currentWidget := aWidget ].
-	pages addLast: aWidget.
-        notebook 
-	    appendPage: aWidget mainWidget tabLabel: (self buildLabelWidget: aString withIcon: GTK.Gtk gtkStockClose at: aWidget).";
-            setTabDetachable: transcriptWidget mainWidget detachable: true;
-            setTabReorderable:  transcriptWidget mainWidget reorderable: true"
-	pages size > 1 ifTrue: [ notebook setShowTabs: true ]
+        pages addLast: aWidget.
+        notebook
+            appendPage: aWidget mainWidget tabLabel: aLabelWidget.
+        pages size > 1 ifTrue: [ notebook setShowTabs: true ]
     ]
 
     buildLabelWidget: aString withIcon: aStockString at: aSmallInteger [

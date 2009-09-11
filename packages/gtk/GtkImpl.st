@@ -1,4 +1,14 @@
-GTK.GList extend [
+GtkTextBuffer extend [
+
+    insertAtEnd: aString [
+        <category: 'accessing'>
+
+        self insert: self getEndIter text: aString
+    ]
+]
+
+
+GList extend [
     do: aOneArgBlock [
 	<category: 'iterating'>
 	| iter |

@@ -117,7 +117,6 @@ THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.';
 	"self addMenuItem: 'File' withSubmenu: self createFileMenus.
 	self addMenuItem: 'Edit' withSubmenu: self createEditMenus.
 	self addMenuItem: 'Tools' withSubmenu: self createToolsMenus.
-	self addMenuItem: 'Windows' withSubmenu: self createWindowsMenus.
 	self addMenuItem: 'Help' withSubmenu: self createHelpMenus"
     ]
 
@@ -152,14 +151,7 @@ THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.';
 	    #('Workspace' #workspace).
 	    #('Inspector' #gtkInspector).
 	    #().
-	    #('SmallZilla' #squeakzilla)}
-    ]
-
-    createWindowsMenus [
-	<category: 'user interface'>
-
-	^ windowsMenu := self createMenuEntry: {#('Arrange' #arrangeWindows).
-	    #('Close all' #closeAllWindows)}
+	    #('Smallzilla' #squeakzilla)}
     ]
 
     cut [

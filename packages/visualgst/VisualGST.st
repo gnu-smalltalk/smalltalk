@@ -207,15 +207,15 @@ THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.';
 	<category: 'user interface'>
 
 	| cmp |
-	outputs := GtkOutputNotebookWidget new
-					initialize;
-					parentWindow: window;
-					showAll;
-					yourself.
+	outputs := GtkNotebookWidget new
+				initialize;
+				parentWindow: window;
+				showAll;
+				yourself.
 	self class setCompilerError: (cmp := self buildWorkspaceWidget).
 	^ outputs
-	    addTranscript: (transcriptWidget := self buildTranscriptWidget) labeled: 'Transcript';
-	    addWidget: cmp labeled: 'Compiler error(s)';
+	    addPermanentWidget: (transcriptWidget := self buildTranscriptWidget) labeled: 'Transcript';
+	    addPermanentWidget: cmp labeled: 'Compiler error(s)';
 	    addWidget: self buildWorkspaceWidget labeled: 'Workspace';
 	    yourself
     ]
@@ -411,7 +411,6 @@ THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.';
 	    #('Method' #createMethodMenus).
 	    #('Smalltalk' #createSmalltalkMenus).
 	    #('Tools' #createToolsMenus).
-	    #('Windows' #createWindowsMenus).
 	    #('Help' #createHelpMenus)}
     ]
 
@@ -452,14 +451,7 @@ THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.';
 	    GTK.GtkMenuItem new.
 	    GTK.GtkMenuItem menuItem: 'Assistant' connectTo: self selector: #gtkAssistant.
 	    GTK.GtkMenuItem new.
-	    GTK.GtkMenuItem menuItem: 'smallZilla' connectTo: self selector: #webBrowser}
-    ]
-
-    createWindowsMenus [
-	<category: 'user interface'>
-
-	^ windowsMenu := self createNewMenuEntry: {GTK.GtkMenuItem menuItem: 'Arrange' connectTo: self selector: #arrangeWindows .
-	    GTK.GtkMenuItem menuItem: 'Close all' connectTo: self selector: #closeAllWindows}
+	    GTK.GtkMenuItem menuItem: 'Smallzilla' connectTo: self selector: #webBrowser}
     ]
 
     isCurrentWidgetTranscript [

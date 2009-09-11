@@ -372,7 +372,6 @@ THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.';
 	self addMenuItem: 'Method' withSubmenu: self createMethodMenus.
 	self addMenuItem: 'Smalltalk' withSubmenu: self createSmalltalkMenus.
 	self addMenuItem: 'Tools' withSubmenu: self createToolsMenus.
-	"self addMenuItem: 'Windows' withSubmenu: self createWindowsMenus."
 	self addMenuItem: 'Help' withSubmenu: self createHelpMenus
     ]
 
@@ -421,13 +420,6 @@ THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.';
 	    GTK.GtkMenuItem menuItem: 'Inspector' connectTo: self selector: #gtkInspector.
 	    GTK.GtkMenuItem new.
 	    GTK.GtkMenuItem menuItem: 'SqueakZilla' connectTo: self selector: #squeakzilla}
-    ]
-
-    createWindowsMenus [
-	<category: 'user interface'>
-
-	^ self createNewMenuEntry: {GTK.GtkMenuItem menuItem: 'Arrange' connectTo: self selector: #arrangeWindows.
-	    GTK.GtkMenuItem menuItem: 'Close all' connectTo: self selector: #closeAllWindows}
     ]
 
     doIt [
