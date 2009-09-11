@@ -1,3 +1,7 @@
+2009-09-11  Paolo Bonzini  <bonzini@gnu.org>
+
+	* kernel/Regex.st: Add #escapeRegex.
+
 2009-09-08  Paolo Bonzini  <bonzini@gnu.org>
 
 	* scripts/Load.st: Fix "gst-load --start A B".

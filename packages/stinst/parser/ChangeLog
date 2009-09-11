@@ -1,5 +1,9 @@
 2009-09-10  Paolo Bonzini  <bonzini@gnu.org>
 
+	* OldSyntaxHeader.st: Remove category pragmas.
+
+2009-09-10  Paolo Bonzini  <bonzini@gnu.org>
+
 	* SqueakExporter.st: Fix filing out uncommented classes.
 
 2009-09-10  Paolo Bonzini  <bonzini@gnu.org>
