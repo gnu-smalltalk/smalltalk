@@ -1,9 +1,9 @@
 <package>
   <name>VisualGST</name>
   <namespace>VisualGST</namespace>
+  <prereq>Parser</prereq>
   <prereq>GTK</prereq>
   <prereq>Cairo</prereq>
-  <prereq>Parser</prereq>
   <prereq>SUnit</prereq>
   <prereq>DebugTools</prereq>
   <provides>Browser</provides>
@@ -46,15 +46,17 @@
   <filein>Commands/FileoutMethodCommand.st</filein>
   <filein>Commands/AddMethodCommand.st</filein>
   <filein>Commands/DeleteMethodCommand.st</filein>
+  <filein>GtkExtends/GtkTextBuffer.st</filein>
   <filein>GtkTextWidget.st</filein>
   <filein>GtkMainWindow.st</filein>
   <filein>VisualGST.st</filein>
   <filein>GtkConcreteWidget.st</filein>
+  <filein>GtkNotebookWidget.st</filein>
+  <filein>GtkOutputNotebookWidget.st</filein>
   <filein>GtkTranscriptWidget.st</filein>
   <filein>Debugger/GtkContextModel.st</filein>
   <filein>Debugger/GtkContextWidget.st</filein>
   <filein>Debugger/GtkDebugger.st</filein>
-  <filein>Project/Author.st</filein>
   <filein>BrowserState.st</filein>
   <filein>NamespaceState.st</filein>
   <filein>ClassState.st</filein>
@@ -96,8 +98,6 @@
   <filein>GtkClassModel.st</filein>
   <filein>GtkCategoryModel.st</filein>
   <filein>GtkMethodModel.st</filein>
-  <filein>GtkProjectDialog.st</filein>
-  <filein>Project.st</filein>
   <filein>Undo/AddCategoryUndoCommand.st</filein>
   <filein>Undo/RenameCategoryUndoCommand.st</filein>
   <filein>Undo/DeleteCategoryUndoCommand.st</filein>
@@ -174,15 +174,17 @@
   <file>Commands/FileoutMethodCommand.st</file>
   <file>Commands/AddMethodCommand.st</file>
   <file>Commands/DeleteMethodCommand.st</file>
+  <file>GtkExtends/GtkTextBuffer.st</file>
   <file>GtkTextWidget.st</file>
   <file>GtkMainWindow.st</file>
   <file>VisualGST.st</file>
   <file>GtkConcreteWidget.st</file>
+  <file>GtkNotebookWidget.st</file>
+  <file>GtkOutputNotebookWidget.st</file>
   <file>GtkTranscriptWidget.st</file>
   <file>Debugger/GtkContextModel.st</file>
   <file>Debugger/GtkContextWidget.st</file>
   <file>Debugger/GtkDebugger.st</file>
-  <file>Project/Author.st</file>
   <file>BrowserState.st</file>
   <file>NamespaceState.st</file>
   <file>ClassState.st</file>
@@ -224,8 +226,6 @@
   <file>GtkClassModel.st</file>
   <file>GtkCategoryModel.st</file>
   <file>GtkMethodModel.st</file>
-  <file>GtkProjectDialog.st</file>
-  <file>Project.st</file>
   <file>Undo/AddCategoryUndoCommand.st</file>
   <file>Undo/RenameCategoryUndoCommand.st</file>
   <file>Undo/DeleteCategoryUndoCommand.st</file>

@@ -156,8 +156,7 @@ GtkMainWindow subclass: GtkInspector [
 	    GTK.GtkMenuItem menuItem: 'Workspace' connectTo: self selector: #workspace.
 	    GTK.GtkMenuItem menuItem: 'Inspector' connectTo: self selector: #gtkInspector.
 	    GTK.GtkMenuItem new.
-	    GTK.GtkMenuItem menuItem: 'GtkDemo' connectTo: self selector: #gtkDemo.
-	    GTK.GtkMenuItem menuItem: 'SqueakZilla' connectTo: self selector: #squeakzilla}
+	    GTK.GtkMenuItem menuItem: 'SmallZilla' connectTo: self selector: #squeakzilla}
     ]
 ]
 

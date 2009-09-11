@@ -87,8 +87,7 @@ Object subclass: GtkClassModel [
     
 	| iter string |
 	aClass environment = self namespace ifTrue: [
-	    string := ((aClass displayString) substrings: $.) last.
-	    iter := self model append: parentGtkIter item: { string } ].
+	    iter := self model append: parentGtkIter item: { aClass instanceClass name asString, ' ' } ].
 
 	aClass subclassesDo: [ :each |
 	    self appendClass: each to: iter ]
@@ -118,7 +117,7 @@ Object subclass: GtkClassModel [
         1 to: stack size do: [ :i | | each |
             each := stack at: (stack size + 1 - i).
             self model getIter: iter path: path.
-            [each, ' class' = (self model getOop: iter column: 0)] whileFalse: [
+            [each, ' ' = (self model getOop: iter column: 0)] whileFalse: [
                 path next.
                 (self model getIter: iter path: path)  ifFalse: [ ^ false ] ].
             path down ].
@@ -142,7 +141,7 @@ Object subclass: GtkClassModel [
         1 to: stack size do: [ :i | | each |
             each := stack at: (stack size + 1 - i).
             self model getIter: iter path: path.
-            [each, ' class' = (self model getOop: iter column: 0)] whileFalse: [
+            [each, ' ' = (self model getOop: iter column: 0)] whileFalse: [
                 path next.
                 (self model getIter: iter path: path)  ifFalse: [ ^ aBlock value ] ].
             path down ].

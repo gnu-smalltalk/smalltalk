@@ -1,3 +1,14 @@
+2009-09-11  Paolo Bonzini  <bonzini@gnu.org>
+
+	* Debugger/GtkDebugger.st, GtkAssistant.st, GtkClassBrowser.st,
+	GtkClassBrowserWidget.st, GtkClassHierarchyWidget.st,
+	GtkClassModel.st, GtkMethodWidget.st, GtkProjectDialog.st,
+	GtkNotebookWidget.st, GtkOutputNotebookWidget.st,
+	GtkTranscriptWidget.st, GtkWebBrowser.st,
+	Inspector/GtkInspector.st, Project.st, Project/Author.st,
+	Project/BSD.st, Project/Licence.st, SUnit/GtkSUnit.st,
+	VisualGST.st, package.xml: Update from r210.
+
 2009-09-08  Paolo Bonzini  <bonzini@gnu.org>
 
 	* Commands/FileoutCategoryCommand.st, Commands/FileoutClassCommand.st,

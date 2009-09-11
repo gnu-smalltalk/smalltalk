@@ -409,16 +409,6 @@ GtkConcreteWidget subclass: GtkClassBrowserWidget [
 	    self fileoutNamespace: space on: dir ]
     ]
 
-    fileoutProject [
-        <category: 'namespace events'>
-
-        | namespace stream parentDir |
-        namespaceWidget hasSelectedNamespace ifFalse: [ ^ self ].
-        namespace := namespaceWidget selectedNamespace.
-	parentDir := (Directory home / 'Temp' / namespace name).
-	self fileoutNamespace: namespace on: parentDir
-    ]
-
     hasSelectedNamespace [
 	<category: 'testing'>
 
@@ -484,21 +474,6 @@ GtkConcreteWidget subclass: GtkClassBrowserWidget [
             list addFirst: namespace displayString.
             namespace := namespace superspace ].
 	^ list
-    ]
-
-    fileoutClassInProject [
-	<category: 'class events'>
-
-	| class dir namespace stream |
-	classWidget hasSelectedClass ifFalse: [ ^ self ].
-	class := classWidget selectedClass.
-	dir := Directory home / 'Temp'.
-	(self extractNamespaceFrom: class environment) do: 
-	    [ :each | dir := dir / each.
-	    dir exists ifFalse: [ dir createDirectory ] ].
-	stream := FileStream open: (dir / (class name asString), '.st') asString mode: FileStream write.
-	(ClassSource write: class on: stream)
-            source
     ]
 
     hasSelectedClass [

@@ -126,7 +126,7 @@ GtkMainWindow subclass: GtkSUnit [
 	<category: 'user interface'>
 
 	^ GTK.GtkNotebook new
-	    appendPage: self buildSuccesfullWidget tabLabel: (GTK.GtkLabel new: 'Successfull Tests');
+	    appendPage: self buildSuccesfullWidget tabLabel: (GTK.GtkLabel new: 'Successful Tests');
 	    appendPage: self buildFailedWidget tabLabel: (GTK.GtkLabel new: 'Failed Tests');
 	    appendPage: self buildErrorWidget tabLabel: (GTK.GtkLabel new: 'Errors Tests');
 	    yourself

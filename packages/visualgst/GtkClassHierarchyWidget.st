@@ -78,7 +78,7 @@ GtkConcreteWidget subclass: GtkClassHierarchyWidget [
 	| iter |
 	iter := GTK.GtkTreeIter new.
 	self model append: iter parent: parentGtkIter.
-	self model setOop: iter column: 0 value: aClass displayString.
+	self model setOop: iter column: 0 value: (aClass instanceClass displayString).
 
 	aClass subclassesDo: [ :each |
 	    self appendClass: each to: iter ]
@@ -109,7 +109,7 @@ GtkConcreteWidget subclass: GtkClassHierarchyWidget [
 	| iter string |
 	(iter := classesTree selectedIter) ifNil: [self error: 'Nothing is selected'].
 	string := ((self model getOop: iter column: 0) subStrings: $ ) at: 1.
-	   
+
 	^ self lookFor: 1 inside: Smalltalk with: (string subStrings: $.) 
     ]
 

@@ -147,8 +147,7 @@ THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.';
             GTK.GtkMenuItem new.
             GTK.GtkMenuItem menuItem: 'Assistant' connectTo: self selector: #gtkAssistant.
             GTK.GtkMenuItem new.
-            GTK.GtkMenuItem menuItem: 'GtkDemo' connectTo: self selector: #gtkDemo.
-            GTK.GtkMenuItem menuItem: 'SqueakZilla' connectTo: self selector: #webBrowser}
+            GTK.GtkMenuItem menuItem: 'smallZilla' connectTo: self selector: #webBrowser}
     ]
 
     createMenus [

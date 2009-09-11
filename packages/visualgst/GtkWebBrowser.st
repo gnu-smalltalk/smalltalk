@@ -152,8 +152,7 @@ THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.';
 	    #('Workspace' #workspace).
 	    #('Inspector' #gtkInspector).
 	    #().
-	    #('GtkDemo' #gtkDemo).
-	    #('SqueakZilla' #squeakzilla)}
+	    #('SmallZilla' #squeakzilla)}
     ]
 
     createWindowsMenus [

@@ -27,7 +27,15 @@ GtkConcreteWidget subclass: GtkTranscriptWidget [
         menuitem
             show;
             connectSignal: 'activate' to: self selector: #debugIt userData: nil.
-        aGtkMenu append: menuitem
+        aGtkMenu append: menuitem.
+        menuitem := GTK.GtkMenuItem new.
+        menuitem show.
+        aGtkMenu append: menuitem.
+        menuitem := GTK.GtkMenuItem newWithLabel: 'Clear'.
+        menuitem 
+	    show;
+	    connectSignal: 'activate' to: self selector: #clear userData: nil.
+        aGtkMenu append: menuitem.
     ]
 
     initialize [
@@ -40,7 +48,7 @@ GtkConcreteWidget subclass: GtkTranscriptWidget [
     update: aString [
 	<category: 'updating'>
 
-	textview getBuffer insertAtCursor: aString 
+	textview getBuffer insertAtEnd: aString
     ]
 
     clear [

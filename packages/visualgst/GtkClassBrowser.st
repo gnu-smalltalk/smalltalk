@@ -77,12 +77,6 @@ THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.';
 	browserWidget fileoutNamespace: aString
     ]
 
-    fileoutProject [
-        <category: 'namespace events'>
-
-        browserWidget fileoutProject
-    ]
-
     newNamespace [
 	<category: 'namespace events'>
 
@@ -121,12 +115,6 @@ THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.';
 	<category: 'class events'>
 
 	browserWidget fileoutClass: aString
-    ]
-
-    fileoutClassInProject [
-	<category: 'class events'>
-
-	browserWidget fileoutClassInProject
     ]
 
     newClass [
@@ -327,8 +315,7 @@ THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.';
 	    GTK.GtkMenuItem new.
 	    GTK.GtkMenuItem menuItem: 'Inspect a namespace' connectTo: self selector: #inspectNamespace.
 	    GTK.GtkMenuItem new.
-	    GTK.GtkMenuItem menuItem: 'File out a namespace' connectTo: self selector: #fileoutNamespace.
-	    GTK.GtkMenuItem menuItem: 'File out in a project' connectTo: self selector: #fileoutProject}
+	    GTK.GtkMenuItem menuItem: 'File out a namespace' connectTo: self selector: #fileoutNamespace}
     ]
 
     createClassMenus [
@@ -340,8 +327,7 @@ THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.';
 	    GTK.GtkMenuItem new.
 	    GTK.GtkMenuItem menuItem: 'Inspect a class' connectTo: self selector: #inspectClass.
 	    GTK.GtkMenuItem new.
-	    GTK.GtkMenuItem menuItem: 'File out a class' connectTo: self selector: #fileoutClass.
-	    GTK.GtkMenuItem menuItem: 'File out in a project' connectTo: self selector: #fileoutClassInProject}
+	    GTK.GtkMenuItem menuItem: 'File out a class' connectTo: self selector: #fileoutClass}
     ]
 
     createCategoryMenus [
