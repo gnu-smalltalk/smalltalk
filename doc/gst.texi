@@ -4551,6 +4551,7 @@ A first way to define the struct would then be:
     @} *SQLAction;
 @end example
 
+@noindent
 but this results in a lot of duplicated code.  Think of what would
 happen if you had other subclasses of @code{SQLAction} such as
 @code{SQLObjectCreation}, @code{SQLUpdateQuery}, and so on! The
@@ -4622,7 +4623,7 @@ Now you can use the fields in the object like in this pseudo-code:
     @r{@dots{}}
     invoke_sql_query(
         vmProxy->oopToCObject(action->database),
-        vmProxy->oopToString(action->request);
+        vmProxy->oopToString(action->request),
         query_completed_callback,       /* Callback function */
         oop);                           /* Passed to the callback */
 
