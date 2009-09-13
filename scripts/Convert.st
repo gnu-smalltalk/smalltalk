@@ -45,7 +45,8 @@ STInST.OldSyntaxExporter class extend [
 
 STInST.SqueakSyntaxExporter class extend [
     emitEval: aBlock to: aStream for: namespace [
-	aBlock value
+	aBlock value.
+	aStream nextPut: $!; nl; nl.
     ]
 ]
 

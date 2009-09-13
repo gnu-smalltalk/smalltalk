@@ -1,3 +1,7 @@
+2009-09-13  Paolo Bonzini  <bonzini@gnu.org>
+
+	* scripts/Convert.st: Add bang at end of squeak evals.
+
 2009-09-11  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/Regex.st: Add #escapeRegex.

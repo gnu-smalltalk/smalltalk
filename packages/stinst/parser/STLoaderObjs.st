@@ -585,14 +585,23 @@ comment
     self subclassResponsibility
 !
 
-comment: aString
+kindOfSubclass
+    "Return a string indicating the type of class the receiver is"
+
+    self shape isNil ifFalse: [^'subclass:'].
+    self shape == #pointer ifTrue: [^'variableSubclass:'].
+    self shape == #byte ifTrue: [^'variableByteSubclass:'].
+    self shape == (CLongSize == 4 ifTrue: [ #uint32 ] ifFalse: [ #uint64 ])
+	ifTrue: [^'variableWordSubclass:'].
+    ^'variable: ' , self shape storeString , 'subclass:'
+!
+
+inheritShape
+    ^false
 !
 
 shape
-    self subclassResponsibility
-!
-
-shape: aSymbol
+    ^nil
 !
 
 environment
@@ -604,6 +613,10 @@ kindOfSubclass
     self shape isNil ifTrue: [ ^'subclass:' ].
     self shape == #pointer ifTrue: [ ^'variableSubclass:' ].
     ^'variable: ', self shape storeString, 'subclass:'
+!
+
+inheritShape
+    ^false
 !
 
 sharedPools
@@ -728,6 +741,14 @@ environment
     ^proxy environment
 !
 
+inheritShape
+    ^proxy inheritShape
+!
+
+shape
+    ^proxy shape
+!
+
 superclass
     ^proxy superclass
 !
@@ -843,10 +864,6 @@ asClass
 
 asMetaclass
     ^self
-!
-
-shape
-    ^nil
 ! !
 
 !UndefinedMetaclass methodsFor: 'delegation'!
@@ -973,10 +990,6 @@ comment: aString
 environment
     "Answer the namespace in which the receiver is implemented"
     ^self asClass environment
-!
-
-shape
-    ^nil
 !
 
 classVarNames

@@ -1,3 +1,8 @@
+2009-09-13  Paolo Bonzini  <bonzini@gnu.org>
+
+	* STLoaderObjs.st: Implement #inheritShape and #kindOfSubclass.
+	Implement #shape for proxy classes, default it to nil.
+
 2009-09-10  Paolo Bonzini  <bonzini@gnu.org>
 
 	* OldSyntaxHeader.st: Remove category pragmas.
