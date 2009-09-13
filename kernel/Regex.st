@@ -1083,7 +1083,7 @@ String extend [
 	"Answer the receiver with all regex special characters escaped
 	 by a backslash."
 
-	^self copyReplacingAllRegex: '[][?*+\\()^$|]' with: '\%1'.
+	^self copyReplacingAllRegex: '([][?*+\\()^$|])' with: '\%1'.
     ]
 ]
 
