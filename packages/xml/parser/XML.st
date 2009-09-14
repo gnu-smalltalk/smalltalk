@@ -2398,9 +2398,13 @@ Instance Variables:
 	^
 	[sax startDocument.
 	self prolog.
-	self atEnd ifTrue: [self malformed: 'Some XML content was expected'].
-	self getElement.
-	[self misc] whileTrue.
+	self atEnd
+	    ifTrue:
+		[sax fatalError: (EmptySignal new 
+			    messageText: 'Some XML content was expected')]
+	    ifFalse:
+		[self getElement.
+		[self misc] whileTrue].
 	self atEnd 
 	    ifFalse: 
 		[self 

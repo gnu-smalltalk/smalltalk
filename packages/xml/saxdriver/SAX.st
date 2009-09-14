@@ -1047,8 +1047,18 @@ SAXParseException subclass: WarningSignal [
     
     <category: 'XML-XML-Exceptions'>
     <comment: nil>
+
+    isResumable [ ^true ]
 ]
 
+
+MalformedSignal subclass: EmptySignal [
+    
+    <category: 'XML-XML-Exceptions'>
+    <comment: nil>
+
+    isResumable [ ^true ]
+]
 
 MalformedSignal subclass: BadCharacterSignal [
     
