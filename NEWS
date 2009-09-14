@@ -31,6 +31,9 @@ o   Floating-point numbers are now read correctly.
 
 o   Swazoo upgraded to version 2.2, plus local fixes.
 
+o   Code running as a Generator now honor exception handlers outside the
+    Generator block.
+
 o   GNU Smalltalk now does not rely anymore on specific (old) versions
     of libtool.
 

@@ -183,7 +183,7 @@ Smalltalk do.'>
 	 Continuation>>#callCC."
 
 	<category: 'private - continuations'>
-	consCC := Continuation escapeDo: 
+	consCC := Continuation currentDo: 
 			[:cc | 
 			genCC := cc.
 			atEnd := nil.

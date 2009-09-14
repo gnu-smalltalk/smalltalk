@@ -1,3 +1,7 @@
+2009-09-15  Paolo Bonzini  <bonzini@gnu.org>
+
+	* kernel/Generator.st: Use a non-escaping continuation.
+
 2009-09-13  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/Regex.st: Fix.
