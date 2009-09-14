@@ -1249,6 +1249,23 @@ Instance Variables:
     type			<String>		Name of tag, used to indicate element or attribute type.
     qualifier		<String>		In XML documents, the namespace is mapped to a qualifier, which is used as a prefix for the type. The namespace is assumed to be unique across all documents, but is quite clumsy. The qualifier is not unique across documents, but is unambiguous at the point where it is used and is short enough to be convenient. The qualifier may be the empty string if the namespace is empty or if the namespace is the current default namespace.'>
 
+    NodeTag class >> qualifier: q ns: ns type: typeStr [
+	<category: 'initialize'>
+	^self new qualifier: q ns: ns type: typeStr
+    ]
+
+    NodeTag class >> name: name ns: ns type: typeStr [
+	<category: 'initialize'>
+	^self new name: name ns: ns type: typeStr 
+    ]
+
+    name: name ns: ns type: typeStr [
+	<category: 'initialize'>
+        namespace := ns.
+        type := typeStr.
+        qualifier := (name includes: $:) ifTrue: [name copyUpTo: $:] ifFalse: [''].
+    ]
+
     qualifier: q ns: ns type: typeStr [
 	<category: 'initialize'>
 	namespace := ns.
@@ -1276,9 +1293,14 @@ Instance Variables:
 	^type
     ]
 
-    asString [
+    name [
 	<category: 'converting'>
 	^qualifier isEmpty ifTrue: [type] ifFalse: [qualifier , ':' , type]
+    ]
+
+    asString [
+	<category: 'converting'>
+	^self name
     ]
 
     isLike: aName [

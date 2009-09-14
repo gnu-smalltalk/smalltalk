@@ -1366,7 +1366,7 @@ Instance Variables:
 	| element tag |
 	document == nil ifTrue: [self startDocument].
 	tag := NodeTag new 
-		    qualifier: ((name includes: $:) ifTrue: [name copyUpTo: $:] ifFalse: [''])
+		    name: name
 		    ns: namespaceURI
 		    type: localName.
 	element := Element 
