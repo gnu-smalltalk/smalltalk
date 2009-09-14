@@ -3271,7 +3271,12 @@ Instance Variables:
 		    ifTrue: [self invalid: 'The DTD does not permit text here']
 		    ifFalse: 
 			[(types contains: [:n | n couldBeText]) ifFalse: [textType := #whitespace].
-			elm types: types]].
+			elm types: types]]
+	    ifFalse: 
+		[testBlanks ifFalse: [^#characters].
+		textType := #whitespace.
+		start to: stop do: [:i | (data at: i) asInteger > 32
+		    ifTrue: [^#characters]]].
 	^textType
     ]
 

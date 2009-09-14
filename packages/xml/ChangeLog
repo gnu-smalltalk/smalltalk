@@ -1,3 +1,7 @@
+2009-09-15  Paolo Bonzini  <bonzini@gnu.org>
+
+	* parser/XML.st: Ignore whitespace in non-validating mode.
+
 2007-12-27  Paolo Bonzini  <bonzini@gnu.org>
 
 	* parser/XML.st: Use new File methods.
