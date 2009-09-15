@@ -117,6 +117,12 @@ GtkConcreteWidget subclass: GtkWorkspaceWidget [
 	GtkInspector openOn: self doIt
     ]
 
+    cancel [
+        <category: 'edit events'>
+
+        self undo
+    ]
+
     undo [
         <category: 'edit events'>
 

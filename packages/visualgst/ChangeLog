@@ -1,3 +1,8 @@
+2009-09-15  Paolo Bonzini  <bonzini@gnu.org>
+
+	* GtkClassBrowser.st, GtkClassBrowserWidget.st, GtkSourceCodeWidget.st,
+	GtkWorkspaceWidget.st, VisualGST.st: Update from r214.
+
 2009-09-11  Paolo Bonzini  <bonzini@gnu.org>
 
 	* Debugger/GtkDebugger.st, GtkAssistant.st, GtkClassBrowser.st,

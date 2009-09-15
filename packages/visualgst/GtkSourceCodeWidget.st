@@ -1,5 +1,5 @@
 GtkConcreteWidget subclass: GtkSourceCodeWidget [
-    | codeBuffer codeView object |
+    | codeText codeBuffer codeView object |
 
     initialize [
 	<category: 'initialization'>
@@ -49,6 +49,11 @@ GtkConcreteWidget subclass: GtkSourceCodeWidget [
         menuitem := GTK.GtkMenuItem new.
         menuitem show.
         aGtkMenu append: menuitem.
+        menuitem := GTK.GtkMenuItem newWithLabel: 'Cancel'.
+        menuitem
+            show;
+            connectSignal: 'activate' to: self selector: #cancel userData: nil.
+        aGtkMenu append: menuitem.
         menuitem := GTK.GtkMenuItem newWithLabel: 'Undo'.
         menuitem
             show;
@@ -91,6 +96,7 @@ GtkConcreteWidget subclass: GtkSourceCodeWidget [
 	<category: 'accessing'>
 
 	codeView emptyStack.
+	self codeText: aString. 
 	codeBuffer setText: aString
     ]
 
@@ -98,6 +104,7 @@ GtkConcreteWidget subclass: GtkSourceCodeWidget [
 	<category: 'accessing'>
 
 	codeView emptyStack.
+	self codeText: aString. 
 	codeBuffer setText: aString
     ]
 
@@ -112,6 +119,7 @@ GtkConcreteWidget subclass: GtkSourceCodeWidget [
 
 	| node |
 	codeView emptyStack.
+	self codeText: aString. 
 	codeBuffer setText: aString.
 	node := self parseSource: aString.
 	SyntaxHighlighter highlight: node in: codeBuffer
@@ -172,6 +180,13 @@ GtkConcreteWidget subclass: GtkSourceCodeWidget [
 	<category: 'buffer events'>
 
 	codeView clearUndo
+    ]
+
+    cancel [
+	<category: 'buffer events'>
+
+	self clearUndo.
+	codeBuffer setText: self codeText
     ]
 
     undo [
@@ -267,6 +282,18 @@ GtkConcreteWidget subclass: GtkSourceCodeWidget [
 	<category: 'accessing'>
 
 	codeView textSaved
+    ]
+
+    codeText [
+	<category: 'accessing'>
+
+	^ codeText ifNil: [ codeText := '' ]
+    ]
+
+    codeText: aString [
+	<category: 'accessing'>
+
+	codeText := aString copy
     ]
 ]
 

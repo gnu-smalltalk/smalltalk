@@ -43,6 +43,13 @@ THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.';
 	<category: 'events'>
     ]
 
+    cancel [
+	<category: 'edit events'>
+
+	browserWidget cancel
+    ]
+
+
     undo [
 	<category: 'edit events'>
 
@@ -243,6 +250,7 @@ THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.';
 	<category: 'user interface'>
 
 	^ browserWidget := (GtkClassBrowserWidget new)
+			    parentWindow: window;
 			    initialize;
 			    yourself
     ]
@@ -250,14 +258,16 @@ THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.';
     createEditMenus [
 	<category: 'user interface'>
 
-        self accelGroup append: {{'<Control>Z'. '<GtkBrowser>/Edit/Undo'}.
+        self accelGroup append: {{'<Control><Shift>Z'. '<GtkBrowser>/Edit/Cancel'}.
+	    {'<Control>Z'. '<GtkBrowser>/Edit/Undo'}.
             {'<Control>R'. '<GtkClassBrowser>/Edit/Redo'}.
             {'<Control>X'. '<GtkClassBrowser>/Edit/Cut'}.
             {'<Control>C'. '<GtkClassBrowser>/Edit/Copy'}.
             {'<Control>V'. '<GtkClassBrowser>/Edit/Paste'}.
             {'<Control>A'. '<GtkClassBrowser>/Edit/SelectAll'}}.
 
-	^ self createNewMenuEntry: {GTK.GtkMenuItem menuItem: 'Undo' accelPath: '<GtkBrowser>/Edit/Undo' connectTo: self selector: #undo.
+	^ self createNewMenuEntry: {GTK.GtkMenuItem menuItem: 'Cancel edits' accelPath: '<GtkBrowser>/Edit/Cancel' connectTo: self selector: #cancel.
+	    GTK.GtkMenuItem menuItem: 'Undo' accelPath: '<GtkBrowser>/Edit/Undo' connectTo: self selector: #undo.
 	    GTK.GtkMenuItem menuItem: 'Redo' accelPath: '<GtkClassBrowser>/Edit/Redo' connectTo: self selector: #redo.
 	    GTK.GtkMenuItem new.
 	    GTK.GtkMenuItem menuItem: 'Cut' accelPath: '<GtkClassBrowser>/Edit/Cut' connectTo: self selector: #cut.

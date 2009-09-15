@@ -272,14 +272,16 @@ THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.';
     createEditMenus [
 	<category: 'user interface'>
 
-	self accelGroup append: {{'<Control>Z'. '<GtkLauncher>/Edit/Undo'}.
+	self accelGroup append: {{'<Control><shift>Z'. '<GtkLauncher>/Edit/Cancel'}.
+	    {'<Control>Z'. '<GtkLauncher>/Edit/Undo'}.
 	    {'<Control>R'. '<GtkLauncher>/Edit/Redo'}.
 	    {'<Control>X'. '<GtkLauncher>/Edit/Cut'}.
 	    {'<Control>C'. '<GtkLauncher>/Edit/Copy'}.
 	    {'<Control>V'. '<GtkLauncher>/Edit/Paste'}.
 	    {'<Control>A'. '<GtkLauncher>/Edit/SelectAll'}}.
 
-	^ self createNewMenuEntry: {GTK.GtkMenuItem menuItem: 'Undo' accelPath: '<GtkLauncher>/Edit/Undo' connectTo: self selector: #undo.
+	^ self createNewMenuEntry: {GTK.GtkMenuItem menuItem: 'Cancel edits' accelPath: '<GtkLauncher>/Edit/Cancel' connectTo: self selector: #cancel.
+	    GTK.GtkMenuItem menuItem: 'Undo' accelPath: '<GtkLauncher>/Edit/Undo' connectTo: self selector: #undo.
             GTK.GtkMenuItem menuItem: 'Redo' accelPath: '<GtkLauncher>/Edit/Redo' connectTo: self selector: #redo.
             GTK.GtkMenuItem new.
             GTK.GtkMenuItem menuItem: 'Cut' accelPath: '<GtkLauncher>/Edit/Cut' connectTo: self selector: #cut.
@@ -438,11 +440,12 @@ THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.';
 
     createToolsMenus [
 	<category: 'user interface'>
-        self accelGroup append: {{'<Control>B'. '<GtkLauncher>/Tools/ClassBrowser'}.
+        self accelGroup append: {{'<Control>B'. '<GtkLauncher>/Tools/TabbedClassBrowser'}.
+	    {'<Control><shift>B'. '<GtkLauncher>/Tools/ClassBrowser'}.
 	    {'<Control>M'. '<GtkLauncher>/Tools/Implementors'}.
             {'<Control>N'. '<GtkLauncher>/Tools/Senders'}}.
 
-	^ self createNewMenuEntry:  {GTK.GtkMenuItem menuItem: 'Browser' connectTo: self selector: #classBrowser.
+	^ self createNewMenuEntry:  {GTK.GtkMenuItem menuItem: 'Browser' accelPath: '<GtkLauncher>/Tools/TabbedClassBrowser' connectTo: self selector: #classBrowser.
 	    GTK.GtkMenuItem menuItem: 'Browser window' accelPath: '<GtkLauncher>/Tools/ClassBrowser' connectTo: self selector: #classBrowserInAWindow.
 	    GTK.GtkMenuItem menuItem: 'Workspace' connectTo: self selector: #workspace.
             GTK.GtkMenuItem menuItem: 'Implementors' accelPath: '<GtkLauncher>/Tools/Implementors' connectTo: self selector: #implementors.
@@ -458,6 +461,13 @@ THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.';
 	<category: 'testing'>
 
 	^ outputs currentWidget == transcriptWidget
+    ]
+
+    cancel [
+	<category: 'edit events'>
+
+	self isCurrentWidgetTranscript ifTrue: [ outputs currentWidget hasFocus ifTrue: [ ^ self ] ].
+	self onFocusPerform: #cancel
     ]
 
     undo [

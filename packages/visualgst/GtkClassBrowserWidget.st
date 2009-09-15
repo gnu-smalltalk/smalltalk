@@ -325,6 +325,14 @@ GtkConcreteWidget subclass: GtkClassBrowserWidget [
 	^ self class undoStack
     ]
 
+    cancel [
+	<category: 'edit events'>
+
+	codeWidget hasFocus 
+	    ifTrue: [ codeWidget cancel ]
+	    ifFalse: [ self undoStack undo ]
+    ]
+
     undo [
 	<category: 'edit events'>
 
