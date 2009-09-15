@@ -1129,3 +1129,196 @@ Instance Variables:
     ]
 ]
 
+
+Object subclass: Attribute [
+    | name value |
+    
+    <category: 'XML-XML-Nodes'>
+    <comment: '
+XML elements may have name-value pairs called attributes associated
+with them. This class instantiates a single XML attribute. Attribute
+is a subclass of Node, both because the W3C DOM model defines it that
+way, and because it provides a uniform API for applications such as
+XSLT that want to do similar sorts of processing on attributes and
+other node types.
+
+Instance Variables:
+    name	<XML.Node | XML.NodeTag>		tag name
+    value	<Object>							tag value'>
+
+    Attribute class >> name: nm value: val [
+	<category: 'instance creation'>
+	^self new name: nm value: val
+    ]
+
+    name: nm value: val [
+	<category: 'initialize'>
+	name := nm isString 
+		    ifTrue: 
+			[NodeTag new 
+			    qualifier: ''
+			    ns: ''
+			    type: nm]
+		    ifFalse: [nm].
+	value := val
+    ]
+
+    tag: aTag [
+	<category: 'initialize'>
+	name := aTag
+    ]
+
+    characterData [
+	<category: 'accessing'>
+	^self value
+    ]
+
+    expandedName [
+	<category: 'accessing'>
+	^name expandedName
+    ]
+
+    key [
+	<category: 'accessing'>
+	^name
+    ]
+
+    tag [
+	<category: 'accessing'>
+	^name
+    ]
+
+    value [
+	<category: 'accessing'>
+	^value
+    ]
+
+    value: aValue [
+	<category: 'accessing'>
+	value := aValue
+    ]
+
+    printCanonicalOn: aStream [
+	<category: 'printing'>
+	aStream nextPutAll: self tag asString , '="'.
+	self printCanonical: value on: aStream.
+	aStream nextPutAll: '"'
+    ]
+
+    printOn: aStream [
+	<category: 'printing'>
+	self printCanonicalOn: aStream
+    ]
+
+    simpleDescription [
+	<category: 'printing'>
+	^'@' , self key
+    ]
+
+    isAttribute [
+	<category: 'testing'>
+	^true
+    ]
+
+    isLike: aNode [
+	<category: 'testing'>
+	^self class == aNode class and: [self tag isLike: aNode tag]
+    ]
+]
+
+
+
+Magnitude subclass: NodeTag [
+    | namespace type qualifier |
+    
+    <category: 'XML-XML-Parsing'>
+    <comment: '
+NodeTag is used as the "tag" of an Element or Attribute. It acts as
+the name or identifier of its owner. It is subclassed from Magnitude
+as a convenience to allow NodeTags to easily understand sorting
+protocol.
+
+In XML all elements or nodes are delimited by start and end tags (or
+empty-element tags) and instances of this class are used to represent
+these element tags. The name of the tag (type instance variable) gives
+the element type.
+
+
+Instance Variables:
+    namespace	<String>		A URI in string form that uniquely identifies the XML namespace to which the type belongs. May be an empty string if the type is outside all namespaces.
+    type			<String>		Name of tag, used to indicate element or attribute type.
+    qualifier		<String>		In XML documents, the namespace is mapped to a qualifier, which is used as a prefix for the type. The namespace is assumed to be unique across all documents, but is quite clumsy. The qualifier is not unique across documents, but is unambiguous at the point where it is used and is short enough to be convenient. The qualifier may be the empty string if the namespace is empty or if the namespace is the current default namespace.'>
+
+    qualifier: q ns: ns type: typeStr [
+	<category: 'initialize'>
+	namespace := ns.
+	type := typeStr.
+	qualifier := q
+    ]
+
+    expandedName [
+	<category: 'accessing'>
+	^namespace isEmpty ifTrue: [type] ifFalse: [namespace , '#' , type]
+    ]
+
+    namespace [
+	<category: 'accessing'>
+	^namespace
+    ]
+
+    qualifier [
+	<category: 'accessing'>
+	^qualifier
+    ]
+
+    type [
+	<category: 'accessing'>
+	^type
+    ]
+
+    asString [
+	<category: 'converting'>
+	^qualifier isEmpty ifTrue: [type] ifFalse: [qualifier , ':' , type]
+    ]
+
+    isLike: aName [
+	<category: 'testing'>
+	^aName isString 
+	    ifTrue: [namespace isEmpty and: [type = aName]]
+	    ifFalse: [namespace = aName namespace and: [type = aName type]]
+    ]
+
+    printOn: aStream [
+	<category: 'printing'>
+	aStream nextPutAll: '{' , self asString , '}'
+    ]
+
+    < aNodeTag [
+	"Answer whether the receiver is less than the argument."
+
+	<category: 'comparing'>
+	^self asString < aNodeTag asString
+    ]
+
+    = aNodeTag [
+	<category: 'comparing'>
+	^self class = aNodeTag class and: 
+		[self type = aNodeTag type and: 
+			[self namespace == nil 
+			    ifTrue: [self qualifier = aNodeTag qualifier]
+			    ifFalse: [self namespace = aNodeTag namespace]]]
+    ]
+
+    hash [
+	"The hash value is not dependent on either the namespace
+	 or the qualifier, but equality is dependent on this. We think
+	 this will not be a problem because collisions between tags
+	 that have the same type but different namespaces or qualifiers
+	 should be rare in the majority of cases."
+
+	<category: 'comparing'>
+	^self type hash
+    ]
+]
+
+

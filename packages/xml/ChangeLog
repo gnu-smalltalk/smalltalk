@@ -1,5 +1,10 @@
 2009-09-15  Paolo Bonzini  <bonzini@gnu.org>
 
+	* dom/DOM.st: Move Attribute and NodeTag...
+	* saxdriver/SAX.st: ... here.
+
+2009-09-15  Paolo Bonzini  <bonzini@gnu.org>
+
 	* parser/XML.st: Raise EmptySignal for an empty XML document,
 	and be prepare for it to resume.
 	* saxdriver/SAX.st: Make WarningSignal and EmptySignal resumable.
