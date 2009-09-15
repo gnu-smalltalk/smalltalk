@@ -1,5 +1,10 @@
 2009-09-15  Paolo Bonzini  <bonzini@gnu.org>
 
+	* saxdriver/SAX.st: Add method to create NodeTag from qName.
+	* dom/DOM.st: Use it.
+
+2009-09-15  Paolo Bonzini  <bonzini@gnu.org>
+
 	* dom/DOM.st: Move Attribute and NodeTag...
 	* saxdriver/SAX.st: ... here.
 
