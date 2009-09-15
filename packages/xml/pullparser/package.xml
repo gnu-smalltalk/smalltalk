@@ -1,0 +1,15 @@
+<package>
+  <name>XML-PullParser</name>
+  <namespace>XML</namespace>
+  <prereq>XML-SAXDriver</prereq>
+  <prereq>XML-XMLParser</prereq>
+
+  <test>
+    <sunit>XML.XMLPullParserTest</sunit>
+    <filein>XMLPullParserTests.st</filein>
+    <file>XMLPullParserTests.st</file>
+  </test>
+
+  <filein>XMLPullParser.st</filein>
+  <file>XMLPullParser.st</file>
+</package>

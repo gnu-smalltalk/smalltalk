@@ -1,5 +1,13 @@
 2009-09-15  Paolo Bonzini  <bonzini@gnu.org>
 
+	* pullparser/XMLPullParser.st: New.
+	* pullparser/XMLPullParserTests.st: New.
+	* pullparser/package.xml: New.
+	* saxdriver/Events.st: New.
+	* saxdriver/package.xml.st: Add it.
+
+2009-09-15  Paolo Bonzini  <bonzini@gnu.org>
+
 	* saxparser/Parser.st: Add #defaultParserClass and setter.
 	* parser/XML.st: Set defaultParserClass if nil.
 

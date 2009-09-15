@@ -2,6 +2,12 @@ List of user-visible changes in GNU Smalltalk
 
 NEWS FROM 3.1 TO 3.2
 
+o   The XML parser will ignore whitespace if placed in non-validating mode.
+
+o   An XML pull parser is included as package XML-PullParser.  The package
+    is based on the VisualWorks and Squeak pull parsers by Anthony Blakey
+    and Ken Treis.
+
 o   Fixed crash on omitting mandatory arguments of short options
 
 o   Support for one-way become (Object>>#becomeForward:)

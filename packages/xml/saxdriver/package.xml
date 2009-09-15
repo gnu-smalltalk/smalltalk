@@ -3,5 +3,7 @@
   <namespace>XML</namespace>
 
   <filein>SAX.st</filein>
+  <filein>Events.st</filein>
   <file>SAX.st</file>
+  <file>Events.st</file>
 </package>
