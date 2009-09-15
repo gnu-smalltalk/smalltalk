@@ -50,6 +50,18 @@ Instance Variables:
     flags		<SmallInteger>				sundry boolean values that are not accessed often enough
     											to need separate instance variables.'>
 
+    DefaultParserClass := nil.
+
+    SAXParser class >> defaultParserClass [
+	<category: 'instance creation'>
+	^DefaultParserClass
+    ]
+
+    SAXParser class >> defaultParserClass: aClass [
+	<category: 'instance creation'>
+	DefaultParserClass := aClass.
+    ]
+
     SAXParser class >> new [
 	<category: 'instance creation'>
 	^super new initialize

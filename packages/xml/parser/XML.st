@@ -4244,6 +4244,8 @@ DocumentType extend [
 
 
 Eval [
-    XML at: #CharacterClasses put: XML.XMLParser characterTable.
+    XML at: #CharacterClasses put: XMLParser characterTable.
+    SAXParser defaultParserClass isNil
+	ifTrue: [SAXParser defaultParserClass: XMLParser].
 ]
 

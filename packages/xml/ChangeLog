@@ -1,5 +1,10 @@
 2009-09-15  Paolo Bonzini  <bonzini@gnu.org>
 
+	* saxparser/Parser.st: Add #defaultParserClass and setter.
+	* parser/XML.st: Set defaultParserClass if nil.
+
+2009-09-15  Paolo Bonzini  <bonzini@gnu.org>
+
 	* saxdriver/SAX.st: Add method to create NodeTag from qName.
 	* dom/DOM.st: Use it.
 
