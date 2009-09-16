@@ -1,3 +1,7 @@
+2009-09-16  Paolo Bonzini  <bonzini@gnu.org>
+
+	* GtkImpl.st: Add GtkMessageDialog utility methods.
+
 2009-09-11  Paolo Bonzini  <bonzini@gnu.org>
 
 	* GtkImpl.st: Sync with VisualGST.

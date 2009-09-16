@@ -63,6 +63,29 @@ GtkMessageDialog class extend [
 	    varargs: {message}
     ]
 
+    new: parent flags: flags type: type buttons: buttons message: message tip: tip [
+	<category: 'instance creation'>
+	^self 
+	    newWithMarkup: parent
+	    flags: flags
+	    type: type
+	    buttons: buttons
+	    messageFormat: '<big><b>%s</b></big>
+
+%s'
+	    varargs: {message. tip}
+    ]
+
+    newWithMarkup: parent flags: flags type: type buttons: buttons message: message [
+	<category: 'instance creation'>
+	^self 
+	    newWithMarkup: parent
+	    flags: flags
+	    type: type
+	    buttons: buttons
+	    messageFormat: (message copyReplaceAll: '%' with: '%%')
+	    varargs: #()
+    ]
 ]
 
 

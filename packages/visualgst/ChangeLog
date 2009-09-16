@@ -1,15 +1,21 @@
-2009-09-15  Paolo Bonzini  <bonzini@gnu.org>
+2009-09-16  Paolo Bonzini  <bonzini@gnu.org>
+	    Gwenael Casaccio  <mrgwen@gmail.com>
+
+	* GtkClassBrowserWidget.st: Tweak message dialog test.
+	* VisualGST.st: Implement save-before-exit dialog.
+
+2009-09-15  Gwenael Casaccio  <mrgwen@gmail.com>
 
 	* GtkClassBrowser.st, GtkClassBrowserWidget.st, GtkSourceCodeWidget.st,
 	GtkWorkspaceWidget.st, VisualGST.st: Update from r214.
 
-2009-09-11  Paolo Bonzini  <bonzini@gnu.org>
+2009-09-11  Gwenael Casaccio  <mrgwen@gmail.com>
 
 	* Debugger/GtkDebugger.st, GtkAssistant.st, GtkClassBrowser.st,
 	GtkNotebookWidget.st, GtkWebBrowser.st, VisualGST.st,
 	package.xml: Update from r213.
 
-2009-09-11  Paolo Bonzini  <bonzini@gnu.org>
+2009-09-11  Gwenael Casaccio  <mrgwen@gmail.com>
 
 	* Debugger/GtkDebugger.st, GtkAssistant.st, GtkClassBrowser.st,
 	GtkClassBrowserWidget.st, GtkClassHierarchyWidget.st,
@@ -20,7 +26,7 @@
 	Project/BSD.st, Project/Licence.st, SUnit/GtkSUnit.st,
 	VisualGST.st, package.xml: Update from r210.
 
-2009-09-08  Paolo Bonzini  <bonzini@gnu.org>
+2009-09-08  Gwenael Casaccio  <mrgwen@gmail.com>
 
 	* Commands/FileoutCategoryCommand.st, Commands/FileoutClassCommand.st,
 	Commands/FileoutMethodCommand.st, Commands/FileoutNamespaceCommand.st,
@@ -30,5 +36,6 @@
 	package.xml: Update from r199.
 
 2009-09-03  Paolo Bonzini  <bonzini@gnu.org>
+	    Gwenael Casaccio  <mrgwen@gmail.com>
 
 	* Import from r191.

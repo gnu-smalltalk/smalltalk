@@ -1,8 +1,15 @@
 GtkMainWindow subclass: VisualGST [
     VisualGST class [ | compileError | ]
 
-    | browsers outputs transcriptWidget windowsMenu |
+    | browsers outputs transcriptWidget windowsMenu saved |
 
+    VisualGST class >> exit [
+	<category: 'exit'>
+
+	GTK.Gtk mainQuit.
+	ObjectMemory quit	
+    ]
+ 
     VisualGST class >> open [
 	<category: 'user interface'>
 
@@ -100,11 +107,34 @@ THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.';
 	outputs addWidget: widget labeled: 'Workspace'.
     ]
 
+    delete: aGtkWidget event: aGdkEvent [
+	<category: 'window events'>
+
+	self quit.
+
+	^ true 
+    ]
+
     quit [
 	<category: 'file events'>
 
-	GTK.Gtk mainQuit.
-	ObjectMemory quit	
+        | dialog |
+        dialog := GTK.GtkMessageDialog
+                                new: window
+                                flags: GTK.Gtk gtkDialogDestroyWithParent
+                                type: GTK.Gtk gtkMessageWarning
+                                buttons: GTK.Gtk gtkButtonsNone
+                                message: 'Save the image before exiting?'
+				tip: 'The image hosts all the code changes that you made %<since the last save|since starting VisualGST>1.  Unless you exported these changes, not saving the image will lose them.' % {saved}.
+        dialog
+            addButton: 'Exit without saving' responseId: 0;
+            addButton: 'Cancel' responseId: 2;
+            addButton: 'Save image' responseId: 1;
+            runBlockingAndDo: [ :dlg :res |
+                res = 0 ifTrue: [ self class exit ].
+                res = 1 ifTrue: [ self saveImage.
+				  self class exit ].
+                dlg destroy ].
     ]
 
     open [
@@ -143,21 +173,17 @@ THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.';
     saveImage [
         <category: 'events'>
 
-        (GTK.GtkMessageDialog new: window flags: GTK.Gtk gtkDialogDestroyWithParent type: GTK.Gtk gtkMessageWarning buttons: GTK.Gtk gtkButtonsOk message: 'WARNING : You can loose all the data')
-            runBlockingAndDestroy.
-        ObjectMemory snapshot
+        saved := ObjectMemory snapshot not
     ]
 
     saveImageAs [
 	<category: 'events'>
 
-	(GTK.GtkMessageDialog new: window flags: GTK.Gtk gtkDialogDestroyWithParent type: GTK.Gtk gtkMessageWarning buttons: GTK.Gtk gtkButtonsOk message: 'WARNING : You can loose all the data')
-	    runBlockingAndDestroy.
 	(GTK.GtkFileChooserDialog save: 'Save image as...' parent: window)
 	    runNonBlockingAndDo: [ :dlg :res |
 		res = GTK.Gtk gtkResponseAccept ifTrue: [ | name |
 		    name := dlg getFilename.
-		    ObjectMemory snapshot: name ].
+		    saved := (ObjectMemory snapshot: name) not ].
 		dlg destroy ]
     ]
 
@@ -187,6 +213,7 @@ THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.';
 	<category: 'initialization'>
 
 	super initialize.
+	saved := false.
 	window maximize.
 	self
 	    clearGlobalState;
@@ -200,7 +227,9 @@ THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.';
     postInitialize [
 	<category: 'initialization'>
 
-	browsers grabFocus
+	browsers grabFocus.
+	window 
+	    connectSignal: 'delete-event' to: self selector: #'delete:event:' userData: nil
     ]
 
     buildNotebookWorkspaceWidget [
