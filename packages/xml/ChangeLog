@@ -1,3 +1,9 @@
+2009-09-16  Paolo Bonzini  <bonzini@gnu.org>
+
+	* pullparser/XMLPullParser.st: Add copyright header.
+	* pullparser/XMLPullParserTests.st: Add copyright header.
+	* saxdriver/Events.st: Add copyright header.
+
 2009-09-15  Paolo Bonzini  <bonzini@gnu.org>
 
 	* pullparser/XMLPullParser.st: New.
