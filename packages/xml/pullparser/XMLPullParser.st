@@ -75,9 +75,9 @@ Notification subclass: XMLResolveEntityNotification [
 
 
 SAXParser class extend [
-    pullParserFactory [
+    pullParserOn: source [
 	<category: 'pull parsing'>
-	^XMLGenerativePullParser
+	^XMLGenerativePullParser on: source for: self
     ]
 ]
 
@@ -106,12 +106,7 @@ Stream subclass: XMLPullParser [
 
     XMLPullParser class >> on: source [
 	<category: 'instance creation'>
-	^self defaultParserClass pullParserFactory on: source
-    ]
-
-    XMLPullParser class >> defaultParserClass [
-	<category: 'accessing'>
-	^SAXParser defaultParserClass
+	^SAXParser defaultParserClass pullParserOn: source
     ]
 
     advance [
@@ -825,14 +820,19 @@ XMLPullParser subclass: XMLGenerativePullParser [
     <comment: 'This is based on Antony Blakey''s XMLPullParser.'>
 
     XMLGenerativePullParser class >> on: source [
-	^self onParser:
-	    (self defaultParserClass on: source)
+	<category: 'instance creation'>
+	^self on: source for: SAXParser defaultParserClass
+    ]
+
+    XMLGenerativePullParser class >> on: source for: aParserClass [
+	<category: 'instance creation'>
+	^self onParser: (aParserClass on: source)
     ]
 
     XMLGenerativePullParser class >> onParser: aParser [
 	<category: 'instance creation'>
 	| class |
-	^self new
+	^super new
 	    initialize: aParser;
 	    yourself
     ]

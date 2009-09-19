@@ -1,5 +1,10 @@
 2009-09-19  Paolo Bonzini  <bonzini@gnu.org>
 
+	* pullparser/XMLPullParser.st: Provide nicer pull parser factory
+	interface.
+
+2009-09-19  Paolo Bonzini  <bonzini@gnu.org>
+
 	* pullparser/XMLPullParser.st: Add optional events, DTD events,
 	XMLResolveEntityNotification, and avoid #copyFrom:to:
 	when not needed.
