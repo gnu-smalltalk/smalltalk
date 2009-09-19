@@ -146,7 +146,7 @@ GtkMainWindow subclass: GtkInspector [
 
 	self addMenuItem: 'File' withSubmenu: self createFileMenus.
 	self addMenuItem: 'Edit' withSubmenu: self createEditMenus.
-	self addMenuItem: 'Smalltalk' withSubmenu: self createToolsMenus.
+	self addMenuItem: 'Tools' withSubmenu: self createToolsMenus.
     ]
 
     createStatusBar [
@@ -174,12 +174,21 @@ GtkMainWindow subclass: GtkInspector [
     createToolsMenus [
 	<category: 'user interface'>
 
-	^ self createNewMenuEntry: 
-	    {GTK.GtkMenuItem menuItem: 'Browser' connectTo: self selector: #classBrowser.
-	    GTK.GtkMenuItem menuItem: 'Workspace' connectTo: self selector: #workspace.
-	    GTK.GtkMenuItem menuItem: 'Inspector' connectTo: self selector: #gtkInspector.
-	    GTK.GtkMenuItem new.
-	    GTK.GtkMenuItem menuItem: 'Smallzilla' connectTo: self selector: #squeakzilla}
+        self accelGroup append: {{'<Control>B'. '<GtkLauncher>/Tools/TabbedClassBrowser'}.
+            {'<Control><shift>B'. '<GtkLauncher>/Tools/ClassBrowser'}.
+            {'<Control>M'. '<GtkLauncher>/Tools/Implementors'}.
+            {'<Control>N'. '<GtkLauncher>/Tools/Senders'}}.
+
+        ^ self createNewMenuEntry:  {GTK.GtkMenuItem menuItem: 'Browser' accelPath: '<GtkLauncher>/Tools/TabbedClassBrowser' connectTo: self selector: #classBrowser.
+            GTK.GtkMenuItem menuItem: 'Browser window' accelPath: '<GtkLauncher>/Tools/ClassBrowser' connectTo: self selector: #classBrowserInAWindow.
+            GTK.GtkMenuItem menuItem: 'Workspace' connectTo: self selector: #workspace.
+            GTK.GtkMenuItem menuItem: 'Implementors' accelPath: '<GtkLauncher>/Tools/Implementors' connectTo: self selector: #implementors.
+            GTK.GtkMenuItem menuItem: 'Senders' accelPath: '<GtkLauncher>/Tools/Senders' connectTo: self selector: #senders.
+            GTK.GtkMenuItem menuItem: 'SUnit' connectTo: self selector: #sunit.
+            GTK.GtkMenuItem new.
+            GTK.GtkMenuItem menuItem: 'Assistant' connectTo: self selector: #gtkAssistant.
+            GTK.GtkMenuItem new.
+            GTK.GtkMenuItem menuItem: 'Smallzilla' connectTo: self selector: #webBrowser}
     ]
 
     onFocusPerform: aSelector [
@@ -270,5 +279,51 @@ GtkMainWindow subclass: GtkInspector [
                 res = 1 ifTrue: saveEvent.
                 dlg destroy ].
     ]
+
+    classBrowser [
+        <category: 'events'>
+
+        | widget |
+        browsers addWidget: self buildClassBrowserWidget labeled: 'Browser'
+    ]
+
+    classBrowserInAWindow [
+        <category: 'events'>
+
+        GtkClassBrowser open
+    ]
+
+    newWorkspace [
+        <category: 'events'>
+
+        | widget |
+        widget := self buildWorkspaceWidget showAll.
+        outputs addWidget: widget labeled: 'Workspace'.
+    ]
+
+    implementors [
+        <category: 'smalltalk events'>
+
+        VisualGST uniqueInstance implementors
+    ]
+
+    senders [
+        <category: 'smalltalk events'>
+
+        VisualGST uniqueInstance senders
+    ]
+
+    gtkAssistant [
+        <category: 'tools events'>
+
+        VisualGST uniqueInstance assistant
+    ]
+
+    webBrowser [
+        <category: 'tools events'>
+
+        VisualGST uniqueInstance webBrowser
+    ]
+
 ]
 

@@ -1,5 +1,11 @@
 2009-09-16  Gwenael Casaccio  <mrgwen@gmail.com>
 
+	* GtkClassBrowserWidget.st, GtkClassModel.st,
+	Implementors/GtkImplementor.st, Inspector/GtkInspector.st,
+	Senders/GtkSender.st, VisualGST.st: Sync to r228.
+
+2009-09-16  Gwenael Casaccio  <mrgwen@gmail.com>
+
 	* BrowserState.st, CategoryState.st, Debugger/GtkDebugger.st,
 	GtkClassBrowser.st, GtkClassBrowserWidget.st, GtkClassModel.st
 	GtkClassSUnitModel.st, GtkConcreteWidget.st, GtkNotebookWidget.st

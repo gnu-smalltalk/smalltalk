@@ -58,13 +58,21 @@ GtkMainWindow subclass: GtkImplementor [
     createToolsMenus [
         <category: 'user interface'>
 
-        ^ self createNewMenuEntry:
-            {GTK.GtkMenuItem menuItem: 'Browser' connectTo: self selector: #classBrowser.
-            GTK.GtkMenuItem menuItem: 'Browser window' connectTo: self selector: #classBrowserInAWindow.
+        self accelGroup append: {{'<Control>B'. '<GtkLauncher>/Tools/TabbedClassBrowser'}.
+            {'<Control><shift>B'. '<GtkLauncher>/Tools/ClassBrowser'}.
+            {'<Control>M'. '<GtkLauncher>/Tools/Implementors'}.
+            {'<Control>N'. '<GtkLauncher>/Tools/Senders'}}.
+
+        ^ self createNewMenuEntry:  {GTK.GtkMenuItem menuItem: 'Browser' accelPath: '<GtkLauncher>/Tools/TabbedClassBrowser' connectTo: self selector: #classBrowser.
+            GTK.GtkMenuItem menuItem: 'Browser window' accelPath: '<GtkLauncher>/Tools/ClassBrowser' connectTo: self selector: #classBrowserInAWindow.
             GTK.GtkMenuItem menuItem: 'Workspace' connectTo: self selector: #workspace.
-            GTK.GtkMenuItem menuItem: 'Inspector' connectTo: self selector: #gtkInspector.
+            GTK.GtkMenuItem menuItem: 'Implementors' accelPath: '<GtkLauncher>/Tools/Implementors' connectTo: self selector: #implementors.
+            GTK.GtkMenuItem menuItem: 'Senders' accelPath: '<GtkLauncher>/Tools/Senders' connectTo: self selector: #senders.
+            GTK.GtkMenuItem menuItem: 'SUnit' connectTo: self selector: #sunit.
             GTK.GtkMenuItem new.
-            GTK.GtkMenuItem menuItem: 'SqueakZilla' connectTo: self selector: #squeakzilla}
+            GTK.GtkMenuItem menuItem: 'Assistant' connectTo: self selector: #gtkAssistant.
+            GTK.GtkMenuItem new.
+            GTK.GtkMenuItem menuItem: 'Smallzilla' connectTo: self selector: #webBrowser}
     ]
 
     createSmalltalkMenus [
@@ -429,6 +437,46 @@ THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.';
                 dlg destroy ].
     ]
 
+    classBrowser [
+        <category: 'events'>
 
+	VisualGST uniqueInstance classBrowser
+    ]
+
+    classBrowserInAWindow [
+        <category: 'events'>
+
+	VisualGST uniqueInstance classBrowserInAWindow
+    ]
+
+    newWorkspace [
+        <category: 'events'>
+
+	VisualGST uniqueInstance workspace 
+    ]
+
+    implementors [
+        <category: 'smalltalk events'>
+
+        VisualGST uniqueInstance implementors
+    ]
+
+    senders [
+        <category: 'smalltalk events'>
+
+        VisualGST uniqueInstance senders
+    ]
+
+    gtkAssistant [
+        <category: 'tools events'>
+
+        VisualGST uniqueInstance assistant
+    ]
+
+    webBrowser [
+        <category: 'tools events'>
+
+        VisualGST uniqueInstance webBrowser
+    ]
 ]
 

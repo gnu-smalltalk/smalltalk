@@ -106,7 +106,7 @@ Object subclass: GtkClassModel [
         result := OrderedCollection new.
         class := aClass.
         [ class isNil not and: [ class environment = self namespace ] ] whileTrue: [
-            result add: class name asString.
+            result add: (class name asString, ' ').
             class := class superclass ].
 
         ^ result
@@ -123,7 +123,7 @@ Object subclass: GtkClassModel [
         1 to: stack size do: [ :i | | each |
             each := stack at: (stack size + 1 - i).
             self model getIter: iter path: path.
-            [each, ' ' = (self model getOop: iter column: 0)] whileFalse: [
+            [each = (self model getOop: iter column: 0)] whileFalse: [
                 path next.
                 (self model getIter: iter path: path)  ifFalse: [ ^ false ] ].
             path down ].
@@ -147,7 +147,7 @@ Object subclass: GtkClassModel [
         1 to: stack size do: [ :i | | each |
             each := stack at: (stack size + 1 - i).
             self model getIter: iter path: path.
-            [each, ' ' = (self model getOop: iter column: 0)] whileFalse: [
+            [each = (self model getOop: iter column: 0)] whileFalse: [
                 path next.
                 (self model getIter: iter path: path)  ifFalse: [ ^ aBlock value ] ].
             path down ].

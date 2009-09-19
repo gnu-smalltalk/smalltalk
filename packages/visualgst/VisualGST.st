@@ -93,12 +93,6 @@ THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.';
 	GtkClassBrowser open
     ]
 
-    gtkInspector [
-	<category: 'events'>
-	
-	GtkInspector openOn: self
-    ]
-
     newWorkspace [
 	<category: 'events'>
 
@@ -470,6 +464,7 @@ THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.';
 
     createToolsMenus [
 	<category: 'user interface'>
+
         self accelGroup append: {{'<Control>B'. '<GtkLauncher>/Tools/TabbedClassBrowser'}.
 	    {'<Control><shift>B'. '<GtkLauncher>/Tools/ClassBrowser'}.
 	    {'<Control>M'. '<GtkLauncher>/Tools/Implementors'}.
