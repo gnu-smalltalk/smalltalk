@@ -1,20 +1,11 @@
 GtkConcreteWidget subclass: GtkSourceCodeWidget [
-    | codeText codeBuffer codeView object |
+    | browser codeText codeBuffer codeView object |
 
     initialize [
 	<category: 'initialization'>
 
 	self mainWidget: self buildCodeView.
-	self 
-	    initializeHighlighter;
-	    initializeAccel
-    ]
-
-    initializeAccel [
-	<category: 'initialization'>
-	
-	| group |
-	group := GTK.GtkAccelGroup new
+	self initializeHighlighter
     ]
 
     initializeHighlighter [
@@ -49,10 +40,18 @@ GtkConcreteWidget subclass: GtkSourceCodeWidget [
         menuitem := GTK.GtkMenuItem new.
         menuitem show.
         aGtkMenu append: menuitem.
+        menuitem := GTK.GtkMenuItem newWithLabel: 'Accept'.
+        menuitem
+            show;
+            connectSignal: 'activate' to: self selector: #accept userData: nil.
+        aGtkMenu append: menuitem.
         menuitem := GTK.GtkMenuItem newWithLabel: 'Cancel'.
         menuitem
             show;
             connectSignal: 'activate' to: self selector: #cancel userData: nil.
+        aGtkMenu append: menuitem.
+        menuitem := GTK.GtkMenuItem new.
+        menuitem show.
         aGtkMenu append: menuitem.
         menuitem := GTK.GtkMenuItem newWithLabel: 'Undo'.
         menuitem
@@ -182,6 +181,12 @@ GtkConcreteWidget subclass: GtkSourceCodeWidget [
 	codeView clearUndo
     ]
 
+    accept [
+	<category: 'buffer events'>
+
+	browser acceptIt
+    ]
+
     cancel [
 	<category: 'buffer events'>
 
@@ -294,6 +299,12 @@ GtkConcreteWidget subclass: GtkSourceCodeWidget [
 	<category: 'accessing'>
 
 	codeText := aString copy
+    ]
+
+    browser: aGtkClassBrowserWidget [
+	<category: 'accessing'>
+
+	browser := aGtkClassBrowserWidget
     ]
 ]
 

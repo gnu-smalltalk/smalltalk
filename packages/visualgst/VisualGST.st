@@ -1,7 +1,7 @@
 GtkMainWindow subclass: VisualGST [
     VisualGST class [ | compileError | ]
 
-    | browsers outputs transcriptWidget windowsMenu saved |
+    | browsers outputs saved transcriptWidget windowsMenu |
 
     VisualGST class >> exit [
 	<category: 'exit'>
@@ -126,6 +126,7 @@ THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.';
                                 buttons: GTK.Gtk gtkButtonsNone
                                 message: 'Save the image before exiting?'
 				tip: 'The image hosts all the code changes that you made %<since the last save|since starting VisualGST>1.  Unless you exported these changes, not saving the image will lose them.' % {saved}.
+
         dialog
             addButton: 'Exit without saving' responseId: 0;
             addButton: 'Cancel' responseId: 2;

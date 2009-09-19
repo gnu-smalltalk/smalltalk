@@ -1,5 +1,5 @@
 GtkConcreteWidget subclass: GtkInspectorBrowserWidget [
-    | namespaceWidget classWidget classHierarchyWidget classHierarchyUpdate iCategoryWidget iMethodWidget cCategoryWidget cMethodWidget codeWidget undoStack |
+    | checkCode namespaceWidget classHierarchyWidget classHierarchyUpdate iCategoryWidget iMethodWidget cCategoryWidget cMethodWidget codeWidget state |
 
     GtkInspectorBrowserWidget class >> title [
 	<category: 'accessing'>
@@ -48,6 +48,7 @@ GtkConcreteWidget subclass: GtkInspectorBrowserWidget [
 
 	codeWidget := (GtkSourceCodeWidget new)
 			initialize;
+			browser: self;
 			showAll;
 			yourself.
     
@@ -95,7 +96,9 @@ GtkConcreteWidget subclass: GtkInspectorBrowserWidget [
 
 	| vpaned |
 	classHierarchyUpdate := false.
+	checkCode := true.
 	vpaned := GTK.GtkVPaned new.
+	state := NamespaceState on: self with: Smalltalk.
 	self mainWidget: vpaned.
     
 	vpaned
@@ -107,6 +110,7 @@ GtkConcreteWidget subclass: GtkInspectorBrowserWidget [
     classInstanceSwitchOn: aGtkNotebook page: aGtkNotebookPage number: aSmallInteger [
 	<category: 'events'>
 
+	self checkCodeWidget.
 	aSmallInteger = 0 
 	    ifTrue: [
 		iMethodWidget hasSelectedMethod 
@@ -122,6 +126,7 @@ GtkConcreteWidget subclass: GtkInspectorBrowserWidget [
 	<category: 'events'>
 
 	| aClass |
+	self checkCodeWidget.
 	classHierarchyWidget hasSelectedClass ifFalse: [ ^ self ].
 	classHierarchyUpdate := true.
         aClass := classHierarchyWidget selectedClass.
@@ -129,55 +134,32 @@ GtkConcreteWidget subclass: GtkInspectorBrowserWidget [
         iMethodWidget class: aClass withCategory: '*'.
         cMethodWidget class: aClass class withCategory: '*'.
 
-        codeWidget sourceCode: ''
-    ]
-
-    onInstanceSideCategoryChanged [
-	<category: 'events'>
-
-	| category |
-	iCategoryWidget hasSelectedCategory ifFalse: [ ^ self ].
-	iMethodWidget class: classWidget selectedClass withCategory: iCategoryWidget selectedCategory.
-
-	codeWidget sourceCode: ''
-    ]
-
-    onClassSideCategoryChanged [
-	<category: 'events'>
-	
-	cCategoryWidget hasSelectedCategory ifFalse: [ ^ self ].
-	cMethodWidget class: classWidget selectedClass class withCategory: cCategoryWidget selectedCategory.
-
-	codeWidget sourceCode: ''
+        codeWidget sourceCode: ''.
+	state := CategoryState on: self with: classHierarchyWidget selectedClass -> iCategoryWidget selectedCategory
     ]
 
     onInstanceSideMethodChanged [
 	<category: 'events'>
 
 	| method |
+	self checkCodeWidget.
 	iMethodWidget hasSelectedMethod ifFalse: [ ^ self ].
 	method := iMethodWidget selectedMethod.
-	codeWidget sourceCode: iMethodWidget sourceCode
+	codeWidget sourceCode: iMethodWidget sourceCode.
+	state := MethodState on: self with: classHierarchyWidget selectedClass -> method
     ]
 
     onClassSideMethodChanged [
 	<category: 'events'>
 
 	| method |
+	self checkCodeWidget.
 	cMethodWidget hasSelectedMethod ifFalse: [ ^ self ].
 	method := cMethodWidget selectedMethod.
-	codeWidget sourceCode: cMethodWidget sourceCode
+	codeWidget sourceCode: cMethodWidget sourceCode.
+	state := MethodState on: self with: classHierarchyWidget selectedClass class -> method
     ]
 
-    saveContents [
-	<category: 'events'>
-
-       "(self selectedClass isNil or: [self selectedMethod isNil])
-	    ifTrue: [ ^ GtkMessageDialog error: 'Unable to save contents' ].
-	self selectedClass compile: codeBuffer text classified: self selectedMethodCategory.
-	saveButton sensitive: false"
-    ]
-    
     selectAClass: aClass [
 	<category: 'selection'>
 
@@ -185,28 +167,132 @@ GtkConcreteWidget subclass: GtkInspectorBrowserWidget [
 
 	iMethodWidget class: aClass withCategory: '*'.
 	cMethodWidget class: aClass class withCategory: '*'.
+	state := CategoryState on: self with: aClass -> '*'
     ]
 
     selectAnInstanceMethod: aSelector [
         <category: 'selection'>
 
         | class |
-        class := classWidget selectedClass.
+        class := classHierarchyWidget selectedClass.
 
         class := (class selectors includes: aSelector) ifFalse: [ class class ] ifTrue: [ class ].
         iMethodWidget
-            class: class withCategory: (class compiledMethodAt: aSelector) methodCategory
+            class: class withCategory: (class compiledMethodAt: aSelector) methodCategory.
+	state := CategoryState on: self with: class -> '*'
     ]
 
     selectAClassMethod: aSelector [
 	<category: 'selection'>
 
         | class |
-        class := classWidget selectedClass.
+        class := classHierarchyWidget selectedClass.
 
 	class := (class selectors includes: aSelector) ifFalse: [ class class ] ifTrue: [ class ].
         cMethodWidget
-            class: class withCategory: (class compiledMethodAt: aSelector) methodCategory
+            class: class withCategory: (class compiledMethodAt: aSelector) methodCategory.
+	state := CategoryState on: self with: class -> '*'
+    ]
+
+    cancel [
+        <category: 'buffer events'>
+
+	codeWidget hasFocus ifTrue: [ codeWidget cancel ]
+    ]
+
+    undo [
+        <category: 'buffer events'>
+
+	codeWidget hasFocus ifTrue: [ codeWidget undo ]
+    ]
+
+    redo [
+        <category: 'buffer events'>
+
+	codeWidget hasFocus ifTrue: [ codeWidget redo ]
+    ]
+
+    copy [
+        <category: 'text editing'>
+
+	codeWidget hasFocus ifTrue: [ codeWidget copy ]
+    ]
+
+    cut [
+        <category: 'text editing'>
+
+	codeWidget hasFocus ifTrue: [ codeWidget cut ]
+    ]
+
+    paste [
+        <category: 'text editing'>
+
+	codeWidget hasFocus ifTrue: [ codeWidget paste ]
+    ]
+
+    selectAll [
+        <category: 'text editing'>
+
+	codeWidget hasFocus ifTrue: [ codeWidget selectAll ]
+    ]
+
+    doNotCheckCode [
+        <category: 'text editing'>
+
+        checkCode := false
+    ]
+
+    checkCodeWidget [
+        <category: 'text editing'>
+
+        checkCode ifFalse: [ checkCode := true. ^ self ].
+        self hasChanged ifFalse: [ codeWidget clearUndo. ^ self ].
+        self saveCodeOnSave: [ self saveCode ].
+        codeWidget clearUndo
+    ]
+
+    saveCodeOnSave: saveEvent [
+        <category: 'saving'>
+
+        | dialog |
+        dialog := GTK.GtkMessageDialog
+                                new: self parentWindow
+                                flags: GTK.Gtk gtkDialogDestroyWithParent
+                                type: GTK.Gtk gtkMessageWarning
+                                buttons: GTK.Gtk gtkButtonsNone
+                                message: 'Save changes to this method?'
+                                tip: 'If you do not save, your changes to %1 will be lost...' % {self stateString}.
+
+        dialog
+            addButton: 'Cancel' responseId: 0;
+            addButton: 'Save' responseId: 1;
+            runBlockingAndDo: [ :dlg :res |
+                res = 1 ifTrue: saveEvent.
+                dlg destroy ].
+    ]
+
+    hasChanged [
+	<category: 'testing'>
+
+	^ codeWidget hasChanged
+    ]
+
+    stateString [
+	<category: 'text editing'>
+
+	^ state displayString
+    ]
+
+    saveCode [
+        <category: 'text saving'>
+
+        state saveSource
+    ]
+
+    sourceCode [
+	<category: 'accessing'>
+
+	^ codeWidget sourceCode
     ]
 ]
 

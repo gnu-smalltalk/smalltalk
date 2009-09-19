@@ -6,9 +6,17 @@ GtkMainWindow subclass: GtkInspector [
 
 	^ (self new)
 	    initialize;
+	    postInitialize;
 	    object: anObject;
 	    showAll;
 	    yourself
+    ]
+
+    postInitialize [
+        <category: 'initialization'>
+
+        window
+            connectSignal: 'delete-event' to: self selector: #'delete:event:' userData: nil
     ]
 
     object: anObject [
@@ -64,6 +72,7 @@ GtkMainWindow subclass: GtkInspector [
 	<category: 'user interface'>
 
 	^ inspectorWidget := (GtkInspectorWidget new)
+				parentWindow: window;
 				initialize;
 				showAll;
 				yourself
@@ -73,6 +82,7 @@ GtkMainWindow subclass: GtkInspector [
 	<category: 'user interface'>
 
 	^ workspaceWidget := (GtkInspectorSourceWidget new)
+				parentWindow: window;
 				initialize;
 				showAll;
 				yourself
@@ -82,19 +92,32 @@ GtkMainWindow subclass: GtkInspector [
 	<category: 'user interface'>
 
 	^ browserWidget := (GtkInspectorBrowserWidget new)
-	    initialize;
-	    showAll;
-	    yourself
+				parentWindow: window;
+				initialize;
+				showAll;
+				yourself
     ]
 
     createEditMenus [
 	<category: 'user interface'>
 
-	^ self createNewMenuEntry: {GTK.GtkMenuItem menuItem: 'Cut' connectTo: self selector: #cut.
-	    GTK.GtkMenuItem menuItem: 'Copy' connectTo: self selector: #copy.
-	    GTK.GtkMenuItem menuItem: 'Paste' connectTo: self selector: #paste.
+        self accelGroup append: {{'<Control><shift>Z'. '<GtkInspector>/Edit/Cancel'}.
+            {'<Control>Z'. '<GtkInspector>/Edit/Undo'}.
+            {'<Control>R'. '<GtkInspector>/Edit/Redo'}.
+            {'<Control>X'. '<GtkInspector>/Edit/Cut'}.
+            {'<Control>C'. '<GtkInspector>/Edit/Copy'}.
+            {'<Control>V'. '<GtkInspector>/Edit/Paste'}.
+            {'<Control>A'. '<GtkInspector>/Edit/SelectAll'}}.
+
+	^ self createNewMenuEntry: {GTK.GtkMenuItem menuItem: 'Cancel edits' accelPath: '<GtkInspector>/Edit/Cancel' connectTo: self selector: #cancel.
+            GTK.GtkMenuItem menuItem: 'Undo' accelPath: '<GtkInspector>/Edit/Undo' connectTo: self selector: #undo.
+            GTK.GtkMenuItem menuItem: 'Redo' accelPath: '<GtkInspector>/Edit/Redo' connectTo: self selector: #redo.
+            GTK.GtkMenuItem new.
+	    GTK.GtkMenuItem menuItem: 'Cut' accelPath: '<GtkInspector>/Edit/Cut' connectTo: self selector: #cut.
+	    GTK.GtkMenuItem menuItem: 'Copy' accelPath: '<GtkInspector>/Edit/Copy' connectTo: self selector: #copy.
+	    GTK.GtkMenuItem menuItem: 'Paste' accelPath: '<GtkInspector>/Edit/Paste' connectTo: self selector: #paste.
 	    GTK.GtkMenuItem new.
-	    GTK.GtkMenuItem menuItem: 'Select all' connectTo: self selector: #selectAll}
+	    GTK.GtkMenuItem menuItem: 'Select all' accelPath: '<GtkInspector>/Edit/SelectAll' connectTo: self selector: #selectAll}
     ]
 
     createFileMenus [
@@ -156,7 +179,96 @@ GtkMainWindow subclass: GtkInspector [
 	    GTK.GtkMenuItem menuItem: 'Workspace' connectTo: self selector: #workspace.
 	    GTK.GtkMenuItem menuItem: 'Inspector' connectTo: self selector: #gtkInspector.
 	    GTK.GtkMenuItem new.
-	    GTK.GtkMenuItem menuItem: 'SmallZilla' connectTo: self selector: #squeakzilla}
+	    GTK.GtkMenuItem menuItem: 'Smallzilla' connectTo: self selector: #squeakzilla}
+    ]
+
+    onFocusPerform: aSelector [
+        <category: 'focus'>
+
+        ^ notebookWidget getCurrentPage = 0 
+            ifTrue: [ workspaceWidget hasFocus
+                            ifTrue: [ workspaceWidget perform: aSelector ] ]
+            ifFalse: [ browserWidget perform: aSelector ]
+    ]
+
+    cancel [
+        <category: 'edit events'>
+
+        self onFocusPerform: #cancel
+    ]
+
+    undo [
+        <category: 'edit events'>
+
+        self onFocusPerform: #undo
+    ]
+
+    redo [
+        <category: 'edit events'>
+
+        self onFocusPerform: #redo
+    ]
+
+    cut [
+        <category: 'edit events'>
+
+        self onFocusPerform: #cut
+    ]
+
+    copy [
+        <category: 'edit events'>
+
+        self onFocusPerform: #copy
+    ]
+
+    paste [
+        <category: 'edit events'>
+
+        self onFocusPerform: #paste
+    ]
+
+    selectAll [
+        <category: 'edit events'>
+
+        self onFocusPerform: #selectAll
+    ]
+
+    close [
+        <category: 'file events'>
+
+        browserWidget hasChanged ifFalse: [ ^ super close ].
+        browserWidget doNotCheckCode.
+        self saveCodeOnClose: [ super close ] onSave: [ browserWidget saveCode. super close ]
+    ]
+
+    delete: aGtkWidget event: aGdkEvent [
+        <category: 'window events'>
+
+        browserWidget hasChanged ifFalse: [ ^ window hideAll ].
+        self saveCodeOnClose: [ window hideAll ] onSave: [ browserWidget saveCode. window hideAll ].
+        ^ true
+    ]
+
+    saveCodeOnClose: closeEvent onSave: saveEvent [
+        <category: 'saving'>
+
+        | dialog |
+        dialog := GTK.GtkMessageDialog
+                                new: window
+                                flags: GTK.Gtk gtkDialogDestroyWithParent
+                                type: GTK.Gtk gtkMessageWarning
+                                buttons: GTK.Gtk gtkButtonsNone
+                                message: 'Save the code before exiting?'
+                                tip: 'If you do not save, your changes to %1 will be lost...' % {browserWidget stateString}.
+
+        dialog
+            addButton: 'Close without saving' responseId: 0;
+            addButton: 'Cancel' responseId: 2;
+            addButton: 'Save' responseId: 1;
+            runBlockingAndDo: [ :dlg :res |
+                res = 0 ifTrue: closeEvent.
+                res = 1 ifTrue: saveEvent.
+                dlg destroy ].
     ]
 ]
 

@@ -41,5 +41,11 @@ BrowserState subclass: CategoryState [
 
 	AddMethodCommand on: self
     ]
+
+    displayString [
+	<category: 'printing'>
+
+	^ self classOrMeta displayString
+    ]
 ]
 

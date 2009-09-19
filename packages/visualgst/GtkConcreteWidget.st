@@ -51,4 +51,8 @@ Smalltalk.Object subclass: GtkConcreteWidget [
 	<category: 'user interface'>
 
     ]
+
+    close [
+	<category: 'user interface'>
+    ]
 ]

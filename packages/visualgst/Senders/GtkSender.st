@@ -57,13 +57,23 @@ GtkMainWindow subclass: GtkSender [
     createEditMenus [
         <category: 'user interface'>
 
-        ^ self createNewMenuEntry: {GTK.GtkMenuItem menuItem: 'Cut' connectTo: self selector: #cut.
-            GTK.GtkMenuItem menuItem: 'Copy' connectTo: self selector: #copy.
-            GTK.GtkMenuItem menuItem: 'Paste' connectTo: self selector: #paste.
+        self accelGroup append: {{'<Control><shift>Z'. '<GtkSender>/Edit/Cancel'}.
+            {'<Control>Z'. '<GtkSender>/Edit/Undo'}.
+            {'<Control>R'. '<GtkSender>/Edit/Redo'}.
+            {'<Control>X'. '<GtkSender>/Edit/Cut'}.
+            {'<Control>C'. '<GtkSender>/Edit/Copy'}.
+            {'<Control>V'. '<GtkSender>/Edit/Paste'}.
+            {'<Control>A'. '<GtkSender>/Edit/SelectAll'}}.
+
+        ^ self createNewMenuEntry: {GTK.GtkMenuItem menuItem: 'Cancel edits' accelPath: '<GtkSender>/Edit/Cancel' connectTo: self selector: #cancel.
+            GTK.GtkMenuItem menuItem: 'Undo' accelPath: '<GtkSender>/Edit/Undo' connectTo: self selector: #undo.
+            GTK.GtkMenuItem menuItem: 'Redo' accelPath: '<GtkSender>/Edit/Redo' connectTo: self selector: #redo.
             GTK.GtkMenuItem new.
-            GTK.GtkMenuItem menuItem: 'Select all' connectTo: self selector: #selectAll.
+            GTK.GtkMenuItem menuItem: 'Cut' accelPath: '<GtkSender>/Edit/Cut' connectTo: self selector: #cut.
+            GTK.GtkMenuItem menuItem: 'Copy' accelPath: '<GtkSender>/Edit/Copy' connectTo: self selector: #copy.
+            GTK.GtkMenuItem menuItem: 'Paste' accelPath: '<GtkSender>/Edit/Paste' connectTo: self selector: #paste.
             GTK.GtkMenuItem new.
-            GTK.GtkMenuItem menuItem: 'Search' connectTo: self selector: #searchClassOrMethod}
+            GTK.GtkMenuItem menuItem: 'Select all' accelPath: '<GtkSender>/Edit/SelectAll' connectTo: self selector: #selectAll}
     ]
 
     createHistoryMenus [
@@ -221,6 +231,7 @@ GtkMainWindow subclass: GtkSender [
         ^ GTK.GtkVPaned new
             add1: self buildSenderList;
             add2: ((classBrowserWidget := GtkClassBrowserWidget new)
+			parentWindow: window;
                         initialize;
                         mainWidget);
             yourself
@@ -251,7 +262,9 @@ GtkMainWindow subclass: GtkSender [
     postInitialize [
         <category: 'initialization'>
 
-        searchEntry grabFocus
+        searchEntry grabFocus.
+        window
+            connectSignal: 'delete-event' to: self selector: #'delete:event:' userData: nil
     ]
 
     aboutSender [
@@ -342,5 +355,103 @@ THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.';
 
         classBrowserWidget forward
     ]
+
+    cancel [
+        <category: 'edit events'>
+
+         classBrowserWidget cancel
+    ]
+
+    undo [
+        <category: 'edit events'>
+
+        classBrowserWidget undo
+    ]
+
+    redo [
+        <category: 'edit events'>
+
+        classBrowserWidget redo
+    ]
+
+    cut [
+        <category: 'edit events'>
+
+        classBrowserWidget cut
+    ]
+
+    copy [
+        <category: 'edit events'>
+
+        classBrowserWidget copy
+    ]
+
+    paste [
+        <category: 'edit events'>
+
+        classBrowserWidget paste
+    ]
+
+    selectAll [
+        <category: 'edit events'>
+
+        classBrowserWidget selectAll
+    ]
+
+    "close [
+        <cateogory: 'file events'>
+
+        classBrowserWidget checkCodeWidget.
+
+        super close
+    ]
+
+    delete: aGtkWidget event: aGdkEvent [
+        <category: 'window events'>
+
+        classBrowserWidget checkCodeWidget.
+
+        ^ false
+    ]"
+
+    close [
+        <category: 'file events'>
+
+        classBrowserWidget hasChanged ifFalse: [ ^ super close ].
+        classBrowserWidget doNotCheckCode.
+        self saveCodeOnClose: [ super close ] onSave: [ classBrowserWidget saveCode. super close ]
+    ]
+
+    delete: aGtkWidget event: aGdkEvent [
+        <category: 'window events'>
+
+        classBrowserWidget hasChanged ifFalse: [ ^ window hideAll ].
+        self saveCodeOnClose: [ window hideAll ] onSave: [ classBrowserWidget saveCode. window hideAll ].
+        ^ true
+    ]
+
+    saveCodeOnClose: closeEvent onSave: saveEvent [
+        <category: 'saving'>
+
+        | dialog |
+        dialog := GTK.GtkMessageDialog
+                                new: window
+                                flags: GTK.Gtk gtkDialogDestroyWithParent
+                                type: GTK.Gtk gtkMessageWarning
+                                buttons: GTK.Gtk gtkButtonsNone
+                                message: 'Save the code before exiting?'
+                                tip: 'If you do not save, your changes to %1 will be lost...' % {classBrowserWidget stateString}.
+
+        dialog
+            addButton: 'Close without saving' responseId: 0;
+            addButton: 'Cancel' responseId: 2;
+            addButton: 'Save' responseId: 1;
+            runBlockingAndDo: [ :dlg :res |
+                res = 0 ifTrue: closeEvent.
+                res = 1 ifTrue: saveEvent.
+                dlg destroy ].
+    ]
+
+
 ]
 

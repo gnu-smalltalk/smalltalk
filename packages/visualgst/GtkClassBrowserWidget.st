@@ -1,7 +1,7 @@
 GtkConcreteWidget subclass: GtkClassBrowserWidget [
     GtkClassBrowserWidget class [ | Undo | ]
 
-    | namespaceWidget classWidget classHierarchyWidget classHierarchyUpdate iCategoryWidget iMethodWidget cCategoryWidget cMethodWidget classAndInstanceSide codeWidget history historyUpdate state |
+    | checkCode namespaceWidget classWidget classHierarchyWidget classHierarchyUpdate iCategoryWidget iMethodWidget cCategoryWidget cMethodWidget classAndInstanceSide codeWidget history historyUpdate state |
 
     GtkClassBrowserWidget class >> title [
 	<category: 'accessing'>
@@ -162,6 +162,8 @@ GtkConcreteWidget subclass: GtkClassBrowserWidget [
 	(SystemChangeNotifier uniqueInstance)
 	    notify: GtkNamespaceModel ofSystemChangesOfItem: #namespace change: #Added using: #'addEvent:';
 	    notify: GtkNamespaceModel ofSystemChangesOfItem: #namespace change: #Removed using: #'removeEvent:';
+	    notify: GtkClassSUnitModel ofSystemChangesOfItem: #class change: #Added using: #'addEvent:';
+	    notify: GtkClassSUnitModel ofSystemChangesOfItem: #class change: #Removed using: #'removeEvent:';
 	    notify: GtkClassModel ofSystemChangesOfItem: #class change: #Added using: #'addEvent:';
 	    notify: GtkClassModel ofSystemChangesOfItem: #class change: #Removed using: #'removeEvent:';
 	    notify: GtkMethodModel ofSystemChangesOfItem: #method change: #Added using: #'addEvent:';
@@ -183,6 +185,7 @@ GtkConcreteWidget subclass: GtkClassBrowserWidget [
 	| vpaned |
 	state := NamespaceState on: self with: Smalltalk.
 	classHierarchyUpdate := false.
+	checkCode := true.
 	vpaned := GTK.GtkVPaned new.
 
 	self mainWidget: vpaned.
@@ -836,22 +839,64 @@ GtkConcreteWidget subclass: GtkClassBrowserWidget [
 
 	codeWidget selectAll
     ]
+    
+    doNotCheckCode [
+	<category: 'text editing'>
+
+	checkCode := false
+    ]
 
     checkCodeWidget [
 	<category: 'text editing'>
 
-	| dlg |
-	codeWidget hasChanged ifFalse: [ codeWidget clearUndo. ^ self ].
-	dlg := GTK.GtkMessageDialog 
-		    new: parentWindow 
-		    flags: GTK.Gtk gtkDialogDestroyWithParent 
-		    type: GTK.Gtk gtkMessageWarning
-		    buttons: GTK.Gtk gtkButtonsOkCancel
-		    message: 'Save the changes in the browser?'.
-	dlg runBlockingAndDo: [ :dlg :res |
-	    res = GTK.Gtk gtkResponseOk ifTrue: [ state saveSource ].
-	    dlg destroy ].
+	checkCode ifFalse: [ checkCode := true. ^ self ].
+	self hasChanged ifFalse: [ codeWidget clearUndo. ^ self ].
+	self saveCodeOnSave: [ self saveCode ].
 	codeWidget clearUndo
+    ]
+
+    saveCodeOnSave: saveEvent [
+        <category: 'saving'>
+
+        | dialog |
+        dialog := GTK.GtkMessageDialog
+                                new: self parentWindow
+                                flags: GTK.Gtk gtkDialogDestroyWithParent
+                                type: GTK.Gtk gtkMessageWarning
+                                buttons: GTK.Gtk gtkButtonsNone
+                                message: 'Save the code before exiting?'
+                                tip: 'If you do not save, your changes to %1 will be lost...' % {self stateString}.
+
+        dialog
+            addButton: 'Cancel' responseId: 0;
+            addButton: 'Save' responseId: 1;
+            runBlockingAndDo: [ :dlg :res |
+                res = 1 ifTrue: saveEvent.
+                dlg destroy ].
+    ]
+
+    stateString [
+	<category: 'accessing'>
+
+	^ state displayString
+    ]
+
+    saveCode [
+	<category: 'text saving'>
+
+	state saveSource
+    ]
+
+    close [
+	<category: 'user interface'>
+
+	self checkCodeWidget
+    ]
+
+    hasChanged [
+	<category: 'testing'>
+
+	^ codeWidget hasChanged
     ]
 ]
 

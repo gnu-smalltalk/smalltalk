@@ -70,6 +70,7 @@ GtkConcreteWidget subclass: GtkNotebookWidget [
 
         | pageNb |
         pageNb := notebook pageNum: aGtkConcreteWidget mainWidget.
+	aGtkConcreteWidget close.
         pages remove: aGtkConcreteWidget.
         notebook removePage: pageNb.
 	pages size = 1 ifTrue: [ notebook setShowTabs: false ]

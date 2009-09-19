@@ -20,5 +20,11 @@ Object subclass: BrowserState [
 
 	self subclassResponsibility
     ]
+
+    displayString [
+        <category: 'printing'>
+
+        ^ state displayString
+    ]
 ]
 

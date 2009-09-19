@@ -1,5 +1,5 @@
 GtkConcreteWidget subclass: GtkInspectorSourceWidget [
-    | object textview |
+    | browser displayBrowserMenu object textview |
     
     GtkInspectorSourceWidget class >> openOn: anObject [
 	^ (self new)
@@ -52,8 +52,9 @@ GtkConcreteWidget subclass: GtkInspectorSourceWidget [
     buildTextView [
 	<category: 'user interface'>
 
-	textview := (GTK.GtkTextView newWithBuffer: GTK.GtkTextBuffer new)
-			connectSignal: 'populate-popup' to: self selector: #popupMenuOn:menu: userData: nil;
+	textview := GtkTextWidget new
+			initialize;
+			connectSignal: 'populate-popup' to: self selector: #'popupMenuOn:menu:' userData: nil;
 			yourself.
 	^ GTK.GtkScrolledWindow withChild: textview
     ]
@@ -90,4 +91,47 @@ GtkConcreteWidget subclass: GtkInspectorSourceWidget [
 
 	GtkInspector openOn: self doIt
     ]
+
+    cancel [
+        <category: 'buffer events'>
+
+	self undo
+    ]
+
+    undo [
+        <category: 'buffer events'>
+
+        textview undo
+    ]
+
+    redo [
+        <category: 'buffer events'>
+
+        textview redo
+    ]
+
+    copy [
+        <category: 'text editing'>
+
+        textview signalEmitByName: 'copy-clipboard' args: {}
+    ]
+
+    cut [
+        <category: 'text editing'>
+
+        textview signalEmitByName: 'cut-clipboard' args: {}
+    ]
+
+    paste [
+        <category: 'text editing'>
+
+        textview signalEmitByName: 'paste-clipboard' args: {}.
+    ]
+
+    selectAll [
+        <category: 'text editing'>
+
+        textview signalEmitByName: 'select-all' args: {true}.
+    ]
+
 ]

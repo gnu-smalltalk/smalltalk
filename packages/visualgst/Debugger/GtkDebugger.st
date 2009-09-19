@@ -1,5 +1,5 @@
 GtkMainWindow subclass: GtkDebugger [
-    | windowsMenu codeWidget contextWidget debugger inspectorWidget stackInspectorWidget selectedContext |
+    | state windowsMenu codeWidget contextWidget debugger inspectorWidget stackInspectorWidget selectedContext |
 
     GtkDebugger class >> openOn: aContext [
 	<category: 'user interface'>
@@ -47,7 +47,14 @@ THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.';
 	    createStatusBar;
 	    centralWidget: self buildCentralWidget
     ]
-    
+   
+    postInitialize [
+        <category: 'initialization'>
+
+        window
+            connectSignal: 'delete-event' to: self selector: #'delete:event:' userData: nil
+    ]
+ 
     buildContextWidget [
 	<category: 'user interface'>
 
@@ -73,15 +80,6 @@ THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.';
             mainWidget
     ]
 
-    buildSourceAndInspectorWidget [
-	<category: 'user interface'>
-
-	^ (GTK.GtkHPaned new)
-            pack1: self buildInspectorWidget resize: true shrink: false;
-            pack2: self buildSourceWidget resize: true shrink: true;
-            yourself
-    ]
-
     buildStackInspectorWidget [
 	<category: 'user interface'>
 
@@ -90,13 +88,22 @@ THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.';
 	    mainWidget
     ]
 
-    buildStateWidget [
+    buildInspectorsWidget [
 	<category: 'user interface'>
 
 	^ (GTK.GtkHPaned new)
-            pack1: self buildSourceAndInspectorWidget resize: true shrink: false;
+            pack1: self buildInspectorWidget resize: true shrink: false;
             pack2: self buildStackInspectorWidget resize: true shrink: true;
             yourself
+    ]
+
+    buildCodeAndStateWidget [
+	<category: 'intialize-release'>
+
+	^ (GTK.GtkVPaned new)
+	    pack1: self buildSourceWidget resize: true shrink: false;
+	    pack2: self buildInspectorsWidget resize: true shrink: true;
+	    yourself
     ]
 
     buildCentralWidget [
@@ -104,21 +111,23 @@ THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.';
 
 	^ (GTK.GtkVPaned new)
 	    pack1: self buildContextWidget resize: true shrink: false;
-	    pack2: self buildStateWidget resize: true shrink: true;
+	    pack2: self buildCodeAndStateWidget resize: true shrink: true;
 	    yourself
     ]
 
     createEditMenus [
 	<category: 'user interface'>
 
-	self accelGroup append: {{'<Control>Z'. '<GtkLauncher>/Edit/Undo'. self. #undo}.
+	self accelGroup append: {{'<Control><shift>Z'. '<GtkLauncher>/Edit/Cancel'}.
+	    {'<Control>Z'. '<GtkLauncher>/Edit/Undo'. self. #undo}.
 	    {'<Control>R'. '<GtkLauncher>/Edit/Redo'. self. #redo}.
 	    {'<Control>X'. '<GtkLauncher>/Edit/Cut'. self. #cut}.
 	    {'<Control>C'. '<GtkLauncher>/Edit/Copy'. self. #copy}.
 	    {'<Control>V'. '<GtkLauncher>/Edit/Paste'. self. #paste}.
 	    {'<Control>A'. '<GtkLauncher>/Edit/SelectAll'. self. #selectAll}}.
 
-	^ self createNewMenuEntry: {GTK.GtkMenuItem menuItem: 'Undo' accelPath: '<GtkLauncher>/Edit/Undo'.
+	^ self createNewMenuEntry: {GTK.GtkMenuItem menuItem: 'Cancel edits' accelPath: '<GtkLauncher>/Edit/Cancel' connectTo: self selector: #cancel.
+	    GTK.GtkMenuItem menuItem: 'Undo' accelPath: '<GtkLauncher>/Edit/Undo'.
             GTK.GtkMenuItem menuItem: 'Redo' accelPath: '<GtkLauncher>/Edit/Redo'.
             GTK.GtkMenuItem new.
             GTK.GtkMenuItem menuItem: 'Cut' accelPath: '<GtkLauncher>/Edit/Cut'.
@@ -244,6 +253,7 @@ THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.';
     updateInspectorWidget: aContext [
 	<category: 'context'>
 
+	state := CategoryState on: self with: aContext receiver class -> '*'.
         inspectorWidget object: aContext receiver.
         stackInspectorWidget object: aContext
     ]
@@ -279,6 +289,7 @@ THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.';
 	<category: 'context events'>
 
 	| iter |
+	self checkCodeWidget.
 	contextWidget hasSelectedContext ifFalse: [ ^ self ].
 	iter := contextWidget selectedIter.
 	selectedContext := debugger suspendedContext parentContextAt: (contextWidget numberOfContext - ((contextWidget model getPath: iter) getIndices value)).
@@ -351,6 +362,70 @@ THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.';
         codeWidget
             object: debugger suspendedContext receiver;
             printIt
+    ]
+
+    checkCodeWidget [
+        <category: 'text editing'>
+
+        codeWidget hasChanged ifFalse: [ codeWidget clearUndo. ^ self ].
+	self saveCodeOnSave: [ state saveSource ]
+    ]
+
+    close [
+        <category: 'file events'>
+
+        codeWidget hasChanged ifFalse: [ ^ super close ].
+        self saveCodeOnClose: [ super close ] onSave: [ state saveSource. super close ]
+    ]
+
+    delete: aGtkWidget event: aGdkEvent [
+        <category: 'window events'>
+
+        codeWidget hasChanged ifFalse: [ ^ window hideAll ].
+        self saveCodeOnClose: [ window hideAll ] onSave: [ state saveSource. window hideAll ].
+        ^ true
+    ]
+
+    saveCodeOnSave: saveEvent [
+        <category: 'saving'>
+
+        | dialog |
+        dialog := GTK.GtkMessageDialog
+                                new: window
+                                flags: GTK.Gtk gtkDialogDestroyWithParent
+                                type: GTK.Gtk gtkMessageWarning
+                                buttons: GTK.Gtk gtkButtonsNone
+                                message: 'Save changes to this method?'
+                                tip: 'If you do not save, your changes to %1 will be lost...' % {state}.
+
+        dialog
+            addButton: 'Cancel' responseId: 0;
+            addButton: 'Save' responseId: 1;
+            runBlockingAndDo: [ :dlg :res |
+                res = 1 ifTrue: saveEvent.
+                dlg destroy ].
+    ]
+
+    saveCodeOnClose: closeEvent onSave: saveEvent [
+        <category: 'saving'>
+
+        | dialog |
+        dialog := GTK.GtkMessageDialog
+                                new: window
+                                flags: GTK.Gtk gtkDialogDestroyWithParent
+                                type: GTK.Gtk gtkMessageWarning
+                                buttons: GTK.Gtk gtkButtonsNone
+                                message: 'Save the code before exiting?'
+                                tip: 'If you do not save, your changes to %1 will be lost...' % {state}.
+
+        dialog
+            addButton: 'Close without saving' responseId: 0;
+            addButton: 'Cancel' responseId: 2;
+            addButton: 'Save' responseId: 1;
+            runBlockingAndDo: [ :dlg :res |
+                res = 0 ifTrue: closeEvent.
+                res = 1 ifTrue: saveEvent.
+                dlg destroy ].
     ]
 ]
 

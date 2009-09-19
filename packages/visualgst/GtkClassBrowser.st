@@ -243,7 +243,9 @@ THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.';
     postInitialize [
 	<category: 'user interface'>
 
-	browserWidget grabFocus
+	browserWidget grabFocus.
+        window
+            connectSignal: 'delete-event' to: self selector: #'delete:event:' userData: nil
     ]
 
     buildClassBrowserWidget [
@@ -454,6 +456,44 @@ THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.';
         <category: 'smalltalk events'>
 
 	browserWidget printIt
+    ]
+
+    close [
+	<category: 'file events'>
+
+	browserWidget hasChanged ifFalse: [ ^ super close ].
+	browserWidget doNotCheckCode.
+	self saveCodeOnClose: [ super close ] onSave: [ browserWidget saveCode. super close ]
+    ]
+
+    delete: aGtkWidget event: aGdkEvent [
+	<category: 'window events'>
+
+	browserWidget hasChanged ifFalse: [ ^ window hideAll ].
+	self saveCodeOnClose: [ window hideAll ] onSave: [ browserWidget saveCode. window hideAll ].
+	^ true
+    ]
+
+    saveCodeOnClose: closeEvent onSave: saveEvent [
+	<category: 'saving'>
+
+        | dialog |
+        dialog := GTK.GtkMessageDialog
+                                new: window
+                                flags: GTK.Gtk gtkDialogDestroyWithParent
+                                type: GTK.Gtk gtkMessageWarning
+                                buttons: GTK.Gtk gtkButtonsNone
+                                message: 'Save the code before exiting?'
+                                tip: 'If you do not save, your changes to %1 will be lost...' % {browserWidget stateString}.
+
+        dialog
+            addButton: 'Close without saving' responseId: 0;
+            addButton: 'Cancel' responseId: 2;
+            addButton: 'Save' responseId: 1;
+            runBlockingAndDo: [ :dlg :res |
+                res = 0 ifTrue: closeEvent.
+                res = 1 ifTrue: saveEvent.
+                dlg destroy ].
     ]
 ]
 
