@@ -55,7 +55,7 @@ end
 
 define stbt
 set unwindonsignal on
-call _gst_show_backtrace ()
+call _gst_show_backtrace (stdout)
 call (void)fflush(stdout)
 set unwindonsignal off
 end
