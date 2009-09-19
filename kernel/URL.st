@@ -558,6 +558,15 @@ Copyright (c) Kazuki Yasumatsu, 1995. All rights reserved.
 	fragment := aString
     ]
 
+    asString [
+	"Answer the full request string corresponding to the URL.  This is how
+	 the URL would be printed in the address bar of a web browser, except that
+	 the query data is printed even if it is to be sent through a POST request."
+
+	<category: 'accessing'>
+	^self printString
+    ]
+
     fullRequestString [
 	"Answer the full request string corresponding to the URL.  This is how
 	 the URL would be printed in the address bar of a web browser, except that
@@ -791,6 +800,11 @@ Copyright (c) Kazuki Yasumatsu, 1995. All rights reserved.
 	| s |
 	^NetClients.URIResolver openStreamOn: self ifFail: [
 	    SystemExceptions.FileError signal: 'could not open %1' % {self} ]
+    ]
+
+    resolvePath: newName [
+	<category: 'private'>
+	^NetClients.URIResolver resolve: newName from: self
     ]
 ]
 

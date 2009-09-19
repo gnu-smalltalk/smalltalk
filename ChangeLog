@@ -1,3 +1,7 @@
+2009-09-19  Paolo Bonzini  <bonzini@gnu.org>
+
+	* kernel/URL.st: Add #asString and #resolvePath:.
+
 2009-09-15  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/Generator.st: Use a non-escaping continuation.

@@ -22,7 +22,7 @@
 |       may be used to endorse or promote products derived derived from
 |       this software without specific prior written permission.
 | 
-| THIS SOFTWARE IS PROVIDED "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES,
+| THIS SOFTWARE IS PROVIDED 'AS IS' AND ANY EXPRESS OR IMPLIED WARRANTIES,
 | INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY
 | AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL
 | ANTONY BLAKEY BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
@@ -44,6 +44,36 @@ Error subclass: XMLStructureException [
 
 
 
+Notification subclass: XMLResolveEntityNotification [
+    
+    <category: 'XMLPullParser'>
+    <comment: nil>
+
+    | publicID systemID |
+
+    publicID [
+	<category: 'accessing'>
+	^publicID
+    ]
+
+    publicID: aString [
+	<category: 'accessing'>
+	publicID := aString
+    ]
+
+    systemID [
+	<category: 'accessing'>
+	^systemID
+    ]
+
+    systemID: aString [
+	<category: 'accessing'>
+	systemID := aString
+    ]
+]
+
+
+
 SAXParser class extend [
     pullParserFactory [
 	<category: 'pull parsing'>
@@ -56,6 +86,13 @@ SAXParser class extend [
 Stream subclass: XMLPullParser [
     <category: 'XMLPullParser'>
     <comment: 'This is based on Antony Blakey''s XMLPullParser.'>
+
+    | needComments needPrefixMappingEvents |
+
+    XMLPullParser class >> new [
+        <category: 'instance creation'>
+        ^super new initialize
+    ]
 
     XMLPullParser class >> onFile: aFilename [
         <category: 'instance creation'>
@@ -75,6 +112,11 @@ Stream subclass: XMLPullParser [
     XMLPullParser class >> defaultParserClass [
 	<category: 'accessing'>
 	^SAXParser defaultParserClass
+    ]
+
+    advance [
+	<category: 'core api'>
+	self subclassResponsibility
     ]
 
     at: attName [
@@ -227,9 +269,19 @@ Stream subclass: XMLPullParser [
 	^self isStartTag: tagName
     ]
 
+    isComment [
+	<category: 'testing event types'>
+	^self current isComment
+    ]
+
     isEndDocument [
 	<category: 'testing event types'>
 	^self current isEndDocument
+    ]
+
+    isEndPrefixMapping [
+	<category: 'testing event types'>
+	^self current isEndPrefixMapping
     ]
 
     isEndTag [
@@ -242,6 +294,11 @@ Stream subclass: XMLPullParser [
 	^self current isEndTag: aStringOrNodeTag
     ]
 
+    isNotationDecl [
+	<category: 'testing event types'>
+	^self current isNotationDecl
+    ]
+
     isPI [
 	<category: 'testing event types'>
 	^self current isPI
@@ -250,6 +307,11 @@ Stream subclass: XMLPullParser [
     isPI: aString [
 	<category: 'testing event types'>
 	^self current isPI: aString
+    ]
+
+    isStartPrefixMapping [
+	<category: 'testing event types'>
+	^self current isStartPrefixMapping
     ]
 
     isStartDocument [
@@ -270,6 +332,11 @@ Stream subclass: XMLPullParser [
     isText [
 	<category: 'testing event types'>
 	^self current isText
+    ]
+
+    isUnparsedEntityDecl [
+	<category: 'testing event types'>
+	^self current isUnparsedEntityDecl
     ]
 
     match: tagName peek: aBlock [
@@ -359,6 +426,17 @@ Stream subclass: XMLPullParser [
     mustBeText [
 	<category: 'asserting event types'>
 	self isText ifFalse: [XMLStructureException signal: 'Expected text']
+    ]
+
+    next [
+	<category: 'core api'>
+	| event |
+	self atEnd ifTrue: [ ^self pastEnd ].
+	[
+	    self advance.
+	    (event := self current) neededBy: self
+	] whileFalse.
+	^event
     ]
 
     pastEnd [
@@ -565,10 +643,88 @@ Stream subclass: XMLPullParser [
 		aBlock numArgs = 1 ifTrue: [aBlock value: tag] ifFalse: [aBlock value].
 		self consumeEndTag]
     ]
+
+    validate [
+	<category: 'core api'>
+	^false
+    ]
+
+    validate: aBoolean [
+	<category: 'core api'>
+	aBoolean ifTrue: [
+	    self error: 'this parser does not support XML validation' ]
+    ]
+
+    initialize [
+	<category: 'initialize'>
+	needComments := needPrefixMappingEvents := false.
+    ]
+
+    needComments [
+	<category: 'accessing'>
+	^needComments
+    ]
+
+    needComments: aBoolean [
+	<category: 'accessing'>
+	needComments := aBoolean
+    ]
+
+    needPrefixMappingEvents [
+	<category: 'accessing'>
+	^needPrefixMappingEvents
+    ]
+
+    needPrefixMappingEvents: aBoolean [
+	<category: 'accessing'>
+	needPrefixMappingEvents := aBoolean
+    ]
 ]
 
 
 
+SAXEvent extend [
+    neededBy: aParser [
+        <category: 'pull parsing'>
+
+	^true
+    ]
+]
+
+
+
+
+
+SAXComment extend [
+    neededBy: aParser [
+        <category: 'pull parsing'>
+
+	^aParser needComments
+    ]
+]
+
+
+
+SAXEndPrefixMapping extend [
+    neededBy: aParser [
+        <category: 'pull parsing'>
+
+	^aParser needPrefixMappingEvents
+    ]
+]
+
+
+
+SAXStartPrefixMapping extend [
+    neededBy: aParser [
+        <category: 'pull parsing'>
+
+	^aParser needPrefixMappingEvents
+    ]
+]
+
+
+
 SAXDriver subclass: SAXEventGenerator [
     | generator |
 
@@ -577,15 +733,16 @@ SAXDriver subclass: SAXEventGenerator [
 	^super new generator: aGenerator
     ]
 
-    comment: data from: start to: stop [
+    comment: aString from: start to: stop [
         <category: 'other'>
 
+	generator yield: (SAXComment text: aString from: start to: stop)
     ]
 
-    characters: aString [
+    characters: aString from: start to: stop [
         <category: 'content handler'>
 
-	generator yield: (SAXText text: aString)
+	generator yield: (SAXText text: aString from: start to: stop)
     ]
 
     endDocument [
@@ -606,7 +763,7 @@ SAXDriver subclass: SAXEventGenerator [
 
     endPrefixMapping: prefix [
         <category: 'content handler'>
-        ^self
+	generator yield: (SAXEndPrefixMapping prefix: prefix)
     ]
 
     processingInstruction: targetString data: dataString [
@@ -629,27 +786,33 @@ SAXDriver subclass: SAXEventGenerator [
 
     startPrefixMapping: prefix uri: uri [
         <category: 'content handler'>
-        ^self
+
+	generator yield: (SAXStartPrefixMapping prefix: prefix uri: uri)
     ]
 
     notationDecl: nameString publicID: publicIDString systemID: systemIDString [
         <category: 'DTD handler'>
 
+	generator yield: (SAXNotationDecl name: nameString publicID: publicIDString systemID: systemIDString)
     ]
 
     unparsedEntityDecl: name publicID: publicID systemID: systemID notationName: notation [
         <category: 'DTD handler'>
-        ^self
+
+	generator yield: (SAXUnparsedEntityDecl name: name publicID: publicID systemID: systemID notationName: notation)
     ]
 
     resolveEntity: publicID systemID: systemID [
         <category: 'entity resolver'>
-        ^nil
+        ^XMLResolveEntityNotification new
+	    publicID: publicID;
+	    systemID: systemID;
+	    signal
     ]
 
     generator: aGenerator [
 	<category: 'initialize'>
-	generator := aGenerator
+	generator := aGenerator.
     ]
 ]
 
@@ -674,11 +837,6 @@ XMLPullParser subclass: XMLGenerativePullParser [
 	    yourself
     ]
 
-    XMLGenerativePullParser class >> isCharEscape: aChar [
-	<category: 'accessing'>
-	^CharEscapes includes: aChar
-    ]
-
     atEnd [
 	<category: 'streaming'>
 	^self isEndDocument
@@ -697,14 +855,18 @@ XMLPullParser subclass: XMLGenerativePullParser [
 	    parser scanDocument ].
     ]
 
+    validate [
+	<category: 'core api'>
+	^parser validate
+    ]
+
     validate: aBoolean [
 	<category: 'core api'>
 	parser validate: aBoolean
     ]
 
-    next [
-	<category: 'core api'>
-	self atEnd ifTrue: [ ^self pastEnd ].
-	^generator next; peek
+    advance [
+	<category: 'private api'>
+	^generator next
     ]
 ]

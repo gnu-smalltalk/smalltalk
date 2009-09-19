@@ -1,3 +1,13 @@
+2009-09-19  Paolo Bonzini  <bonzini@gnu.org>
+
+	* pullparser/XMLPullParser.st: Add optional events, DTD events,
+	XMLResolveEntityNotification, and avoid #copyFrom:to:
+	when not needed.
+	* pullparser/XMLPullParserTests.st: Test DTDs, comments and
+	XMLResolveEntityNotification.
+	* saxdriver/Events.st: Add missing events.  Do #copyFrom:to:
+	lazily for comments and text.
+
 2009-09-16  Paolo Bonzini  <bonzini@gnu.org>
 
 	* pullparser/XMLPullParser.st: Add copyright header.

@@ -22,7 +22,7 @@
 |       may be used to endorse or promote products derived derived from
 |       this software without specific prior written permission.
 | 
-| THIS SOFTWARE IS PROVIDED "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES,
+| THIS SOFTWARE IS PROVIDED 'AS IS' AND ANY EXPRESS OR IMPLIED WARRANTIES,
 | INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY
 | AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL
 | ANTONY BLAKEY BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
@@ -41,7 +41,32 @@ Object subclass: SAXEvent [
     <category: 'XMLPullParser'>
     <comment: nil>
 
+    isComment [
+	<category: 'testing'>
+	^false
+    ]
+
     isEndDocument [
+	<category: 'testing'>
+	^false
+    ]
+
+    isEndDocumentFragment [
+	<category: 'testing'>
+	^false
+    ]
+
+    isNotationDecl [
+	<category: 'testing'>
+	^false
+    ]
+
+    isUnparsedEntityDecl [
+	<category: 'testing'>
+	^false
+    ]
+
+    isEndPrefixMapping [
 	<category: 'testing'>
 	^false
     ]
@@ -81,6 +106,11 @@ Object subclass: SAXEvent [
 	^false
     ]
 
+    isStartDocumentFragment [
+	<category: 'testing'>
+	^false
+    ]
+
     isStartTag [
 	<category: 'testing'>
 	^false
@@ -99,6 +129,25 @@ Object subclass: SAXEvent [
 
 
 
+SAXEvent subclass: SAXEndDocumentFragment [
+    
+    <category: 'XMLPullParser'>
+    <comment: nil>
+
+    isEndDocumentFragment [
+	<category: 'testing'>
+	^true
+    ]
+
+    serializeTo: serializer [
+	<category: 'serializing'>
+	
+	serializer endDocumentFragment
+    ]
+]
+
+
+
 SAXEvent subclass: SAXEndDocument [
     
     <category: 'XMLPullParser'>
@@ -112,6 +161,25 @@ SAXEvent subclass: SAXEndDocument [
     serializeTo: serializer [
 	<category: 'serializing'>
 	
+	serializer endDocument
+    ]
+]
+
+
+
+SAXEvent subclass: SAXStartDocumentFragment [
+    
+    <category: 'XMLPullParser'>
+    <comment: nil>
+
+    isStartDocumentFragment [
+	<category: 'testing'>
+	^true
+    ]
+
+    serializeTo: serializer [
+	<category: 'serializing'>
+	serializer startDocumentFragment
     ]
 ]
 
@@ -362,16 +430,64 @@ SAXEvent subclass: SAXProcessingInstruction [
 
 
 
-SAXEvent subclass: SAXText [
-    | text |
+SAXEvent subclass: SAXStringEvent [
+    | text from to textPart |
     
     <category: 'XMLPullParser'>
     <comment: nil>
 
-    SAXText class >> text: aString [
+    SAXStringEvent class >> text: aString [
 	<category: 'instance creation'>
 	^self new text: aString
     ]
+
+    SAXStringEvent class >> text: aString from: start to: stop [
+	<category: 'instance creation'>
+	^self new text: aString from: start to: stop
+    ]
+
+    isText [
+	<category: 'testing'>
+	^true
+    ]
+
+    serializeTo: serializer [
+	<category: 'serializing'>
+	serializer 
+	    characters: text
+	    from: from
+	    to: to
+    ]
+
+    text [
+	<category: 'accessing'>
+	textPart isNil ifTrue: [textPart := text copyFrom: from to: to].
+	^textPart
+    ]
+
+    text: aString [
+	<category: 'accessing'>
+	text := textPart := aString.
+	from := 1.
+	to := text size.
+    ]
+
+    text: aString from: start to: stop [
+	<category: 'accessing'>
+	text := aString.
+	from := start.
+	to := stop.
+	textPart := nil
+    ]
+]
+
+
+
+SAXStringEvent subclass: SAXText [
+    | text |
+    
+    <category: 'XMLPullParser'>
+    <comment: nil>
 
     isText [
 	<category: 'testing'>
@@ -385,14 +501,234 @@ SAXEvent subclass: SAXText [
 	    from: 1
 	    to: text size
     ]
+]
 
-    text [
-	<category: 'accessing'>
-	^text
+
+
+SAXStringEvent subclass: SAXComment [
+    | text |
+    
+    <category: 'XMLPullParser'>
+    <comment: nil>
+
+    isComment [
+	<category: 'testing'>
+	^true
     ]
 
-    text: aString [
-	<category: 'accessing'>
-	text := aString
+    serializeTo: serializer [
+	<category: 'serializing'>
+	serializer 
+	    comment: text
+	    from: 1
+	    to: text size
     ]
+]
+
+
+
+SAXEvent subclass: SAXStartPrefixMapping [
+    | prefix uri |
+    
+    <category: 'XMLPullParser'>
+    <comment: nil>
+
+    SAXStartPrefixMapping class >> prefix: aString uri: uriString [
+	<category: 'instance creation'>
+	^self new prefix: aString; uri: uriString
+    ]
+
+    isStartPrefixMapping [
+	<category: 'testing'>
+	^true
+    ]
+
+    serializeTo: serializer [
+	<category: 'serializing'>
+	serializer 
+	    startPrefixMapping: prefix
+	    uri: uri
+    ]
+
+    prefix [
+	<category: 'accessing'>
+	^prefix
+    ]
+
+    prefix: aString [
+	<category: 'accessing'>
+	prefix := aString.
+    ]
+
+    uri [
+	<category: 'accessing'>
+	^uri
+    ]
+
+    uri: aString [
+	<category: 'accessing'>
+	uri := aString.
+    ]
+]
+
+
+
+SAXEvent subclass: SAXEndPrefixMapping [
+    | prefix |
+    
+    <category: 'XMLPullParser'>
+    <comment: nil>
+
+    SAXEndPrefixMapping class >> prefix: aString [
+	<category: 'instance creation'>
+	^self new prefix: aString
+    ]
+
+    isEndPrefixMapping [
+	<category: 'testing'>
+	^true
+    ]
+
+    serializeTo: serializer [
+	<category: 'serializing'>
+	serializer 
+	    endPrefixMapping: prefix
+    ]
+
+    prefix [
+	<category: 'accessing'>
+	^prefix
+    ]
+
+    prefix: aString [
+	<category: 'accessing'>
+	prefix := aString.
+    ]
+]
+
+
+
+SAXEvent subclass: SAXNotationDecl [
+    | name publicID systemID |
+    
+    <category: 'XMLPullParser'>
+    <comment: nil>
+
+    SAXNotationDecl class >> name: aString publicID: pidString systemID: sidString [
+	<category: 'instance creation'>
+	^self new name: aString; publicID: pidString; systemID: sidString
+    ]
+
+    isNotationDecl [
+	<category: 'testing'>
+	^true
+    ]
+
+    serializeTo: serializer [
+	<category: 'serializing'>
+	serializer 
+	    notationDecl: name
+	    publicID: publicID
+	    systemID: systemID
+    ]
+
+    name [
+        <category: 'accessing'>
+        ^name
+    ]
+
+    name: aString [
+        <category: 'accessing'>
+        name := aString
+    ]
+
+    publicID [
+        <category: 'accessing'>
+        ^publicID
+    ]
+
+    publicID: aString [
+        <category: 'accessing'>
+        publicID := aString
+    ]
+
+    systemID [
+        <category: 'accessing'>
+        ^systemID
+    ]
+
+    systemID: aString [
+        <category: 'accessing'>
+        systemID := aString
+    ]
+
+]
+
+
+
+SAXEvent subclass: SAXUnparsedEntityDecl [
+    | name publicID systemID notationName |
+    
+    <category: 'XMLPullParser'>
+    <comment: nil>
+
+    SAXUnparsedEntityDecl class >> name: aString publicID: pidString systemID: sidString notationName: notation [
+	<category: 'instance creation'>
+	^self new name: aString; publicID: pidString; systemID: sidString; notationName: notation
+    ]
+
+    isUnparsedEntityDecl [
+	<category: 'testing'>
+	^true
+    ]
+
+    serializeTo: serializer [
+	<category: 'serializing'>
+	serializer 
+	    unparsedEntityDecl: name
+	    publicID: publicID
+	    systemID: systemID
+	    notationName: notationName
+    ]
+
+    name [
+        <category: 'accessing'>
+        ^name
+    ]
+
+    name: aString [
+        <category: 'accessing'>
+        name := aString
+    ]
+
+    notationName [
+        <category: 'accessing'>
+        ^notationName
+    ]
+
+    notationName: aString [
+        <category: 'accessing'>
+        notationName := aString
+    ]
+
+    publicID [
+        <category: 'accessing'>
+        ^publicID
+    ]
+
+    publicID: aString [
+        <category: 'accessing'>
+        publicID := aString
+    ]
+
+    systemID [
+        <category: 'accessing'>
+        ^systemID
+    ]
+
+    systemID: aString [
+        <category: 'accessing'>
+        systemID := aString
+    ]
+
 ]
