@@ -3903,7 +3903,7 @@ registry typically overlap.
 To avoid garbage collection of such object, you can use these functions,
 which access a separate registry:
 
-@deftypefun void registerOOP (OOP)
+@deftypefun OOP registerOOP (OOP)
 Puts the given OOP in the registry.  If you register an object multiple
 times, you will need to unregister it the same number of times.  You may
 want to register objects returned by Smalltalk call-ins.
