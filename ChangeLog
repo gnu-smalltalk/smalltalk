@@ -1,4 +1,11 @@
 2009-09-19  Paolo Bonzini  <bonzini@gnu.org>
+            Nicolas Cellier  <ncellier@ifrance.com>
+
+	* kernel/Float.st: Add #predecessor and #successor.
+	* tests/floatmath.st: New tests.
+	* tests/floatmath.ok: Regenerate.
+
+2009-09-19  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/URL.st: Add #asString and #resolvePath:.
 

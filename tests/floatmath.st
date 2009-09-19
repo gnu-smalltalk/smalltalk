@@ -209,6 +209,20 @@ Eval [ FloatD pi = 3.14159265358979323846264338327950288419716939937510582097494
 Eval [ FloatE pi = 3.1415926535897932384626433832795028841971693993751058209749445923078164062862e ]
 
 
+"Use #predecessor/#succesor to test reading."
+Eval [ (0.2q0 successor asExactFraction - (1/5)) abs >= (0.2q0 asExactFraction - (1/5)) abs ]
+Eval [ (0.2q0 predecessor asExactFraction - (1/5)) abs >= (0.2q0 asExactFraction - (1/5)) abs ]
+Eval [ (0.2q0 successor - (1/5) asFloatQ) abs >= (0.2q0 - (1/5) asFloatQ) abs ]
+Eval [ (0.2q0 predecessor - (1/5) asFloatQ) abs >= (0.2q0 - (1/5) asFloatQ) abs ]
+Eval [ (0.137q0 successor asExactFraction - (137/1000)) abs >= (0.137q0 asExactFraction - (137/1000)) abs ]
+Eval [ (0.137q0 predecessor asExactFraction - (137/1000)) abs >= (0.137q0 asExactFraction - (137/1000)) abs ]
+Eval [ (0.137q0 successor - (137/1000) asFloatQ) abs >= (0.137q0 - (137/1000) asFloatQ) abs ]
+Eval [ (0.137q0 predecessor - (137/1000) asFloatQ) abs >= (0.137q0 - (137/1000) asFloatQ) abs ]
+Eval [ (1.3q0 successor asExactFraction - (13/10)) abs >= (1.3q0 asExactFraction - (13/10)) abs ]
+Eval [ (1.3q0 predecessor asExactFraction - (13/10)) abs >= (1.3q0 asExactFraction - (13/10)) abs ]
+Eval [ (1.3q0 successor - (13/10) asFloatQ) abs >= (1.3q0 - (13/10) asFloatQ) abs ]
+Eval [ (1.3q0 predecessor - (13/10) asFloatQ) abs >= (1.3q0 - (13/10) asFloatQ) abs ]
+
 "Fun with rounding"
 
 Float class extend [

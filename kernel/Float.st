@@ -698,5 +698,31 @@ if the hardware supports it.'>
 	<primitive: VMpr_Float_arcTan>
 	
     ]
+
+    successor [
+	<category: 'floating point'>
+	| exponent |
+	self isFinite ifFalse: [
+	    (self isNaN or: [self positive]) ifTrue: [^self].
+	    ^self class fmax negated].
+	self = 0.0 ifTrue: [^self class fmin].
+	exponent := self exponent.
+	^exponent < self class emin
+	    ifTrue: [self + self class fminDenormalized]
+	    ifFalse: [self + (self class epsilon timesTwoPower: exponent)]
+    ]
+
+    predecessor [
+	<category: 'floating point'>
+	| exponent |
+	self isFinite ifFalse: [
+		(self isNaN or: [self negative]) ifTrue: [^self].
+		^self class fmax].
+	self = 0.0 ifTrue: [^self class fmin negated].
+	exponent := self exponent.
+	^exponent < self class emin
+	    ifTrue: [self - self class fminDenormalized]
+	    ifFalse: [self - (self class epsilon timesTwoPower: exponent)]
+    ]
 ]
 
