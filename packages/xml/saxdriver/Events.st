@@ -46,6 +46,16 @@ Object subclass: SAXEvent [
 	^false
     ]
 
+    isEndCdataSection [
+	<category: 'testing'>
+	^false
+    ]
+
+    isEndDoctypeDecl [
+	<category: 'testing'>
+	^false
+    ]
+
     isEndDocument [
 	<category: 'testing'>
 	^false
@@ -101,6 +111,21 @@ Object subclass: SAXEvent [
 	^false
     ]
 
+    isStartCdataSection [
+	<category: 'testing'>
+	^false
+    ]
+
+    isStartDoctypeDecl [
+	<category: 'testing'>
+	^false
+    ]
+
+    isStartDoctypeDecl: aString [
+	<category: 'testing'>
+	^false
+    ]
+
     isStartDocument [
 	<category: 'testing'>
 	^false
@@ -124,6 +149,44 @@ Object subclass: SAXEvent [
     isText [
 	<category: 'testing'>
 	^false
+    ]
+]
+
+
+
+SAXEvent subclass: SAXEndCdataSection [
+    
+    <category: 'XMLPullParser'>
+    <comment: nil>
+
+    isEndCdataSection [
+	<category: 'testing'>
+	^true
+    ]
+
+    serializeTo: serializer [
+	<category: 'serializing'>
+	
+	serializer endCdataSection
+    ]
+]
+
+
+
+SAXEvent subclass: SAXEndDoctypeDecl [
+    
+    <category: 'XMLPullParser'>
+    <comment: nil>
+
+    isEndDoctypeDecl [
+	<category: 'testing'>
+	^true
+    ]
+
+    serializeTo: serializer [
+	<category: 'serializing'>
+	
+	serializer endDoctypeDecl
     ]
 ]
 
@@ -162,6 +225,24 @@ SAXEvent subclass: SAXEndDocument [
 	<category: 'serializing'>
 	
 	serializer endDocument
+    ]
+]
+
+
+
+SAXEvent subclass: SAXStartCdataSection [
+    
+    <category: 'XMLPullParser'>
+    <comment: nil>
+
+    isStartCdataSection [
+	<category: 'testing'>
+	^true
+    ]
+
+    serializeTo: serializer [
+	<category: 'serializing'>
+	serializer startCdataSection
     ]
 ]
 
@@ -608,8 +689,101 @@ SAXEvent subclass: SAXEndPrefixMapping [
 
 
 
-SAXEvent subclass: SAXNotationDecl [
-    | name publicID systemID |
+SAXEvent subclass: SAXExternalDecl [
+    | publicID systemID |
+    
+    <category: 'XMLPullParser'>
+    <comment: nil>
+
+    isNotationDecl [
+	<category: 'testing'>
+	^true
+    ]
+
+    publicID [
+        <category: 'accessing'>
+        ^publicID
+    ]
+
+    publicID: aString [
+        <category: 'accessing'>
+        publicID := aString
+    ]
+
+    systemID [
+        <category: 'accessing'>
+        ^systemID
+    ]
+
+    systemID: aString [
+        <category: 'accessing'>
+        systemID := aString
+    ]
+
+]
+
+
+
+SAXExternalDecl subclass: SAXStartDoctypeDecl [
+    | name hasInternalSubset |
+    
+    <category: 'XMLPullParser'>
+    <comment: nil>
+
+    SAXStartDoctypeDecl class >> name: aString publicID: pidString systemID: sidString hasInternalSubset: aBoolean [
+	<category: 'instance creation'>
+	^self new
+	    name: aString;
+	    publicID: pidString;
+	    systemID: sidString;
+	    hasInternalSubset: aBoolean
+    ]
+
+    isStartDoctypeDecl: aString [
+	<category: 'testing'>
+	^name isLike: aString
+    ]
+
+    isStartDoctypeDecl [
+	<category: 'testing'>
+	^true
+    ]
+
+    serializeTo: serializer [
+	<category: 'serializing'>
+	serializer 
+	    startDoctypeDecl: name
+	    publicID: publicID
+	    systemID: systemID
+	    hasInternalSubset: hasInternalSubset
+    ]
+
+    hasInternalSubset [
+        <category: 'accessing'>
+        ^hasInternalSubset
+    ]
+
+    hasInternalSubset: aBoolean [
+        <category: 'accessing'>
+        hasInternalSubset := aBoolean
+    ]
+
+    name [
+        <category: 'accessing'>
+        ^name
+    ]
+
+    name: aString [
+        <category: 'accessing'>
+        name := aString
+    ]
+
+]
+
+
+
+SAXExternalDecl subclass: SAXNotationDecl [
+    | name |
     
     <category: 'XMLPullParser'>
     <comment: nil>
@@ -642,32 +816,12 @@ SAXEvent subclass: SAXNotationDecl [
         name := aString
     ]
 
-    publicID [
-        <category: 'accessing'>
-        ^publicID
-    ]
-
-    publicID: aString [
-        <category: 'accessing'>
-        publicID := aString
-    ]
-
-    systemID [
-        <category: 'accessing'>
-        ^systemID
-    ]
-
-    systemID: aString [
-        <category: 'accessing'>
-        systemID := aString
-    ]
-
 ]
 
 
 
-SAXEvent subclass: SAXUnparsedEntityDecl [
-    | name publicID systemID notationName |
+SAXExternalDecl subclass: SAXUnparsedEntityDecl [
+    | name notationName |
     
     <category: 'XMLPullParser'>
     <comment: nil>
@@ -709,26 +863,6 @@ SAXEvent subclass: SAXUnparsedEntityDecl [
     notationName: aString [
         <category: 'accessing'>
         notationName := aString
-    ]
-
-    publicID [
-        <category: 'accessing'>
-        ^publicID
-    ]
-
-    publicID: aString [
-        <category: 'accessing'>
-        publicID := aString
-    ]
-
-    systemID [
-        <category: 'accessing'>
-        ^systemID
-    ]
-
-    systemID: aString [
-        <category: 'accessing'>
-        systemID := aString
     ]
 
 ]

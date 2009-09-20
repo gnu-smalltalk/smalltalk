@@ -74,6 +74,16 @@ Instance Variables:
 	^self characters: (aString copyFrom: start to: stop)
     ]
 
+    endCdataSection [
+	<category: 'content handler'>
+	
+    ]
+
+    endDoctypeDecl [
+	<category: 'DTD handler'>
+	
+    ]
+
     endDocument [
 	<category: 'content handler'>
 	
@@ -145,6 +155,16 @@ Instance Variables:
 
 	<category: 'content handler'>
 	^self
+    ]
+
+    startCdataSection [
+	<category: 'content handler'>
+	
+    ]
+
+    startDoctypeDecl: doctypeName publicID: publicID systemID: systemID hasInternalSubset: aBoolean [
+	<category: 'DTD handler'>
+	
     ]
 
     startDocument [

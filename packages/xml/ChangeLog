@@ -1,5 +1,13 @@
 2009-09-19  Paolo Bonzini  <bonzini@gnu.org>
 
+	* parser/XML.st: Generate DOCTYPE and CDATA section events.
+	* pullparser/XMLPullParser.st: Likewise.  Add #needCdataDelimiters
+	and #needDTDEvents, as well as the utility method #doctypeName.
+	* pullparser/XMLPullParserTests.st: Test new features.
+	* saxdriver/Events.st: Add more events.
+
+2009-09-19  Paolo Bonzini  <bonzini@gnu.org>
+
 	* pullparser/XMLPullParser.st: Provide nicer pull parser factory
 	interface.
 

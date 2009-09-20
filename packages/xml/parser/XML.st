@@ -2273,7 +2273,7 @@ Instance Variables:
 
     docTypeDecl [
 	<category: 'api'>
-	| nm id |
+	| nm id hasInternalSubset |
 	^(self skipIf: '<!DOCTYPE') 
 	    ifTrue: 
 		[self forceSpace.
@@ -2283,13 +2283,20 @@ Instance Variables:
 		self skipSpace.
 		(id := self externalID: #docType) notNil ifTrue: [self skipSpace].
 		self sourceWrapper usedAsExternal: false.
-		(self skipIf: '[') 
+		hasInternalSubset := self skipIf: '['. 
+		sax
+		    startDoctypeDecl: nm
+		    publicID: (id ifNotNil: [ id second ])
+		    systemID: (id ifNotNil: [ id first ])
+		    hasInternalSubset: hasInternalSubset.
+		hasInternalSubset
 		    ifTrue: [[self skipIf: ']'] whileFalse: [self dtdEntry]].
 		self skipSpace.
 		hereChar = $> ifFalse: [self expected: '>'].
 		self sourceWrapper usedAsExternal: nil.
 		id == nil ifFalse: [self dtdFile: id].
 		self mustFind: '>'.
+		sax endDoctypeDecl.
 		self isValidating ifTrue: [dtd completeValidationAgainst: self].
 		true]
 	    ifFalse: [false]
@@ -3141,7 +3148,10 @@ Instance Variables:
 			    ifTrue: [self completePI: str1]
 			    ifFalse: 
 				[(self skipIf: '<![CDATA[') 
-				    ifTrue: [self completeCDATA: str1]
+				    ifTrue: [
+					sax startCdataSection.
+					self completeCDATA: str1.
+					sax endCdataSection]
 				    ifFalse: 
 					[(self skipIf: '<!--') 
 					    ifTrue: [self completeComment: str1]

@@ -87,7 +87,7 @@ Stream subclass: XMLPullParser [
     <category: 'XMLPullParser'>
     <comment: 'This is based on Antony Blakey''s XMLPullParser.'>
 
-    | needComments needPrefixMappingEvents |
+    | needComments needPrefixMappingEvents needCdataDelimiters needDTDEvents |
 
     XMLPullParser class >> new [
         <category: 'instance creation'>
@@ -211,6 +211,18 @@ Stream subclass: XMLPullParser [
 	self subclassResponsibility
     ]
 
+    doctypeName [
+	<category: 'delegating accessors'>
+	^self isStartDoctypeDecl 
+	    ifTrue: 
+		[| name |
+		name := self current name.
+		self needDTDEvents: false.
+		self next.
+		name asString]
+	    ifFalse: [nil]
+    ]
+
     if: tagName peek: aBlock [
 	<category: 'tag-based api'>
 	(self is: tagName) ifTrue: [self matchAnyPeek: aBlock]
@@ -269,6 +281,11 @@ Stream subclass: XMLPullParser [
 	^self current isComment
     ]
 
+    isEndCdataSection [
+	<category: 'testing event types'>
+	^self current isEndCdataSection
+    ]
+
     isEndDocument [
 	<category: 'testing event types'>
 	^self current isEndDocument
@@ -304,9 +321,24 @@ Stream subclass: XMLPullParser [
 	^self current isPI: aString
     ]
 
+    isStartCdataSection [
+	<category: 'testing event types'>
+	^self current isStartCdataSection
+    ]
+
     isStartPrefixMapping [
 	<category: 'testing event types'>
 	^self current isStartPrefixMapping
+    ]
+
+    isStartDoctypeDecl [
+	<category: 'testing event types'>
+	^self current isStartDoctypeDecl
+    ]
+
+    isStartDoctypeDecl: aString [
+	<category: 'testing event types'>
+	^self current isStartDoctypeDecl: aString
     ]
 
     isStartDocument [
@@ -652,7 +684,18 @@ Stream subclass: XMLPullParser [
 
     initialize [
 	<category: 'initialize'>
-	needComments := needPrefixMappingEvents := false.
+	needComments := needPrefixMappingEvents := needCdataDelimiters := false.
+	needDTDEvents := true.
+    ]
+
+    needCdataDelimiters [
+	<category: 'accessing'>
+	^needCdataDelimiters
+    ]
+
+    needCdataDelimiters: aBoolean [
+	<category: 'accessing'>
+	needCdataDelimiters := aBoolean
     ]
 
     needComments [
@@ -663,6 +706,16 @@ Stream subclass: XMLPullParser [
     needComments: aBoolean [
 	<category: 'accessing'>
 	needComments := aBoolean
+    ]
+
+    needDTDEvents [
+	<category: 'accessing'>
+	^needDTDEvents
+    ]
+
+    needDTDEvents: aBoolean [
+	<category: 'accessing'>
+	needDTDEvents := aBoolean
     ]
 
     needPrefixMappingEvents [
@@ -683,6 +736,76 @@ SAXEvent extend [
         <category: 'pull parsing'>
 
 	^true
+    ]
+]
+
+
+
+SAXEndCdataSection extend [
+    neededBy: aParser [
+        <category: 'pull parsing'>
+
+	^aParser needCdataDelimiters
+    ]
+]
+
+
+
+
+
+SAXStartCdataSection extend [
+    neededBy: aParser [
+        <category: 'pull parsing'>
+
+	^aParser needCdataDelimiters
+    ]
+]
+
+
+
+
+
+SAXUnparsedEntityDecl extend [
+    neededBy: aParser [
+        <category: 'pull parsing'>
+
+	^aParser needDTDEvents
+    ]
+]
+
+
+
+
+
+SAXNotationDecl extend [
+    neededBy: aParser [
+        <category: 'pull parsing'>
+
+	^aParser needDTDEvents
+    ]
+]
+
+
+
+
+
+SAXEndDoctypeDecl extend [
+    neededBy: aParser [
+        <category: 'pull parsing'>
+
+	^aParser needDTDEvents
+    ]
+]
+
+
+
+
+
+SAXStartDoctypeDecl extend [
+    neededBy: aParser [
+        <category: 'pull parsing'>
+
+	^aParser needDTDEvents
     ]
 ]
 
@@ -740,6 +863,18 @@ SAXDriver subclass: SAXEventGenerator [
 	generator yield: (SAXText text: aString from: start to: stop)
     ]
 
+    endCdataSection [
+        <category: 'content handler'>
+
+	generator yield: SAXEndCdataSection new
+    ]
+
+    endDoctypeDecl [
+        <category: 'content handler'>
+
+	generator yield: SAXEndDoctypeDecl new
+    ]
+
     endDocument [
         <category: 'content handler'>
 
@@ -765,6 +900,22 @@ SAXDriver subclass: SAXEventGenerator [
         <category: 'content handler'>
 
 	generator yield: (SAXProcessingInstruction target: targetString data: dataString)
+    ]
+
+    startCdataSection [
+        <category: 'content handler'>
+
+	generator yield: SAXStartCdataSection new
+    ]
+
+    startDoctypeDecl: doctypeName publicID: publicID systemID: systemID hasInternalSubset: aBoolean [
+        <category: 'content handler'>
+
+	generator yield: (SAXStartDoctypeDecl
+	    name: doctypeName
+	    publicID: publicID
+	    systemID: systemID
+	    hasInternalSubset: aBoolean)
     ]
 
     startDocument [

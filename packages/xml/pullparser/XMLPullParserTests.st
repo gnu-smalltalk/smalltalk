@@ -66,6 +66,24 @@ TestCase subclass: XMLPullParserTest [
 	self assert: parser next isEndDocument
     ]
 
+    testCDATAEvents [
+	<category: 'testing'>
+	| parser |
+	parser := XMLPullParser 
+		    parse: '<document>This is a test <![CDATA[& stuff in here doesn''t have to be escaped]]></document>'.
+	parser needCdataDelimiters: true.
+	self assert: parser isStartDocument.
+	self assert: (parser next isStartTag: 'document').
+	self assert: parser next isText.
+	self assert: parser text = 'This is a test '.
+	self assert: parser isStartCdataSection.
+	self assert: parser next isText.
+	self assert: parser text = '& stuff in here doesn''t have to be escaped'.
+	self assert: parser isEndCdataSection.
+	self assert: (parser next isEndTag: 'document').
+	self assert: parser next isEndDocument
+    ]
+
     testCharacterReferences [
 	<category: 'testing'>
 	| parser |
@@ -203,6 +221,21 @@ TestCase subclass: XMLPullParserTest [
 	self assert: parser next isEndDocument
     ]
 
+    testDTDSkip [
+	<category: 'testing'>
+	| parser |
+	parser := XMLPullParser parse: '<!DOCTYPE name [
+<!NOTATION nblah PUBLIC "foo">
+<!ENTITY blah SYSTEM "" NDATA nblah>
+]><document/>'.
+	self assert: parser isStartDocument.
+	self assert: parser next isStartDoctypeDecl.
+	self assert: parser doctypeName = 'name'.
+	self assert: (parser isStartTag: 'document').
+	self assert: (parser next isEndTag: 'document').
+	self assert: parser next isEndDocument
+    ]
+
     testDTDEvents [
 	<category: 'testing'>
 	| parser |
@@ -211,6 +244,7 @@ TestCase subclass: XMLPullParserTest [
 <!ENTITY blah SYSTEM "" NDATA nblah>
 ]><document/>'.
 	self assert: parser isStartDocument.
+	self assert: (parser next isStartDoctypeDecl: 'test').
 	self assert: parser next isNotationDecl.
 	self assert: parser current name = 'nblah'.
 	self assert: parser current publicID = 'foo'.
@@ -219,6 +253,7 @@ TestCase subclass: XMLPullParserTest [
 	self assert: parser current publicID isNil.
 	self assert: parser current systemID isEmpty.
 	self assert: parser current notationName = 'nblah'.
+	self assert: parser next isEndDoctypeDecl.
 	self assert: (parser next isStartTag: 'document').
 	self assert: (parser next isEndTag: 'document').
 	self assert: parser next isEndDocument
@@ -231,6 +266,7 @@ TestCase subclass: XMLPullParserTest [
 	    parser := XMLPullParser parse: '<!DOCTYPE test [
 <!ENTITY blah PUBLIC "bar" "foo://">
 ]><document>&blah;</document>'.
+	    parser needDTDEvents: false.
 	    self assert: parser isStartDocument.
 	    self assert: (parser next isStartTag: 'document').
 	    self assert: (parser next isText).
