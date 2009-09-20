@@ -75,6 +75,16 @@ Instance Variables:
 	^self new on: aDataSource
     ]
 
+    SAXParser class >> onFile: aFilename [
+        <category: 'instance creation'>
+        ^self on: (FileStream open: aFilename mode: FileStream read)
+    ]
+
+    SAXParser class >> onString: aString [
+        <category: 'instance creation'>
+        ^self on: aString readStream
+    ]
+
     SAXParser class >> processDocumentInFilename: aFilename [
 	<category: 'instance creation'>
 	^self processDocumentInFilename: aFilename beforeScanDo: [:parser | ]
@@ -83,8 +93,7 @@ Instance Variables:
     SAXParser class >> processDocumentInFilename: aFilename beforeScanDo: aBlock [
 	<category: 'instance creation'>
 	| stream p |
-	stream := FileStream open: aFilename mode: FileStream read.
-	p := self on: stream.
+	p := self onFile: aFilename.
 	aBlock value: p.
 	^p scanDocument
     ]
@@ -97,7 +106,7 @@ Instance Variables:
     SAXParser class >> processDocumentString: aString beforeScanDo: aBlock [
 	<category: 'instance creation'>
 	| p |
-	p := self on: aString readStream.
+	p := self onString: aString.
 	aBlock value: p.
 	^p scanDocument
     ]

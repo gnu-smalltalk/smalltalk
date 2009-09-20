@@ -132,6 +132,11 @@ Stream subclass: XMLPullParser [
 	^self current at: attName ifNone: aBlock
     ]
 
+    atEnd [
+	<category: 'streaming'>
+	^self isEndDocument
+    ]
+
     collect: tagName peek: aBlock [
 	<category: 'tag-based api'>
 	| result |
@@ -560,13 +565,16 @@ Stream subclass: XMLPullParser [
 
     text [
 	<category: 'delegating accessors'>
-	^self isText 
-	    ifTrue: 
-		[| text |
-		text := self current text.
-		self next.
-		text]
-	    ifFalse: ['']
+	| text s |
+	self isText ifFalse: [ ^'' ].
+
+	text := self current text.
+	self next isText ifFalse: [ ^text ].
+
+	s := WriteStream with: text.
+	[s nextPutAll: self current text.
+	self next isText] whileTrue.
+	^s contents
     ]
 
     textIf: tagName [
@@ -986,11 +994,6 @@ XMLPullParser subclass: XMLGenerativePullParser [
 	^super new
 	    initialize: aParser;
 	    yourself
-    ]
-
-    atEnd [
-	<category: 'streaming'>
-	^self isEndDocument
     ]
 
     current [

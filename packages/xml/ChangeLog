@@ -1,5 +1,14 @@
 2009-09-20  Paolo Bonzini  <bonzini@gnu.org>
 
+	* pullparser/XMLPullParser.st: Push up #atEnd.  Look ahead for more
+	text in #text.
+	* saxdriver/Events.st: Lazily initialize attributes.  Remove duplicate
+	instance variables.
+	* saxparser/Parser.st: Add more constructors.
+	* tests/XMLPullParserTests.st: Avoid ignorable whitespace issues.
+
+2009-09-20  Paolo Bonzini  <bonzini@gnu.org>
+
 	* parser/XMLTests.st: New.
 	* parser/package.xml: Add it.  Provide XML-Parser.
 	* pullparser/XMLPullParserTests.st: Move parser creation to test class,

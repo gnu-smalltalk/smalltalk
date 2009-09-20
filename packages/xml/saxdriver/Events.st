@@ -405,25 +405,37 @@ SAXTagEvent subclass: SAXStartTag [
 
     attributesArray [
 	<category: 'accessing'>
+	attrArray isNil ifTrue: [ ^self computeAttributesArray ].
 	^attrArray
-    ]
-
-    attributes [
-	<category: 'accessing'>
-	^attributes
     ]
 
     attributesArray: anObject [
 	<category: 'accessing'>
 	attrArray := anObject.
-	attributes := LookupTable new.
-	attrArray do: [ :each | attributes at: each key name put: each value ].
+	attributes := nil.
+    ]
 
+    attributes [
+	<category: 'accessing'>
+	attributes isNil ifTrue: [ ^self computeAttributes ].
+	^attributes
     ]
 
     attributes: anObject [
 	<category: 'accessing'>
 	attributes := anObject.
+	attrArray := nil.
+    ]
+
+    computeAttributes [
+	<category: 'private'>
+	attributes := LookupTable new.
+	attrArray do: [ :each | attributes at: each key name put: each value ].
+
+    ]
+
+    computeAttributesArray [
+	<category: 'private'>
 	attrArray := OrderedCollection new.
 	attributes keysAndValuesDo: [ :key :value |
 	    attrArray add: (Attribute name: key value: value) ].
@@ -565,7 +577,6 @@ SAXEvent subclass: SAXStringEvent [
 
 
 SAXStringEvent subclass: SAXText [
-    | text |
     
     <category: 'XMLPullParser'>
     <comment: nil>
@@ -587,7 +598,6 @@ SAXStringEvent subclass: SAXText [
 
 
 SAXStringEvent subclass: SAXComment [
-    | text |
     
     <category: 'XMLPullParser'>
     <comment: nil>

@@ -130,12 +130,8 @@ TestCase subclass: XMLPullParserTest [
 	<category: 'testing'>
 	| parser |
 	parser := self parserOn: '
-<person id="27">
-	<!-- Comment -->
-	<name>Kent Beck</name>
-	<notedFor>XP</notedFor>
-</person>
-'.
+<person id="27"><!-- Comment
+--><name>Kent Beck</name><notedFor>XP</notedFor></person>'.
 	self assert: parser isStartDocument.
 	self assert: (parser next isStartTag: 'person').
 	self assert: (parser current attributes at: 'id') = '27'.
@@ -153,14 +149,7 @@ TestCase subclass: XMLPullParserTest [
 	<category: 'testing'>
 	| parser |
 	parser := self parserOn: '
-<a>
-	<!-- Comment 1 -->
-	<!-- Comment 2 -->
-	<b/>
-	<!-- Another comment -->
-	<c/>
-</a>
-'.
+<a><!-- Comment 1 --><!-- Comment 2 --><b/><!-- Another comment --><c/></a>'.
 	self assert: parser isStartDocument.
 	self assert: (parser next isStartTag: 'a').
 	parser needComments: true.
