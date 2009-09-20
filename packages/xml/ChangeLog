@@ -1,3 +1,14 @@
+2009-09-20  Paolo Bonzini  <bonzini@gnu.org>
+
+	* parser/XMLTests.st: New.
+	* parser/package.xml: Add it.  Provide XML-Parser.
+	* pullparser/XMLPullParserTests.st: Move parser creation to test class,
+	rename to...
+	* tests/XMLPullParserTests.st: ... this.
+	* pullparser/package.xml: Depend on SAXParser and XML-Parser.  Remove
+	XMLPullParserTests.st.
+	* tests/package.xml: Depend on SAXParser only.
+
 2009-09-19  Paolo Bonzini  <bonzini@gnu.org>
 
 	* parser/XML.st: Generate DOCTYPE and CDATA section events.

@@ -35,28 +35,24 @@
 |
  ======================================================================"
 
-XMLPullParser extend [
-    XMLPullParser class >> parse: source [
-	<category: 'instance creation'>
-	| pull |
-	pull := self onString: source.
-	pull validate: false.
-	^pull
-    ]
-]
-
-
 
 TestCase subclass: XMLPullParserTest [
     
     <comment: nil>
     <category: 'XMLPullParser'>
 
+    parserOn: source [
+	<category: 'instance creation'>
+	| pull |
+	pull := XMLPullParser onString: source.
+	pull validate: false.
+	^pull
+    ]
+
     testCDATA [
 	<category: 'testing'>
 	| parser |
-	parser := XMLPullParser 
-		    parse: '<document><![CDATA[This is a test & stuff in here doesn''t have to be escaped]]></document>'.
+	parser := self parserOn: '<document><![CDATA[This is a test & stuff in here doesn''t have to be escaped]]></document>'.
 	self assert: parser isStartDocument.
 	self assert: (parser next isStartTag: 'document').
 	self assert: parser next isText.
@@ -69,8 +65,7 @@ TestCase subclass: XMLPullParserTest [
     testCDATAEvents [
 	<category: 'testing'>
 	| parser |
-	parser := XMLPullParser 
-		    parse: '<document>This is a test <![CDATA[& stuff in here doesn''t have to be escaped]]></document>'.
+	parser := self parserOn: '<document>This is a test <![CDATA[& stuff in here doesn''t have to be escaped]]></document>'.
 	parser needCdataDelimiters: true.
 	self assert: parser isStartDocument.
 	self assert: (parser next isStartTag: 'document').
@@ -87,8 +82,7 @@ TestCase subclass: XMLPullParserTest [
     testCharacterReferences [
 	<category: 'testing'>
 	| parser |
-	parser := XMLPullParser 
-		    parse: '<document><name>&#35;&#40;&amp;&#41;</name></document>'.
+	parser := self parserOn: '<document><name>&#35;&#40;&amp;&#41;</name></document>'.
 	self assert: parser isStartDocument.
 	self assert: (parser next isStartTag: 'document').
 	self assert: (parser next isStartTag: 'name').
@@ -102,7 +96,7 @@ TestCase subclass: XMLPullParserTest [
     testDoubleTag [
 	<category: 'testing'>
 	| parser |
-	parser := XMLPullParser parse: '<document><body></body></document>'.
+	parser := self parserOn: '<document><body></body></document>'.
 	self assert: parser isStartDocument.
 	self assert: (parser next isStartTag: 'document').
 	self assert: (parser next isStartTag: 'body').
@@ -115,7 +109,7 @@ TestCase subclass: XMLPullParserTest [
 	<category: 'testing'>
 	| parser |
 	[
-	    parser := XMLPullParser parse: ''.
+	    parser := self parserOn: ''.
 	    self assert: parser isStartDocument.
 	    self assert: parser next isEndDocument
 	] on: EmptySignal do: [ :ex | ex resume ]
@@ -124,8 +118,7 @@ TestCase subclass: XMLPullParserTest [
     testEscapes [
 	<category: 'testing'>
 	| parser |
-	parser := XMLPullParser 
-		    parse: '<tag>Escaped &amp; Unescaped: &lt;&gt;</tag>'.
+	parser := self parserOn: '<tag>Escaped &amp; Unescaped: &lt;&gt;</tag>'.
 	self assert: parser isStartDocument.
 	self assert: (parser next isStartTag: 'tag').
 	self assert: parser next isText.
@@ -136,8 +129,7 @@ TestCase subclass: XMLPullParserTest [
     testPerson [
 	<category: 'testing'>
 	| parser |
-	parser := XMLPullParser 
-		    parse: '
+	parser := self parserOn: '
 <person id="27">
 	<!-- Comment -->
 	<name>Kent Beck</name>
@@ -160,8 +152,7 @@ TestCase subclass: XMLPullParserTest [
     testComments [
 	<category: 'testing'>
 	| parser |
-	parser := XMLPullParser 
-		    parse: '
+	parser := self parserOn: '
 <a>
 	<!-- Comment 1 -->
 	<!-- Comment 2 -->
@@ -187,7 +178,7 @@ TestCase subclass: XMLPullParserTest [
     testPI [
 	<category: 'testing'>
 	| parser |
-	parser := XMLPullParser parse: '<?xml version="1.0"?><?xsl stylesheet="a"?><test />'.
+	parser := self parserOn: '<?xml version="1.0"?><?xsl stylesheet="a"?><test />'.
 	self assert: parser isStartDocument.
 	self assert: (parser next isPI).
 	self deny: (parser isPI: 'xml').
@@ -202,7 +193,7 @@ TestCase subclass: XMLPullParserTest [
     testSingleSelfClosingTag [
 	<category: 'testing'>
 	| parser |
-	parser := XMLPullParser parse: '<selfClose />'.
+	parser := self parserOn: '<selfClose />'.
 	self assert: parser isStartDocument.
 	self assert: (parser next isStartTag: 'selfClose').
 	self assert: parser next isEndTag.
@@ -212,7 +203,7 @@ TestCase subclass: XMLPullParserTest [
     testSingleTag [
 	<category: 'testing'>
 	| parser |
-	parser := XMLPullParser parse: '<document><body></body></document>'.
+	parser := self parserOn: '<document><body></body></document>'.
 	self assert: parser isStartDocument.
 	self assert: (parser next isStartTag: 'document').
 	self assert: (parser next isStartTag: 'body').
@@ -224,7 +215,7 @@ TestCase subclass: XMLPullParserTest [
     testDTDSkip [
 	<category: 'testing'>
 	| parser |
-	parser := XMLPullParser parse: '<!DOCTYPE name [
+	parser := self parserOn: '<!DOCTYPE name [
 <!NOTATION nblah PUBLIC "foo">
 <!ENTITY blah SYSTEM "" NDATA nblah>
 ]><document/>'.
@@ -239,7 +230,7 @@ TestCase subclass: XMLPullParserTest [
     testDTDEvents [
 	<category: 'testing'>
 	| parser |
-	parser := XMLPullParser parse: '<!DOCTYPE test [
+	parser := self parserOn: '<!DOCTYPE test [
 <!NOTATION nblah PUBLIC "foo">
 <!ENTITY blah SYSTEM "" NDATA nblah>
 ]><document/>'.
@@ -263,7 +254,7 @@ TestCase subclass: XMLPullParserTest [
 	<category: 'testing'>
 	| parser |
 	[
-	    parser := XMLPullParser parse: '<!DOCTYPE test [
+	    parser := self parserOn: '<!DOCTYPE test [
 <!ENTITY blah PUBLIC "bar" "foo://">
 ]><document>&blah;</document>'.
 	    parser needDTDEvents: false.

@@ -2,12 +2,12 @@
   <name>XML-PullParser</name>
   <namespace>XML</namespace>
   <prereq>XML-SAXDriver</prereq>
-  <prereq>XML-XMLParser</prereq>
+  <prereq>XML-SAXParser</prereq>
 
   <test>
+    <prereq>XML-Parser</prereq>
+    <prereq>XML-ParserTests</prereq>
     <sunit>XML.XMLPullParserTest</sunit>
-    <filein>XMLPullParserTests.st</filein>
-    <file>XMLPullParserTests.st</file>
   </test>
 
   <filein>XMLPullParser.st</filein>

@@ -1,0 +1,12 @@
+<package>
+  <!-- This package is a hack, it is only present because filing in
+       package A's test package does not file in the test package
+       for the prerequisites (of either A or A's test package). -->
+  <name>XML-ParserTests</name>
+  <namespace>XML</namespace>
+  <prereq>XML-PullParser</prereq>
+  <prereq>SUnit</prereq>
+
+  <filein>XMLPullParserTests.st</filein>
+  <file>XMLPullParserTests.st</file>
+</package>

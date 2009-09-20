@@ -1,6 +1,15 @@
 <package>
   <name>XML-XMLParser</name>
   <namespace>XML</namespace>
+  <provides>XML-Parser</provides>
+
+  <test>
+    <prereq>XML-ParserTests</prereq>
+    <sunit>XML.XMLParserTest</sunit>
+
+    <filein>XMLTests.st</filein>
+    <file>XMLTests.st</file>
+  </test>
 
   <prereq>XML-SAXParser</prereq>
   <prereq>XML-DOM</prereq>

@@ -707,7 +707,7 @@ at_help_all="1;testsuite.at:27;arrays.st;base;
 121;testsuite.at:159;Seaside-Core;seaside-core sunit;
 122;testsuite.at:160;Sport;sport sunit;
 123;testsuite.at:161;Swazoo;swazoo sunit;
-124;testsuite.at:162;XML-PullParser;xml-pullparser sunit;
+124;testsuite.at:162;XML-XMLParser;xml-xmlparser sunit;
 125;testsuite.at:163;ZLib;zlib sunit;
 "
 
@@ -7246,11 +7246,11 @@ $at_traceon; }
 read at_status <"$at_status_file"
 #AT_STOP_123
 #AT_START_124
-# 124. testsuite.at:162: XML-PullParser
+# 124. testsuite.at:162: XML-XMLParser
 at_setup_line='testsuite.at:162'
 at_fn_banner 5
-at_desc="XML-PullParser"
-at_desc_line="124: $at_desc                                 "
+at_desc="XML-XMLParser"
+at_desc_line="124: $at_desc                                  "
 $at_quiet $as_echo_n "$at_desc_line"
 at_xfail=no
 echo "#                             -*- compilation -*-" >> "$at_group_log"
@@ -7267,11 +7267,11 @@ echo "#                             -*- compilation -*-" >> "$at_group_log"
     *) image_path="" ;;
   esac
 
-  echo "{ (cd $abs_top_builddir && gst $image_path -f $abs_top_srcdir/scripts/Test.st --verbose  -p XML-PullParser); echo exit $? > retcode; } | tr -d '\r' | tee stdout; . ./retcode"
+  echo "{ (cd $abs_top_builddir && gst $image_path -f $abs_top_srcdir/scripts/Test.st --verbose  -p XML-XMLParser); echo exit $? > retcode; } | tr -d '\r' | tee stdout; . ./retcode"
   { set +x
-$as_echo "$at_srcdir/testsuite.at:162: { (cd \$abs_top_builddir && gst \$image_path -f \$abs_top_srcdir/scripts/Test.st --verbose  -p XML-PullParser); echo exit \$? > retcode; } | tr -d '\\r' | tee stdout; . ./retcode"
-at_fn_check_prepare_dynamic "{ (cd $abs_top_builddir && gst $image_path -f $abs_top_srcdir/scripts/Test.st --verbose  -p XML-PullParser); echo exit $? > retcode; } | tr -d '\\r' | tee stdout; . ./retcode" "testsuite.at:162"
-( $at_check_trace; { (cd $abs_top_builddir && gst $image_path -f $abs_top_srcdir/scripts/Test.st --verbose  -p XML-PullParser); echo exit $? > retcode; } | tr -d '\r' | tee stdout; . ./retcode
+$as_echo "$at_srcdir/testsuite.at:162: { (cd \$abs_top_builddir && gst \$image_path -f \$abs_top_srcdir/scripts/Test.st --verbose  -p XML-XMLParser); echo exit \$? > retcode; } | tr -d '\\r' | tee stdout; . ./retcode"
+at_fn_check_prepare_dynamic "{ (cd $abs_top_builddir && gst $image_path -f $abs_top_srcdir/scripts/Test.st --verbose  -p XML-XMLParser); echo exit $? > retcode; } | tr -d '\\r' | tee stdout; . ./retcode" "testsuite.at:162"
+( $at_check_trace; { (cd $abs_top_builddir && gst $image_path -f $abs_top_srcdir/scripts/Test.st --verbose  -p XML-XMLParser); echo exit $? > retcode; } | tr -d '\r' | tee stdout; . ./retcode
 ) >>"$at_stdout" 2>>"$at_stderr"
 at_status=$? at_failed=false
 $at_check_filter
