@@ -1,4 +1,4 @@
-@emph{by Thomas Gagne}
+@emph{by Thomas Gagne, edited by Paolo Bonzini}
 
 @menu
 * Building a DOM from XML::
@@ -16,7 +16,7 @@ a Document Object Model (DOM) tree from some kind of XML input.  Assuming
 you've got the XML in a String the following code will build an XML Document:
 
 @example
-XML XMLParser processDocumentString: theXMLString 
+XML.SAXParser defaultParserClass processDocumentString: theXMLString 
 	beforeScanDo: [ :p | p validate: false].
 @end example
 
@@ -31,7 +31,8 @@ Since the middleware doesn't assume to know anything about the message
 it received, it's received into a String, null-byte and all.  To remove it I used:
 
 @example
-XML XMLParser processDocumentString: (aString copyWithout: 0 asCharacter)
+XML.SAXParser defaultParserClass
+    processDocumentString: (aString copyWithout: 0 asCharacter)
     beforeScanDo: [ :p | p validate: false].
 
 @end example
@@ -159,8 +160,8 @@ co-worker was attempting to use Sablot's sabcmd to transform the XML
 from my server into HTML.  So start your document with the root ready to go:
 
 @example
-replyDoc := XML Document new.
-replyDoc addNode: (XML Element tag: 'response').
+replyDoc := XML.Document new.
+replyDoc addNode: (XML.Element tag: 'response').
 @end example
 
 Before doing anything more complex, we can play with our new
@@ -194,9 +195,9 @@ document.  The first node (or element) is named @code{response}.
 The second node adds text to the first:
 
 @example
-replyDoc := XML Document new.
-replyDoc addNode: (XML Element tag: response). "our root node"
-replyDoc root addNode: (XML Text text: 'Hello, world!').
+replyDoc := XML.Document new.
+replyDoc addNode: (XML.Element tag: response). "our root node"
+replyDoc root addNode: (XML.Text text: 'Hello, world!').
 @end example
 
 Another way of writing it, and the way I've adopted in my code is to create the whole
@@ -205,10 +206,10 @@ but it suggests a template for cascading @code{#addNode:} messages to an element
 which, if you're building any kind of nontrivial XML, you'll be doing a lot of:
 
 @example
-replyDoc := XML Document new.
+replyDoc := XML.Document new.
 replyDoc addNode: (
-    (XML Element tag: response)
-        addNode: (XML Text text: 'Hello, world!')
+    (XML.Element tag: response)
+        addNode: (XML.Text text: 'Hello, world!')
 ).
 @end example
 
@@ -223,9 +224,9 @@ abstract superclass:
 asXMLElement: tag value: aValue
     | n |
 
-    n := XML Element tag: tag.
+    n := XML.Element tag: tag.
     aValue isNil ifFalse: [
-	n addNode: (XML Text
+	n addNode: (XML.Text
 	    text: (aValue displayString copyReplaceAll: '&' with: '&amp;'))].
     ^n
 @end example
@@ -238,7 +239,7 @@ If we wanted to add an attribute to our document above we can do so with
 a single statement:
 
 @example
-replyDoc root addAttribute: (XML Attribute name: 'isExample' value: 'yes').
+replyDoc root addAttribute: (XML.Attribute name: 'isExample' value: 'yes').
 @end example
 
 Now, our XML looks like:
@@ -276,24 +277,24 @@ of the error into an XML response.  It's also a fairly decent example
 of XML document building as discussed earlier.
 
 @example
-replyDoc := XML Document new.
-replyDoc addNode: (XML Element tag: 'response').
+replyDoc := XML.Document new.
+replyDoc addNode: (XML.Element tag: 'response').
 
 [
-    doc := XML XMLParser processDocumentString: (anIsdMessage message copyWithout: 0) asString
+    doc := XML.SAXParser defaultParserClass processDocumentString: (anIsdMessage message copyWithout: 0) asString
 ] on: Exception do: [ :ex |
     replyDoc root 
-        addAttribute: (XML Attribute name: 'type' value: 'Exception');
-        addNode: ((XML Element tag: 'description')
-            addNode: (XML Text text: ex signal description));
-        addNode: ((XML Element tag: 'message')
-            addNode: (XML Text text: ex messageText))
+        addAttribute: (XML.Attribute name: 'type' value: 'Exception');
+        addNode: ((XML.Element tag: 'description')
+            addNode: (XML.Text text: ex signal description));
+        addNode: ((XML.Element tag: 'message')
+            addNode: (XML.Text text: ex messageText))
 ].
 
 @end example
 
 I said before there's not a lot programmers can do with DTDs,
-but there are some things I wish VW's XML library would do:
+but there are some things I wish the XML library would do:
 
 @itemize @bullet
 
@@ -330,7 +331,7 @@ the spare CPU cycles put to better use.
 @section XSL Processing
 
 I spent a night the other week trying to figure out how
-to get VW's XSL libraries to do anything.  I no longer
+to get the XSL libraries to do anything.  I no longer
 need it now, but I did discover some things others
 with an immediate need may want to be aware of.
 
@@ -338,7 +339,7 @@ with an immediate need may want to be aware of.
 @item	
 Transforming an XML document requires you parse
 the XSL and XML documents separately first.  After
-that, you tell the XSL RuleDatabase to process
+that, you tell the XSL.RuleDatabase to process
 the XML document.  The result is another XML
 document with the transformations.
 		
@@ -346,8 +347,8 @@ A code snippet for doing just that appears below.
 @example
 | rules xmlDoc htmlDoc |
 
-rules := XSL RuleDatabase new readFileNamed: 'paymentspending.xsl'.
-xmlDoc := XML XMLParser
+rules := XSL.RuleDatabase new readFileNamed: 'paymentspending.xsl'.
+xmlDoc := XML.SAXParser defaultParserClass
              processDocumentInFilename: 'paymentspending.xml'
              beforeScanDo: [ :p | p validate: false ].
 htmlDoc := rules process: xmlDoc.
@@ -357,7 +358,7 @@ There is also a @code{readString:} method which can be used
 instead of @code{readFileNamed:}.
 
 @item	
-VW's XSL library doesn't use the W3-approved stylesheet, but
+The XSL library doesn't use the W3-approved stylesheet, but
 instead uses the draft version (same one Microsoft uses).
 @code{<xsl:stylesheet xmlns:xsl="http://www.w3.org/TR/WD-xsl">}
 	
@@ -371,8 +372,9 @@ tools implement it.
 @section Attributions
 
 Cincom, for supporting Smalltalk and the Smalltalk community by making 
-an open-source version available.
+the library available for GNU Smalltalk under the LGPL.
 
 Thanks also to Randy Ynchausti, Bijan Parsia, Reinout Heeck, 
-and Joseph Bacanskas for answering many questions on VW XML.
+and Joseph Bacanskas for answering many questions on the XML
+library.
 
