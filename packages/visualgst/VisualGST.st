@@ -1,7 +1,36 @@
 GtkMainWindow subclass: VisualGST [
-    VisualGST class [ | compileError | ]
+    VisualGST class [ | compileError uniqueInstance | ]
 
     | browsers outputs saved transcriptWidget windowsMenu |
+
+    VisualGST class >> uniqueInstance [
+	<category: 'public'>
+
+	uniqueInstance ifNil: [ uniqueInstance := self createInstance ].
+        ^ uniqueInstance
+    ]
+
+    VisualGST class >> createInstance [
+        <category: 'private'>
+
+        ^ self basicNew
+            initialize;
+            showAll;
+            postInitialize;
+            yourself
+    ]
+
+    VisualGST class >> instanceCreationErrorString [
+        <category: 'private'>
+
+        ^ 'This is a singleton implementation, so you are not allowed to create instances yourself. Use #uniqueInstance to access the instance.'
+    ]
+
+    VisualGST class >> new [
+        <category: 'instance creation'>
+
+        ^ self error: self instanceCreationErrorString
+    ]
 
     VisualGST class >> exit [
 	<category: 'exit'>
@@ -13,7 +42,7 @@ GtkMainWindow subclass: VisualGST [
     VisualGST class >> open [
 	<category: 'user interface'>
 
-	^ self openSized: 450@375
+        self uniqueInstance
     ]
 
     VisualGST class >> version [
@@ -81,20 +110,20 @@ THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.';
     ]
 
     classBrowser [
-	<category: 'events'>
+	<category: 'tools events'>
 
 	| widget |
 	browsers addWidget: self buildClassBrowserWidget labeled: 'Browser'
     ]
 
     classBrowserInAWindow [
-	<category: 'events'>
+	<category: 'tools events'>
 
 	GtkClassBrowser open
     ]
 
     newWorkspace [
-	<category: 'events'>
+	<category: 'tools events'>
 
 	| widget |
 	widget := self buildWorkspaceWidget showAll.
@@ -182,14 +211,8 @@ THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.';
 		dlg destroy ]
     ]
 
-    smallZilla [
-	<category: 'events'>
-
-	GtkSmallZilla open
-    ]
-
     workspace [
-	<category: 'events'>
+	<category: 'tools events'>
 	
 	self newWorkspace
     ]
@@ -465,21 +488,25 @@ THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.';
     createToolsMenus [
 	<category: 'user interface'>
 
+	| menu |
         self accelGroup append: {{'<Control>B'. '<GtkLauncher>/Tools/TabbedClassBrowser'}.
 	    {'<Control><shift>B'. '<GtkLauncher>/Tools/ClassBrowser'}.
 	    {'<Control>M'. '<GtkLauncher>/Tools/Implementors'}.
             {'<Control>N'. '<GtkLauncher>/Tools/Senders'}}.
 
-	^ self createNewMenuEntry:  {GTK.GtkMenuItem menuItem: 'Browser' accelPath: '<GtkLauncher>/Tools/TabbedClassBrowser' connectTo: self selector: #classBrowser.
-	    GTK.GtkMenuItem menuItem: 'Browser window' accelPath: '<GtkLauncher>/Tools/ClassBrowser' connectTo: self selector: #classBrowserInAWindow.
-	    GTK.GtkMenuItem menuItem: 'Workspace' connectTo: self selector: #workspace.
-            GTK.GtkMenuItem menuItem: 'Implementors' accelPath: '<GtkLauncher>/Tools/Implementors' connectTo: self selector: #implementors.
-            GTK.GtkMenuItem menuItem: 'Senders' accelPath: '<GtkLauncher>/Tools/Senders' connectTo: self selector: #senders.
-	    GTK.GtkMenuItem menuItem: 'SUnit' connectTo: self selector: #sunit.
-	    GTK.GtkMenuItem new.
-	    GTK.GtkMenuItem menuItem: 'Assistant' connectTo: self selector: #gtkAssistant.
-	    GTK.GtkMenuItem new.
-	    GTK.GtkMenuItem menuItem: 'Smallzilla' connectTo: self selector: #webBrowser}
+	menu := {GTK.GtkMenuItem menuItem: 'Browser' accelPath: '<GtkLauncher>/Tools/TabbedClassBrowser' connectTo: OpenBrowserCommand selector: #execute.
+            GTK.GtkMenuItem menuItem: 'Browser window' accelPath: '<GtkLauncher>/Tools/ClassBrowser' connectTo: OpenWindowedBrowserCommand selector: #execute.
+            GTK.GtkMenuItem menuItem: 'Workspace' connectTo: OpenWorkspaceCommand selector: #execute.
+            GTK.GtkMenuItem menuItem: 'Implementors' accelPath: '<GtkLauncher>/Tools/Implementors' connectTo: OpenImplementorCommand selector: #execute.
+            GTK.GtkMenuItem menuItem: 'Senders' accelPath: '<GtkLauncher>/Tools/Senders' connectTo: OpenSenderCommand selector: #execute.
+            GTK.GtkMenuItem menuItem: 'SUnit' connectTo: OpenSUnitCommand selector: #execute} asOrderedCollection.
+
+	GtkWebView hasWebkit ifTrue: [ menu addAll: {GTK.GtkMenuItem new.
+            GTK.GtkMenuItem menuItem: 'Assistant' connectTo: OpenAssistantCommand selector: #execute.
+            GTK.GtkMenuItem new.
+            GTK.GtkMenuItem menuItem: 'Smallzilla' connectTo: OpenWebBrowserCommand selector: #execute} ].
+
+	^ self createNewMenuEntry: menu 
     ]
 
     isCurrentWidgetTranscript [
@@ -576,30 +603,6 @@ THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.';
 	<category: 'smalltalk events'>
 
 	browsers currentWidget acceptIt
-    ]
-
-    implementors [
-	<category: 'smalltalk events'>
-
-	GtkImplementor open
-    ]
-
-    senders [
-	<category: 'smalltalk events'>
-
-	GtkSender open
-    ]
-
-    gtkAssistant [
-	<category: 'tools events'>
-
-	GtkAssistant open
-    ]
-
-    webBrowser [
-	<category: 'tools events'>
-
-	GtkWebBrowser open
     ]
 
     back [
@@ -732,12 +735,6 @@ THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.';
         <category: 'method events'>
 
 	browsers currentWidget fileoutMethod
-    ]
-
-    sunit [
-	<category: 'tools events'>
-
-	GtkSUnit open
     ]
 ]
 

@@ -36,5 +36,10 @@ GtkConcreteWidget subclass: GtkSUnitResult [
 	results do: [ :each |
 	    self model appendItem: {each displayString} ]
     ]
+
+    onPress: aGtkWidget event: aGdkEvent [
+	<category: 'event'>
+
+    ]
 ]
 

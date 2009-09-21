@@ -54,7 +54,6 @@ THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.';
 	<category: 'intialize-release'>
 
         | webview |
-        GtkWebView registerDLD.
 
         webview := GtkWebView new
                         openUrl: 'http://library.gnome.org/devel/gtk/stable/index.html';

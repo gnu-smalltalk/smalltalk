@@ -46,6 +46,12 @@
   <filein>Commands/FileoutMethodCommand.st</filein>
   <filein>Commands/AddMethodCommand.st</filein>
   <filein>Commands/DeleteMethodCommand.st</filein>
+  <filein>Commands/OpenWindowedBrowserCommand.st</filein>
+  <filein>Commands/OpenAssistantCommand.st</filein>
+  <filein>Commands/OpenImplementorCommand.st</filein>
+  <filein>Commands/OpenSenderCommand.st</filein>
+  <filein>Commands/OpenSUnitCommand.st</filein>
+  <filein>Commands/OpenWebBrowserCommand.st</filein>
   <filein>GtkTextWidget.st</filein>
   <filein>GtkMainWindow.st</filein>
   <filein>VisualGST.st</filein>
@@ -143,6 +149,8 @@
   <filein>GtkMethodSUnitWidget.st</filein>
   <filein>GtkMethodSUnitModel.st</filein>
   <filein>SUnit/GtkSUnit.st</filein>
+  <filein>Commands/OpenBrowserCommand.st</filein>
+  <filein>Commands/OpenWorkspaceCommand.st</filein>
   <file>Notification/AbstractEvent.st</file>
   <file>Notification/AddedEvent.st</file>
   <file>Notification/CommentedEvent.st</file>
@@ -172,6 +180,12 @@
   <file>Commands/FileoutMethodCommand.st</file>
   <file>Commands/AddMethodCommand.st</file>
   <file>Commands/DeleteMethodCommand.st</file>
+  <file>Commands/OpenWindowedBrowserCommand.st</file>
+  <file>Commands/OpenAssistantCommand.st</file>
+  <file>Commands/OpenImplementorCommand.st</file>
+  <file>Commands/OpenSenderCommand.st</file>
+  <file>Commands/OpenSUnitCommand.st</file>
+  <file>Commands/OpenWebBrowserCommand.st</file>
   <file>GtkTextWidget.st</file>
   <file>GtkMainWindow.st</file>
   <file>VisualGST.st</file>
@@ -269,6 +283,8 @@
   <file>GtkMethodSUnitWidget.st</file>
   <file>GtkMethodSUnitModel.st</file>
   <file>SUnit/GtkSUnit.st</file>
+  <file>Commands/OpenBrowserCommand.st</file>
+  <file>Commands/OpenWorkspaceCommand.st</file>
   <start>VisualGST.VisualGST open.
     GTK.Gtk main</start>
 </package>

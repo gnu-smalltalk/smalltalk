@@ -11,7 +11,7 @@ GtkMainWindow subclass: GtkClassBrowser [
 	<category: 'events'>
 
 	(GTK.GtkAboutDialog new)
-	    setVersion: GtkLauncher version;
+	    setVersion: VisualGST version;
 	    setLicense: 'Permission is hereby granted, free of charge, to any person obtaining
 a copy of this software and associated documentation files (the "Software"),
 to deal in the Software without restriction, including without limitation
@@ -424,14 +424,27 @@ THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.';
     ]
 
     createToolsMenus [
-	<category: 'user interface'>
+        <category: 'user interface'>
 
-	^ self createNewMenuEntry: 
-	    {GTK.GtkMenuItem menuItem: 'Browser' connectTo: self selector: #classBrowser.
-	    GTK.GtkMenuItem menuItem: 'Workspace' connectTo: self selector: #workspace.
-	    GTK.GtkMenuItem menuItem: 'Inspector' connectTo: self selector: #gtkInspector.
-	    GTK.GtkMenuItem new.
-	    GTK.GtkMenuItem menuItem: 'SqueakZilla' connectTo: self selector: #squeakzilla}
+        | menu |
+        self accelGroup append: {{'<Control>B'. '<GtkLauncher>/Tools/TabbedClassBrowser'}.
+            {'<Control><shift>B'. '<GtkLauncher>/Tools/ClassBrowser'}.
+            {'<Control>M'. '<GtkLauncher>/Tools/Implementors'}.
+            {'<Control>N'. '<GtkLauncher>/Tools/Senders'}}.
+
+        menu := {GTK.GtkMenuItem menuItem: 'Browser' accelPath: '<GtkLauncher>/Tools/TabbedClassBrowser' connectTo: OpenBrowserCommand selector: #execute.
+            GTK.GtkMenuItem menuItem: 'Browser window' accelPath: '<GtkLauncher>/Tools/ClassBrowser' connectTo: OpenWindowedBrowserCommand selector: #execute.
+            GTK.GtkMenuItem menuItem: 'Workspace' connectTo: OpenWorkspaceCommand selector: #execute.
+            GTK.GtkMenuItem menuItem: 'Implementors' accelPath: '<GtkLauncher>/Tools/Implementors' connectTo: OpenImplementorCommand selector: #execute.
+            GTK.GtkMenuItem menuItem: 'Senders' accelPath: '<GtkLauncher>/Tools/Senders' connectTo: OpenSenderCommand selector: #execute.
+            GTK.GtkMenuItem menuItem: 'SUnit' connectTo: OpenSUnitCommand selector: #execute} asOrderedCollection.
+
+        GtkWebView hasWebkit ifTrue: [ menu addAll: {GTK.GtkMenuItem new.
+            GTK.GtkMenuItem menuItem: 'Assistant' connectTo: OpenAssistantCommand selector: #execute.
+            GTK.GtkMenuItem new.
+            GTK.GtkMenuItem menuItem: 'Smallzilla' connectTo: OpenWebBrowserCommand selector: #execute} ].
+
+        ^ self createNewMenuEntry: menu
     ]
 
     doIt [

@@ -60,8 +60,6 @@ THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.';
     buildCentralWidget [
 	<category: 'intialize-release'>
 
-        GtkWebView registerDLD.
-
         webview := GtkWebView new
                         openUrl: 'http://smalltalk.gnu.org/';
                         showAll;
