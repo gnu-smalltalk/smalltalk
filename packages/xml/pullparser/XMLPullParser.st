@@ -216,6 +216,13 @@ Stream subclass: XMLPullParser [
 	self subclassResponsibility
     ]
 
+    do: aBlock [
+	<category: 'core api'>
+	self atEnd ifTrue: [^self].
+	aBlock value: self current.
+	super do: aBlock
+    ]
+
     doctypeName [
 	<category: 'delegating accessors'>
 	^self isStartDoctypeDecl 
@@ -314,6 +321,11 @@ Stream subclass: XMLPullParser [
     isNotationDecl [
 	<category: 'testing event types'>
 	^self current isNotationDecl
+    ]
+
+    isSkippedEntity [
+	<category: 'testing event types'>
+	^self current isSkippedEntity
     ]
 
     isPI [
@@ -908,6 +920,12 @@ SAXDriver subclass: SAXEventGenerator [
         <category: 'content handler'>
 
 	generator yield: (SAXProcessingInstruction target: targetString data: dataString)
+    ]
+
+    skippedEntity: aString [
+        <category: 'content handler'>
+
+	generator yield: (SAXSkippedEntity name: aString)
     ]
 
     startCdataSection [

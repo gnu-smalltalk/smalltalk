@@ -71,6 +71,11 @@ Object subclass: SAXEvent [
 	^false
     ]
 
+    isSkippedEntity [
+	<category: 'testing'>
+	^false
+    ]
+
     isUnparsedEntityDecl [
 	<category: 'testing'>
 	^false
@@ -776,6 +781,42 @@ SAXExternalDecl subclass: SAXStartDoctypeDecl [
     hasInternalSubset: aBoolean [
         <category: 'accessing'>
         hasInternalSubset := aBoolean
+    ]
+
+    name [
+        <category: 'accessing'>
+        ^name
+    ]
+
+    name: aString [
+        <category: 'accessing'>
+        name := aString
+    ]
+
+]
+
+
+
+SAXEvent subclass: SAXSkippedEntity [
+    | name |
+    
+    <category: 'XMLPullParser'>
+    <comment: nil>
+
+    SAXSkippedEntity class >> name: aString [
+	<category: 'instance creation'>
+	^self new name: aString
+    ]
+
+    isSkippedEntity [
+	<category: 'testing'>
+	^true
+    ]
+
+    serializeTo: serializer [
+	<category: 'serializing'>
+	serializer 
+	    skippedEntity: name
     ]
 
     name [

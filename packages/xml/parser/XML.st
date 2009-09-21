@@ -2467,6 +2467,7 @@ Instance Variables:
 	"So we don't lose hereChar."
 	input := sax resolveEntity: (uriList at: 1) systemID: (uriList at: 2).
 	input == nil ifTrue: [input := InputSource for: (uriList at: 2)].
+	"TODO: raise skippedEntity here?"
 	self pushSource: (str := StreamWrapper 
 			    resource: input
 			    entity: ((GeneralEntity new)
@@ -2773,15 +2774,14 @@ Instance Variables:
 		hereChar = $; ifFalse: [self malformed: 'A semicolon was expected'].
 		exp := self dtd parameterEntityAt: nm.
 		exp == nil 
-		    ifTrue: [self warn: 'The parameter entity "%1" has not been defined' % {nm}].
-		exp == nil 
 		    ifTrue: 
 			[self isValidating 
 			    ifTrue: 
-				[self invalid: 'Parameter entity used but not defined'.
+				[self invalid: 'Parameter entity "%%%1" used but not defined' % {nm}.
 				self getNextChar]
 			    ifFalse: 
-				[self 
+				[self skippedEntity: '%', nm.
+				self 
 				    pushSource: (StreamWrapper emptyWithExtraSpace: refType ~= #data from: self).
 				self getNextChar]]
 		    ifFalse:
@@ -3193,8 +3193,9 @@ Instance Variables:
 	exp := self dtd generalEntityAt: nm.
 	exp == nil 
 	    ifTrue: 
-		[msg := 'The general entity "%1" has not been defined' % {nm}.
-		self isValidating ifTrue: [self invalid: msg] ifFalse: [self warn: msg].
+		[self isValidating
+		    ifTrue: [self invalid: 'The general entity "%1" has not been defined' % {nm}]
+		    ifFalse: [sax skippedEntity: nm].
 		self shouldTestWFCEntityDeclared 
 		    ifTrue: [self malformed: 'General entity used but not defined'].
 		"str nextPut: $&; nextPutAll: nm; nextPut: $;."

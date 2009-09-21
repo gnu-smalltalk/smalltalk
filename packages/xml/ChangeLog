@@ -1,3 +1,9 @@
+2009-09-21  Paolo Bonzini  <bonzini@gnu.org>
+
+	* pullparser/XMLPullParser.st: Another event...
+	* saxdriver/Events.st: Another event...
+	* parser/XML.st: Raise it here.
+
 2009-09-20  Paolo Bonzini  <bonzini@gnu.org>
 
 	* pullparser/XMLPullParser.st: Push up #atEnd.  Look ahead for more
