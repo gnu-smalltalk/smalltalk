@@ -73,12 +73,13 @@ recurse (volatile int n)
   return *recurse_1 (n, &n);
 }
 
+/* glibc says: Users should use SIGSTKSZ as the size of user-supplied
+   buffers.  */
+char mystack[SIGSTKSZ];
+
 int
 main ()
 {
-  /* glibc says: Users should use SIGSTKSZ as the size of user-supplied
-     buffers.  */
-  char mystack[SIGSTKSZ];
   sigset_t emptyset;
 
 #if HAVE_SETRLIMIT && defined RLIMIT_STACK

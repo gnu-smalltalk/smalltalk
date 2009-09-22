@@ -1,3 +1,9 @@
+2009-09-22  Paolo Bonzini  <bonzini@gnu.org>
+
+	Fix crash of stackoverflow2 on x86_64-linux.
+	* tests/stackoverflow1.c: Make mystack global.
+	* tests/stackoverflow2.c: Likewise.
+
 2008-10-19  Paolo Bonzini  <bonzini@gnu.org>
 
 	* configure.ac: Test for vm_region before using stackvma-mach.c.
