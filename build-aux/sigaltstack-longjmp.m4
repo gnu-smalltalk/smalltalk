@@ -48,9 +48,9 @@ volatile int recurse (volatile int n)
   int sum = 0;
   return *recurse_1 (n, &sum);
 }
+char mystack[16384];
 int main ()
 {
-  char mystack[16384];
   stack_t altstack;
   struct sigaction action;
   sigset_t emptyset;
