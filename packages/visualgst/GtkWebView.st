@@ -2,19 +2,25 @@ GTK.GtkWidget subclass: GtkWebView [
 
     WebKitAvailable := nil.
 
-    GtkWebView class >> update: aSymbol [
-	<category: 'C call-outs'>
+    GtkWebView class >> initialize [
+        <category: 'initialize'>
 
-	aSymbol == #returnFromSnapshot ifTrue: [ WebKitAvailable := nil ].
+        DLD addLibrary: 'libwebkit-1.0'.
+        ObjectMemory addDependent: self.
+    ]
+
+    GtkWebView class >> update: aSymbol [
+        <category: 'initialize'>
+
+        aSymbol == #returnFromSnapshot ifTrue: [ WebKitAvailable := nil ].
     ]
 
     GtkWebView class >> hasWebkit [
-	<category: 'testing'>
+        <category: 'testing'>
 
-	^WebKitAvailable ifNil: [
-	    DLD addLibrary: 'libwebkit-1.0'.
-	    WebKitAvailable :=
-		CFunctionDescriptor isFunction: 'webkit_web_view_new' ]
+        ^ WebKitAvailable ifNil: [
+            WebKitAvailable :=
+                CFunctionDescriptor isFunction: 'webkit_web_view_new' ]
     ]
 
     GtkWebView class >> new [
@@ -30,3 +36,6 @@ GTK.GtkWidget subclass: GtkWebView [
     ]
 ]
 
+Eval [
+    GtkWebView initialize
+]
