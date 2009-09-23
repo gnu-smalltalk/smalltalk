@@ -1,3 +1,7 @@
+2009-09-23  Gwenael Casaccio  <mrgwen@gmail.com>
+
+	* GtkSourceCodeWidget.st: Fix backtraces.
+
 2009-09-23  Paolo Bonzini  <bonzini@gnu.org>
 
 	* GtkWebView.st: Fixlet.

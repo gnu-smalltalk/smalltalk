@@ -116,23 +116,22 @@ GtkConcreteWidget subclass: GtkSourceCodeWidget [
     sourceCode: aString [
 	<category: 'accessing'>
 
-	| node |
 	codeView emptyStack.
 	self codeText: aString. 
 	codeBuffer setText: aString.
-	node := self parseSource: aString.
-	SyntaxHighlighter highlight: node in: codeBuffer
+	self parseSource: aString ifParsed: [ :node | SyntaxHighlighter highlight: node in: codeBuffer ]
     ]
 
-    parseSource: aString [
+    parseSource: aString ifParsed: aOneArgBlock [
 	<category: 'parsing'>
 
-	| parser |
+	| node parser |
 	parser := STInST.RBBracketedMethodParser new
                     errorBlock: [ :string :pos | ^ self ];
                     initializeParserWith: aString type: #'on:errorBlock:';
                     yourself.
-        ^ [ parser parseMethod ] on: Error do: [ :ex | stderr print: ex messageText; nl; print: ex signalingContext; nl; nl ]
+        [ node := parser parseMethod ] on: Error do: [ :ex | stderr print: ex messageText; nl; print: ex signalingContext; nl; nl. ^ self ].
+	^ aOneArgBlock value: node
     ]
 
     buildCodeView [
@@ -158,9 +157,7 @@ GtkConcreteWidget subclass: GtkSourceCodeWidget [
 
 	| node text |
 	(text := codeBuffer text) = '' ifTrue: [ ^ self ].
-	node := self parseSource: text.
-	node == self ifTrue: [ ^ self ].
-        SyntaxHighlighter highlight: node in: codeBuffer
+	self parseSource: text ifParsed: [ :node | SyntaxHighlighter highlight: node in: codeBuffer ]
     ]
 
     hasUndo [
