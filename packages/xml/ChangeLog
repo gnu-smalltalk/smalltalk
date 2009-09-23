@@ -1,3 +1,11 @@
+2009-09-23  Paolo Bonzini  <bonzini@gnu.org>
+
+	* expat/ExpatParser.st: New.
+	* expat/ExpatPullParser.st: New.
+	* expat/ExpatTests.st: New.
+	* expat/expat.c: New.
+	* expat/package.xml: New.
+
 2009-09-21  Paolo Bonzini  <bonzini@gnu.org>
 
 	* pullparser/XMLPullParser.st: Another event...

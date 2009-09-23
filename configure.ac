@@ -491,6 +491,10 @@ GST_PACKAGE_ENABLE([XML-XMLNodeBuilder], [xml/builder])
 GST_PACKAGE_ENABLE([XML-DOM], [xml/dom])
 GST_PACKAGE_ENABLE([XML-ParserTests], [xml/tests])
 GST_PACKAGE_ENABLE([XML-PullParser], [xml/pullparser])
+GST_PACKAGE_ENABLE([XML-Expat], [xml/expat],
+  [AC_CHECK_HEADER([expat.h])],
+  [ac_cv_header_expat_h],
+  [Makefile], [expat.la])
 GST_PACKAGE_ENABLE([XML-XMLParser], [xml/parser])
 GST_PACKAGE_ENABLE([XML-SAXDriver], [xml/saxdriver])
 GST_PACKAGE_ENABLE([XML-SAXParser], [xml/saxparser])

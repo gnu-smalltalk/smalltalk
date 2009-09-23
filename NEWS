@@ -8,6 +8,15 @@ o   An XML pull parser is included as package XML-PullParser.  The package
     is based on the VisualWorks and Squeak pull parsers by Anthony Blakey
     and Ken Treis.
 
+o   In addition to the validating XML parser, a non-validating Expat-based
+    parser is available in package XML-Expat.  The Expat parser is
+    experimental, but it is very fast and supports both pull and push
+    operation.
+
+o   The suggested way to instantiate an XML parser is now using
+    "SAXParser defaultParserClass", which will work with either of the
+    two available parsers.
+
 o   Fixed crash on omitting mandatory arguments of short options
 
 o   Support for one-way become (Object>>#becomeForward:)

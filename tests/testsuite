@@ -578,7 +578,7 @@ at_change_dir=false
 # List of the tested programs.
 at_tested='gst'
 # List of the all the test groups.
-at_groups_all=' 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46 47 48 49 50 51 52 53 54 55 56 57 58 59 60 61 62 63 64 65 66 67 68 69 70 71 72 73 74 75 76 77 78 79 80 81 82 83 84 85 86 87 88 89 90 91 92 93 94 95 96 97 98 99 100 101 102 103 104 105 106 107 108 109 110 111 112 113 114 115 116 117 118 119 120 121 122 123 124 125'
+at_groups_all=' 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46 47 48 49 50 51 52 53 54 55 56 57 58 59 60 61 62 63 64 65 66 67 68 69 70 71 72 73 74 75 76 77 78 79 80 81 82 83 84 85 86 87 88 89 90 91 92 93 94 95 96 97 98 99 100 101 102 103 104 105 106 107 108 109 110 111 112 113 114 115 116 117 118 119 120 121 122 123 124 125 126'
 # As many question marks as there are digits in the last test group number.
 # Used to normalize the test group numbers so that `ls' lists them in
 # numerical order.
@@ -708,7 +708,8 @@ at_help_all="1;testsuite.at:27;arrays.st;base;
 122;testsuite.at:160;Sport;sport sunit;
 123;testsuite.at:161;Swazoo;swazoo sunit;
 124;testsuite.at:162;XML-XMLParser;xml-xmlparser sunit;
-125;testsuite.at:163;ZLib;zlib sunit;
+125;testsuite.at:163;XML-Expat;xml-expat sunit;
+126;testsuite.at:164;ZLib;zlib sunit;
 "
 
 # at_fn_validate_ranges NAME...
@@ -720,7 +721,7 @@ at_fn_validate_ranges ()
   for at_grp
   do
     eval at_value=\$$at_grp
-    if test $at_value -lt 1 || test $at_value -gt 125; then
+    if test $at_value -lt 1 || test $at_value -gt 126; then
       $as_echo "invalid test group: $at_value" >&2
       exit 1
     fi
@@ -7288,11 +7289,11 @@ $at_traceon; }
 read at_status <"$at_status_file"
 #AT_STOP_124
 #AT_START_125
-# 125. testsuite.at:163: ZLib
+# 125. testsuite.at:163: XML-Expat
 at_setup_line='testsuite.at:163'
 at_fn_banner 5
-at_desc="ZLib"
-at_desc_line="125: $at_desc                                           "
+at_desc="XML-Expat"
+at_desc_line="125: $at_desc                                      "
 $at_quiet $as_echo_n "$at_desc_line"
 at_xfail=no
 echo "#                             -*- compilation -*-" >> "$at_group_log"
@@ -7309,21 +7310,21 @@ echo "#                             -*- compilation -*-" >> "$at_group_log"
     *) image_path="" ;;
   esac
 
-  echo "{ (cd $abs_top_builddir && gst $image_path -f $abs_top_srcdir/scripts/Test.st --verbose  -p ZLib
+  echo "{ (cd $abs_top_builddir && gst $image_path -f $abs_top_srcdir/scripts/Test.st --verbose  -p XML-Expat
     ret=$?
     case $ret in
       2) exit 77 ;;
       0|1) exit $ret ;;
     esac); echo exit $? > retcode; } | tr -d '\r' | tee stdout; . ./retcode"
   { set +x
-$as_echo "$at_srcdir/testsuite.at:163: { (cd \$abs_top_builddir && gst \$image_path -f \$abs_top_srcdir/scripts/Test.st --verbose  -p ZLib
+$as_echo "$at_srcdir/testsuite.at:163: { (cd \$abs_top_builddir && gst \$image_path -f \$abs_top_srcdir/scripts/Test.st --verbose  -p XML-Expat
     ret=\$?
     case \$ret in
       2) exit 77 ;;
       0|1) exit \$ret ;;
     esac); echo exit \$? > retcode; } | tr -d '\\r' | tee stdout; . ./retcode"
 at_fn_check_prepare_notrace 'an embedded newline' "testsuite.at:163"
-( $at_check_trace; { (cd $abs_top_builddir && gst $image_path -f $abs_top_srcdir/scripts/Test.st --verbose  -p ZLib
+( $at_check_trace; { (cd $abs_top_builddir && gst $image_path -f $abs_top_srcdir/scripts/Test.st --verbose  -p XML-Expat
     ret=$?
     case $ret in
       2) exit 77 ;;
@@ -7344,3 +7345,60 @@ $at_traceon; }
 ) 5>&1 2>&1 | eval $at_tee_pipe
 read at_status <"$at_status_file"
 #AT_STOP_125
+#AT_START_126
+# 126. testsuite.at:164: ZLib
+at_setup_line='testsuite.at:164'
+at_fn_banner 5
+at_desc="ZLib"
+at_desc_line="126: $at_desc                                           "
+$at_quiet $as_echo_n "$at_desc_line"
+at_xfail=no
+echo "#                             -*- compilation -*-" >> "$at_group_log"
+(
+  $as_echo "126. testsuite.at:164: testing ..."
+  $at_traceon
+
+
+
+
+
+  case $AUTOTEST_PATH in
+    tests) image_path="-I $abs_top_builddir/gst.im" ;;
+    *) image_path="" ;;
+  esac
+
+  echo "{ (cd $abs_top_builddir && gst $image_path -f $abs_top_srcdir/scripts/Test.st --verbose  -p ZLib
+    ret=$?
+    case $ret in
+      2) exit 77 ;;
+      0|1) exit $ret ;;
+    esac); echo exit $? > retcode; } | tr -d '\r' | tee stdout; . ./retcode"
+  { set +x
+$as_echo "$at_srcdir/testsuite.at:164: { (cd \$abs_top_builddir && gst \$image_path -f \$abs_top_srcdir/scripts/Test.st --verbose  -p ZLib
+    ret=\$?
+    case \$ret in
+      2) exit 77 ;;
+      0|1) exit \$ret ;;
+    esac); echo exit \$? > retcode; } | tr -d '\\r' | tee stdout; . ./retcode"
+at_fn_check_prepare_notrace 'an embedded newline' "testsuite.at:164"
+( $at_check_trace; { (cd $abs_top_builddir && gst $image_path -f $abs_top_srcdir/scripts/Test.st --verbose  -p ZLib
+    ret=$?
+    case $ret in
+      2) exit 77 ;;
+      0|1) exit $ret ;;
+    esac); echo exit $? > retcode; } | tr -d '\r' | tee stdout; . ./retcode
+) >>"$at_stdout" 2>>"$at_stderr"
+at_status=$? at_failed=false
+$at_check_filter
+at_fn_diff_devnull "$at_stderr" || at_failed=:
+echo stdout:; cat "$at_stdout"
+at_fn_check_status 0 $at_status "$at_srcdir/testsuite.at:164"
+$at_failed && at_fn_log_failure
+$at_traceon; }
+
+
+    set +x
+  $at_times_p && times >"$at_times_file"
+) 5>&1 2>&1 | eval $at_tee_pipe
+read at_status <"$at_status_file"
+#AT_STOP_126
