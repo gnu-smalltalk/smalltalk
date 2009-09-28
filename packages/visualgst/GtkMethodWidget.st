@@ -49,8 +49,8 @@ GtkConcreteWidget subclass: GtkMethodWidget [
     model [
 	<category: 'accessing'>
 
-	^ (self methodModel currentOn: self class withCategory: self category)
-	    model.
+	
+	^ model ifNil: [ model := self methodModel on: self class withCategory: self category ]
     ]
 
     emptyModel [
@@ -62,25 +62,26 @@ GtkConcreteWidget subclass: GtkMethodWidget [
     refreshModel [
 	<category: 'events'>
 
-	methodTree setModel: self model.
-        (self methodModel currentOn: self class withCategory: self category) isSorted
+	model := self methodModel on: self class withCategory: self category.
+	methodTree setModel: self model gtkModel.
+        self model isSorted
             ifFalse: [
                 column signalEmitByName: 'clicked' args: {}.
-                (self methodModel currentOn: self class withCategory: self category) sorted: true ].
+                self model sorted: true ].
     ]
 
     buildTreeView [
         <category: 'user interface'>
     
-	methodTree := (GTK.GtkTreeView newWithSortedTextColumn: self model title: 'Methods')
+	methodTree := (GTK.GtkTreeView newWithSortedTextColumn: self model gtkModel title: 'Methods')
                             connectSignal: 'button-press-event' to: self selector: #'onPress:event:' userData: nil;
                             yourself.
 	column := methodTree getColumn: 0.
 	methodTree getSelection setMode: GTK.Gtk gtkSelectionBrowse.
-        (self methodModel currentOn: self class withCategory: self category) isSorted
+        self model isSorted
             ifFalse: [
                 column signalEmitByName: 'clicked' args: {}.
-                (self methodModel currentOn: self class withCategory: self category) sorted: true ].
+                self model sorted: true ].
 	^ GTK.GtkScrolledWindow withChild: methodTree
     ]
 
@@ -135,7 +136,7 @@ GtkConcreteWidget subclass: GtkMethodWidget [
 
         | iter string |
         (iter := methodTree selectedIter) ifNil: [ self error: 'Nothing is selected' ].
-        ^ (self model getOop: iter column: 0) asSymbol
+        ^ (self model gtkModel getOop: iter column: 0) asSymbol
     ]
 
     selectedMethod [

@@ -1,13 +1,4 @@
 Object subclass: GtkMethodModel [
-    GtkMethodModel class [ | current | ]
-
-    GtkMethodModel class >> currentOn: aClass withCategory: aCategory [
-	<category: 'accessing'>
-
-	current ifNil: [ current := Dictionary new ].
-	^ (current at: aClass ifAbsentPut: [ Dictionary new ])
-	    at: aCategory ifAbsentPut: [ self on: aClass withCategory: aCategory ]
-    ]
 
     GtkMethodModel class >> on: aClass withCategory: aCategory [
 	<category: 'instance creation'>
@@ -18,30 +9,21 @@ Object subclass: GtkMethodModel [
 	    yourself
     ]
 
-    GtkMethodModel class >> addEvent: anEvent [
-	<category: 'event'>
-
-	| model |
-	model := (current at: anEvent item methodClass ifAbsent: [ ^ self ])
-		    at: anEvent item methodCategory ifAbsent: [ ^ self ].
-	model appendMethod: anEvent item selector asString
-    ]
-
-    GtkMethodModel class >> removeEvent: anEvent [
-	<category: 'event'>
-
-        | model |
-        model := (current at: anEvent item methodClass ifAbsent: [ ^ self ])
-                    at: anEvent item methodCategory ifAbsent: [ ^ self ].
-        model removeMethod: anEvent item selector asString
-    ]
-
     | model classOrMeta category sorted |
 
     initialize [
         <category: 'initialize-release'>
 
-        sorted := false
+        sorted := false.
+	self registerNotifier
+    ]
+
+    registerNotifier [
+	<category: 'initialize-release'>
+
+	(SystemChangeNotifier uniqueInstance)
+	    notify: self ofSystemChangesOfItem: #method change: #Added using: #'addEvent:';
+	    notify: self ofSystemChangesOfItem: #method change: #Removed using: #'removeEvent:'
     ]
 
     isSorted [
@@ -82,7 +64,7 @@ Object subclass: GtkMethodModel [
 	self category: aString
     ]
 
-    model [
+    gtkModel [
 	<category: 'accessing'>
 
 	^ model ifNil: [
@@ -100,7 +82,7 @@ Object subclass: GtkMethodModel [
     
 	self classOrMeta ifNil: [ ^ model := self emptyModel ].
 
-	self model clear.
+	self gtkModel clear.
 
 	self classOrMeta selectors do: [ :each |
 	    (((self classOrMeta compiledMethodAt: each) methodCategory = self category) or: [ self category = '*'])
@@ -121,7 +103,7 @@ Object subclass: GtkMethodModel [
     findIterInAMethod: aString [
         <category: 'item selection'>
 
-	self model do: [ :elem :iter |
+	self gtkModel do: [ :elem :iter |
 	    elem first = aString ifTrue: [ ^ iter ] ].
         self error: 'Method not found'
     ]
@@ -129,7 +111,7 @@ Object subclass: GtkMethodModel [
     appendMethod: aString [
 	<category: 'model builder'>
     
-	self model appendItem: {aString}
+	self gtkModel appendItem: {aString}
     ]
 
     removeMethod: aString [
@@ -137,7 +119,21 @@ Object subclass: GtkMethodModel [
 
         | iter |
         iter := self findIterInAMethod: aString.
-        self model remove: iter
+        self gtkModel remove: iter
+    ]
+
+    addEvent: anEvent [
+	<category: 'event'>
+
+	(anEvent item methodClass == self classOrMeta and: [ anEvent item methodCategory = self category ]) ifFalse: [ ^ self ].
+	self appendMethod: anEvent item selector asString
+    ]
+
+    removeEvent: anEvent [
+	<category: 'event'>
+
+	(anEvent item methodClass == self classOrMeta and: [ anEvent item methodCategory = self category ]) ifFalse: [ ^ self ].
+        self removeMethod: anEvent item selector asString
     ]
 ]
 

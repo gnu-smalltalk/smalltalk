@@ -1,3 +1,15 @@
+2009-09-28  Gwenael Casaccio  <mrgwen@gmail.com>
+
+	* Commands/SaveImageAsCommand.st, Commands/SaveImageCommand.st,
+	Debugger/GtkDebugger.st, GtkCategoryModel.st, GtkCategoryWidget.st,
+	GtkClassBrowser.st, GtkClassBrowserWidget.st, GtkClassModel.st,
+	GtkClassSUnitModel.st, GtkClassWidget.st, GtkMethodModel.st,
+	GtkMethodSUnitModel.st, GtkMethodWidget.st, GtkNamespaceModel.st,
+	GtkNamespaceWidget.st, Implementors/GtkImageModel.st,
+	Implementors/GtkImplementor.st, Inspector/GtkInspector.st,
+	Notification/SystemEventManager.st, SUnit/GtkSUnit.st,
+	Senders/GtkSender.st, VisualGST.st, package.xml: Sync to r236.
+
 2009-09-23  Gwenael Casaccio  <mrgwen@gmail.com>
 
 	* GtkSourceCodeWidget.st: Fix backtraces.

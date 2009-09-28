@@ -156,20 +156,6 @@ GtkConcreteWidget subclass: GtkClassBrowserWidget [
         ^ iMethodWidget mainWidget
     ]
 
-    initializeNotification [
-	<category: 'initialize-release'>
-
-	(SystemChangeNotifier uniqueInstance)
-	    notify: GtkNamespaceModel ofSystemChangesOfItem: #namespace change: #Added using: #'addEvent:';
-	    notify: GtkNamespaceModel ofSystemChangesOfItem: #namespace change: #Removed using: #'removeEvent:';
-	    notify: GtkClassSUnitModel ofSystemChangesOfItem: #class change: #Added using: #'addEvent:';
-	    notify: GtkClassSUnitModel ofSystemChangesOfItem: #class change: #Removed using: #'removeEvent:';
-	    notify: GtkClassModel ofSystemChangesOfItem: #class change: #Added using: #'addEvent:';
-	    notify: GtkClassModel ofSystemChangesOfItem: #class change: #Removed using: #'removeEvent:';
-	    notify: GtkMethodModel ofSystemChangesOfItem: #method change: #Added using: #'addEvent:';
-	    notify: GtkMethodModel ofSystemChangesOfItem: #method change: #Removed using: #'removeEvent:'
-    ]
-
     initializeHistory [
 	<category: 'initialize-release'>
 
@@ -189,7 +175,6 @@ GtkConcreteWidget subclass: GtkClassBrowserWidget [
 	vpaned := GTK.GtkVPaned new.
 
 	self mainWidget: vpaned.
-	self initializeNotification.
 	self initializeHistory.
  
 	vpaned

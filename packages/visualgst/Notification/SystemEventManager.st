@@ -14,25 +14,29 @@ Object subclass: SystemEventManager [
 
 	events := Dictionary new
     ]
- 
-    removeActionsWithReceiver: anObject [
+
+    removeActionsWithReceiver: anObject forEvent: anEvent [
 	"Stop sending system notifications to an object"
+
+	| dict |
+	dict := events keys at: anEvent ifAbsent: [ ^ self ].
+	dict removeKey: anObject ifAbsent: [ ^ self ].
     ]
 
     when: eachEvent send: oneArgumentSelector to: anObject [
 	"Notifies an object of any events in the eventsCollection. Send it back a message 
 	#oneArgumentSelector, with as argument the particular system event instance"
 
-	| set |
-	set := events at: eachEvent ifAbsentPut: [ Set new ].
-	set add: (anObject -> oneArgumentSelector)
+	| dict |
+	dict := events at: eachEvent ifAbsentPut: [ WeakKeyIdentityDictionary new ].
+	dict at: anObject put: oneArgumentSelector
     ]
 
     triggerEvent: anEventSelector with: anEvent [
 
-	| set |
-	set := events at: anEventSelector ifAbsent: [ ^ self ].
-	set do: [ :each |
+	| dict |
+	dict := events at: anEventSelector ifAbsent: [ ^ self ].
+	dict associationsDo: [ :each |
 	    each key perform: each value with: anEvent ]
     ]
 

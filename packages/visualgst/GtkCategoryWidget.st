@@ -32,8 +32,7 @@ GtkConcreteWidget subclass: GtkCategoryWidget [
     model [
 	<category: 'accessing'>
 
-	^ (GtkCategoryModel currentOn: self class)
-	    model
+	^ model ifNil: [ model := GtkCategoryModel on: self class ]
     ]
 
     emptyModel [
@@ -44,26 +43,28 @@ GtkConcreteWidget subclass: GtkCategoryWidget [
 
     refreshModel [
 	<category: 'events'>
-   
-	categoryTree setModel: self model.
-	(GtkCategoryModel currentOn: self class) isSorted
+
+	model := GtkCategoryModel on: self class.
+
+	categoryTree setModel: self model gtkModel.
+	self model isSorted
             ifFalse: [
                 column signalEmitByName: 'clicked' args: {}.
-                (GtkCategoryModel currentOn: self class) sorted: true ]
+		self model sorted: true ]
     ]
 
     buildTreeView [
         <category: 'user interface'>
     
-	categoryTree := (GTK.GtkTreeView newWithSortedTextColumn: self model title: 'Method categories')
+	categoryTree := (GTK.GtkTreeView newWithSortedTextColumn: self model gtkModel title: 'Method categories')
 			    connectSignal: 'button-press-event' to: self selector: #'onPress:event:' userData: nil;
 			    yourself.
 	column := categoryTree getColumn: 0.
 	categoryTree getSelection setMode: GTK.Gtk gtkSelectionBrowse.
-	(GtkCategoryModel currentOn: self class) isSorted
+	self model isSorted
 	    ifFalse: [
 		column signalEmitByName: 'clicked' args: {}.
-		(GtkCategoryModel currentOn: self class) sorted: true ].
+		self model sorted: true ].
 	^ GTK.GtkScrolledWindow withChild: categoryTree
     ]
 
@@ -109,13 +110,13 @@ GtkConcreteWidget subclass: GtkCategoryWidget [
 
 	| iter string |
 	(iter := categoryTree selectedIter) ifNil: [self error: 'Nothing is selected'].
-	^ self model getOop: iter column: 0.
+	^ self model gtkModel getOop: iter column: 0.
     ]
 
     viewedCategoryModel [
 	<category: 'accessing'>
 
-	^ GtkCategoryModel currentOn: self class
+	^ self model
     ]
 
     newCategory [

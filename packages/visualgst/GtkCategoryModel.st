@@ -1,12 +1,4 @@
 Object subclass: GtkCategoryModel [
-    GtkCategoryModel class [ | current | ]
-
-    GtkCategoryModel class >> currentOn: aClass [
-	<category: 'accessing'>
-
-	current ifNil: [ current := Dictionary new ].
-	^ current at: aClass ifAbsentPut: [ self on: aClass ]
-    ]
 
     GtkCategoryModel class >> on: aClass [
 	<category: 'instance creation'>
@@ -23,6 +15,14 @@ Object subclass: GtkCategoryModel [
         <category: 'initialize-release'>
 
         sorted := false
+    ]
+
+    registerNofifier [
+	<category: 'initialize-release'>
+
+	(SystemChangeNotifier uniqueInstance)
+	    notify: self ofSystemChangesOfItem: #category change: #Added using: #'addEvent:';
+	    notify: self ofSystemChangesOfItem: #category change: #Removed using: #'removeEvent:'
     ]
 
     isSorted [
@@ -50,7 +50,7 @@ Object subclass: GtkCategoryModel [
 	self refreshModel
     ]
 
-    model [
+    gtkModel [
 	<category: 'accessing'>
 
 	^ model ifNil: [
@@ -60,13 +60,13 @@ Object subclass: GtkCategoryModel [
     clearModel [
 	<category: 'accessing'>
 
-	self model clear
+	self gtkModel clear
     ]
 
     refreshModel [
 	<category: 'events'>
    
-	self model clear.
+	self clearModel.
 	self classOrMeta isNil ifTrue: [ ^ self ].
 	self buildCategory do: [ :each |
 	    self appendCategory: each ]
@@ -90,9 +90,9 @@ Object subclass: GtkCategoryModel [
         | iter stack parent path pathString number |
         iter := GTK.GtkTreeIter new.
         path := GTK.GtkTreePath newFirst.
-        [self model getIter: iter path: path] whileTrue: [
-            self model getIter: iter path: path.
-            (aString = (self model getOop: iter column: 0))
+        [self gtkModel getIter: iter path: path] whileTrue: [
+            self gtkModel getIter: iter path: path.
+            (aString = (self gtkModel getOop: iter column: 0))
                 ifTrue: [ ^ true  ].
             path next ].
         ^ false
@@ -101,7 +101,7 @@ Object subclass: GtkCategoryModel [
     findIterInACategory: aString [
         <category: 'item selection'>
 
-	self model do: [ :elem :iter |
+	self gtkModel do: [ :elem :iter |
 	    elem first = aString ifTrue: [ ^ iter ] ].
 	self error: 'Category not found'
     ]
@@ -109,7 +109,7 @@ Object subclass: GtkCategoryModel [
     appendCategory: aString [
 	<category: 'model builder'>
     
-	self model appendItem: {aString}
+	self gtkModel appendItem: {aString}
     ]
 
     removeCategory: aString [
@@ -117,7 +117,7 @@ Object subclass: GtkCategoryModel [
 
         | iter |
 	iter := self findIterInACategory: aString.
-        self model remove: iter
+        self gtkModel remove: iter
     ]
 ]
 

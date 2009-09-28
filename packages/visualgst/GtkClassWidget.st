@@ -36,34 +36,35 @@ GtkConcreteWidget subclass: GtkClassWidget [
     model [
 	<category: 'accessing'>
 
-	^ (self classModel currentOn: self namespace)
-	    model
+	^ model ifNil: [ model := self classModel on: self namespace ]
     ]
 
     refreshModel [
 	<category: 'events'>
-	
+
+	model := self classModel on: self namespace.
+
 	classesTree
-	    setModel: self model;
+	    setModel: self model gtkModel;
 	    expandAll.
-	(self classModel currentOn: self namespace) isSorted
+	self model isSorted
             ifFalse: [
                 column signalEmitByName: 'clicked' args: {}.
-                (self classModel currentOn: self namespace) sorted: true ].
+                self model sorted: true ].
     ]
 
     buildTreeView [
 	<category: 'user interface'>
     
-	classesTree := (GTK.GtkTreeView newWithSortedTextColumn: self model title: 'Classes')
+	classesTree := (GTK.GtkTreeView newWithSortedTextColumn: self model gtkModel title: 'Classes')
 			    connectSignal: 'button-press-event' to: self selector: #'onPress:event:' userData: nil;
 			    yourself.
 	column := classesTree getColumn: 0.
 	classesTree getSelection setMode: GTK.Gtk gtkSelectionBrowse.
-	(self classModel currentOn: self namespace) isSorted 
+	self model isSorted 
 	    ifFalse: [
 		column signalEmitByName: 'clicked' args: {}.
-		(self classModel currentOn: self namespace) sorted: true ].
+		self model sorted: true ].
 	^ GTK.GtkScrolledWindow withChild: classesTree
     ]
 
@@ -117,7 +118,7 @@ GtkConcreteWidget subclass: GtkClassWidget [
 
 	| iter string |
 	(iter := self selectedIter) ifNil: [self error: 'Nothing is selected'].
-	string := ((self model getOop: iter column: 0) subStrings: $ ) at: 1.
+	string := ((self model gtkModel getOop: iter column: 0) subStrings: $ ) at: 1.
 	^ self namespace classAt: string asSymbol
     ]
 
@@ -135,8 +136,8 @@ GtkConcreteWidget subclass: GtkClassWidget [
 
 	| result |
 
-	result := (self classModel currentOn: self namespace) findIterInAClass: aClass.
-	classesTree scrollToCell: (self model getPath: result) column: nil useAlign: false rowAlign: 0.5 colAlign: 0.5.
+	result := self model findIterInAClass: aClass.
+	classesTree scrollToCell: (self model gtkModel getPath: result) column: nil useAlign: false rowAlign: 0.5 colAlign: 0.5.
 	^ result 
     ]
 

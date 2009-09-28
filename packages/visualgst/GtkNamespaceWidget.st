@@ -10,21 +10,23 @@ GtkConcreteWidget subclass: GtkNamespaceWidget [
     model [
 	<category: 'accessing'>
 
-	^ GtkNamespaceModel current model
+	^ model ifNil: [ model := GtkNamespaceModel new
+						initialize;
+						yourself ]
     ]
 
     buildTreeView [
 	<category: 'user interface'>
     
-	namespacesTree := (GTK.GtkTreeView newWithSortedTextColumn: self model title: 'Namespaces')
+	namespacesTree := (GTK.GtkTreeView newWithSortedTextColumn: self model gtkModel title: 'Namespaces')
 			    connectSignal: 'button-press-event' to: self selector: #'onPress:event:' userData: nil;
 			    expandAll;
                             yourself.
 	namespacesTree getSelection setMode: GTK.Gtk gtkSelectionBrowse.
-	GtkNamespaceModel current isSorted 
+	self model isSorted 
 	    ifFalse: [ 
 		(namespacesTree getColumn: 0) signalEmitByName: 'clicked' args: {}.
-		GtkNamespaceModel current sorted: true ].
+		self model sorted: true ].
 	^ GTK.GtkScrolledWindow withChild: namespacesTree
     ]
 
@@ -71,7 +73,7 @@ GtkConcreteWidget subclass: GtkNamespaceWidget [
     selectedNamespace [
 	<category: 'accessing'>
 
-	^ self findNamespace: (self model getOop: self selectedIter column: 0)
+	^ self findNamespace: (self model gtkModel getOop: self selectedIter column: 0)
     ]
 
     selectANamespace: aNamespace [
@@ -86,7 +88,7 @@ GtkConcreteWidget subclass: GtkNamespaceWidget [
     findIterInANamespace: aNamespace [
 	<category: 'item selection'>
 
-	^ GtkNamespaceModel current findIterInANamespace: aNamespace
+	^ self model findIterInANamespace: aNamespace
     ]
     
     findNamespace: aString [

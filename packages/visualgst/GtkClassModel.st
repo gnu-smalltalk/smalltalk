@@ -1,17 +1,4 @@
 Object subclass: GtkClassModel [
-    GtkClassModel class [ | current | ]
-    
-    GtkClassModel class >> current [
-	<category: 'accessing'>
-
-	^ current ifNil: [ current := Dictionary new ].
-    ]
-
-    GtkClassModel class >> currentOn: aNamespace [
-	<category: 'accessing'>
-
-	^ self current at: aNamespace ifAbsentPut: [ self on: aNamespace]
-    ]
 
     GtkClassModel class >> on: aNamespace [
 	<category: 'instance creation'>
@@ -22,30 +9,21 @@ Object subclass: GtkClassModel [
 	    yourself
     ]
 
-    GtkClassModel class >> addEvent: anEvent [
-	<category: 'model event'>
-
-	| model parentIter parent |
-	model := self current at: anEvent item environment ifAbsent: [ ^ self ].
-	parentIter := model findIterInAClass: anEvent item superclass ifAbsent: [ nil ].
-	model append: parentIter column: 0 value: anEvent item name
-    ]
-
-    GtkClassModel class >> removeEvent: anEvent [
-        <category: 'model event'>
-
-	| model |
-	model := current at: anEvent item environment ifAbsent: [ ^ self ].
-	(model hasClass: anEvent item) ifFalse: [ ^ self ].
-        model remove: anEvent item
-    ]
-
     | model namespace sorted |
 
     initialize [
 	<category: 'initialize-release'>
 
-	sorted := false
+	sorted := false.
+	self registerNotifier
+    ]
+
+    registerNotifier [
+	<category: 'initialize-release'>
+
+	(SystemChangeNotifier uniqueInstance)
+	    notify: self ofSystemChangesOfItem: #class change: #Added using: #'addEvent:';
+	    notify: self ofSystemChangesOfItem: #class change: #Removed using: #'removeEvent:'
     ]
 
     isSorted [
@@ -73,7 +51,7 @@ Object subclass: GtkClassModel [
 	self refreshModel
     ]
 
-    model [
+    gtkModel [
 	<category: 'accessing'>
 
 	^ model ifNil: [
@@ -83,7 +61,7 @@ Object subclass: GtkClassModel [
     refreshModel [
 	<category: 'events'>
 	
-	self model clear.
+	self gtkModel clear.
 	Class subclassesDo: [ :each |
 	    self appendClass: each to: nil ]
     ]
@@ -93,7 +71,7 @@ Object subclass: GtkClassModel [
     
 	| iter string |
 	aClass environment = self namespace ifTrue: [
-	    iter := self model append: parentGtkIter item: { aClass asClass name asString, ' ' } ].
+	    iter := self gtkModel append: parentGtkIter item: { aClass asClass name asString, ' ' } ].
 
 	aClass subclassesDo: [ :each |
 	    self appendClass: each to: iter ]
@@ -122,10 +100,10 @@ Object subclass: GtkClassModel [
         path := GTK.GtkTreePath newFirst.
         1 to: stack size do: [ :i | | each |
             each := stack at: (stack size + 1 - i).
-            self model getIter: iter path: path.
-            [each = (self model getOop: iter column: 0)] whileFalse: [
+            self gtkModel getIter: iter path: path.
+            [each = (self gtkModel getOop: iter column: 0)] whileFalse: [
                 path next.
-                (self model getIter: iter path: path)  ifFalse: [ ^ false ] ].
+                (self gtkModel getIter: iter path: path)  ifFalse: [ ^ false ] ].
             path down ].
         ^ true
     ]
@@ -146,10 +124,10 @@ Object subclass: GtkClassModel [
         path := GTK.GtkTreePath newFirst.
         1 to: stack size do: [ :i | | each |
             each := stack at: (stack size + 1 - i).
-            self model getIter: iter path: path.
-            [each = (self model getOop: iter column: 0)] whileFalse: [
+            self gtkModel getIter: iter path: path.
+            [each = (self gtkModel getOop: iter column: 0)] whileFalse: [
                 path next.
-                (self model getIter: iter path: path)  ifFalse: [ ^ aBlock value ] ].
+                (self gtkModel getIter: iter path: path)  ifFalse: [ ^ aBlock value ] ].
             path down ].
         ^ iter
     ]
@@ -157,7 +135,7 @@ Object subclass: GtkClassModel [
     at: aGtkIter column: aSmallInteger value: anObject [
         <category: 'item accessing'>
 
-        self model setOop: aGtkIter column: aSmallInteger value: anObject
+        self gtkModel setOop: aGtkIter column: aSmallInteger value: anObject
     ]
 
     append: aParentIter column: aSmallInteger value: anObject [
@@ -165,7 +143,7 @@ Object subclass: GtkClassModel [
 
         | iter |
         iter := GTK.GtkTreeIter new.
-        (self model)
+        (self gtkModel)
             append: iter parent: aParentIter;
             setOop: iter column: aSmallInteger value: anObject
     ]
@@ -175,7 +153,24 @@ Object subclass: GtkClassModel [
 
 	| iter |
 	iter := self findIterInAClass: aClass.
-	self model remove: iter
+	self gtkModel remove: iter
+    ]
+
+    addEvent: anEvent [
+	<category: 'model event'>
+
+	| parentIter parent |
+	anEvent item environment == self namespace ifFalse: [ ^ self ].
+	parentIter := self findIterInAClass: anEvent item superclass ifAbsent: [ nil ].
+	self append: parentIter column: 0 value: anEvent item name
+    ]
+
+    removeEvent: anEvent [
+        <category: 'model event'>
+
+	anEvent item environment == self namespace ifFalse: [ ^ self ].
+	(self hasClass: anEvent item) ifFalse: [ ^ self ].
+        self remove: anEvent item
     ]
 ]
 

@@ -1,36 +1,19 @@
 Object subclass: GtkNamespaceModel [
-    GtkNamespaceModel class [ | current | ]
-
     | model sorted |
-
-    GtkNamespaceModel class >> current [
-	<category: 'accessing'>
-
-	^ current ifNil: [
-	    current := self new
-			    initialize;
-			    yourself ]
-    ]
-
-    GtkNamespaceModel class >> addEvent: anEvent [
-	<category: 'model event'>
-
-	self current
-		append: (self current findIterInANamespace: anEvent item superspace)
-		column: 0
-		value: anEvent item displayString
-    ]
-
-    GtkNamespaceModel class >> removeEvent: anEvent [
-	<category: 'model event'>
-
-	self current remove: anEvent item
-    ]
 
     initialize [
 	<category: 'initialize-release'>
 
-	sorted := false
+	sorted := false.
+	self registerNotifier
+    ]
+
+    registerNotifier [
+	<category: 'initialize-release'>
+
+	(SystemChangeNotifier uniqueInstance)
+	    notify: self ofSystemChangesOfItem: #namespace change: #Added using: #'addEvent:';
+	    notify: self ofSystemChangesOfItem: #namespace change: #Removed using: #'removeEvent:'
     ]
 
     isSorted [
@@ -45,7 +28,7 @@ Object subclass: GtkNamespaceModel [
 	sorted := aBoolean
     ]
 
-    model [
+    gtkModel [
 	<category: 'accessing'>
 
 	^ model ifNil: [
@@ -57,7 +40,7 @@ Object subclass: GtkNamespaceModel [
     refresh [
 	<category: 'model'>
 
-	self model clear.
+	self gtkModel clear.
 	self appendNamespace: Smalltalk to: nil
     ]
 
@@ -66,7 +49,7 @@ Object subclass: GtkNamespaceModel [
 
 	
 	| iter |
-	iter := self model append: parentGtkIter item: {aNamespace displayString}.	
+	iter := self gtkModel append: parentGtkIter item: {aNamespace displayString}.	
 
 	aNamespace subspacesDo: [ :each |
 	    self appendNamespace: each to: iter ]
@@ -102,17 +85,17 @@ Object subclass: GtkNamespaceModel [
         <category: 'item selection'>
 
         | iter stack parent path |
-        aNamespace = Smalltalk ifTrue: [ ^ self model getIterFirst ].
+        aNamespace = Smalltalk ifTrue: [ ^ self gtkModel getIterFirst ].
 
         stack := self buildNamespaceArray: aNamespace.
         iter := GTK.GtkTreeIter new.
 	path := GTK.GtkTreePath newFirst.
         1 to: stack size do: [ :i | | each |
             each := stack at: i.
-	    self model getIter: iter path: path.
-            [each = (self model getOop: iter column: 0)] whileFalse: [
+	    self gtkModel getIter: iter path: path.
+            [each = (self gtkModel getOop: iter column: 0)] whileFalse: [
 		path next.
-		(self model getIter: iter path: path) ifFalse: [ self error: 'Namespace ', each , ' not found' ] ].
+		(self gtkModel getIter: iter path: path) ifFalse: [ self error: 'Namespace ', each , ' not found' ] ].
 	    path down ].
         ^ iter
     ]
@@ -120,7 +103,7 @@ Object subclass: GtkNamespaceModel [
     at: aGtkIter column: aSmallInteger value: anObject [
 	<category: 'item accessing'>
 
-	self model setOop: aGtkIter column: aSmallInteger value: anObject
+	self gtkModel setOop: aGtkIter column: aSmallInteger value: anObject
     ]
 
     append: aParentIter column: aSmallInteger value: anObject [
@@ -128,7 +111,7 @@ Object subclass: GtkNamespaceModel [
 
 	| iter |
 	iter := GTK.GtkTreeIter new.
-	(self model)
+	(self gtkModel)
             append: iter parent: aParentIter;
             setOop: iter column: aSmallInteger value: anObject
     ]
@@ -138,7 +121,22 @@ Object subclass: GtkNamespaceModel [
 
 	 | iter |
         iter := self findIterInANamespace: aNamespace.
-        self model remove: iter
+        self gtkModel remove: iter
+    ]
+
+    addEvent: anEvent [
+	<category: 'model event'>
+
+	self
+	    append: (self findIterInANamespace: anEvent item superspace)
+	    column: 0
+	    value: anEvent item displayString
+    ]
+
+    removeEvent: anEvent [
+	<category: 'model event'>
+
+	self remove: anEvent item
     ]
 ]
 

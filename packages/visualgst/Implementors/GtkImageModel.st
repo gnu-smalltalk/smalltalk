@@ -26,7 +26,20 @@ Object subclass: GtkImageModel [
 	    gtkModel;
             buildNamespaceModel;
             buildClassModel;
-            buildMethodModel
+            buildMethodModel;
+	    registerNotifier
+    ]
+
+    registerNotifier [
+	<category: 'initialize-release'>
+
+	(SystemChangeNotifier uniqueInstance)
+	    notify: self ofSystemChangesOfItem: #namespace change: #Added using: #'addNamespaceEvent:';
+	    notify: self ofSystemChangesOfItem: #namespace change: #Removed using: #'removeNamespaceEvent:';
+	    notify: self ofSystemChangesOfItem: #class change: #Added using: #'addClassEvent:';
+	    notify: self ofSystemChangesOfItem: #class change: #Removed using: #'removeClassEvent:';
+	    notify: self ofSystemChangesOfItem: #method change: #Added using: #'addMethodEvent:';
+	    notify: self ofSystemChangesOfItem: #method change: #Removed using: #'removeMethodEvent:'
     ]
 
     isSorted [
@@ -124,5 +137,37 @@ Object subclass: GtkImageModel [
 	finderDic := aDictionary.
 	finderDic keysDo: [ :each |
 	    self appendToModel: each ]
+    ]
+    
+    addNamespaceEvent: anEvent [
+	<category: 'events'>
+
+        finderDic at: anEvent item displayString ifAbsentPut: [ self appendToModel: anEvent item displayString. Dictionary new ].
+	self at: anEvent item displayString addToFinder: (NamespaceFinder on: anEvent item).
+    ]
+
+    removeNamespaceEvent: anEvent [
+	<category: 'events'>
+    ]
+
+    addClassEvent: anEvent [
+	<category: 'events'>
+
+	| string |
+        string := ((anEvent item displayString) substrings: $.) last.
+        finderDic at: string ifAbsentPut: [ self appendToModel: string. Dictionary new ].
+	self at: string addToFinder: (ClassFinder on: anEvent item) 
+    ]
+
+    removeClassEvent: anEvent [
+	<category: 'events'>
+    ]
+
+    addMethodEvent: anEvent [
+	<category: 'events'>
+    ]
+
+    removeMethodEvent: anEvent [
+	<category: 'events'>
     ]
 ]

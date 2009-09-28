@@ -151,6 +151,8 @@
   <filein>SUnit/GtkSUnit.st</filein>
   <filein>Commands/OpenBrowserCommand.st</filein>
   <filein>Commands/OpenWorkspaceCommand.st</filein>
+  <filein>Commands/SaveImageCommand.st</filein>
+  <filein>Commands/SaveImageAsCommand.st</filein>
   <file>Notification/AbstractEvent.st</file>
   <file>Notification/AddedEvent.st</file>
   <file>Notification/CommentedEvent.st</file>
@@ -285,6 +287,8 @@
   <file>SUnit/GtkSUnit.st</file>
   <file>Commands/OpenBrowserCommand.st</file>
   <file>Commands/OpenWorkspaceCommand.st</file>
+  <file>Commands/SaveImageCommand.st</file>
+  <file>Commands/SaveImageAsCommand.st</file>
   <start>VisualGST.VisualGST open.
     GTK.Gtk main</start>
 </package>
