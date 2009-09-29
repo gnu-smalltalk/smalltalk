@@ -130,6 +130,13 @@ GtkConcreteWidget subclass: GtkNamespaceWidget [
     inspectNamespace [
         <category: 'namespace events'>
 
+	InspectNamespaceCommand on: self
+    ]
+
+    fileoutNamespace [
+        <category: 'namespace events'>
+
+	FileoutNamespaceCommand on: self selectedNamespace
     ]
 ]
 

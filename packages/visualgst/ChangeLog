@@ -1,3 +1,10 @@
+2009-09-29  Gwenael Casaccio  <mrgwen@gmail.com>
+
+	* Commands/InspectClassCommand.st, Debugger/GtkDebugger.st,
+	Extensions.st, GtkCategoryWidget.st, GtkClassWidget.st,
+	GtkMethodWidget.st GtkNamespaceWidget.st package.xml:
+	Sync (almost) to r237.
+
 2009-09-28  Gwenael Casaccio  <mrgwen@gmail.com>
 
 	* Commands/SaveImageAsCommand.st, Commands/SaveImageCommand.st,

@@ -85,7 +85,7 @@ GtkConcreteWidget subclass: GtkCategoryWidget [
             {'Rename a category'. self. #renameCategory}.
             {'Delete a category'. self. #deleteCategory}.
             {}.
-            {'File out a class'. self. #fileoutCategory}}.
+            {'File out a category'. self. #fileoutCategory}}.
         menu attachToWidget: categoryTree detacher: nil.
         menu popup: nil parentMenuItem: nil func: nil data: nil button: 3 activateTime: aGdkButtonEvent time value.
         menu showAll.
@@ -137,5 +137,10 @@ GtkConcreteWidget subclass: GtkCategoryWidget [
         DeleteCategoryCommand on: self
     ]
 
+    fileoutCategory [
+        <category: 'category events'>
+
+        FileoutCategoryCommand on: self class categorized: self selectedCategory
+    ]
 ]
 

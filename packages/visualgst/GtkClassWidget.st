@@ -168,6 +168,13 @@ GtkConcreteWidget subclass: GtkClassWidget [
     inspectClass [
         <category: 'class events'>
 
+	InspectClassCommand on: self
+    ]
+
+    fileoutClass [
+        <category: 'class events'>
+
+	FileoutClassCommand on: self selectedClass
     ]
 ]
 

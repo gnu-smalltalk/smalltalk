@@ -191,8 +191,8 @@ MethodContext extend [
         <category: '*VisualGST'>
 
         | variables method |
-        method := self method method parserClass parseMethod: self method method methodSourceString.
-        (variables := method argumentNames) addAll: method body temporaryNames.
+        method := self method method parserClass parseMethod: self method method methodSourceString onError: [ :aString :position | ^ variables:= #() ].
+        (variables := method argumentNames asOrderedCollection) addAll: method body temporaryNames.
         ^ variables
     ]
 ]
@@ -294,6 +294,15 @@ Debugger extend [
                 ifTrue: [ self finish: self suspendedContext. ^ self ].
         self suspendedContext == context ]
                 whileTrue
+    ]
+]
+
+Behavior extend [
+
+    debuggerClass [
+	<category: '*VisualGST'>
+
+	^ VisualGST.GtkDebugger
     ]
 ]
 

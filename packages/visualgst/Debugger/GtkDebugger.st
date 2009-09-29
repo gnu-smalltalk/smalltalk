@@ -1,11 +1,26 @@
 GtkMainWindow subclass: GtkDebugger [
     | state windowsMenu codeWidget contextWidget debugger inspectorWidget stackInspectorWidget selectedContext |
 
-    GtkDebugger class >> openOn: aContext [
+    GtkDebugger class >> open: aString [
 	<category: 'user interface'>
 
-	^ (self openSized: 450@375)
-	    context: aContext
+	aString printNl.
+	[ :debugger |
+	    Processor activeProcess name: 'Notifier/Debugger'.
+	    (self openSized: 450@375)
+		debugger: debugger ] forkDebugger
+    ]
+    
+    GtkDebugger class >> debuggerClass [
+        <category: 'debugging interface'>
+
+        ^nil
+    ]
+
+    GtkDebugger class >> debuggingPriority [
+	<category: 'debugging interface'>
+
+	^ 1
     ]
 
     aboutDebugger [
@@ -301,7 +316,34 @@ THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.';
         ^ self createNewMenuEntry: menu
     ]
 
-    debugger: aProcess [
+    debugger: aDebugger [
+        <category: 'context'>
+
+	debugger := aDebugger.
+	self 
+	    updateContextWidget
+    ]
+
+    skipTopContext [
+        <category: 'context'>
+
+        | context lastContext contexts |
+        context := debugger suspendedContext.
+        lastContext := context environment.
+        "stacktrace := OrderedCollection new."
+        contexts := OrderedCollection new.
+
+        [ context ~~ lastContext and: [ context isInternalExceptionHandlingContext ] ]
+            whileTrue: [ context := context parentContext ].
+        [ context == lastContext ] whileFalse:
+                [ context isDisabled
+                    ifFalse:
+                        [ "stacktrace add: context printString."
+                        contexts add: context ].
+                context := context parentContext ].
+    ]
+
+    initializeProcess: aProcess [
         <category: 'context'>
 
         debugger := Debugger on: aProcess suspend.
@@ -328,7 +370,7 @@ THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.';
     doItProcess: aProcess [
 	<category: 'context'>
 
-	self debugger: aProcess.
+	self initializeProcess: aProcess.
 	3 timesRepeat: [ debugger step ].
 	debugger myStepInto.
 	self updateContextWidget
@@ -338,7 +380,7 @@ THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.';
 	<category: 'context'>
 	
 	self 
-	    debugger: aProcess;
+	    initializeProcess: aProcess;
 	    updateContextWidget
     ]
 

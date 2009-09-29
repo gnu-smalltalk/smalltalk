@@ -31,10 +31,12 @@
   <filein>Notification/SystemEventManager.st</filein>
   <filein>Commands/Command.st</filein>
   <filein>Commands/UndoableCommand.st</filein>
+  <filein>Commands/InspectNamespaceCommand.st</filein>
   <filein>Commands/FileoutNamespaceCommand.st</filein>
   <filein>Commands/AddNamespaceCommand.st</filein>
   <filein>Commands/DeleteNamespaceCommand.st</filein>
   <filein>Commands/RenameNamespaceCommand.st</filein>
+  <filein>Commands/InspectClassCommand.st</filein>
   <filein>Commands/FileoutClassCommand.st</filein>
   <filein>Commands/AddClassCommand.st</filein>
   <filein>Commands/DeleteClassCommand.st</filein>
@@ -44,6 +46,7 @@
   <filein>Commands/DeleteCategoryCommand.st</filein>
   <filein>Commands/RenameCategoryCommand.st</filein>
   <filein>Commands/FileoutMethodCommand.st</filein>
+  <filein>Commands/InspectMethodCommand.st</filein>
   <filein>Commands/AddMethodCommand.st</filein>
   <filein>Commands/DeleteMethodCommand.st</filein>
   <filein>Commands/OpenWindowedBrowserCommand.st</filein>
@@ -167,10 +170,12 @@
   <file>Notification/SystemEventManager.st</file>
   <file>Commands/Command.st</file>
   <file>Commands/UndoableCommand.st</file>
+  <file>Commands/InspectNamespaceCommand.st</file>
   <file>Commands/FileoutNamespaceCommand.st</file>
   <file>Commands/AddNamespaceCommand.st</file>
   <file>Commands/DeleteNamespaceCommand.st</file>
   <file>Commands/RenameNamespaceCommand.st</file>
+  <file>Commands/InspectClassCommand.st</file>
   <file>Commands/FileoutClassCommand.st</file>
   <file>Commands/AddClassCommand.st</file>
   <file>Commands/DeleteClassCommand.st</file>
@@ -180,6 +185,7 @@
   <file>Commands/DeleteCategoryCommand.st</file>
   <file>Commands/RenameCategoryCommand.st</file>
   <file>Commands/FileoutMethodCommand.st</file>
+  <file>Commands/InspectMethodCommand.st</file>
   <file>Commands/AddMethodCommand.st</file>
   <file>Commands/DeleteMethodCommand.st</file>
   <file>Commands/OpenWindowedBrowserCommand.st</file>

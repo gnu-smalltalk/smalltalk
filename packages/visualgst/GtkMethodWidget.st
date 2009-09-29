@@ -162,6 +162,13 @@ GtkConcreteWidget subclass: GtkMethodWidget [
     inspectMethod [
         <category: 'method events'>
 
+	InspectMethodCommand on: self
+    ]
+
+    fileoutMethod [
+        <category: 'method events'>
+
+	FileoutMethodCommand on: self selectedMethod
     ]
 ]
 
