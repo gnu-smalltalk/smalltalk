@@ -196,7 +196,8 @@ Object subclass: ClassSource [
     
 	printClass methodDictionary ifNotNil: [ printClass methodDictionary do: [ :each | 
 							| text |
-							text := each methodSourceString ifNil: [ each selector asString, ' [', Character nl asString, '    ]', Character nl asString ].
+							text := each methodSourceString 
+									ifNil: [ each selector asString, ' [', Character nl asString, '    ]', Character nl asString ].
 							stream 
 							    space: 4; 
 							    nextPutAll: text; 

@@ -270,8 +270,8 @@ THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.';
 	<category: 'user interface'>
 
 	classWidget := GtkClassSUnitWidget showAll 
+				selectionMode: GTK.Gtk gtkSelectionMultiple;
 				whenSelectionChangedSend: #onClassChanged to: self;
-				selectionMode: GTK.Gtk gtkSelectionMultiple
 				yourself.
 	^ classWidget mainWidget
     ]

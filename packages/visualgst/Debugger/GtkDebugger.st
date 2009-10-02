@@ -1,6 +1,12 @@
 GtkMainWindow subclass: GtkDebugger [
     | state windowsMenu codeWidget contextWidget debugger inspectorWidget stackInspectorWidget selectedContext |
 
+    GtkDebugger class >> debuggerClass [
+	<category: 'class attributes'>
+
+	^ nil
+    ]
+
     GtkDebugger class >> open: aString [
 	<category: 'user interface'>
 
@@ -393,7 +399,7 @@ THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.';
 	iter := contextWidget selectedIter.
 	selectedContext := debugger suspendedContext parentContextAt: (contextWidget numberOfContext - ((contextWidget model getPath: iter) getIndices value)).
 	codeWidget sourceCode: selectedContext method methodSourceString.
-
+	codeWidget object: selectedContext receiver.
 	self updateInspectorWidget: selectedContext
     ]
 
@@ -432,35 +438,27 @@ THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.';
     doIt [
         <category: 'smalltalk event'>
 
-        codeWidget
-            object: debugger suspendedContext receiver;
-            doIt
+        codeWidget doIt
     ]
 
     debugIt [
         <category: 'smalltalk event'>
 
-        codeWidget
-            object: debugger suspendedContext receiver;
-            debugIt
+        codeWidget debugIt
     ]
 
 
     inspectIt [
         <category: 'smalltalk event'>
 
-        codeWidget
-            object: debugger suspendedContext receiver;
-            inspectIt
+        codeWidget inspectIt
     ]
 
 
     printIt [
         <category: 'smalltalk event'>
 
-        codeWidget
-            object: debugger suspendedContext receiver;
-            printIt
+        codeWidget printIt
     ]
 
     checkCodeWidget [
