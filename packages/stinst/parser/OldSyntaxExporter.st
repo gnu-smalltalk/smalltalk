@@ -133,7 +133,7 @@ FileOutExporter subclass: OldSyntaxExporter [
 
     fileOutSource: selectors class: aClass [
 	| categories catSB methodSB |
-	catSB := [ :a :b | (a ifNil: ['~~']) < (b ifNil: ['~~']) ].
+	catSB := [ :a :b | (a key ifNil: ['~~']) < (b key ifNil: ['~~']) ].
 	methodSB := [ :a :b | a selector < b selector ].
 
 	categories := Dictionary new.

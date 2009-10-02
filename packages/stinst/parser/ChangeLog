@@ -1,3 +1,7 @@
+2009-10-02  Paolo Bonzini  <bonzini@gnu.org>
+
+	* OldSyntaxExporter.st: Fix emission of nil categories.
+
 2009-09-13  Paolo Bonzini  <bonzini@gnu.org>
 
 	* STLoaderObjs.st: Implement #inheritShape and #kindOfSubclass.
@@ -5,7 +9,7 @@
 
 2009-09-10  Paolo Bonzini  <bonzini@gnu.org>
 
-	* OldSyntaxHeader.st: Remove category pragmas.
+	* OldSyntaxExporter.st: Remove category pragmas.
 
 2009-09-10  Paolo Bonzini  <bonzini@gnu.org>
 
