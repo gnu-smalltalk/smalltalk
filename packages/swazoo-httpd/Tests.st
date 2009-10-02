@@ -69,7 +69,7 @@ Object subclass: SwazooBenchmarks [
 	response := HTTPResponse ok.
 	response entity: (ByteArray new: self contentSize withAll: 85).
 	ws := SwazooStream on: String new.
-	response writeTo: ws.
+	HTTPPrinter writeResponse: response to: ws.
 	content := ws writeBuffer contents
     ]
 
@@ -1188,7 +1188,7 @@ TestCase subclass: HTTPResponseTest [
 	| ws rs |
 	response := HTTPResponse internalServerError.
 	ws := SwazooStream on: String new.
-	response printStatusOn: ws.
+	HTTPPrinter new response: response; stream: ws; printStatus.
 	rs := SwazooStream on: ws writeBuffer contents.
 	self assert: rs nextLine = 'HTTP/1.1 500 Internal Server Error'
     ]
@@ -1198,7 +1198,7 @@ TestCase subclass: HTTPResponseTest [
 	| ws rs |
 	response := HTTPResponse ok.
 	ws := SwazooStream on: String new.
-	response printStatusOn: ws.
+	HTTPPrinter new response: response; stream: ws; printStatus.
 	rs := SwazooStream on: ws writeBuffer contents.
 	self assert: rs nextLine = 'HTTP/1.1 200 OK'
     ]

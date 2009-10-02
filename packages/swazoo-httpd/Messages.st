@@ -92,32 +92,22 @@ HTTPMessage subclass: HTTPRequest [
 	^self subclassResponsibility
     ]
 
-    HTTPRequest class >> newFor: aRequestLine readFrom: aSwazooStream [
+    HTTPRequest class >> classFor: aString [
 	"to support an additional http method, simply subclass a HTTPRequest!!"
 
 	<category: 'instance creation'>
-	| targetClass |
-	targetClass := aRequestLine method = 'GET' 
-		    ifTrue: [HTTPGet	"most used anyway"]
-		    ifFalse: 
-			[aRequestLine method = 'POST' 
-			    ifTrue: [HTTPPost	"second most used"]
-			    ifFalse: 
-				[self subclasses detect: [:each | each methodName = aRequestLine method]
-				    ifNone: [nil]]].
-	targetClass isNil ifTrue: [^HTTPException notImplemented].
-	^targetClass new for: aRequestLine readFrom: aSwazooStream
+	aString = 'GET' ifTrue: [^HTTPGet	"most used anyway"].
+	aString = 'POST' ifTrue: [^HTTPPost	"second most used"].
+
+	^self subclasses detect: [:each | each methodName = aString]
+	    ifNone: [^HTTPException notImplemented].
     ]
 
     HTTPRequest class >> readFrom: aSwazooStream [
-	"^an HTTPRequest
-	 I create and return a new instance of one of my subclasses which will represent the HTTP request presumed to be the contents of aStream.
-	 The first step is to work out which of my subclasses to create.  I do this by parsing the 'request-line' from the stream.  The request-line contains the 'method', and I look for the subclass that handles this method and delegate the rest of the message parsing to a new instance of that class."
+	"For testing only (I'm guessing / hoping!!)."
 
-	<category: 'instance creation'>
-	| requestLine |
-	requestLine := HTTPRequestLine readFrom: aSwazooStream.
-	^self newFor: requestLine readFrom: aSwazooStream
+	<category: 'tests support'>
+	^HTTPReader readFrom: aSwazooStream
     ]
 
     HTTPRequest class >> request: aUriString [
@@ -210,15 +200,12 @@ HTTPMessage subclass: HTTPRequest [
 	^environmentData
     ]
 
-    for: aRequestLine readFrom: aSwazooStream [
+    requestLine: aRequestLine [
 	"^self
 	 I parse my headers from aStream and update my URI and HTTP version information from aRequest line.  I need to parse the headers first because, for some reason, the URI insists on knowing the host, and this is taken from the Host: header field."
 
 	<category: 'initialize-release'>
 	requestLine := aRequestLine.
-	headers := HTTPHeaders readFrom: aSwazooStream.
-	self setTimestamp.
-	^self
     ]
 
     hasCookie [
@@ -473,6 +460,10 @@ HTTPMessage subclass: HTTPRequest [
     queryData [
 	<category: 'accessing-queries'>
 	^self uri queryData
+    ]
+
+    readFrom: aSwazooStream [
+	<category: 'parsing'>
     ]
 
     referer [
@@ -886,9 +877,8 @@ Instance Variables:
 	entityBody := aString
     ]
 
-    for: aRequestLine readFrom: aSwazooStream [
+    readFrom: aSwazooStream [
 	<category: 'parsing'>
-	super for: aRequestLine readFrom: aSwazooStream.
 	self initPostDataFor: aSwazooStream
 	"self parsePostDataFrom: aSwazooStream."	"defered until first access of postData!!"
     ]
@@ -1254,7 +1244,6 @@ Instance Variables:
     readFrom: aStream [
 	<category: 'reading'>
 	| contentTypeField |
-	super readFrom: aStream.
 	contentTypeField := self headers fieldOfClass: ContentTypeField
 		    ifNone: [SwazooHTTPPutError raiseSignal: 'Missing Content-Type'].
 	contentTypeField mediaType = 'application/octet-stream' 
@@ -1452,7 +1441,10 @@ HTTPMessage subclass: HTTPResponse [
 
     HTTPResponse class >> statusTextForCode: aNumber [
 	<category: 'accessing'>
-	^StatusCodes at: aNumber ifAbsent: ['']
+	^StatusCodes at: aNumber ifAbsent: [
+	    "if some new status codes was added later"
+	    self class initialize.
+	    StatusCodes at: aNumber ifAbsent: ['']]
     ]
 
     HTTPResponse class >> unauthorized [
@@ -1528,11 +1520,14 @@ HTTPMessage subclass: HTTPResponse [
 	^self class statusTextForCode: self code
     ]
 
-    contentLength: anInteger [
-	<category: 'accessing-headers'>
-	self headers 
-	    addField: (HTTPContentLengthField new contentLength: anInteger).
-	^self
+    contentLength [
+	^self headers
+	    fieldNamed: 'Content-length'
+	    ifNone: [
+		| field |
+		field := HTTPContentLengthField new contentLength: self contentSize.
+		self headers addField: field.
+		field ]
     ]
 
     contentSize [
@@ -1566,18 +1561,6 @@ HTTPMessage subclass: HTTPResponse [
 	^self
     ]
 
-    crlfOn: aStream [
-	<category: 'private-sending'>
-	aStream
-	    nextPut: Character cr;
-	    nextPut: Character lf
-    ]
-
-    endHeaderOn: aStream [
-	<category: 'private-sending'>
-	self crlfOn: aStream
-    ]
-
     entity [
 	<category: 'accessing'>
 	^entity
@@ -1586,6 +1569,11 @@ HTTPMessage subclass: HTTPResponse [
     entity: anEntity [
 	<category: 'accessing'>
 	entity := anEntity asByteArray	"if not already"
+    ]
+
+    printEntityOn: aStream [
+	<category: 'sending'>
+	self entity isNil ifFalse: [aStream nextPutBytes: self entity]
     ]
 
     expires: aSpTimestamp [
@@ -1701,81 +1689,7 @@ HTTPMessage subclass: HTTPResponse [
 	self headers addField: (HTTPLocationField new uriString: aString).
 	^self
     ]
-
-    printChunkedTransferEncodingOn: aStream [
-	<category: 'private-sending'>
-	aStream nextPutAll: 'Transfer-Encoding: chunked'.
-	self crlfOn: aStream
-    ]
-
-    printContentLengthOn: aSwazooStream [
-	"it is also added to headers. It is added so late because to be printed last,
-	 just before body starts"
-
-	<category: 'private-sending'>
-	self contentLength: self contentSize.
-	(self headers fieldNamed: 'Content-length') printOn: aSwazooStream.
-	self crlfOn: aSwazooStream
-    ]
-
-    printEntityOn: aStream [
-	<category: 'private-sending'>
-	self entity isNil ifFalse: [aStream nextPutBytes: self entity]
-    ]
-
-    printHeadersOn: aSwazooStream [
-	"^self
-	 Write the headers (key-value pairs) to aStream.  The key
-	 must be a String."
-
-	<category: 'private-sending'>
-	self headers fields do: 
-		[:aField | 
-		aField printOn: aSwazooStream.
-		self crlfOn: aSwazooStream]
-    ]
-
-    printStatusOn: aSwazooStream [
-	<category: 'private-sending'>
-	| version |
-	StatusCodes at: self code ifAbsent: [self class initialize].	"if some new status codes was added           													with #postInitialize method later"
-	version := (self task isNil 
-		    or: [self task request isNil or: [self task request isHttp11]]) 
-			ifTrue: ['HTTP/1.1 ']
-			ifFalse: ['HTTP/1.0 '].
-	aSwazooStream
-	    nextPutAll: version;
-	    print: self code;
-	    space;
-	    nextPutAll: (self class statusTextForCode: self code).
-	self crlfOn: aSwazooStream
-    ]
-
-    writeHeaderTo: aSwazooStream [
-	<category: 'private-sending'>
-	self printStatusOn: aSwazooStream.
-	self printHeadersOn: aSwazooStream.
-	(self isStreamed and: [self shouldBeChunked]) 
-	    ifTrue: [self printChunkedTransferEncodingOn: aSwazooStream]
-	    ifFalse: [self printContentLengthOn: aSwazooStream].
-	self endHeaderOn: aSwazooStream
-    ]
-
-    writeTo: aSwazooStream [
-	<category: 'sending'>
-	self writeTo: aSwazooStream inResponseTo: nil
-    ]
-
-    writeTo: aSwazooStream inResponseTo: aRequest [
-	<category: 'sending'>
-	aSwazooStream isNil ifTrue: [^self].
-	self writeHeaderTo: aSwazooStream.
-	(aRequest isNil or: [aRequest isHead not]) 
-	    ifTrue: [self printEntityOn: aSwazooStream].
-	aSwazooStream closeResponse
-    ]
 ]
-
 
 
 HTTPResponse subclass: FileResponse [
@@ -1790,17 +1704,13 @@ HTTPResponse subclass: FileResponse [
 
     entity: aMimeObject [
 	<category: 'accessing'>
-	entity := aMimeObject
+	entity := aMimeObject.
+	self contentType: self entity contentType.
     ]
 
-    printContentLengthOn: aStream [
+    contentSize [
 	<category: 'private-printing'>
-	self entity isNil 
-	    ifFalse: 
-		[aStream
-		    nextPutAll: 'Content-Length: ';
-		    print: self entity value fileSize.
-		self crlfOn: aStream]
+	^self entity notNil ifTrue: [self entity value fileSize] ifFalse: [0]
     ]
 
     printEntityOn: aStream [
@@ -1816,12 +1726,6 @@ HTTPResponse subclass: FileResponse [
 			    ensure: [rs close]]
 		    on: SpError
 		    do: [:ex | ex return]]
-    ]
-
-    printHeadersOn: aStream [
-	<category: 'private-printing'>
-	self contentType: self entity contentType.
-	super printHeadersOn: aStream
     ]
 ]
 
@@ -2218,11 +2122,6 @@ Object subclass: HTTPRequestLine [
     <category: 'Swazoo-Messages'>
     <comment: nil>
 
-    HTTPRequestLine class >> readFrom: aSwazooStream [
-	<category: 'instance creation'>
-	^self new readFrom: aSwazooStream
-    ]
-
     httpVersion [
 	<category: 'accessing'>
 	^httpVersion
@@ -2250,45 +2149,8 @@ Object subclass: HTTPRequestLine [
     ]
 
     method: aString [
-	"For development testing only"
-
 	<category: 'private'>
 	method := aString.
-	^self
-    ]
-
-    parseHTTPVersionFrom: aSwazooStream [
-	<category: 'parsing'>
-	| major minor |
-	self skipSpacesIn: aSwazooStream.
-	aSwazooStream upTo: $/ asInteger.
-	major := (aSwazooStream upTo: $. asInteger) asString asNumber.
-	minor := (aSwazooStream upTo: Character cr asInteger) asString asNumber.
-	self httpVersion: (Array with: major with: minor).
-	aSwazooStream next.
-	^self
-    ]
-
-    parseURIFrom: aSwazooStream [
-	"^self
-	 Really, we should parse the URI directly out of the stream."
-
-	<category: 'parsing'>
-	self skipSpacesIn: aSwazooStream.
-	requestURI := SwazooURI 
-		    fromString: (aSwazooStream upTo: Character space asInteger) asString.
-	^self
-    ]
-
-    readFrom: aSwazooStream [
-	"^self
-	 I initialize myself to represents a request line read from aStream.  If no valid request line can be found, I throw an exception."
-
-	<category: 'parsing'>
-	self skipLeadingBlankLinesIn: aSwazooStream.
-	method := (aSwazooStream upTo: Character space asInteger) asString.
-	self parseURIFrom: aSwazooStream.
-	self parseHTTPVersionFrom: aSwazooStream.
 	^self
     ]
 
@@ -2298,31 +2160,8 @@ Object subclass: HTTPRequestLine [
     ]
 
     requestURI: aString [
-	"Development testing only!!"
-
 	<category: 'private'>
 	requestURI := aString.
-	^self
-    ]
-
-    skipLeadingBlankLinesIn: aSwazooStream [
-	"^self
-	 RFC 2616:
-	 In the interest of robustness, servers SHOULD ignore any empty
-	 line(s) received where a Request-Line is expected. In other words, if
-	 the server is reading the protocol stream at the beginning of a
-	 message and receives a CRLF first, it should ignore the CRLF."
-
-	<category: 'private'>
-	[aSwazooStream peek == Character cr asInteger] whileTrue: 
-		[((aSwazooStream next: 2) at: 2) == Character lf asInteger 
-		    ifFalse: [SwazooHTTPParseError raiseSignal: 'CR without LF']].
-	^self
-    ]
-
-    skipSpacesIn: aSwazooStream [
-	<category: 'private'>
-	[aSwazooStream peek = Character space] whileTrue: [aSwazooStream next].
 	^self
     ]
 ]

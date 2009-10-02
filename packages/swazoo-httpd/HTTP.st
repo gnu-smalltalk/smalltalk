@@ -133,15 +133,15 @@ Object subclass: HTTPConnection [
     nextPutError: aResponse [
 	<category: 'serving-responses'>
 	aResponse informConnectionClose.
-	aResponse writeTo: self stream.
+	self responsePrinterClass writeResponse: aResponse to: self stream.
 	self stream closeResponse
     ]
 
     nextPutResponse: aMessage toRequest: aRequest [
 	<category: 'serving-responses'>
 	aRequest isHead 
-	    ifTrue: [aMessage writeHeaderTo: self stream]
-	    ifFalse: [aMessage writeTo: self stream].
+	    ifTrue: [self responsePrinterClass writeHeadersFor: aMessage to: self stream]
+	    ifFalse: [self responsePrinterClass writeResponse: aMessage to: self stream].
 	self stream closeResponse
     ]
 
@@ -187,7 +187,7 @@ Object subclass: HTTPConnection [
 	| request |
 	SpExceptionContext 
 	    for: 
-		[request := HTTPRequest readFrom: self stream.
+		[request := self requestReaderClass readFrom: self stream.
 		request uri port: self server port.
 		(request httpVersion last = 1 
 		    and: [(request headers includesFieldOfClass: HTTPHostField) not]) 
@@ -203,6 +203,16 @@ Object subclass: HTTPConnection [
 		aSwazooTask response: HTTPResponse badRequest.
 		self nextPutError: aSwazooTask response.
 		self close]
+    ]
+
+    requestReaderClass [
+	<category: 'private'>
+	^server requestReaderClass
+    ]
+
+    responsePrinterClass [
+	<category: 'private'>
+	^server responsePrinterClass
     ]
 
     server [
@@ -396,6 +406,16 @@ Object subclass: HTTPServer [
     removeSite: aSite [
 	<category: 'sites'>
 	^self sites removeResource: aSite
+    ]
+
+    requestReaderClass [
+	<category: 'factories'>
+	^HTTPReader
+    ]
+
+    responsePrinterClass [
+	<category: 'factories'>
+	^HTTPPrinter
     ]
 
     restart [

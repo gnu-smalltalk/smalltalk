@@ -35,14 +35,6 @@ Object subclass: HTTPHeaders [
     <category: 'Swazoo-Headers'>
     <comment: nil>
 
-    HTTPHeaders class >> readFrom: aSwazooStream [
-	"^an HTTPHeaders
-	 I return a new instance of myself which contains fields parsed from aStream."
-
-	<category: 'instance creation'>
-	^self new readFrom: aSwazooStream
-    ]
-
     addField: aField [
 	"HTTPSpec1.1 Sec4.2
 	 Multiple message-header fields with the same field-name MAY be present in a message if and only if the entire field-value for that header field is defined as a comma-separated list [i.e., #(values)]. It MUST be possible to combine the multiple header fields into one 'field-name: field-value' pair, without changing the semantics of the message, by appending each subsequent field-value to the first, each separated by a comma. The order in which header fields with the same field-name are received is therefore significant to the interpretation of the combined field value, and thus a proxy MUST NOT change the order of these field values when a message is forwarded.
@@ -53,13 +45,6 @@ Object subclass: HTTPHeaders [
 	    ifTrue: [(self fieldNamed: aField name) combineWith: aField]
 	    ifFalse: [self fields at: aField name asUppercase put: aField].
 	^self
-    ]
-
-    crlfOn: aStream [
-	<category: 'emitting'>
-	aStream
-	    nextPut: Character cr;
-	    nextPut: Character lf
     ]
 
     fieldNamed: aString [
@@ -172,39 +157,6 @@ Object subclass: HTTPHeaders [
 		    nextPutAll: '   ' , each printString;
 		    cr]
     ]
-
-    readFieldFromString: aString [
-	"^self
-	 First I get the field parsed from aString, then I add the new field to my collection of fields.  Adding the new field may involve merging field values if I already have a field of that class."
-
-	<category: 'initialize-release'>
-	self addField: (HeaderField fromLine: aString).
-	^self
-    ]
-
-    readFrom: aSwazooStream [
-	"^an HTTPHeaders
-	 I return a new instance of myself which contains fields parsed from aStream.  Everything upto the next blank line is a header field."
-
-	<category: 'initialize-release'>
-	| nextLine |
-	
-	[nextLine := aSwazooStream nextUnfoldedLine.
-	nextLine isEmpty] 
-		whileFalse: [self readFieldFromString: nextLine].
-	^self
-    ]
-
-    writeOn: aStream [
-	"^self
-	 I write all my fields to aStream."
-
-	<category: 'emitting'>
-	self fields do: 
-		[:aField | 
-		aField printOn: aStream.
-		self crlfOn: aStream]
-    ]
 ]
 
 
@@ -229,14 +181,22 @@ Object subclass: HeaderField [
     ]
 
     HeaderField class >> fromLine: aString [
+        "for testing only"
+ 	<category: 'instance creation'>
+ 	| sourceStream fieldName fieldValue |
+ 	sourceStream := ReadStream on: aString.
+ 	fieldName := sourceStream upTo: $:.
+ 	fieldValue := sourceStream upToEnd.
+ 	^self name: fieldName value: fieldValue
+    ]
+
+    HeaderField class >> name: fieldName value: fieldValue [
 	<category: 'instance creation'>
-	| sourceStream fieldName fieldValue fieldClass |
-	sourceStream := ReadStream on: aString.
-	fieldName := (HTTPString trimBlanksFrom: (sourceStream upTo: $:)) 
-		    asUppercase.
-	fieldClass := self classForFieldName: fieldName.
-	fieldValue := HTTPString trimBlanksFrom: sourceStream upToEnd.
-	^fieldClass newForFieldName: fieldName withValueFrom: fieldValue
+	| upName trimValue fieldClass |
+	upName := (HTTPString trimBlanksFrom: fieldName) asUppercase.
+	fieldClass := self classForFieldName: upName.
+	trimValue := HTTPString trimBlanksFrom: fieldValue.
+	^fieldClass newForFieldName: upName withValueFrom: trimValue
     ]
 
     HeaderField class >> httpFieldNameToClassDictionary [

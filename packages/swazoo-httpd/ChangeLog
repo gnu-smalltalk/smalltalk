@@ -1,3 +1,12 @@
+2009-11-17  Paolo Bonzini  <bonzini@gnu.org>
+
+	* HTTP.st: Use #responsePrinterClass/#requestReaderClass.
+	* Headers.st: Remove request reading and response printing.
+	* Messages.st: Remove request reading and response printing.
+	* Protocol.st: New.
+	* Tests.st: Use HTTPPrinter.
+	* package.xml: Add Protocol.st.
+
 2009-07-23  Paolo Bonzini  <bonzini@gnu.org>
 
 	* HTTP.st: Correctly close sockets with no data ready.
