@@ -189,10 +189,7 @@ provide for writing collections sequentially.'>
 	 the last"
 
 	<category: 'accessing-reading'>
-	| stream |
-	stream := WriteStream on: (self species new: 10).
-	self nextPutAllOn: stream.
-	^stream contents
+	^self upToEnd
     ]
 
     upToEnd [
@@ -202,7 +199,7 @@ provide for writing collections sequentially.'>
 	<category: 'accessing-reading'>
 	| ws |
 	ws := WriteStream on: (self species new: 8).
-	[self atEnd] whileFalse: [ws nextPut: self next].
+	self nextPutAllOn: ws.
 	^ws contents
     ]
 

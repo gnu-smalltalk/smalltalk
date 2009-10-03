@@ -1,5 +1,10 @@
 2009-10-03  Paolo Bonzini  <bonzini@gnu.org>
 
+	* kernel/Stream.st: Use #nextPutAllOn: for Stream>>#upToEnd,
+	implement Stream>>#contents using #upToEnd.
+
+2009-10-03  Paolo Bonzini  <bonzini@gnu.org>
+
 	* kernel/PosStream.st: Fix #nextPutAllOn:.
 
 2009-09-19  Paolo Bonzini  <bonzini@gnu.org>
