@@ -1,5 +1,9 @@
 2009-10-03  Paolo Bonzini  <bonzini@gnu.org>
 
+	* kernel/WriteStream.st: Optimize #next:putAll:startingAt:.
+
+2009-10-03  Paolo Bonzini  <bonzini@gnu.org>
+
 	* kernel/Stream.st: Use #nextPutAllOn: for Stream>>#upToEnd,
 	implement Stream>>#contents using #upToEnd.
 

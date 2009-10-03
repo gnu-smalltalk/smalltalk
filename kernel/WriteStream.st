@@ -99,22 +99,15 @@ my instances; reading is strictly forbidden.'>
 	 in the collection buffer."
 
 	<category: 'accessing-writing'>
-	| end written amount |
-	ptr = collection size ifTrue: [self growCollection].
-	written := 0.
-	
-	[end := collection size min: ptr + (n - written - 1).
-	end >= ptr 
-	    ifTrue: 
-		[collection 
-		    replaceFrom: ptr
-		    to: end
-		    with: aCollection
-		    startingAt: pos + written.
-		written := written + (end - ptr + 1).
-		ptr := end + 1].
-	written < n] 
-		whileTrue: [self growCollection].
+	| end |
+	end := ptr + n.
+	end > collection size ifTrue: [ self growCollectionTo: end - 1].
+	collection 
+	    replaceFrom: ptr
+	    to: end - 1
+	    with: aCollection
+	    startingAt: pos.
+	ptr := end.
 	ptr > endPtr ifTrue: [endPtr := ptr - 1]
     ]
 
@@ -170,6 +163,24 @@ my instances; reading is strictly forbidden.'>
 
 	"Guess which collection is which :-)"
 	collection := (collection copyEmpty: (size * 2 max: 8))
+		    replaceFrom: 1
+			to: collection size
+			with: collection
+			startingAt: 1;
+		    yourself
+    ]
+
+    growCollectionTo: n [
+	"Private - Double the size of the collection or, if its size < 8,
+	 grow it to 8 places"
+
+	<category: 'private methods'>
+	| size |
+	n <= (size := collection size) ifTrue: [ ^self ].
+	size * 2 > n ifTrue: [ ^self growCollection ].
+
+	"Guess which collection is which :-)"
+	collection := (collection copyEmpty: n)
 		    replaceFrom: 1
 			to: collection size
 			with: collection
