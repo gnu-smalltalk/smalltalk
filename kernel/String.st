@@ -240,6 +240,34 @@ or assumed to be the system default.'>
 	^self primitiveFailed
     ]
 
+    indexOf: anElement startingAt: anIndex ifAbsent: exceptionBlock [
+	"Answer the first index > anIndex which contains anElement.
+	 Invoke exceptionBlock and answer its result if no item is found"
+
+	<category: 'basic'>
+	<primitive: VMpr_ArrayedCollection_indexOfStartingAt>
+	"If anIndex is just past the end of the collection, don't raise
+	 an error (this is the most generic solution that avoids that
+	 #indexOf: fails when the collection is empty."
+	^(anIndex < 1 or: [anIndex > (self size + 1)])
+	    ifTrue: [self checkIndexableBounds: anIndex]
+	    ifFalse: [exceptionBlock value]
+    ]
+
+    indexOf: anElement startingAt: anIndex [
+	"Answer the first index > anIndex which contains anElement.
+	 Invoke exceptionBlock and answer its result if no item is found"
+
+	<category: 'basic'>
+	<primitive: VMpr_ArrayedCollection_indexOfStartingAt>
+	"If anIndex is just past the end of the collection, don't raise
+	 an error (this is the most generic solution that avoids that
+	 #indexOf: fails when the collection is empty."
+	^(anIndex < 1 or: [anIndex > (self size + 1)])
+	    ifTrue: [self checkIndexableBounds: anIndex]
+	    ifFalse: [0]
+    ]
+
     replaceFrom: start to: stop withByteArray: byteArray startingAt: replaceStart [
 	"Replace the characters from start to stop with new characters whose
 	 ASCII codes are contained in byteArray, starting at the replaceStart

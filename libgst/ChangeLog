@@ -1,3 +1,7 @@
+2009-10-04  Paolo Bonzini  <bonzini@gnu.org>
+
+	* libgst/prims.def: Implement memchr primitive.
+
 2009-09-07  Paolo Bonzini  <bonzini@gnu.org>
 
 	* sysdep/win32/signals.c: Simplify given known set of valid signals.

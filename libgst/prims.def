@@ -3169,6 +3169,53 @@ primitive VMpr_ArrayedCollection_equal [succeed,fail]
   PRIM_FAILED;
 }
 
+/* ByteArray indexOf:startingAt:
+   ByteArray indexOf:startingAt:ifAbsent:
+   String indexOf:startingAt:
+   String indexOf:startingAt:ifAbsent: */
+primitive VMpr_ArrayedCollection_indexOfStartingAt [succeed,fail]
+{
+  OOP srcIndexOOP, srcOOP, targetOOP;
+  int srcIndex, srcLen, target;
+  gst_uchar *srcBase, *srcTarget;
+  _gst_primitives_executed++;
+
+  POP_N_OOPS (numArgs - 2);
+  srcIndexOOP = POP_OOP ();
+  targetOOP = POP_OOP ();
+  srcOOP = STACKTOP ();
+  if COMMON ((IS_INT (targetOOP) || OOP_CLASS (targetOOP) == _gst_char_class)
+	     && IS_INT (srcIndexOOP) && !IS_INT (srcOOP))
+    {
+      intptr_t srcSpec = OOP_INSTANCE_SPEC (srcOOP);
+      if (srcSpec & (~0 << ISP_NUMFIXEDFIELDS))
+	goto bad;
+
+      /* Check compatibility.  */
+      if (_gst_log2_sizes[srcSpec & ISP_SHAPE] != 0)
+	goto bad;
+
+      target = IS_INT (targetOOP) ? TO_INT (targetOOP) : CHAR_OOP_VALUE (targetOOP);
+      srcIndex = TO_INT (srcIndexOOP);
+      srcLen = NUM_INDEXABLE_FIELDS (srcOOP) - srcIndex + 1;
+
+      if UNCOMMON (srcLen < 0)
+	goto bad;
+
+      srcBase = (gst_uchar *) OOP_TO_OBJ (srcOOP)->data;
+      srcTarget = memchr (&srcBase[srcIndex - 1], target, srcLen);
+      if (!srcTarget)
+	goto bad;
+
+      SET_STACKTOP_INT (srcTarget - srcBase + 1);
+      PRIM_SUCCEEDED;
+    }
+
+ bad:
+  UNPOP (numArgs);
+  PRIM_FAILED;
+}
+
 /* LargeInteger primReplaceFrom:to:with:startingAt
    ByteArray replaceFrom:to:withString:startingAt:
    String replaceFrom:to:withByteArray:startingAt:
