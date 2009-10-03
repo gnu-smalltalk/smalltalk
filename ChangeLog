@@ -1,3 +1,7 @@
+2009-10-03  Paolo Bonzini  <bonzini@gnu.org>
+
+	* kernel/PosStream.st: Fix #nextPutAllOn:.
+
 2009-09-19  Paolo Bonzini  <bonzini@gnu.org>
             Nicolas Cellier  <ncellier@ifrance.com>
 

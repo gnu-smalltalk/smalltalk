@@ -84,8 +84,11 @@ or ReadWriteStream instead of me to create and use streams.'>
     nextPutAllOn: aStream [
 	"Write all the objects in the receiver to aStream."
 
+	| n |
 	(access bitAnd: 1) = 0 ifTrue: [^self shouldNotImplement].
-	aStream next: endPtr putAll: collection startingAt: 1.
+	n := endPtr - ptr + 1.
+	aStream next: n putAll: collection startingAt: ptr.
+	ptr := ptr + n.
     ]
 
     nextAvailable: anInteger putAllOn: aStream [
@@ -94,11 +97,9 @@ or ReadWriteStream instead of me to create and use streams.'>
 
         <category: 'accessing-reading'>
 	| n |
+	(access bitAnd: 1) = 0 ifTrue: [^self shouldNotImplement].
 	n := anInteger min: endPtr - ptr + 1.
-	aStream
-	    next: n
-	    putAll: collection
-	    startingAt: ptr.
+	aStream next: n putAll: collection startingAt: ptr.
 	ptr := ptr + n.
 	^n
     ]
@@ -110,6 +111,7 @@ or ReadWriteStream instead of me to create and use streams.'>
 
         <category: 'accessing-reading'>
 	| n |
+	(access bitAnd: 1) = 0 ifTrue: [^self shouldNotImplement].
 	n := anInteger min: endPtr - ptr + 1.
 	aCollection
 	    replaceFrom: pos
