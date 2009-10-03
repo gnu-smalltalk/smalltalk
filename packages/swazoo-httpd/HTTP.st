@@ -257,23 +257,23 @@ Object subclass: HTTPConnection [
 
 
 
-Object subclass: HTTPServer [
-    | ip port connections sites socket loop isMultiThreading |
+Object subclass: AbstractHTTPServer [
+    | connections sites socket loop isMultiThreading |
     
     <category: 'Swazoo-HTTP'>
     <comment: nil>
 
-    HTTPServer class >> initialize [
+    AbstractHTTPServer class >> initialize [
 	<category: 'intialize-release'>
 	SpEnvironment addImageShutdownTask: [self shutDown] for: self
     ]
 
-    HTTPServer class >> new [
+    AbstractHTTPServer class >> new [
 	<category: 'instance creation'>
 	^super new initialize
     ]
 
-    HTTPServer class >> shutDown [
+    AbstractHTTPServer class >> shutDown [
 	"HTTPServer shutDown"
 
 	<category: 'intialize-release'>
@@ -326,6 +326,11 @@ Object subclass: HTTPServer [
 	^connections
     ]
 
+    createSocket [
+	<category: 'abstract-start/stop'>
+	self subclassResponsibility.
+    ]
+
     hasNoSites [
 	<category: 'sites'>
 	^self sites hasNoResources
@@ -345,23 +350,6 @@ Object subclass: HTTPServer [
 	<category: 'private-initialize'>
 	self initConnections.
 	self initSites
-    ]
-
-    ip [
-	<category: 'private-initialize'>
-	^ip
-    ]
-
-    ip: anIPString [
-	<category: 'private-initialize'>
-	ip := anIPString
-    ]
-
-    ipCorrected [
-	"in case of '*' always return '0.0.0.0'"
-
-	<category: 'private-initialize'>
-	^self ip = '*' ifTrue: ['0.0.0.0'] ifFalse: [self ip]
     ]
 
     isMultiThreading [
@@ -388,16 +376,6 @@ Object subclass: HTTPServer [
 	loop := aProcess
     ]
 
-    port [
-	<category: 'private-initialize'>
-	^port
-    ]
-
-    port: aNumber [
-	<category: 'private-initialize'>
-	port := aNumber
-    ]
-
     removeConnection: aConnection [
 	<category: 'private'>
 	self connections remove: aConnection ifAbsent: [nil]
@@ -410,12 +388,12 @@ Object subclass: HTTPServer [
 
     requestReaderClass [
 	<category: 'factories'>
-	^HTTPReader
+	self subclassResponsibility
     ]
 
     responsePrinterClass [
 	<category: 'factories'>
-	^HTTPPrinter
+	self subclassResponsibility
     ]
 
     restart [
@@ -460,21 +438,11 @@ Object subclass: HTTPServer [
 	socket := aSocket
     ]
 
-    socketClass [
-	"^a Class
-	 I use SwazooSocket to wrap the actual socket.  SwazooSocket does some of the byte translation work for me."
-
-	<category: 'private'>
-	^SwazooSocket
-    ]
-
     start [
 	<category: 'start/stop'>
 	self loop isNil 
 	    ifTrue: 
-		[self 
-		    socket: (self socketClass serverOnIP: self ipCorrected port: self port).
-		self socket listenFor: 50.
+		[self socket: self createSocket.
 		self loop: ([[self acceptConnection] repeat] 
 			    forkAt: Processor userBackgroundPriority)]
     ]
@@ -488,6 +456,68 @@ Object subclass: HTTPServer [
 		self loop: nil.
 		self socket close.
 		self socket: nil]
+    ]
+]
+
+
+
+AbstractHTTPServer subclass: HTTPServer [
+    
+    | ip port |
+
+    <category: 'Swazoo-HTTP'>
+    <comment: nil>
+
+    createSocket [
+	<category: 'private-initialize'>
+	^(self socketClass serverOnIP: self ipCorrected port: self port)
+		listenFor: 50;
+		yourself
+    ]
+
+    ip [
+	<category: 'private-initialize'>
+	^ip
+    ]
+
+    ip: anIPString [
+	<category: 'private-initialize'>
+	ip := anIPString
+    ]
+
+    ipCorrected [
+	"in case of '*' always return '0.0.0.0'"
+
+	<category: 'private-initialize'>
+	^self ip = '*' ifTrue: ['0.0.0.0'] ifFalse: [self ip]
+    ]
+
+    port [
+	<category: 'private-initialize'>
+	^port
+    ]
+
+    port: aNumber [
+	<category: 'private-initialize'>
+	port := aNumber
+    ]
+
+    requestReaderClass [
+	<category: 'factories'>
+	^HTTPReader
+    ]
+
+    responsePrinterClass [
+	<category: 'factories'>
+	^HTTPPrinter
+    ]
+
+    socketClass [
+	"^a Class
+	 I use SwazooSocket to wrap the actual socket.  SwazooSocket does some of the byte translation work for me."
+
+	<category: 'private'>
+	^SwazooSocket
     ]
 ]
 
@@ -636,7 +666,69 @@ CompositeResource subclass: ServerRootComposite [
 
 
 
-Object subclass: SwazooSocket [
+Object subclass: AbstractSwazooSocket [
+    <category: 'Swazoo-HTTP'>
+    <comment: nil>
+
+    accept [
+	<category: 'server accessing'>
+	self subclassResponsibility
+    ]
+
+    close [
+	<category: 'accessing'>
+	self subclassRespnsibility
+    ]
+
+    isActive [
+	<category: 'testing'>
+	self subclassResponsibility
+    ]
+
+    listenFor: anInteger [
+	<category: 'server accessing'>
+	self subclassResponsibility
+    ]
+
+    localAddress [
+	<category: 'accessing'>
+	self subclassResponsibility
+    ]
+
+    read: anInteger [
+	<category: 'accessing'>
+	self subclassResponsibility
+    ]
+
+    readInto: aByteArray startingAt: start for: length [
+	<category: 'accessing'>
+	self subclassResponsibility
+    ]
+
+    remoteAddress [
+	<category: 'accessing'>
+	self subclassResponsibility
+    ]
+
+    stream [
+	<category: 'private'>
+	self subclassResponsibility
+    ]
+
+    write: aByteArray [
+	<category: 'accessing'>
+	self subclassResponsibility
+    ]
+
+    writeFrom: aByteArray startingAt: start for: length [
+	<category: 'accessing'>
+	self subclassResponsibility
+    ]
+]
+
+
+
+AbstractSwazooSocket subclass: SwazooSocket [
     | accessor |
     
     <category: 'Swazoo-HTTP'>
@@ -708,13 +800,6 @@ Object subclass: SwazooSocket [
     read: anInteger [
 	<category: 'accessing'>
 	^self accessor read: anInteger
-    ]
-
-    read: anInteger timeout: aNumberOfMilliseconds [
-	<category: 'accessing'>
-	^(self accessor waitForReadDataUpToMs: aNumberOfMilliseconds) 
-	    ifTrue: [self read: anInteger]
-	    ifFalse: [ByteArray new]
     ]
 
     readInto: aByteArray startingAt: start for: length [

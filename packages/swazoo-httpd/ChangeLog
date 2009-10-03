@@ -1,5 +1,9 @@
 2009-11-17  Paolo Bonzini  <bonzini@gnu.org>
 
+	* HTTP.st: Add AbstractHTTPServer and AbstractSwazooSocket.
+
+2009-11-17  Paolo Bonzini  <bonzini@gnu.org>
+
 	* HTTP.st: Use #responsePrinterClass/#requestReaderClass.
 	* Headers.st: Remove request reading and response printing.
 	* Messages.st: Remove request reading and response printing.
