@@ -1,3 +1,7 @@
+2009-10-04  Paolo Bonzini  <bonzini@gnu.org>
+
+	* Buffers.st: Implement #upTo: using #indexOf:.
+
 2009-09-07  Paolo Bonzini  <bonzini@gnu.org>
 
 	* AbstractSocketImpl.st: Check error after fileop 14.

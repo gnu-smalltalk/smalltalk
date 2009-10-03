@@ -184,5 +184,39 @@ evaluates an user defined block to try to get some more data.'>
 	<category: 'buffer handling'>
 	^self basicAtEnd not
     ]
+
+    upToEnd [
+	"Returns a collection of the same type that the stream accesses, up to
+	 but not including the object anObject.  Returns the entire rest of the
+	 stream's contents if anObject is not present."
+
+	<category: 'accessing-reading'>
+	| ws |
+	ws := String new writeStream.
+	[self nextAvailablePutAllOn: ws.
+	self atEnd] whileFalse.
+	^ws contents
+    ]
+
+    upTo: anObject [
+	"Returns a collection of the same type that the stream accesses, up to
+	 but not including the object anObject.  Returns the entire rest of the
+	 stream's contents if anObject is not present."
+
+	<category: 'accessing-reading'>
+	| result r ws |
+	self atEnd ifTrue: [^collection copyEmpty: 0].
+	r := collection indexOf: anObject startingAt: ptr ifAbsent: [0].
+	r = 0 ifFalse: [result := self next: r - ptr. self next. ^result].
+
+	ws := String new writeStream.
+	[self nextAvailablePutAllOn: ws.
+	self atEnd ifTrue: [^ws contents].
+	r := collection indexOf: anObject startingAt: ptr ifAbsent: [0].
+	r = 0] whileTrue.
+
+	self next: r - 1 putAllOn: ws; next.
+	^ws contents
+    ]
 ]
 

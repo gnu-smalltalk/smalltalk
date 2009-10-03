@@ -1,5 +1,9 @@
 2009-10-04  Paolo Bonzini  <bonzini@gnu.org>
 
+	* kernel/PosStream.st: Implement #upTo: using #indexOf:.
+
+2009-10-04  Paolo Bonzini  <bonzini@gnu.org>
+
 	* kernel/String.st: Use memchr primitive.
 	* kernel/ByteArray.st: Use memchr primitive.
 

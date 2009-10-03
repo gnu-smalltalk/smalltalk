@@ -333,5 +333,27 @@ or ReadWriteStream instead of me to create and use streams.'>
 	<category: 'class type methods'>
 	^collection species
     ]
+
+    upToEnd [
+	"Returns a collection of the same type that the stream accesses,
+	 containing the entire rest of the stream's contents."
+
+	<category: 'accessing-reading'>
+	^self next: endPtr - ptr + 1.
+    ]
+
+    upTo: anObject [
+	"Returns a collection of the same type that the stream accesses, up to
+	 but not including the object anObject.  Returns the entire rest of the
+	 stream's contents if anObject is not present."
+
+	<category: 'accessing-reading'>
+	| result r ws |
+	r := collection indexOf: anObject startingAt: ptr ifAbsent: [0].
+	^r = 0
+	    ifTrue: [self upToEnd]
+	    ifFalse: [result := self next: r - ptr. self next. ^result].
+    ]
+
 ]
 
