@@ -70,7 +70,7 @@ Object subclass: SwazooBenchmarks [
 	response entity: (ByteArray new: self contentSize withAll: 85).
 	ws := SwazooStream on: String new.
 	HTTPPrinter writeResponse: response to: ws.
-	content := ws writeBuffer contents
+	content := ws writeBufferContents
     ]
 
     server [
@@ -353,7 +353,7 @@ So, to the HTTP server it must look like a server socket.  To the tester it must
 	 For some reason, we have to look for a character in a ByteStream - this is a Swazoo thing."
 
 	<category: 'stream-toServer'>
-	^(self byteStreamToServer upTo: aCharacter asInteger) asByteString
+	^self byteStreamToServer upTo: aCharacter asInteger
     ]
 
     write: aByteArray [
@@ -616,7 +616,7 @@ TestCase subclass: HTTPPostTest [
 	    nextPutLine: 'DTSTART;VALUE=DATE:20050425';
 	    nextPutLine: 'END:VEVENT';
 	    nextPutLine: 'END:VCALENDAR'.
-	^stream writeBuffer contents asString
+	^stream writeBufferContents asString
     ]
 
     postDashes [
@@ -639,7 +639,7 @@ TestCase subclass: HTTPPostTest [
 	    nextPutLine: '- --';
 	    nextPutLine: '--boundary--'.
 	^HTTPRequest 
-	    readFrom: (SwazooStream on: requestStream writeBuffer contents)
+	    readFrom: (SwazooStream on: requestStream writeBufferContents)
     ]
 
     postEmpty [
@@ -660,7 +660,7 @@ TestCase subclass: HTTPPostTest [
 	    nextPutLine: '';
 	    nextPutLine: '--boundary--'.
 	^HTTPRequest 
-	    readFrom: (SwazooStream on: requestStream writeBuffer contents)
+	    readFrom: (SwazooStream on: requestStream writeBufferContents)
     ]
 
     postFile [
@@ -697,7 +697,7 @@ TestCase subclass: HTTPPostTest [
 	    nextPutLine: 'Attach';
 	    nextPutLine: '-------------------20752836116568320241700153999--'.
 	^HTTPRequest 
-	    readFrom: (SwazooStream on: requestStream writeBuffer contents)
+	    readFrom: (SwazooStream on: requestStream writeBufferContents)
     ]
 
     postPreambleEpilogue [
@@ -718,7 +718,7 @@ TestCase subclass: HTTPPostTest [
 	    nextPutLine: '--boundary--';
 	    nextPutLine: 'This is the epilogue'.
 	^HTTPRequest 
-	    readFrom: (SwazooStream on: requestStream writeBuffer contents)
+	    readFrom: (SwazooStream on: requestStream writeBufferContents)
     ]
 
     postSimple [
@@ -737,7 +737,7 @@ TestCase subclass: HTTPPostTest [
 	    nextPutLine: 'main';
 	    nextPutLine: '--boundary--'.
 	^HTTPRequest 
-	    readFrom: (SwazooStream on: requestStream writeBuffer contents)
+	    readFrom: (SwazooStream on: requestStream writeBufferContents)
     ]
 
     postUrlEncoded [
@@ -752,7 +752,7 @@ TestCase subclass: HTTPPostTest [
 	    crlf;
 	    nextPutAll: 'home=Cosby+one&favorite+flavor=flies'.
 	^HTTPRequest 
-	    readFrom: (SwazooStream on: requestStream writeBuffer contents)
+	    readFrom: (SwazooStream on: requestStream writeBufferContents)
     ]
 
     testBlockCopy [
@@ -878,7 +878,7 @@ TestCase subclass: HTTPPostTest [
 	    crlf;
 	    nextPutLine: 'Hello, World'.
 	post := HTTPRequest 
-		    readFrom: (SwazooStream on: requestStream writeBuffer contents).
+		    readFrom: (SwazooStream on: requestStream writeBufferContents).
 	self assert: post isPostDataEmpty.
 	self assert: post entityBody = 'Hello, World'
     ]
@@ -895,7 +895,7 @@ TestCase subclass: HTTPPostTest [
 	    crlf;
 	    nextPutLine: 'address=+fs&product=&quantity=1'.
 	post := HTTPRequest 
-		    readFrom: (SwazooStream on: requestStream writeBuffer contents).
+		    readFrom: (SwazooStream on: requestStream writeBufferContents).
 	self assert: (post postDataAt: 'address') value = ' fs'.
 	self assert: (post postDataAt: 'product') value = ''.
 	self assert: (post postDataAt: 'quantity') value = '1'
@@ -919,7 +919,7 @@ TestCase subclass: HTTPRequestTest [
 	    nextPutLine: 'Host: foo.com';
 	    crlf.
 	^HTTPRequest 
-	    readFrom: (SwazooStream on: requestStream writeBuffer contents)
+	    readFrom: (SwazooStream on: requestStream writeBufferContents)
     ]
 
     basicGetHTTP10 [
@@ -930,7 +930,7 @@ TestCase subclass: HTTPRequestTest [
 	    nextPutLine: 'GET / HTTP/1.0';
 	    crlf.
 	^HTTPRequest 
-	    readFrom: (SwazooStream on: requestStream writeBuffer contents)
+	    readFrom: (SwazooStream on: requestStream writeBufferContents)
     ]
 
     basicGetHTTP10Keepalive [
@@ -942,7 +942,7 @@ TestCase subclass: HTTPRequestTest [
 	    nextPutLine: 'Connection: Keep-Alive';
 	    crlf.
 	^HTTPRequest 
-	    readFrom: (SwazooStream on: requestStream writeBuffer contents)
+	    readFrom: (SwazooStream on: requestStream writeBufferContents)
     ]
 
     basicHead [
@@ -954,7 +954,7 @@ TestCase subclass: HTTPRequestTest [
 	    nextPutLine: 'Host: foo.com';
 	    crlf.
 	^HTTPRequest 
-	    readFrom: (SwazooStream on: requestStream writeBuffer contents)
+	    readFrom: (SwazooStream on: requestStream writeBufferContents)
     ]
 
     crlfOn: aStream [
@@ -976,7 +976,7 @@ TestCase subclass: HTTPRequestTest [
 	    nextPutLine: 'Referer: http://www.bar.com/takeMeThere.html';
 	    crlf.
 	^HTTPRequest 
-	    readFrom: (SwazooStream on: requestStream writeBuffer contents)
+	    readFrom: (SwazooStream on: requestStream writeBufferContents)
     ]
 
     getMultiValueHeader [
@@ -988,7 +988,7 @@ TestCase subclass: HTTPRequestTest [
 	    nextPutLine: 'Content-Type: multipart/form-data; boundary= --boundary';
 	    crlf.
 	^HTTPRequest 
-	    readFrom: (SwazooStream on: requestStream writeBuffer contents)
+	    readFrom: (SwazooStream on: requestStream writeBufferContents)
     ]
 
     portedGet [
@@ -1000,7 +1000,7 @@ TestCase subclass: HTTPRequestTest [
 	    nextPutLine: 'Host: foo.com:8888';
 	    crlf.
 	^HTTPRequest 
-	    readFrom: (SwazooStream on: requestStream writeBuffer contents)
+	    readFrom: (SwazooStream on: requestStream writeBufferContents)
     ]
 
     test10ConnectionClose [
@@ -1102,7 +1102,7 @@ TestCase subclass: HTTPRequestTest [
 	result := SpExceptionContext 
 		    for: 
 			[(HTTPRequest 
-			    readFrom: (SwazooStream on: requestStream writeBuffer contents)) 
+			    readFrom: (SwazooStream on: requestStream writeBufferContents)) 
 				ensureFullRead	"because of defered post data parsing"]
 		    on: SpError
 		    do: [:ex | ex].
@@ -1127,7 +1127,7 @@ TestCase subclass: HTTPRequestTest [
 	    nextPutLine: 'Host: foo.com:8888';
 	    crlf.
 	request := HTTPRequest 
-		    readFrom: (SwazooStream on: requestStream writeBuffer contents).
+		    readFrom: (SwazooStream on: requestStream writeBufferContents).
 	self assert: (request includesQuery: 'WSDL').
 	self assert: (request queryAt: 'WSDL') isEmpty
     ]
@@ -1152,7 +1152,7 @@ TestCase subclass: HTTPRequestTest [
 	 nextPutAll: 'GET / HTTP/1.1';
 	 cr.
 	 result := SpExceptionContext
-	 for: [HTTPRequest readFrom: (SwazooStream on: requestStream writeBuffer contents)]
+	 for: [HTTPRequest readFrom: (SwazooStream on: requestStream writeBufferContents)]
 	 on: SpError
 	 do: [:ex | ex].
 	 self assert: result class == SwazooHTTPParseError.
@@ -1189,7 +1189,7 @@ TestCase subclass: HTTPResponseTest [
 	response := HTTPResponse internalServerError.
 	ws := SwazooStream on: String new.
 	HTTPPrinter new response: response; stream: ws; printStatus.
-	rs := SwazooStream on: ws writeBuffer contents.
+	rs := SwazooStream on: ws writeBufferContents.
 	self assert: rs nextLine = 'HTTP/1.1 500 Internal Server Error'
     ]
 
@@ -1199,7 +1199,7 @@ TestCase subclass: HTTPResponseTest [
 	response := HTTPResponse ok.
 	ws := SwazooStream on: String new.
 	HTTPPrinter new response: response; stream: ws; printStatus.
-	rs := SwazooStream on: ws writeBuffer contents.
+	rs := SwazooStream on: ws writeBufferContents.
 	self assert: rs nextLine = 'HTTP/1.1 200 OK'
     ]
 
@@ -1303,7 +1303,7 @@ TestCase subclass: HeaderFieldTest [
 	    nextPutLine: ' charset=iso-8859-1';
 	    crlf.
 	request := HTTPRequest 
-		    readFrom: (SwazooStream on: requestStream writeBuffer contents).
+		    readFrom: (SwazooStream on: requestStream writeBufferContents).
 	field := request headers fieldNamed: 'content-type'.
 	self assert: field name = 'Content-Type'.
 	self assert: field mediaType = 'text/html'.
@@ -1672,87 +1672,87 @@ TestCase subclass: SwazooBaseExtensionsTest [
 
 
 
-TestCase subclass: SwazooBufferTest [
+TestCase subclass: SwazooBoundaryTest [
     
     <comment: nil>
     <category: 'Swazoo-Tests'>
 
     testBoundaryFull [
 	<category: 'testing-mime boundary'>
-	| boundary buffer |
+	| boundary stream |
 	boundary := '--boundary--'.
-	buffer := SwazooBuffer on: 'just--boundary--something'.	"full boundary"
-	self assert: (buffer signsOfBoundary: boundary) = boundary size
+	stream := SwazooStream on: 'just--boundary--something'.	"full boundary"
+	self assert: (stream signsOfBoundary: boundary) = boundary size
     ]
 
     testBoundaryMixed [
 	<category: 'testing-mime boundary'>
-	| boundary buffer |
+	| boundary stream |
 	boundary := '--boundary--'.
-	buffer := SwazooBuffer on: 'yes,--just--boundary--something'.	"partial, later full boundary"
-	self assert: (buffer signsOfBoundary: boundary) = boundary size
+	stream := SwazooStream on: 'yes,--just--boundary--something'.	"partial, later full boundary"
+	self assert: (stream signsOfBoundary: boundary) = boundary size
     ]
 
     testBoundaryOnEdge [
-	"part of boundary at the end of this buffer, remaining probably in the next"
+	"part of boundary at the end of this stream, remaining probably in the next"
 
 	<category: 'testing-mime boundary'>
-	| boundary buffer |
+	| boundary stream |
 	boundary := '--boundary--'.
-	buffer := SwazooBuffer on: 'just something-'.	"just first char of boundary"
-	self assert: (buffer signsOfBoundary: boundary) = 1.
-	buffer := SwazooBuffer on: 'just something--'.	"two chars"
-	self assert: (buffer signsOfBoundary: boundary) = 2.
-	buffer := SwazooBuffer on: 'just something--bound'.	"half"
-	self assert: (buffer signsOfBoundary: boundary) = 7.
-	buffer := SwazooBuffer on: 'just something--boundary--'.	"full boundary at the edge"
-	self assert: (buffer signsOfBoundary: boundary) = boundary size
+	stream := SwazooStream on: 'just something-'.	"just first char of boundary"
+	self assert: (stream signsOfBoundary: boundary) = 1.
+	stream := SwazooStream on: 'just something--'.	"two chars"
+	self assert: (stream signsOfBoundary: boundary) = 2.
+	stream := SwazooStream on: 'just something--bound'.	"half"
+	self assert: (stream signsOfBoundary: boundary) = 7.
+	stream := SwazooStream on: 'just something--boundary--'.	"full boundary at the edge"
+	self assert: (stream signsOfBoundary: boundary) = boundary size
     ]
 
     testBoundaryOnEdgeMixed [
 	"signs of boundary in the middle part at the end of this buffer, remaining probably in the next"
 
 	<category: 'testing-mime boundary'>
-	| boundary buffer |
+	| boundary stream |
 	boundary := '--boundary--'.
-	buffer := SwazooBuffer on: 'just-something-'.	"sign in the middle, one char at the end"
-	self assert: (buffer signsOfBoundary: boundary) = 1.
-	buffer := SwazooBuffer on: 'just-something--'.	"two chars"
-	self assert: (buffer signsOfBoundary: boundary) = 2.
-	buffer := SwazooBuffer on: 'just-so--mething--bound'.	"even more mixed case"
-	self assert: (buffer signsOfBoundary: boundary) = 7
+	stream := SwazooStream on: 'just-something-'.	"sign in the middle, one char at the end"
+	self assert: (stream signsOfBoundary: boundary) = 1.
+	stream := SwazooStream on: 'just-something--'.	"two chars"
+	self assert: (stream signsOfBoundary: boundary) = 2.
+	stream := SwazooStream on: 'just-so--mething--bound'.	"even more mixed case"
+	self assert: (stream signsOfBoundary: boundary) = 7
     ]
 
     testBoundarySimple [
 	<category: 'testing-mime boundary'>
-	| boundary buffer |
+	| boundary stream |
 	boundary := '--boundary--'.
-	buffer := SwazooBuffer on: 'just something'.	"no boundary"
-	self assert: (buffer signsOfBoundary: boundary) = 0.
-	buffer := SwazooBuffer on: 'just-something'.	"sign of boundary"
-	self assert: (buffer signsOfBoundary: boundary) = 0.
-	buffer := SwazooBuffer on: 'just--something'.	"more sign of boundary"
-	self assert: (buffer signsOfBoundary: boundary) = 0.
-	buffer := SwazooBuffer on: 'just--boundary--something'.	"full boundary"
-	self assert: (buffer signsOfBoundary: boundary) = boundary size
+	stream := SwazooStream on: 'just something'.	"no boundary"
+	self assert: (stream signsOfBoundary: boundary) = 0.
+	stream := SwazooStream on: 'just-something'.	"sign of boundary"
+	self assert: (stream signsOfBoundary: boundary) = 0.
+	stream := SwazooStream on: 'just--something'.	"more sign of boundary"
+	self assert: (stream signsOfBoundary: boundary) = 0.
+	stream := SwazooStream on: 'just--boundary--something'.	"full boundary"
+	self assert: (stream signsOfBoundary: boundary) = boundary size
     ]
 
     testIndexOfBoundary [
 	"index of start of boundary in buffer, both full or partial at the edge/end of buffer"
 
 	<category: 'testing-mime boundary'>
-	| boundary buffer |
+	| boundary stream |
 	boundary := '--boundary--'.
-	buffer := SwazooBuffer on: 'just something'.	"no boundary"
-	self assert: (buffer indexOfBoundary: boundary) = 0.
-	buffer := SwazooBuffer on: 'just--boundary--something-'.	"full boundary"
-	self assert: (buffer indexOfBoundary: boundary) = 5.
-	buffer := SwazooBuffer on: 'just something--boun'.	"partial boundary at the edge"
-	self assert: (buffer indexOfBoundary: boundary) = 15.
-	buffer := SwazooBuffer on: 'just something-'.	"partial boundary, one char only"
-	self assert: (buffer indexOfBoundary: boundary) = 15.
-	buffer := SwazooBuffer on: 'just-som--ething--boun'.	"mixed case with partial at the edge"
-	self assert: (buffer indexOfBoundary: boundary) = 17
+	stream := SwazooStream on: 'just something'.	"no boundary"
+	self assert: (stream indexOfBoundary: boundary) = 0.
+	stream := SwazooStream on: 'just--boundary--something-'.	"full boundary"
+	self assert: (stream indexOfBoundary: boundary) = 5.
+	stream := SwazooStream on: 'just something--boun'.	"partial boundary at the edge"
+	self assert: (stream indexOfBoundary: boundary) = 15.
+	stream := SwazooStream on: 'just something-'.	"partial boundary, one char only"
+	self assert: (stream indexOfBoundary: boundary) = 15.
+	stream := SwazooStream on: 'just-som--ething--boun'.	"mixed case with partial at the edge"
+	self assert: (stream indexOfBoundary: boundary) = 17
     ]
 ]
 
@@ -2414,7 +2414,7 @@ TestCase subclass: SwazooStreamTest [
 	ws nextPutAll: comparisonString.
 	self crlfOn: ws.
 	self crlfOn: ws.
-	rs := SwazooStream on: ws writeBuffer contents.
+	rs := SwazooStream on: ws writeBufferContents.
 	self assert: rs nextLine = comparisonString.
 	self assert: rs nextLine = ''
     ]
@@ -2497,7 +2497,7 @@ TestCase subclass: SwazooStreamTest [
 	ws := SwazooStream on: String new.
 	ws nextPutAll: comparisonString.
 	ws nextPut: Character cr.
-	rs := SwazooStream on: ws writeBuffer contents.
+	rs := SwazooStream on: ws writeBufferContents.
 	errored := false.
 	SpExceptionContext 
 	    for: [rs nextLine]
@@ -2513,7 +2513,7 @@ TestCase subclass: SwazooStreamTest [
 	ws := SwazooStream on: String new.
 	ws nextPutAll: comparisonString.
 	self crlfOn: ws.
-	rs := SwazooStream on: ws writeBuffer contents.
+	rs := SwazooStream on: ws writeBufferContents.
 	self assert: rs nextLine = comparisonString
     ]
 ]

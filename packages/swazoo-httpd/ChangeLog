@@ -1,3 +1,11 @@
+2010-01-29  Paolo Bonzini  <bonzini@gnu.org>
+
+	* Buffer.st: Delete.
+	* HTTP.st: Merge buffering into SwazooStream, don't call #closeResponse.
+	* Messages.st: Rewrite parts dealing with SwazooBuffers.
+	* Protocol.st: Call #closeResponse here.
+	* Tests.st: Adjust for removal of SwazooBuffer.
+
 2010-01-01  Paolo Bonzini  <bonzini@gnu.org>
 
 	* Update copyright years.

@@ -199,27 +199,34 @@ Object subclass: SwazooResponsePrinter [
 
     SwazooResponsePrinter class >> writeHeadersFor: aResponse to: aSwazooStream [
 	<category: 'private-sending'>
+	aSwazooStream isNil ifTrue: [ ^self ].
 	^self new
 	    response: aResponse;
 	    stream: aSwazooStream;
-	    writeHeader
+	    writeHeader;
+	    closeResponse
     ]
 
     SwazooResponsePrinter class >> writeResponse: aResponse to: aSwazooStream [
 	<category: 'private-sending'>
+	aSwazooStream isNil ifTrue: [ ^self ].
 	^self new
 	    response: aResponse;
 	    stream: aSwazooStream;
-	    writeResponseTo: nil
+	    writeResponseTo: nil;
+	    closeResponse
     ]
 
     SwazooResponsePrinter class >> writeResponse: aResponse for: aRequest to: aSwazooStream [
 	<category: 'private-sending'>
+	aSwazooStream isNil ifTrue: [ ^self ].
 	^self new
 	    response: aResponse;
 	    stream: aSwazooStream;
-	    writeResponseTo: aRequest
+	    writeResponseTo: aRequest;
+	    closeResponse
     ]
+
     response [
 	<category: 'accessing'>
 	^response
@@ -238,6 +245,11 @@ Object subclass: SwazooResponsePrinter [
     stream: aSwazooStream [
 	<category: 'accessing'>
 	stream := aSwazooStream
+    ]
+
+    closeResponse [
+	<category: 'private-sending'>
+	stream closeResponse
     ]
 
     endHeader [

@@ -134,7 +134,6 @@ Object subclass: HTTPConnection [
 	<category: 'serving-responses'>
 	aResponse informConnectionClose.
 	self responsePrinterClass writeResponse: aResponse to: self stream.
-	self stream closeResponse
     ]
 
     nextPutResponse: aMessage toRequest: aRequest [
@@ -142,7 +141,6 @@ Object subclass: HTTPConnection [
 	aRequest isHead 
 	    ifTrue: [self responsePrinterClass writeHeadersFor: aMessage to: self stream]
 	    ifFalse: [self responsePrinterClass writeResponse: aMessage to: self stream].
-	self stream closeResponse
     ]
 
     produceResponseFor: aSwazooTask [
@@ -837,10 +835,20 @@ AbstractSwazooSocket subclass: SwazooSocket [
 
 
 Object subclass: SwazooStream [
-    | socket readBuffer writeBuffer chunked |
+    | socket readBuffer readPtr readEnd writeBuffer writePtr writeEnd chunked |
     
     <category: 'Swazoo-HTTP'>
     <comment: nil>
+
+    SwazooStream class >> preambleSize [
+        <category: 'defaults'>
+	^6
+    ]
+
+    SwazooStream class >> defaultBufferSize [
+        <category: 'defaults'>
+        ^8000
+    ]
 
     SwazooStream class >> connectedPair [
 	<category: 'instance creation'>
@@ -851,7 +859,7 @@ Object subclass: SwazooStream [
 	"use only for testing!!"
 
 	<category: 'instance creation'>
-	^self new readBuffer: (SwazooBuffer on: aString)
+	^self new setInputString: aString
     ]
 
     SwazooStream class >> socket: aSwazooSocket [
@@ -859,14 +867,71 @@ Object subclass: SwazooStream [
 	^self new setSocket: aSwazooSocket
     ]
 
+    copyBufferTo: anIndex [
+	"from current position to desired index"
+
+	<category: 'mime boundary'>
+	| start |
+	start := readPtr.
+	readPtr := anIndex.
+	^readBuffer copyFrom: start to: anIndex - 1
+    ]
+
+    indexOfBoundary: aBoundaryBytes [
+	"index of boundary start, beeing full boundary or part at the end of buffer. 0 if not found"
+
+	<category: 'mime boundary'>
+	| inx innerInx firstInx |
+	inx := readPtr.
+	[inx <= readEnd] whileTrue: 
+		[innerInx := 1.
+		firstInx := inx.
+		[(aBoundaryBytes at: innerInx) = (readBuffer at: inx)] whileTrue: 
+			[innerInx = aBoundaryBytes size ifTrue: [^firstInx].	"full boundary found"
+			inx = readEnd ifTrue: [^firstInx].	"partial boundary at the edge of buffer found"
+			inx := inx + 1.
+			innerInx := innerInx + 1].
+		inx := inx + 1].
+	^0
+    ]
+
+    signsOfBoundary: aBoundaryBytes [
+	"detect as fast as possible if any if not all MIME part boundary is present in buffer contents"
+
+	"return number of bundary bytes detected, 0 = no boundary"
+
+	<category: 'mime boundary'>
+	| first index |
+	first := aBoundaryBytes first.
+	"fast test"
+	((readPtr + 1 to: readEnd) 
+	    contains: [:inx | (readBuffer at: inx) = first]) ifFalse: [^0].
+	"full or partial boundary on the edge of buffer test"
+	index := self indexOfBoundary: aBoundaryBytes.	"index of full, or partial boundary at the edge"
+	index = 0 ifTrue: [^0].	"no boundary found"
+	readEnd - index >= aBoundaryBytes size ifTrue: [^aBoundaryBytes size].	"full boundary detected"
+	^readEnd - index + 1	"partial boundary at the end of buffer"
+    ]
+
+    startsWith: aPartialBoundaryBytes [
+	"is remaining part of MIME part boundary at the start of buffer?"
+
+	<category: 'mime boundary'>
+	1 to: aPartialBoundaryBytes size
+	    do: 
+		[:inx | 
+		(readBuffer at: readPtr + inx) = (aPartialBoundaryBytes at: inx) 
+		    ifFalse: [^false]].
+	^true
+    ]
+
     anyDataReady [
 	"wait for data and return true if any data ready. On VW somethimes happen that data
 	 receipt is signaled but no data is actually received"
 
 	<category: 'accessing-reading'>
-	self readBuffer atEnd ifFalse: [^true].	"data is there from before"
 	self fillBuffer.
-	^self readBuffer atEnd not
+	^readPtr <= readEnd
     ]
 
     atEnd [
@@ -885,6 +950,19 @@ Object subclass: SwazooStream [
 	self nilReadBuffer	"to GC buffers"
     ]
 
+    closeChunk [
+        "a zero sized chunk determine and end of chunked data and also response"
+
+	<category: 'chunked encoding'>
+        | written |
+        "first crlf ends 0 length line, second crlf ends whole response"
+        written := self socket
+                    writeFrom: #(48 13 10 13 10) asByteArray
+                    startingAt: 1
+                    for: 5.
+        written = 5 ifFalse: [self error: 'socket write error']
+    ]
+
     closeResponse [
 	"for chunked response: close it by sending null chunk"
 
@@ -892,20 +970,12 @@ Object subclass: SwazooStream [
 
 	<category: 'initialize-release'>
 	self flush.
-	self isChunked 
-	    ifTrue: 
-		[self writeBuffer closeChunkTo: self socket.
-		self resetChunked].
-	self socket notNil 
-	    ifTrue: 
-		["not simulation"
-
-		self nilWriteBuffer]	"to release memory"
+	self isChunked ifTrue: [self closeChunk; resetChunked].
     ]
 
     cr [
 	<category: 'accessing-writing'>
-	self nextPut: Character cr asInteger
+	self nextPutByte: 13
     ]
 
     crlf [
@@ -915,34 +985,64 @@ Object subclass: SwazooStream [
 	    lf
     ]
 
+    writeDataSize [
+	<category: 'private'>
+
+	^writeEnd - writePtr + 1
+    ]
+
     fillBuffer [
 	<category: 'private'>
+	readPtr > readEnd ifFalse: [^self].
 	self socket isNil ifTrue: [^self].	"if SwazooStream is used for tests only"
-	self readBuffer refillFrom: self socket
+	readPtr := 1.
+        readEnd := self socket
+                    readInto: readBuffer
+                    startingAt: 1
+                    for: readBuffer size.       "nr. of actuall bytes read"
+        readEnd = 0
+            ifTrue:
+                [SwazooStreamNoDataError
+                    raiseSignal: 'No data available.  Socket probably closed']
+    ]
+
+    fillPreamble [
+	<category: 'chunked encoding'>
+
+	| size length start |
+	size := self writeDataSize.
+	"preamble has no room for bigger chunk..."
+        size > 65535 ifTrue: [self error: 'chunk too long!'].
+        length := size printStringRadix: 16.
+
+        SpEnvironment isSqueak ifTrue: [length := length copyFrom: 4].     "trim 16r"
+	writeBuffer
+	    replaceFrom: 1 to: length size
+	    with: length
+	    startingAt: 1.
+	writeBuffer
+	    replaceFrom: length size + 1 to: 6
+	    with: #[32 32 32 32 13 10]
+	    startingAt: length size + 1.
+	writePtr := 1
     ]
 
     flush [
 	"actually write to the tcp socket and clear write buffer"
 
 	<category: 'initialize-release'>
+	| written |
 	self socket isNil ifTrue: [^nil].	"for simulations and tests"
-	self isChunked 
-	    ifTrue: [self writeBuffer flushChunkTo: self socket]
-	    ifFalse: [self writeBuffer flushTo: self socket]
-    ]
 
-    initReadBuffer [
-	"temporary read buffer"
-
-	<category: 'initialize-release'>
-	readBuffer := SwazooBuffer newRead
-    ]
-
-    initWriteBuffer [
-	"temporary write buffer. flush it to socket ocassionaly!!"
-
-	<category: 'initialize-release'>
-	writeBuffer := SwazooBuffer newWrite
+	self isChunked ifTrue: [self fillPreamble].
+	[writeEnd < writePtr] whileFalse:
+	    [written := self socket
+                            writeFrom: writeBuffer
+                            startingAt: writePtr
+                            for: writeEnd - writePtr + 1.
+            writePtr := writePtr + written].
+	writePtr := self class preambleSize + 1.
+	writeEnd := self class preambleSize.
     ]
 
     isChunked [
@@ -952,32 +1052,55 @@ Object subclass: SwazooStream [
 	^chunked notNil and: [chunked]
     ]
 
+    isFull [
+	"sending in chunks (transfer encoding: chunked)"
+
+	<category: 'chunking'>
+	^writeEnd >= writeBuffer size
+    ]
+
     lf [
 	<category: 'accessing-writing'>
-	self nextPut: Character lf asInteger
+	self nextPutByte: 10
     ]
 
     next [
 	<category: 'accessing-reading'>
-	^Character value: self nextByte
+	self fillBuffer.
+	^readBuffer at: (readPtr := readPtr + 1) - 1
     ]
 
     next: anInteger [
 	<category: 'accessing-reading'>
-	^(self nextBytes: anInteger) asString
+	| array at n |
+	array := String new: anInteger.
+	at := 1.
+	[ at <= anInteger ] whileTrue: [
+	    self fillBuffer.
+	    n := readEnd - readPtr + 1 min: anInteger - at + 1.
+	    array replaceFrom: at to: at + n - 1 with: readBuffer startingAt: readPtr.
+	    readPtr := readPtr + n.
+	    at := at + n].
+	^array
     ]
 
     nextByte [
 	<category: 'private-stream'>
-	self syncBuffer.
-	^self readBuffer next
+	self fillBuffer.
+	^readBuffer byteAt: (readPtr := readPtr + 1) - 1
     ]
 
-    nextBytes: aNumber [
+    nextBytes: anInteger [
 	<category: 'private-stream'>
-	| array |
-	array := ByteArray new: aNumber.
-	1 to: aNumber do: [:index | array at: index put: self nextByte].
+	| array at n |
+	array := ByteArray new: anInteger.
+	at := 1.
+	[ at <= anInteger ] whileTrue: [
+	    self fillBuffer.
+	    n := readEnd - readPtr + 1 min: anInteger - at + 1.
+	    array replaceFrom: at to: at + n - 1 with: readBuffer startingAt: readPtr.
+	    readPtr := readPtr + n.
+	    at := at + n].
 	^array
     ]
 
@@ -991,28 +1114,42 @@ Object subclass: SwazooStream [
 
     nextPut: aCharacterOrInteger [
 	<category: 'accessing-writing'>
-	self nextPutByte: aCharacterOrInteger asInteger.
+	self isFull ifTrue: [self flush].
+	writeBuffer at: (writeEnd := writeEnd + 1) put: aCharacterOrInteger asCharacter. "###"
 	^aCharacterOrInteger
+    ]
+
+    nextPutAllBufferOn: aStream [
+	<category: 'accessing-reading'>
+	| n |
+	n := readEnd - readPtr + 1.
+	aStream next: readEnd - readPtr + 1 putAll: readBuffer startingAt: readPtr.
+	readPtr := readEnd + 1.
+	^n
     ]
 
     nextPutAll: aByteStringOrArray [
 	<category: 'accessing-writing'>
-	self nextPutBytes: aByteStringOrArray asByteArray.
+	| at n |
+	at := 1.
+	[ at <= aByteStringOrArray size ] whileTrue: [
+	    self isFull ifTrue: [self flush].
+	    n := writeBuffer size - writeEnd min: aByteStringOrArray size - at + 1.
+	    writeBuffer replaceFrom: writeEnd + 1 to: writeEnd + n with: aByteStringOrArray startingAt: at.
+	    writeEnd := writeEnd + n.
+	    at := at + n].
 	^aByteStringOrArray
     ]
 
     nextPutByte: aByte [
 	<category: 'private-stream'>
-	self writeBuffer nextPut: aByte.
-	self writeBuffer isFull ifTrue: [self flush].
-	^aByte
+	self isFull ifTrue: [self flush].
+	^writeBuffer byteAt: (writeEnd := writeEnd + 1) put: aByte
     ]
 
     nextPutBytes: aByteArray [
 	<category: 'private-stream'>
-	self writeBuffer nextPutAll: aByteArray.
-	self writeBuffer isFull ifTrue: [self flush].
-	^aByteArray
+	^self nextPutAll: aByteArray
     ]
 
     nextPutLine: aByteStringOrArray [
@@ -1052,14 +1189,14 @@ Object subclass: SwazooStream [
     peek [
 	<category: 'accessing-reading'>
 	| byte |
-	byte := self peekByte.
-	^byte notNil ifTrue: [Character value: byte] ifFalse: [nil]
+	self anyDataReady ifFalse: [^nil].
+	^readBuffer at: readPtr
     ]
 
     peekByte [
 	<category: 'private-stream'>
-	self syncBuffer.
-	^self readBuffer peek
+	self anyDataReady ifFalse: [^nil].
+	^readBuffer byteAt: readPtr
     ]
 
     print: anObject [
@@ -1068,14 +1205,33 @@ Object subclass: SwazooStream [
     ]
 
     readBuffer [
-	<category: 'private'>
-	readBuffer isNil ifTrue: [self initReadBuffer].
+	<category: 'accessing'>
 	^readBuffer
     ]
 
-    readBuffer: aSwazooBuffer [
+    enlargeReadBuffer: anInteger [
+	<category: 'buffer size'>
+	anInteger < readBuffer size ifTrue: [ ^self ].
+	readBuffer := (readBuffer class new: anInteger)
+	    replaceFrom: 1
+	        to: readBuffer size
+	        with: readBuffer
+	        startingAt: 1;
+	    yourself
+    ]
+
+    readBuffer: aByteArray ready: dataLength [
 	<category: 'private'>
-	readBuffer := aSwazooBuffer
+	readBuffer := aByteArray.
+	readPtr := 1.
+	readEnd := dataLength.
+    ]
+
+    writeBuffer: aByteArray [
+	<category: 'private'>
+	writeBuffer := aByteArray.
+	writePtr := self class preambleSize + 1.
+	writeEnd := self class preambleSize.
     ]
 
     resetChunked [
@@ -1092,14 +1248,29 @@ Object subclass: SwazooStream [
 	chunked := true
     ]
 
+    setInputString: aCollection [
+	<category: 'private'>
+	self readBuffer: aCollection asString ready: aCollection size.
+	self writeBuffer: (String new: self class defaultBufferSize).
+    ]
+
     setSocket: aSwazooSocket [
 	<category: 'private'>
-	self socket: aSwazooSocket
+	self socket: aSwazooSocket.
+	self readBuffer: (String new: self class defaultBufferSize) ready: 0.
+	self writeBuffer: (String new: self class defaultBufferSize).
     ]
 
     skip: anInteger [
 	<category: 'accessing-reading'>
-	anInteger timesRepeat: [self nextByte]
+	| n skipped |
+	n := anInteger.
+	[
+	    skipped := n min: (readEnd - readPtr + 1).
+	    readPtr := readPtr + skipped.
+	    n := n - skipped.
+	    n > 0
+	] whileTrue: [self fillBuffer]
     ]
 
     socket [
@@ -1114,36 +1285,44 @@ Object subclass: SwazooStream [
 
     space [
 	<category: 'accessing-writing'>
-	self nextPut: Character space
-    ]
-
-    syncBuffer [
-	<category: 'private'>
-	self readBuffer atEnd ifTrue: [self fillBuffer]
+	self nextPutByte: 32
     ]
 
     upTo: aCharacterOrByte [
 	<category: 'accessing-reading'>
-	| targetByte ws byte |
-	targetByte := aCharacterOrByte asInteger.
-	ws := ByteArray new writeStream.
-	
-	[byte := self nextByte.
-	byte = targetByte] whileFalse: [ws nextPut: byte].
+	| targetChar result r ws |
+	targetChar := aCharacterOrByte asCharacter. "###"
+	r := readBuffer indexOf: targetChar startingAt: readPtr ifAbsent: [0].
+	r = 0 ifFalse: [result := self next: r - readPtr. self next. ^result].
+
+	ws := String new writeStream.
+	[self nextPutAllBufferOn: ws.
+	self fillBuffer.
+	r := readBuffer indexOf: targetChar startingAt: readPtr ifAbsent: [0].
+	r = 0] whileTrue.
+
+	ws next: r putAll: readBuffer startingAt: 1.
+	readPtr := r + 1.
 	^ws contents
     ]
 
-    writeBuffer [
-	<category: 'private'>
-	writeBuffer isNil ifTrue: [self initWriteBuffer].
-	^writeBuffer
+    writeBufferContents [
+	<category: 'accessing-writing'>
+	^writeBuffer copyFrom: writePtr to: writeEnd
     ]
 
     writeNextLineTo: aStream [
 	<category: 'accessing-reading'>
-	aStream nextPutAll: (self upTo: Character cr asInteger) asString.
-	^self peekByte = Character lf asInteger 
-	    ifTrue: [self nextByte	"skip remaining linefeed"]
+	| r |
+	[r := readBuffer indexOf: Character cr startingAt: readPtr ifAbsent: [0].
+	r = 0] whileTrue: [
+	    self nextPutAllBufferOn: aStream.
+	    self fillBuffer].
+
+	aStream next: r - readPtr putAll: readBuffer startingAt: readPtr.
+	readPtr := r + 1.
+	self peekByte = 10	"skip remaining linefeed"
+	    ifTrue: [readPtr := readPtr + 1]
 	    ifFalse: [SwazooHTTPParseError raiseSignal: 'CR without LF']
     ]
 ]

@@ -773,7 +773,7 @@ Instance Variables:
 	^self
     ]
 
-    blockStreamingFrom: aSwazooStream to: outStream until: aBoundaryBytes [
+    blockStreamingFrom: aSwazooStream to: outStream until: boundary [
 	"detected"
 
 	"copy by 8k blocks for optimal performance until a boundary of MIME part is detected"
@@ -781,27 +781,22 @@ Instance Variables:
 	"Finish appropriatelly streaming at the end (skip crlf etc.)"
 
 	<category: 'private-parsing support'>
-	| boundary start nrOfBoundary contents inPrevious remainingBoundary boundaryIndex |
-	boundary := aSwazooStream readBuffer isBinary 
-		    ifTrue: [aBoundaryBytes asByteArray]
-		    ifFalse: [aBoundaryBytes asByteString].
+	| start nrOfBoundary contents inPrevious remainingBoundary boundaryIndex |
 	start := self readPosition.
 	[true] whileTrue: 
 		[nrOfBoundary := 0.
 		[nrOfBoundary = 0] whileTrue: 
-			[nrOfBoundary := aSwazooStream readBuffer signsOfBoundary: boundary.
+			[nrOfBoundary := aSwazooStream signsOfBoundary: boundary.
 			nrOfBoundary = 0 
 			    ifTrue: 
 				["no boundary in current buffer content"
-
-				contents := aSwazooStream readBuffer readContents.
-				outStream nextPutAll: contents.
-				self incReadPosition: contents size.
+				self incReadPosition:
+					(aSwazooStream nextPutAllBufferOn: outStream).
 				self checkToEnlargeBufferIn: aSwazooStream from: start.	"for effective streaming"
 				aSwazooStream fillBuffer]].
 		"copy and stream out content up to potential boundary"
-		boundaryIndex := aSwazooStream readBuffer indexOfBoundary: boundary.
-		inPrevious := aSwazooStream readBuffer copyBufferTo: boundaryIndex - 1.
+		boundaryIndex := aSwazooStream indexOfBoundary: boundary.
+		inPrevious := aSwazooStream copyBufferTo: boundaryIndex.
 		outStream 
 		    nextPutAll: (inPrevious copyFrom: 1 to: (inPrevious size - 2 max: 0)).	"without potential crlf"
 		self incReadPosition: inPrevious size.	"potential crlf included!!"
@@ -815,7 +810,7 @@ Instance Variables:
 		self incReadPosition: nrOfBoundary.
 		aSwazooStream fillBuffer.	"let's get next buffer"
 		remainingBoundary := boundary copyFrom: nrOfBoundary + 1 to: boundary size.
-		(aSwazooStream readBuffer startsWith: remainingBoundary) 
+		(aSwazooStream startsWith: remainingBoundary) 
 		    ifTrue: 
 			["bound. ends in next buff?"
 
@@ -831,12 +826,9 @@ Instance Variables:
 	"enlarge buffer to 1MB (if not already) if more than 100KB already read"
 
 	<category: 'private-parsing support'>
-	aSwazooStream readBuffer isEnlarged ifTrue: [^nil].
+	aSwazooStream readBuffer size > 100000 ifTrue: [^nil].
 	self readPosition - startPosition > 100000 
-	    ifTrue: 
-		["about 100KB"
-
-		aSwazooStream readBuffer resizeEnlarge]
+	    ifTrue: [aSwazooStream enlargeReadBuffer: 1000000]
     ]
 
     containsHeaderNecessaryFields [
@@ -931,11 +923,7 @@ Instance Variables:
 		[part := self partFromStream: aSwazooStream boundary: boundary.
 		part notNil ifTrue: [self postDataAt: part key put: part value]].
 	self skipMimeEpilogueFrom: aSwazooStream.	"all to the end  as defined by contentLegth"
-	aSwazooStream readBuffer isEnlarged 
-	    ifTrue: 
-		["if MIME part larger that 100KB was read"
-
-		aSwazooStream readBuffer resizeShrink]	"that is, release memory"
+	aSwazooStream nilReadBuffer.
     ]
 
     parsePostDataFrom: aSwazooStream [

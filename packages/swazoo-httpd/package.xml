@@ -21,6 +21,7 @@
     <sunit>
       Swazoo.CompositeResourceTest
       Swazoo.FileResourceTest
+      Swazoo.HTTPPostTest
       Swazoo.HTTPRequestTest
       Swazoo.HTTPResponseTest
       Swazoo.HTTPServerTest
@@ -32,6 +33,7 @@
       Swazoo.SiteIdentifierTest
       Swazoo.SiteTest
       Swazoo.SwazooBaseExtensionsTest
+      Swazoo.SwazooBoundaryTest
       Swazoo.SwazooCacheControlTest
       Swazoo.SwazooCompilerTest
       Swazoo.SwazooConfigurationTest
@@ -50,7 +52,6 @@
   <filein>Messages.st</filein>
   <filein>Core.st</filein>
   <filein>Resources.st</filein>
-  <filein>Buffer.st</filein>
   <filein>HTTP.st</filein>
   <filein>Protocol.st</filein>
   <filein>Extensions.st</filein>
@@ -60,7 +61,6 @@
   <file>Messages.st</file>
   <file>Core.st</file>
   <file>Resources.st</file>
-  <file>Buffer.st</file>
   <file>HTTP.st</file>
   <file>Protocol.st</file>
   <file>Extensions.st</file>
