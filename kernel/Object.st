@@ -773,6 +773,17 @@ All classes in the system are subclasses of me.'>
 	
     ]
 
+    checkIndexableBounds: index ifAbsent: aBlock [
+	"Private - Check the reason why an access to the given indexed
+	 instance variable failed.  Evaluate aBlock for an invalid index."
+
+	<category: 'built ins'>
+	self class isFixed ifTrue: [^SystemExceptions.NotIndexable signalOn: self].
+	index isInteger 
+	    ifFalse: [^SystemExceptions.WrongClass signalOn: index mustBe: SmallInteger].
+	^aBlock value
+    ]
+
     checkIndexableBounds: index [
 	"Private - Check the reason why an access to the given indexed
 	 instance variable failed"

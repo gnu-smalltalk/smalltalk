@@ -49,6 +49,14 @@ and general access behavior from SequenceableCollection.'>
 	^anArray
     ]
 
+    at: anIndex ifAbsent: aBlock [
+	"Answer the index-th indexed instance variable of the receiver"
+
+	<category: 'built ins'>
+	<primitive: VMpr_Object_basicAt>
+	^self checkIndexableBounds: anIndex ifAbsent: aBlock
+    ]
+
     printOn: aStream [
 	"Print a representation for the receiver on aStream"
 

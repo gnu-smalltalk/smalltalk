@@ -1,5 +1,14 @@
 2009-10-04  Paolo Bonzini  <bonzini@gnu.org>
 
+	* kernel/Array.st: Use a primitive for #at:ifAbsent:.
+	* kernel/ByteArray.st: Use a primitive for #at:ifAbsent:.
+	* kernel/OtherArrays.st: Use a primitive for #at:ifAbsent:.
+	* kernel/String.st: Use a primitive for #at:ifAbsent:.
+	* kernel/UniString.st: Use a primitive for #at:ifAbsent:.
+	* kernel/Object.st: Implement helper method for #at:ifAbsent:.
+
+2009-10-04  Paolo Bonzini  <bonzini@gnu.org>
+
 	* kernel/PosStream.st: Implement #upTo: using #indexOf:.
 
 2009-10-04  Paolo Bonzini  <bonzini@gnu.org>

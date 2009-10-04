@@ -296,6 +296,14 @@ or assumed to be the system default.'>
 	    startingAt: replaceStart
     ]
 
+    at: anIndex ifAbsent: aBlock [
+	"Answer the index-th indexed instance variable of the receiver"
+
+	<category: 'built ins'>
+	<primitive: VMpr_Object_basicAt>
+	^self checkIndexableBounds: anIndex ifAbsent: aBlock
+    ]
+
     at: anIndex [
 	"Answer the index-th indexed instance variable of the receiver"
 

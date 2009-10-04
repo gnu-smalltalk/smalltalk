@@ -2049,6 +2049,7 @@ primitive VMpr_Object_basicAt = 60 [succeed,fail,inlined]
   OOP oop2;
   _gst_primitives_executed++;
 
+  POP_N_OOPS (numArgs - 1);
   oop2 = POP_OOP ();
   oop1 = STACKTOP ();
   if COMMON (IS_INT (oop2))
@@ -2062,7 +2063,7 @@ primitive VMpr_Object_basicAt = 60 [succeed,fail,inlined]
 	  PRIM_SUCCEEDED;
 	}
     }
-  UNPOP (1);
+  UNPOP (numArgs);
   PRIM_FAILED;
 }
 

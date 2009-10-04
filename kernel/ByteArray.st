@@ -104,6 +104,14 @@ a String''s elements are characters.'>
 	self isReadOnly ifFalse: [aStream nextPutAll: ' copy']
     ]
 
+    at: anIndex ifAbsent: aBlock [
+	"Answer the index-th indexed instance variable of the receiver"
+
+	<category: 'built ins'>
+	<primitive: VMpr_Object_basicAt>
+	^self checkIndexableBounds: anIndex ifAbsent: aBlock
+    ]
+
     objectAt: index [
 	"Access the Smalltalk object (OOP) at the given index in the receiver.
 	 Indices are 1-based just like for other Smalltalk access."

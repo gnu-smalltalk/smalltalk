@@ -115,6 +115,14 @@ as 4-byte UTF-32 characters'>
 	aStream nextPut: $'
     ]
 
+    at: anIndex ifAbsent: aBlock [
+	"Answer the index-th indexed instance variable of the receiver"
+
+	<category: 'built ins'>
+	<primitive: VMpr_Object_basicAt>
+	^self checkIndexableBounds: anIndex ifAbsent: aBlock
+    ]
+
     encoding [
 	"Answer the encoding used by the receiver.  Conventionally, we
 	 answer 'Unicode' to ensure that two UnicodeStrings always have

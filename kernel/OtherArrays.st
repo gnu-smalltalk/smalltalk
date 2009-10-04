@@ -37,6 +37,15 @@ ArrayedCollection subclass: WordArray [
     <category: 'Collections-Sequenceable'>
     <comment: '
 I am similar to a plain array, but my items are 32-bit integers.'>
+
+    at: anIndex ifAbsent: aBlock [
+	"Answer the index-th indexed instance variable of the receiver"
+
+	<category: 'built ins'>
+	<primitive: VMpr_Object_basicAt>
+	^self checkIndexableBounds: anIndex ifAbsent: aBlock
+    ]
+
 ]
 
 
