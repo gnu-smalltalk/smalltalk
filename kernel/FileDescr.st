@@ -394,7 +394,7 @@ do arbitrary processing on the files.'>
 	"Store the byte, anInteger, on the file"
 
 	<category: 'basic'>
-	self nextPut: (Character value: anInteger)
+	self nextPut: (Character value: (anInteger bitAnd: 255))
     ]
 
     nextPutByteArray: aByteArray [
@@ -1041,18 +1041,6 @@ do arbitrary processing on the files.'>
 	self nextPutByte: (f at: 2).
 	self nextPutByte: (f at: 3).
 	self nextPutByte: (f at: 4)
-    ]
-
-    nextPutByte: anInteger [
-	"Store anInteger (range: -128..255) on the byte array"
-
-	<category: 'binary I/O'>
-	| int |
-	int := anInteger.
-	int := anInteger < 0 
-		    ifTrue: [anInteger negated - 1 bitXor: 255]
-		    ifFalse: [anInteger].
-	^super nextPut: (int bitAnd: 255)
     ]
 
     nextPutInt64: anInteger [
