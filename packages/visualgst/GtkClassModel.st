@@ -162,7 +162,7 @@ Object subclass: GtkClassModel [
 	| parentIter parent |
 	anEvent item environment == self namespace ifFalse: [ ^ self ].
 	parentIter := self findIterInAClass: anEvent item superclass ifAbsent: [ nil ].
-	self append: parentIter column: 0 value: anEvent item name
+	self append: parentIter column: 0 value: (anEvent item name, ' ')
     ]
 
     removeEvent: anEvent [

@@ -141,11 +141,29 @@ GtkMainWindow subclass: GtkInspector [
 	    GTK.GtkMenuItem menuItem: 'Close' accelPath: '<GtkInspector>/File/Close' connectTo: self selector: #close}
     ]
 
+    createSmalltalkMenus [
+        <category: 'user interface'>
+
+        self accelGroup append: {{'<Control>D'. '<GtkInspector>/Smalltalk/DoIt'}.
+            {'<Control>P'. '<GtkInspector>/Smalltalk/PrintIt'}.
+            {'<Control>I'. '<GtkInspector>/Smalltalk/InspectIt'}.
+            {'<Alt>D'. '<GtkInspector>/Smalltalk/DebugIt'}.
+            {'<Control>S'. '<GtkInspector>/Smalltalk/AcceptIt'}}.
+
+        ^ self createNewMenuEntry: {GTK.GtkMenuItem menuItem: 'Do It' accelPath: '<GtkInspector>/Smalltalk/DoIt' connectTo: self selector: #doIt.
+            GTK.GtkMenuItem menuItem: 'Print It' accelPath: '<GtkInspector>/Smalltalk/PrintIt' connectTo: self selector: #printIt.
+            GTK.GtkMenuItem menuItem: 'Inspect It' accelPath: '<GtkInspector>/Smalltalk/InspectIt' connectTo: self selector: #inspectIt.
+            GTK.GtkMenuItem menuItem: 'Debug It' accelPath: '<GtkInspector>/Smalltalk/DebugIt' connectTo: self selector: #debugIt.
+            GTK.GtkMenuItem new.
+            GTK.GtkMenuItem menuItem: 'Accept It' accelPath: '<GtkInspector>/Smalltalk/AcceptIt' connectTo: self selector: #acceptIt}
+    ]
+
     createMenus [
 	<category: 'user interface'>
 
 	self addMenuItem: 'File' withSubmenu: self createFileMenus.
 	self addMenuItem: 'Edit' withSubmenu: self createEditMenus.
+	self addMenuItem: 'Smalltalk' withSubmenu: self createSmalltalkMenus.
 	self addMenuItem: 'Tools' withSubmenu: self createToolsMenus.
     ]
 
@@ -329,6 +347,36 @@ GtkMainWindow subclass: GtkInspector [
                 res = 0 ifTrue: closeEvent.
                 res = 1 ifTrue: saveEvent.
                 dlg destroy ].
+    ]
+
+    doIt [
+        <category: 'smalltalk events'>
+
+        self onFocusPerform: #doIt
+    ]
+
+    printIt [
+        <category: 'smalltalk events'>
+
+        self onFocusPerform: #printIt
+    ]
+
+    inspectIt [
+        <category: 'smalltalk events'>
+
+        self onFocusPerform: #inspectIt
+    ]
+
+    debugIt [
+        <category: 'smalltalk events'>
+
+        self onFocusPerform: #debugIt
+    ]
+
+    acceptIt [
+        <category: 'smalltalk events'>
+
+        browserWidget saveCode
     ]
 ]
 

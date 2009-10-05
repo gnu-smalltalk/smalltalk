@@ -195,13 +195,17 @@ THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.';
     ]
 
     saveImage [
-        <category: 'events'>
+        <category: 'file events'>
 
+        "ObjectMemory>>#snapshot breaks hard links due to
+         http://bugzilla.kernel.org/show_bug.cgi?id=9138, so we have to
+         check the permission of the directory rather than the file."
+        File image parent isWriteable ifFalse: [ ^self saveImageAs ].
         saved := ObjectMemory snapshot not
     ]
 
     saveImageAs [
-	<category: 'events'>
+	<category: 'file events'>
 
 	(GTK.GtkFileChooserDialog save: 'Save image as...' parent: window)
 	    runNonBlockingAndDo: [ :dlg :res |
@@ -242,7 +246,8 @@ THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.';
 	<category: 'initialization'>
 
 	browsers grabFocus.
-	window 
+	window
+	    connectSignal: 'key-press-event' to: self selector:  #'keyPressedOn:keyEvent:' userData: nil;
 	    connectSignal: 'delete-event' to: self selector: #'delete:event:' userData: nil
     ]
 
@@ -435,6 +440,19 @@ THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.';
 	    GTK.GtkMenuItem menuItem: 'Accept It' accelPath: '<GtkLauncher>/Smalltalk/AcceptIt' connectTo: self selector: #acceptIt}
     ]
 
+    createTabsMenus [
+	<category: 'user interface'>
+
+       self accelGroup append: {{'<Control><Shift>Tab'. '<GtkLauncher>/Tabs/PreviousTab'}.
+	    {'<Control>Tab'. '<GtkLauncher>/Tabs/NextTab'}.
+	    {'<Control>w'. '<GtkLauncher>/Tabs/CloseTab'}}.
+
+	^ self createNewMenuEntry: {GTK.GtkMenuItem menuItem: 'Previous Tab' accelPath: '<GtkLauncher>/Tabs/PreviousTab' connectTo: self selector: #previousTab.
+	GTK.GtkMenuItem menuItem: 'Next Tab' accelPath: '<GtkLauncher>/Tabs/NextTab' connectTo: self selector: #nextTab.
+	GTK.GtkMenuItem new.
+	GTK.GtkMenuItem menuItem: 'Close Tab' accelPath: '<GtkLauncher>/Tabs/CloseTab' connectTo: self selector: #closeTab.}
+    ]
+
     createHelpMenus [
 	<category: 'user interface'>
 
@@ -456,6 +474,7 @@ THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.';
 	    #('Method' #createMethodMenus).
 	    #('Smalltalk' #createSmalltalkMenus).
 	    #('Tools' #createToolsMenus).
+	    #('Tabs' #createTabsMenus).
 	    #('Help' #createHelpMenus)}
     ]
 
@@ -660,6 +679,26 @@ THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.';
 	browsers currentWidget forward
     ]
 
+    previousTab [
+	<category: 'tabs events'>
+
+	browsers currentPage > 0 
+		    ifTrue: [ browsers currentPage: browsers currentPage - 1 ]
+		    ifFalse: [ browsers currentPage: browsers numberOfPages - 1 ] 
+    ]
+
+    nextTab [
+	<category: 'tabs events'>
+
+	browsers currentPage: (browsers currentPage + 1 \\ browsers numberOfPages)
+    ]
+
+    closeTab [
+	<category: 'tabs events'>
+
+	browsers closeCurrentPage
+    ]
+
     helpcontents [
 	<category: 'help events'>
 
@@ -778,6 +817,20 @@ THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.';
         <category: 'method events'>
 
 	browsers currentWidget fileoutMethod
+    ]
+
+    keyPressedOn: aGtkWidget keyEvent: aGdkEventKey [
+        <category: 'key event'>
+
+        | event |
+        event := aGdkEventKey castTo: GTK.GdkEventKey type.
+
+	(event state value bitAnd: GTK.Gdk gdkControlMask) = 0 ifTrue: [ ^ false ].
+	(#(65417 65289 65056) includes: event keyval value) ifFalse: [ ^ false ].
+	(event state value bitAnd: GTK.Gdk gdkShiftMask) = 0  
+					    ifFalse: [ self previousTab ]
+					    ifTrue: [ self nextTab ].
+        ^ true
     ]
 ]
 
