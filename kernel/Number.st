@@ -111,6 +111,14 @@ implicit type coercing code for binary operations.'>
 	^self
     ]
 
+    asString [
+	"Answer the receiver's #displayString, which should be a good enough
+	 conversion to String for a number."
+
+	<category: 'converting'>
+	^self displayString
+    ]
+
     degreesToRadians [
 	"Convert the receiver to radians"
 

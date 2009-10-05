@@ -1,5 +1,9 @@
 2009-10-05  Paolo Bonzini  <bonzini@gnu.org>
 
+	* kernel/Number.st: Add #asString.
+
+2009-10-05  Paolo Bonzini  <bonzini@gnu.org>
+
 	* kernel/FileDescr.st: Fix #nextPutByte:, reported by Nicolas
 	Petton.
 
