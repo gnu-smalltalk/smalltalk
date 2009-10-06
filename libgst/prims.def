@@ -2514,6 +2514,8 @@ primitive VMpr_Object_becomeForward [succeed]
       PRIM_FAILED;
     }
 
+  /* Search also on LIFO contexts.  */
+  empty_context_stack ();
   PREFETCH_START (_gst_mem.ot_base, PREF_READ | PREF_NTA);
   for (ownerOOP = _gst_mem.ot_base, lastOOP = &_gst_mem.ot[_gst_mem.ot_size];
        ownerOOP < lastOOP; ownerOOP++)

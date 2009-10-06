@@ -139,8 +139,17 @@ Eval [
 ]
 
 Eval [
+    "This uses global (Association) variables."
     a := 'a' copy.
     (a becomeForward: 'b') printNl.
     a
 ]
 
+Eval [
+    "This uses local (stack) variables."
+    | a b |
+    a := Object new.
+    b := 5.
+    a becomeForward: b.
+    a printNl
+]
