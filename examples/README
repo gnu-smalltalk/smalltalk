@@ -38,12 +38,13 @@ by me
 GenClasses.st	Provides help in creating many similarly named classes.
 by sbb
 
-Lisp.st		A nice Lisp interpreter class; try LispInterpreter exampleXX
-by Aoki Atsushi	with XX going from 01 to 18.  I modified it to remove the
-Nishihara Satoshi	Smalltalk-subset compiler that was needed on commercial
-			systems that don't allow a compiler to be enclosed in
-			a run-time image -- it was 25% of the total code; this
-			way there is more focus on the Lisp stuff.
+Lisp.st		        A nice Lisp interpreter class; try "LispInterpreter
+by Aoki Atsushi	        exampleXX" with XX going from 01 to 18.  I modified it
+Nishihara Satoshi	to remove the Smalltalk-subset compiler that was needed
+			on proprietary systems that don't allow a compiler
+			to be enclosed in a run-time image -- it was 25%
+			of the total code; this way there is more focus
+			on the Lisp stuff.
 
 MemUsage.st	This is really more of a test suite kind of program.  It
 by sbb		iterates through all the objects in the system, counting
@@ -58,6 +59,9 @@ and me
 MiniDebugger.st A simplified debugger which shows how to use the single step
 by me           primitives to implement an interface that vaguely resembles
                 gdb.
+
+PackageBuilder.st   A simple script to make package.xml file from a Smalltalk
+by Stefan Schmiedl  description.  You may find it useful!
 
 Prolog.st	This is absolutely stunning! A Prolog interpreter written in
 by Aoki Atsushi	Smalltalk, from the same author as the Lisp interpreter; try
