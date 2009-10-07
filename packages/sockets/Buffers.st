@@ -61,10 +61,40 @@ collection.'>
 	self flush
     ]
 
+    growCollectionTo: n [
+	<category: 'private'>
+	self shouldNotImplement
+    ]
+
     isFull [
 	<category: 'testing'>
 	^self position = self collection size
     ]
+
+    next: n putAll: aCollection startingAt: pos [
+        "Put n characters or bytes of aCollection, starting at the pos-th,
+         in the collection buffer."
+
+        <category: 'accessing-writing'>
+
+	| end written amount |
+	ptr = collection size ifTrue: [self growCollection].
+	written := 0.
+	
+	[end := collection size min: ptr + (n - written - 1).
+	end >= ptr 
+	    ifTrue: 
+		[collection 
+		    replaceFrom: ptr
+		    to: end
+		    with: aCollection
+		    startingAt: pos + written.
+		written := written + (end - ptr + 1).
+		ptr := end + 1].
+	written < n] 
+		whileTrue: [self growCollection].
+    ]
+
 ]
 
 
