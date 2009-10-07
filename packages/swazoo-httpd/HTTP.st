@@ -794,7 +794,7 @@ AbstractSwazooSocket subclass: SwazooSocket [
 
     localAddress [
 	<category: 'accessing'>
-	^self accessor getSocketName hostAddressString
+	^self accessor getSocketName
     ]
 
     read: anInteger [
@@ -812,7 +812,7 @@ AbstractSwazooSocket subclass: SwazooSocket [
 
     remoteAddress [
 	<category: 'accessing'>
-	^self accessor getPeerName hostAddressString
+	^self accessor getPeerName
     ]
 
     stream [
