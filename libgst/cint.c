@@ -485,7 +485,10 @@ dld_open (const char *filename)
   lt_dlhandle handle;
   void (*initModule) (struct VMProxy *);
 
-  handle = lt_dlopenext (filename);
+  /* Not all shared libraries have .xyz extensions! */
+  handle = lt_dlopen (filename);
+  if (!handle)
+    handle = lt_dlopenext (filename);
   if (handle)
     {
       initModule = lt_dlsym (handle, "gst_initModule");

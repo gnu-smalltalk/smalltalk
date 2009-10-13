@@ -1,3 +1,8 @@
+2009-10-13  Nigel Williams  <nigelw@elder-gods.net>
+
+	* libgst/cint.c: Always open with lt_dlopen first, then try
+	lt_dlopenext.
+
 2009-10-13  Eli Green  <detgk@me.com>
 
 	* libgst/events.h: Fix multiply defined symbols on Mac OS X.
