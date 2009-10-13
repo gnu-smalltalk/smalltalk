@@ -54,7 +54,8 @@
 #define GST_EVENTS_H
 
 /* Array of semaphores associated to the C signals.  */
-volatile OOP _gst_sem_int_vec[NSIG];
+extern volatile OOP _gst_sem_int_vec[NSIG]
+  ATTRIBUTE_HIDDEN;
 
 /* Initialize the data structures used to hold information about
    asynchronous events requested by Smalltalk programs.  */

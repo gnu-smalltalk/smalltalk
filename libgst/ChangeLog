@@ -1,3 +1,7 @@
+2009-10-13  Eli Green  <detgk@me.com>
+
+	* libgst/events.h: Fix multiply defined symbols on Mac OS X.
+
 2009-10-06  Paolo Bonzini  <bonzini@gnu.org>
 
 	* libgst/prims.def: Fix #becomeForward: to look at LIFO contexts.
