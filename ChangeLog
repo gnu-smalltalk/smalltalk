@@ -1,3 +1,8 @@
+2009-10-13  Paolo Bonzini  <bonzini@gnu.org>
+
+	* gst-tool.c: Do not save image when starting browsers, let the
+	user do that within the GUI.
+
 2009-10-06  Paolo Bonzini  <bonzini@gnu.org>
 
 	* tests/objects.st: Add #becomeForward: testcase for bug triggered
