@@ -41,11 +41,9 @@ Object subclass: CategorySource [
 	class methodDictionary do: [ :each |
 	    each methodCategory = printCategory ifTrue: [
 		(MethodSource write: each on: stream)
-		    sourceWithoutClassHeader.
-	    stream nl ] ].
+		    sourceWithoutClassHeader ] ].
 
 	stream
-	    nl;
             nextPutAll: ']';
             nl.
 

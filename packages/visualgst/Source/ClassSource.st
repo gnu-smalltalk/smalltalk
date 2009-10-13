@@ -49,7 +49,7 @@ Object subclass: ClassSource [
     ]
 
     outputInstVarNamesArray [
-	<category: 'printint'>
+	<category: 'printing'>
 
 	printClass instVarNames do: [ :each |
 	    stream
@@ -161,9 +161,66 @@ Object subclass: ClassSource [
 	stream nl
     ]
 
+    sourceOf: aMethod [
+	<category: 'accessing'>
 
-    header [
-        <category: 'accessing'>
+        ^ (aMethod methodSourceString
+                    ifNil: [ aMethod selector asString, ' [', Character nl asString, '    ]', Character nl asString ])
+	    copyReplacingAllRegex: '\t' with: '    '
+    ]
+
+    outputMethod: aMethod [
+	<category: 'printing'>
+
+	| j lines toPrint |
+	lines := (self sourceOf: aMethod) lines.
+	1 to: lines size - 1 do: [ :i |
+	    stream
+		space: 4;
+		nextPutAll: (lines at: i);
+		nl ].
+	stream
+	    nextPutAll: lines last; 
+	    nl; 
+	    nl
+    ]
+
+    outputClassMethod: aMethod [
+	<category: 'printing'>
+
+        stream
+            space: 4;
+            nextPutAll: printClass name, ' class >> '.
+	self outputMethod: aMethod
+    ]
+
+    outputMethodsFor: aClass [
+	<category: 'printing'>
+
+	aClass methodDictionary ifNotNil: [ 
+	    aClass methodDictionary do: [ :each | 
+		self outputMethod: each ] ]
+    ]
+
+    outputMethods [
+	<category: 'printing'>
+
+	self 
+	    outputMethodsFor: printClass class;
+	    outputMethodsFor: printClass
+    ]
+
+    outputFinalBracket [
+	<category: 'printing'>
+
+        stream
+            nextPut: $];
+            nl;
+            nl
+    ]
+
+    outputClass [
+	<category: 'printing'>
 
         self
             outputClassHeader;
@@ -172,12 +229,15 @@ Object subclass: ClassSource [
             outputSharedPool;
             outputPragmas;
             outputClassInstanceVariables;
-            outputClassVariables.
+            outputClassVariables
+    ]
 
-        stream
-            nextPut: $];
-            nl;
-            nl.
+    header [
+        <category: 'accessing'>
+
+        self
+            outputClass;
+	    outputFinalBracket.
 
         ^ stream contents
     ]
@@ -186,28 +246,9 @@ Object subclass: ClassSource [
 	<category: 'accessing'>
 	
 	self
-	    outputClassHeader;
-	    outputInstVarNames;
-	    outputShape;
-	    outputSharedPool;
-	    outputPragmas;
-	    outputClassInstanceVariables;
-	    outputClassVariables.
-    
-	printClass methodDictionary ifNotNil: [ printClass methodDictionary do: [ :each | 
-							| text |
-							text := each methodSourceString 
-									ifNil: [ each selector asString, ' [', Character nl asString, '    ]', Character nl asString ].
-							stream 
-							    space: 4; 
-							    nextPutAll: text; 
-							    nl; 
-							    nl ] ].
-    
-	stream
-	    nextPut: $];
-	    nl;
-	    nl.
+	    outputClass;
+	    outputMethods;
+	    outputFinalBracket.
 
 	^ stream contents
     ]

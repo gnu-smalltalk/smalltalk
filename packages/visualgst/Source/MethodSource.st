@@ -35,15 +35,38 @@ Object subclass: MethodSource [
 	^ printMethod methodSourceString 
     ]
 
+    methodSource [
+        <category: 'accessing'>
+
+        ^ (printMethod methodSourceString
+                    ifNil: [ printMethod selector asString, ' [', Character nl asString, '    ]', Character nl asString ])
+            copyReplacingAllRegex: '\t' with: '    '
+    ]
+
+    outputMethod: aMethod [
+        <category: 'printing'>
+
+        | lines |
+        lines := self methodSource lines.
+        1 to: lines size - 1 do: [ :i |
+            stream
+                space: 4;
+                nextPutAll: (lines at: i);
+                nl ].
+        stream 
+            nextPutAll: lines last;
+            nl  
+    ]
+
     source [
 	<category: 'accessing'>
 
         stream
             nextPutAll: printMethod methodClass displayString;
             nextPutAll: ' extend [';
-            nl;
-            nextPutAll: printMethod methodSourceString;
-	    nl;
+            nl.
+        self outputMethod: self methodSource.
+	stream
             nextPutAll: ']';
             nl.
 
@@ -53,10 +76,9 @@ Object subclass: MethodSource [
     sourceWithoutClassHeader [
         <category: 'accessing'>
 
-        stream
-            nextPutAll: printMethod methodSourceString;
-            nl.
+        self outputMethod: self methodSource.
 
+        stream nl. 
         ^ stream contents
     ]
 ]

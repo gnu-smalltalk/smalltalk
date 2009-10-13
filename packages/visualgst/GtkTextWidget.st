@@ -16,7 +16,7 @@ GTK.GtkTextView subclass: GtkTextWidget [
     connectSignals [
 	<category: 'initialization'>
 
-	self 
+	self
 	    connectSignal: 'paste-clipboard' to: self selector: #paste userData: nil;
             connectSignal: 'cut-clipboard' to: self selector: #cut userData: nil.
 
@@ -164,5 +164,6 @@ GTK.GtkTextView subclass: GtkTextWidget [
         lastCommand := nil.
         lastSavedCommand := self lastUndoCommand
     ]
+
 ]
 

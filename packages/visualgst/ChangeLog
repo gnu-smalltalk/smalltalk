@@ -1,8 +1,13 @@
+2009-10-13  Gwenael Casaccio  <mrgwen@gmail.com>
+
+	* GtkTextWidget.st, Source/CategorySource.st,
+	Source/ClassSource.st, Source/MethodSource.st, VisualGST.st:
+	Sync to r249.
+
 2009-10-05  Gwenael Casaccio  <mrgwen@gmail.com>
 
-	* GtkClassModel.st, visualgst/GtkNotebookWidget.st,
-	visualgst/Inspector/GtkInspector.st, visualgst/VisualGST.st:
-	Sync (almost) to r246.
+	* GtkClassModel.st, GtkNotebookWidget.st,
+	Inspector/GtkInspector.st, VisualGST.st: Sync (almost) to r246.
 
 2009-10-02  Gwenael Casaccio  <mrgwen@gmail.com>
 
