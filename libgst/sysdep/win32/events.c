@@ -406,6 +406,7 @@ _gst_init_async_events (void)
   hSocketEvent = CreateEvent (NULL, FALSE, FALSE, NULL);
   hNewWaitEvent = CreateEvent (NULL, FALSE, FALSE, NULL);
   hAlarmEvent = CreateEvent (NULL, FALSE, FALSE, NULL);
+  hWakeUpEvent = CreateEvent (NULL, FALSE, FALSE, NULL);
   fhev_unref (fhev_new (hAlarmEvent, EV_EVENT));
 
   hConIn = CreateFile ("CONIN$", GENERIC_READ, FILE_SHARE_READ,
@@ -513,13 +514,11 @@ _gst_get_fd_error (int fd)
 void
 _gst_pause (void)
 {
-  /* Not sure about race conditions here.  */
-  _gst_disable_interrupts (false);
+  /* Doing an async call between the _gst_have_pending_async_calls
+     and WFSO will set the event again, so that WFSO exits immediately.  */
+  ResetEvent (hWakeUpEvent);
   if (!_gst_have_pending_async_calls ())
-    {
-      _gst_enable_interrupts (false);
-      WaitForSingleObject (hWakeUpEvent, INFINITE);
-    }
+    WaitForSingleObject (hWakeUpEvent, INFINITE);
 }
 
 void

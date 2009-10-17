@@ -1,3 +1,7 @@
+2009-10-17  Paolo Bonzini  <bonzini@gnu.org>
+
+	* libgst/sysdep/win32/events.c: Implement pause/wakeup.
+
 2009-10-21  Paolo Bonzini  <bonzini@gnu.org>
 
 	* libgst/sockets.c: Fix !HAVE_IPV6 compilation, and other Cygwin
@@ -26,25 +30,26 @@
 
 2009-09-07  Paolo Bonzini  <bonzini@gnu.org>
 
-	* sysdep/win32/signals.c: Simplify given known set of valid signals.
+	* libgst/sysdep/win32/signals.c: Simplify given known set of valid
+	signals.
 
 2009-09-07  Paolo Bonzini  <bonzini@gnu.org>
 
-	* events.h: Add _gst_get_fd_error.
-	* sysdep/win32/events.c: Implement it.
-	* sysdep/posix/events.c: Implement it as a stub.
-	* sockets.c: Use it in getSoError.
+	* libgst/events.h: Add _gst_get_fd_error.
+	* libgst/sysdep/win32/events.c: Implement it.
+	* libgst/sysdep/posix/events.c: Implement it as a stub.
+	* libgst/sockets.c: Use it in getSoError.
 
 2009-09-07  Paolo Bonzini  <bonzini@gnu.org>
 
-	* sysdep/win32/events.c: Extract select-based polling from
+	* libgst/sysdep/win32/events.c: Extract select-based polling from
 	poll_thread, use it in _gst_sync_file_polling and
 	_gst_async_file_polling, save error conditions returned
 	by WSAEnumNetworkEvents.
 
 2009-09-03  Paolo Bonzini  <bonzini@gnu.org>
 
-	* gst-parse.c: Fix crash on invalid class variable definitions.
+	* libgst/gst-parse.c: Fix crash on invalid class variable definitions.
 
 2009-08-26  Paolo Bonzini  <bonzini@gnu.org>
 
@@ -52,34 +57,34 @@
 	the common parts back outside sysdep/ and adding a stab at the
 	Win32 version.  This lets us throw Makefile/lib-src hacks away.
 
-	* gstpriv.h: Include signal.h, do not include poll.h.
-	* events.h: Add _gst_register_socket.
-	* sysdep.h: Add _gst_wait_for_input.  Remove TIMER_REAL,
+	* libgst/gstpriv.h: Include signal.h, do not include poll.h.
+	* libgst/events.h: Add _gst_register_socket.
+	* libgst/sysdep.h: Add _gst_wait_for_input.  Remove TIMER_REAL,
 	TIMER_PROCESS.
-	* input.c: Use _gst_wait_for_input and _gst_sync_file_polling.
-	* sockets.c: Use gstpriv.h.  Do _gst_register_socket.  Do
+	* libgst/input.c: Use _gst_wait_for_input and _gst_sync_file_polling.
+	* libgst/sockets.c: Use gstpriv.h.  Do _gst_register_socket.  Do
 	not warn under mingw.
-	* interp.c: Cope with nonexistent SIGUSR1.  Avoid useless
+	* libgst/interp.c: Cope with nonexistent SIGUSR1.  Avoid useless
 	abstraction in _gst_signal_after.
-	* sysdep/common/files.c: Cope with nonexistent SIGPIPE.
-	* sysdep/cygwin/timer.c: Adjust for changes in sysdep.h.
-	* sysdep/posix/timer.c: Adjust for changes in sysdep.h.
-	* sysdep/win32/timer.c: Adjust for changes in sysdep.h.
-	* sysdep/win32/events.c: Rewrite.
-	* sysdep/win32/signals.c: Remove signals not found under mingw.
-	* sysdep/posix/events.c: Add _gst_register_socket and
+	* libgst/sysdep/common/files.c: Cope with nonexistent SIGPIPE.
+	* libgst/sysdep/cygwin/timer.c: Adjust for changes in sysdep.h.
+	* libgst/sysdep/posix/timer.c: Adjust for changes in sysdep.h.
+	* libgst/sysdep/win32/timer.c: Adjust for changes in sysdep.h.
+	* libgst/sysdep/win32/events.c: Rewrite.
+	* libgst/sysdep/win32/signals.c: Remove signals not found under mingw.
+	* libgst/sysdep/posix/events.c: Add _gst_register_socket and
 	_gst_wait_for_input.  Adjust to move OS-independent parts...
-	* events.c: ... here.
+	* libgst/events.c: ... here.
 
 2009-08-25  Paolo Bonzini  <bonzini@gnu.org>
 
-	* dict.c: Just skip primitives that are unknown to the image.
+	* libgst/dict.c: Just skip primitives that are unknown to the image.
 
 2009-08-25  Paolo Bonzini  <bonzini@gnu.org>
 
-	* sockets.c: Move from packages/sockets/.
-	* sockets.h: New.
-	* files.c: Initialize sockets.
+	* libgst/sockets.c: Move from packages/sockets/.
+	* libgst/sockets.h: New.
+	* libgst/files.c: Initialize sockets.
 
 2009-08-24  Paolo Bonzini  <bonzini@gnu.org>
 	    Nicolas Petton  <petton.nicolas@gmail.com>
