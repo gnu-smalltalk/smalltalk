@@ -518,14 +518,18 @@ Number extend [
 
 	<category: 'accessing'>
 	| log theta |
-	aNumber isComplex 
-	    ifFalse: 
-		[^Complex rho: (self absSquared raisedTo: aNumber / 2)
-		    theta: self arg * aNumber].
-	log := self abs ln.
 	theta := self arg.
-	^Complex rho: (aNumber real * log - (aNumber imaginary * theta)) exp
-	    theta: aNumber real * theta + (aNumber imaginary * log)
+	(aNumber isComplex or: [theta ~= 0]) ifTrue: [
+	    log := self abs ln.
+	    ^Complex
+		rho: (aNumber real * log - (aNumber imaginary * theta)) exp
+		theta: aNumber real * theta + (aNumber imaginary * log)].
+
+        aNumber isInteger
+            ifTrue: [^self raisedToInteger: aNumber].
+        ^aNumber generality > 1.0d generality
+            ifTrue: [(aNumber coerce: self) raisedTo: aNumber]
+            ifFalse: [self asFloatD raisedTo: aNumber asFloatD]
     ]
 
     arg [
@@ -587,9 +591,50 @@ Float extend [
 	^Complex real: 0 imaginary: self negated sqrt
     ]
 
+    primRaisedTo: aNumber [
+        "Answer the receiver raised to its aNumber power"
+
+        <category: 'built ins'>
+        <primitive: VMpr_Float_pow>
+        aNumber isFloat ifTrue: [self arithmeticError: 'invalid operands'].
+        ^self raisedTo: (self coerce: aNumber)
+    ]
+
+    raisedTo: aNumber [
+	"Return the receiver, raised to aNumber.  This may answer a complex number
+	 if the receiver is negative."
+
+	<category: 'accessing'>
+	| log theta |
+	^(aNumber isComplex or: [self < 0])
+	    ifTrue: [ super raisedTo: aNumber ]
+	    ifFalse: [ self primRaisedTo: aNumber ].
+    ]
+
 ]
 
 
+
+FloatQ extend [
+
+    arg [
+	"Return the argument of the receiver."
+
+	<category: 'accessing'>
+	^self >= 0 ifTrue: [self zero] ifFalse: [self class pi]
+    ]
+
+    primRaisedTo: aNumber [
+        "Return self raised to aNumber power"
+
+        <category: 'misc math'>
+        ^aNumber isInteger
+            ifTrue: [self raisedToInteger: aNumber]
+            ifFalse: [super primRaisedTo: aNumber asFloatQ]
+    ]
+]
+
+FloatQ removeSelector: #raisedTo:.
 
 Integer extend [
     sqrt [

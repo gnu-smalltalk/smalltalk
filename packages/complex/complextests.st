@@ -434,8 +434,36 @@ TestCase subclass: ComplexTest [
 
     testRaisedTo [
 	<category: 'unit tests'>
+	| a b |
 	self assert: (Complex i raisedTo: Complex i) closeTo: (Float pi / -2) exp.
-	self assert: (1 raisedTo: Complex i) = 1
+	self assert: (1 raisedTo: Complex i) = 1.
+
+	"The coercion between real and complex numbers is a bit tricky."
+	self assert: (2 raisedTo: 4) = 16.
+	self assert: (2d raisedTo: 4) = 16d.
+	self assert: (2q raisedTo: 4) = 16q.
+	self assert: (2 raisedTo: 4d) closeTo: 16.
+	self assert: (2d raisedTo: 4d) closeTo: 16.
+	self assert: (2q raisedTo: 4d) closeTo: 16.
+	self assert: (2 raisedTo: 4q) closeTo: 16.
+	self assert: (2d raisedTo: 4q) closeTo: 16.
+	self assert: (2q raisedTo: 4q) closeTo: 16.
+
+	self assert: (1 i raisedTo: 0.5q) closeTo: (2 sqrt + 2 sqrt i) / 2.
+	self assert: (1 i raisedTo: 1/2) closeTo: (2 sqrt + 2 sqrt i) / 2.
+	self assert: (1 i raisedTo: 0.5d) closeTo: (2 sqrt + 2 sqrt i) / 2.
+	self assert: (1 i raisedTo: 0.5q) closeTo: (2 sqrt + 2 sqrt i) / 2.
+	self assert: (1 i raisedTo: 1/2) closeTo: (2 sqrt + 2 sqrt i) / 2.
+	self assert: (1.0d i raisedTo: 0.5d) closeTo: (2 sqrt + 2 sqrt i) / 2.
+	self assert: (1.0d i raisedTo: 0.5q) closeTo: (2 sqrt + 2 sqrt i) / 2.
+	self assert: (1.0d i raisedTo: 1/2) closeTo: (2 sqrt + 2 sqrt i) / 2.
+	self assert: (1.0q i raisedTo: 0.5d) closeTo: (2 sqrt + 2 sqrt i) / 2.
+	self assert: (1.0q i raisedTo: 0.5q) closeTo: (2 sqrt + 2 sqrt i) / 2.
+	self assert: (1.0q i raisedTo: 1/2) closeTo: (2 sqrt + 2 sqrt i) / 2.
+	
+	a := 2 * (1 i raisedTo: 64 reciprocal ) imaginary * 64.
+	b := 2 * (1 i raisedTo: 128 reciprocal ) imaginary * 128.
+	self assert: (b - Float pi) abs < (a - Float pi) abs
     ]
 ]
 
