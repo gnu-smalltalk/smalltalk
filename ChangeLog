@@ -1,3 +1,9 @@
+2009-10-18  Paolo Bonzini  <bonzini@gnu.org>
+
+	* kernel/FloatQ.st: Fix infinite loop.
+	* tests/floatmath.st: Add testcases.
+	* tests/floatmath.ok: Regenerate.
+
 2009-10-13  Paolo Bonzini  <bonzini@gnu.org>
 
 	* gst-tool.c: Do not save image when starting browsers, let the

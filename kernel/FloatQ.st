@@ -346,7 +346,7 @@ accuracy as C''s "long double" numbers.'>
         <category: 'misc math'>
         ^aNumber isInteger
             ifTrue: [self raisedToInteger: aNumber]
-            ifFalse: [self raisedTo: aNumber asFloatQ]
+            ifFalse: [super raisedTo: aNumber asFloatQ]
     ]
 ]
 

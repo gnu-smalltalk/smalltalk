@@ -128,6 +128,19 @@ Eval [ (( 0.4 \\ -1) * 10) rounded == ( 4 \\ -10) ]
 Eval [ ((-0.4 \\  1) * 10) rounded == (-4 \\  10) ]
 Eval [ ((-0.4 \\ -1) * 10) rounded == (-4 \\ -10) ]
 
+Eval [ (1.0e raisedTo: 1   ) class ]
+Eval [ (1.0d raisedTo: 1   ) class ]
+Eval [ (1.0q raisedTo: 1   ) class ]
+Eval [ (1.0e raisedTo: 1.0e) class ]
+Eval [ (1.0d raisedTo: 1.0e) class ]
+Eval [ (1.0q raisedTo: 1.0e) class ]
+Eval [ (1.0e raisedTo: 1.0d) class ]
+Eval [ (1.0d raisedTo: 1.0d) class ]
+Eval [ (1.0q raisedTo: 1.0d) class ]
+Eval [ (1.0e raisedTo: 1.0q) class ]
+Eval [ (1.0d raisedTo: 1.0q) class ]
+Eval [ (1.0q raisedTo: 1.0q) class ]
+
 " Fun with signed zeros"
 
 Eval [
