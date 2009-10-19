@@ -138,7 +138,7 @@ members that my instance represents.'>
 	^Interval 
 	    from: (self at: self size)
 	    to: (self at: 1)
-	    by: self step negated
+	    by: step negated
     ]
 
     species [
@@ -165,8 +165,8 @@ members that my instance represents.'>
 
 	<category: 'testing'>
 	self class == anInterval class ifFalse: [^false].
-	^self first = anInterval first & (self last = anInterval last) 
-	    & (self increment = anInterval increment)
+	^self first = anInterval first and: [self last = anInterval last
+	    and: [self increment = anInterval increment]]
     ]
 
     hash [

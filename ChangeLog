@@ -1,3 +1,7 @@
+2009-10-19  Lee Duhem  <lee.duhem@gmail.com>
+
+	* kernel/Interval.st: Fix wrong send of #step.
+
 2009-10-18  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/FloatQ.st: Fix infinite loop.
