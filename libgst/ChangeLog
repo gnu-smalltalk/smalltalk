@@ -1,3 +1,8 @@
+2009-10-21  Paolo Bonzini  <bonzini@gnu.org>
+
+	* libgst/sockets.c: Fix !HAVE_IPV6 compilation, and other Cygwin
+	problems.
+
 2009-10-13  Nigel Williams  <nigelw@elder-gods.net>
 
 	* libgst/cint.c: Always open with lt_dlopen first, then try

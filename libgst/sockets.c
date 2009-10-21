@@ -172,11 +172,9 @@ myGetHostName (void)
 
 constantFunction (afUnspec, AF_UNSPEC);
 constantFunction (afInet, AF_INET);
-constantFunction (afInet6, AF_INET6);
 constantFunction (afUnix, AF_UNIX);
 constantFunction (pfUnspec, PF_UNSPEC);
 constantFunction (pfInet, PF_INET);
-constantFunction (pfInet6, PF_INET6);
 constantFunction (pfUnix, PF_UNIX);
 constantFunction (msgOOB, MSG_OOB);
 constantFunction (msgPeek, MSG_PEEK);
@@ -187,12 +185,21 @@ constantFunction (sockStream, SOCK_STREAM);
 constantFunction (sockRaw, SOCK_RAW);
 constantFunction (sockRDM, SOCK_RDM);
 constantFunction (sockDgram, SOCK_DGRAM);
-constantFunction (ipprotoIcmpv6, IPPROTO_ICMPV6);
 constantFunction (ipprotoIcmp, IPPROTO_ICMP);
 constantFunction (ipprotoUdp, IPPROTO_UDP);
 constantFunction (ipprotoTcp, IPPROTO_TCP);
 constantFunction (ipprotoIp, IPPROTO_IP);
 constantFunction (tcpNodelay, TCP_NODELAY);
+
+#ifdef HAVE_IPV6
+constantFunction (afInet6, AF_INET6);
+constantFunction (pfInet6, PF_INET6);
+constantFunction (ipprotoIcmpv6, IPPROTO_ICMPV6);
+#else
+constantFunction (afInet6, -1);
+constantFunction (pfInet6, -1);
+constantFunction (ipprotoIcmpv6, -1);
+#endif
 
 #ifdef IP_MULTICAST_TTL
 constantFunction (ipMulticastTtl, IP_MULTICAST_TTL);
@@ -428,7 +435,7 @@ getSoError (int fd)
 
   else if (myGetsockopt (fd, SOL_SOCKET, SO_ERROR, (char *)&error, &size) == -1)
     {
-#ifdef _WIN32
+#if defined _WIN32 && !defined __CYGWIN__
       error = WSAGetLastError ();
 #else
       error = errno;
@@ -450,7 +457,7 @@ getSoError (int fd)
 void
 _gst_init_sockets ()
 {
-#ifdef _WIN32
+#if defined WIN32 && !defined __CYGWIN__
   WSADATA wsaData;
   int iRet;
   iRet = WSAStartup(MAKEWORD(2,2), &wsaData);

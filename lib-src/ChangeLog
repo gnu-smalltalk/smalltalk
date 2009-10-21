@@ -1,3 +1,7 @@
+2009-09-21  Paolo Bonzini  <bonzini@gnu.org>
+
+	* lib-src/sincosl.c: Fix Cygwin compilation.
+
 2009-09-02  Paolo Bonzini  <bonzini@gnu.org>
 
 	* lib-src/pointer-set.c: Fix compilation, reported by Lee Duhem.
