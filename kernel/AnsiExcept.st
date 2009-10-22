@@ -910,6 +910,15 @@ InvalidArgument subclass: NotFound [
 	    signal: aString , ' not found'
     ]
 
+    NotFound class >> signalOn: value reason: aString [
+	"Raise an exception: reason specifies the reason of the exception."
+
+	<category: 'accessing'>
+	^(self new)
+	    value: value;
+	    signal: aString
+    ]
+ 
     description [
 	"Answer a textual description of the exception."
 

@@ -1,5 +1,11 @@
 2009-10-22  Lee Duhem  <lee.duhem@gmail.com>
 
+	* kernel/AnsiExcept.st: Add NotFound>>#signal:reason:.
+	* kernel/PkgLoader.st: Specify the reason why the package is not
+	found.
+
+2009-10-22  Lee Duhem  <lee.duhem@gmail.com>
+
 	* kernel/CCallback.st: Fix comments.
 	* kernel/Object.st: Fix comments.
 

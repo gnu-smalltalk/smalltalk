@@ -57,6 +57,12 @@ NotFound subclass: PackageNotAvailable [
 	^super signalOn: aString what: 'package'
     ]
 
+    PackageNotAvailable class >> signal: package reason: reason [
+	"Signal an exception saying that be package named package
+	 can't be found because the reason named reason."
+	^super signalOn: package reason: reason
+    ]
+
     isResumable [
         "Answer true.  Package unavailability is resumable, because the
 	 package files might just lie elsewhere."
@@ -1254,9 +1260,8 @@ XML.'>
 		file := dir / fileName.
 		file exists ifTrue: [^file]].
 
-	"TODO: should put the name and baseDirectories into the exception."
-	"fileName printNl.  baseDirectories printNl."
 	SystemExceptions.PackageNotAvailable signal: self name
+	    reason: (fileName printString , ' does not exist in ' , baseDirectories printString)
     ]
 
     directory [
