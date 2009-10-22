@@ -1,3 +1,8 @@
+2009-10-22  Lee Duhem  <lee.duhem@gmail.com>
+
+	* kernel/CCallback.st: Fix comments.
+	* kernel/Object.st: Fix comments.
+
 2009-10-19  Lee Duhem  <lee.duhem@gmail.com>
 
 	* kernel/Interval.st: Fix wrong send of #step.

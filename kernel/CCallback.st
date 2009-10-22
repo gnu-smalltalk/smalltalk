@@ -40,8 +40,8 @@ CCallable subclass: CCallbackDescriptor [
 able to convert blocks into C functions that can be passed to C.'>
 
     CCallbackDescriptor class >> for: aBlock returning: returnTypeSymbol withArgs: argsArray [
-	"Answer a CFunctionDescriptor with the given function name, return type
-	 and arguments.  funcName must be a String."
+	"Answer a CCallbackDescriptor with the given block, return type and
+	 arguments."
 
 	<category: 'instance creation'>
 	^(super for: nil returning: returnTypeSymbol withArgs: argsArray)
@@ -51,16 +51,14 @@ able to convert blocks into C functions that can be passed to C.'>
     ]
 
     block [
-	"Answer the name of the function (on the C side) represented by the
-	 receiver"
+	"Answer the block of the function represented by the receiver."
 
 	<category: 'accessing'>
 	^block
     ]
 
     block: aBlock [
-	"Set the name of the function (on the C side) represented by the
-	 receiver"
+	"Set the block of the function represented by the receiver."
 
 	<category: 'accessing'>
 	block := aBlock

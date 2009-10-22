@@ -147,7 +147,7 @@ All classes in the system are subclasses of me.'>
     ]
 
     ifNotNil: notNilBlock [
-	"Evaluate notNiilBlock if the receiver is not nil, passing the receiver.
+	"Evaluate notNilBlock if the receiver is not nil, passing the receiver.
 	 Else answer nil."
 
 	<category: 'testing functionality'>
