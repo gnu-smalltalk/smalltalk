@@ -1,3 +1,8 @@
+2009-10-26  Gwenael Casaccio  <mrgwen@gmail.com>
+
+	* MoreFuncs.st: Add G_TYPE_OOP support.
+	* gst-gtk.c: Likewise.
+
 2009-10-23  Paolo Bonzini  <bonzini@gnu.org>
 
 	* GtkImpl.st: Add a couple of VisualGST extra methods.

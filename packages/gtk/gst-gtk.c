@@ -60,6 +60,8 @@
 #include <glib-object.h>
 #include <glib.h>
 
+#include <gobject/gvaluecollector.h>
+
 #ifdef STDC_HEADERS
 #include <stdlib.h>
 #include <string.h>
@@ -82,6 +84,53 @@ VMProxy *_gst_vm_proxy;
 
 static GQuark q_gst_object = 0;
 static int pending_quit_count = 0;
+
+static GTypeInfo gtype_oop_info = {
+  0,                           /* class_size */
+  NULL,                        /* base_init */
+  NULL,                        /* base_finalize */
+  NULL,                        /* class_init */
+  NULL,                        /* class_finalize */
+  NULL,                        /* class_data */
+  0,                           /* instance_size */
+  0,                           /* n_preallocs */
+  NULL,                        /* instance_init */
+  NULL,                        /* value_table */
+};
+
+static void
+g_type_oop_value_init (GValue *value)
+{
+  value->data[0].v_pointer = NULL;
+}
+
+static void
+g_type_oop_value_free (GValue *value)
+{
+  if (value->data[0].v_pointer)
+      _gst_vm_proxy->unregisterOOP ((OOP) value->data[0].v_pointer);
+}
+
+static void
+g_type_oop_value_copy (const GValue *src_value,
+                        GValue       *dest_value)
+{
+  _gst_vm_proxy->registerOOP ((OOP) src_value->data[0].v_pointer);
+  dest_value->data[0].v_pointer = src_value->data[0].v_pointer;
+}
+
+static const GTypeValueTable gtype_oop_value_table = {
+  g_type_oop_value_init,             /* value_init */
+  g_type_oop_value_free,             /* value_free */
+  g_type_oop_value_copy,             /* value_copy */
+  NULL,                              /* value_peek_pointer */
+  NULL,                               /* collect_format */
+  NULL,                              /* collect_value */
+  NULL,                               /* lcopy_format */
+  NULL,                              /* lcopy_value */
+};
+
+static GType G_TYPE_OOP;
 
 /* Start the main event loop and then signal OOP.  */
 static void my_gtk_main (OOP semaphore);
@@ -274,6 +323,11 @@ convert_g_value_to_oop (const GValue *val)
   else
     fundamental = G_TYPE_FUNDAMENTAL (type);
 
+  if (type == G_TYPE_OOP) {
+      v_ptr = g_value_get_boxed (val);
+      return (OOP) v_ptr;
+  }
+
   switch (fundamental)
     {
     case G_TYPE_CHAR:
@@ -360,6 +414,13 @@ fill_g_value_from_oop (GValue *return_value, OOP oop)
     fundamental = type;
   else
     fundamental = G_TYPE_FUNDAMENTAL (type);
+
+
+  if (type == G_TYPE_OOP) {
+    _gst_vm_proxy->registerOOP (oop);
+    g_value_set_boxed (return_value, (gpointer)oop);
+    return ;
+  }
 
   switch (fundamental)
     {
@@ -920,6 +981,12 @@ void my_log_handler (const gchar * log_domain,
     abort ();
 }
 
+int
+gst_type_oop ()
+{
+  return G_TYPE_OOP;
+}
+
 /* Initialization.  */
  
 static int initialized = 0;
@@ -960,8 +1027,12 @@ gst_initModule (proxy)
 		     | G_LOG_FLAG_FATAL | G_LOG_FLAG_RECURSION,
 		     my_log_handler, NULL);
 
+  gtype_oop_info.value_table = &gtype_oop_value_table;
+  G_TYPE_OOP = g_type_register_static (G_TYPE_BOXED, "OOP", &gtype_oop_info, 0);
+
   _gst_vm_proxy = proxy;
   _gst_vm_proxy->defineCFunc ("gtkInitialized", gst_gtk_initialized);
+  _gst_vm_proxy->defineCFunc ("gstTypeOOP", gst_type_oop);
   _gst_vm_proxy->defineCFunc ("gstGtkRegisterForType", register_for_type);
   _gst_vm_proxy->defineCFunc ("gstGtkFreeGObjectOOP", free_oop_for_g_object);
   _gst_vm_proxy->defineCFunc ("gstGtkNarrowGObjectOOP", narrow_oop_for_g_object);
