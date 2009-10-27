@@ -37,6 +37,17 @@ Behavior extend [
 	 RBMethodNode that compiles to my method named by selector."
         ^(self compiledMethodAt: selector) methodParseNode
     ]
+
+    formattedSourceStringAt: aSelector ifAbsent: aBlock [
+	"Answer the method source code as a formatted string. Requires
+	 package Parser."
+
+	<category: 'source code'>
+	| method |
+	method := self lookupSelector: aSelector.
+	method isNil ifTrue: [^aBlock value copy].
+	^method methodFormattedSourceString
+    ]
 ]
 
 

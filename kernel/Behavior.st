@@ -257,6 +257,23 @@ method dictionary, and iterating over the class hierarchy.'>
 	^self methodDictionary removeKey: selector ifAbsent: [self error: 'huh?!?']
     ]
 
+    formattedSourceStringAt: aSelector ifAbsent: aBlock [
+	"Answer the method source code as a formatted string. Requires
+	 package Parser."
+
+	<category: 'accessing the method dictionary'>
+	self notYetImplemented
+    ]
+
+    formattedSourceStringAt: selector [
+	"Answer the method source code as a formatted string (if available)
+	 for the given selector.  Requires package Parser."
+
+	<category: 'accessing the method dictionary'>
+	^self formattedSourceStringAt: selector ifAbsent: [
+	    '" *** SOURCE CODE NOT AVAILABLE *** "']
+    ]
+
     compile: code [
 	"Compile method source.  If there are parsing errors, answer nil.
 	 Else, return a CompiledMethod result of compilation"
@@ -537,7 +554,7 @@ method dictionary, and iterating over the class hierarchy.'>
     selectors [
 	"Answer a Set of the receiver's selectors"
 
-	<category: 'accessing the methodDictionary'>
+	<category: 'accessing the method dictionary'>
 	self methodDictionary isNil 
 	    ifTrue: [^Set new]
 	    ifFalse: [^self methodDictionary keys]
@@ -546,7 +563,7 @@ method dictionary, and iterating over the class hierarchy.'>
     allSelectors [
 	"Answer a Set of all the selectors understood by the receiver"
 
-	<category: 'accessing the methodDictionary'>
+	<category: 'accessing the method dictionary'>
 	| aSet |
 	aSet := self selectors.
 	self allSuperclassesDo: [:superclass | aSet addAll: superclass selectors].
@@ -557,7 +574,7 @@ method dictionary, and iterating over the class hierarchy.'>
 	"Return the compiled method associated with selector, from the local
 	 method dictionary or one of a superclass; return nil if not found."
 
-	<category: 'accessing the methodDictionary'>
+	<category: 'accessing the method dictionary'>
 	| class method |
 	class := self.
 	
@@ -568,11 +585,25 @@ method dictionary, and iterating over the class hierarchy.'>
 		repeat
     ]
 
+    lookupAllSelectors: aSelector [
+	"Answer a Set of all the compiled method associated with selector.
+	 from the local method dictionary and all of the superclasses."
+
+	<category: 'accessing the method dictionary'>
+	| implementors |
+
+	implementors := Set new.
+	self withAllSuperclassesDo: [:c | | m |
+	    m := c compiledMethodAt: aSelector ifAbsent: [nil].
+	    m ifNotNil: [implementors add: m]].
+	^implementors
+    ]
+
     compiledMethodAt: selector ifAbsent: aBlock [
 	"Return the compiled method associated with selector, from the local
 	 method dictionary.  Evaluate aBlock if not found."
 
-	<category: 'accessing the methodDictionary'>
+	<category: 'accessing the method dictionary'>
 	self methodDictionary isNil ifTrue: [^aBlock value].
 	^self methodDictionary at: selector ifAbsent: aBlock
     ]
@@ -581,7 +612,7 @@ method dictionary, and iterating over the class hierarchy.'>
 	"Return the compiled method associated with selector, from the local
 	 method dictionary.  Error if not found."
 
-	<category: 'accessing the methodDictionary'>
+	<category: 'accessing the method dictionary'>
 	self methodDictionary isNil 
 	    ifTrue: [SystemExceptions.NotFound signalOn: selector what: 'key'].
 	^self methodDictionary at: selector
@@ -592,7 +623,7 @@ method dictionary, and iterating over the class hierarchy.'>
 	"Return the compiled method associated with selector, from the local
 	 method dictionary.  Error if not found."
 
-	<category: 'accessing the methodDictionary'>
+	<category: 'accessing the method dictionary'>
 	self methodDictionary isNil 
 	    ifTrue: [SystemExceptions.NotFound signalOn: selector what: 'key'].
 	^self methodDictionary at: selector
@@ -602,7 +633,7 @@ method dictionary, and iterating over the class hierarchy.'>
     selectorAt: method [
 	"Return selector for the given CompiledMethod"
 
-	<category: 'accessing the methodDictionary'>
+	<category: 'accessing the method dictionary'>
 	self methodDictionary isNil 
 	    ifTrue: [SystemExceptions.NotFound signalOn: method what: 'method'].
 	^self methodDictionary keyAtValue: method
@@ -613,14 +644,14 @@ method dictionary, and iterating over the class hierarchy.'>
 	"Answer the parse tree for the given selector, or nil if there was an
 	 error.  Requires the Parser package to be loaded."
 
-	<category: 'accessing the methodDictionary'>
+	<category: 'accessing the method dictionary'>
 	^(self >> selector) methodParseNode
     ]
 
     sourceCodeAt: selector ifAbsent: aBlock [
 	"Answer source code (if available) for the given selector."
 
-	<category: 'accessing the methodDictionary'>
+	<category: 'accessing the method dictionary'>
 	| source |
 	source := (self >> selector) methodSourceCode.
 	source isNil ifTrue: [^aBlock value copy].
@@ -630,7 +661,7 @@ method dictionary, and iterating over the class hierarchy.'>
     sourceCodeAt: selector [
 	"Answer source code (if available) for the given selector."
 
-	<category: 'accessing the methodDictionary'>
+	<category: 'accessing the method dictionary'>
 	^self sourceCodeAt: selector ifAbsent: [
 	    '" *** SOURCE CODE NOT AVAILABLE *** "']
     ]
@@ -638,7 +669,7 @@ method dictionary, and iterating over the class hierarchy.'>
     sourceMethodAt: selector [
 	"This is too dependent on the original implementation"
 
-	<category: 'accessing the methodDictionary'>
+	<category: 'accessing the method dictionary'>
 	self shouldNotImplement
     ]
 
@@ -1547,11 +1578,40 @@ method dictionary, and iterating over the class hierarchy.'>
 		    nl]
     ]
 
+    printFullHierarchy [
+	"Print my full hierarchy (i.e. all my superclasses and subclasses)
+	 on the terminal."
+
+	<category: 'printing hierarchy'>
+	| printBlock |
+	printBlock := [:name :level |
+			  stdout
+			      next: level * self hierarchyIndent put: Character space;
+			      nextPutAll: name;
+			      nl].
+	self printSuperclasses: 0 using: printBlock;
+	     printSubclasses: (self allSuperclasses size) using: printBlock
+    ]
+
+    printSuperclasses: level using: aBlock [
+	"I print all my superclasses, each indented according to its position in
+	the hierarchy. I pass aBlock a class name and a level."
+
+	<category: 'private'>
+	| mySuperclass currentLevel |
+	currentLevel := level.
+	mySuperclass := self allSuperclasses reverse.
+	mySuperclass do:
+	   [:superclass |
+	   aBlock value: superclass name value: currentLevel.
+	   currentLevel := currentLevel + 1]
+    ]
+
     printSubclasses: level using: aBlock [
 	"I print my name, and then all my subclasses, each indented according
 	 to its position in the hierarchy. I pass aBlock a class name and a level"
 
-	<category: 'printing hierarchy'>
+	<category: 'private'>
 	| mySubclasses |
 	aBlock value: self name value: level.
 	mySubclasses := self subclasses 

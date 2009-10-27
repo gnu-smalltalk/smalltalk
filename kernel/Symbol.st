@@ -244,6 +244,23 @@ representation are in fact the same instance.'>
 	    ifFalse: [{self}]
     ]
 
+    implementors [
+	"Answer a Set of all the compiled method associated with selector
+	 named by the receiver, which is supposed to be a valid message
+	 name."
+
+	<category: 'accessing the method dictionary'>
+	| implementors |
+
+	implementors := Set new.
+	Class withAllSubclassesDo: [:c | | m |
+	    m := c compiledMethodAt: self ifAbsent: [nil].
+	    m isNil ifFalse: [implementors add: m].
+	    m := c asClass compiledMethodAt: self ifAbsent: [nil].
+	    m isNil ifFalse: [implementors add: m]].
+	 ^implementors
+    ]
+
     shallowCopy [
 	"Returns a deep copy of the receiver. As Symbols are identity objects, we
 	 actually return the receiver itself."

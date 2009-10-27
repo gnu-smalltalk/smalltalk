@@ -1,3 +1,12 @@
+2009-10-27  Lee Duhem  <lee.duhem@gmail.com>
+	    Paolo Bonzini  <bonzini@gnu.org>
+
+	* kernel/Behavior.st: Adjust method categories, add
+	#formattedSourceStringAt: and #formattedSourceStringAt:ifAbsent:,
+	#lookupAllSelectors:, #printFullHierarchy.
+	* kernel/Collection.st: Add #displayLines.
+	* kernel/Symbol.st: Add #implementors.
+
 2009-10-22  Lee Duhem  <lee.duhem@gmail.com>
 
 	* kernel/AnsiExcept.st: Add NotFound>>#signal:reason:.

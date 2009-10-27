@@ -587,6 +587,13 @@ of objects.'>
 	aStream nextPut: $)
     ]
 
+    displayLines [
+	"Print each element of the receiver to a line on standard output."
+
+	<category: 'printing'>
+	self do: [:each | Transcript display: each; nl]
+    ]
+
     storeOn: aStream [
 	"Store Smalltalk code compiling to the receiver on aStream"
 

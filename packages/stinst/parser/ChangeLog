@@ -1,3 +1,8 @@
+2009-10-27  Lee Duhem  <lee.duhem@gmail.com>
+	    Paolo Bonzini  <bonzini@gnu.org>
+
+	* Extensions.st: Add #formattedSourceStringAt:ifAbsent:.
+
 2009-10-02  Paolo Bonzini  <bonzini@gnu.org>
 
 	* OldSyntaxExporter.st: Fix emission of nil categories.
