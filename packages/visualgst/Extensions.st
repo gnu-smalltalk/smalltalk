@@ -276,7 +276,7 @@ Debugger extend [
         context := self suspendedContext.
 
         [ self stepBytecode.
-        self suspendedContext == context ]
+          self suspendedContext == context ]
                 whileTrue
     ]
 
@@ -290,9 +290,9 @@ Debugger extend [
         context := self suspendedContext.
 
         [ self stepBytecode.
-        (self suspendedContext notNil and: [ self suspendedContext parentContext == context ])
+         (self suspendedContext notNil and: [ self suspendedContext parentContext == context ])
                 ifTrue: [ self finish: self suspendedContext. ^ self ].
-        self suspendedContext == context ]
+         self suspendedContext == context ]
                 whileTrue
     ]
 ]

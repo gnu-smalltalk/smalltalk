@@ -91,6 +91,9 @@ GtkConcreteWidget subclass: GtkWorkspaceWidget [
     debugIt [
 	<category: 'events'>
 
+	| nodes |
+        nodes := STInST.RBParser parseExpression: self selectedText onError: [ :s :p | self error: s ].
+        variableTracker visitNode: nodes.
 	object class 
 	    compile: ('Doit [ ^ [ ', self selectedText , ' ] value ]')
 	    ifError:  [ :fname :lineNo :errorString | 

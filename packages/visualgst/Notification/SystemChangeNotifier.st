@@ -190,6 +190,24 @@ Object subclass: SystemChangeNotifier [
 		context: aContext)
     ]
 
+    categoryAdded: aCategory inClass: aClass [
+        "A category was added to aClass"
+        <category: 'system triggers'>
+
+        self trigger: (AddedEvent
+                category: aCategory
+                class: aClass)
+    ]
+
+    categoryRemoved: aCategory inClass: aClass [
+        "A category was removed to aClass"
+        <category: 'system triggers'>
+
+        self trigger: (RemovedEvent
+                category: aCategory
+                class: aClass)
+    ]
+
     methodAdded: aCompiledMethod [
 	<category: 'system triggers'>
 

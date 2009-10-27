@@ -71,7 +71,9 @@
   <filein>MethodState.st</filein>
   <filein>GtkWorkspaceWidget.st</filein>
   <filein>GtkNamespaceWidget.st</filein>
+  <filein>GtkCategorizedNamespaceWidget.st</filein>
   <filein>GtkClassWidget.st</filein>
+  <filein>GtkCategorizedClassWidget.st</filein>
   <filein>GtkCategoryWidget.st</filein>
   <filein>GtkMethodWidget.st</filein>
   <filein>GtkSourceCodeWidget.st</filein>
@@ -102,7 +104,9 @@
   <filein>Extensions.st</filein>
   <filein>GtkAssistant.st</filein>
   <filein>GtkNamespaceModel.st</filein>
+  <filein>GtkCategorizedNamespaceModel.st</filein>
   <filein>GtkClassModel.st</filein>
+  <filein>GtkCategorizedClassModel.st</filein>
   <filein>GtkCategoryModel.st</filein>
   <filein>GtkMethodModel.st</filein>
   <filein>Undo/AddCategoryUndoCommand.st</filein>
@@ -128,6 +132,7 @@
   <filein>Senders/GtkSender.st</filein>
   <filein>Notification/Kernel/AbstractNamespace.st</filein>
   <filein>Notification/Kernel/Metaclass.st</filein>
+  <filein>Notification/Kernel/Class.st</filein>
   <filein>Notification/Kernel/MethodDictionary.st</filein>
   <filein>Debugger/GtkStackInspectorView.st</filein>
   <filein>Debugger/GtkStackInspector.st</filein>
@@ -210,7 +215,9 @@
   <file>MethodState.st</file>
   <file>GtkWorkspaceWidget.st</file>
   <file>GtkNamespaceWidget.st</file>
+  <file>GtkCategorizedNamespaceWidget.st</file>
   <file>GtkClassWidget.st</file>
+  <file>GtkCategorizedClassWidget.st</file>
   <file>GtkCategoryWidget.st</file>
   <file>GtkMethodWidget.st</file>
   <file>GtkSourceCodeWidget.st</file>
@@ -241,7 +248,9 @@
   <file>Extensions.st</file>
   <file>GtkAssistant.st</file>
   <file>GtkNamespaceModel.st</file>
+  <file>GtkCategorizedNamespaceModel.st</file>
   <file>GtkClassModel.st</file>
+  <file>GtkCategorizedClassModel.st</file>
   <file>GtkCategoryModel.st</file>
   <file>GtkMethodModel.st</file>
   <file>Undo/AddCategoryUndoCommand.st</file>
@@ -267,6 +276,7 @@
   <file>Senders/GtkSender.st</file>
   <file>Notification/Kernel/AbstractNamespace.st</file>
   <file>Notification/Kernel/Metaclass.st</file>
+  <file>Notification/Kernel/Class.st</file>
   <file>Notification/Kernel/MethodDictionary.st</file>
   <file>Debugger/GtkStackInspectorView.st</file>
   <file>Debugger/GtkStackInspector.st</file>
@@ -295,6 +305,9 @@
   <file>Commands/OpenWorkspaceCommand.st</file>
   <file>Commands/SaveImageCommand.st</file>
   <file>Commands/SaveImageAsCommand.st</file>
+  <file>Icons/category.png</file>
+  <file>Icons/namespace.png</file>
+  <file>Icons/next.png</file>
   <start>VisualGST.VisualGST open.
     GTK.Gtk main</start>
 </package>

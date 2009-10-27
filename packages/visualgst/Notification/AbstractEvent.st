@@ -298,6 +298,15 @@ Object subclass: AbstractEvent [
 	^ self basicNew item: anItem kind: anItemKind
     ]
 
+    AbstractEvent class >> category: aCategory class: aClass [
+        <category: 'instance creation'>
+
+        | instance |
+        instance := self item: aCategory kind: self categoryKind.
+        instance itemClass: aClass.
+        ^ instance
+    ]
+
     AbstractEvent class >> method: aMethod class: aClass [
 	<category: 'instance creation'>
 

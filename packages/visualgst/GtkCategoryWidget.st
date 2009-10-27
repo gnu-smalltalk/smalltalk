@@ -6,7 +6,7 @@ GtkConcreteWidget subclass: GtkCategoryWidget [
 
 	^ (self new)
 	    initialize;
-	    class: aClass;
+	    classOrMeta: aClass;
 	    yourself
     ]
 
@@ -16,13 +16,13 @@ GtkConcreteWidget subclass: GtkCategoryWidget [
 	self mainWidget: self buildTreeView
     ]
 
-    class [
+    classOrMeta [
 	<category: 'accessing'>
     
 	^ class
     ]
 
-    class: aClass [
+    classOrMeta: aClass [
 	<category: 'accessing'>
 
 	class := aClass.
@@ -32,7 +32,7 @@ GtkConcreteWidget subclass: GtkCategoryWidget [
     model [
 	<category: 'accessing'>
 
-	^ model ifNil: [ model := GtkCategoryModel on: self class ]
+	^ model ifNil: [ model := GtkCategoryModel on: self classOrMeta ]
     ]
 
     emptyModel [
@@ -44,7 +44,7 @@ GtkConcreteWidget subclass: GtkCategoryWidget [
     refreshModel [
 	<category: 'events'>
 
-	model := GtkCategoryModel on: self class.
+	model := GtkCategoryModel on: self classOrMeta.
 
 	categoryTree setModel: self model gtkModel.
 	self model isSorted
@@ -105,12 +105,38 @@ GtkConcreteWidget subclass: GtkCategoryWidget [
 	^ categoryTree hasSelectedItem
     ]
 
+    hasCategory: aString [
+        <category: 'testing'>
+
+        ^ self model hasCategory: aString
+    ]
+
     selectedCategory [
 	<category: 'accessing'>
 
-	| iter string |
+	| iter |
 	(iter := categoryTree selectedIter) ifNil: [self error: 'Nothing is selected'].
-	^ self model gtkModel getOop: iter column: 0.
+	^ self model gtkModel getOop: iter column: 0
+    ]
+
+    selectACategory: aString [
+        <category: 'item selection'>
+
+        | selection |
+        selection := categoryTree getSelection.
+        selection unselectAll.
+	aString ifNil: [ ^ self ].
+        selection selectIter: (self findIterInACategory: aString)
+    ]
+
+    findIterInACategory: aString [
+        <category: 'item selection'>
+
+        | result |
+
+        result := self model findIterInACategory: aString.
+        categoryTree scrollToCell: (self model gtkModel getPath: result) column: nil useAlign: false rowAlign: 0.5 colAlign: 0.5.
+        ^ result
     ]
 
     viewedCategoryModel [
@@ -140,7 +166,7 @@ GtkConcreteWidget subclass: GtkCategoryWidget [
     fileoutCategory [
         <category: 'category events'>
 
-        FileoutCategoryCommand on: self class categorized: self selectedCategory
+        FileoutCategoryCommand on: self classOrMeta categorized: self selectedCategory
     ]
 ]
 

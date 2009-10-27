@@ -1,6 +1,6 @@
 UndoCommand subclass: AddMethodUndoCommand [
 
-    | selector method category classOrMeta oldCompiledMethod compiledMethod |
+    | selector method category classOrMeta oldCompiledMethod browserWidget compiledMethod methodWidget selectedMethod |
 
     AddMethodUndoCommand class >> add: aString classified: aCategory in: aClass [
 	<category: 'instance creation'>
@@ -11,17 +11,37 @@ UndoCommand subclass: AddMethodUndoCommand [
 	    yourself
     ]
 
+    AddMethodUndoCommand class >> add: aString classified: aCategory in: aClass widget: aGtkWidget browser: aGtkBrowserWidget [
+        <category: 'instance creation'>
+
+        ^ (self new)
+            add: aString classified: aCategory in: aClass widget: aGtkWidget browser: aGtkBrowserWidget;
+            precondition;
+            yourself
+    ]
+
     compileError: aString [
 	<category: 'error printing'>
 
 	VisualGST compileError: aString
     ]
 
+    add: aString classified: aCategory in: aClass widget: aGtkWidget browser: aGtkBrowserWidget [
+        <category: 'initialize'>
+
+	self add: aString classified: aCategory in: aClass.
+	methodWidget := aGtkWidget.
+	browserWidget := aGtkBrowserWidget.
+	methodWidget hasSelectedMethod ifTrue: [ selectedMethod := methodWidget selectedMethodSymbol ]
+    ]
+
     add: aString classified: aCategory in: aClass [
 	<category: 'initialize'>
 
 	method := aString.
-	category := aCategory.
+        category := (#('still unclassified' '*') includes: (aCategory))
+					    ifTrue: [ nil ]
+					    ifFalse: [ aCategory ].
 	classOrMeta := aClass.
     ]
 
@@ -53,13 +73,17 @@ UndoCommand subclass: AddMethodUndoCommand [
 
 	classOrMeta methodDictionary removeMethod: compiledMethod.
 	oldCompiledMethod 
-	    ifNotNil: [ classOrMeta methodDictionary insertMethod: oldCompiledMethod ]
+	    ifNotNil: [ classOrMeta methodDictionary insertMethod: oldCompiledMethod ].
+	methodWidget ifNotNil: [ methodWidget selectAMethod: selectedMethod ]
     ]
 
     redo [
 	<category: 'events'>
 
-	oldCompiledMethod ifNil: [ classOrMeta methodDictionary insertMethod: compiledMethod ]
+	oldCompiledMethod ifNil: [ classOrMeta methodDictionary insertMethod: compiledMethod ].
+	methodWidget ifNotNil: [ 
+	    browserWidget codeSaved.
+	    methodWidget selectAMethod: selector asString ]
     ]
 ]
 

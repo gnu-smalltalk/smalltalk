@@ -1,21 +1,20 @@
 UndoCommand subclass: AddCategoryUndoCommand [
+    | categoryWidget category selectedCategory |
 
-    | category treeStore |
-
-    AddCategoryUndoCommand class >> add: aSymbol onModel: aGtkCategoryModel [
+    AddCategoryUndoCommand class >> add: aSymbol onWidget: aGtkCategoryWidget [
 	<category: 'instance creation'>
 
 	^ (self new)
-	    add: aSymbol onModel: aGtkCategoryModel;
+	    add: aSymbol onWidget: aGtkCategoryWidget;
 	    precondition;
 	    yourself
     ]
 
-    add: aSymbol onModel: aGtkCategoryModel [
+    add: aSymbol onWidget: aGtkCategoryWidget [
 	<category: 'initialize'>
 
 	category := aSymbol.
-	treeStore := aGtkCategoryModel
+	categoryWidget := aGtkCategoryWidget
     ]
 
     description [
@@ -28,19 +27,22 @@ UndoCommand subclass: AddCategoryUndoCommand [
         <category: 'checking'>
 
 	category = '*' ifTrue: [ self error: 'Can''t create a * category' ].
-	(treeStore hasCategory: category asString) ifTrue: [ self error: 'Category is present' ]
+	(categoryWidget hasCategory: category asString) ifTrue: [ self error: 'Category is present' ].
+	categoryWidget hasSelectedCategory ifTrue: [ selectedCategory := categoryWidget selectedCategory ]
     ]
 
     undo [
 	<category: 'events'>
 
-	treeStore removeCategory: category asString	
+	SystemChangeNotifier uniqueInstance categoryRemoved: category asString inClass: categoryWidget classOrMeta.
+	categoryWidget selectACategory: selectedCategory
     ]
 
     redo [
 	<category: 'events'>
 
-	treeStore appendCategory: category asString
+	SystemChangeNotifier uniqueInstance categoryAdded: category asString inClass: categoryWidget classOrMeta.
+	categoryWidget selectACategory: category asString
     ]
 ]
 

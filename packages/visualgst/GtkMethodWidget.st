@@ -146,6 +146,26 @@ GtkConcreteWidget subclass: GtkMethodWidget [
 	^ self class compiledMethodAt: self selectedMethodSymbol
     ]
 
+    selectAMethod: aString [
+        <category: 'item selection'>
+
+        | selection |
+        selection := methodTree getSelection.
+        selection unselectAll.
+        aString ifNil: [ ^ self ].
+        selection selectIter: (self findIterInAMethod: aString)
+    ]
+
+    findIterInAMethod: aString [
+        <category: 'item selection'>
+
+        | result |
+
+        result := self model findIterInAMethod: aString.
+        methodTree scrollToCell: (self model gtkModel getPath: result) column: nil useAlign: false rowAlign: 0.5 colAlign: 0.5.
+        ^ result
+    ]
+
     sourceCode [
 	<category: 'accessing'>
 

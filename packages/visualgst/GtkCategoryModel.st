@@ -14,10 +14,11 @@ Object subclass: GtkCategoryModel [
     initialize [
         <category: 'initialize-release'>
 
-        sorted := false
+        sorted := false.
+	self registerNotifier
     ]
 
-    registerNofifier [
+    registerNotifier [
 	<category: 'initialize-release'>
 
 	(SystemChangeNotifier uniqueInstance)
@@ -118,6 +119,20 @@ Object subclass: GtkCategoryModel [
         | iter |
 	iter := self findIterInACategory: aString.
         self gtkModel remove: iter
+    ]
+
+    addEvent: anEvent [
+        <category: 'event'>
+
+        (anEvent itemClass == self classOrMeta) ifFalse: [ ^ self ].
+        self appendCategory: anEvent item
+    ]
+
+    removeEvent: anEvent [
+        <category: 'event'>
+
+        (anEvent itemClass == self classOrMeta) ifFalse: [ ^ self ].
+	self removeCategory: anEvent item
     ]
 ]
 

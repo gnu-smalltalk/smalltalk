@@ -78,7 +78,7 @@ GtkConcreteWidget subclass: GtkClassBrowserWidget [
     buildNamespaceView [
 	<category: 'user interface'>
 
-	namespaceWidget := GtkNamespaceWidget showAll
+	namespaceWidget := GtkCategorizedNamespaceWidget showAll
 				whenSelectionChangedSend: #onNamespaceChanged to: self;
 				yourself.
 
@@ -88,7 +88,7 @@ GtkConcreteWidget subclass: GtkClassBrowserWidget [
     buildClassView [
 	<category: 'user interface'>
 
-	classWidget := GtkClassWidget showAll
+	classWidget := GtkCategorizedClassWidget showAll
 			    whenSelectionChangedSend: #onClassChanged to: self;
 			    yourself.
 
@@ -218,7 +218,7 @@ GtkConcreteWidget subclass: GtkClassBrowserWidget [
 	self checkCodeWidget.
 	namespaceWidget hasSelectedNamespace ifFalse: [ ^ self ].
 	namespace := namespaceWidget selectedNamespace.
-	classWidget namespace: namespace.
+	classWidget namespace: namespace category: namespaceWidget selectedCategory.
 
 	classHierarchyUpdate ifFalse: [ classHierarchyWidget emptyModel ].
 	iCategoryWidget emptyModel.
@@ -237,8 +237,8 @@ GtkConcreteWidget subclass: GtkClassBrowserWidget [
 	classWidget hasSelectedClass ifFalse: [ ^ self ].
 	aClass := classWidget selectedClass.
 	classHierarchyUpdate ifFalse: [ classHierarchyWidget class: aClass ].
-	iCategoryWidget class: aClass.
-	cCategoryWidget class: aClass class.
+	iCategoryWidget classOrMeta: aClass.
+	cCategoryWidget classOrMeta: aClass class.
 	iCategoryWidget unselectAll.
         cCategoryWidget unselectAll.
 
@@ -532,9 +532,7 @@ GtkConcreteWidget subclass: GtkClassBrowserWidget [
     viewedCategoryModel [
 	<category: 'category events'>
 
-	^ classAndInstanceSide getCurrentPage = 0
-            ifTrue: [ GtkCategoryModel currentOn: classWidget selectedClass ]
-            ifFalse: [ GtkCategoryModel currentOn: classWidget selectedClass class ]
+	^ self viewedCategoryWidget model 
     ]
 
     fileoutCategory [
@@ -694,8 +692,8 @@ GtkConcreteWidget subclass: GtkClassBrowserWidget [
 
         classWidget selectAClass: aClass.
 	classHierarchyWidget class: aClass.
-        iCategoryWidget class: aClass.
-        cCategoryWidget class: aClass class.
+        iCategoryWidget classOrMeta: aClass.
+        cCategoryWidget classOrMeta: aClass class.
 
         iMethodWidget emptyModel.
         cMethodWidget emptyModel
@@ -871,6 +869,12 @@ GtkConcreteWidget subclass: GtkClassBrowserWidget [
 	<category: 'text saving'>
 
 	state saveSource
+    ]
+
+    codeSaved [
+	<category: 'code saved'>
+
+	codeWidget codeSaved
     ]
 
     close [

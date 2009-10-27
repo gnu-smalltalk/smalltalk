@@ -1,3 +1,20 @@
+2009-10-28  Gwenael Casaccio  <mrgwen@gmail.com>
+
+	* Commands/AddCategoryCommand.st, Commands/AddMethodCommand.st,
+	Debugger/GtkDebugger.st, Extensions.st, GtkCategorizedClassModel.st,
+	GtkCategorizedClassWidget.st, GtkCategorizedNamespaceModel.st,
+	GtkCategorizedNamespaceWidget.st, GtkCategoryModel.st,
+	GtkCategoryWidget.st, GtkClassBrowserWidget.st, GtkMethodWidget.st,
+	GtkNamespaceWidget.st, GtkNotebookWidget.st, GtkWorkspaceWidget.st,
+	Icons/NUnit.Failed.png, Icons/NUnit.Loading.png, Icons/NUnit.None.png,
+	Icons/NUnit.NotRun.png, Icons/NUnit.Running.png,
+	Icons/NUnit.Success.png, Icons/NUnit.SuccessAndFailed.png,
+	Icons/category.png, Icons/namespace.png, Icons/next.png,
+	Notification/AbstractEvent.st, Notification/Kernel/Class.st,
+	Notification/SystemChangeNotifier.st, Source/ClassSource.st,
+	Undo/AddCategoryUndoCommand.st, Undo/AddMethodUndoCommand.st,
+	VisualGST.st, package.xml: Sync.
+
 2009-10-13  Gwenael Casaccio  <mrgwen@gmail.com>
 
 	* GtkTextWidget.st, Source/CategorySource.st,

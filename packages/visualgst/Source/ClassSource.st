@@ -172,7 +172,7 @@ Object subclass: ClassSource [
     outputMethod: aMethod [
 	<category: 'printing'>
 
-	| j lines toPrint |
+	| lines |
 	lines := (self sourceOf: aMethod) lines.
 	1 to: lines size - 1 do: [ :i |
 	    stream

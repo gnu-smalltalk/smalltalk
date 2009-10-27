@@ -1,9 +1,10 @@
 GtkConcreteWidget subclass: GtkNotebookWidget [
-    | currentWidget notebook pages |
+    | currentWidget notebook pages labels |
 
     initialize [
 	<category: 'initialization'>
 
+	labels := OrderedCollection new.
 	pages := OrderedCollection new.
 	self mainWidget: self buildNotebookWidget
     ]
@@ -29,7 +30,7 @@ GtkConcreteWidget subclass: GtkNotebookWidget [
     addPermanentWidget: aWidget labeled: aString [
         <category: 'user interface'>
 
-	self addWidget: aWidget labelWidget: (GTK.GtkLabel new: aString)
+	self addWidget: aWidget labelWidget: (labels add: (GTK.GtkLabel new: aString))
     ]
 
     addWidget: aWidget labelWidget: aLabelWidget [
@@ -53,7 +54,7 @@ GtkConcreteWidget subclass: GtkNotebookWidget [
                     connectSignal: 'pressed' to: self selector: #'closeIt:at:' userData: aSmallInteger;
                     yourself.
         ^ (GTK.GtkHBox new: false spacing: 0)
-            add: (GTK.GtkLabel new: aString);
+            add: (labels add: (GTK.GtkLabel new: aString));
             add: close;
             showAll;
             yourself
@@ -71,7 +72,8 @@ GtkConcreteWidget subclass: GtkNotebookWidget [
         | pageNb |
         pageNb := notebook pageNum: aGtkConcreteWidget mainWidget.
 	aGtkConcreteWidget close.
-        pages remove: aGtkConcreteWidget.
+        pages removeAtIndex: pageNb + 1.
+	labels removeAtIndex: pageNb + 1.
         notebook removePage: pageNb.
 	pages size = 1 ifTrue: [ notebook setShowTabs: false ]
     ]
@@ -105,6 +107,7 @@ GtkConcreteWidget subclass: GtkNotebookWidget [
 
 	self numberOfPages = 1 ifTrue: [ ^ self ].
         pages removeAtIndex: self currentPage + 1.
+	labels removeAtIndex: self currentPage + 1.
 	notebook removePage: self currentPage.
 	pages size = 1 ifTrue: [ notebook setShowTabs: false ]
     ]
