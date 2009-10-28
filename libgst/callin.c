@@ -57,6 +57,7 @@
  ***********************************************************************/
 
 #include "gstpriv.h"
+#include "gstpub.h"
 
 #ifndef NAN
 #define NAN (0.0 / 0.0)
@@ -1134,4 +1135,48 @@ _gst_mark_registered_oops (void)
       OOP *last = *(k->last);
       MARK_OOP_RANGE (first, last);
     }
+}
+
+void
+_gst_init_vmproxy (void)
+{
+  gst_interpreter_proxy.nilOOP = _gst_nil_oop;
+  gst_interpreter_proxy.trueOOP = _gst_true_oop;
+  gst_interpreter_proxy.falseOOP = _gst_false_oop;
+
+  gst_interpreter_proxy.objectClass = _gst_object_class;
+  gst_interpreter_proxy.arrayClass = _gst_array_class;
+  gst_interpreter_proxy.stringClass = _gst_string_class;
+  gst_interpreter_proxy.characterClass = _gst_char_class;
+  gst_interpreter_proxy.smallIntegerClass = _gst_small_integer_class;
+  gst_interpreter_proxy.floatDClass = _gst_floatd_class;
+  gst_interpreter_proxy.floatEClass = _gst_floate_class;
+  gst_interpreter_proxy.byteArrayClass = _gst_byte_array_class;
+  gst_interpreter_proxy.objectMemoryClass = _gst_object_memory_class;
+  gst_interpreter_proxy.classClass = _gst_class_class;
+  gst_interpreter_proxy.behaviorClass = _gst_behavior_class;
+  gst_interpreter_proxy.blockClosureClass = _gst_block_closure_class;
+  gst_interpreter_proxy.contextPartClass = _gst_context_part_class;
+  gst_interpreter_proxy.blockContextClass = _gst_block_context_class;
+  gst_interpreter_proxy.methodContextClass = _gst_method_context_class;
+  gst_interpreter_proxy.compiledMethodClass = _gst_compiled_method_class;
+  gst_interpreter_proxy.compiledBlockClass = _gst_compiled_block_class;
+  gst_interpreter_proxy.fileDescriptorClass = _gst_file_descriptor_class;
+  gst_interpreter_proxy.fileStreamClass = _gst_file_stream_class;
+  gst_interpreter_proxy.processClass = _gst_process_class;
+  gst_interpreter_proxy.semaphoreClass = _gst_semaphore_class;
+  gst_interpreter_proxy.cObjectClass = _gst_c_object_class;
+
+  /* And system objects.  */
+  gst_interpreter_proxy.processorOOP = _gst_processor_oop;
+}
+
+struct VMProxy *
+_gst_get_vmproxy (void)
+{
+  struct VMProxy *result;
+
+  result = xmalloc (sizeof (struct VMProxy));
+  memcpy (result, &gst_interpreter_proxy, sizeof (struct VMProxy));
+  return result;
 }

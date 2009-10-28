@@ -267,4 +267,12 @@ extern void _gst_copy_registered_oops (void)
 extern void _gst_init_oopregistry (void) 
   ATTRIBUTE_HIDDEN;
 
+/* Returns a copy of the VMProxy.  */
+extern struct VMProxy *_gst_get_vmproxy (void) 
+  ATTRIBUTE_HIDDEN;
+
+/* Initialize the VMProxy.  */
+extern void _gst_init_vmproxy (void) 
+  ATTRIBUTE_HIDDEN;
+
 #endif /* GST_CALLIN_H */

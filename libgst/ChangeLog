@@ -1,3 +1,12 @@
+2009-10-28  Paolo Bonzini  <bonzini@gnu.org>
+
+	* libgst/gstpub.c: Move init_vmproxy and _gst_get_vmproxy...
+	* libgst/callin.c: ... here.  Make_gst_init_vmproxy public, do
+	not call it from _gst_get_vmproxy.
+	* libgst/callin.h: Declare them here...
+	* libgst/files.h: ... not here.
+	* libgst/files.c: Call _gst_init_vmproxy.
+
 2009-10-17  Paolo Bonzini  <bonzini@gnu.org>
 
 	* libgst/sysdep/win32/events.c: Implement pause/wakeup.

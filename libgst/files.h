@@ -132,10 +132,6 @@ extern int _gst_initialize (const char *kernel_dir,
 extern void _gst_top_level_loop (void)
   ATTRIBUTE_HIDDEN;
 
-/* Returns a copy of the VMProxy.  In gstpub.c.  */
-extern struct VMProxy *_gst_get_vmproxy (void) 
-  ATTRIBUTE_HIDDEN;
-
 /* Attempts to find a viable kernel Smalltalk file (.st file).
    FILENAME is a simple file name, sans directory; the file name to use 
    for the particular kernel file is returned.

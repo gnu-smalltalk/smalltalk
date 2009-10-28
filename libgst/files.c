@@ -496,6 +496,7 @@ _gst_initialize (const char *kernel_dir,
     {
       _gst_init_interpreter ();
       _gst_init_compiler ();
+      _gst_init_vmproxy ();
     }
   else if (abortOnFailure)
     {
@@ -513,6 +514,7 @@ _gst_initialize (const char *kernel_dir,
       _gst_init_dictionary ();
       _gst_init_interpreter ();
       _gst_init_compiler ();
+      _gst_init_vmproxy ();
 
       _gst_install_initial_methods ();
 
