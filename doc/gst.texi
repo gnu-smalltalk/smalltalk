@@ -3837,8 +3837,12 @@ which represents the same char as the passed C @code{wchar_t}.
 
 @deftypefun OOP classNameToOOP (char *)
 This method returns the Smalltalk class (i.e. an instance of a subclass
-of Class) whose name is the given parameter.  This method is slow; you
-can safely cache its result.
+of Class) whose name is the given parameter.  Namespaces are supported;
+the parameter must give the complete path to the class starting from the
+@code{Smalltalk} dictionary.  @code{NULL} is returned if the class is
+not found.
+
+This method is slow; you can safely cache its result.
 @end deftypefun
 
 @deftypefun OOP stringToOOP (char *)
