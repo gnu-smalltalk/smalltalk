@@ -1570,12 +1570,6 @@ method dictionary, and iterating over the class hierarchy.'>
 
 	<category: 'printing hierarchy'>
 	self printSubclasses: 0
-	    using: 
-		[:name :level | 
-		stdout
-		    next: level * self hierarchyIndent put: Character space;
-		    nextPutAll: name;
-		    nl]
     ]
 
     printFullHierarchy [
@@ -1583,43 +1577,38 @@ method dictionary, and iterating over the class hierarchy.'>
 	 on the terminal."
 
 	<category: 'printing hierarchy'>
-	| printBlock |
-	printBlock := [:name :level |
-			  stdout
-			      next: level * self hierarchyIndent put: Character space;
-			      nextPutAll: name;
-			      nl].
-	self printSuperclasses: 0 using: printBlock;
-	     printSubclasses: (self allSuperclasses size) using: printBlock
+	self printSuperclasses: 0; printSubclasses: self allSuperclasses size
     ]
 
-    printSuperclasses: level using: aBlock [
+    printSuperclasses: level [
 	"I print all my superclasses, each indented according to its position in
 	the hierarchy. I pass aBlock a class name and a level."
 
 	<category: 'private'>
 	| mySuperclass currentLevel |
 	currentLevel := level.
-	mySuperclass := self allSuperclasses reverse.
-	mySuperclass do:
-	   [:superclass |
-	   aBlock value: superclass name value: currentLevel.
-	   currentLevel := currentLevel + 1]
+	self allSuperclasses reverseDo:
+	    [:superclass |
+	    Transcript
+		space: currentLevel * self hierarchyIndent;
+		nextPutAll: (superclass nameIn: Namespace current);
+		nl.
+	    currentLevel := currentLevel + 1]
     ]
 
-    printSubclasses: level using: aBlock [
+    printSubclasses: level [
 	"I print my name, and then all my subclasses, each indented according
 	 to its position in the hierarchy. I pass aBlock a class name and a level"
 
 	<category: 'private'>
 	| mySubclasses |
-	aBlock value: self name value: level.
-	mySubclasses := self subclasses 
-		    asSortedCollection: [:a :b | a isMetaclass | b isMetaclass or: [a name <= b name]].
-	mySubclasses do: 
-		[:subclass | 
-		subclass isMetaclass 
-		    ifFalse: [subclass printSubclasses: level + 1 using: aBlock]]
+	Transcript
+	    space: level * self hierarchyIndent;
+	    nextPutAll: (self nameIn: Namespace current);
+	    nl.
+	mySubclasses := self subclasses reject: [ :a | a isMetaclass ].
+	(mySubclasses asSortedCollection: [:a :b | a name <= b name]) do: 
+		[:subclass | subclass printSubclasses: level + 1]
     ]
 
     hierarchyIndent [

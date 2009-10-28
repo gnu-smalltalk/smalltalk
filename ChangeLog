@@ -1,3 +1,8 @@
+2009-10-28  Lee Duhem  <lee.duhem@gmail.com>
+	    Paolo Bonzini  <bonzini@gnu.org>
+
+	* kernel/Behavior.st: Clean up hierarchy printing methods.
+
 2009-10-27  Lee Duhem  <lee.duhem@gmail.com>
 	    Paolo Bonzini  <bonzini@gnu.org>
 
