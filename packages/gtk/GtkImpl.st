@@ -977,19 +977,32 @@ GTK.GtkTreeView class extend [
     newWith: aGtkModel columns: anArray [
         <category: 'user interface'>
 
-        | i view col render |
-        view := self new
-		    setModel: aGtkModel;
-		    yourself.
-	i := 0.
-	anArray do: [ :each |
+        | view |
+        view := self new.
+	view setModel: aGtkModel.
+	anArray keysAndValuesDo: [ :i :each || col render |
 	    col := (GtkTreeViewColumn new)
-		    packStart: (render := each key = 'pixbuf' ifTrue: [ GTK.GtkCellRendererPixbuf new ] ifFalse: [ GTK.GtkCellRendererText new ]) expand: true;
-		    addAttribute: render attribute: each key column: i;
+		    packStart: (render := each key = 'text' ifFalse: [ GTK.GtkCellRendererPixbuf new ] ifTrue: [ GTK.GtkCellRendererText new ]) expand: true;
+		    addAttribute: render attribute: each key column: i - 1;
 		    yourself.
 	    each value isEmpty ifFalse: [ col setTitle: each value ].
-	    i := i + 1.
 	    view insertColumn: col position: -1 ].
+	^ view
+    ]
+
+    newWith: aGtkModel pack: anArray title: aString [
+        <category: 'user interface'>
+
+        | view col |
+        view := self new.
+	view setModel: aGtkModel.
+	col := GtkTreeViewColumn new.
+	anArray keysAndValuesDo: [ :i :each || render |
+	    col
+		packStart: (render := each = 'text' ifFalse: [ GTK.GtkCellRendererPixbuf new ] ifTrue: [ GTK.GtkCellRendererText new ]) expand: each = 'text';
+		addAttribute: render attribute: each column: i - 1 ].
+	col setTitle: aString.
+	view insertColumn: col position: -1.
 	^ view
     ]
 

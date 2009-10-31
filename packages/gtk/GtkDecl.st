@@ -46,22 +46,6 @@ Object subclass: Gdk [
 
 
 
-Object subclass: Gnome [
-    
-    <category: 'Gnome'>
-    <comment: nil>
-]
-
-
-
-Object subclass: GnomeVFS [
-    
-    <category: 'Gnome'>
-    <comment: nil>
-]
-
-
-
 Object subclass: Gtk [
     
     <category: 'Gtk'>

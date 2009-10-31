@@ -1,3 +1,8 @@
+2009-10-31  Paolo Bonzini  <bonzini@gnu.org>
+
+	* GtkDecl.st: Remove useless empty classes.
+	* GtkImpl.st: Add packed-columns constructor for GtkTreeView.
+
 2009-10-26  Gwenael Casaccio  <mrgwen@gmail.com>
 
 	* MoreFuncs.st: Add G_TYPE_OOP support.
