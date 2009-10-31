@@ -103,6 +103,8 @@ GtkMainWindow subclass: GtkSUnit [
     createToolbar [
 	<category: 'user interface'>
 
+        | package |
+        package := PackageLoader packageAt: 'VisualGST'.
 	self
 	    appendToolItem: ((GTK.GtkToolButton newFromStock: 'gtk-new')
 				connectSignal: 'clicked' to: OpenWorkspaceCommand selector: #execute userData: nil;
@@ -160,7 +162,12 @@ GtkMainWindow subclass: GtkSUnit [
 	    appendToolItem: ((GTK.GtkToolButton newFromStock: 'gtk-apply')
 				connectSignal: 'clicked' to: self selector: #acceptIt userData: nil;
 				setTooltipText: 'Accept It';
-				yourself)
+				yourself);
+            appendSeparator;
+            appendToolItem: ((GTK.GtkToolButton new: (GTK.GtkImage newFromFile: (package / 'Icons/next.png') file displayString) label: '')
+                                connectSignal: 'clicked' to: self selector: #runTest userData: nil;
+                                setTooltipText: 'Step';
+                                yourself)
     ]
 
     buildNamespaceAndClassWidget [
@@ -260,7 +267,7 @@ THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.';
     buildNamespaceWidget [
 	<category: 'user interface'>
 
-	namespaceWidget := GtkNamespaceWidget showAll 
+	namespaceWidget := GtkCategorizedNamespaceWidget showAll 
 				whenSelectionChangedSend: #onNamespaceChanged to: self;
 				yourself.
 	^ namespaceWidget mainWidget

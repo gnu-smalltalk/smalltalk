@@ -1,5 +1,9 @@
 2009-10-28  Gwenael Casaccio  <mrgwen@gmail.com>
 
+ 	* GtkCategorizedClassModel.st, SUnit/GtkSUnit.st: Sync.
+
+2009-10-28  Gwenael Casaccio  <mrgwen@gmail.com>
+
 	* Commands/AddCategoryCommand.st, Commands/AddMethodCommand.st,
 	Debugger/GtkDebugger.st, Extensions.st, GtkCategorizedClassModel.st,
 	GtkCategorizedClassWidget.st, GtkCategorizedNamespaceModel.st,
