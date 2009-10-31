@@ -3,7 +3,9 @@ Command subclass: OpenImplementorCommand [
     execute [
         <category: 'command'>
 
-	GtkImplementor open
+	target isNil
+	    ifTrue: [ GtkImplementor open ]
+	    ifFalse: [ GtkImplementor openOn: target selectedMethodSymbol ]
     ]
 ]
 

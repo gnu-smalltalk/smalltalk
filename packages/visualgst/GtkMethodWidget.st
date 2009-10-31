@@ -20,12 +20,6 @@ GtkConcreteWidget subclass: GtkMethodWidget [
 	^ GtkMethodModel
     ]
 
-    class [
-	<category: 'accessing'>
-    
-	^ class
-    ]
-
     category [
 	<category: 'accessing'>
 
@@ -50,7 +44,7 @@ GtkConcreteWidget subclass: GtkMethodWidget [
 	<category: 'accessing'>
 
 	
-	^ model ifNil: [ model := self methodModel on: self class withCategory: self category ]
+	^ model ifNil: [ model := self methodModel on: self classOrMetaSelected withCategory: self category ]
     ]
 
     emptyModel [
@@ -62,7 +56,7 @@ GtkConcreteWidget subclass: GtkMethodWidget [
     refreshModel [
 	<category: 'events'>
 
-	model := self methodModel on: self class withCategory: self category.
+	model := self methodModel on: self classOrMetaSelected withCategory: self category.
 	methodTree setModel: self model gtkModel.
         self model isSorted
             ifFalse: [
@@ -85,6 +79,12 @@ GtkConcreteWidget subclass: GtkMethodWidget [
 	^ GTK.GtkScrolledWindow withChild: methodTree
     ]
 
+    isTestMethod [
+	<category: 'button event'>
+	^(self classOrMetaSelected inheritsFrom: TestCase)
+	    and: [ self selectedMethodSymbol startsWith: 'test' ]
+    ]
+
     onPress: aGtkWidget event: aGdkEvent [
         <category: 'button event'>
 
@@ -92,12 +92,17 @@ GtkConcreteWidget subclass: GtkMethodWidget [
         aGdkButtonEvent := aGdkEvent castTo: GTK.GdkEventButton type.
         aGdkButtonEvent button value = 3 ifFalse: [ ^ false ].
         menu := GTK.GtkMenu new.
-        menu appendMenuItems: {{'Rename a method'. self. #renameMethod}.
-            {'Delete a method'. self. #deleteMethod}.
+	self isTestMethod ifTrue: [
+            menu appendMenuItems: {{'Run test'. self. #runTest}} ].
+        menu appendMenuItems: {{'Browse senders'. self. #browseSenders}.
+	    {'Browse implementors'. self. #browseImplementors}.
+	    {}.
+	    {'Rename method'. self. #renameMethod}.
+            {'Delete method'. self. #deleteMethod}.
             {}.
-            {'Inspect a method'. self. #inspectMethod}.
+            {'Inspect method'. self. #inspectMethod}.
             {}.
-            {'File out a method'. self. #fileoutMethod}}.
+            {'File out method'. self. #fileoutMethod}}.
         menu attachToWidget: methodTree detacher: nil.
         menu popup: nil parentMenuItem: nil func: nil data: nil button: 3 activateTime: aGdkButtonEvent time value.
         menu showAll.
@@ -143,7 +148,7 @@ GtkConcreteWidget subclass: GtkMethodWidget [
 	<category: 'accessing'>
 
 	self hasSelectedMethod ifFalse: [ self error: 'Nothing is selected' ].
-	^ self class compiledMethodAt: self selectedMethodSymbol
+	^ self classOrMetaSelected compiledMethodAt: self selectedMethodSymbol
     ]
 
     selectAMethod: aString [
@@ -170,7 +175,7 @@ GtkConcreteWidget subclass: GtkMethodWidget [
 	<category: 'accessing'>
 
 	self hasSelectedMethod ifFalse: [ self error: 'Nothing is selected' ].
-	^ (self class compiledMethodAt: self selectedMethodSymbol) methodRecompilationSourceString
+	^ (self classOrMetaSelected compiledMethodAt: self selectedMethodSymbol) methodRecompilationSourceString
     ]
 
     deleteMethod [
@@ -183,6 +188,24 @@ GtkConcreteWidget subclass: GtkMethodWidget [
         <category: 'method events'>
 
 	InspectMethodCommand on: self
+    ]
+
+    browseSenders [
+        <category: 'method events'>
+
+	OpenSenderCommand on: self
+    ]
+
+    browseImplementors [
+        <category: 'method events'>
+
+	OpenImplementorCommand on: self
+    ]
+
+    runTest [
+        <category: 'method events'>
+
+	RunTestCommand on: self
     ]
 
     fileoutMethod [

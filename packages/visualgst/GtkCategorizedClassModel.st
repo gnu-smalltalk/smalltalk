@@ -177,8 +177,8 @@ Object subclass: GtkCategorizedClassModel [
 	<category: 'item removing'>
 
 	| iter |
-	iter := self findIterInAClass: aClass.
-	self gtkModel remove: iter
+	iter := self findIterInAClass: aClass ifAbsent: [ nil ].
+	iter isNil ifFalse: [ self gtkModel remove: iter ]
     ]
 
     addEvent: anEvent [

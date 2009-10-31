@@ -5,8 +5,8 @@ GtkMainWindow subclass: GtkSender [
 	<category: 'instance creation'>
 
 	^ (self new)
-            initialize;
             selector: aSelector;
+            initialize;
             showAll;
             yourself
     ]
@@ -25,10 +25,19 @@ GtkMainWindow subclass: GtkSender [
 
     | currentMethod selector finderModel finderTree senderResults senderModel senderTree classBrowserWidget searchEntry |
 
-    selector: aSelector [
+    selector [
 	<category: 'accessor'>
 
-	selector := aSelector
+	^selector
+    ]
+
+    selector: aSymbol [
+	<category: 'accessor'>
+
+	selector := aSymbol asSymbol.
+	self 
+	    clearSenderModel;
+	    findInMethod: (self finderModel matchSelector: aSymbol) values first element.
     ]
 
     createFileMenus [
@@ -153,18 +162,13 @@ GtkMainWindow subclass: GtkSender [
     <category: 'user interface'>
 
     self
-        appendToolItem: ((GTK.GtkToolButton newFromStock: 'gtk-new')
+        "appendToolItem: ((GTK.GtkToolButton newFromStock: 'gtk-new')
 		connectSignal: 'clicked' to: OpenWorkspaceCommand selector: #execute userData: nil;
 		setTooltipText: 'Create a new workspace';
-		yourself);
-        appendSeparator;
+		yourself);"
         appendToolItem: ((GTK.GtkToolButton newFromStock: 'gtk-save')
 		connectSignal: 'clicked' to: SaveImageCommand selector: #execute userData: nil;
 		setTooltipText: 'Save the image';
-		yourself);
-        appendToolItem: ((GTK.GtkToolButton newFromStock: 'gtk-save-as')
-		connectSignal: 'clicked' to: SaveImageAsCommand selector: #execute userData: nil;
-		setTooltipText: 'Save the image as';
 		yourself);
         appendSeparator;
         appendToolItem: ((GTK.GtkToolButton newFromStock: 'gtk-cut')
@@ -188,52 +192,29 @@ GtkMainWindow subclass: GtkSender [
 		connectSignal: 'clicked' to: self selector: #redo userData: nil;
 		setTooltipText: 'Redo';
 		yourself);
-            appendSeparator;
-        appendToolItem: ((GTK.GtkToolButton newFromStock: 'gtk-execute')
-		connectSignal: 'clicked' to: self selector: #doIt userData: nil;
-		setTooltipText: 'Do It';
-		yourself);
-        appendToolItem: ((GTK.GtkToolButton newFromStock: 'gtk-print')
-		connectSignal: 'clicked' to: self selector: #printIt userData: nil;
-		setTooltipText: 'Print It';
-		yourself);
-        appendToolItem: ((GTK.GtkToolButton newFromStock: 'gtk-convert')
-		connectSignal: 'clicked' to: self selector: #inspectIt userData: nil;
-		setTooltipText: 'Inspect It';
-		yourself);
-        appendToolItem: ((GTK.GtkToolButton newFromStock: 'gtk-sort-descending')
-		connectSignal: 'clicked' to: self selector: #debugIt userData: nil;
-		setTooltipText: 'Debug It';
-		yourself);
         appendSeparator;
-        appendToolItem: ((GTK.GtkToolButton newFromStock: 'gtk-apply')
-		connectSignal: 'clicked' to: self selector: #acceptIt userData: nil;
-		setTooltipText: 'Accept It';
-		yourself)
+            appendToolItem: ((GTK.GtkToolButton newFromStock: 'gtk-execute' label: 'Do It')
+                                connectSignal: 'clicked' to: self selector: #doIt userData: nil;
+                                setTooltipText: 'Do It';
+                                yourself);
+            appendToolItem: ((GTK.GtkToolButton newFromStock: 'gtk-print' label: 'Print It')
+                                connectSignal: 'clicked' to: self selector: #printIt userData: nil;
+                                setTooltipText: 'Print It';
+                                yourself);
+            appendToolItem: ((GTK.GtkToolButton newFromStock: 'gtk-convert' label: 'Inspect It')
+                                connectSignal: 'clicked' to: self selector: #inspectIt userData: nil;
+                                setTooltipText: 'Inspect It';
+                                yourself);
+            appendToolItem: ((GTK.GtkToolButton newFromStock: 'gtk-sort-descending' label: 'Debug It')
+                                connectSignal: 'clicked' to: self selector: #debugIt userData: nil;
+                                setTooltipText: 'Debug It';
+                                yourself);
+        appendSeparator;
+            appendToolItem: ((GTK.GtkToolButton newFromStock: 'gtk-apply' label: 'Accept')
+                                connectSignal: 'clicked' to: self selector: #acceptIt userData: nil;
+                                setTooltipText: 'Accept';
+                                yourself)
     ]
-
-"    createToolbar [
-        <category: 'user interface'>
-
-	| temp |
-        self
-            appendToolItem: (GTK.GtkToolButton newFromStock: 'gtk-new');
-            appendSeparator;
-            appendToolItem: (GTK.GtkToolButton newFromStock: 'gtk-save');
-            appendToolItem: (GTK.GtkToolButton newFromStock: 'gtk-save-as');
-            appendSeparator;
-            appendToolItem: (GTK.GtkToolButton newFromStock: 'gtk-cut');
-            appendToolItem: (GTK.GtkToolButton newFromStock: 'gtk-copy');
-            appendToolItem: (GTK.GtkToolButton newFromStock: 'gtk-paste');
-            appendSeparator;
-            appendToolItem: (GTK.GtkToolButton newFromStock: 'gtk-execute');
-	    appendSeparator.
-	    temp := (GTK.GtkToolItem new)
-                        add: (GTK.GtkEntry new);
-                        yourself.
-            self toolBar insert: temp pos: -1
-
-    ]"
 
     buildFinderEntry [
 	<category: 'user interface'>
@@ -257,6 +238,7 @@ GtkMainWindow subclass: GtkSender [
         finderTree
             getSelection
                 connectSignal: 'changed' to: self selector: #finderSelected userData: nil.
+	finderTree setSearchEntry: searchEntry.
         ^ GTK.GtkScrolledWindow withChild: finderTree
     ]
 
@@ -315,6 +297,7 @@ GtkMainWindow subclass: GtkSender [
     buildCentralWidget [
         <category: 'intialize-release'>
 
+	self selector isNil ifFalse: [ ^self buildSenderAndClassBrowser ].
 	^ (GTK.GtkHPaned new)
 	    add1: self buildFinderList;
 	    add2: self buildSenderAndClassBrowser;
@@ -331,7 +314,6 @@ GtkMainWindow subclass: GtkSender [
             createToolbar;
             createStatusBar;
             centralWidget: self buildCentralWidget.
-	finderTree setSearchEntry: searchEntry.
     ]
 
     postInitialize [
@@ -390,10 +372,8 @@ THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.';
 
 	| iter string |
 	(iter := finderTree selectedIter) ifNil: [ ^ self ].
-
-	self 
-	    clearSenderModel;
-	    findInMethod: (self finderModel selectedItem: iter) values first element.
+	string := (self finderModel gtkModel getOop: iter column: 0).
+	self selector: string asSymbol.
     ]
 
     senderSelected [

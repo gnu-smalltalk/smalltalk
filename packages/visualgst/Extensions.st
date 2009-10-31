@@ -306,3 +306,10 @@ Behavior extend [
     ]
 ]
 
+GTK.GtkToolButton class extend [
+    newFromStock: icon label: aString [ 
+        ^(self newFromStock: icon)
+	    setLabel: aString;
+	    yourself
+    ]
+]

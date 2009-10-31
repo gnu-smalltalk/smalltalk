@@ -111,12 +111,10 @@ Object subclass: GtkImageModel [
         self gtkModel insertWithValues: nil position: 0 varargs: {0. aString. -1}
     ]
 
-    selectedItem: aGtkIter [
+    matchSelector: aSymbol [
 	<category: 'item selection'>
 
-	| string |
-	string := (self gtkModel getOop: aGtkIter column: 0).
-        ^ finderDic at: string ifAbsent: [ self error: 'Element not found' ].
+        ^ finderDic at: aSymbol asString ifAbsent: [ self error: 'Element not found' ].
     ]
 
     matchRegex: aString [

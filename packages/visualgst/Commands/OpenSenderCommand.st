@@ -3,7 +3,9 @@ Command subclass: OpenSenderCommand [
     execute [
         <category: 'command'>
 
-	GtkSender open
+	target isNil
+	    ifTrue: [ GtkSender open ]
+	    ifFalse: [ GtkSender openOn: target selectedMethodSymbol ]
     ]
 ]
 

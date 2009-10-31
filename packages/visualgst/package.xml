@@ -49,6 +49,7 @@
   <filein>Commands/InspectMethodCommand.st</filein>
   <filein>Commands/AddMethodCommand.st</filein>
   <filein>Commands/DeleteMethodCommand.st</filein>
+  <filein>Commands/RunTestCommand.st</filein>
   <filein>Commands/OpenWindowedBrowserCommand.st</filein>
   <filein>Commands/OpenAssistantCommand.st</filein>
   <filein>Commands/OpenImplementorCommand.st</filein>
@@ -193,6 +194,7 @@
   <file>Commands/InspectMethodCommand.st</file>
   <file>Commands/AddMethodCommand.st</file>
   <file>Commands/DeleteMethodCommand.st</file>
+  <file>Commands/RunTestCommand.st</file>
   <file>Commands/OpenWindowedBrowserCommand.st</file>
   <file>Commands/OpenAssistantCommand.st</file>
   <file>Commands/OpenImplementorCommand.st</file>
@@ -307,7 +309,17 @@
   <file>Commands/SaveImageAsCommand.st</file>
   <file>Icons/category.png</file>
   <file>Icons/namespace.png</file>
-  <file>Icons/next.png</file>
+  <file>Icons/go-bottom.png</file>
+  <file>Icons/go-down.png</file>
+  <file>Icons/go-first.png</file>
+  <file>Icons/go-home.png</file>
+  <file>Icons/go-jump.png</file>
+  <file>Icons/go-last.png</file>
+  <file>Icons/go-next.png</file>
+  <file>Icons/go-previous.png</file>
+  <file>Icons/go-run.png</file>
+  <file>Icons/go-top.png</file>
+  <file>Icons/go-up.png</file>
   <start>VisualGST.VisualGST open.
     GTK.Gtk main</start>
 </package>

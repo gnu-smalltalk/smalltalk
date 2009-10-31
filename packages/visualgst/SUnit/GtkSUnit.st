@@ -106,18 +106,13 @@ GtkMainWindow subclass: GtkSUnit [
         | package |
         package := PackageLoader packageAt: 'VisualGST'.
 	self
-	    appendToolItem: ((GTK.GtkToolButton newFromStock: 'gtk-new')
+	    "appendToolItem: ((GTK.GtkToolButton newFromStock: 'gtk-new')
 				connectSignal: 'clicked' to: OpenWorkspaceCommand selector: #execute userData: nil;
 				setTooltipText: 'Create a new workspace';
-				yourself);
-	    appendSeparator;
+				yourself);"
 	    appendToolItem: ((GTK.GtkToolButton newFromStock: 'gtk-save')
 				connectSignal: 'clicked' to: SaveImageCommand selector: #execute userData: nil;
 				setTooltipText: 'Save the image';
-				yourself);
-	    appendToolItem: ((GTK.GtkToolButton newFromStock: 'gtk-save-as')
-				connectSignal: 'clicked' to: SaveImageAsCommand selector: #execute userData: nil;
-				setTooltipText: 'Save the image as';
 				yourself);
 	    appendSeparator;
 	    appendToolItem: ((GTK.GtkToolButton newFromStock: 'gtk-cut')
@@ -142,31 +137,31 @@ GtkMainWindow subclass: GtkSUnit [
 				setTooltipText: 'Redo';
 				yourself);
             appendSeparator;
-	    appendToolItem: ((GTK.GtkToolButton newFromStock: 'gtk-execute')
-				connectSignal: 'clicked' to: self selector: #doIt userData: nil;
-				setTooltipText: 'Do It';
-				yourself);
-	    appendToolItem: ((GTK.GtkToolButton newFromStock: 'gtk-print')
-				connectSignal: 'clicked' to: self selector: #printIt userData: nil;
-				setTooltipText: 'Print It';
-				yourself);
-	    appendToolItem: ((GTK.GtkToolButton newFromStock: 'gtk-convert')
-				connectSignal: 'clicked' to: self selector: #inspectIt userData: nil;
-				setTooltipText: 'Inspect It';
-				yourself);
-	    appendToolItem: ((GTK.GtkToolButton newFromStock: 'gtk-sort-descending')
-				connectSignal: 'clicked' to: self selector: #debugIt userData: nil;
-				setTooltipText: 'Debug It';
-				yourself);
-	    appendSeparator;
-	    appendToolItem: ((GTK.GtkToolButton newFromStock: 'gtk-apply')
-				connectSignal: 'clicked' to: self selector: #acceptIt userData: nil;
-				setTooltipText: 'Accept It';
-				yourself);
+            appendToolItem: ((GTK.GtkToolButton newFromStock: 'gtk-execute' label: 'Do It')
+                                connectSignal: 'clicked' to: self selector: #doIt userData: nil;
+                                setTooltipText: 'Do It';
+                                yourself);
+            appendToolItem: ((GTK.GtkToolButton newFromStock: 'gtk-print' label: 'Print It')
+                                connectSignal: 'clicked' to: self selector: #printIt userData: nil;
+                                setTooltipText: 'Print It';
+                                yourself);
+            appendToolItem: ((GTK.GtkToolButton newFromStock: 'gtk-convert' label: 'Inspect It')
+                                connectSignal: 'clicked' to: self selector: #inspectIt userData: nil;
+                                setTooltipText: 'Inspect It';
+                                yourself);
+            appendToolItem: ((GTK.GtkToolButton newFromStock: 'gtk-sort-descending' label: 'Debug It')
+                                connectSignal: 'clicked' to: self selector: #debugIt userData: nil;
+                                setTooltipText: 'Debug It';
+                                yourself);
             appendSeparator;
-            appendToolItem: ((GTK.GtkToolButton new: (GTK.GtkImage newFromFile: (package / 'Icons/next.png') file displayString) label: '')
+            appendToolItem: ((GTK.GtkToolButton newFromStock: 'gtk-apply' label: 'Accept')
+                                connectSignal: 'clicked' to: self selector: #acceptIt userData: nil;
+                                setTooltipText: 'Accept';
+                                yourself);
+            appendSeparator;
+            appendToolItem: ((GTK.GtkToolButton new: (GTK.GtkImage newFromFile: (package / 'Icons/go-run.png') file displayString) label: 'Run test')
                                 connectSignal: 'clicked' to: self selector: #runTest userData: nil;
-                                setTooltipText: 'Step';
+                                setTooltipText: 'Run test';
                                 yourself)
     ]
 

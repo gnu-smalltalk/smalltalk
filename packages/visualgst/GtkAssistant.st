@@ -178,7 +178,7 @@ THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.';
 	    appendToolItem: (GTK.GtkToolButton newFromStock: 'gtk-copy');
 	    appendToolItem: (GTK.GtkToolButton newFromStock: 'gtk-paste');
 	    appendSeparator;
-	    appendToolItem: (GTK.GtkToolButton newFromStock: 'gtk-execute')
+	    appendToolItem: (GTK.GtkToolButton newFromStock: 'gtk-execute' label: 'Do it')
     ]
 
     cut [

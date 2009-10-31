@@ -1,5 +1,15 @@
 GtkMainWindow subclass: GtkImplementor [
-    | model resultModel set finderTree resultArray resultTree classBrowserWidget searchEntry |
+    | model selector resultModel set finderTree resultArray resultTree classBrowserWidget searchEntry |
+
+    GtkImplementor class >> openOn: aSelector [
+        <category: 'instance creation'>
+
+        ^ (self new)
+            selector: aSelector;
+            initialize;
+            showAll;
+            yourself
+    ]
 
     createFileMenus [
         <category: 'user interface'>
@@ -122,18 +132,13 @@ GtkMainWindow subclass: GtkImplementor [
     <category: 'user interface'>
 
     self
-        appendToolItem: ((GTK.GtkToolButton newFromStock: 'gtk-new')
+        "appendToolItem: ((GTK.GtkToolButton newFromStock: 'gtk-new')
 		connectSignal: 'clicked' to: OpenWorkspaceCommand selector: #execute userData: nil;
 		setTooltipText: 'Create a new workspace';
-		yourself);
-        appendSeparator;
+		yourself);"
         appendToolItem: ((GTK.GtkToolButton newFromStock: 'gtk-save')
 		connectSignal: 'clicked' to: SaveImageCommand selector: #execute userData: nil;
 		setTooltipText: 'Save the image';
-		yourself);
-        appendToolItem: ((GTK.GtkToolButton newFromStock: 'gtk-save-as')
-		connectSignal: 'clicked' to: SaveImageAsCommand selector: #execute userData: nil;
-		setTooltipText: 'Save the image as';
 		yourself);
         appendSeparator;
         appendToolItem: ((GTK.GtkToolButton newFromStock: 'gtk-cut')
@@ -158,26 +163,26 @@ GtkMainWindow subclass: GtkImplementor [
 		setTooltipText: 'Redo';
 		yourself);
             appendSeparator;
-        appendToolItem: ((GTK.GtkToolButton newFromStock: 'gtk-execute')
+        appendToolItem: ((GTK.GtkToolButton newFromStock: 'gtk-execute' label: 'Do It')
 		connectSignal: 'clicked' to: self selector: #doIt userData: nil;
 		setTooltipText: 'Do It';
 		yourself);
-        appendToolItem: ((GTK.GtkToolButton newFromStock: 'gtk-print')
+        appendToolItem: ((GTK.GtkToolButton newFromStock: 'gtk-print' label: 'Print It')
 		connectSignal: 'clicked' to: self selector: #printIt userData: nil;
 		setTooltipText: 'Print It';
 		yourself);
-        appendToolItem: ((GTK.GtkToolButton newFromStock: 'gtk-convert')
+        appendToolItem: ((GTK.GtkToolButton newFromStock: 'gtk-convert' label: 'Inspect It')
 		connectSignal: 'clicked' to: self selector: #inspectIt userData: nil;
 		setTooltipText: 'Inspect It';
 		yourself);
-        appendToolItem: ((GTK.GtkToolButton newFromStock: 'gtk-sort-descending')
+        appendToolItem: ((GTK.GtkToolButton newFromStock: 'gtk-sort-descending' label: 'Debug It')
 		connectSignal: 'clicked' to: self selector: #debugIt userData: nil;
 		setTooltipText: 'Debug It';
 		yourself);
         appendSeparator;
-        appendToolItem: ((GTK.GtkToolButton newFromStock: 'gtk-apply')
+        appendToolItem: ((GTK.GtkToolButton newFromStock: 'gtk-apply' label: 'Accept')
 		connectSignal: 'clicked' to: self selector: #acceptIt userData: nil;
-		setTooltipText: 'Accept It';
+		setTooltipText: 'Accept';
 		yourself)
     ]
 
@@ -240,6 +245,7 @@ GtkMainWindow subclass: GtkImplementor [
 	finderTree
 	    getSelection
 		connectSignal: 'changed' to: self selector: #elementSelected userData: nil.
+	finderTree setSearchEntry: searchEntry.
         ^ GTK.GtkScrolledWindow withChild: finderTree
     ]
 
@@ -278,6 +284,7 @@ GtkMainWindow subclass: GtkImplementor [
     buildCentralWidget [
         <category: 'intialize-release'>
 
+	self selector isNil ifFalse: [ ^self buildResultAndClassBrowser ].
 	^ (GTK.GtkHPaned new)
 	    add1: self buildFinderList;
 	    add2: self buildResultAndClassBrowser;
@@ -294,7 +301,6 @@ GtkMainWindow subclass: GtkImplementor [
             createToolbar;
             createStatusBar;
             centralWidget: self buildCentralWidget.
-	finderTree setSearchEntry: searchEntry.
     ]
 
     postInitialize [
@@ -344,15 +350,7 @@ THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.';
 
 	| iter string |
         (iter := finderTree selectedIter) ifNil: [ ^ self ].
-        string := (self model gtkModel getOop: iter column: 0).
-   
-	self resultModel clear. 
-	resultArray := self model selectedItem: iter.
-	resultArray keysDo: [ :each |
-	    iter := GTK.GtkTreeIter new.
-	    self resultModel append: iter parent: nil.
-	    self resultModel setOop: iter column: 0 value: each ].
-	"resultTree getSelection selectPath: GTK.GtkTreePath newFirst"
+        self selector: (self model gtkModel getOop: iter column: 0).
     ]
 
     resultSelected [
@@ -399,6 +397,26 @@ THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.';
         <category: 'history events'>
 
         classBrowserWidget forward
+    ]
+
+    selector [
+	<category: 'accessing'>
+
+	^selector
+    ]
+
+    selector: aSymbol [
+	<category: 'accessing'>
+
+	| iter |
+	selector := aSymbol.
+	self resultModel clear. 
+	resultArray := self model matchSelector: aSymbol.
+	resultArray keysDo: [ :each |
+	    iter := GTK.GtkTreeIter new.
+	    self resultModel append: iter parent: nil.
+	    self resultModel setOop: iter column: 0 value: each ].
+	"resultTree getSelection selectPath: GTK.GtkTreePath newFirst"
     ]
 
     searchValidate [

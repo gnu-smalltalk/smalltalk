@@ -55,55 +55,27 @@ Object subclass: GtkNamespaceModel [
 	    self appendNamespace: each to: iter ]
     ]
 
-    buildNamespaceArray: aNamespace [
-	<category: 'item selection'>
-
-	| result namespace |
-        result := OrderedCollection new.
-        namespace := aNamespace.
-        [ namespace isNil ] whileFalse: [
-            result add: namespace displayString.
-            namespace := namespace superspace ].
-
-	^ result
-    ]
-
-    buildNamespaceArray: aNamespace [
-        <category: 'item selection'>
-
-        | result namespace |
-        result := OrderedCollection new.
-        namespace := aNamespace.
-        [ namespace isNil ] whileFalse: [
-            result addFirst: namespace displayString.
-            namespace := namespace superspace ].
-
-        ^ result
-    ]
-
     findIterInANamespace: aNamespace [
         <category: 'item selection'>
 
-        | iter stack parent path |
+        | iter stack parent path namespace |
         aNamespace = Smalltalk ifTrue: [ ^ self gtkModel getIterFirst ].
 
-        stack := self buildNamespaceArray: aNamespace.
+        stack := OrderedCollection new.
+        namespace := aNamespace.
+        [ namespace isNil ] whileFalse: [
+            stack addFirst: namespace displayString.
+            namespace := namespace superspace ].
+
         iter := GTK.GtkTreeIter new.
 	path := GTK.GtkTreePath newFirst.
-        1 to: stack size do: [ :i | | each |
-            each := stack at: i.
+        stack do: [ :each |
 	    self gtkModel getIter: iter path: path.
             [each = (self gtkModel getOop: iter column: 0)] whileFalse: [
 		path next.
 		(self gtkModel getIter: iter path: path) ifFalse: [ self error: 'Namespace ', each , ' not found' ] ].
 	    path down ].
         ^ iter
-    ]
-
-    at: aGtkIter column: aSmallInteger value: anObject [
-	<category: 'item accessing'>
-
-	self gtkModel setOop: aGtkIter column: aSmallInteger value: anObject
     ]
 
     append: aParentIter column: aSmallInteger value: anObject [

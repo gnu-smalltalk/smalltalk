@@ -59,7 +59,6 @@ GtkMainWindow subclass: Tetris [
 	self 
 	    title: 'Tetris';
 	    createMenus;
-	    createToolbar;
 	    createStatusBar;
 	    centralWidget: self buildCentralWidget
     ]
@@ -90,22 +89,6 @@ GtkMainWindow subclass: Tetris [
 
         self createMainMenu: {#('Game' #createGameMenus).
             #('Help' #createHelpMenus)}
-    ]
-
-    createToolbar [
-        <category: 'user interface'>
-
-        self
-            appendToolItem: (GTK.GtkToolButton newFromStock: 'gtk-new');
-            appendSeparator;
-            appendToolItem: (GTK.GtkToolButton newFromStock: 'gtk-save');
-            appendToolItem: (GTK.GtkToolButton newFromStock: 'gtk-save-as');
-            appendSeparator;
-            appendToolItem: (GTK.GtkToolButton newFromStock: 'gtk-cut');
-            appendToolItem: (GTK.GtkToolButton newFromStock: 'gtk-copy');
-            appendToolItem: (GTK.GtkToolButton newFromStock: 'gtk-paste');
-            appendSeparator;
-            appendToolItem: (GTK.GtkToolButton newFromStock: 'gtk-execute')
     ]
 
     createStatusBar [

@@ -397,18 +397,13 @@ THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.';
 	<category: 'user interface'>
 
     self
-        appendToolItem: ((GTK.GtkToolButton newFromStock: 'gtk-new')
+        "appendToolItem: ((GTK.GtkToolButton newFromStock: 'gtk-new')
 		connectSignal: 'clicked' to: OpenWorkspaceCommand selector: #execute userData: nil;
 		setTooltipText: 'Create a new workspace';
-		yourself);
-        appendSeparator;
+		yourself);"
         appendToolItem: ((GTK.GtkToolButton newFromStock: 'gtk-save')
 		connectSignal: 'clicked' to: SaveImageCommand selector: #execute userData: nil;
 		setTooltipText: 'Save the image';
-		yourself);
-        appendToolItem: ((GTK.GtkToolButton newFromStock: 'gtk-save-as')
-		connectSignal: 'clicked' to: SaveImageAsCommand selector: #execute userData: nil;
-		setTooltipText: 'Save the image as';
 		yourself);
         appendSeparator;
         appendToolItem: ((GTK.GtkToolButton newFromStock: 'gtk-cut')
@@ -433,58 +428,28 @@ THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.';
 		setTooltipText: 'Redo';
 		yourself);
             appendSeparator;
-        appendToolItem: ((GTK.GtkToolButton newFromStock: 'gtk-execute')
+        appendToolItem: ((GTK.GtkToolButton newFromStock: 'gtk-execute' label: 'Do It')
 		connectSignal: 'clicked' to: self selector: #doIt userData: nil;
 		setTooltipText: 'Do It';
 		yourself);
-        appendToolItem: ((GTK.GtkToolButton newFromStock: 'gtk-print')
+        appendToolItem: ((GTK.GtkToolButton newFromStock: 'gtk-print' label: 'Print It')
 		connectSignal: 'clicked' to: self selector: #printIt userData: nil;
 		setTooltipText: 'Print It';
 		yourself);
-        appendToolItem: ((GTK.GtkToolButton newFromStock: 'gtk-convert')
+        appendToolItem: ((GTK.GtkToolButton newFromStock: 'gtk-convert' label: 'Inspet It')
 		connectSignal: 'clicked' to: self selector: #inspectIt userData: nil;
 		setTooltipText: 'Inspect It';
 		yourself);
-        appendToolItem: ((GTK.GtkToolButton newFromStock: 'gtk-sort-descending')
+        appendToolItem: ((GTK.GtkToolButton newFromStock: 'gtk-sort-descending' label: 'Debug It')
 		connectSignal: 'clicked' to: self selector: #debugIt userData: nil;
 		setTooltipText: 'Debug It';
 		yourself);
         appendSeparator;
-        appendToolItem: ((GTK.GtkToolButton newFromStock: 'gtk-apply')
+        appendToolItem: ((GTK.GtkToolButton newFromStock: 'gtk-apply' label: 'Accept')
 		connectSignal: 'clicked' to: self selector: #acceptIt userData: nil;
-		setTooltipText: 'Accept It';
+		setTooltipText: 'Accept';
 		yourself)
     ]
-
-"    createToolbar [
-	<category: 'user interface'>
-
-	| temp |
-	self
-	    appendToolItem: (GTK.GtkToolButton newFromStock: 'gtk-new');
-	    appendSeparator;
-	    appendToolItem: (GTK.GtkToolButton newFromStock: 'gtk-save');
-	    appendToolItem: (GTK.GtkToolButton newFromStock: 'gtk-save-as');
-	    appendSeparator;
-	    appendToolItem: (GTK.GtkToolButton newFromStock: 'gtk-cut');
-	    appendToolItem: (GTK.GtkToolButton newFromStock: 'gtk-copy');
-	    appendToolItem: (GTK.GtkToolButton newFromStock: 'gtk-paste');
-	    appendSeparator;
-	    appendToolItem: (GTK.GtkToolButton newFromStock: 'gtk-undo');
-	    appendToolItem: (GTK.GtkToolButton newFromStock: 'gtk-redo');
-	    appendSeparator;
-	    appendToolItem: (GTK.GtkToolButton newFromStock: 'gtk-execute');
-	    appendSeparator.
-	    temp := (GTK.GtkToolItem new)
-			add: ((GTK.GtkEntry new)
-				setCompletion: ((GTK.GtkEntryCompletion new)
-						    setModel: GtkImageModel current gtkModel;
-						    setTextColumn: 0;
-						    yourself);
-				yourself);
-			yourself.
-	    self toolBar insert: temp pos: -1
-    ]"
 
     createToolsMenus [
         <category: 'user interface'>

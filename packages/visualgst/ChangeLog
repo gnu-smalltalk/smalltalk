@@ -1,4 +1,17 @@
-2009-10-28  Gwenael Casaccio  <mrgwen@gmail.com>
+2009-10-31  Paolo Bonzini  <bonzini@gnu.org>
+
+	* Debugger/GtkDebugger.st, Extensions.st, GtkAssistant.st,
+	GtkCategorizedClassModel.st, GtkCategorizedNamespaceModel.st,
+	GtkCategorizedNamespaceWidget.st, GtkClassBrowser.st,
+	GtkMethodWidget.st, GtkNamespaceModel.st, GtkNamespaceWidget.st,
+	GtkWebBrowser.st, Icons/next.png, Implementors/GtkImplementor.st,
+	Inspector/GtkInspector.st, Makefile.frag, SUnit/GtkSUnit.st,
+	SUnit/GtkSUnitResultWidget.st, Senders/GtkSender.st,
+	Tetris/Tetris.st, VisualGST.st, package.xml, Icons/go-*.png,
+	Commands/OpenImplementorCommand.st, Commands/OpenSenderCommand.st
+	Implementors/GtkImageModel.st: Miscellaneous improvements.
+
+2009-10-30  Gwenael Casaccio  <mrgwen@gmail.com>
 
  	* GtkCategorizedClassModel.st, SUnit/GtkSUnit.st: Sync.
 

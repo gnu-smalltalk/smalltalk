@@ -1,5 +1,5 @@
-Object subclass: GtkCategorizedNamespaceModel [
-    | categoryIcon model namespaceIcon sorted |
+GtkNamespaceModel subclass: GtkCategorizedNamespaceModel [
+    | categoryIcon model namespaceIcon |
 
     GtkCategorizedNamespaceModel class >> displayedNamespaceColumn [
         <category: 'accessing'>
@@ -23,32 +23,18 @@ Object subclass: GtkCategorizedNamespaceModel [
 	<category: 'initialize-release'>
 
 	| package |
-	sorted := false.
 	package := PackageLoader packageAt: 'VisualGST'.
 	categoryIcon := GTK.GdkPixbuf newFromFile: (package / 'Icons/category.png') file displayString error: nil.
 	namespaceIcon := GTK.GdkPixbuf newFromFile: (package / 'Icons/namespace.png') file displayString error: nil.
-	self registerNotifier
+	super initialize.
     ]
 
     registerNotifier [
 	<category: 'initialize-release'>
 
+	super registerNotifier.
 	(SystemChangeNotifier uniqueInstance)
-	    notify: self ofSystemChangesOfItem: #namespace change: #Added using: #'addEvent:';
-	    notify: self ofSystemChangesOfItem: #namespace change: #Removed using: #'removeEvent:';
             notify: self ofSystemChangesOfItem: #class change: #Recategorized using: #'recategorizedClassEvent:'
-    ]
-
-    isSorted [
-	<category: 'testing'>
-
-	^ sorted
-    ]
-
-    sorted: aBoolean [
-	<category: 'accessing'>
-	
-	sorted := aBoolean
     ]
 
     gtkModel [
@@ -58,13 +44,6 @@ Object subclass: GtkCategorizedNamespaceModel [
 	    model := GTK.GtkTreeStore new: 4 varargs: {GTK.GdkPixbuf getType. GTK.GValue gTypeString. GTK.GLib oopType. GTK.GValue gTypeString}.
 	    self appendNamespace: Smalltalk to: nil.
 	    model ]
-    ]
-
-    refresh [
-	<category: 'model'>
-
-	self gtkModel clear.
-	self appendNamespace: Smalltalk to: nil
     ]
 
     appendNamespace: aNamespace to: parentGtkIter [
@@ -127,36 +106,12 @@ Object subclass: GtkCategorizedNamespaceModel [
 	^ self error: 'Namespace ', aNamespace displayString , ' not found'
     ]
 
-    append: aParentIter column: aSmallInteger value: anObject [
-	<category: 'item accessing'>
-
-	| iter |
-	iter := GTK.GtkTreeIter new.
-	(self gtkModel)
-            append: iter parent: aParentIter;
-            setOop: iter column: aSmallInteger value: anObject
-    ]
-
-    remove: aNamespace [
-	<category: 'item removing'>
-
-	 | iter |
-        iter := self findIterInANamespace: aNamespace.
-        self gtkModel remove: iter
-    ]
-
     addEvent: anEvent [
 	<category: 'model event'>
 
 	| iter |
 	iter := self findIterInANamespace: anEvent item superspace.
 	self gtkModel append: iter item: {namespaceIcon. anEvent item displayString. anEvent item. 'N'}
-    ]
-
-    removeEvent: anEvent [
-	<category: 'model event'>
-
-	self remove: anEvent item
     ]
 
     recategorizedClassEvent: anEvent [
