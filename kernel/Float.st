@@ -480,7 +480,7 @@ if the hardware supports it.'>
 	<category: 'private'>
 	"First, take care of the easy cases."
 
-	| me exponential small num weight prevWeight digit eps precision digits digitStream exponent dotPrinted |
+	| me exponential small num weight prevWeight digit eps precision digits digitStream exponent dotPrinted allNines |
 	self isNaN 
 	    ifTrue: [^aStream nextPutAll: (whatToPrintArray at: 3) % {self class}].
 	self = self class infinity 
@@ -505,8 +505,10 @@ if the hardware supports it.'>
 	exponent := (num floorLog: 10) + 1.
 	digits := 0.
 	weight := 10 raisedToInteger: exponent - 1.
+	allNines := true.
 	me class decimalDigits timesRepeat: 
 		[digit := num // weight.
+		allNines := allNines and: [digit = 9].
 		digits := digits * 10 + digit.
 		num := num - (digit * weight).
 		prevWeight := weight.
@@ -521,7 +523,9 @@ if the hardware supports it.'>
 	  allows to save trailing nines while not changing the meaning."
 	((num - prevWeight) abs < num or: [
 	    digit = 9 and: [ num - prevWeight > (eps / -2) ]])
-		ifTrue: [digits := digits + 1].
+		ifTrue: [
+		    digits := digits + 1.
+		    allNines ifTrue: [allNines := false. exponent := exponent + 1]].
 	digits := digits printString.
 
 	"Print the non-significant zeros."

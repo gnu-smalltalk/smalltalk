@@ -211,6 +211,8 @@ Eval [ FloatD test: #[227 220 89 240 39 160 234 63] ]
 Eval [ FloatD test: #[157 232 59 160 26 192 225 63] ]
 Eval [ FloatD test: #[148 232 59 160 26 192 225 63] ]
 Eval [ FloatD test: #[255 255 255 255 255 255 239 63] ]
+Eval [ FloatD test: #[92 244 249 110 24 220 230 84] ]
+
 
 "Fun reading floats"
 

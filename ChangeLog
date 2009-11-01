@@ -1,5 +1,12 @@
 2009-11-01  Paolo Bonzini  <bonzini@gnu.org>
 
+	* kernel/Float.st: Fix printing floats when an all-nines mantissa
+	is rounded up to 10^n.
+	* tests/floatmath.st: Add regression test.
+	* tests/floatmath.st: Regenerate.
+
+2009-11-01  Paolo Bonzini  <bonzini@gnu.org>
+
 	* tests/compiler.st: Add regression test.
 
 2009-10-28  Lee Duhem  <lee.duhem@gmail.com>
