@@ -1499,12 +1499,12 @@ compile_while_loop (OOP selector,
   for (oldJumpAroundLen = finalJumpLen = 0; ; oldJumpAroundLen = jumpAroundLen)
     {
       finalJumpOfs = whileCondLen + 2 + oldJumpAroundLen + jumpAroundOfs;
-      finalJumpLen = (finalJumpOfs + finalJumpLen > 65536 ? 6 :
-		      finalJumpOfs + finalJumpLen > 256 ? 4 : 2);
-      finalJumpLen = (finalJumpOfs + finalJumpLen > 65536 ? 6 :
-		      finalJumpOfs + finalJumpLen > 256 ? 4 : 2);
-      jumpAroundLen = (jumpAroundOfs + finalJumpLen > 65536 ? 6 :
-		       jumpAroundOfs + finalJumpLen > 256 ? 4 : 2);
+      finalJumpLen = (finalJumpOfs + finalJumpLen >= 65536 ? 6 :
+		      finalJumpOfs + finalJumpLen >= 256 ? 4 : 2);
+      finalJumpLen = (finalJumpOfs + finalJumpLen >= 65536 ? 6 :
+		      finalJumpOfs + finalJumpLen >= 256 ? 4 : 2);
+      jumpAroundLen = (jumpAroundOfs + finalJumpLen >= 65536 ? 6 :
+		       jumpAroundOfs + finalJumpLen >= 256 ? 4 : 2);
       if (jumpAroundLen == oldJumpAroundLen)
         break;
     }
@@ -1551,12 +1551,12 @@ compile_repeat (tree_node receiver)
   repeatedLoopLen = _gst_bytecode_length (receiverExprCodes);
 
   repeatedLoopLen += 2;
-  finalJumpLen = (repeatedLoopLen > 65536 ? 6 :
-		  repeatedLoopLen > 256 ? 4 : 2);
-  finalJumpLen = (repeatedLoopLen + finalJumpLen > 65536 ? 6 :
-		  repeatedLoopLen + finalJumpLen > 256 ? 4 : 2);
-  finalJumpLen = (repeatedLoopLen + finalJumpLen > 65536 ? 6 :
-		  repeatedLoopLen + finalJumpLen > 256 ? 4 : 2);
+  finalJumpLen = (repeatedLoopLen >= 65536 ? 6 :
+		  repeatedLoopLen >= 256 ? 4 : 2);
+  finalJumpLen = (repeatedLoopLen + finalJumpLen >= 65536 ? 6 :
+		  repeatedLoopLen + finalJumpLen >= 256 ? 4 : 2);
+  finalJumpLen = (repeatedLoopLen + finalJumpLen >= 65536 ? 6 :
+		  repeatedLoopLen + finalJumpLen >= 256 ? 4 : 2);
 
   _gst_compile_and_free_bytecodes (receiverExprCodes);
   _gst_compile_byte (POP_STACK_TOP, 0);	/* we don't care about expr's

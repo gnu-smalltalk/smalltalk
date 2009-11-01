@@ -1,3 +1,7 @@
+2009-11-01  Paolo Bonzini  <bonzini@gnu.org>
+
+	* libgst/comp.c: Fix computation of jump lengths.
+
 2009-10-28  Paolo Bonzini  <bonzini@gnu.org>
 
 	* libgst/gstpub.c: Move init_vmproxy and _gst_get_vmproxy...

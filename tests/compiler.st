@@ -187,6 +187,36 @@ Number extend [
     ]
 ]
 
+"this has a jump of exactly 256 bytes, and was buggy at some point.
+ reduced with delta, so the code does not totally make sense. :-) "
+Object extend [
+    buggy: packagesList test: aBoolean ifMissing: aBlock [
+	| toBeLoaded featuresFound pending allPrereq allFeatures package name |
+	featuresFound := Set withAll: Smalltalk.Features.
+	[pending notEmpty] whileTrue: [
+	    name := pending removeFirst.
+	    (featuresFound includes: name) 
+	        ifFalse: 
+		    [package := self at: name ifAbsent: [^aBlock value: name].
+		    allPrereq := package prerequisites asSet.
+		    allFeatures := package features asSet.
+		    (aBoolean and: [package test notNil]) ifTrue: [
+		        allPrereq addAll: package test prerequisites.
+		        allFeatures addAll: package test features].
+		    (allPrereq noneSatisfy: [ :each | pending includes: each ])
+		        ifFalse: [
+			    pending addLast: name]
+			ifTrue: [
+			    pending removeAll: allPrereq ifAbsent: [:doesNotMatter | ].
+			    pending removeAll: allFeatures ifAbsent: [:doesNotMatter | ].
+			    allPrereq removeAll: allFeatures ifAbsent: [:doesNotMatter | ].
+			    featuresFound addAll: allFeatures.
+			    featuresFound add: name.
+			    toBeLoaded addFirst: name.
+			    pending addAllLast: allPrereq]]].
+    ]
+]
+
 Eval [ 19 inWords ]
 
 "test that blocks defined with ##() work properly"
@@ -219,3 +249,4 @@ Eval [
     'Object extend [ a [ ^5 ] ]' readStream fileIn.
     (Object >> #a) descriptor sourceCode class
 ]
+

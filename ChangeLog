@@ -1,3 +1,7 @@
+2009-11-01  Paolo Bonzini  <bonzini@gnu.org>
+
+	* tests/compiler.st: Add regression test.
+
 2009-10-28  Lee Duhem  <lee.duhem@gmail.com>
 	    Paolo Bonzini  <bonzini@gnu.org>
 
@@ -166,8 +170,8 @@
 	    Nicolas Petton  <petton.nicolas@gmail.com>
 
 	* kernel/Object.st: Add #becomeForward:.
-	* testsuite/objects.st: Add #becomeForward: tests.
-	* testsuite/objects.ok: Regenerate.
+	* tests/objects.st: Add #becomeForward: tests.
+	* tests/objects.ok: Regenerate.
 
 2009-08-22  Paolo Bonzini  <bonzini@gnu.org>
 
@@ -275,8 +279,8 @@
 2009-07-15  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/ObjDumper.st: Check #atEnd in #load.
-	* testsuite/objdump.st: Add test.
-	* testsuite/objdump.ok: Regenerate.
+	* tests/objdump.st: Add test.
+	* tests/objdump.ok: Regenerate.
 
 2009-07-15  Stefan Schmiedl  <s@xss.de>
 
@@ -285,18 +289,18 @@
 2009-07-11  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/ExcHandling.st: Make #signalingContext more robust.
-	* testsuite/exceptions.st: Add regression test.
-	* testsuite/exceptions.ok: Regenerate.
+	* tests/exceptions.st: Add regression test.
+	* tests/exceptions.ok: Regenerate.
 
 2009-07-11  Paolo Bonzini  <bonzini@gnu.org>
 
-	* testsuite/floatmath.st: Stress-test reading pi.
-	* testsuite/floatmath.ok: Regenerate.
+	* tests/floatmath.st: Stress-test reading pi.
+	* tests/floatmath.ok: Regenerate.
 
 2009-07-11  Paolo Bonzini  <bonzini@gnu.org>
 
-	* testsuite/compiler.st: Test reading 16r-33.0.
-	* testsuite/compiler.ok: Regenerate.
+	* tests/compiler.st: Test reading 16r-33.0.
+	* tests/compiler.ok: Regenerate.
 
 2009-07-07  Stefan Schmiedl  <s@xss.de>
 
