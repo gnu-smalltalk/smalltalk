@@ -1,6 +1,6 @@
 2009-11-02  Paolo Bonzini  <bonzini@gnu.org>
 
-	* kernel/FloatQ.st: Remove useless override of #raisedTo:.
+	* Complex.st: Remove useless override of #raisedTo:.
 
 2009-10-18  Paolo Bonzini  <bonzini@gnu.org>
 

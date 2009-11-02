@@ -625,7 +625,6 @@ FloatQ extend [
     ]
 ]
 
-FloatQ removeSelector: #raisedTo:.
 
 Integer extend [
     sqrt [
