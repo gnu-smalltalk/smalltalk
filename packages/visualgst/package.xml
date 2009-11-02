@@ -320,6 +320,13 @@
   <file>Icons/go-run.png</file>
   <file>Icons/go-top.png</file>
   <file>Icons/go-up.png</file>
+  <file>Icons/NUnit.Failed.png</file>
+  <file>Icons/NUnit.Loading.png</file>
+  <file>Icons/NUnit.None.png</file>
+  <file>Icons/NUnit.NotRun.png</file>
+  <file>Icons/NUnit.Running.png</file>
+  <file>Icons/NUnit.SuccessAndFailed.png</file>
+  <file>Icons/NUnit.Success.png</file>
   <start>VisualGST.VisualGST open.
     GTK.Gtk main</start>
 </package>

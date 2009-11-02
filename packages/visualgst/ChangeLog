@@ -1,3 +1,7 @@
+2009-11-02  Paolo Bonzini  <bonzini@gnu.org>
+
+	* GtkCategorizedNamespaceModel.st, package.xml: Sync.
+
 2009-10-31  Paolo Bonzini  <bonzini@gnu.org>
 
 	* Debugger/GtkDebugger.st, Extensions.st, GtkAssistant.st,

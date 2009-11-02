@@ -76,7 +76,7 @@ GtkNamespaceModel subclass: GtkCategorizedNamespaceModel [
         token do: [ :item |
             | result |
             (item ~= '' and: [ i > 1 or: [ i = 1 and: [ item ~= aClass environment displayString ] ] ]) ifTrue: [
-            (result := self findIterInACategory: item parent: iter) 
+            (result := self findIterInACategory: item parent: iter)
                         ifNil: [ iter := self gtkModel append: iter item: {categoryIcon. item. nil. 'C'} ] 
                         ifNotNil: [ iter := result ] ].
             i := i + 1 ]
@@ -89,7 +89,7 @@ GtkNamespaceModel subclass: GtkCategorizedNamespaceModel [
         iter := GTK.GtkTreeIter new.
         path := self gtkModel getPath: aGtkIter.
 	path down.
-	self gtkModel getIter: iter path: path.
+	(self gtkModel getIter: iter path: path) ifFalse: [ ^ nil ].
 	[ aString = (self gtkModel getOop: iter column: self class displayedNamespaceColumn) 
 	    and: [ 'C' = (self gtkModel getOop: iter column: self class categoryColumn) ] ] whileFalse: [
 	  path next.
