@@ -120,11 +120,17 @@ if the hardware supports it.'>
     ]
 
     hash [
-	"Answer an hash value for the receiver"
+	"Answer an hash value for the receiver.  Not-a-number values do not
+	 have a hash code and cannot be put in a hashed collection."
 
 	"Hack so that 2 hash = 2.0 hash"
 
 	<category: 'basic'>
+	self = self ifFalse: [
+	    SystemExceptions.InvalidValue
+		signalOn: self
+		reason: 'cannot put NaN in a hashed collection' ].
+
 	^self fractionPart = 0.0 
 	    ifTrue: [self asInteger hash]
 	    ifFalse: [self primHash]
