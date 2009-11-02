@@ -1,3 +1,7 @@
+2009-11-02  Paolo Bonzini  <bonzini@gnu.org>
+
+	* libgst/prims.def: Do not fail on pow(0.0, 0.0).
+
 2009-11-01  Paolo Bonzini  <bonzini@gnu.org>
 
 	* libgst/comp.c: Fix computation of jump lengths.

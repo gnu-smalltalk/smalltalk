@@ -4358,7 +4358,7 @@ primitive VMpr_Float_pow [succeed,fail]
       PRIM_FAILED;
     }
 
-  if ((lfarg1 == 0.0 && lfarg2 <= 0.0) || lfarg1 < 0.0)
+  if ((lfarg1 == 0.0 && lfarg2 < 0.0) || lfarg1 < 0.0)
     {
       UNPOP (1);
       PRIM_FAILED;

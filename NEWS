@@ -17,6 +17,10 @@ o   The suggested way to instantiate an XML parser is now using
     "SAXParser defaultParserClass", which will work with either of the
     two available parsers.
 
+o   "aNumber raisedToInteger: 0" will raise an exception if and only if
+    aNumber is not a floating-point value.  This was backwards in previous
+    versions.
+
 o   Fixed crash on omitting mandatory arguments of short options
 
 o   Support for one-way become (Object>>#becomeForward:)

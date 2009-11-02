@@ -860,7 +860,9 @@ implicit type coercing code for binary operations.'>
 	anInteger isInteger 
 	    ifFalse: [SystemExceptions.WrongClass signalOn: anInteger mustBe: Integer].
 	anInteger < 0 ifTrue: [^self reciprocal raisedToInteger: 0 - anInteger].
-	anInteger = 0 ifTrue: [^self unity].
+	anInteger = 0 ifTrue: [
+	    self = self zero ifTrue: [self arithmeticError: 'invalid operands'].
+	    ^self unity].
 	anInteger = 1 ifTrue: [^self].
 
 	"Fire the big loop."

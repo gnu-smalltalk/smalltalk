@@ -1,5 +1,9 @@
 2009-11-02  Paolo Bonzini  <bonzini@gnu.org>
 
+	* kernel/Number.st: Fail on "x raisedToInteger: 0".
+
+2009-11-02  Paolo Bonzini  <bonzini@gnu.org>
+
 	* kernel/FloatQ.st: Remove useless override of #raisedTo:.
 
 2009-11-02  Paolo Bonzini  <bonzini@gnu.org>
