@@ -623,15 +623,6 @@ FloatQ extend [
 	<category: 'accessing'>
 	^self >= 0 ifTrue: [self zero] ifFalse: [self class pi]
     ]
-
-    primRaisedTo: aNumber [
-        "Return self raised to aNumber power"
-
-        <category: 'misc math'>
-        ^aNumber isInteger
-            ifTrue: [self raisedToInteger: aNumber]
-            ifFalse: [super primRaisedTo: aNumber asFloatQ]
-    ]
 ]
 
 FloatQ removeSelector: #raisedTo:.
