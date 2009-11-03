@@ -1,3 +1,8 @@
+2009-11-03  Paolo Bonzini  <bonzini@gnu.org>
+
+	* MoreStructs.st: Remove GtkTreeModel.
+	* structs.awk: Derive interfaces from GObject.
+
 2009-10-31  Paolo Bonzini  <bonzini@gnu.org>
 
 	* GtkDecl.st: Remove useless empty classes.

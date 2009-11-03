@@ -67,6 +67,8 @@ BEGIN {
       is_vtable_decl = src ~ /(Class|Iface)$/
       is_g_name = src ~ /^(G|Pango|Atk)/
       is_pointer = dest ~ /\*/
+      if (src ~ /Iface$/ && is_g_name && !is_pointer)
+        known_parent[substr (dest, 1, length (dest) - 5)] = "GObject"
     }
   else if (is_struct)
     name = $2
@@ -104,7 +106,10 @@ END {
   for (i in classNames)
     savedClassNames[i] = classNames[i]
   for (className in savedClassNames)
-    emit_struct("CObject", className)
+    if (className in known_parent)
+      emit_struct(known_parent[className], className)
+    else
+      emit_struct("CObject", className)
 }
 
 # strips garbage from string

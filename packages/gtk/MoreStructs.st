@@ -41,15 +41,6 @@ CStruct subclass: GTypeClass [
 
 
 
-CObject subclass: GtkTreeModel [
-    
-    <shape: #word>
-    <category: 'Gtk'>
-    <comment: nil>
-]
-
-
-
 "FIXME: passing #cObjectPtr should be smarter or something"
 
 
