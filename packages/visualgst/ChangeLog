@@ -1,4 +1,8 @@
-2009-11-02  Paolo Bonzini  <bonzini@gnu.org>
+2009-11-03  Gwenael Casaccio  <mrgwen@gmail.com>
+
+	* GtkClassBrowserWidget.st, GtkMethodModel.st: Sync.
+
+2009-11-02  Gwenael Casaccio  <mrgwen@gmail.com>
 
 	* GtkCategorizedNamespaceModel.st, package.xml: Sync.
 

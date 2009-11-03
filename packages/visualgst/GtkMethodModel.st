@@ -122,17 +122,25 @@ Object subclass: GtkMethodModel [
         self gtkModel remove: iter
     ]
 
+    includesCategory: aSymbol [
+	<category: 'testing'>
+
+	self category = '*' ifTrue: [ ^ true ].
+	(self category = 'still unclassified' and: [ aSymbol isNil ]) ifTrue: [ ^ true ].
+	^ self category = aSymbol
+    ]
+
     addEvent: anEvent [
 	<category: 'event'>
 
-	(anEvent item methodClass == self classOrMeta and: [ anEvent item methodCategory = self category ]) ifFalse: [ ^ self ].
+	(anEvent item methodClass == self classOrMeta and: [ self includesCategory: anEvent item methodCategory ] ) ifFalse: [ ^ self ].
 	self appendMethod: anEvent item selector asString
     ]
 
     removeEvent: anEvent [
 	<category: 'event'>
 
-	(anEvent item methodClass == self classOrMeta and: [ anEvent item methodCategory = self category ]) ifFalse: [ ^ self ].
+	(anEvent item methodClass == self classOrMeta and: [ self includesCategory: anEvent item methodCategory ]) ifFalse: [ ^ self ].
         self removeMethod: anEvent item selector asString
     ]
 ]
