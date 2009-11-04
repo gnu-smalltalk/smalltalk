@@ -32,9 +32,7 @@ Object subclass: GtkNamespaceModel [
 	<category: 'accessing'>
 
 	^ model ifNil: [
-	    model := GTK.GtkTreeStore new: 1 varargs: {GTK.GValue gTypeString}.
-	    self appendNamespace: Smalltalk to: nil.
-	    model ]
+	    model := GTK.GtkTreeStore new: 1 varargs: {GTK.GValue gTypeString} ]
     ]
 
     refresh [

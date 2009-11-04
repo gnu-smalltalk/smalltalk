@@ -1,3 +1,13 @@
+2009-11-04  Paolo Bonzini  <mrgwen@gmail.com>
+
+	* GtkNamespaceModel.st: Do not refresh upon creation.
+	* GtkNamespaceWidget.st: Do it here.
+	* GtkCategorizedNamespaceModel.st: Improve sorting.
+	* GtkCategorizedNamespaceWidget.st: Collapse namespaces with no
+	child namespaces.
+	* Icons/category.png: Redraw.
+	* Icons/namespace.png: Take from silk.
+
 2009-11-03  Gwenael Casaccio  <mrgwen@gmail.com>
 
 	* GtkClassBrowserWidget.st, GtkMethodModel.st: Sync.

@@ -4,7 +4,8 @@ GtkConcreteWidget subclass: GtkNamespaceWidget [
     initialize [
 	<category: 'initialization'>
 
-	self mainWidget: self buildTreeView
+	self mainWidget: self buildTreeView.
+	self model refresh
     ]
 
     model [
