@@ -48,7 +48,7 @@ fraction.'>
 	"Answer aNumber converted to a Fraction"
 
 	<category: 'converting'>
-	^aNumber asFraction
+	^aNumber asExactFraction
     ]
 
     Fraction class >> initialize [
@@ -210,7 +210,7 @@ fraction.'>
 	"Coerce aNumber to the receiver's class"
 
 	<category: 'coercing'>
-	^aNumber asFraction
+	^aNumber asExactFraction
     ]
 
     generality [
@@ -362,6 +362,13 @@ fraction.'>
 
 	<category: 'converting'>
 	^self asFloat: FloatQ
+    ]
+
+    asExactFraction [
+	"Answer the receiver, it is already a Fraction"
+
+	<category: 'converting'>
+	^self
     ]
 
     asFraction [

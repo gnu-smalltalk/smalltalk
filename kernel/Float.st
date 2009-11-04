@@ -277,8 +277,8 @@ if the hardware supports it.'>
 	shift := self exponent negated + self class precision.
 	mantissa := (self timesTwoPower: shift) truncated.
 	^shift negative 
-	    ifTrue: [mantissa * (1 bitShift: shift negated)]
-	    ifFalse: [mantissa / (1 bitShift: shift)]
+	    ifTrue: [(mantissa * (1 bitShift: shift negated)) asFraction]
+	    ifFalse: [(mantissa / (1 bitShift: shift)) asFraction]
     ]
 
     asFraction [

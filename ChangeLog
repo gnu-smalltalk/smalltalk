@@ -1,3 +1,10 @@
+2009-11-04  Paolo Bonzini  <bonzini@gnu.org>
+
+	* kernel/Number.st: Add abstract #asFraction and (concrete)
+	#asExactFraction.
+	* kernel/Float.st: Return a Fraction from #asExactFraction.
+	* kernel/Fraction.st: Use #asExactFraction for coercion.
+
 2009-11-02  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/Number.st: Fail on "x raisedToInteger: 0".

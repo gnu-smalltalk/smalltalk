@@ -210,6 +210,19 @@ implicit type coercing code for binary operations.'>
 	self subclassResponsibility
     ]
 
+    asFraction [
+	<category: 'converting'>
+	self subclassResponsibility
+    ]
+
+    asExactFraction [
+	"Return the receiver, converted to a Fraction retaining the exact
+	 value of the receiver."
+
+	<category: 'converting'>
+	^self asFraction
+    ]
+
     retryError [
 	"Raise an error---a retrying method was called with two arguments
 	 having the same generality."
