@@ -14,7 +14,8 @@ EXTRA_DIST = cpp.awk structs.awk funcs.awk mk_enums.awk mk_sizeof.awk mkorder.aw
 gst_module_ldflags = -rpath $(moduleexecdir) -release $(VERSION) -module \
 	-no-undefined # -export-symbols-regex gst_initModule
 
-ALL_LIBS = $(GLIB_LIBS) $(GTK_LIBS) $(PANGO_LIBS) $(ATK_LIBS) $(GTHREAD_LIBS)
+ALL_LIBS = $(GLIB_LIBS) $(GTK_LIBS) $(PANGO_LIBS) $(ATK_LIBS) $(GTHREAD_LIBS) \
+	$(CAIRO_LIBS)
 
 moduleexec_LTLIBRARIES = gst-gtk.la
 gst_gtk_la_LDFLAGS = $(gst_module_ldflags)
