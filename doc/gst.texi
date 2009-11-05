@@ -2011,6 +2011,11 @@ this:
 
 Other tags exist:
 @table @code
+@item url
+Specifies a URL at which a repository for the package can be found.
+The repository, when checked out, should contain a @file{package.xml}
+file at its root.  The contents of this tag are not used yet.
+
 @item library
 Loads a dynamic shared object and registers the functions in it
 so that they can all be called from Smalltalk code.  The @code{GTK}

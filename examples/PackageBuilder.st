@@ -195,7 +195,7 @@ Object subclass: TestBuilder [
 
 
 Object subclass: PackageBuilder [
-  |name namespace prereqs provides testBuilder start fileins resources|
+  |name url namespace prereqs provides testBuilder start fileins resources|
 
   PackageBuilder class >> new [
     ^ self basicNew initialize
@@ -215,6 +215,14 @@ Object subclass: PackageBuilder [
   name: aString [
     <category: 'accessing'>
     name := aString
+  ]
+  url [
+    <category: 'accessing'>
+    ^ url
+  ]
+  url: aString [
+    <category: 'accessing'>
+    url := aString
   ]
   namespace [
     <category: 'accessing'>
@@ -278,6 +286,7 @@ Object subclass: PackageBuilder [
     aStream wrap: 'package' do: [ 
       aStream 
         wrap: 'name' around: self name;
+        wrap: 'url' around: self url;
         wrap: 'namespace' around: self namespace.
       self prereqs do: [ :p | aStream wrap: 'prereq' around: p ].
       self provides do: [ :p | aStream wrap: 'provides' around: p ].

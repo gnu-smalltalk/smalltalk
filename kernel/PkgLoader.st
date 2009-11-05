@@ -532,6 +532,14 @@ XML.'>
 		    nextPutAll: '</name>';
 		    nl;
 		    space: indent].
+	self url isNil 
+	    ifFalse: 
+		[aStream
+		    nextPutAll: '  <url>';
+		    nextPutAll: self url;
+		    nextPutAll: '</url>';
+		    nl;
+		    space: indent].
 	self namespace isNil 
 	    ifFalse: 
 		[aStream
@@ -642,6 +650,13 @@ XML.'>
 
 	<category: 'accessing'>
 	name := aString
+    ]
+
+    url [
+	"Answer the URL at which the package repository can be found."
+
+	<category: 'accessing'>
+	self subclassResponsibility
     ]
 
     namespace [
@@ -890,6 +905,13 @@ PackageInfo subclass: StarPackage [
 	^self loadedPackage test
     ]
 
+    url [
+	"Answer the URL at which the package repository can be found."
+
+	<category: 'accessing'>
+	^self loadedPackage url
+    ]
+
     namespace [
 	"Answer the namespace in which the package is loaded."
 
@@ -1039,7 +1061,7 @@ PackageInfo subclass: StarPackage [
 
 Kernel.PackageInfo subclass: Package [
     | features prerequisites builtFiles files fileIns relativeDirectory
-	baseDirectories libraries modules callouts namespace sunitScripts
+	baseDirectories libraries modules callouts url namespace sunitScripts
 	startScript stopScript test |
     
     <category: 'Language-Packaging'>
@@ -1120,6 +1142,20 @@ XML.'>
 
 	<category: 'accessing'>
 	stopScript := aString
+    ]
+
+    url [
+	"Answer the URL at which the package repository can be found."
+
+	<category: 'accessing'>
+	^url
+    ]
+
+    url: aString [
+	"Set to aString the URL at which the package repository can be found."
+
+	<category: 'accessing'>
+	url := aString
     ]
 
     namespace [
@@ -1352,6 +1388,7 @@ XML.'>
 			    tag = 'module' ifTrue: [self modules add: cdata] ifFalse: [
 			    tag = 'directory' ifTrue: [self relativeDirectory: cdata] ifFalse: [
 			    tag = 'name' ifTrue: [self name: cdata] ifFalse: [
+			    tag = 'url' ifTrue: [self url: cdata] ifFalse: [
 			    tag = 'namespace' ifTrue: [self namespace: cdata] ifFalse: [
 			    tag = 'library' ifTrue: [self libraries add: cdata] ifFalse: [
 			    tag = 'built-file' ifTrue: [self builtFiles add: cdata] ifFalse: [
@@ -1426,6 +1463,13 @@ that package.
 
 	<category: 'accessing'>
 	owner := aPackage
+    ]
+
+    url [
+	"Answer the URL at which the package repository can be found."
+
+	<category: 'accessing'>
+	^super url ifNil: [owner url]
     ]
 
     namespace [
