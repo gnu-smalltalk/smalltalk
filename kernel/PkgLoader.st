@@ -1397,7 +1397,7 @@ XML.'>
 			    tag = 'stop' ifTrue: [self stopScript: cdata] ifFalse: [
 			    tag = 'callout' ifTrue: [self callouts add: cdata] ifFalse: [
 			    tag = openingTag ifTrue: [^self] ifFalse: [
-				self error: 'invalid tag ' , tag]]]]]]]]]]]]]]].
+				self error: 'invalid tag ' , tag]]]]]]]]]]]]]]]].
 			    cdata := nil].
 		    ch isAlphaNumeric 
 			ifTrue: 

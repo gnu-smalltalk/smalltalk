@@ -1,3 +1,7 @@
+2009-11-06  Paolo Bonzini  <bonzini@gnu.org>
+
+	* kernel/PkgLoader.st: Add missing bracket.
+
 2009-11-06  Nicolas Petton <petton.nicolas@gmail.com>
 
 	* example/PackageBuilder.st: Make url optional.
