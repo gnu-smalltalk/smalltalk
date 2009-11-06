@@ -95,12 +95,12 @@ Object subclass: Indenter [
   wrap: aString around: contentString [ 
     <category: 'xml-printing'>
     <comment: 'Write opening and closing tags on the same line as the contentString.'>
-    self indentNl: [ :aStream |
-      self 
-        tag: aString; 
-        nextPutAll: contentString; 
-        tag: '/',aString
-    ]
+    contentString ifNotNil: [
+	self indentNl: [ :aStream |
+	self
+	    tag: aString; 
+	    nextPutAll: contentString; 
+	    tag: '/',aString]]
   ]
 
   wrap: aString aroundEachOf: aCollection [
@@ -205,7 +205,7 @@ Object subclass: PackageBuilder [
     prereqs := OrderedCollection new.
     provides := OrderedCollection new.
     fileins := OrderedCollection new.
-    resources := OrderedCollection new
+    resources := OrderedCollection new.
   ]
 
   name [
