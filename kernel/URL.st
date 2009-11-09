@@ -795,9 +795,14 @@ Copyright (c) Kazuki Yasumatsu, 1995. All rights reserved.
 	    s ifNotNil: [ s close ] ]
     ]
 
+    entity [
+	<contents: 'streaming'>
+	^NetClients.URIResolver openOn: self ifFail: [
+	    SystemExceptions.FileError signal: 'could not open %1' % {self} ]
+    ]
+
     readStream [
 	<contents: 'streaming'>
-	| s |
 	^NetClients.URIResolver openStreamOn: self ifFail: [
 	    SystemExceptions.FileError signal: 'could not open %1' % {self} ]
     ]

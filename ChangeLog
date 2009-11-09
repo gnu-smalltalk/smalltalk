@@ -1,3 +1,7 @@
+2009-11-09  Paolo Bonzini  <bonzini@gnu.org>
+
+	* kernel/URL.st: Add #entity.
+
 2009-11-06  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/PkgLoader.st: Add missing bracket.
