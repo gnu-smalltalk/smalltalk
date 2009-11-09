@@ -236,7 +236,7 @@ Object subclass: Command [
     destDir: destdir installDir: instDir [
 	self validateDestDir: destdir installDir: instDir.
 	installDir :=
-	    File name: destdir, (instDir ifNil: [ self defaultInstallDir ])
+	    File name: destdir, (instDir ifNil: [ self defaultInstallDir asString ])
     ]
 
     defaultInstallDir [ ^Directory image ]

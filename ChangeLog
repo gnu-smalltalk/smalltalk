@@ -1,5 +1,9 @@
 2009-11-09  Paolo Bonzini  <bonzini@gnu.org>
 
+	* scripts/Package.st: Fix gst-package when -t is not passed.
+
+2009-11-09  Paolo Bonzini  <bonzini@gnu.org>
+
 	* kernel/PkgLoader.st: Add #packageAt:ifAbsent:.
 
 2009-11-09  Paolo Bonzini  <bonzini@gnu.org>
