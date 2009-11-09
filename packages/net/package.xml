@@ -1,7 +1,11 @@
 <package>
   <name>NetClients</name>
   <prereq>Sockets</prereq>
-  <prereq>SUnit</prereq>
+  
+  <test>
+    <filein>IMAPTests.st</filein>
+    <file>IMAPTests.st</file>
+  </test>
 
   <filein>MIME.st</filein>
   <filein>Base.st</filein>
