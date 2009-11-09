@@ -1505,6 +1505,14 @@ into a Smalltalk image, correctly handling dependencies.'>
 	
     ]
 
+    PackageLoader class >> packageAt: package ifAbsent: aBlock [
+	"Answer a Package object for the given package"
+
+	<category: 'accessing'>
+	self refresh.
+	^root at: package asString ifAbsent: aBlock
+    ]
+
     PackageLoader class >> packageAt: package [
 	"Answer a Package object for the given package"
 
