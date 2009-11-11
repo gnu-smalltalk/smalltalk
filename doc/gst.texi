@@ -1286,7 +1286,7 @@ Finally, be careful when working with fundamental system classes.  Although you
 can use code like
 @example
     Namespace current: NewNS [
-        Smalltalk.Set subclass: #Set [
+        Smalltalk.Set subclass: Set [
             <category: 'My application-Extensions'>
             @r{@dots{}}
         ]
