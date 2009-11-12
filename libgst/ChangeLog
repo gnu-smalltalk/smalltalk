@@ -1,3 +1,7 @@
+2009-11-12  Paolo Bonzini  <bonzini@gnu.org>
+
+	* libgst/dict.c: Pass PREFIX and EXEC_PREFIX.
+
 2009-11-02  Paolo Bonzini  <bonzini@gnu.org>
 
 	* libgst/prims.def: Do not fail on pow(0.0, 0.0).

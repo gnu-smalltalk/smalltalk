@@ -712,6 +712,8 @@ case "$relocatable_reason" in
     IMAGE_PATH=`func_make_relpath ${acl_final_imagedir}`
     MODULE_PATH=`func_make_relpath ${acl_final_moduledir}`
     LIBEXEC_PATH=`func_make_relpath "${acl_final_libexecdir}/${PACKAGE}"`
+    PREFIX=`func_make_relpath "${acl_final_prefix}"`
+    EXEC_PREFIX=`func_make_relpath "${acl_final_exec_prefix}"`
     AC_DEFINE_UNQUOTED(KERNEL_PATH, "$KERNEL_PATH",
 		       [The relative path from the program to the kernel path.
 		        Defined only for relocatable installs.])
@@ -724,6 +726,12 @@ case "$relocatable_reason" in
     AC_DEFINE_UNQUOTED(LIBEXEC_PATH, "$LIBEXEC_PATH",
 		       [The relative path from the program to the per-package
 			libexec path.  Defined only for relocatable installs.])
+    AC_DEFINE_UNQUOTED(PREFIX, "$PREFIX",
+		       [The relative path from the program to the prefix.
+		        Defined only for relocatable installs.])
+    AC_DEFINE_UNQUOTED(EXEC_PREFIX, "$EXEC_PREFIX",
+		       [The relative path from the program to the exec-prefix.
+			Defined only for relocatable installs.])
     ;;
 
   *)
@@ -732,7 +740,9 @@ case "$relocatable_reason" in
     RELOC_CPPFLAGS='-DKERNEL_PATH=\""${pkgdatadir}/kernel"\" \
 	-DIMAGE_PATH=\""${imagedir}"\" \
 	-DMODULE_PATH=\""${moduledir}"\" \
-	-DLIBEXEC_PATH=\""${libexecdir}/${PACKAGE}"\"'
+	-DLIBEXEC_PATH=\""${libexecdir}/${PACKAGE}"\" \
+	-DPREFIX=\""${prefix}"\" \
+	-DEXEC_PREFIX=\""${exec_prefix}"\" '
     ;;
 esac
 

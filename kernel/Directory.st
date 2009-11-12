@@ -77,6 +77,22 @@ how to use the instances returned by my class methods.'>
 	^File name: ModulePath
     ]
 
+    Directory class >> prefix [
+	"Answer the path to GNU Smalltalk's installation prefix"
+
+	<category: 'reading system defaults'>
+	Prefix isNil ifTrue:[ ^'/' ].
+	^File name: Prefix
+    ]
+
+    Directory class >> execPrefix [
+	"Answer the path to GNU Smalltalk's executable installation prefix"
+
+	<category: 'reading system defaults'>
+	ExecPrefix isNil ifTrue:[ ^'/' ].
+	^File name: ExecPrefix
+    ]
+
     Directory class >> libexec [
 	"Answer the path to GNU Smalltalk's auxiliary executables"
 

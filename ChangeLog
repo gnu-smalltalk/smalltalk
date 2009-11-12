@@ -1,3 +1,7 @@
+2009-11-12  Paolo Bonzini  <bonzini@gnu.org>
+
+	* kernel/Directory.st: Add #prefix and #execPrefix.
+
 2009-11-09  Paolo Bonzini  <bonzini@gnu.org>
 
 	* scripts/Package.st: Fix gst-package when -t is not passed.

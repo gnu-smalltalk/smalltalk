@@ -1078,6 +1078,8 @@ init_runtime_objects (void)
   add_smalltalk ("SystemKernelPath", relocate_path_oop (KERNEL_PATH));
   add_smalltalk ("ModulePath", relocate_path_oop (MODULE_PATH));
   add_smalltalk ("LibexecPath", relocate_path_oop (LIBEXEC_PATH));
+  add_smalltalk ("Prefix", relocate_path_oop (PREFIX));
+  add_smalltalk ("ExecPrefix", relocate_path_oop (EXEC_PREFIX));
   add_smalltalk ("ImageFilePath", _gst_string_new (_gst_image_file_path));
   add_smalltalk ("ExecutableFileName", _gst_string_new (_gst_executable_path));
   add_smalltalk ("ImageFileName", _gst_string_new (_gst_binary_image_name));
