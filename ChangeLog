@@ -1,5 +1,9 @@
 2009-11-12  Paolo Bonzini  <bonzini@gnu.org>
 
+	* kernel/AnsiExcept.st: Add DynamicVariable.
+
+2009-11-12  Paolo Bonzini  <bonzini@gnu.org>
+
 	* kernel/Directory.st: Add #prefix and #execPrefix.
 
 2009-11-09  Paolo Bonzini  <bonzini@gnu.org>
