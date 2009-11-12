@@ -121,9 +121,10 @@ GtkNamespaceModel subclass: GtkCategorizedNamespaceModel [
     recategorizedClassEvent: anEvent [
 	<category: 'model event'>
 
-       | iter |
-        iter := self findIterInANamespace: anEvent item environment.
-	self appendCategory: anEvent item category into: iter
+	| iter namespace |
+	namespace := anEvent item environment.
+        iter := self findIterInANamespace: namespace.
+	self appendCategory: anEvent item category for: namespace into: iter
     ]
 
 ]
