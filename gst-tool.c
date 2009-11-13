@@ -109,7 +109,7 @@ const struct tool tools[] = {
     "-h|--help --version --load --no-load --no-install --uninstall --dist \
         --prepare --test -t|--target-directory: --list-files: --list-packages \
         --srcdir: --distdir|--destdir: --copy --all-files --vpath -n|--dry-run \
-        -I|--image-file: --kernel-directory: --download|--update ",
+        -I|--image-file: --kernel-directory: --update|--download ",
     NULL, true
   },
   {

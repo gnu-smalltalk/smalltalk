@@ -1,5 +1,10 @@
 2009-11-13  Paolo Bonzini  <bonzini@gnu.org>
 
+	* gst-tool.c: Uh-oh.
+	* scripts/Package.st: Uh-oh.
+
+2009-11-13  Paolo Bonzini  <bonzini@gnu.org>
+
 	* gst-tool.c: Add --update/--download.
 	* scripts/Package.st: Add --update.
 

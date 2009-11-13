@@ -1139,7 +1139,7 @@ The default target directory is ', Directory image name, '
                 --dist -t|--target-directory: --list-files: --list-packages
                 --prepare --srcdir: --distdir|--destdir: -n|--dry-run
 		--all-files --vpath --copy -I|--image-file: --kernel-directory:
-		--download|--update --version'
+		--update|--download --version'
 
             do: [ :opt :arg || modeClass |
 	        opt = 'help' ifTrue: [
