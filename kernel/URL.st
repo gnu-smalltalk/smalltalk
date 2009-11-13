@@ -211,7 +211,9 @@ Copyright (c) Kazuki Yasumatsu, 1995. All rights reserved.
 	write := WriteStream on: (String new: aString size).
 
 	"parse scheme"
-	[read atEnd or: [(ch := read next) isAlphaNumeric not]] 
+	[read atEnd or: [
+	    (ch := read next) isAlphaNumeric not
+	    and: [ch ~= $+]]] 
 	    whileFalse: [write nextPut: ch].
 	(write isEmpty or: [ch ~= $:]) 
 	    ifTrue: 

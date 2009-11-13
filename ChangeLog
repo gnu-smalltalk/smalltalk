@@ -1,3 +1,7 @@
+2009-11-13  Paolo Bonzini  <bonzini@gnu.org>
+
+	* kernel/URL.st: Allow + in URL schemes.
+
 2009-11-12  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/AnsiExcept.st: Add DynamicVariable.
