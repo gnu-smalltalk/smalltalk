@@ -266,25 +266,13 @@ XML.'>
 
 Namespace current: Kernel [
 
-PackageGroup subclass: PackageDirectory [
-    | packages file baseDirectories baseDirCache |
+PackageGroup subclass: PackageContainer [
+    | packages file |
     
     <category: 'Language-Packaging'>
     <comment: 'I am not part of a standard Smalltalk system. I store internally the
 information on a Smalltalk package, and can output my description in
 XML.'>
-
-    PackageDirectory class >> new [
-	<category: 'accessing'>
-	self shouldNotImplement
-    ]
-
-    PackageDirectory class >> on: aFile baseDirectories: aBlock [
-	<category: 'accessing'>
-	^(super new)
-	    file: aFile;
-	    baseDirectories: aBlock
-    ]
 
     file [
 	<category: 'accessing'>
@@ -301,25 +289,35 @@ XML.'>
 	file := aFile
     ]
 
-    baseDirectories: aBlock [
+    packages [
 	<category: 'accessing'>
-	baseDirectories := aBlock
+	packages isNil ifTrue: [packages := LookupTable new].
+	^packages
+    ]
+
+    packages: aDictionary [
+	<category: 'accessing'>
+	packages := aDictionary
     ]
 
     at: aString ifAbsent: aBlock [
 	<category: 'accessing'>
-	packages isNil ifTrue: [^aBlock value].
-	^packages at: aString asString ifAbsent: aBlock
+	^self packages at: aString asString ifAbsent: aBlock
     ]
 
     keys [
 	<category: 'accessing'>
-	^packages isNil ifTrue: [#()] ifFalse: [packages keys]
+	^self packages keys
     ]
 
     includesKey: aString [
 	<category: 'accessing'>
-	^packages includesKey: aString
+	^self packages includesKey: aString
+    ]
+
+    baseDirectoriesFor: aPackage [
+	<category: 'refreshing'>
+	self subclassResponsibility
     ]
 
     refresh: loadDate [
@@ -327,48 +325,14 @@ XML.'>
 	 Package objects along the way."
 
 	<category: 'refreshing'>
-	| dir allDirs |
-	dir := self file parent.
-	allDirs := Smalltalk imageLocal 
-		    ifTrue: [{Directory image} , baseDirectories value]
-		    ifFalse: [baseDirectories value].
-	((self file exists and: [self file lastModifyTime > loadDate]) or: 
-		[(dir exists and: [dir lastModifyTime > loadDate]) 
-		    or: [allDirs ~= baseDirCache]]) 
-	    ifTrue: 
-		[packages := LookupTable new.
-		baseDirCache := allDirs.
-		self refreshPackageList.
-		self refreshStarList: dir]
-    ]
-
-    refreshPackageList [
-	<category: 'refreshing'>
-	baseDirCache isEmpty ifTrue: [^self].
-	self file exists ifFalse: [^self].
-	self file withReadStreamDo: [ :fileStream |
-	    [self parse: fileStream]
-		on: SystemExceptions.PackageNotAvailable
-	        do: [:ex | ex resignalAs: PackageSkip new]].
- 
-	packages := packages reject: [:each | each isDisabled]
-    ]
-
-    refreshStarList: dir [
-	<category: 'refreshing'>
-	dir exists ifFalse: [^self].
-	dir filesMatching: '*.star'
-	    do: 
-		[:starFile | 
-		| package |
-		package := Kernel.StarPackage file: starFile.
-		packages at: package name put: package]
+	self subclassResponsibility
     ]
 
     parse: file [
 	<category: 'refreshing'>
-	| open ch cdata tag package |
+	| open ch cdata tag package allPackages |
 	open := false.
+	allPackages := OrderedCollection new.
 	
 	[cdata := cdata isNil 
 		    ifTrue: [file upTo: $<]
@@ -402,12 +366,85 @@ XML.'>
 				    [package name isNil 
 					ifTrue: [^self error: 'missing package name in ' , self fileName].
 				    
-				    [package baseDirectories: baseDirCache.
-				    packages at: package name put: package] 
+				    [self testPackageValidity: package.
+				    self packages at: package name put: package.
+				    allPackages add: package] 
 					    on: PackageSkip
 					    do: [:ex | ex return].
-				    open ifFalse: [^self]].
-			    package := nil]]
+				    open ifFalse: [^allPackages]].
+			    package := nil]].
+	^allPackages
+    ]
+
+    testPackageValidity: package [
+	package baseDirectories: (self baseDirectoriesFor: package).
+    ]
+]
+
+]
+
+Namespace current: Kernel [
+
+PackageContainer subclass: PackageDirectory [
+    | baseDirectories baseDirCache |
+
+    PackageContainer class >> on: aFile baseDirectories: aBlock [
+	<category: 'accessing'>
+	^(super new)
+	    file: aFile;
+	    baseDirectories: aBlock
+    ]
+
+    baseDirectoriesFor: aPacakge [
+	<category: 'accessing'>
+	baseDirCache isNil ifTrue: [self refresh].
+	^baseDirCache
+    ]
+
+    baseDirectories: aBlock [
+	<category: 'accessing'>
+	baseDirectories := aBlock
+    ]
+
+    refresh: loadDate [
+	"Private - Process the XML source in the packages file, creating
+	 Package objects along the way."
+
+	| dir allDirs |
+	dir := self file parent.
+	allDirs := Smalltalk imageLocal 
+		    ifTrue: [{Directory image} , baseDirectories value]
+		    ifFalse: [baseDirectories value].
+	((self file exists and: [self file lastModifyTime > loadDate]) or: 
+		[(dir exists and: [dir lastModifyTime > loadDate]) 
+		    or: [allDirs ~= baseDirCache]]) 
+	    ifTrue: 
+		[baseDirCache := allDirs.
+		self refreshPackageList.
+		self refreshStarList: dir]
+    ]
+
+    refreshPackageList [
+	<category: 'refreshing'>
+	baseDirCache isEmpty ifTrue: [^self].
+	self file exists ifFalse: [^self].
+	self file withReadStreamDo: [ :fileStream |
+	    [self parse: fileStream]
+		on: SystemExceptions.PackageNotAvailable
+	        do: [:ex | ex resignalAs: PackageSkip new]].
+ 
+	self packages: (self packages reject: [:each | each isDisabled])
+    ]
+
+    refreshStarList: dir [
+	<category: 'refreshing'>
+	dir exists ifFalse: [^self].
+	dir filesMatching: '*.star'
+	    do: 
+		[:starFile | 
+		| package |
+		package := Kernel.StarPackage file: starFile.
+		self packages at: package name put: package]
     ]
 ]
 

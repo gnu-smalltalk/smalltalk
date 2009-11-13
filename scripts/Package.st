@@ -8,7 +8,7 @@
 
 "======================================================================
 |
-| Copyright 2007, 2008 Free Software Foundation, Inc.
+| Copyright 2007, 2008, 2009 Free Software Foundation, Inc.
 | Written by Paolo Bonzini.
 |
 | This file is part of GNU Smalltalk.
@@ -28,7 +28,13 @@
 |
  ======================================================================"
 
+[PackageLoader fileInPackage: 'NetClients'] on: Error do: [:ex | ex return].
 
+
+DynamicVariable subclass: CurrentCommand [
+]
+
+
 Package extend [
     srcdir [
 	^self baseDirectories last
@@ -51,71 +57,307 @@ Package extend [
     ]
 ]
 
-Kernel.PackageDirectory subclass: StarPackageFile [
-    refreshStarList: dir [
-	| package |
-	package := Kernel.StarPackage file: self file.
-        packages at: package name put: package loadedPackage
+Kernel.PackageContainer subclass: StarPackageFile [
+    | name |
+
+    StarPackageFile class >> on: aFile [
+	^self new file: aFile; yourself
     ]
 
-    refreshPackageList []
+    StarPackageFile class >> on: aFile name: aString [
+	^self new file: aFile; name: aString; yourself
+    ]
+
+    baseDirectoriesFor: aPackage [
+	^self file zip
+    ]
+
+    name [
+	^name
+    ]
+
+    name: aString [
+	name := aString
+    ]
+
+    refresh: loadDate [
+	| package |
+	package := Kernel.StarPackage file: self file.
+	name isNil ifFalse: [ package name: self name ].
+        self packages at: package name put: package loadedPackage
+    ]
 ]
 
-Kernel.PackageDirectory subclass: PackageFile [
-    refreshStarList: dir []
+Kernel.PackageContainer subclass: RemotePackageFile [
+    RemotePackageFile class >> on: aFile [
+	^self new file: aFile; yourself
+    ]
 
-    refreshPackageList [
+    testPackageValidity: package [ ]
+
+    refresh: loadDate [
         | file |
 	self file withReadStreamDo: [ :fileStream |
 	    self parse: fileStream ]
     ]
 ]
 
-Kernel.PackageDirectories subclass: PackageFiles [
+Kernel.PackageContainer subclass: PackageFile [
     | srcdir |
 
-    addAllFiles: aCollection [
-	aCollection do: [ :each | self addFile: each ]
+    PackageFile class >> on: aFile [
+	^self new file: aFile; yourself
     ]
 
-    parse: fileName [
-	| file packageFile |
-	file := File name: fileName.
-	packageFile := ('*.star' match: fileName)
-	    ifFalse: [
-		PackageFile
-		    on: file
-		    baseDirectories: [ self baseDirsFor: file ] ]
-	    ifTrue: [
-		StarPackageFile
-		    on: file
-		    baseDirectories: [ {(File name: fileName) zip} ] ].
-
-	packageFile refresh.
-	^packageFile
+    srcdir [
+	^srcdir
     ]
 
-    addFile: fileName [
-	self add: (self parse: fileName).
+    srcdir: aString [
+	srcdir := aString
     ]
 
-    baseDirsFor: file [
+    baseDirectoriesFor: aPackage [
 	| srcdirFile builddirPrefix |
 	self srcdir isNil ifTrue: [ ^{ file path } ].
 
 	"See if the file is in srcdir or builddir.  In any case, we want to
 	 look for files first in the builddir, and secondarily in srcdir."
-	srcdirFile := file pathFrom: self srcdir.
+	srcdirFile := self file pathFrom: self srcdir.
 	builddirPrefix := Directory working pathFrom: self srcdir.
 	^(srcdirFile startsWith: builddirPrefix, Directory pathSeparatorString)
 	    ifFalse: [ {
 		"file is in srcdir."
 		(File name: srcdirFile) parent.
-		file parent } ]
+		self file parent } ]
 	    ifTrue: [ {
 		"file is in builddir."
-		file parent.
-		(self srcdir / (file pathFrom: Directory working)) parent } ]
+		self file parent.
+		(self srcdir / (self file pathFrom: Directory working)) parent } ]
+    ]
+
+    refresh: loadDate [
+        | file |
+	self file withReadStreamDo: [ :fileStream |
+	    self parse: fileStream ]
+    ]
+]
+
+
+DynamicVariable subclass: MainPackage []
+
+Kernel.PackageContainer subclass: PackageCheckout [
+    | url checkoutDirectory |
+
+    PackageCheckout class >> cacheRoot [
+	^Directory userBase / 'cache'
+    ]
+
+    PackageCheckout class >> on: anURL [
+	^self new url: anURL; yourself
+    ]
+
+    baseDirectoriesFor: aPackage [
+	| mainPackage |
+	mainPackage := MainPackage value.
+	mainPackage isNil ifTrue: [ ^{ self checkoutDirectory } ].
+	aPackage = mainPackage ifTrue: [ ^{ self checkoutDirectory } ].
+
+	^{ mainPackage baseDirectories first
+	    / (aPackage name copyFrom: mainPackage name size + 2) }
+    ]
+
+    checkoutDirectory [
+	| dir name |
+	checkoutDirectory isNil ifTrue: [
+	    name := '%1__%2__%3' % {
+		url scheme. url host.
+		NetClients.URL encode: url path }.
+	    checkoutDirectory := self class cacheRoot / name ].
+	^checkoutDirectory
+    ]
+
+    checkout [
+	self subclassResponsibility
+    ]
+
+    url [
+	^url
+    ]
+
+    url: anURL [
+	url := anURL
+    ]
+
+    parseFile: aFile [
+	aFile withReadStreamDo: [ :fileStream |
+	    self parse: fileStream ]
+    ]
+
+    parse: aFileStream [
+	| addedPackages mainPackage |
+	addedPackages := super parse: aFileStream.
+	addedPackages size > 1 ifTrue: [ ^addedPackages ].
+
+	mainPackage := addedPackages first.
+	MainPackage use: mainPackage during: [
+	    mainPackage prerequisites printNl do: [ :each || file |
+	        ((each startsWith: mainPackage name, '-') and: [
+		    (file := mainPackage baseDirectories first
+		        / (each copyFrom: mainPackage name size + 2)
+		        / 'package.xml') exists ])
+			    ifTrue: [ self parseFile: file ]]].
+
+	^addedPackages
+    ]
+
+    refresh: loadDate [
+	self checkout.
+	(self checkoutDirectory / 'package.xml') exists ifFalse: [
+	    Command dryRun ifTrue: [^self].
+	    ^self error: 'cannot find package.xml in checked out repository'].
+
+	self file: self checkoutDirectory / 'package.xml'.
+	self parseFile: self file.
+    ]
+]
+
+
+PackageCheckout subclass: SvnPackageCheckout [
+    checkout [
+	| realUrl command saveDir |
+	self checkoutDirectory exists
+	    ifFalse: [
+	        self checkoutDirectory emitMkdir.
+		realUrl := url copy.
+		url scheme = 'svn+http' ifTrue: [ realUrl scheme: 'http' ].
+		url host = '' ifTrue: [ realUrl := realUrl path ].
+	        command := 'svn checkout %1 .' % {realUrl} ]
+	    ifTrue: [
+		command := 'svn update' ].
+
+        ('cd %1 && ' % { self checkoutDirectory }, command) displayNl.
+        saveDir := Directory working.
+	Command
+	    execute: [
+	        Directory working: self checkoutDirectory.
+		Smalltalk system: command ]
+	    ensure: [ Directory working: saveDir ]
+    ]
+]
+
+
+PackageCheckout subclass: GitPackageCheckout [
+    checkout [
+	| realUrl command saveDir |
+	self checkoutDirectory exists
+	    ifFalse: [
+	        self checkoutDirectory emitMkdir.
+		realUrl := url copy.
+		url scheme ~ 'git+(https?|rsync)' ifTrue: [
+		     realUrl scheme: (url scheme copyFrom: 5) ].
+		url host = '' ifTrue: [ realUrl := realUrl path ].
+	        command := 'git clone --depth 1 %1 .' % {realUrl} ]
+	    ifTrue: [
+		command := 'git fetch' ].
+
+        ('cd %1 && ' % { self checkoutDirectory }, command) displayNl.
+        saveDir := Directory working.
+	Command
+	    execute: [
+	        Directory working: self checkoutDirectory.
+		Smalltalk system: command ]
+	    ensure: [ Directory working: saveDir ].
+
+	url fragment isNil ifFalse: [
+	    command := 'git checkout origin/%1' % {url fragment}.
+
+            ('cd %1 && ' % { self checkoutDirectory }, command) displayNl.
+	    Command
+	        execute: [
+	            Directory working: self checkoutDirectory.
+		    Smalltalk system: command ]
+	        ensure: [ Directory working: saveDir ] ]
+    ]
+]
+
+
+Kernel.PackageDirectories subclass: PackageFiles [
+    | srcdir |
+
+    parseStarFile: file [
+	^(StarPackageFile on: file)
+	    refresh;
+	    yourself
+    ]
+
+    parseStarFile: file name: aString [
+	^(StarPackageFile on: file name: aString)
+	    refresh;
+	    yourself
+    ]
+
+    parseXMLFile: file [
+	^(PackageFile on: file)
+	    srcdir: self srcdir;
+	    refresh;
+	    yourself
+    ]
+
+    parse: fileName [
+	| file packageFile |
+	file := File name: fileName.
+	^('*.star' match: fileName)
+	    ifFalse: [ self parseXMLFile: file ]
+	    ifTrue: [ self parseStarFile: file ]
+    ]
+
+    addURL: urlString [
+	| url localFile package found |
+	url := NetClients.URL fromString: urlString.
+
+	"Remote package.xml: download it to find the `real' URL."
+	('*.xml' match: url path)
+	    ifTrue: [
+		localFile := File name: url entity localFileName.
+		package := RemotePackageFile on: localFile.
+		package parse: url readStream.
+		found := false.
+		package packages do: [ :each |
+		    (each url notNil and: [each url notEmpty]) ifTrue: [
+			found := true.
+		        each url = urlString ifTrue: [
+			    ^self error: 'infinite loop in package.xml urls' ].
+			self addURL: (NetClients.URL fromString: each url) ]].
+		found ifTrue: [^self].
+		^self error: 'url element not found in remote XML file' ].
+
+	"Remote .star file: download it and install."
+	('*.star' match: url path)
+	    ifTrue: [
+		^self add: (self
+		    parseStarFile: (File name: url entity localFileName)
+		    name: (File stripPathFrom: (File stripExtensionFrom: url path))) ].
+	
+	(url scheme ~ '^svn(\+|$)')
+	    ifTrue: [
+		^self add: ((SvnPackageCheckout on: url)
+		    refresh;
+		    yourself) ].
+	
+	(url scheme ~ '^git(\+|$)')
+	    ifTrue: [
+		^self add: ((GitPackageCheckout on: url)
+		    refresh;
+		    yourself) ].
+
+	(url scheme ~ '^(https?|ftp|file)$')
+	    ifTrue: [ self error: 'invalid URL %1' % {url} ]
+	    ifFalse: [ self error: 'unknown protocol %1' % {url scheme} ]
+    ]
+
+    addFile: fileName [
+	self add: (self parse: fileName).
     ]
 
     filesDo: aBlock [
@@ -191,20 +433,23 @@ File extend [
 ]
 
 Object subclass: Command [
-    | packages installDir options |
+    | installDir options |
 
-    DryRun := false.
+    Command class >> selectionOptions [
+	^#()
+    ]
+
+    Command class >> current [
+	^CurrentCommand value
+    ]
     Command class >> execute: aBlock [
-	DryRun ifFalse: [ aBlock value ]
+	self dryRun ifFalse: [ aBlock value ]
     ]
     Command class >> execute: aBlock ensure: ensureBlock [
-	DryRun ifFalse: [ aBlock ensure: ensureBlock ]
+	self dryRun ifFalse: [ aBlock ensure: ensureBlock ]
     ]
     Command class >> dryRun [
-	^DryRun
-    ]
-    Command class >> dryRun: aBoolean [
-	DryRun := aBoolean
+	^self current isOption: 'dry-run'
     ]
 
     Command class >> zip [
@@ -217,14 +462,39 @@ Object subclass: Command [
 	^(Smalltalk getenv: 'LN_S') ifNil: [ 'ln -s' ]
     ]
 
-    options: aSet [
-	options := aSet.
-	aSet do: [ :each |
-	    (self validOptions includes: each) ifFalse: [
-		self error: ('option %1 invalid for this mode' % {each}) ] ]
+    options [
+	| optionsCollection |
+	optionsCollection := OrderedCollection new.
+	options keysDo: [ :opt |
+	    (options at: opt) do: [ :arg |
+	        optionsCollection add: opt->arg ]].
+	^optionsCollection
     ]
-    validOptions [ ^#() ]
-    isOption: aString [ ^options includes: aString ]
+
+    options: aCollection [
+	options := Dictionary new.
+	aCollection do: [ :assoc |
+	    (options at: assoc key ifAbsentPut: [ OrderedCollection new ])
+	        addLast: assoc value.
+	    (self isValidOption: assoc key) ifFalse: [
+	        self error: ('--%1 invalid for this mode' % {assoc key}) ] ]
+    ]
+
+    isValidOption: aString [
+	^#('srcdir' 'target-directory' 'destdir' 'image-file'
+	   'dry-run' 'kernel-directory') includes: aString
+    ]
+
+    isOption: aString [ ^options includesKey: aString ]
+    optionsAt: aString [ ^options at: aString ]
+    optionAt: aString [ ^self optionAt: aString ifAbsent: [ nil ] ]
+
+    optionAt: aString ifAbsent: aBlock [
+	| value |
+	value := options at: aString ifAbsent: [ ^aBlock value ].
+	value size > 1 ifTrue: [ self error: '--%1 given multiple times' % {aString} ].
+	^value first
+    ]
 
     validateDestDir: destdir installDir: instDir [ 
 	instDir isNil ifTrue: [ ^self ].
@@ -233,7 +503,11 @@ Object subclass: Command [
 		self error: '--destdir used with relative target directory' ]
     ]
 
-    destDir: destdir installDir: instDir [
+    prolog [
+	| destdir instDir |
+	destdir := self optionAt: 'destdir' ifAbsent: [ '' ].
+	instDir := self optionAt: 'target-directory' ifAbsent: [ nil ].
+
 	self validateDestDir: destdir installDir: instDir.
 	installDir :=
 	    File name: destdir, (instDir ifNil: [ self defaultInstallDir asString ])
@@ -242,56 +516,99 @@ Object subclass: Command [
     defaultInstallDir [ ^Directory image ]
     installDir [ ^installDir ]
 
+    defaultFiles [ ^#() ]
+    runOnAll: args [ self subclassResponsibility ]
+
+    executeOnAll: args [
+	CurrentCommand use: self during: [
+	    | packageArgs |
+	    self prolog.
+	    packageArgs := args.
+            packageArgs isEmpty ifTrue: [ packageArgs := self defaultFiles ].
+            packageArgs isEmpty ifTrue: [ self error: 'no packages given' ].
+	    self runOnAll: packageArgs]
+    ]
+]
+
+
+Command subclass: PkgDownload [
+    PkgDownload class >> selectionOptions [
+	^#('download' 'update')
+    ]
+
+    PkgDownload class >> urlBase [
+	^'http://smalltalk.gnu.org/project'
+    ]
+
+    isValidOption: aString [
+	"Let PkgInstall decide later."
+	^true
+    ]
+
+    prolog []
+
+    runOnAll: args [
+	| urls |
+	urls := args collect: [ :each || pkg url |
+	    pkg := PackageLoader packageAt: each ifAbsent: [ nil ].
+	    url := pkg ifNotNil: [ pkg url ].
+	    url ifNil: [ '%1/%2/package.xml' % { self class urlBase. each } ] ].
+		
+	PkgInstall new
+            options: self options;
+            executeOnAll: urls
+    ]
+]
+
+Command subclass: PackageCommand [
+    | packages |
+
+    buildPackages [
+	| srcdir |
+	packages := PackageFiles new.
+	srcdir := self optionAt: 'srcdir' ifAbsent: [ '.' ].
+	(srcdir = '.' or: [ (File fullNameFor: srcdir) = Directory working ])
+	    ifTrue: [ srcdir := nil ].
+
+	packages srcdir: srcdir.
+	^packages
+    ]
+
     packages [
-	packages isNil ifTrue: [ packages := PackageFiles new ].
+	packages isNil ifTrue: [ self buildPackages ].
 	^packages 
     ]
 
     srcdir [
 	^self packages srcdir ifNil: [ '.' ]
     ]
-    srcdir: aString [
-	(aString = '.' or: [ (File fullNameFor: aString) = Directory working ])
-	    ifTrue: [ self packages srcdir: nil ]
-	    ifFalse: [ self packages srcdir: aString ]
+
+    addFile: aString [
+	aString ~ '^[a-z+]*://'
+	    ifTrue: [
+		self handleURLs
+		    ifFalse: [ self error: 'URLs are not supported by this mode' ]
+		    ifTrue: [ self packages addURL: aString ] ]
+	    ifFalse: [ self packages addFile: aString ]
     ]
 
-    addAllFiles: aCollection [ self packages addAllFiles: aCollection ]
+    handleURLs [ ^false ]
 
-    prolog [ ]
     run [ self packages do: [ :pkg | pkg runCommand: self ] ]
     runOnStar: aStarPackage [ self runOnPackage: aStarPackage ]
     runOnPackage: aPackage [ ]
 
-    listFiles: listFiles [
-	| base vpathBase vpath source test |
-	vpath := self isOption: 'vpath'.
-	source := self isOption: 'load'.
-	test := self isOption: 'test'.
-	base := self installDir.
-	vpathBase := File name: self srcdir.
-
-        listFiles do: [ :each || package files |
-	    package := self packages at: each.
-	    files := source
-		ifFalse: [ package allFiles ]
-		ifTrue: [ package fileIns ].
-
-	    (test and: [ source and: [ package test notNil ]])
-		ifTrue: [ files := files, package test fileIns ].
-
-	    files do: [ :file |
-		| path relativePath |
-		path := package fullPathOf: file.
-		relativePath := base pathTo: path.
-		(vpath and: [ (relativePath indexOfSubCollection: '../') > 0 ])
-		    ifTrue: [ relativePath := vpathBase pathTo: path ].
-
-		relativePath displayNl ] ]
+    runOnAll: args [
+	args do: [ :each | self addFile: each ].
+	self run
     ]
 ]
 
-Command subclass: PkgDist [
+PackageCommand subclass: PkgDist [
+    PkgDist class >> selectionOptions [
+	^#('dist')
+    ]
+
     validateDestDir: destdir installDir: instDir [ 
 	(destdir isEmpty and: [ instDir isNil ]) ifTrue: [
 	    self error: 'using --dist without specifying --distdir' ].
@@ -315,7 +632,10 @@ Command subclass: PkgDist [
 			in: nil ] ]
     ]
 
-    validOptions [ ^#('all-files' 'copy') ]
+    isValidOption: aString [
+	(#('all-files' 'copy') includes: aString) ifTrue: [^true].
+	^super isValidOption: aString
+    ]
 
     distribute: srcFile as: file in: dir [
 	| destName baseDir |
@@ -352,9 +672,14 @@ Command subclass: PkgDist [
     ]
 ]
 
-Command subclass: PkgInstall [
+PackageCommand subclass: PkgInstall [
     | tmpDir |
-    validOptions [ ^#('load' 'test') ]
+    isValidOption: aString [
+	(#('load' 'test') includes: aString) ifTrue: [^true].
+	^super isValidOption: aString
+    ]
+
+    handleURLs [ ^true ]
 
     run [
         "Create the installation directory."
@@ -453,7 +778,11 @@ Command subclass: PkgInstall [
     ]
 ]
 
-Command subclass: PkgUninstall [
+PackageCommand subclass: PkgUninstall [
+    PkgUninstall class >> selectionOptions [
+	^#('uninstall')
+    ]
+
     run [
         super run.
         packages filesDo: [ :each | (File name: each) emitRemove ]
@@ -472,8 +801,7 @@ Command subclass: PkgUninstall [
     runOnStar: aPackage [ ]
 ]
 
-Command subclass: PkgList [
-    validOptions [ ^#('list-files' 'vpath' 'load') ]
+PackageCommand subclass: ListCommand [
     validateDestDir: destdir installDir: installDir [
 	destdir = ''
 	    ifFalse: [ self error: '--destdir not needed with --list-files' ].
@@ -483,12 +811,60 @@ Command subclass: PkgList [
     defaultInstallDir [ ^'.' ]
 ]
 
-PkgList subclass: PkgPackageList [
+ListCommand subclass: PkgList [
+    PkgList class >> selectionOptions [
+	^#('list-files' 'no-install')
+    ]
+
+    isValidOption: aString [
+	(#('list-files' 'vpath' 'load') includes: aString) ifTrue: [^true].
+	^super isValidOption: aString
+    ]
+
+    run [
+	| base vpathBase vpath source test listFiles |
+	super run.
+	listFiles := self optionsAt: 'list-files'.
+	vpath := self isOption: 'vpath'.
+	source := self isOption: 'load'.
+	test := self isOption: 'test'.
+	base := self installDir.
+	vpathBase := File name: self srcdir.
+
+        listFiles do: [ :each || package files |
+	    package := self packages at: each.
+	    files := source
+		ifFalse: [ package allFiles ]
+		ifTrue: [ package fileIns ].
+
+	    (test and: [ source and: [ package test notNil ]])
+		ifTrue: [ files := files, package test fileIns ].
+
+	    files do: [ :file |
+		| path relativePath |
+		path := package fullPathOf: file.
+		relativePath := base pathTo: path.
+		(vpath and: [ (relativePath indexOfSubCollection: '../') > 0 ])
+		    ifTrue: [ relativePath := vpathBase pathTo: path ].
+
+		relativePath displayNl ] ]
+    ]
+]
+
+ListCommand subclass: PkgPackageList [
+    PkgPackageList class >> selectionOptions [
+	^#('list-packages')
+    ]
+
     runOnPackage: aPackage [ aPackage name displayNl ]
 ]
 
-Command subclass: PkgPrepare [
+PackageCommand subclass: PkgPrepare [
     | srcFile |
+    PkgPrepare class >> selectionOptions [
+	^#('prepare')
+    ]
+
     validateDestDir: destdir installDir: installDir [
 	destdir = ''
 	    ifFalse: [ self error: '--destdir not needed with --prepare' ].
@@ -496,26 +872,32 @@ Command subclass: PkgPrepare [
 	    ifFalse: [ self error: '--target-directory not needed with --prepare' ]
     ]
 
-    addAllFiles: aCollection [
-	| f |
-	aCollection isEmpty ifTrue: [
-	    (File exists: self srcdir, '/package.xml')
-		ifTrue: [ srcFile := 'package.xml' ].
-	    (File exists: self srcdir, '/package.xml.in')
-		ifTrue: [ srcFile := 'package.xml.in' ].
-	    ^super addAllFiles: { srcFile } ].
+    defaultFiles [
+	(File exists: self srcdir, '/package.xml')
+	    ifTrue: [ srcFile := 'package.xml' ].
+	(File exists: self srcdir, '/package.xml.in')
+	    ifTrue: [ srcFile := 'package.xml.in' ].
+	^{ srcFile }
+    ]
 
+    addFile: aString [
+	| f |
 	srcFile isNil ifTrue: [
-	    f := self srcdir / aCollection first.
+	    f := self srcdir / aString.
             (File exists: f)
 	        ifTrue: [ srcFile := (File name: self srcdir) pathTo: f ].
 
 	    f := f, '.in'.
             (File exists: f)
-	        ifTrue: [ srcFile := (File name: self srcdir) pathTo: f ]
+	        ifTrue: [ srcFile := (File name: self srcdir) pathTo: f ].
+
+            (File exists: aString)
+		ifTrue: [ srcFile := File name: aString ].
+
+	    srcFile isNil ifTrue: [ self error: '%1 not found' % {srcFile} ]
 	].
 
-	super addAllFiles: aCollection.
+	super addFile: aString.
     ]
 
     run [
@@ -648,20 +1030,52 @@ uninstall-local::
     ]
 ]
 
-| srcdir installDir mode listFiles destdir packageFiles helpString options |
+
+Object subclass: PackageManager [
+    | mode args options |
 
-mode := nil.
-listFiles := OrderedCollection new.
-installDir := nil.
-destdir := ''.
-srcdir := '.'.
-options := Set new.
-packageFiles := OrderedCollection new.
-packages := PackageFiles new.
+    ModeClasses := nil.
+    PackageManager class >> classForMode: aString [
+	^self modeClasses at: aString ifAbsent: [ nil ]
+    ]
 
-helpString := 
-'Usage:
-    gst-package [OPTION]... FILES...
+    PackageManager class >> modeClasses [
+	ModeClasses isNil ifTrue: [
+	    ModeClasses := Dictionary new.
+	    Command allSubclassesDo: [ :each |
+	        each selectionOptions do: [ :opt |
+		    ModeClasses at: opt put: each ] ] ].
+
+	^ModeClasses
+    ]
+
+    mode [
+	mode isNil ifTrue: [ mode := PkgInstall ].
+	^mode
+    ]
+
+    mode: aClass [
+	mode isNil ifFalse: [ self error: 'multiple modes specified' ].
+	mode := aClass
+    ]
+
+    options [
+	options isNil ifTrue: [ options := OrderedCollection new ].
+	^options
+    ]
+
+    addOption: opt argument: arg [
+	self options add: opt->arg
+    ]
+
+    addArgument: arg [
+	args isNil ifTrue: [ args := OrderedCollection new ].
+	args add: arg
+    ]
+
+    helpString [
+	^'Usage:
+    gst-package [OPTION]... ARGS...
 
 Operation modes:
         --install               make or install STAR packages (default)
@@ -670,6 +1084,10 @@ Operation modes:
         --prepare               create configure.ac or Makefile.am
         --list-files PKG        just output the list of files in the package
         --list-packages         just output the list of packages in the files
+
+        --download, --update    download package from smalltalk.gnu.org or
+                                from its specified URL
+
 	--help                  display this message and exit
 	--version               print version information and exit
 
@@ -695,84 +1113,70 @@ Common suboptions:
         --all-files             Process all files, not just non-built ones
         --copy                  Do not create symbolic links
 
+All operation modes except --download (or its synonym --update) accept
+paths to package.xml files or .star files, including remote URLs.
+--download and --update accept names of packages, which will be searched
+in the current system or on smalltalk.gnu.org)
+or URLs to package.xml or .star files.
+
 Except in uninstall and list files mode, gst-package requires write
 access to the GNU Smalltalk image directory, and merges the XML package
 files on the command line with that file.
 
 The default target directory is ', Directory image name, '
 
-'.
+'
+    ]
 
-[
-    Smalltalk
-        "--kenrel-directory and --image-file are processed by gst-tool.
-	 --no-load present for backwards compatibility, it is now the default.
-	 --no-install is also present for backwards compatibility."
-        arguments: '-h|--help --no-load --test --load --no-install --uninstall
-            --dist -t|--target-directory: --list-files: --list-packages
-            --prepare --srcdir: --distdir|--destdir: -n|--dry-run --all-files
-	    --vpath --copy -I|--image-file: --kernel-directory: --version'
+    parseArguments: args [
+        Getopt
+            "--kernel-directory and --image-file are processed by gst-tool.
+	     --no-load present for backwards compatibility, it is now the
+	     default. --no-install is also present for backwards compatibility."
+	     parse: args
+	     with: '-h|--help --no-load --test --load --no-install --uninstall
+                --dist -t|--target-directory: --list-files: --list-packages
+                --prepare --srcdir: --distdir|--destdir: -n|--dry-run
+		--all-files --vpath --copy -I|--image-file: --kernel-directory:
+		--download --version'
 
-        do: [ :opt :arg |
-	    opt = 'help' ifTrue: [
-		helpString displayOn: stdout.
-		ObjectMemory quit: 0 ].
+            do: [ :opt :arg || modeClass |
+	        opt = 'help' ifTrue: [
+		    self helpString displayOn: stdout.
+		    ObjectMemory quit: 0 ].
 
-	    opt = 'version' ifTrue: [
-		('gst-package - %1' % {Smalltalk version}) displayNl.
-		ObjectMemory quit: 0 ].
+	        opt = 'version' ifTrue: [
+		    ('gst-package - %1' % {Smalltalk version}) displayNl.
+		    ObjectMemory quit: 0 ].
 
-            opt = 'uninstall' ifTrue: [
-		mode isNil ifFalse: [ self error: 'multiple modes specified' ].
-		mode := PkgUninstall ].
-            opt = 'dist' ifTrue: [
-		mode isNil ifFalse: [ self error: 'multiple modes specified' ].
-		mode := PkgDist ].
-            opt = 'list-packages' ifTrue: [
-		mode isNil ifFalse: [ self error: 'multiple modes specified' ].
-		mode := PkgPackageList ].
-            opt = 'no-install' ifTrue: [
-		mode isNil ifFalse: [ self error: 'multiple modes specified' ].
-		mode := PkgList ].
-            opt = 'prepare' ifTrue: [
-		mode isNil ifFalse: [ self error: 'multiple modes specified' ].
-		mode := PkgPrepare ].
-            opt = 'list-files' ifTrue: [
-		(mode isNil or: [ mode = PkgList ])
-		     ifFalse: [ self error: 'multiple modes specified' ].
-		listFiles add: arg.
-		mode := PkgList ].
+		modeClass := self class classForMode: opt.
+		modeClass notNil ifTrue: [ self mode: modeClass ].
 
-            opt = 'target-directory' ifTrue: [ installDir := arg ].
+		(modeClass isNil or: [ arg notNil ])
+		    ifTrue: [
+			opt isNil
+			    ifFalse: [ self addOption: opt argument: arg. ]
+			    ifTrue: [ self addArgument: arg ]]]
+            ifError: [
+                self helpString displayOn: stderr.
+                ObjectMemory quit: 1 ].
+    ]
 
-            opt = 'srcdir' ifTrue: [ srcdir := arg ].
-            opt = 'destdir' ifTrue: [ destdir := arg ].
-            opt = 'dry-run' ifTrue: [ Command dryRun: true ].
-            opt = 'test' ifTrue: [ options add: opt ].
-            opt = 'load' ifTrue: [ options add: opt ].
-            opt = 'all-files' ifTrue: [ options add: opt ].
-            opt = 'copy' ifTrue: [ options add: opt ].
-            opt = 'vpath' ifTrue: [ options add: opt ].
+    run [
+	| command |
+        command := self mode new.
+        command options: self options.
+        command executeOnAll: args.
+    ]
+]
 
-            opt isNil ifTrue: [ packageFiles add: arg ] ]
-        ifError: [
-            helpString displayOn: stderr.
-            ObjectMemory quit: 1 ].
-
-    mode isNil ifTrue: [ mode := PkgInstall ].
-
-    "Validate the installation and source directory."
-    mode new
-        destDir: destdir installDir: installDir;
-	srcdir: srcdir;
-	addAllFiles: packageFiles;
-	options: options;
-	prolog;
-	run;
-	listFiles: listFiles
+
+[ PackageManager new
+	parseArguments: Smalltalk arguments;
+	run
 ]
     on: Error
     do: [ :ex |
 	('gst-package: ', ex messageText, '
 ') displayOn: stderr.
-	"ex pass." ObjectMemory quit: 1 ].
+	ex pass. ObjectMemory quit: 1 ].

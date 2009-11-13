@@ -1861,9 +1861,8 @@ approach based on ephemeron objects.
 @chapter Packages
 
 @gst{} includes a packaging system which allows one to file in components
-(often called @dfn{goodies} in Smalltalk's very folkloristic
-terminology) without caring of whether they need other goodies to be
-loaded first.
+(often called @dfn{goodies} in Smalltalk lore) without caring of whether
+they need other goodies to be loaded first.
 
 The packaging system is implemented by a Smalltalk class,
 @code{PackageLoader}, which looks for information about packages in
@@ -2014,7 +2013,9 @@ Other tags exist:
 @item url
 Specifies a URL at which a repository for the package can be found.
 The repository, when checked out, should contain a @file{package.xml}
-file at its root.  The contents of this tag are not used yet.
+file at its root.  The contents of this tag are not used for local
+packages; they are used when using the @option{--download} option to
+@command{gst-package}.
 
 @item library
 Loads a dynamic shared object and registers the functions in it
@@ -2062,6 +2063,46 @@ a @file{.star} archive in the current image directory, with the
 files specified in the @code{file} tags.  By default the package is
 placed in the system-wide package directory; you can use the option
 @option{--target-directory} to create the @file{.star} file elsewhere.
+
+Instead of a local @file{package.xml} file, you can give:
+@itemize @bullet
+@item
+a local @file{.star} file or a @code{URL} to such a file.  The file
+will be downloaded if necessary, and copied to the target directory;
+
+@item
+a URL to a @file{package.xml} file.  The @code{url} tag in the file
+will be used to find a source code repository (@command{git} or
+@command{svn}) or to download a @file{package.xml} file.
+@end itemize
+
+There is a short form for specifying @file{package.xml} file on
+@gst{}'s web site; the following two commands are equivalent:
+
+@example
+    gst-package http://smalltalk.gnu.org/project/Iliad/package.xml
+    gst-package --download Iliad
+@end example
+
+When downloading remote @file{package.xml} files, @command{gst-package}
+also performs a special check to detect multiple packages in the same
+repository.  If the following conditions are met:
+@itemize @bullet
+@item
+a package named @code{@var{package}} has a prerequisite
+@code{@var{package}-@var{subpackage}};
+
+@item
+there is a toplevel subdirectory @var{subpackage} in the repository;
+
+@item
+the subdirectory has a @file{package.xml} file in it
+@end itemize
+
+@noindent
+then the @file{@var{subpackage}/package.xml} will be installed as well.
+@command{gst-package} does not check if the file actually defines a
+package with the correct name, but this may change in future versions.
 
 Alternatively, @code{gst-package} can be used to create a skeleton
 @gnu{} style source tree.  This includes a @file{configure.ac} that will

@@ -1,5 +1,10 @@
 2009-11-13  Paolo Bonzini  <bonzini@gnu.org>
 
+	* kernel/PkgLoader.st: Adjust for downloadable packages.
+	* scripts/Package.st: Refactoring and downloadable packages.
+
+2009-11-13  Paolo Bonzini  <bonzini@gnu.org>
+
 	* kernel/URL.st: Allow + in URL schemes.
 
 2009-11-12  Paolo Bonzini  <bonzini@gnu.org>
