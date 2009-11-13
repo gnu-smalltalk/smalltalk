@@ -533,7 +533,7 @@ Object subclass: Command [
 
 Command subclass: PkgDownload [
     PkgDownload class >> selectionOptions [
-	^#('download' 'update')
+	^#('download')
     ]
 
     PkgDownload class >> urlBase [
@@ -1139,7 +1139,7 @@ The default target directory is ', Directory image name, '
                 --dist -t|--target-directory: --list-files: --list-packages
                 --prepare --srcdir: --distdir|--destdir: -n|--dry-run
 		--all-files --vpath --copy -I|--image-file: --kernel-directory:
-		--download --version'
+		--download|--update --version'
 
             do: [ :opt :arg || modeClass |
 	        opt = 'help' ifTrue: [

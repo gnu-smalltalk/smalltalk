@@ -108,8 +108,8 @@ const struct tool tools[] = {
     "gst-package", "scripts/Package.st",
     "-h|--help --version --load --no-load --no-install --uninstall --dist \
         --prepare --test -t|--target-directory: --list-files: --list-packages \
-        --srcdir: --distdir|--destdir: --copy --all-files --vpath \
-        -n|--dry-run -I|--image-file: --kernel-directory:",
+        --srcdir: --distdir|--destdir: --copy --all-files --vpath -n|--dry-run \
+        -I|--image-file: --kernel-directory: --download|--update ",
     NULL, true
   },
   {

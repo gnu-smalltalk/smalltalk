@@ -1,5 +1,10 @@
 2009-11-13  Paolo Bonzini  <bonzini@gnu.org>
 
+	* gst-tool.c: Add --update/--download.
+	* scripts/Package.st: Add --update.
+
+2009-11-13  Paolo Bonzini  <bonzini@gnu.org>
+
 	* scripts/Package.st: Fix --list-files=Foo --list-files=Bar.
 
 2009-11-13  Paolo Bonzini  <bonzini@gnu.org>
