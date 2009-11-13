@@ -1055,7 +1055,8 @@ Object subclass: PackageManager [
     ]
 
     mode: aClass [
-	mode isNil ifFalse: [ self error: 'multiple modes specified' ].
+	(mode notNil and: [ mode ~~ aClass ])
+	    ifTrue: [ self error: 'multiple modes specified' ].
 	mode := aClass
     ]
 

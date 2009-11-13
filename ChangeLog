@@ -1,5 +1,9 @@
 2009-11-13  Paolo Bonzini  <bonzini@gnu.org>
 
+	* scripts/Package.st: Fix --list-files=Foo --list-files=Bar.
+
+2009-11-13  Paolo Bonzini  <bonzini@gnu.org>
+
 	* kernel/PkgLoader.st: Adjust for downloadable packages.
 	* scripts/Package.st: Refactoring and downloadable packages.
 
