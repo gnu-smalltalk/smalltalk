@@ -1,3 +1,7 @@
+2009-11-14  Nicolas Petton <petton.nicolas@gmail.com>  (tiny change)
+
+	* kernel/VFS.st: ArchiveFile>>at: answer nil if fo file found
+
 2009-11-13  Paolo Bonzini  <bonzini@gnu.org>
 
 	* gst-tool.c: Uh-oh.

@@ -509,7 +509,7 @@ on them, to extract them to a real file, and so on.'>
 	<category: 'directory operations'>
 	| handler data |
 	allFiles isNil ifTrue: [self refresh].
-	data := allFiles at: aName ifAbsent: [nil].
+	data := allFiles at: aName ifAbsent: [^nil].
 	handler := data at: 5 ifAbsent: [nil].
 	handler isNil ifFalse: [^handler].
 	tmpFiles isNil 
