@@ -3,19 +3,22 @@ dnl
 AC_DEFUN([GST_HAVE_OPENGL], [
 
 AC_REQUIRE([AC_PATH_XTRA])
-AC_CHECK_HEADERS([OpenGL/gl.h GL/gl.h])
+AC_CHECK_HEADERS([OpenGL/gl.h OpenGL/glu.h GL/gl.h GL/glu.h])
 
 AC_CACHE_CHECK([how to link with OpenGL libraries], gst_cv_opengl_libs, [
-  if test $ac_cv_header_OpenGL_gl_h = yes || \
-     test $ac_cv_header_GL_gl_h = yes; then
+  if test $ac_cv_header_OpenGL_gl_h = no && \
+     test $ac_cv_header_GL_gl_h = no; then
+    gst_cv_opengl_libs='not found'
+  elif test $ac_cv_header_OpenGL_glu_h = no && \
+       test $ac_cv_header_GL_glu_h = no; then
+    gst_cv_opengl_libs='not found'
+  else
     case $host in
       *-*-mingw* | *-*-cygwin*) gst_cv_opengl_libs='-lopengl32 -lglu32' ;;
       *-*-beos* | *-*-qnx*) gst_cv_opengl_libs='-lGL' ;;
       *-*-darwin*) gst_cv_opengl_libs='-Wl,-framework,OpenGL' ;;
       *) gst_cv_opengl_libs='-lGL -lGLU $(X_LIBS) $(X_PRE_LIBS) -lX11' ;;
     esac
-  else
-    gst_cv_opengl_libs='not found'
   fi
 ])
 
