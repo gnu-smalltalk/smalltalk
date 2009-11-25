@@ -10,6 +10,7 @@
   <filein>ColumnInfo.st</filein>
   <filein>Table.st</filein>
   <filein>TableColumnInfo.st</filein>
+  <filein>FieldConverter.st</filein>
 
   <file>Connection.st</file>
   <file>ResultSet.st</file>
@@ -17,4 +18,5 @@
   <file>ColumnInfo.st</file>
   <file>Table.st</file>
   <file>TableColumnInfo.st</file>
+  <file>FieldConverter.st</file>
 </package>

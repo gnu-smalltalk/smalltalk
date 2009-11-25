@@ -57,7 +57,7 @@ FieldConverter subclass: PGFieldConverter [
         <category: 'converting-smalltalk'>
 	"HACK.  Time should support timezones too."
 	(aTime respondsTo: #offset)
-	     ifTrue: [ self writeDateTime: aDateTime on: aStream ]
+	     ifTrue: [ self writeDateTime: aTime on: aStream ]
 	     ifFalse: [ super writeTime: aTime on: aStream ]
     ]
 ]
