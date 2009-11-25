@@ -1,5 +1,9 @@
 2009-11-25  Paolo Bonzini  <bonzini@gnu.org>
 
+	* ResultSet.st: Ugh.
+
+2009-11-25  Paolo Bonzini  <bonzini@gnu.org>
+
 	* ResultSet.st: Print "a ResultSet" for DML results.
 
 2008-09-15  Paolo Bonzini  <bonzini@gnu.org>
