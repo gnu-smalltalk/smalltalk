@@ -147,6 +147,7 @@ case I only hold the number of rows affected.'>
     printOn: aStream [
 	"Print a representation of the receiver on aStream."
 	<category: 'printing'>
+	self isSelect ifFalse: [ ^super printOn: aString ].
 	self rows do: 
 		[:row | 
 		row printOn: aStream.
