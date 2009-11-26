@@ -1,5 +1,10 @@
 2009-11-03  Paolo Bonzini  <bonzini@gnu.org>
 
+	* funcs.awk: Point every #free method to unref if there is an unref
+	method.
+
+2009-11-03  Paolo Bonzini  <bonzini@gnu.org>
+
 	* MoreStructs.st: Remove GtkTreeModel.
 	* structs.awk: Derive interfaces from GObject.
 

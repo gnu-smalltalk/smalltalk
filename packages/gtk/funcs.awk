@@ -308,6 +308,11 @@ match_function_first_line($0) {
   # print the declaration
 
   print "!" prefixClassName (self ? "" : " class") " methodsFor: 'C call-outs'!"
+  if (decl == "unref") {
+      print "free"
+      print "    (self isAbsolute and: [ self address > 0 ])"
+      print "\tifTrue: [ self unref ]!"
+  }
   if (decl == "free") {
       print "free"
       print "    (self isAbsolute and: [ self address > 0 ])"
