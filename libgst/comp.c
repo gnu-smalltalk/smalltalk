@@ -465,12 +465,12 @@ _gst_install_initial_methods (void)
 
   install_method (termination_method);
 
-  methodsForString = "\
-methodsFor: aCategoryString [\
-    \"Calling this method prepares the parser to receive methods \
-      to be compiled and installed in the receiver's method dictionary. \
-      The methods are put in the category identified by the parameter.\" \
-    <primitive: VMpr_Behavior_methodsFor> \
+  methodsForString = "\n\
+methodsFor: aCategoryString [\n\
+    \"Calling this method prepares the parser to receive methods \n\
+      to be compiled and installed in the receiver's method dictionary. \n\
+      The methods are put in the category identified by the parameter.\" \n\
+    <primitive: VMpr_Behavior_methodsFor> \n\
 ]";
   _gst_set_compilation_class (_gst_behavior_class);
   _gst_set_compilation_category (_gst_string_new ("compiling methods"));

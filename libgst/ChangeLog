@@ -1,3 +1,8 @@
+2009-11-26  Lee Duhem  <lee.duhem@gmail.com>
+
+	* libgst/comp.c: Make formatted source of Behavior>>methodsFor: look
+	better.
+
 2009-11-12  Paolo Bonzini  <bonzini@gnu.org>
 
 	* libgst/dict.c: Pass PREFIX and EXEC_PREFIX.
