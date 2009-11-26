@@ -51,14 +51,39 @@ Date subclass: DateTime [
 	^ClockPrecision
     ]
 
+    DateTime class >> fromSeconds: secs offset: ofs [
+	"Answer a DateTime denoting the given date and time (as seconds
+	 since January 1, 1901 midnight). Set the offset field to ofs (a
+	 Duration)."
+
+	<category: 'instance creation (non-ANSI)'>
+	^self fromDays: 0 seconds: secs offset: ofs
+    ]
+
+    DateTime class >> fromSeconds: secs [
+	"Answer a DateTime denoting the given date and time (as seconds
+	 since January 1, 1901 midnight UTC)."
+
+	<category: 'instance creation (non-ANSI)'>
+	^self fromDays: 0 seconds: secs offset: Duration zero
+    ]
+
+    DateTime class >> fromDays: days seconds: secs [
+	"Answer a DateTime denoting the given date (as days since
+	 January 1, 1901) and time (as seconds since UTC midnight)."
+
+	<category: 'instance creation (non-ANSI)'>
+	^self fromDays: days seconds: secs offset: Duration zero
+    ]
+
     DateTime class >> fromDays: days seconds: secs offset: ofs [
 	"Answer a DateTime denoting the given date (as days since
 	 January 1, 1901) and time (as seconds since midnight). Set the
 	 offset field to ofs (a Duration)."
 
 	<category: 'instance creation (non-ANSI)'>
-	^(self fromDays: days)
-	    setSeconds: secs;
+	^(self fromDays: days + (secs // 86400))
+	    setSeconds: secs \\ 86400;
 	    setOffset: ofs
     ]
 

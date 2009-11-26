@@ -1,3 +1,7 @@
+2009-11-26  Paolo Bonzini  <bonzini@gnu.org>
+
+	* kernel/DateTime.st: Add more creation methods.
+
 2009-11-14  Nicolas Petton <petton.nicolas@gmail.com>  (tiny change)
 
 	* kernel/VFS.st: ArchiveFile>>at: answer nil if fo file found
