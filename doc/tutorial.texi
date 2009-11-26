@@ -2766,7 +2766,7 @@ Error subclass: ReadOnlyText [
 
 Here, if you ever want to subclass @code{ReadOnlyText} and add new
 information to the instance before signalling it, you'll have to use
-the private method #initText:range:.
+the private method @code{#initText:range:}.
 
 We recommend leaving out the signalling instance-creation variant in new
 code, as it saves very little work and makes signalling code less clear.
@@ -2789,7 +2789,7 @@ This code will put a handler for @code{ReadOnlyText} signals on the
 handler stack while the first block is executing.  If such an exception
 occurs, and it is not handled by any handlers closer to the point of
 signalling on the stack (known as "inner handlers"), the exception object
-will pass itself to the handler block given as the do: argument.
+will pass itself to the handler block given as the @code{do:} argument.
 
 You will almost always want to use this object to handle the exception
 somehow.  There are six basic handler actions, all sent as messages to
@@ -2797,10 +2797,10 @@ the exception object:
 
 @table @code
 @item return:
-Exit the block that received this #on:do:, returning the given value.
-You can also leave out the argument by sending #return, in which case
+Exit the block that received this @code{#on:do:}, returning the given value.
+You can also leave out the argument by sending @code{#return}, in which case
 it will be nil.  If you want this handler to also handle exceptions in
-whatever value you might provide, you should use #retryUsing: with a
+whatever value you might provide, you should use @code{#retryUsing:} with a
 block instead.
 
 @item retry
@@ -2852,10 +2852,10 @@ answering @code{true} from the @code{#isResumable} method, which is
 checked on every @code{#resume:} send.
 
 @item outer
-This is like @code{#pass}, but if an outer handler uses #resume:, this
-handler block will be resumed  (and #outer will answer the argument
-given to #resume:) rather than the piece of code that sent #signal in
-the first place.
+This is like @code{#pass}, but if an outer handler uses @code{#resume:},
+this handler block will be resumed  (and @code{#outer} will answer the
+argument given to @code{#resume:}) rather than the piece of code that
+sent @code{#signal} in the first place.
 @end table
 
 None of these methods return to the invoking handler block except for
@@ -2961,7 +2961,7 @@ Object subclass: ExecuteWithBreak [
 
 This class provides a way to stop the execution of a block without
 exiting the whole method as using @code{^} inside a block would do.
-The use of #ensure: guarantees (hence the name "ensure") that even
+The use of @code{#ensure:} guarantees (hence the name "ensure") that even
 if @code{breakBlock} is invoked or an error is handled by unwinding,
 the old ``break block'' will be restored.
 
@@ -2974,7 +2974,7 @@ probably already used:
            ifTrue: [ ^self error: 'Duplicate check number' ].
 @end example
 
-You have probably been using #ensure: without knowing.  For example,
+You have probably been using @code{#ensure:} without knowing.  For example,
 @code{File>>#withReadStreamDo:} uses it to ensure that the file is
 closed when leaving the block.
 
@@ -3719,14 +3719,15 @@ means zero or more;
 @example
    [ @dots{}  ]+
 @end example
+
 @noindent
 means one or more.
 
 @example
    @dots{}  | @dots{}  [ | @dots{}  ]*
 @end example
-@noindent
 
+@noindent
 means that one of the variants must be chosen.  Characters
 in double quotes refer to the literal characters.  Most elements
 may be separated by white space; where this is not legal, the
@@ -3735,11 +3736,11 @@ between them.
 
 @table @b
 
-@item @t{methods: ``!'' id [``class''] ``methodsFor:'' string ``!'' [method ``!''] ``!''}
+@item @t{methods: ``!'' id [``class''] ``methodsFor:'' string ``!'' [method ``!'']+ ``!''}
 Methods are introduced by first naming a class (the id element),
 specifying ``class'' if you're adding class methods
 instead of instance methods, and sending a string argument
-to the methodsFor: message.  Each method is terminated with
+to the @code{methodsFor:} message.  Each method is terminated with
 an ``!''; two bangs in a row (with a space in the middle)
 signify the end of the new methods.
 
