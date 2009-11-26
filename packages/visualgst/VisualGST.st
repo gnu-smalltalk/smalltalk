@@ -10,6 +10,14 @@ GtkMainWindow subclass: VisualGST [
         ^ uniqueInstance
     ]
 
+    VisualGST class >> uniqueInstance: anObject [
+        <category: 'private'>
+
+	(uniqueInstance notNil and: [ anObject notNil ])
+	    ifTrue: [ self error: 'cannot override uniqueInstance' ].
+        uniqueInstance := anObject
+    ]
+
     VisualGST class >> createInstance [
         <category: 'private'>
 
@@ -201,7 +209,7 @@ THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.';
 	 http://bugzilla.kernel.org/show_bug.cgi?id=9138, so we have to
 	 check the permission of the directory rather than the file."
 	File image parent isWriteable ifFalse: [ ^ self saveImageAs ].
-	saved := ObjectMemory snapshot not
+        self saveImage: [ObjectMemory snapshot]
     ]
 
     saveImageAs [
@@ -211,8 +219,14 @@ THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.';
 	    runNonBlockingAndDo: [ :dlg :res |
 		res = GTK.Gtk gtkResponseAccept ifTrue: [ | name |
 		    name := dlg getFilename.
-		    saved := (ObjectMemory snapshot: name) not ].
+		    self saveImage: [ObjectMemory snapshot: name] ].
 		dlg destroy ]
+    ]
+
+    saveImage: aBlock [
+	self class uniqueInstance: nil.
+	(saved := aBlock value not)
+	    ifTrue: [self class uniqueInstance: self]
     ]
 
     workspace [

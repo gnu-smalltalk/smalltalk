@@ -1,3 +1,7 @@
+2009-11-26  Paolo Bonzini  <mrgwen@gmail.com>
+
+	* VisualGST.st: Fix resumption of VisualGST image.
+
 2009-11-12  Paolo Bonzini  <mrgwen@gmail.com>
 
 	* GtkCategorizedNamespaceModel.st: Fix.
