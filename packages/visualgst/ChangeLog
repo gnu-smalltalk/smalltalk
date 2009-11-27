@@ -1,3 +1,9 @@
+2009-11-27  Paolo Bonzini  <mrgwen@gmail.com>
+
+	* GtkSourceCodeWidget.st: Add first version of source code widget
+	browse senders/browse implementors.
+	* SUnit/GtkSUnitResultWidget.st: Add browse implementors.
+
 2009-11-26  Paolo Bonzini  <mrgwen@gmail.com>
 
 	* VisualGST.st: Fix resumption of VisualGST image.

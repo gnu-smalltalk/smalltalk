@@ -37,19 +37,39 @@ GtkConcreteWidget subclass: GtkSUnitResult [
 	    self model appendItem: {each displayString. each} ]
     ]
 
+    popupMenuOn: aGtkWidget menu: aGtkMenu [
+	<category: 'events'>
+	| menuitem symbol |
+
+        symbol := self selectedMethodSymbol.
+        menuitem := GTK.GtkMenuItem newWithLabel: 'Run test'.
+        menuitem
+            show;
+            connectSignal: 'activate' to: self selector: #runTest userData: nil.
+        aGtkMenu append: menuitem.
+	"TODO: show test"
+        menuitem := GTK.GtkMenuItem new.
+        menuitem show.
+        aGtkMenu append: menuitem.
+        menuitem := GTK.GtkMenuItem newWithLabel: 'Browse implementors'.
+        menuitem
+            setSensitive: symbol notNil;
+            show;
+            connectSignal: 'activate' to: self selector: #browseImplementors userData: nil.
+        aGtkMenu append: menuitem.
+    ]
+
     onPress: aGtkWidget event: aGdkEvent [
-	<category: 'event'>
+	<category: 'events'>
 	| aGdkButtonEvent menu |
         aGdkButtonEvent := aGdkEvent castTo: GTK.GdkEventButton type.
         aGdkButtonEvent button value = 3 ifFalse: [ ^ false ].
         menu := GTK.GtkMenu new.
-        menu appendMenuItems: {{'Run test'. self. #runTest}.
-            "{'Show test'. self. #showTest}"}.
+	self popupMenuOn: aGtkWidget menu: menu.
         menu attachToWidget: resultTree detacher: nil.
-        menu popup: nil parentMenuItem: nil func: nil data: nil button: 3 activateTime: aGdkButtonEvent time value.
         menu showAll.
+        menu popup: nil parentMenuItem: nil func: nil data: nil button: 3 activateTime: aGdkButtonEvent time value.
         ^ true
-
     ]
 
     runTest [
@@ -73,7 +93,7 @@ GtkConcreteWidget subclass: GtkSUnitResult [
     selectedMethodSymbol [
         <category: 'accessing'>
 
-        ^ self selectedResult selector
+        ^ self selectedResult ifNotNil: [ :result | result selector ]
     ]
 
     selectedMethod [
@@ -91,6 +111,8 @@ GtkConcreteWidget subclass: GtkSUnitResult [
         ^ self model getOop: iter column: 1
     ]
 
-
+    browseImplementors [
+        OpenImplementorCommand on: self
+    ]
 ]
 

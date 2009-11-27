@@ -313,3 +313,12 @@ GTK.GtkToolButton class extend [
 	    yourself
     ]
 ]
+
+GTK.GtkWidget extend [
+
+    setSensitive: aBoolean [
+	aBoolean
+	     ifTrue: [ self setFlags: Gtk gtkSensitive ]
+	     ifFalse: [ self unsetFlags: Gtk gtkSensitive ]
+    ]
+]

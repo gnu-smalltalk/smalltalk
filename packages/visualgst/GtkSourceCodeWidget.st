@@ -35,8 +35,26 @@ GtkConcreteWidget subclass: GtkSourceCodeWidget [
     popupMenuOn: aGtkWidget menu: aGtkMenu [
         <category: 'events'>
 
-        | menuitem |
+        | menuitem symbol |
 
+	symbol := self selectedMethodSymbol.
+        menuitem := GTK.GtkMenuItem new.
+        menuitem show.
+        aGtkMenu append: menuitem.
+        menuitem := GTK.GtkMenuItem newWithLabel: 'Browse senders'.
+        menuitem
+	    setSensitive: symbol notNil;
+            show;
+            connectSignal: 'activate' to: self selector: #browseSenders userData: nil.
+        aGtkMenu append: menuitem.
+        menuitem := GTK.GtkMenuItem newWithLabel: 'Browse implementors'.
+        menuitem
+	    setSensitive: symbol notNil;
+            show;
+            connectSignal: 'activate' to: self selector: #browseImplementors userData: nil.
+        aGtkMenu append: menuitem.
+        menuitem := GTK.GtkMenuItem new.
+        menuitem show.
         menuitem := GTK.GtkMenuItem new.
         menuitem show.
         aGtkMenu append: menuitem.
@@ -302,6 +320,31 @@ GtkConcreteWidget subclass: GtkSourceCodeWidget [
 	<category: 'accessing'>
 
 	browser := aGtkClassBrowserWidget
+    ]
+
+    selectedMethodSymbol [
+        | iters stream parser node |
+	stream := self sourceCode readStream.
+        iters := codeBuffer getSelectionBounds.
+        parser := STInST.RBBracketedMethodParser new.
+        parser errorBlock: [:message :position | ^nil].
+        parser 
+            scanner: (parser scannerClass on: stream errorBlock: parser errorBlock).
+        node := parser parseMethod body.
+        node := node bestNodeFor:
+	    (iters first getOffset + 1 to: iters second getOffset + 1).
+        [node isNil ifTrue: [^nil].
+	node isMessage] whileFalse: 
+                [node := node parent].
+        ^node selector
+    ]
+
+    browseSenders [
+	OpenSenderCommand on: self
+    ]
+
+    browseImplementors [
+	OpenImplementorCommand on: self
     ]
 ]
 
