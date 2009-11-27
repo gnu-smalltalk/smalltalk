@@ -1,6 +1,6 @@
 UndoCommand subclass: AddMethodUndoCommand [
 
-    | selector method category classOrMeta oldCompiledMethod browserWidget compiledMethod methodWidget selectedMethod |
+    | selector method category classOrMeta oldCompiledMethod browserWidget compiledMethod |
 
     AddMethodUndoCommand class >> add: aString classified: aCategory in: aClass [
 	<category: 'instance creation'>
@@ -11,11 +11,11 @@ UndoCommand subclass: AddMethodUndoCommand [
 	    yourself
     ]
 
-    AddMethodUndoCommand class >> add: aString classified: aCategory in: aClass widget: aGtkWidget browser: aGtkBrowserWidget [
+    AddMethodUndoCommand class >> add: aString classified: aCategory in: aClass browser: aGtkBrowserWidget [
         <category: 'instance creation'>
 
         ^ (self new)
-            add: aString classified: aCategory in: aClass widget: aGtkWidget browser: aGtkBrowserWidget;
+            add: aString classified: aCategory in: aClass browser: aGtkBrowserWidget;
             precondition;
             yourself
     ]
@@ -26,13 +26,11 @@ UndoCommand subclass: AddMethodUndoCommand [
 	VisualGST compileError: aString
     ]
 
-    add: aString classified: aCategory in: aClass widget: aGtkWidget browser: aGtkBrowserWidget [
+    add: aString classified: aCategory in: aClass browser: aGtkBrowserWidget [
         <category: 'initialize'>
 
 	self add: aString classified: aCategory in: aClass.
-	methodWidget := aGtkWidget.
 	browserWidget := aGtkBrowserWidget.
-	methodWidget hasSelectedMethod ifTrue: [ selectedMethod := methodWidget selectedMethodSymbol ]
     ]
 
     add: aString classified: aCategory in: aClass [
@@ -71,19 +69,31 @@ UndoCommand subclass: AddMethodUndoCommand [
     undo [
 	<category: 'events'>
 
+	| selector |
 	classOrMeta methodDictionary removeMethod: compiledMethod.
 	oldCompiledMethod 
-	    ifNotNil: [ classOrMeta methodDictionary insertMethod: oldCompiledMethod ].
-	methodWidget ifNotNil: [ methodWidget selectAMethod: selectedMethod ]
+	    ifNotNil: [
+		classOrMeta methodDictionary insertMethod: oldCompiledMethod.
+		selector := oldCompiledMethod selector ]
+	    ifNil: [ selector := nil ].
+
+	browserWidget ifNil: [^self].
+	oldCompiledMethod methodClass isMetaclass
+	    ifTrue: [ browserWidget selectAClassMethod: selector ]
+	    ifFalse: [ browserWidget selectAnInstanceMethod: selector ].
+	browserWidget codeSaved.
     ]
 
     redo [
 	<category: 'events'>
 
-	oldCompiledMethod ifNil: [ classOrMeta methodDictionary insertMethod: compiledMethod ].
-	methodWidget ifNotNil: [ 
-	    browserWidget codeSaved.
-	    methodWidget selectAMethod: selector asString ]
+	classOrMeta methodDictionary insertMethod: compiledMethod.
+
+	browserWidget ifNil: [^self].
+	compiledMethod methodClass isMetaclass
+	    ifTrue: [ browserWidget selectAClassMethod: compiledMethod selector ]
+	    ifFalse: [ browserWidget selectAnInstanceMethod: compiledMethod selector ].
+	browserWidget codeSaved.
     ]
 ]
 

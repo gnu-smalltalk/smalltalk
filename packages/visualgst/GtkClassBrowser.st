@@ -62,6 +62,29 @@ THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.';
 	browserWidget redo
     ]
 
+    cut [
+        <category: 'edit events'>
+
+        browserWidget cut
+    ]
+
+    copy [
+        <category: 'edit events'>
+
+        browserWidget copy
+    ]
+
+    paste [
+        <category: 'edit events'>
+
+        browserWidget paste
+    ]
+
+    selectAll [
+        <category: 'edit events'>
+
+        browserWidget selectAll
+    ]
     gtkInspector [
 	<category: 'events'>
 	

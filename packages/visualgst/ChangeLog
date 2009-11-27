@@ -1,5 +1,13 @@
 2009-11-27  Paolo Bonzini  <mrgwen@gmail.com>
 
+	* Commands/AddMethodCommand.st, Debugger/GtkContextModel.st
+	Extensions.st, GtkClassBrowser.st, GtkClassBrowserWidget.st
+	GtkClassSUnitWidget.st, GtkMethodModel.st, GtkMethodSUnitModel.st
+	GtkMethodWidget.st, SUnit/GtkSUnit.st, Undo/AddMethodUndoCommand.st:
+	Sync.
+
+2009-11-27  Paolo Bonzini  <mrgwen@gmail.com>
+
 	* GtkSourceCodeWidget.st: Add first version of source code widget
 	browse senders/browse implementors.
 	* SUnit/GtkSUnitResultWidget.st: Add browse implementors.

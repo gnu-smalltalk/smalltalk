@@ -292,6 +292,7 @@ THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.';
 
         sourceCodeWidget := GtkSourceCodeWidget showAll.
 	sourceCodeWidget parentWindow: window.
+	sourceCodeWidget browser: self.
         ^ sourceCodeWidget mainWidget
     ]
 
@@ -330,9 +331,18 @@ THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.';
 
 	self checkCodeWidget.
         namespaceWidget hasSelectedNamespace ifFalse: [ ^ self ].
-        namespace := namespaceWidget selectedNamespace.
-        classWidget namespace: namespace.
-	state := NamespaceState on: self with: namespace
+	self selectANamespace: namespaceWidget selectedNamespace
+    ]
+
+    selectANamespace: aNamespace [
+	<category: 'browser methods'>
+
+	aNamespace = namespaceWidget selectedNamespace ifFalse: [
+            namespaceWidget selectANamespace: aNamespace ].
+        namespace := aNamespace.
+	aNamespace isNil ifTrue: [ ^self ].
+        classWidget namespace: aNamespace.
+	state := NamespaceState on: self with: aNamespace
     ]
 
     onClassChanged [
@@ -340,27 +350,59 @@ THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.';
 
 	self checkCodeWidget.
         classWidget hasSelectedClass ifFalse: [ ^ self ].
-        class := classWidget selectedClass.
-	methodWidget class: class first withCategory: '*'.
-	state := CategoryState on: self with: class -> '*'
+	self selectAClass: classWidget selectedClass
+    ]
+
+    selectAClass: aClass [
+	<category: 'browser methods'>
+
+	aClass = classWidget selectedClass ifFalse: [
+            classWidget selectAClass: aClass ].
+        class := aClass.
+	aClass isNil ifTrue: [ ^self ].
+	methodWidget class: class withCategory: '*'.
+	state := CategoryState on: self with: class -> '*'.
+	self selectAnInstanceMethod: nil.
     ]
 
     onMethodChanged [
 	<category: 'method events'>
 
 	self checkCodeWidget.
-	methodWidget hasSelectedMethod ifFalse: [ ^ self ].
+	self selectAnInstanceMethod: methodWidget selectedMethodSymbol.
+    ]
+
+    selectAnInstanceMethod: aSymbol [
+	<category: 'browser methods'>
+
+	aSymbol = methodWidget selectedMethodSymbol ifFalse: [
+            methodWidget selectAMethod: aSymbol asString ].
+	aSymbol isNil ifTrue: [ ^self ].
 	sourceCodeWidget sourceCode: methodWidget sourceCode.
 	state := MethodState on: self with: class -> methodWidget selectedMethod
+    ]
+
+    classOrMetaSelected [
+	<category: 'browser methods'>
+
+	^class
+    ]
+
+    selectedCategory [
+	<category: 'browser methods'>
+
+	^methodWidget selectedMethod
+	    ifNil: [ 'unit tests' ]
+	    ifNotNil: [ :method | method methodCategory ]
     ]
 
     runTest [
 	<category: 'run events'>
 
-	| suite results |
+	| suite results name |
 	classWidget hasSelectedClass ifFalse: [ ^ self ].
-	suite := TestSuite named: class first name asString.
-	class do: [ :elem |
+	suite := TestSuite named: classWidget allClassNames.
+	classWidget selectedClasses do: [ :elem |
 	    elem selectors do: [ :each |
 		(each matchRegex: 'test' from: 1 to: 4)
 		    ifTrue: [ suite addTest: (elem selector: each) ] ] ].
@@ -378,6 +420,14 @@ THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.';
 	<category: 'events'>
 
 	sourceCodeWidget hasFocus ifTrue: [ sourceCodeWidget perform: aSymbol ]
+    ]
+
+    acceptIt [
+	<category: 'method events'>
+
+	classWidget hasSelectedClass ifFalse: [ ^ self ].
+	AddMethodCommand on: self.
+	sourceCodeWidget codeSaved
     ]
 
     cancel [
@@ -498,5 +548,12 @@ THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.';
 
         ^ sourceCodeWidget sourceCode
     ]
+
+    codeSaved [
+	<category: 'code saved'>
+
+	sourceCodeWidget codeSaved
+    ]
+
 ]
 

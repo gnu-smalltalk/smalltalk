@@ -703,15 +703,17 @@ GtkConcreteWidget subclass: GtkClassBrowserWidget [
 	<category: 'selection'>
 
         | class |
-        class := classWidget selectedClass.
+	aSelector isNil ifFalse: [
+            class := classWidget selectedClass.
 
-        class := (class selectors includes: aSelector) ifFalse: [ class class ] ifTrue: [ class ].
-	aCategoryWidget
-	    classOrMeta: class;
-	    selectACategory: (class compiledMethodAt: aSelector) methodCategory.
-        aMethodWidget
-            class: class withCategory: (class compiledMethodAt: aSelector) methodCategory;
-	    selectAMethod: aSelector asString
+            class := (class selectors includes: aSelector) ifFalse: [ class class ] ifTrue: [ class ].
+	    aCategoryWidget
+	        classOrMeta: class;
+	        selectACategory: (class compiledMethodAt: aSelector) methodCategory.
+            aMethodWidget
+                class: class withCategory: (class compiledMethodAt: aSelector) methodCategory ].
+
+	aMethodWidget selectAMethod: aSelector asString
     ]
 
     selectAnInstanceMethod: aSelector [

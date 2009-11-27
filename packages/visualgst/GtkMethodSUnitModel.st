@@ -4,7 +4,7 @@ GtkMethodModel subclass: GtkMethodSUnitModel [
         <category: 'model builder'>
 
 	(aString matchRegex: 'test' from: 1 to: 4) 
-	    ifTrue: [ self gtkModel appendItem: {aString} ]
+	    ifTrue: [ super appendMethod: aString ]
     ]
 ]
 

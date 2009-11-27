@@ -140,15 +140,16 @@ GtkConcreteWidget subclass: GtkMethodWidget [
 	<category: 'accessing'>
 
         | iter string |
-        (iter := methodTree selectedIter) ifNil: [ self error: 'Nothing is selected' ].
+        (iter := methodTree selectedIter) ifNil: [ ^nil ].
         ^ (self model gtkModel getOop: iter column: 0) asSymbol
     ]
 
     selectedMethod [
 	<category: 'accessing'>
 
-	self hasSelectedMethod ifFalse: [ self error: 'Nothing is selected' ].
-	^ self classOrMetaSelected compiledMethodAt: self selectedMethodSymbol
+	| symbol |
+	(symbol := self selectedMethodSymbol) ifNil: [ ^nil ].
+	^ self classOrMetaSelected compiledMethodAt: symbol
     ]
 
     selectAMethod: aString [

@@ -105,12 +105,13 @@ Object subclass: GtkMethodModel [
 
 	self gtkModel do: [ :elem :iter |
 	    elem first = aString ifTrue: [ ^ iter ] ].
-        self error: 'Method not found'
+        ^nil
     ]
 
     appendMethod: aString [
 	<category: 'model builder'>
     
+        (self findIterInAMethod: aString) isNil ifFalse: [^self].
 	self gtkModel appendItem: {aString}
     ]
 
@@ -119,6 +120,7 @@ Object subclass: GtkMethodModel [
 
         | iter |
         iter := self findIterInAMethod: aString.
+	iter isNil ifTrue: [^self].
         self gtkModel remove: iter
     ]
 

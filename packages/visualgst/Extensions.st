@@ -168,25 +168,6 @@ CompiledBlock extend [
 ]
 
 MethodContext extend [
-    printDebugHeaderOn: aStream [
-	<category: '*VisualGST'>
-
-	self receiver class printOn: aStream in: Namespace current.
-	self receiver class == self methodClass 
-	    ifFalse:  [
-		aStream nextPut: $(.
-		self methodClass printOn: aStream in: Namespace current.
-		aStream nextPut: $) ].
-	aStream
-	    nextPutAll: '>>';
-	    nextPutAll: self selector.
-	self selector = #doesNotUnderstand: 
-	    ifTrue:  [
-		aStream
-		    space;
-		    print: (self at: 1) selector ]
-    ]
-
     variables [
         <category: '*VisualGST'>
 
@@ -198,12 +179,6 @@ MethodContext extend [
 ]
 
 BlockContext extend [
-    printDebugHeaderOn: aStream [
-        <category: '*VisualGST'>
-
-	aStream nextPutAll: 'BlockContext'
-    ]
-
     variables [
         <category: '*VisualGST'>
 
@@ -215,12 +190,6 @@ BlockContext extend [
 ]
 
 ContextPart extend [
-    printDebugHeaderOn: aStream [
-        <category: '*VisualGST'>
-
-	self subclassResponsibility
-    ]
-
     parentContextAt: anInteger [
 	<category: '*VisualGST'>
 

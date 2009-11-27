@@ -5,7 +5,11 @@ UndoableCommand subclass: AddMethodCommand [
 
         | category |
         category := target selectedCategory.
-        self push: (AddMethodUndoCommand add: target sourceCode classified: category in: target classOrMetaSelected widget: target viewedMethodWidget browser: target)
+        self push: (AddMethodUndoCommand
+	    add: target sourceCode
+	    classified: category
+	    in: target classOrMetaSelected
+	    browser: target)
     ]
 ]
 

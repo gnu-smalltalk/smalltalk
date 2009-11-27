@@ -46,8 +46,7 @@ Object subclass: GtkContextModel [
     
 	ctxt := self context.
 	[ ctxt isNil ] whileFalse: [
-	    ctxt printDebugHeaderOn: (stream := WriteStream on: String new).
-	    self prepend: stream contents.
+	    self prepend: ctxt printString.
 	    ctxt := ctxt parentContext ].
     ]
 
