@@ -25,6 +25,7 @@ GtkMainWindow subclass: VisualGST [
             initialize;
             showAll;
             postInitialize;
+	    resize: 1024@600;
             yourself
     ]
 

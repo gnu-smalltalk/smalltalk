@@ -1,12 +1,22 @@
 GtkMainWindow subclass: GtkImplementor [
     | model selector resultModel set finderTree resultArray resultTree classBrowserWidget searchEntry |
 
+    
+    GtkImplementor class >> open [
+        <category: 'instance creation'>
+
+	^ super open
+	    resize: 1024@600;
+	    yourself
+    ]
+
     GtkImplementor class >> openOn: aSelector [
         <category: 'instance creation'>
 
         ^ (self new)
             selector: aSelector;
             initialize;
+	    resize: 1024@600;
             showAll;
             yourself
     ]

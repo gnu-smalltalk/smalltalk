@@ -1,4 +1,10 @@
-2009-11-27  Paolo Bonzini  <mrgwen@gmail.com>
+2009-12-01  Gwenael Casaccio  <mrgwen@gmail.com>
+
+	* Debugger/GtkDebugger.st, GtkClassBrowser.st,
+	Implementors/GtkImplementor.st, Senders/GtkSender.st,
+	VisualGST.st: Sync.
+
+2009-11-27  Paolo Bonzini  <bonzini@gnu.org>
 
 	* Commands/AddMethodCommand.st, Debugger/GtkContextModel.st
 	Extensions.st, GtkClassBrowser.st, GtkClassBrowserWidget.st
@@ -6,22 +12,22 @@
 	GtkMethodWidget.st, SUnit/GtkSUnit.st, Undo/AddMethodUndoCommand.st:
 	Sync.
 
-2009-11-27  Paolo Bonzini  <mrgwen@gmail.com>
+2009-11-27  Paolo Bonzini  <bonzini@gnu.org>
 
 	* GtkSourceCodeWidget.st: Add first version of source code widget
 	browse senders/browse implementors.
 	* SUnit/GtkSUnitResultWidget.st: Add browse implementors.
 
-2009-11-26  Paolo Bonzini  <mrgwen@gmail.com>
+2009-11-26  Paolo Bonzini  <bonzini@gnu.org>
 
 	* VisualGST.st: Fix resumption of VisualGST image.
 
-2009-11-12  Paolo Bonzini  <mrgwen@gmail.com>
+2009-11-12  Paolo Bonzini  <bonzini@gnu.org>
 
 	* GtkCategorizedNamespaceModel.st: Fix.
 	* GtkMainWindow.st: Fix about GST dialog.
 
-2009-11-04  Paolo Bonzini  <mrgwen@gmail.com>
+2009-11-04  Paolo Bonzini  <bonzini@gnu.org>
 
 	* GtkNamespaceModel.st: Do not refresh upon creation.
 	* GtkNamespaceWidget.st: Do it here.

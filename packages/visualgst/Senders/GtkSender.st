@@ -1,12 +1,21 @@
 GtkMainWindow subclass: GtkSender [
     GtkSender class [ | LiteralsAndSpecialSelectors | ]
 
+    GtkSender class >> open [
+	<category: 'instance creation'>
+
+	^ super open
+	    resize: 1024@600;
+	    yourself
+    ]
+
     GtkSender class >> openOn: aSelector [
 	<category: 'instance creation'>
 
 	^ (self new)
             selector: aSelector;
             initialize;
+	    resize: 1024@600;
             showAll;
             yourself
     ]

@@ -4,7 +4,7 @@ GtkMainWindow subclass: GtkClassBrowser [
     GtkClassBrowser class >> open [
 	<category: 'user interface'>
 
-	^ self openSized: 650@450
+	^ self openSized: 600@400
     ]
 
     aboutBrowser [
