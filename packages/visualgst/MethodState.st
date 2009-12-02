@@ -1,5 +1,11 @@
 BrowserState subclass: MethodState [
 
+    printOn: aStream [
+	<category: 'printing'>
+
+	aStream print: state value
+    ]
+
     namespace [
         <category: 'accessing'>
 
@@ -40,12 +46,6 @@ BrowserState subclass: MethodState [
 	<category: 'events'>
 
 	AddMethodCommand on: self.
-    ]
-
-    displayString [
-	<category: 'printing'>
-
-	^ state value displayString
     ]
 
     codeSaved [

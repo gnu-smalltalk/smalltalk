@@ -1,3 +1,13 @@
+2009-12-02  Paolo Bonzini  <bonzini@gnu.org>
+
+	* CategoryState.st: Add #printOn:.
+	* ClassState.st: Add #printOn:.
+	* MethodState.st: Add #printOn:.
+	* NamespaceState.st: Add #printOn:.
+	* GtkClassBrowserWidget.st: Remove useless update.
+	* SUnit/GtkSUnit.st: Remove useless update.
+	* Debugger/GtkDebugger.st: Fix Accept menu item.
+
 2009-12-02  Gwenael Casaccio  <mrgwen@gmail.com>
 
 	* CategoryState.st, Debugger/GtkContextModel.st,

@@ -634,7 +634,6 @@ GtkConcreteWidget subclass: GtkClassBrowserWidget [
 
 	classWidget hasSelectedClass ifFalse: [ ^ self ].
 	AddMethodCommand on: self.
-	codeWidget codeSaved
     ]
 
     deleteMethod [

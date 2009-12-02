@@ -1,5 +1,5 @@
 GtkMainWindow subclass: GtkDebugger [
-    | state windowsMenu codeWidget contextWidget debugger inspectorWidget stackInspectorWidget selectedContext |
+    | state codeWidget contextWidget debugger inspectorWidget stackInspectorWidget selectedContext |
 
     GtkDebugger class >> open [
 	<category: 'user interface'>
@@ -101,6 +101,8 @@ THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.';
 	^ (codeWidget := GtkSourceCodeWidget new)
             initialize;
 	    appendTag: #debug description: #('background' 'cyan4' 'foreground' 'NavyBlue' nil);
+	    parentWindow: window;
+	    browser: self;
             mainWidget
     ]
 
@@ -168,7 +170,6 @@ THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.';
 
         self accelGroup append: 
 	    {{'<Control>O'. '<GtkDebugger>/File/Open'. self. #open}.
-	    {'<Control>S'. '<GtkDebugger>/File/Save'. self. #save}.
 	    {'<Control><Shift>S'. '<GtkDebugger>/File/SaveAs'. self. #saveAs}.
 	    {'<Control>Q'. '<GtkDebugger>/File/Close'. self. #close}}.
 
@@ -203,7 +204,8 @@ THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.';
             {'<Control>P'. '<GtkLauncher>/Smalltalk/PrintIt'. self. #printIt}.
             {'<Control>I'. '<GtkLauncher>/Smalltalk/InspectIt'. self. #inspectIt}.
             {'<Control>M'. '<GtkLauncher>/Smalltalk/Implementors'. self. #implementors}.
-            {'<Control>N'. '<GtkLauncher>/Smalltalk/Senders'. self. #senders}}.
+            {'<Control>N'. '<GtkLauncher>/Smalltalk/Senders'. self. #senders}.
+            {'<Control>S'. '<GtkLauncher>/Smalltalk/AcceptIt'. self. #acceptIt}}.
 
         ^ self createNewMenuEntry: {GTK.GtkMenuItem menuItem: 'Do It' accelPath: '<GtkLauncher>/Smalltalk/DoIt' connectTo: self selector: #doIt.
             GTK.GtkMenuItem menuItem: 'Print It' accelPath: '<GtkLauncher>/Smalltalk/PrintIt' connectTo: self selector: #printIt.
@@ -211,7 +213,9 @@ THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.';
             GTK.GtkMenuItem menuItem: 'Debug It' connectTo: self selector: #debugIt.
             GTK.GtkMenuItem new.
             GTK.GtkMenuItem menuItem: 'Implementors' accelPath: '<GtkLauncher>/Smalltalk/Implementors' connectTo: self selector: #implementors.
-            GTK.GtkMenuItem menuItem: 'Senders' accelPath: '<GtkLauncher>/Smalltalk/Senders' connectTo: self selector: #senders}
+            GTK.GtkMenuItem menuItem: 'Senders' accelPath: '<GtkLauncher>/Smalltalk/Senders' connectTo: self selector: #senders.
+            GTK.GtkMenuItem new.
+            GTK.GtkMenuItem menuItem: 'Accept' accelPath: '<GtkLauncher>/Smalltalk/AcceptIt' connectTo: self selector: #acceptIt}
     ]
 
     createHelpMenus [
@@ -367,7 +371,9 @@ THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.';
     updateInspectorWidget: aContext [
 	<category: 'context'>
 
-	state := CategoryState on: self with: aContext receiver class -> '*'.
+	| method |
+	method := aContext method method.
+	state := MethodState on: self with: method methodClass -> method.
         inspectorWidget object: aContext receiver.
         stackInspectorWidget object: aContext
     ]
@@ -443,6 +449,36 @@ THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.';
 
 	self close.
 	debugger continue
+    ]
+
+    codeSaved [
+	<category: 'method events'>
+
+	codeWidget codeSaved
+    ]
+
+    classOrMetaSelected [
+	<category: 'method events'>
+
+	^state classOrMetaSelected
+    ]
+
+    sourceCode [
+	<category: 'method events'>
+
+	^codeWidget sourceCode
+    ]
+
+    selectedCategory [
+	<category: 'method events'>
+
+	^state selectedCategory
+    ]
+
+    acceptIt [
+	<category: 'method events'>
+
+	AddMethodCommand on: self.
     ]
 
     doIt [

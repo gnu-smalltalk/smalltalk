@@ -1,5 +1,12 @@
 BrowserState subclass: NamespaceState [
 
+    printOn: aStream [
+	<category: 'printing'>
+
+	aStream
+	    print: self namespace
+    ]
+
     namespace [
 	<category: 'accessing'>
 

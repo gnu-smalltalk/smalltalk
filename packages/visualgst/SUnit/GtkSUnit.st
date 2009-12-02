@@ -427,7 +427,6 @@ THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.';
 
 	classWidget hasSelectedClass ifFalse: [ ^ self ].
 	AddMethodCommand on: self.
-	sourceCodeWidget codeSaved
     ]
 
     cancel [
