@@ -1,10 +1,12 @@
 GtkMainWindow subclass: GtkDebugger [
     | state windowsMenu codeWidget contextWidget debugger inspectorWidget stackInspectorWidget selectedContext |
 
-    GtkDebugger class >> debuggerClass [
-	<category: 'class attributes'>
+    GtkDebugger class >> open [
+	<category: 'user interface'>
 
-	^ nil
+	^ super open
+	    resize: 1024@600;
+	    yourself
     ]
 
     GtkDebugger class >> open: aString [
@@ -20,7 +22,7 @@ GtkMainWindow subclass: GtkDebugger [
     GtkDebugger class >> debuggerClass [
         <category: 'debugging interface'>
 
-        ^nil
+        ^ nil
     ]
 
     GtkDebugger class >> debuggingPriority [
@@ -98,6 +100,7 @@ THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.';
 
 	^ (codeWidget := GtkSourceCodeWidget new)
             initialize;
+	    appendTag: #debug description: #('background' 'cyan4' 'foreground' 'NavyBlue' nil);
             mainWidget
     ]
 
@@ -241,10 +244,6 @@ THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.';
 	| package |
 	package := PackageLoader packageAt: 'VisualGST'.
 	self
-	    "appendToolItem: ((GTK.GtkToolButton newFromStock: 'gtk-new')
-				connectSignal: 'clicked' to: OpenWorkspaceCommand selector: #execute userData: nil;
-				setTooltipText: 'Create a new workspace';
-				yourself);"
             appendToolItem: ((GTK.GtkToolButton newFromStock: 'gtk-save')
 				connectSignal: 'clicked' to: SaveImageCommand selector: #execute userData: nil;
 				setTooltipText: 'Save the image';
@@ -378,7 +377,7 @@ THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.';
 
 	contextWidget
             context: debugger suspendedContext;
-            selectLastContext.
+            selectFirstContext.
 
 	self updateInspectorWidget: debugger suspendedContext
     ]
@@ -407,7 +406,7 @@ THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.';
 	self checkCodeWidget.
 	contextWidget hasSelectedContext ifFalse: [ ^ self ].
 	iter := contextWidget selectedIter.
-	selectedContext := debugger suspendedContext parentContextAt: (contextWidget numberOfContext - ((contextWidget model getPath: iter) getIndices value)).
+	selectedContext := debugger suspendedContext parentContextAt: ((contextWidget model getPath: iter) getIndices value) + 1.
 	codeWidget sourceCode: selectedContext method methodSourceString.
 	codeWidget object: selectedContext receiver.
 	self updateInspectorWidget: selectedContext

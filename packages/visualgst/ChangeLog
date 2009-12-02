@@ -1,3 +1,13 @@
+2009-12-02  Gwenael Casaccio  <mrgwen@gmail.com>
+
+	* CategoryState.st, Debugger/GtkContextModel.st,
+	Debugger/GtkContextWidget.st, Debugger/GtkDebugger.st,
+	Extensions.st, GtkClassBrowserWidget.st, GtkClassHierarchyWidget.st
+	GtkSourceCodeWidget.st, Implementors/GtkImplementor.st
+	Inspector/GtkInspectorBrowserWidget.st, MethodState.st
+	Senders/GtkSender.st, Undo/AddMethodUndoCommand.st, VisualGST.st:
+	Sync.
+
 2009-12-01  Gwenael Casaccio  <mrgwen@gmail.com>
 
 	* Debugger/GtkDebugger.st, GtkClassBrowser.st,

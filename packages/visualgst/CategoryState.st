@@ -47,5 +47,10 @@ BrowserState subclass: CategoryState [
 
 	^ self classOrMeta displayString
     ]
+
+    codeSaved [
+
+        browser codeSaved
+    ]
 ]
 

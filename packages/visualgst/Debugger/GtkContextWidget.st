@@ -83,6 +83,15 @@ GtkConcreteWidget subclass: GtkContextWidget [
         selection selectIter: self model lastIter
     ]
 
+    selectFirstContext [
+        <category: 'item selection'>
+
+        | selection |
+        selection := contextTree getSelection.
+        selection unselectAll.
+        selection selectIter: self model getIterFirst
+    ]
+
     hasSelectedContext [
 	<category: 'testing'>
 

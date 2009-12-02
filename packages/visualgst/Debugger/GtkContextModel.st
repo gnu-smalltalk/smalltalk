@@ -46,7 +46,7 @@ Object subclass: GtkContextModel [
     
 	ctxt := self context.
 	[ ctxt isNil ] whileFalse: [
-	    self prepend: ctxt printString.
+	    self append: ctxt printString.
 	    ctxt := ctxt parentContext ].
     ]
 
@@ -56,10 +56,16 @@ Object subclass: GtkContextModel [
 	^ self model lastIter
     ]
 
-    prepend: aString [
+    selectFirstContext [
+        <category: 'item selection'>
+
+        ^ self model firstIter
+    ]
+
+    append: aString [
 	<category: 'model builder'>
     
-	self model prependItem: {aString}
+	self model appendItem: {aString}
     ]
 ]
 

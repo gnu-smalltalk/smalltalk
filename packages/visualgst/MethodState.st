@@ -15,7 +15,7 @@ BrowserState subclass: MethodState [
     category [
         <category: 'accessing'>
 
-        ^ state value
+        ^ state value methodCategory
     ]
 
     selectedCategory [
@@ -39,13 +39,18 @@ BrowserState subclass: MethodState [
     saveSource [
 	<category: 'events'>
 
-	AddMethodCommand on: self
+	AddMethodCommand on: self.
     ]
 
     displayString [
 	<category: 'printing'>
 
 	^ state value displayString
+    ]
+
+    codeSaved [
+
+	browser codeSaved
     ]
 ]
 

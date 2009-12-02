@@ -193,7 +193,7 @@ GtkConcreteWidget subclass: GtkClassBrowserWidget [
 	<category: 'events'>
 
 	classWidget hasSelectedClass ifFalse: [ ^ self ].
-	aSmallInteger = 0 ifTrue: [ classHierarchyWidget class: classWidget selectedClass ].
+	aSmallInteger = 0 ifTrue: [ classHierarchyWidget classOrMeta: classWidget selectedClass ].
     ]
 
     classInstanceSwitchOn: aGtkNotebook page: aGtkNotebookPage number: aSmallInteger [
@@ -236,7 +236,7 @@ GtkConcreteWidget subclass: GtkClassBrowserWidget [
 	self checkCodeWidget.
 	classWidget hasSelectedClass ifFalse: [ ^ self ].
 	aClass := classWidget selectedClass.
-	classHierarchyUpdate ifFalse: [ classHierarchyWidget class: aClass ].
+	classHierarchyUpdate ifFalse: [ classHierarchyWidget classOrMeta: aClass ].
 	iCategoryWidget classOrMeta: aClass.
 	cCategoryWidget classOrMeta: aClass class.
 	iCategoryWidget unselectAll.
@@ -277,7 +277,7 @@ GtkConcreteWidget subclass: GtkClassBrowserWidget [
 
     onClassSideCategoryChanged [
 	<category: 'events'>
-	
+
 	self checkCodeWidget.
 	cCategoryWidget hasSelectedCategory ifFalse: [ ^ self ].
 	cMethodWidget class: classWidget selectedClass class withCategory: cCategoryWidget selectedCategory.
@@ -294,7 +294,7 @@ GtkConcreteWidget subclass: GtkClassBrowserWidget [
 	iMethodWidget hasSelectedMethod ifFalse: [ ^ self ].
 	method := iMethodWidget selectedMethod.
 	codeWidget sourceCode: iMethodWidget sourceCode.
-	state := MethodState on: self with: classWidget selectedClass class -> method
+	state := MethodState on: self with: classWidget selectedClass -> method
     ]
 
     onClassSideMethodChanged [
@@ -691,7 +691,7 @@ GtkConcreteWidget subclass: GtkClassBrowserWidget [
 	<category: 'selection'>
 
         classWidget selectAClass: aClass.
-	classHierarchyWidget class: aClass.
+	classHierarchyWidget classOrMeta: aClass.
         iCategoryWidget classOrMeta: aClass.
         cCategoryWidget classOrMeta: aClass class.
 
@@ -708,8 +708,8 @@ GtkConcreteWidget subclass: GtkClassBrowserWidget [
 
             class := (class selectors includes: aSelector) ifFalse: [ class class ] ifTrue: [ class ].
 	    aCategoryWidget
-	        classOrMeta: class;
-	        selectACategory: (class compiledMethodAt: aSelector) methodCategory.
+		classOrMeta: class;
+		selectACategory: (class compiledMethodAt: aSelector) methodCategory.
             aMethodWidget
                 class: class withCategory: (class compiledMethodAt: aSelector) methodCategory ].
 

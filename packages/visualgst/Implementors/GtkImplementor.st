@@ -104,13 +104,16 @@ GtkMainWindow subclass: GtkImplementor [
 
         self accelGroup append: {{'<Control>D'. '<GtkLauncher>/Smalltalk/DoIt'}.
             {'<Control>P'. '<GtkLauncher>/Smalltalk/PrintIt'}.
+            {'<Control>S'. '<GtkLauncher>/Smalltalk/AcceptIt'}.
             {'<Control>I'. '<GtkLauncher>/Smalltalk/InspectIt'}.
             {'<Alt>D'. '<GtkLauncher>/Smalltalk/DebugIt'}}.
 
         ^ self createNewMenuEntry: {GTK.GtkMenuItem menuItem: 'Do It' accelPath: '<GtkLauncher>/Smalltalk/DoIt' connectTo: self selector: #doIt.
             GTK.GtkMenuItem menuItem: 'Print It' accelPath: '<GtkLauncher>/Smalltalk/PrintIt' connectTo: self selector: #printIt.
             GTK.GtkMenuItem menuItem: 'Inspect It' accelPath: '<GtkLauncher>/Smalltalk/InspectIt' connectTo: self selector: #inspectIt.
-            GTK.GtkMenuItem menuItem: 'Debug It' accelPath: '<GtkLauncher>/Smalltalk/DebugIt' connectTo: self selector: #debugIt}
+            GTK.GtkMenuItem menuItem: 'Debug It' accelPath: '<GtkLauncher>/Smalltalk/DebugIt' connectTo: self selector: #debugIt.
+            GTK.GtkMenuItem new.
+            GTK.GtkMenuItem menuItem: 'Accept It' accelPath: '<GtkLauncher>/Smalltalk/AcceptIt' connectTo: self selector: #acceptIt}
     ]
 
     createHelpMenus [
@@ -397,6 +400,12 @@ THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.';
         classBrowserWidget debugIt
     ]
 
+    acceptIt [
+	<category: 'smalltalk events'>
+
+	classBrowserWidget acceptIt
+    ]
+
     back [
         <category: 'history events'>
 
@@ -477,22 +486,6 @@ THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.';
 
         classBrowserWidget selectAll
     ]
-
-    "close [
-        <category: 'file events'>
-
-        classBrowserWidget checkCodeWidget.
-
-        super close
-    ]
-
-    delete: aGtkWidget event: aGdkEvent [
-        <category: 'window events'>
-
-        classBrowserWidget checkCodeWidget.
-
-        ^ false
-    ]"
 
     close [
         <category: 'file events'>

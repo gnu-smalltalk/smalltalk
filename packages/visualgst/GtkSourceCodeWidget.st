@@ -340,11 +340,32 @@ GtkConcreteWidget subclass: GtkSourceCodeWidget [
     ]
 
     browseSenders [
+	<category: 'browse'>
+
 	OpenSenderCommand on: self
     ]
 
     browseImplementors [
+	<category: 'browse'>
+
 	OpenImplementorCommand on: self
     ]
+
+    appendTag: aSymbol description: anArray [
+	<category: 'text buffer'>
+
+	codeBuffer
+            createTag: aSymbol varargs: anArray
+    ]
+
+    applyTag: aSymbol forLine: anInteger [
+	<category: 'text buffer'>
+
+	| start end |
+	start := codeBuffer getIterAtLine: anInteger - 1.
+	end := codeBuffer getIterAtLine: anInteger.
+	codeBuffer applyTagByName: aSymbol start: start end: end
+    ]
+
 ]
 

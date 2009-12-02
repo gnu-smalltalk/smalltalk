@@ -1,5 +1,5 @@
 GtkConcreteWidget subclass: GtkClassHierarchyWidget [
-    | classesTree model class |
+    | classesTree model classOrMeta |
 
     GtkClassHierarchyWidget >> on: aClass [
 	^ (self new)
@@ -14,16 +14,16 @@ GtkConcreteWidget subclass: GtkClassHierarchyWidget [
 	self mainWidget: self buildTreeView
     ]
 
-    class [
+    classOrMeta [
 	<category: 'accessing'>
     
-	^ class
+	^ classOrMeta
     ]
 
-    class: aClass [
+    classOrMeta: aClass [
 	<category: 'accessing'>
 
-	class := aClass.
+	classOrMeta := aClass.
 	self refreshModel
     ]
 
@@ -47,7 +47,7 @@ GtkConcreteWidget subclass: GtkClassHierarchyWidget [
 	
 	self model clear.
 	iter := self buildSuperClassHierarchy.
-	self class class subclassesDo: [ :each |
+	self classOrMeta class subclassesDo: [ :each |
 		self appendClass: each to: iter].
 
 	classesTree expandAll
@@ -57,7 +57,7 @@ GtkConcreteWidget subclass: GtkClassHierarchyWidget [
 	<category: 'model builder'>
 
 	| iter res parent parentGtkIter |
-	parent := self class.
+	parent := self classOrMeta.
 	res := OrderedCollection new.
 	[parent isNil] whileFalse: [
 	    res addFirst: parent displayString.
@@ -107,7 +107,7 @@ GtkConcreteWidget subclass: GtkClassHierarchyWidget [
 	<category: 'accessing'>
 
 	| iter string |
-	(iter := classesTree selectedIter) ifNil: [self error: 'Nothing is selected'].
+	(iter := classesTree selectedIter) ifNil: [ ^ self classOrMeta " self error: 'Nothing is selected' " ].
 	string := ((self model getOop: iter column: 0) subStrings: $ ) at: 1.
 
 	^ self lookFor: 1 inside: Smalltalk with: (string subStrings: $.) 

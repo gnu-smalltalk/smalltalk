@@ -135,7 +135,7 @@ GtkConcreteWidget subclass: GtkInspectorBrowserWidget [
         cMethodWidget class: aClass class withCategory: '*'.
 
         codeWidget sourceCode: ''.
-	state := CategoryState on: self with: classHierarchyWidget selectedClass -> iCategoryWidget selectedCategory
+	state := CategoryState on: self with: classHierarchyWidget selectedClass -> '*' 
     ]
 
     onInstanceSideMethodChanged [
@@ -163,7 +163,7 @@ GtkConcreteWidget subclass: GtkInspectorBrowserWidget [
     selectAClass: aClass [
 	<category: 'selection'>
 
-	classHierarchyWidget class: aClass.
+	classHierarchyWidget classOrMeta: aClass.
 
 	iMethodWidget class: aClass withCategory: '*'.
 	cMethodWidget class: aClass class withCategory: '*'.
@@ -293,6 +293,12 @@ GtkConcreteWidget subclass: GtkInspectorBrowserWidget [
 	<category: 'accessing'>
 
 	^ codeWidget sourceCode
+    ]
+
+    codeSaved [
+	<category: 'code saved'>
+
+	codeWidget codeSaved
     ]
 ]
 

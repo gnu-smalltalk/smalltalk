@@ -40,7 +40,7 @@ UndoCommand subclass: AddMethodUndoCommand [
         category := (#('still unclassified' '*') includes: (aCategory))
 					    ifTrue: [ nil ]
 					    ifFalse: [ aCategory ].
-	classOrMeta := aClass.
+	classOrMeta := aClass
     ]
 
     description [
@@ -77,11 +77,13 @@ UndoCommand subclass: AddMethodUndoCommand [
 		selector := oldCompiledMethod selector ]
 	    ifNil: [ selector := nil ].
 
-	browserWidget ifNil: [^self].
+	browserWidget ifNil: [ ^ self ].
+	browserWidget codeSaved.
+	"browserWidget ifNil: [ ^ self ].
+	browserWidget codeSaved.
 	oldCompiledMethod methodClass isMetaclass
 	    ifTrue: [ browserWidget selectAClassMethod: selector ]
-	    ifFalse: [ browserWidget selectAnInstanceMethod: selector ].
-	browserWidget codeSaved.
+	    ifFalse: [ browserWidget selectAnInstanceMethod: selector ]."
     ]
 
     redo [
@@ -89,11 +91,13 @@ UndoCommand subclass: AddMethodUndoCommand [
 
 	classOrMeta methodDictionary insertMethod: compiledMethod.
 
-	browserWidget ifNil: [^self].
+	browserWidget ifNil: [ ^ self ].
+	browserWidget codeSaved.
+	"browserWidget ifNil: [ ^ self ].
+	browserWidget codeSaved.
 	compiledMethod methodClass isMetaclass
 	    ifTrue: [ browserWidget selectAClassMethod: compiledMethod selector ]
-	    ifFalse: [ browserWidget selectAnInstanceMethod: compiledMethod selector ].
-	browserWidget codeSaved.
+	    ifFalse: [ browserWidget selectAnInstanceMethod: compiledMethod selector ]."
     ]
 ]
 

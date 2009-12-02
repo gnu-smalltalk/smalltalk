@@ -54,7 +54,6 @@ GtkMainWindow subclass: GtkSender [
 
         self accelGroup append:
             {{'<Control>O'. '<GtkSender>/File/Open'}.
-            {'<Control>S'. '<GtkSender>/File/Save'}.
             {'<Control><Shift>S'. '<GtkSender>/File/SaveAs'}.
             {'<Control>Q'. '<GtkSender>/File/Close'}}.
 
@@ -65,7 +64,6 @@ GtkMainWindow subclass: GtkSender [
             GTK.GtkMenuItem menuItem: 'Save as...' accelPath: '<GtkSender>/File/SaveAs' connectTo: self selector: #saveImageAs.
             GTK.GtkMenuItem new.
             GTK.GtkMenuItem menuItem: 'Print' connectTo: self selector: #print.
-            GTK.GtkMenuItem new.
             GTK.GtkMenuItem menuItem: 'Save image' connectTo: self selector: #saveImage.
             GTK.GtkMenuItem menuItem: 'Save image as...' connectTo: self selector: #saveImageAs.
             GTK.GtkMenuItem new.
@@ -110,13 +108,16 @@ GtkMainWindow subclass: GtkSender [
 
         self accelGroup append: {{'<Control>D'. '<GtkLauncher>/Smalltalk/DoIt'}.
             {'<Control>P'. '<GtkLauncher>/Smalltalk/PrintIt'}.
+            {'<Control>S'. '<GtkLauncher>/Smalltalk/AcceptIt'}.
             {'<Control>I'. '<GtkLauncher>/Smalltalk/InspectIt'}.
             {'<Alt>D'. '<GtkLauncher>/Smalltalk/DebugIt'}}.
 
         ^ self createNewMenuEntry: {GTK.GtkMenuItem menuItem: 'Do It' accelPath: '<GtkLauncher>/Smalltalk/DoIt' connectTo: self selector: #doIt.
             GTK.GtkMenuItem menuItem: 'Print It' accelPath: '<GtkLauncher>/Smalltalk/PrintIt' connectTo: self selector: #printIt.
             GTK.GtkMenuItem menuItem: 'Inspect It' accelPath: '<GtkLauncher>/Smalltalk/InspectIt' connectTo: self selector: #inspectIt.
-            GTK.GtkMenuItem menuItem: 'Debug It' accelPath: '<GtkLauncher>/Smalltalk/DebugIt' connectTo: self selector: #debugIt}
+            GTK.GtkMenuItem menuItem: 'Debug It' accelPath: '<GtkLauncher>/Smalltalk/DebugIt' connectTo: self selector: #debugIt.
+            GTK.GtkMenuItem new.
+            GTK.GtkMenuItem menuItem: 'Accept It' accelPath: '<GtkLauncher>/Smalltalk/AcceptIt' connectTo: self selector: #acceptIt}
     ]
 
     createToolsMenus [
@@ -462,21 +463,35 @@ THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.';
         classBrowserWidget selectAll
     ]
 
-    "close [
-        <cateogory: 'file events'>
+    doIt [
+        <category: 'smalltalk events'>
 
-        classBrowserWidget checkCodeWidget.
-
-        super close
+        classBrowserWidget doIt
     ]
 
-    delete: aGtkWidget event: aGdkEvent [
-        <category: 'window events'>
+    printIt [
+        <category: 'smalltalk events'>
 
-        classBrowserWidget checkCodeWidget.
+        classBrowserWidget printIt
+    ]
 
-        ^ false
-    ]"
+    inspectIt [
+        <category: 'smalltalk events'>
+
+        classBrowserWidget inspectIt
+    ]
+
+    debugIt [
+        <category: 'smalltalk events'>
+
+        classBrowserWidget debugIt
+    ]
+
+    acceptIt [
+        <category: 'smalltalk events'>
+
+        classBrowserWidget acceptIt
+    ]
 
     close [
         <category: 'file events'>

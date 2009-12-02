@@ -409,7 +409,6 @@ THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.';
 
         self accelGroup append: 
 	    {{'<Control>O'. '<GtkLauncher>/File/Open'}.
-	    {'<Control>S'. '<GtkLauncher>/File/Save'}.
 	    {'<Control><Shift>S'. '<GtkLauncher>/File/SaveAs'}.
 	    {'<Control>Q'. '<GtkLauncher>/File/Quit'}}.
 

@@ -184,7 +184,7 @@ BlockContext extend [
 
         | variables method |
         method := self method method parserClass parseMethod: self method method methodSourceString.
-        (variables := method argumentNames) addAll: method body temporaryNames.
+        variables := method argumentNames,  method body temporaryNames.
         ^ variables
     ]
 ]
@@ -291,3 +291,4 @@ GTK.GtkWidget extend [
 	     ifFalse: [ self unsetFlags: Gtk gtkSensitive ]
     ]
 ]
+
