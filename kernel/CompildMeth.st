@@ -248,6 +248,13 @@ instances.'>
 	^super hash bitXor: descriptor hash
     ]
 
+    method [
+	"Answer the receiver, since it is already a method."
+
+	<category: 'accessing'>
+	^self
+    ]
+
     methodClass [
 	"Answer the class in which the receiver is installed."
 
