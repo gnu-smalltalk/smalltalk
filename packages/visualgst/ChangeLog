@@ -1,3 +1,7 @@
+2009-12-06  Paolo Bonzini  <bonzini@gnu.org>
+
+	* Debugger/GtkDebugger.st: Show current line in the context.
+
 2009-12-02  Paolo Bonzini  <bonzini@gnu.org>
 
 	* CategoryState.st: Add #printOn:.
