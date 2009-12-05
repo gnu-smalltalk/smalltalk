@@ -763,16 +763,6 @@ optimize_basic_block (gst_uchar *from,
 	 a method).  This almost never happens, so we don't bother.  */
       switch (bp[0])
 	{
-	case LINE_NUMBER_BYTECODE:
-	  /* Remove two consecutive line-number bytecode.  */
-	  if (bp < to - 2
-	      && bp[2] == LINE_NUMBER_BYTECODE)
-	    {
-	      bp += 2;
-	      continue;
-	    }
-	  break;
-
         case PUSH_TEMPORARY_VARIABLE:
         case PUSH_RECEIVER_VARIABLE:
 	  /* Leave only the store in store/pop/push sequences.  Don't do this

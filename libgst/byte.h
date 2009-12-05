@@ -130,11 +130,13 @@ enum {
   /* Causes _gst_line_number to always emit a line number bytecode.  */
   LN_FORCE = 1,
 
-  /* If line is -1, causes _gst_line_number to emit an absolute line
-     number (and use that line number as the offset) on the *next* call.
-     If line is > 0, causes _gst_line_number to emit line numbers
-     relatives to that line.  */
-  LN_RESET = 2
+  /* If LN_ABSOLUTE is also set, causes _gst_line_number to emit an absolute
+     ine number and use that line number as the offset.  If not,
+     _gst_line_number will emit line numbers relatives to that line.  */
+  LN_RESET = 2,
+
+  /* See above for description.  */
+  LN_ABSOLUTE = 4
 };
 
 typedef struct bytecode_array

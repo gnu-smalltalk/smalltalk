@@ -85,62 +85,10 @@ _gst_extract_bytecodes (OOP byteArrayOOP)
   return (result);
 }
 
-void
-_gst_line_number (int n, int flags)
-{
-  static int emit_absolute;
-  static int prev_line;
-  static int line_offset;
-  int emitted_line;
+static int next_line_number;
 
-  if (n > 65535)
-    n = 65535;
-
-  if (flags & LN_RESET)
-    {
-      if (n == -1)
-	{
-	  prev_line = -1;
-          emit_absolute = true;
-	}
-      else
-	{
-	  /* When we are reading from stdin, it's better to write
-	     line numbers where 1 is the first line *in the current
-	     doit*, because for now the prompt does not include the
-	     line number.  This might change in the future, in which
-	     case this special casing will become useless and LN_RESET
-	     will always be called with n == -1.  */
-	  prev_line = 1;
-          line_offset = n - 1;
-          emit_absolute = false;
-	}
-      return;
-    }
-
-  if (emit_absolute)
-    {
-      assert (n != -1);
-      assert (!(flags & LN_FORCE));
-      emitted_line = n;
-      line_offset = n - 1;
-      emit_absolute = false;
-    }
-  else
-    {
-      emitted_line = n - line_offset;
-      if (emitted_line <= 0)
-        return;
-      if (!(flags & LN_FORCE) && n == prev_line)
-        return;
-    }
-
-  prev_line = n;
-  _gst_compile_byte (LINE_NUMBER_BYTECODE, emitted_line);
-}
-
-void
-_gst_compile_byte (gst_uchar byte, int arg)
+static void
+compile_byte (gst_uchar byte, int arg)
 {
   int num_bytes;
   long n;
@@ -165,6 +113,59 @@ _gst_compile_byte (gst_uchar byte, int arg)
 
   *_gst_cur_bytecodes->ptr++ = byte;
   *_gst_cur_bytecodes->ptr++ = arg & 255;
+}
+
+void
+_gst_line_number (int n, int flags)
+{
+  static int prev_line;
+  static int line_offset;
+
+  if (n > 65535)
+    n = 65535;
+
+  if (flags & LN_RESET)
+    {
+      assert (!(flags & LN_FORCE));
+      assert (n > 0);
+      if (flags & LN_ABSOLUTE)
+	{
+	  compile_byte (LINE_NUMBER_BYTECODE, n);
+	  prev_line = n;
+	}
+      line_offset = n - 1;
+      next_line_number = -1;
+    }
+  else
+    {
+      assert (!(flags & LN_ABSOLUTE));
+      if (n == -1)
+	{
+	  prev_line = -1;
+	  next_line_number = -1;
+	}
+      else
+	{
+	  assert (n > line_offset);
+	  if ((flags & LN_FORCE) || n != prev_line)
+	    {
+	      prev_line = n;
+	      next_line_number = n - line_offset;
+	    }
+	}
+    }
+}
+
+void
+_gst_compile_byte (gst_uchar byte, int arg)
+{
+  if (next_line_number != -1)
+    {
+      compile_byte (LINE_NUMBER_BYTECODE, next_line_number);
+      next_line_number = -1;
+    }
+
+  compile_byte (byte, arg);
 }
 
 void

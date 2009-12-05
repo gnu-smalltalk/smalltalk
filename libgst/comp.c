@@ -809,10 +809,17 @@ _gst_compile_method (tree_node method,
   _gst_push_new_scope ();
   inside_block = 0;
   selector = compute_selector (method->v_method.selectorExpr);
-  if (method->location.file_offset != -1 && _gst_get_cur_stream_prompt ())
+
+  /* When we are reading from stdin, it's better to write line numbers where
+     1 is the first line *in the current doit*, because for now the prompt
+     does not include the line number.  This might change in the future.
+
+     Also, do not emit line numbers if the method has no statements.  */
+  if ((method->location.file_offset != -1 && _gst_get_cur_stream_prompt ())
+      || !method->v_method.statements)
     _gst_line_number (method->location.first_line, LN_RESET);
   else
-    _gst_line_number (-1, LN_RESET);
+    _gst_line_number (method->location.first_line, LN_RESET | LN_ABSOLUTE);
 
   INC_ADD_OOP (selector);
 

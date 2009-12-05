@@ -1,3 +1,12 @@
+2009-12-05  Paolo Bonzini  <bonzini@gnu.org>
+
+	* libgst/byte.c: Add LN_ABSOLUTE, emit relative line number bytecodes
+	together with _following_ bytecode.
+	* libgst/byte.h: Add LN_ABSOLUTE.
+	* libgst/comp.c: Emit absolute line number for the line with the
+	selector.
+	* libgst/opt.c: Remove now useless two-line-numbers optimization.
+
 2009-11-26  Lee Duhem  <lee.duhem@gmail.com>
 
 	* libgst/comp.c: Make formatted source of Behavior>>methodsFor: look
