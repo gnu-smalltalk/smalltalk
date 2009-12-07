@@ -25,7 +25,7 @@ libgst_la_LIBADD=$(top_builddir)/lib-src/library.la $(SOCKET_LIBS) \
 
 libgst_la_DEPENDENCIES=$(top_builddir)/lib-src/library.la $(LIBSNPRINTFV)
 
-libgst_la_LDFLAGS = -version-info $(VERSION_INFO) -no-undefined \
+libgst_la_LDFLAGS = -version-info $(VERSION_INFO) -no-undefined -static \
 	-export-symbols-regex "^gst_.*"
 
 libgst_la_SOURCES = \
