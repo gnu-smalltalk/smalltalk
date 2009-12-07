@@ -1,3 +1,7 @@
+2009-12-07  Paolo Bonzini  <bonzini@gnu.org>
+
+	* lib-src/ltdl.c: Apply CVE-2009-3736 patch.
+
 2009-09-21  Paolo Bonzini  <bonzini@gnu.org>
 
 	* lib-src/sincosl.c: Fix Cygwin compilation.
