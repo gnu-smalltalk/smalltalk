@@ -33,8 +33,9 @@ AC_DEFUN([GST_LIBC_SO_NAME],
 	/usr/lib/libSystem.dylib"
   esac
 
+  gst_lib_sysroot=`$CC --print-sysroot`
   for i in $gst_libc_search_path; do
-    if test -f "$i"; then
+    if test -f "$gst_lib_sysroot$i"; then
       oldwd=`pwd`
       gst_cv_libc_so_name=`basename $i`
       gst_cv_libc_so_dir=`dirname $i`
