@@ -5,6 +5,7 @@
 *.lo
 *.o
 *.star
+*.stamp
 .svn
 .deps
 .dirstamp
@@ -41,7 +42,6 @@ termnorm
 /lightning/funcs.h
 /packages/blox/tests/package.xml
 /snprintfv/snprintfv/compat.h
-/snprintfv/snprintfv/compat.stamp
 /smalltalk-mode-init.el
 /tests/atconfig
 /tests/atlocal
