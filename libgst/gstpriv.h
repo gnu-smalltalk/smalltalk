@@ -618,6 +618,7 @@ extern OOP _gst_nil_oop
 #include "print.h"
 #include "security.h"
 #include "real.h"
+#include "sockets.h"
 
 /* Include this last, it has the bad habit of #defining printf
    and this fools gcc's __attribute__ (format) */
