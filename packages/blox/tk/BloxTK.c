@@ -703,7 +703,7 @@ xpmParseColors (XpmData * data, unsigned int ncolors, unsigned int cpp,
 	  curkey = 0;
 	  lastwaskey = 0;
 	  *curbuf = '\0';	/* init curbuf */
-	  while ((l = xpmNextWord (data, buf, BUFSIZ)) != NULL)
+	  while ((l = xpmNextWord (data, buf, BUFSIZ)) != 0)
 	    {
 	      if (!lastwaskey)
 		{
@@ -785,7 +785,7 @@ xpmParseColors (XpmData * data, unsigned int ncolors, unsigned int cpp,
 	   */
 	  xpmNextString (data);	/* get to the next string */
 	  *curbuf = '\0';	/* init curbuf */
-	  while ((l = xpmNextWord (data, buf, BUFSIZ)) != NULL)
+	  while ((l = xpmNextWord (data, buf, BUFSIZ)) != 0)
 	    {
 	      if (*curbuf != '\0')
 		strcat (curbuf, " ");	/* append space */
