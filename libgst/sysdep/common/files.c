@@ -251,7 +251,7 @@ _gst_relocate_path (const char *path)
 
   /* Now p points just past the last separator (if any).  */
   s = alloca (p - _gst_executable_path + strlen (path) + 1);
-  sprintf (s, "%.*s%s", p - _gst_executable_path, _gst_executable_path, path);
+  sprintf (s, "%.*s%s", (int)(p - _gst_executable_path), _gst_executable_path, path);
   return _gst_get_full_file_name (s);
 }
 
