@@ -1206,7 +1206,7 @@ _gst_make_class_variable_dictionary (const char *variableNames,
   inc_ptr incPtr;
 
   if (variableNames == NULL)
-    variableNames = (gst_uchar *) "";
+    variableNames = "";
 
   incPtr = INC_SAVE_POINTER ();
 
