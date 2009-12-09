@@ -2,24 +2,16 @@ List of user-visible changes in GNU Smalltalk
 
 NEWS FROM 3.1 TO 3.2
 
-o   The XML parser will ignore whitespace if placed in non-validating mode.
-
-o   An XML pull parser is included as package XML-PullParser.  The package
-    is based on the VisualWorks and Squeak pull parsers by Anthony Blakey
-    and Ken Treis.
-
-o   In addition to the validating XML parser, a non-validating Expat-based
-    parser is available in package XML-Expat.  The Expat parser is
-    experimental, but it is very fast and supports both pull and push
-    operation.
-
-o   The suggested way to instantiate an XML parser is now using
-    "SAXParser defaultParserClass", which will work with either of the
-    two available parsers.
-
 o   "aNumber raisedToInteger: 0" will raise an exception if and only if
     aNumber is not a floating-point value.  This was backwards in previous
     versions.
+
+o   Packages can be downloaded and updated directly from the network.  The
+    repository of packages is at http://smalltalk.gnu.org/project; the
+    repository holds the location of the package.xml files, which point to
+    the svn or git URL of the code.
+
+    In order to download a package with git, version 1.6.2 is required.
 
 o   Fixed crash on omitting mandatory arguments of short options
 
@@ -116,6 +108,21 @@ o   The text-based #inspect method is now available also as
     Contributed by Stefan Schmiedl.
 
 o   The VM has 0% CPU usage when no process is active.
+
+o   The XML parser will ignore whitespace if placed in non-validating mode.
+
+o   An XML pull parser is included as package XML-PullParser.  The package
+    is based on the VisualWorks and Squeak pull parsers by Anthony Blakey
+    and Ken Treis.
+
+o   In addition to the validating XML parser, a non-validating Expat-based
+    parser is available in package XML-Expat.  The Expat parser is
+    experimental, but it is very fast and supports both pull and push
+    operation.
+
+o   The suggested way to instantiate an XML parser is now using
+    "SAXParser defaultParserClass", which will work with either of the
+    two available parsers.
 
 -----------------------------------------------------------------------------
 
