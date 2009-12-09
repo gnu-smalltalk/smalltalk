@@ -37,7 +37,7 @@ struct pointer_set_t
   size_t n_slots;		/* n_slots = 2^log_slots */
   size_t n_elements;
 
-  void **slots;
+  const void **slots;
 };
 
 /* Use the multiplicative method, as described in Knuth 6.4, to obtain
@@ -118,7 +118,7 @@ pointer_set_contains (struct pointer_set_t *pset, void *p)
 /* Subroutine of pointer_set_insert.  Return the insertion slot for P into
    an empty element of SLOTS, an array of length N_SLOTS.  */
 static inline size_t
-insert_aux (void *p, void **slots, size_t n_slots, size_t log_slots)
+insert_aux (const void *p, const void **slots, size_t n_slots, size_t log_slots)
 {
   size_t n = hash1 (p, n_slots, log_slots);
   for (;;)
@@ -152,7 +152,7 @@ pointer_set_insert (struct pointer_set_t *pset, void *p)
 
       for (i = 0; i < pset->n_slots; ++i)
         {
-	  void *value = pset->slots[i];
+	  const void *value = pset->slots[i];
 	  n = insert_aux (value, new_slots, new_n_slots, new_log_slots);
 	  new_slots[n] = value;
 	}
@@ -176,7 +176,7 @@ pointer_set_insert (struct pointer_set_t *pset, void *p)
    parameter DATA.  If FN returns false, the iteration stops.  */
 
 void pointer_set_traverse (struct pointer_set_t *pset,
-			   char (*fn) (void *, void *), void *data)
+			   char (*fn) (const void *, void *), void *data)
 {
   size_t i;
   for (i = 0; i < pset->n_slots; ++i)
@@ -197,7 +197,7 @@ struct pointer_map_t
   size_t n_slots;		/* n_slots = 2^log_slots */
   size_t n_elements;
 
-  void **keys;
+  const void **keys;
   void **values;
 };
 
@@ -297,7 +297,7 @@ pointer_map_insert (struct pointer_map_t *pmap, void *p)
    iteration stops.  */
 
 void pointer_map_traverse (struct pointer_map_t *pmap,
-			   char (*fn) (void *, void **, void *), void *data)
+			   char (*fn) (const void *, void **, void *), void *data)
 {
   size_t i;
   for (i = 0; i < pmap->n_slots; ++i)
