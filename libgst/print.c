@@ -388,6 +388,7 @@ _gst_display_object (gst_object obj)
     }
 
   printf ("Object at %p (%s)",
+	  obj,
 	  IS_EDEN_ADDR (obj) ? "Eden" :
 	  IS_SURVIVOR_ADDR (obj, 0) ? "Even" :
 	  IS_SURVIVOR_ADDR (obj, 1) ? "Odd" : "Old");
