@@ -337,7 +337,7 @@ myConnect (int fd, struct sockaddr *sockaddr, int len)
 }
 
 static int
-myAccept (int fd, struct sockaddr *addr, int *addrlen)
+myAccept (int fd, struct sockaddr *addr, socklen_t *addrlen)
 {
   SOCKET fh = SOCKET_ERROR;
   int new_fd;
@@ -363,26 +363,26 @@ myAccept (int fd, struct sockaddr *addr, int *addrlen)
 }
 
 static int
-myBind (int fd, struct sockaddr *addr, int addrlen)
+myBind (int fd, struct sockaddr *addr, socklen_t addrlen)
 {
   fix_sockaddr (addr);
   return bind (FD_TO_SOCKET (fd), addr, addrlen);
 }
 
 static int
-myGetpeername (int fd, struct sockaddr *addr, int *addrlen)
+myGetpeername (int fd, struct sockaddr *addr, socklen_t *addrlen)
 {
   return getpeername (FD_TO_SOCKET (fd), addr, addrlen);
 }
 
 static int
-myGetsockname (int fd, struct sockaddr *addr, int *addrlen)
+myGetsockname (int fd, struct sockaddr *addr, socklen_t *addrlen)
 {
   return getsockname (FD_TO_SOCKET (fd), addr, addrlen);
 }
 
 static int
-myGetsockopt (int fd, int level, int optname, char *optval, int *optlen)
+myGetsockopt (int fd, int level, int optname, char *optval, socklen_t *optlen)
 {
   return getsockopt (FD_TO_SOCKET (fd), level, optname, optval, optlen);
 }
@@ -398,7 +398,7 @@ myListen (int fd, int backlog)
 
 static int
 myRecvfrom (int fd, char *buf, int len, int flags, struct sockaddr *from,
-	    int *fromlen)
+	    socklen_t *fromlen)
 {
   int frombufsize = *fromlen;
   int r = recvfrom (FD_TO_SOCKET (fd), buf, len, flags, from, fromlen);
@@ -429,7 +429,7 @@ static int
 getSoError (int fd)
 {
   int error;
-  int size = sizeof (error);
+  socklen_t size = sizeof (error);
   if ((error = _gst_get_fd_error (fd)) != 0)
     ;
 
