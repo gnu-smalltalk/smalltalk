@@ -1,3 +1,12 @@
+2009-12-09  Alexey Zakhlestin  <indeyets@gmail.com>
+
+	* libgst/gstpriv.h: Include sockets.h.
+	* libgst/print.c: Fix printf.
+	* libgst/socklen.c: Use socklen_t where appropriate.
+	* libgst/sym.c: Remove useless cast.
+	* libgst/sysdep/common/files.c: Fix 64-bit cleanliness problems.
+	* libgst/sysdep/posix/findexec.c: Likewise.
+
 2009-12-05  Paolo Bonzini  <bonzini@gnu.org>
 
 	* libgst/byte.c: Add LN_ABSOLUTE, emit relative line number bytecodes

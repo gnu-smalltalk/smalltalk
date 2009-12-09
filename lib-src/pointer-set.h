@@ -27,7 +27,7 @@ void pointer_set_destroy (struct pointer_set_t *pset);
 
 int pointer_set_contains (struct pointer_set_t *pset, void *p);
 int pointer_set_insert (struct pointer_set_t *pset, void *p);
-void pointer_set_traverse (struct pointer_set_t *, char (*) (void *, void *),
+void pointer_set_traverse (struct pointer_set_t *, char (*) (const void *, void *),
 			   void *);
 
 struct pointer_map_t;
@@ -37,6 +37,6 @@ void pointer_map_destroy (struct pointer_map_t *pmap);
 void **pointer_map_contains (struct pointer_map_t *pmap, void *p);
 void **pointer_map_insert (struct pointer_map_t *pmap, void *p);
 void pointer_map_traverse (struct pointer_map_t *,
-			   char (*) (void *, void **, void *), void *);
+			   char (*) (const void *, void **, void *), void *);
 
 #endif  /* POINTER_SET_H  */

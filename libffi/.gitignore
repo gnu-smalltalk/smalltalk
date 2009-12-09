@@ -1,2 +1,5 @@
-fficonfig.h.in
-stamp-h.in
+/fficonfig.h.in
+/stamp-h.in
+/fficonfig.h
+/include/ffi.h
+/include/ffitarget.h

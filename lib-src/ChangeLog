@@ -1,3 +1,8 @@
+2009-12-09  Alexey Zakhlestin  <indeyets@gmail.com>
+
+	* lib-src/pointer-set.c: Add const markers.
+	* lib-src/pointer-set.h: Add const markers.
+
 2009-12-07  Paolo Bonzini  <bonzini@gnu.org>
 
 	* lib-src/ltdl.c: Apply CVE-2009-3736 patch.

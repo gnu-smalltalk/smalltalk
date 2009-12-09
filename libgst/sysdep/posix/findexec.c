@@ -171,7 +171,7 @@ find_executable (const char *argv0)
 	  else if (!p_next)
 	    asprintf (&concat_name, "%s/%s", p, argv0);
 	  else
-	    asprintf (&concat_name, "%.*s/%s", p_next++ - p, p, argv0);
+	    asprintf (&concat_name, "%.*s/%s", (int)(p_next++ - p), p, argv0);
 
 	  if (maybe_executable (concat_name))
 	    {
