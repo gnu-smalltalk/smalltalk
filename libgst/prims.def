@@ -3083,7 +3083,7 @@ primitive VMpr_String_similarityTo [succeed,fail]
   OOP oop1, oop2;
   _gst_primitives_executed++;
 
-  oop2 = STACKTOP ();
+  oop2 = POP_OOP ();
   oop1 = STACKTOP ();
 
   if (OOP_FIXED_FIELDS (oop1)

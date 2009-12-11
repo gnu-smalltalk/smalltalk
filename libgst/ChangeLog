@@ -1,3 +1,7 @@
+2009-12-11  Gwenael Casaccio  <mrgwen@gmail.com>
+
+	* libgst/prims.def: Fix bug in similarityTo:.
+
 2009-12-09  Alexey Zakhlestin  <indeyets@gmail.com>
 
 	* libgst/gstpriv.h: Include sockets.h.
