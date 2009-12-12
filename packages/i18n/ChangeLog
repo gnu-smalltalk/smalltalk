@@ -1,3 +1,7 @@
+2009-12-12  Paolo Bonzini  <bonzini@gnu.org>
+
+	* Locale.st: Move #primRootDirectory to class side.
+
 2008-04-07  Paolo Bonzini  <bonzini@gnu.org>
 
 	* GetText.st: Use new File classes.

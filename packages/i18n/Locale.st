@@ -488,7 +488,7 @@ asked for things with a common idiom, the #? binary message.'>
 	
     ]
 
-    primRootDirectory [
+    Locale class >> primRootDirectory [
 	<category: 'C call-outs'>
 	<cCall: 'i18n_localeDirectory' returning: #string args: #()>
 	
