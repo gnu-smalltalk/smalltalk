@@ -518,6 +518,11 @@ XML.'>
 	self subclassResponsibility
     ]
 
+    isDisabled [
+	<category: 'accessing'>
+	^false
+    ]
+
     printXmlOn: aStream collection: aCollection tag: aString indent: indent [
 	"Private - Print aCollection on aStream as a sequence of aString
 	 tags."
@@ -1124,11 +1129,6 @@ XML.'>
 		tag = 'disabled-package' 
 		    ifTrue: [^DisabledPackage new parse: file tag: tag]]] 
 		repeat
-    ]
-
-    isDisabled [
-	<category: 'accessing'>
-	^false
     ]
 
     test [

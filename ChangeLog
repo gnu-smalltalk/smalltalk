@@ -1,3 +1,7 @@
+2009-12-13  Paolo Bonzini  <bonzini@gnu.org>
+
+	* kernel/PkgLoader.st: Push #isDisabled up to PackageInfo.
+
 2009-12-02  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/CompildMeth.st: Add #method.
