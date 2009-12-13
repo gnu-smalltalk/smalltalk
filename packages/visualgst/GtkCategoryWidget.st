@@ -139,6 +139,12 @@ GtkConcreteWidget subclass: GtkCategoryWidget [
         ^ result
     ]
 
+    viewedCategoryWidget [
+	<category: 'accessing'>
+
+	^ self
+    ]
+
     viewedCategoryModel [
 	<category: 'accessing'>
 

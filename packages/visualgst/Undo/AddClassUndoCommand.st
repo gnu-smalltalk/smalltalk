@@ -29,9 +29,10 @@ UndoCommand subclass: AddClassUndoCommand [
     precondition [
 	<category: 'checking'>
 
-	newClassName = #Smalltalk ifTrue: [ self error: 'class name can''t be the same has a namespace name'  ].
-	Smalltalk subspacesDo: [ :each | each name = newClassName ifTrue: [ self error: 'class name can''t be the same has a namespace name'  ] ].
-	(namespace findIndexOrNil: newClassName) ifNotNil: [ self error: 'class exist in the namespace' ]
+	newClassName = #Smalltalk ifTrue: [ ^ self preconditionFailed: 'class name can''t be the same has a namespace name'  ].
+	Smalltalk subspacesDo: [ :each | each name = newClassName ifTrue: [ ^ self preconditionFailed: 'class name can''t be the same has a namespace name'  ] ].
+	(namespace findIndexOrNil: newClassName) ifNotNil: [ ^ self preconditionFailed: 'class exist in the namespace' ].
+	^ true
     ]
 
     undo [

@@ -7,7 +7,7 @@ UndoCommand subclass: DeleteMethodUndoCommand [
 
 	^ (self new)
 	    delete: aSymbol in: aClass;
-	    precondition;
+	    "precondition;"
 	    yourself
     ]
 

@@ -6,7 +6,7 @@ UndoCommand subclass: AddNamespaceUndoCommand [
 
 	^ (self new)
 	    add: aSymbol to: aNamespace;
-	    precondition;
+	    "precondition;"
 	    yourself
     ]
 
@@ -15,7 +15,6 @@ UndoCommand subclass: AddNamespaceUndoCommand [
 
 	parentNamespace := aNamespace.
 	namespaceName := aSymbol.
-	newNamespace := Namespace gstNew: parentNamespace name: namespaceName asSymbol
     ]
 
     description [
@@ -27,8 +26,11 @@ UndoCommand subclass: AddNamespaceUndoCommand [
     precondition [
         <category: 'checking'>
 
-        newNamespace = #Smalltalk ifTrue: [ self error: 'class name can''t be the same has a namespace name'  ].
-        Smalltalk subspacesDo: [ :each | each name = newNamespace ifTrue: [ self error: 'class name can''t be the same has a namespace name'  ] ].
+        namespaceName = #Smalltalk ifTrue: [ ^ self preconditionFailed: 'class name can''t be the same has a namespace name'  ].
+        parentNamespace subspacesDo: [ :each |
+	    each name = namespaceName ifTrue: [ ^ self preconditionFailed: 'class name can''t be the same has a namespace name'  ] ].
+	newNamespace := Namespace gstNew: parentNamespace name: namespaceName asSymbol.
+	^ true
     ]
 
     undo [

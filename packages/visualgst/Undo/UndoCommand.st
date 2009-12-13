@@ -1,10 +1,29 @@
 Object subclass: UndoCommand [
-    | description |
+    | description preconditionError |
 
     description [
 	<category: 'accessing'>
 
 	^ self subclassResponsibility 
+    ]
+
+    precondition [
+	<category: 'checking'>
+
+	^ true
+    ]
+
+    preconditionFailed: aString [
+	<category: 'checking'>
+
+	preconditionError := aString.
+	^ false
+    ]
+
+    error [
+	<category: 'checking'>
+
+	^ preconditionError
     ]
 
     undo [
@@ -17,6 +36,23 @@ Object subclass: UndoCommand [
 	<category: 'events'>
 
 	self subclassResponsibility 
+    ]
+
+    displayError [
+        <Category: 'error'>
+
+        | dialog |
+        dialog := GTK.GtkMessageDialog
+                                new: nil
+                                flags: GTK.Gtk gtkDialogDestroyWithParent
+                                type: GTK.Gtk gtkMessageWarning
+                                buttons: GTK.Gtk gtkButtonsNone
+                                message: self description
+                                tip: self error.
+
+        dialog
+            addButton: 'Ok' responseId: 1;
+            runBlockingAndDo: [ :dlg :res | dlg destroy ].
     ]
 ]
 

@@ -188,7 +188,7 @@ Object subclass: GtkCategorizedClassModel [
 	anEvent item environment == self namespace ifFalse: [ ^ self ].
 	(anEvent item category = self category or: [ self category isEmpty ]) ifFalse: [ ^ self ].
 	parentIter := self findIterInAClass: anEvent item superclass ifAbsent: [ nil ].
-	self append: parentIter column: 0 value: (anEvent item name, ' ')
+	self appendClass: anEvent item to: parentIter
     ]
 
     removeEvent: anEvent [

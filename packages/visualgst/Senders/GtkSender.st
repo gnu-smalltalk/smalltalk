@@ -27,8 +27,11 @@ GtkMainWindow subclass: GtkSender [
             LiteralsAndSpecialSelectors := Dictionary new.
             "[" CompiledMethod allInstancesDo: [ :each |
                 each literalsAndSpecialSelectorsDo: [ :lit |
-		    lit isSymbol ifTrue: [
-			(LiteralsAndSpecialSelectors at: lit ifAbsentPut: [ OrderedCollection new ]) add: each ] ] ] "] fork".
+		    lit isSymbol 
+			ifTrue: [ (LiteralsAndSpecialSelectors at: lit ifAbsentPut: [ OrderedCollection new ]) add: each ]
+			ifFalse: [  "lit isClass ifTrue: [ lit displayString printNl.
+					    (LiteralsAndSpecialSelectors at: lit displayString asSymbol ifAbsentPut: [ OrderedCollection new ]) add: each ]" ]
+				 ] ] "] fork".
             LiteralsAndSpecialSelectors ]
     ]
 
@@ -364,9 +367,10 @@ THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.';
 
     findInMethod: anObject [
 	<category: 'find'>
-	
+
+	| to |	
 	senderResults := Dictionary new.
-	(self literalsAndSpecialSelectors at: anObject asSymbol ifAbsent: [ #() ] ) do: [ :each |
+	(self literalsAndSpecialSelectors at: anObject displaySymbol ifAbsent: [ #() ] ) do: [ :each |
 	    self senderModel appendItem: {each displayString}.
 	    senderResults at: each displayString put: each ].
     ]

@@ -63,7 +63,7 @@ GtkNamespaceModel subclass: GtkCategorizedNamespaceModel [
 	classes := classes select: [ :each | (aNamespace at: each) isClass ].
 	(classes collect: [ :each | (aNamespace at: each) category ])
 	    asSortedCollection
-	        do: [ :each | self appendCategory: each for: aNamespace into: aGtkIter ]
+		do: [ :each | self appendCategory: each for: aNamespace into: aGtkIter ]
     ]
 
     appendCategory: aString for: aNamespace into: aGtkIter [
@@ -99,7 +99,7 @@ GtkNamespaceModel subclass: GtkCategorizedNamespaceModel [
         <category: 'item selection'>
 
 	self gtkModel itersDo: [ :iter |
-	    (self gtkModel getOop: iter column: self class namespaceColumn) = aNamespace ifTrue: [ ^ iter ] ].
+	    (self gtkModel at: iter column: self class namespaceColumn) = aNamespace ifTrue: [ ^ iter ] ].
 
 	^ self error: 'Namespace ', aNamespace displayString , ' not found'
     ]
@@ -107,9 +107,7 @@ GtkNamespaceModel subclass: GtkCategorizedNamespaceModel [
     addEvent: anEvent [
 	<category: 'model event'>
 
-	| iter |
-	iter := self findIterInANamespace: anEvent item superspace.
-	self gtkModel append: iter item: {namespaceIcon. anEvent item displayString. anEvent item. 'N'}
+	self appendNamespace: anEvent item to: (self findIterInANamespace: anEvent item superspace)
     ]
 
     isIterNamespace: aGtkIter [

@@ -25,7 +25,7 @@ UndoCommand subclass: DeleteNamespaceUndoCommand [
     undo [
 	<category: 'events'>
 
-	namespace superspace insertSubspace: namespace name
+	namespace superspace insertSubspace: namespace
     ]
 
     redo [

@@ -275,6 +275,21 @@ Behavior extend [
     ]
 ]
 
+VariableBinding extend [
+
+    hasLiterals [
+	<category: '*VisualGST'>
+
+	^ true
+    ]
+
+    symbolFromliterals [
+	<category: '*VisualGST'>
+
+	^ {self key}
+    ]
+]
+
 GTK.GtkToolButton class extend [
     newFromStock: icon label: aString [ 
         ^(self newFromStock: icon)
@@ -292,3 +307,26 @@ GTK.GtkWidget extend [
     ]
 ]
 
+Metaclass extend [
+    displaySymbol [
+	<category: '*VisualGST'>
+
+	^ self instanceClass name
+    ]
+]
+
+AbstractNamespace extend [
+    displaySymbol [
+	<category: '*VisualGST'>
+
+	^ self displayString asSymbol
+    ]
+]
+
+Symbol extend [
+    displaySymbol [
+	<category: '*VisualGST'>
+
+	^ self
+    ]
+]

@@ -7,7 +7,7 @@ UndoCommand subclass: DeleteCategoryUndoCommand [
 
 	^ (self new)
 	    delete: aString in: aClass onModel: aGtkCategoryModel;
-	    precondition;
+	    "precondition;"
 	    yourself
     ]
 
@@ -28,7 +28,8 @@ UndoCommand subclass: DeleteCategoryUndoCommand [
     precondition [
         <category: 'checking'>
 
-        category = '*' ifTrue: [ self error: 'Can''t delete a * category' ].
+        category = '*' ifTrue: [ ^ self preconditionFailed: 'Can''t delete a * category' ].
+	^ true
     ]
 
     undo [

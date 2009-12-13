@@ -7,7 +7,6 @@ UndoCommand subclass: AddMethodUndoCommand [
 
 	^ (self new)
 	    add: aString classified: aCategory in: aClass;
-	    precondition;
 	    yourself
     ]
 
@@ -16,14 +15,14 @@ UndoCommand subclass: AddMethodUndoCommand [
 
         ^ (self new)
             add: aString classified: aCategory in: aClass browser: aGtkBrowserWidget;
-            precondition;
             yourself
     ]
 
     compileError: aString [
 	<category: 'error printing'>
 
-	VisualGST compileError: aString
+	VisualGST compileError: aString.
+	^ self preconditionFailed: aString
     ]
 
     add: aString classified: aCategory in: aClass browser: aGtkBrowserWidget [
@@ -64,6 +63,7 @@ UndoCommand subclass: AddMethodUndoCommand [
 				classified: category
 				ifError: [ :fname :lineNo :errorString |
 				    ^ self compileError: 'Compile error ', errorString ].
+	^ true
     ]
 
     undo [
@@ -78,12 +78,7 @@ UndoCommand subclass: AddMethodUndoCommand [
 	    ifNil: [ selector := nil ].
 
 	browserWidget ifNil: [ ^ self ].
-	browserWidget codeSaved.
-	"browserWidget ifNil: [ ^ self ].
-	browserWidget codeSaved.
-	oldCompiledMethod methodClass isMetaclass
-	    ifTrue: [ browserWidget selectAClassMethod: selector ]
-	    ifFalse: [ browserWidget selectAnInstanceMethod: selector ]."
+	browserWidget codeSaved
     ]
 
     redo [
@@ -92,12 +87,12 @@ UndoCommand subclass: AddMethodUndoCommand [
 	classOrMeta methodDictionary insertMethod: compiledMethod.
 
 	browserWidget ifNil: [ ^ self ].
-	browserWidget codeSaved.
-	"browserWidget ifNil: [ ^ self ].
-	browserWidget codeSaved.
-	compiledMethod methodClass isMetaclass
-	    ifTrue: [ browserWidget selectAClassMethod: compiledMethod selector ]
-	    ifFalse: [ browserWidget selectAnInstanceMethod: compiledMethod selector ]."
+	browserWidget codeSaved
+    ]
+
+    displayError [
+        <Category: 'error'>
+
     ]
 ]
 

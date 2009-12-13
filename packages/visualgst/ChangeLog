@@ -1,3 +1,17 @@
+2009-12-06  Gwenael Casaccio  <mrgwen@gmail.com>
+
+	* Commands/UndoableCommand.st, Debugger/GtkDebugger.st,
+	Extensions.st, GtkCategorizedClassModel.st,
+	GtkCategorizedNamespaceModel.st, GtkCategorizedNamespaceWidget.st,
+	GtkCategoryWidget.st, Notification/Kernel/AbstractNamespace.st,
+	Senders/GtkSender.st, Undo/AddCategoryUndoCommand.st,
+	Undo/AddClassUndoCommand.st, Undo/AddMethodUndoCommand.st,
+	Undo/AddNamespaceUndoCommand.st, Undo/DeleteCategoryUndoCommand.st,
+	Undo/DeleteClassUndoCommand.st, Undo/DeleteMethodUndoCommand.st,
+	Undo/DeleteNamespaceUndoCommand.st, Undo/RenameCategoryUndoCommand.st,
+	Undo/RenameClassUndoCommand.st, Undo/RenameNamespaceUndoCommand.st,
+	Undo/UndoCommand.st, VisualGST.st: Merge.
+
 2009-12-06  Paolo Bonzini  <bonzini@gnu.org>
 
 	* Debugger/GtkDebugger.st: Show current line in the context.

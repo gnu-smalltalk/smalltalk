@@ -101,7 +101,7 @@ THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.';
 	^ (codeWidget := GtkSourceCodeWidget new)
             initialize;
 	    appendTag: #debug
-	        description: #('paragraph-background' 'grey83' 'foreground' 'black' nil);
+		description: #('paragraph-background' 'grey83' 'foreground' 'black' nil);
 	    parentWindow: window;
 	    browser: self;
             mainWidget
@@ -428,7 +428,7 @@ THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.';
 	selectedContext := debugger suspendedContext parentContextAt: ((contextWidget model getPath: iter) getIndices value) + 1.
 	codeWidget sourceCode: selectedContext method methodSourceString.
 	codeWidget object: selectedContext receiver.
-	codeWidget applyTag: #debug forLine: selectedContext currentLine.
+	codeWidget applyTag: #debug forLine: selectedContext currentLine - 1.
 	self updateInspectorWidget: selectedContext
     ]
 

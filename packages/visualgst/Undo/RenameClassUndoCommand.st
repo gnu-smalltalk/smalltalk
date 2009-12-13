@@ -7,7 +7,7 @@ UndoCommand subclass: RenameClassUndoCommand [
 
 	^ (self new)
 	    rename: aClass as: aSymbol;
-	    precondition;
+	    "precondition;"
 	    yourself
     ]
 
@@ -28,9 +28,10 @@ UndoCommand subclass: RenameClassUndoCommand [
     precondition [
         <category: 'checking'>
 
-        newClassName = #Smalltalk ifTrue: [ self error: 'class name can''t be the same has a namespace name'  ].
-        Smalltalk subspacesDo: [ :each | each name = newClassName ifTrue: [ self error: 'class name can''t be the same has a namespace name'  ] ].
-        (class environment findIndexOrNil: newClassName) ifNotNil: [ :class | self error: 'class exist in the namespace' ]
+        newClassName = #Smalltalk ifTrue: [ ^ self preconditionFailed: 'class name can''t be the same has a namespace name'  ].
+        class environment subspacesDo: [ :each | each name = newClassName ifTrue: [ ^ self preconditionFailed: 'class name can''t be the same has a namespace name'  ] ].
+        (class environment findIndexOrNil: newClassName) ifNotNil: [ :class | ^ self preconditionFailed: 'class exist in the namespace' ].
+	^ true
     ]
 
     undo [

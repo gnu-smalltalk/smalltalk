@@ -210,24 +210,28 @@ THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.';
 	 http://bugzilla.kernel.org/show_bug.cgi?id=9138, so we have to
 	 check the permission of the directory rather than the file."
 	File image parent isWriteable ifFalse: [ ^ self saveImageAs ].
-        self saveImage: [ObjectMemory snapshot]
+        self saveImage: [ ObjectMemory snapshot ]
     ]
 
     saveImageAs [
 	<category: 'file events'>
 
 	(GTK.GtkFileChooserDialog save: 'Save image as...' parent: window)
-	    runNonBlockingAndDo: [ :dlg :res |
-		res = GTK.Gtk gtkResponseAccept ifTrue: [ | name |
-		    name := dlg getFilename.
-		    self saveImage: [ObjectMemory snapshot: name] ].
-		dlg destroy ]
+	    runNonBlockingAndDo: [ :dlg :res | | name |
+		name := dlg getFilename.
+		dlg destroy.
+		res = GTK.Gtk gtkResponseAccept ifTrue: [ self saveImage: [ ObjectMemory snapshot: name ] ] ]
     ]
 
     saveImage: aBlock [
+
+	| oldMessage |
+	oldMessage := Transcript message.
+	Transcript message: stdout->#nextPutAllFlush:.
 	self class uniqueInstance: nil.
 	(saved := aBlock value not)
-	    ifTrue: [self class uniqueInstance: self]
+	    ifTrue: [ self class uniqueInstance: self.
+		Transcript message: oldMessage ]
     ]
 
     workspace [

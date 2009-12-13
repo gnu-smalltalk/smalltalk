@@ -65,7 +65,7 @@ Smalltalk.AbstractNamespace extend [
     insertSubspace: aNamespace [
 	"Insert an existing namespace"
 
-	<category: '*VisuaglGST'>
+	<category: '*VisualGST'>
 
         self
             at: aNamespace name asGlobalKey
