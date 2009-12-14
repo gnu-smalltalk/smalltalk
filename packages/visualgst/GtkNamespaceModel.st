@@ -11,7 +11,7 @@ Object subclass: GtkNamespaceModel [
     registerNotifier [
 	<category: 'initialize-release'>
 
-	(SystemChangeNotifier uniqueInstance)
+	(VisualGST uniqueInstance systemChangeNotifier)
 	    notify: self ofSystemChangesOfItem: #namespace change: #Added using: #'addEvent:';
 	    notify: self ofSystemChangesOfItem: #namespace change: #Removed using: #'removeEvent:'
     ]

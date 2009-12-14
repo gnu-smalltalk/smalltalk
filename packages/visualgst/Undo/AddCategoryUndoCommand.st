@@ -35,14 +35,14 @@ UndoCommand subclass: AddCategoryUndoCommand [
     undo [
 	<category: 'events'>
 
-	SystemChangeNotifier uniqueInstance categoryRemoved: category asString inClass: categoryWidget classOrMeta.
+	SystemChangeNotifier root categoryRemoved: category asString inClass: categoryWidget classOrMeta.
 	categoryWidget selectACategory: selectedCategory
     ]
 
     redo [
 	<category: 'events'>
 
-	SystemChangeNotifier uniqueInstance categoryAdded: category asString inClass: categoryWidget classOrMeta.
+	SystemChangeNotifier root categoryAdded: category asString inClass: categoryWidget classOrMeta.
 	categoryWidget selectACategory: category asString
     ]
 ]

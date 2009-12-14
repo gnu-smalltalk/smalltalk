@@ -14,7 +14,7 @@ Smalltalk.AbstractNamespace class extend [
 				    setSuperspace: parent;
 				    name: spaceName asSymbol;
 				    yourself).
-	VisualGST.SystemChangeNotifier uniqueInstance namespaceAdded: namespace.
+	VisualGST.SystemChangeNotifier root namespaceAdded: namespace.
 	^ namespace
     ]
 
@@ -41,7 +41,7 @@ Smalltalk.AbstractNamespace extend [
 	    ifAbsent: 
 	    [SystemExceptions.InvalidValue signalOn: aSymbol
 		reason: 'aSymbol must name a subspace'].
-	VisualGST.SystemChangeNotifier uniqueInstance namespaceRemoved: namespace.
+	VisualGST.SystemChangeNotifier root namespaceRemoved: namespace.
 	^ self removeKey: spaceName
     ]
 
@@ -51,7 +51,7 @@ Smalltalk.AbstractNamespace extend [
 	| class className |
 	className := aSymbol asGlobalKey.
 	class := self hereAt: className.
-	VisualGST.SystemChangeNotifier uniqueInstance classRemoved: class.
+	VisualGST.SystemChangeNotifier root classRemoved: class.
 	^ self removeKey: className
     ]
 
@@ -59,7 +59,7 @@ Smalltalk.AbstractNamespace extend [
 
         <category: '*VisualGST'>
 	self at: aClass name put: aClass.
-        VisualGST.SystemChangeNotifier uniqueInstance classAdded: aClass.
+        VisualGST.SystemChangeNotifier root classAdded: aClass.
     ]
 
     insertSubspace: aNamespace [
@@ -73,7 +73,7 @@ Smalltalk.AbstractNamespace extend [
 
 	subspaces add: aNamespace.
 
-	VisualGST.SystemChangeNotifier uniqueInstance namespaceAdded: aNamespace.
+	VisualGST.SystemChangeNotifier root namespaceAdded: aNamespace.
 	^ aNamespace
     ]
 ]

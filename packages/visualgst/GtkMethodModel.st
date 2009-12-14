@@ -21,7 +21,7 @@ Object subclass: GtkMethodModel [
     registerNotifier [
 	<category: 'initialize-release'>
 
-	(SystemChangeNotifier uniqueInstance)
+	(VisualGST uniqueInstance systemChangeNotifier)
 	    notify: self ofSystemChangesOfItem: #method change: #Added using: #'addEvent:';
 	    notify: self ofSystemChangesOfItem: #method change: #Removed using: #'removeEvent:'
     ]

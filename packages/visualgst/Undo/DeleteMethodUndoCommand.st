@@ -27,6 +27,7 @@ UndoCommand subclass: DeleteMethodUndoCommand [
     precondition [
         <category: 'checking'>
 
+	^ true
     ]
 
     undo [

@@ -8,6 +8,6 @@ Smalltalk.Class extend [
 	| oldCategory |
 	oldCategory := category.
 	category := aString.
-	VisualGST.SystemChangeNotifier uniqueInstance class: self recategorizedFrom: oldCategory to: category
+	VisualGST.SystemChangeNotifier root class: self recategorizedFrom: oldCategory to: category
     ]
 ]

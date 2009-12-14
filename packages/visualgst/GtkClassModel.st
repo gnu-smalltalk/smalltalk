@@ -21,7 +21,7 @@ Object subclass: GtkClassModel [
     registerNotifier [
 	<category: 'initialize-release'>
 
-	(SystemChangeNotifier uniqueInstance)
+	(VisualGST uniqueInstance systemChangeNotifier)
 	    notify: self ofSystemChangesOfItem: #class change: #Added using: #'addEvent:';
 	    notify: self ofSystemChangesOfItem: #class change: #Removed using: #'removeEvent:'
     ]

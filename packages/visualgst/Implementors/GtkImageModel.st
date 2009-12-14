@@ -1,6 +1,13 @@
 Object subclass: GtkImageModel [
     GtkImageModel class [ | current | ]
 
+    GtkImageModel class >> release [
+	<category: 'accessing'>
+
+	current := nil.
+        super release
+    ]
+
     GtkImageModel class >> current [
 	<category: 'accessing'>
 
@@ -33,7 +40,7 @@ Object subclass: GtkImageModel [
     registerNotifier [
 	<category: 'initialize-release'>
 
-	(SystemChangeNotifier uniqueInstance)
+	(VisualGST uniqueInstance systemChangeNotifier)
 	    notify: self ofSystemChangesOfItem: #namespace change: #Added using: #'addNamespaceEvent:';
 	    notify: self ofSystemChangesOfItem: #namespace change: #Removed using: #'removeNamespaceEvent:';
 	    notify: self ofSystemChangesOfItem: #class change: #Added using: #'addClassEvent:';

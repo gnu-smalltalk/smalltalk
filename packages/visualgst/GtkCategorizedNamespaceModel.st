@@ -33,7 +33,7 @@ GtkNamespaceModel subclass: GtkCategorizedNamespaceModel [
 	<category: 'initialize-release'>
 
 	super registerNotifier.
-	(SystemChangeNotifier uniqueInstance)
+	(VisualGST uniqueInstance systemChangeNotifier)
             notify: self ofSystemChangesOfItem: #class change: #Recategorized using: #'recategorizedClassEvent:'
     ]
 

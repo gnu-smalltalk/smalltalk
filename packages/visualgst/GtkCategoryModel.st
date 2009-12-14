@@ -21,7 +21,7 @@ Object subclass: GtkCategoryModel [
     registerNotifier [
 	<category: 'initialize-release'>
 
-	(SystemChangeNotifier uniqueInstance)
+	(VisualGST uniqueInstance systemChangeNotifier)
 	    notify: self ofSystemChangesOfItem: #category change: #Added using: #'addEvent:';
 	    notify: self ofSystemChangesOfItem: #category change: #Removed using: #'removeEvent:'
     ]

@@ -4,7 +4,7 @@ Smalltalk.MethodDictionary extend [
 	<category: '*VisualGST'>
 
 	self at: aCompiledMethod selector put: aCompiledMethod.
-	VisualGST.SystemChangeNotifier uniqueInstance methodAdded: aCompiledMethod.
+	VisualGST.SystemChangeNotifier root methodAdded: aCompiledMethod.
 	^ aCompiledMethod
     ]
 
@@ -12,7 +12,7 @@ Smalltalk.MethodDictionary extend [
         <category: '*VisualGST'>
 
         self removeKey: aCompiledMethod selector.
-        VisualGST.SystemChangeNotifier uniqueInstance methodRemoved: aCompiledMethod.
+        VisualGST.SystemChangeNotifier root methodRemoved: aCompiledMethod.
         ^ aCompiledMethod
     ]
 ]

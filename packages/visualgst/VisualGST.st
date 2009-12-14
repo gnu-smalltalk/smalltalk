@@ -1,12 +1,12 @@
 GtkMainWindow subclass: VisualGST [
     VisualGST class [ | compileError uniqueInstance | ]
 
-    | browsers outputs saved transcriptWidget windowsMenu |
+    | browsers outputs saved transcriptWidget windowsMenu systemChangeNotifier |
 
     VisualGST class >> uniqueInstance [
 	<category: 'public'>
 
-	uniqueInstance ifNil: [ uniqueInstance := self createInstance ].
+	uniqueInstance ifNil: [ self createInstance ].
         ^ uniqueInstance
     ]
 
@@ -21,7 +21,7 @@ GtkMainWindow subclass: VisualGST [
     VisualGST class >> createInstance [
         <category: 'private'>
 
-        ^ self basicNew
+        ^(uniqueInstance :=  self basicNew)
             initialize;
             showAll;
             postInitialize;
@@ -224,14 +224,20 @@ THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.';
     ]
 
     saveImage: aBlock [
-
-	| oldMessage |
+	| oldMessage oldNotifier |
+	oldNotifier := SystemChangeNotifier uniqueInstance.
 	oldMessage := Transcript message.
+
 	Transcript message: stdout->#nextPutAllFlush:.
+	SystemChangeNotifier root remove: systemChangeNotifier.
+	systemChangeNotifier := nil.
 	self class uniqueInstance: nil.
-	(saved := aBlock value not)
-	    ifTrue: [ self class uniqueInstance: self.
-		Transcript message: oldMessage ]
+
+	(saved := aBlock value not) ifTrue: [
+            self class uniqueInstance: self.
+	    systemChangeNotifier := oldNotifier.
+	    SystemChangeNotifier root add: oldNotifier.
+	    Transcript message: oldMessage ]
     ]
 
     workspace [
@@ -240,10 +246,16 @@ THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.';
 	self newWorkspace
     ]
 
+    systemChangeNotifier [
+	<category: 'initialization cleanup'>
+
+	^systemChangeNotifier
+    ]
+
     clearGlobalState [
 	<category: 'initialization cleanup'>
 
-	GtkImageModel instVarNamed: #current put: nil.
+	GtkImageModel release
     ]
 
     initialize [
@@ -251,6 +263,8 @@ THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.';
 
 	super initialize.
 	saved := false.
+        systemChangeNotifier := SystemChangeNotifier new.
+        SystemChangeNotifier root add: systemChangeNotifier.
 	window maximize.
 	self
 	    clearGlobalState;

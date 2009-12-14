@@ -1,12 +1,14 @@
-Object subclass: SystemChangeNotifier [
-    SystemChangeNotifier class [ | UniqueInstance | ]
+EventMultiplexer subclass: SystemChangeNotifier [
+    SystemChangeNotifier class [ | root | ]
 
     | eventSource silenceLevel |
 
     initialize [
 	<category: 'initialize'>
 
-	eventSource := SystemEventManager new.
+        super initialize.
+	eventSource := EventDispatcher new.
+        self add: eventSource.
 	silenceLevel := 0
     ]
 
@@ -350,7 +352,7 @@ Object subclass: SystemChangeNotifier [
     trigger: event [
 	<category: 'private'>
 
-        self isBroadcasting ifTrue: [event trigger: eventSource]
+        self isBroadcasting ifTrue: [event trigger: self]
 
 "   | caughtExceptions |
     caughtExceptions := OrderedCollection new.
@@ -387,12 +389,6 @@ Object subclass: SystemChangeNotifier [
 	<category: 'private-event lists'>
 
 	^ AbstractEvent eventSelectorBlock value: itemKind value: changeKind
-    ]
-
-    SystemChangeNotifier class >> new [
-	<category: 'instance creation'>
-
-	^self error: self instanceCreationErrorString
     ]
 
     SystemChangeNotifier class >> categoryKind [
@@ -432,33 +428,11 @@ Object subclass: SystemChangeNotifier [
     ]
 
 
-    SystemChangeNotifier class >> uniqueInstance [
+    SystemChangeNotifier class >> root [
 	<category: 'public'>
 
-        UniqueInstance ifNil: [UniqueInstance := self createInstance].
-	^ UniqueInstance
-    ]
-
-    SystemChangeNotifier class >> createInstance [
-	<category: 'private'>
-
-	^ self basicNew initialize
-    ]
-
-    SystemChangeNotifier class >> instanceCreationErrorString [
-	<category: 'private'>
-
-	^ 'This is a singleton implementation, so you are not allowed to create instances yourself. Use #uniqueInstance to access the instance.'
-    ]
-
-    SystemChangeNotifier class >> resetUniqueInstance [
-	<category: 'private'>
-
-        "self resetUniqueInstance"
-
-	UniqueInstance
-	    ifNotNil: [:u | UniqueInstance releaseAll.
-		UniqueInstance := nil]
+        root ifNil: [root := self new].
+	^root
     ]
 ]
 

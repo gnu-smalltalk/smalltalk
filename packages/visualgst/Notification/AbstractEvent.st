@@ -415,16 +415,16 @@ Smalltalk organizati
 classify:under:
 
 
-SystemChangeNotifier uniqueInstance releaseAll
-SystemChangeNotifier uniqueInstance noMoreNotificationsFor: aDependent.
+SystemChangeNotifier root releaseAll
+SystemChangeNotifier root noMoreNotificationsFor: aDependent.
 
 
 aDependent := SystemChangeNotifierTest new.
-SystemChangeNotifier uniqueInstance
+SystemChangeNotifier root
     notifyOfAllSystemChanges: aDependent
     using: #event:
 
-SystemChangeNotifier uniqueInstance classAdded: #Foo inCategory: #FooCat
+SystemChangeNotifier root classAdded: #Foo inCategory: #FooCat
 
 
 

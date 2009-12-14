@@ -22,7 +22,7 @@ Smalltalk.Metaclass extend [
 		    makeUntrusted: theSuperclass isUntrusted;
 		    category: categoryName;
 		    yourself.
-	VisualGST.SystemChangeNotifier uniqueInstance classAdded: aClass.
+	VisualGST.SystemChangeNotifier root classAdded: aClass.
 	^ aClass
     ]
 

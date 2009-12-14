@@ -21,6 +21,9 @@
   <filein>Notification/AddedEvent.st</filein>
   <filein>Notification/CommentedEvent.st</filein>
   <filein>Notification/DoItEvent.st</filein>
+  <filein>Notification/SystemEventManager.st</filein>
+  <filein>Notification/EventMultiplexer.st</filein>
+  <filein>Notification/EventDispatcher.st</filein>
   <filein>Notification/ModifiedEvent.st</filein>
   <filein>Notification/ModifiedClassDefinitionEvent.st</filein>
   <filein>Notification/RecategorizedEvent.st</filein>
@@ -28,7 +31,6 @@
   <filein>Notification/RenamedEvent.st</filein>
   <filein>Notification/ReorganizedEvent.st</filein>
   <filein>Notification/SystemChangeNotifier.st</filein>
-  <filein>Notification/SystemEventManager.st</filein>
   <filein>Commands/Command.st</filein>
   <filein>Commands/UndoableCommand.st</filein>
   <filein>Commands/InspectNamespaceCommand.st</filein>
@@ -166,6 +168,9 @@
   <file>Notification/AddedEvent.st</file>
   <file>Notification/CommentedEvent.st</file>
   <file>Notification/DoItEvent.st</file>
+  <file>Notification/SystemEventManager.st</file>
+  <file>Notification/EventMultiplexer.st</file>
+  <file>Notification/EventDispatcher.st</file>
   <file>Notification/ModifiedEvent.st</file>
   <file>Notification/ModifiedClassDefinitionEvent.st</file>
   <file>Notification/RecategorizedEvent.st</file>
@@ -173,7 +178,6 @@
   <file>Notification/RenamedEvent.st</file>
   <file>Notification/ReorganizedEvent.st</file>
   <file>Notification/SystemChangeNotifier.st</file>
-  <file>Notification/SystemEventManager.st</file>
   <file>Commands/Command.st</file>
   <file>Commands/UndoableCommand.st</file>
   <file>Commands/InspectNamespaceCommand.st</file>
