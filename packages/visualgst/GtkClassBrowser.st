@@ -559,5 +559,17 @@ THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.';
                 res = 1 ifTrue: saveEvent.
                 dlg destroy ].
     ]
+
+    selectANamespace: aNamespace [
+	<category: 'selection'>
+
+	browserWidget selectANamespace: aNamespace
+    ]
+
+    selectAClass: aClass [
+	<category: 'selection'>
+
+	browserWidget selectAClass: aClass
+    ]
 ]
 

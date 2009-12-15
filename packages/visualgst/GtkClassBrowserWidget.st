@@ -830,7 +830,13 @@ GtkConcreteWidget subclass: GtkClassBrowserWidget [
 
 	codeWidget selectAll
     ]
-    
+   
+    selectedText [
+	<category: 'text editing'>
+
+	^ codeWidget selectedText
+    ]
+
     doNotCheckCode [
 	<category: 'text editing'>
 

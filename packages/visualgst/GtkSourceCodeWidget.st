@@ -292,6 +292,12 @@ GtkConcreteWidget subclass: GtkSourceCodeWidget [
         codeView signalEmitByName: 'select-all' args: {true}.
     ]
 
+    selectedText [
+        <category: 'text accessing'>
+
+        ^ codeView getBuffer selectedText
+    ]
+
     textview [
 	<category: 'accessing'>
 

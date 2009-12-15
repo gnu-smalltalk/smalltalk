@@ -428,7 +428,7 @@ THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.';
 	selectedContext := debugger suspendedContext parentContextAt: ((contextWidget model getPath: iter) getIndices value) + 1.
 	codeWidget sourceCode: selectedContext method methodSourceString.
 	codeWidget object: selectedContext receiver.
-	codeWidget applyTag: #debug forLine: selectedContext currentLine - 1.
+	codeWidget applyTag: #debug forLine: selectedContext currentLine.
 	self updateInspectorWidget: selectedContext
     ]
 

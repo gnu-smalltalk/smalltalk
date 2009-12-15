@@ -122,7 +122,8 @@ THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.';
 	<category: 'tools events'>
 
 	| widget |
-	browsers addWidget: self buildClassBrowserWidget labeled: 'Browser'
+	browsers addWidget: (widget := self buildClassBrowserWidget) labeled: 'Browser'.
+	^ widget
     ]
 
     classBrowserInAWindow [
@@ -247,7 +248,7 @@ THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.';
     ]
 
     systemChangeNotifier [
-	<category: 'initialization cleanup'>
+	<category: 'notifications'>
 
 	^systemChangeNotifier
     ]
@@ -588,7 +589,7 @@ THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.';
 	    {'<Control>M'. '<GtkLauncher>/Tools/Implementors'}.
             {'<Control>N'. '<GtkLauncher>/Tools/Senders'}}.
 
-	menu := {GTK.GtkMenuItem menuItem: 'Browser' accelPath: '<GtkLauncher>/Tools/TabbedClassBrowser' connectTo: OpenBrowserCommand selector: #execute.
+	menu := {GTK.GtkMenuItem menuItem: 'Browser' accelPath: '<GtkLauncher>/Tools/TabbedClassBrowser' connectTo: OpenTabbedBrowserCommand selector: #execute.
             GTK.GtkMenuItem menuItem: 'Browser window' accelPath: '<GtkLauncher>/Tools/ClassBrowser' connectTo: OpenWindowedBrowserCommand selector: #execute.
             GTK.GtkMenuItem menuItem: 'Workspace' connectTo: OpenWorkspaceCommand selector: #execute.
             GTK.GtkMenuItem menuItem: 'Implementors' accelPath: '<GtkLauncher>/Tools/Implementors' connectTo: OpenImplementorCommand selector: #execute.
@@ -663,10 +664,22 @@ THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.';
     onFocusPerform: aSelector [
 	<category: 'focus'>
 
-	^ browsers hasFocus 
+	^ self browserHasFocus 
 	    ifTrue: [ browsers currentWidget perform: aSelector ]
 	    ifFalse: [ outputs hasFocus 
 			    ifTrue: [ outputs currentWidget perform: aSelector ] ].
+    ]
+
+    browserHasFocus [
+	<category: 'testing'>
+
+	^ browsers hasFocus
+    ]
+
+    currentWidgetOfBrowser [
+	<category: 'focus'>
+
+	^ browsers currentWidget
     ]
 
     doIt [
