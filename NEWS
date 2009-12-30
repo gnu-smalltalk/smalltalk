@@ -93,6 +93,9 @@ o   Sending mode, file time and owner setters to a recursive directory
     decorator (such as `Directory working all') sets the mode/time/owner
     on all files under the path.
 
+o   String>>#subStrings: accepts a single separator character or also, in
+    accordance with ANSI, a String holding a list of separators.
+
 o   The Continuations package provides delimited continuations via
     BlockClosure>>#shift and BlockClosure>>#reset.  Both methods accept
     a block (1-arg for shift, 0-arg for reset).

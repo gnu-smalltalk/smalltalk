@@ -281,20 +281,22 @@ accessing and manipulation methods for strings.'>
 	^oc
     ]
 
-    substrings: aCharacter [
+    substrings: sep [
 	"Answer an OrderedCollection of substrings of the receiver. A new substring
-	 start at the start of the receiver, or after every sequence of characters
-	 matching aCharacter.  This message is preserved for backwards compatibility;
+	 start at the start of the receiver, or after every occurrence of one of the
+         characters in sep.  This message is preserved for backwards compatibility;
 	 the ANSI standard mandates `subStrings:', with an uppercase s."
 
 	<category: 'string processing'>
 	| oc last |
+        sep isCharacter ifTrue: [ ^self subStringsChar: sep ].
+        sep size = 1 ifTrue: [ ^self subStringsChar: sep first ].
 	last := 1.
 	oc := OrderedCollection new.
 	1 to: self size
 	    do: 
 		[:i | 
-		(self at: i) == aCharacter 
+		(sep includes: (self at: i))
 		    ifTrue: 
 			[last = i ifFalse: [oc addLast: (self copyFrom: last to: i - 1)].
 			last := i + 1]].
@@ -303,19 +305,42 @@ accessing and manipulation methods for strings.'>
 	^oc
     ]
 
-    subStrings: aCharacter [
+    subStrings: sep [
 	"Answer an OrderedCollection of substrings of the receiver. A new substring
-	 start at the start of the receiver, or after every sequence of characters
-	 matching aCharacter"
+	 start at the start of the receiver, or after every occurrence of one of the
+         characters in sep"
 
 	<category: 'string processing'>
+	| oc last |
+        sep isCharacter ifTrue: [ ^self subStringsChar: sep ].
+        sep size = 1 ifTrue: [ ^self subStringsChar: sep first ].
+	last := 1.
+	oc := OrderedCollection new.
+	1 to: self size
+	    do: 
+		[:i | 
+		(sep includes: (self at: i))
+		    ifTrue: 
+			[last = i ifFalse: [oc addLast: (self copyFrom: last to: i - 1)].
+			last := i + 1]].
+	last <= self size 
+	    ifTrue: [oc addLast: (self copyFrom: last to: self size)].
+	^oc
+    ]
+
+    subStringsChar: sepChar [
+	"Private - Answer an OrderedCollection of substrings of the receiver. A new substring
+	 start at the start of the receiver, or after every occurrence of the
+         character sepChar."
+
+	<category: 'private-string processing'>
 	| oc last |
 	last := 1.
 	oc := OrderedCollection new.
 	1 to: self size
 	    do: 
 		[:i | 
-		(self at: i) == aCharacter 
+		(self at: i) == sepChar 
 		    ifTrue: 
 			[last = i ifFalse: [oc addLast: (self copyFrom: last to: i - 1)].
 			last := i + 1]].
