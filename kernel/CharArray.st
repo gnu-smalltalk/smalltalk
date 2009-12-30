@@ -340,7 +340,7 @@ accessing and manipulation methods for strings.'>
 	1 to: self size
 	    do: 
 		[:i | 
-		(self at: i) == sepChar 
+		(self at: i) = sepChar 
 		    ifTrue: 
 			[last = i ifFalse: [oc addLast: (self copyFrom: last to: i - 1)].
 			last := i + 1]].
