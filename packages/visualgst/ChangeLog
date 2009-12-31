@@ -1,3 +1,11 @@
+2009-12-30  Gwenael Casaccio  <mrgwen@gmail.com>
+
+	* GtkListModel.st, GtkListWidget.st, GtkTreeModel.st,
+	GtkTreeWidget.st, Image/GtkImageModel.st, Image/GtkImageWidget.st,
+	Implementors/GtkImageModel.st, Implementors/GtkImplementor.st,
+	Notification/EventMultiplexer.st, Senders/GtkSender.st,
+	VisualGST.st, package.xml: Sync.
+
 2009-12-15  Gwenael Casaccio  <mrgwen@gmail.com>
 
 	* Commands/OpenBrowserCommand.st, Commands/OpenTabbedBrowserCommand.st,

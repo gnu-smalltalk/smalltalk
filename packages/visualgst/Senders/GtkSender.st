@@ -35,7 +35,7 @@ GtkMainWindow subclass: GtkSender [
             LiteralsAndSpecialSelectors ]
     ]
 
-    | currentMethod selector finderModel finderTree senderResults senderModel senderTree classBrowserWidget searchEntry |
+    | imageWidget currentMethod selector senderResults senderModel senderTree classBrowserWidget |
 
     selector [
 	<category: 'accessor'>
@@ -49,7 +49,7 @@ GtkMainWindow subclass: GtkSender [
 	selector := aSymbol asSymbol.
 	self 
 	    clearSenderModel;
-	    findInMethod: (self finderModel matchSelector: aSymbol) values first element.
+	    findInMethod: (imageWidget model matchSelector: aSymbol) values first element.
     ]
 
     createFileMenus [
@@ -175,10 +175,6 @@ GtkMainWindow subclass: GtkSender [
     <category: 'user interface'>
 
     self
-        "appendToolItem: ((GTK.GtkToolButton newFromStock: 'gtk-new')
-		connectSignal: 'clicked' to: OpenWorkspaceCommand selector: #execute userData: nil;
-		setTooltipText: 'Create a new workspace';
-		yourself);"
         appendToolItem: ((GTK.GtkToolButton newFromStock: 'gtk-save')
 		connectSignal: 'clicked' to: SaveImageCommand selector: #execute userData: nil;
 		setTooltipText: 'Save the image';
@@ -229,39 +225,6 @@ GtkMainWindow subclass: GtkSender [
                                 yourself)
     ]
 
-    buildFinderEntry [
-	<category: 'user interface'>
-
-	searchEntry := (GTK.GtkEntry new)
-                            connectSignal: 'activate' to: self selector: #searchValidate userData: nil;
-                            yourself.
-	^ (GTK.GtkHBox new: true spacing: 3)
-	    add: (GTK.GtkLabel new: 'Class or method :');
-	    add: searchEntry;
-	    yourself
-    ]
-
-    buildFinderTree [
-	<category: 'user interface'>
-
-	finderTree := GTK.GtkTreeView newWithSortedTextColumn: self finderModel gtkModel title: 'Selectors'.
-        self finderModel isSorted ifFalse: [
-	    (finderTree getColumn: 0) signalEmitByName: 'clicked' args: {}.
-	    self finderModel isSorted: true ].
-        finderTree
-            getSelection
-                connectSignal: 'changed' to: self selector: #finderSelected userData: nil.
-	finderTree setSearchEntry: searchEntry.
-        ^ GTK.GtkScrolledWindow withChild: finderTree
-    ]
-
-    finderModel [
-	<category: 'model accessing'>
-
-	^ finderModel ifNil: [
-	    finderModel := GtkImageModel current ]
-    ]
-
     senderModel [
         <category: 'model accessing'>
 
@@ -278,10 +241,10 @@ GtkMainWindow subclass: GtkSender [
     buildFinderList [
 	<category: 'user interface'>
 
-	^ GTK.GtkVPaned new
-            add1: self buildFinderEntry;
-            add2: self buildFinderTree;
-            yourself
+	^ (imageWidget := GtkImageWidget new)
+				    initialize;
+				    whenSelectionChangedSend: #finderSelected to: self;
+				    mainWidget
     ]
 
     buildSenderList [
@@ -310,7 +273,7 @@ GtkMainWindow subclass: GtkSender [
     buildCentralWidget [
         <category: 'intialize-release'>
 
-	self selector isNil ifFalse: [ ^self buildSenderAndClassBrowser ].
+	self selector isNil ifFalse: [ ^ self buildSenderAndClassBrowser ].
 	^ (GTK.GtkHPaned new)
 	    add1: self buildFinderList;
 	    add2: self buildSenderAndClassBrowser;
@@ -332,7 +295,7 @@ GtkMainWindow subclass: GtkSender [
     postInitialize [
         <category: 'initialization'>
 
-        searchEntry grabFocus.
+        imageWidget grabFocus.
         window
             connectSignal: 'delete-event' to: self selector: #'delete:event:' userData: nil
     ]
@@ -384,10 +347,7 @@ THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.';
     finderSelected [
 	<category: 'finder events'>
 
-	| iter string |
-	(iter := finderTree selectedIter) ifNil: [ ^ self ].
-	string := (self finderModel gtkModel getOop: iter column: 0).
-	self selector: string asSymbol.
+	self selector: imageWidget selection asSymbol.
     ]
 
     senderSelected [
@@ -404,13 +364,6 @@ THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.';
         currentMethod methodClass isClass
                 ifTrue: [ classBrowserWidget selectAnInstanceMethod: currentMethod selector ]
                 ifFalse: [ classBrowserWidget selectAClassMethod: currentMethod selector  ]
-    ]
-
-    searchValidate [
-        <category: 'search entry events'>
-
-        searchEntry getText isEmpty ifTrue: [ ^ finderTree setModel: (finderModel := GtkImageModel current) gtkModel ].
-        finderTree setModel: (finderModel := (GtkImageModel current matchRegex: searchEntry getText)) gtkModel
     ]
 
     back [

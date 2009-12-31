@@ -1,7 +1,7 @@
 GtkMainWindow subclass: VisualGST [
     VisualGST class [ | compileError uniqueInstance | ]
 
-    | browsers outputs saved transcriptWidget windowsMenu systemChangeNotifier |
+    | browsers outputs saved imageName transcriptWidget windowsMenu systemChangeNotifier |
 
     VisualGST class >> uniqueInstance [
 	<category: 'public'>
@@ -210,27 +210,27 @@ THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.';
 	"ObjectMemory>>#snapshot breaks hard links due to
 	 http://bugzilla.kernel.org/show_bug.cgi?id=9138, so we have to
 	 check the permission of the directory rather than the file."
-	File image parent isWriteable ifFalse: [ ^ self saveImageAs ].
-        self saveImage: [ ObjectMemory snapshot ]
+	imageName asFile parent isWriteable ifFalse: [ ^ self saveImageAs ].
+        self saveImage: [ ObjectMemory snapshot: imageName ]
     ]
 
     saveImageAs [
 	<category: 'file events'>
 
 	(GTK.GtkFileChooserDialog save: 'Save image as...' parent: window)
-	    runNonBlockingAndDo: [ :dlg :res | | name |
-		name := dlg getFilename.
+	    runNonBlockingAndDo: [ :dlg :res |
+		imageName := dlg getFilename.
 		dlg destroy.
-		res = GTK.Gtk gtkResponseAccept ifTrue: [ self saveImage: [ ObjectMemory snapshot: name ] ] ]
+		res = GTK.Gtk gtkResponseAccept ifTrue: [ self saveImage: [ ObjectMemory snapshot: imageName ] ] ]
     ]
 
     saveImage: aBlock [
 	| oldMessage oldNotifier |
-	oldNotifier := SystemChangeNotifier uniqueInstance.
+	oldNotifier := self systemChangeNotifier.
 	oldMessage := Transcript message.
 
 	Transcript message: stdout->#nextPutAllFlush:.
-	SystemChangeNotifier root remove: systemChangeNotifier.
+	SystemChangeNotifier root remove: oldNotifier.
 	systemChangeNotifier := nil.
 	self class uniqueInstance: nil.
 
@@ -250,7 +250,7 @@ THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.';
     systemChangeNotifier [
 	<category: 'notifications'>
 
-	^systemChangeNotifier
+	^ systemChangeNotifier
     ]
 
     clearGlobalState [
@@ -264,6 +264,7 @@ THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.';
 
 	super initialize.
 	saved := false.
+	imageName := File image asString.
         systemChangeNotifier := SystemChangeNotifier new.
         SystemChangeNotifier root add: systemChangeNotifier.
 	window maximize.
@@ -741,6 +742,7 @@ THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.';
     closeTab [
 	<category: 'tabs events'>
 
+	browsers numberOfPages > 1 ifTrue: [ browsers currentWidget checkCodeWidget ].
 	browsers closeCurrentPage
     ]
 

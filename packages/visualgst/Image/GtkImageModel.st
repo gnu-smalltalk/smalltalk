@@ -31,10 +31,10 @@ Object subclass: GtkImageModel [
 	isSorted := false.
 	self
 	    gtkModel;
+	    registerNotifier;
             buildNamespaceModel;
             buildClassModel;
-            buildMethodModel;
-	    registerNotifier
+            buildMethodModel.
     ]
 
     registerNotifier [

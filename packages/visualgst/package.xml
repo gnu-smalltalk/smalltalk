@@ -58,14 +58,13 @@
   <filein>Commands/OpenSUnitCommand.st</filein>
   <filein>Commands/OpenWebBrowserCommand.st</filein>
   <filein>GtkListModel.st</filein>
-  <filein>GtkTreeModel.st</filein>
   <filein>GtkTextWidget.st</filein>
   <filein>GtkMainWindow.st</filein>
   <filein>VisualGST.st</filein>
   <filein>GtkConcreteWidget.st</filein>
-  <filein>GtkListWidget.st</filein>
-  <filein>GtkTreeWidget.st</filein>
   <filein>GtkNotebookWidget.st</filein>
+  <filein>Image/GtkImageModel.st</filein>
+  <filein>Image/GtkImageWidget.st</filein>
   <filein>GtkTranscriptWidget.st</filein>
   <filein>Debugger/GtkContextModel.st</filein>
   <filein>Debugger/GtkContextWidget.st</filein>
@@ -133,7 +132,6 @@
   <filein>Inspector/GtkCharacterInspectorView.st</filein>
   <filein>Inspector/GtkIntegerInspectorView.st</filein>
   <filein>Inspector/GtkFloatInspectorView.st</filein>
-  <filein>Implementors/GtkImageModel.st</filein>
   <filein>Implementors/GtkImplementor.st</filein>
   <filein>Senders/GtkSender.st</filein>
   <filein>Notification/Kernel/AbstractNamespace.st</filein>
@@ -210,14 +208,13 @@
   <file>Commands/OpenSUnitCommand.st</file>
   <file>Commands/OpenWebBrowserCommand.st</file>
   <file>GtkListModel.st</file>
-  <file>GtkTreeModel.st</file>
   <file>GtkTextWidget.st</file>
   <file>GtkMainWindow.st</file>
   <file>VisualGST.st</file>
   <file>GtkConcreteWidget.st</file>
-  <file>GtkListWidget.st</file>
-  <file>GtkTreeWidget.st</file>
   <file>GtkNotebookWidget.st</file>
+  <file>Image/GtkImageModel.st</file>
+  <file>Image/GtkImageWidget.st</file>
   <file>GtkTranscriptWidget.st</file>
   <file>Debugger/GtkContextModel.st</file>
   <file>Debugger/GtkContextWidget.st</file>
@@ -285,7 +282,6 @@
   <file>Inspector/GtkCharacterInspectorView.st</file>
   <file>Inspector/GtkIntegerInspectorView.st</file>
   <file>Inspector/GtkFloatInspectorView.st</file>
-  <file>Implementors/GtkImageModel.st</file>
   <file>Implementors/GtkImplementor.st</file>
   <file>Senders/GtkSender.st</file>
   <file>Notification/Kernel/AbstractNamespace.st</file>

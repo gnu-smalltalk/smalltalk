@@ -4,13 +4,13 @@ SystemEventManager subclass: EventMultiplexer [
     add: anObject [
 	"Start sending system notifications to a manager"
 
-        ^sources add: anObject
+        ^ sources add: anObject
     ]
 
     remove: anObject [
 	"Stop sending system notifications to a manager"
 
-        ^sources remove: anObject ifAbsent: [ nil ]
+        ^ sources remove: anObject ifAbsent: [ nil ]
     ]
 
     triggerEvent: anEventSelector with: anEvent [

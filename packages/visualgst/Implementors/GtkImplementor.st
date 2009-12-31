@@ -1,5 +1,5 @@
 GtkMainWindow subclass: GtkImplementor [
-    | model selector resultModel set finderTree resultArray resultTree classBrowserWidget searchEntry |
+    | imageWidget selector resultModel set resultArray resultTree classBrowserWidget |
 
     
     GtkImplementor class >> open [
@@ -199,48 +199,6 @@ GtkMainWindow subclass: GtkImplementor [
 		yourself)
     ]
 
-    "createToolbar [
-        <category: 'user interface'>
-
-	| temp |
-        self
-            appendToolItem: (GTK.GtkToolButton newFromStock: 'gtk-new');
-            appendSeparator;
-            appendToolItem: (GTK.GtkToolButton newFromStock: 'gtk-save');
-            appendToolItem: (GTK.GtkToolButton newFromStock: 'gtk-save-as');
-            appendSeparator;
-            appendToolItem: (GTK.GtkToolButton newFromStock: 'gtk-cut');
-            appendToolItem: (GTK.GtkToolButton newFromStock: 'gtk-copy');
-            appendToolItem: (GTK.GtkToolButton newFromStock: 'gtk-paste');
-            appendSeparator;
-            appendToolItem: (GTK.GtkToolButton newFromStock: 'gtk-execute');
-	    appendSeparator.
-	    temp := (GTK.GtkToolItem new)
-                        add: (GTK.GtkEntry new);
-                        yourself.
-            self toolBar insert: temp pos: -1
-
-    ]"
-
-    buildFinderEntry [
-	<category: 'user interface'>
-
-	searchEntry := (GTK.GtkEntry new)
-			    connectSignal: 'activate' to: self selector: #searchValidate userData: nil;
-			    yourself.
-	^ (GTK.GtkHBox new: true spacing: 3)
-	    add: (GTK.GtkLabel new: 'Class or method :');
-	    add: searchEntry;
-	    yourself
-    ]
-
-    model [
-	<category: 'model accessing'>
-
-	^ model ifNil: [
-	    model := GtkImageModel current ]
-    ]
-
     resultModel [
         <category: 'model accessing'>
 
@@ -248,27 +206,13 @@ GtkMainWindow subclass: GtkImplementor [
             resultModel := GTK.GtkTreeStore new: 1 varargs: {GTK.GValue gTypeString} ]
     ]
 
-    buildClassAndMethodList [
-	<category: 'user interface'>
-
-	finderTree := GTK.GtkTreeView newWithSortedTextColumn: self model gtkModel title: 'Methods and Classes'.
-	self model isSorted ifFalse: [
-	    (finderTree getColumn: 0) signalEmitByName: 'clicked' args: {}.
-	    self model isSorted: true ].
-	finderTree
-	    getSelection
-		connectSignal: 'changed' to: self selector: #elementSelected userData: nil.
-	finderTree setSearchEntry: searchEntry.
-        ^ GTK.GtkScrolledWindow withChild: finderTree
-    ]
-
     buildFinderList [
 	<category: 'user interface'>
 
-	^ GTK.GtkVPaned new
-            add1: self buildFinderEntry;
-            add2: self buildClassAndMethodList;
-            yourself
+	^ (imageWidget := GtkImageWidget new)
+				    initialize;
+				    whenSelectionChangedSend: #elementSelected to: self;
+				    mainWidget
     ]
 
     buildResultList [
@@ -319,7 +263,7 @@ GtkMainWindow subclass: GtkImplementor [
     postInitialize [
 	<category: 'initialization'>
 
-        searchEntry grabFocus.
+        imageWidget grabFocus.
         window
             connectSignal: 'delete-event' to: self selector: #'delete:event:' userData: nil
     ]
@@ -352,18 +296,10 @@ THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.';
             run
     ]
 
-    hasSelectedElement [
-	<category: 'testing'>
-
-	^ finderTree hasSelectedItem
-    ]
-
     elementSelected [
 	<category: 'events'>
 
-	| iter string |
-        (iter := finderTree selectedIter) ifNil: [ ^ self ].
-        self selector: (self model gtkModel getOop: iter column: 0).
+        self selector: imageWidget selection
     ]
 
     resultSelected [
@@ -430,19 +366,12 @@ THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.';
 	| iter |
 	selector := aSymbol.
 	self resultModel clear. 
-	resultArray := self model matchSelector: aSymbol.
+	resultArray := imageWidget model matchSelector: aSymbol.
 	resultArray keysDo: [ :each |
 	    iter := GTK.GtkTreeIter new.
 	    self resultModel append: iter parent: nil.
 	    self resultModel setOop: iter column: 0 value: each ].
 	"resultTree getSelection selectPath: GTK.GtkTreePath newFirst"
-    ]
-
-    searchValidate [
-	<category: 'search entry events'>
-
-	searchEntry getText isEmpty ifTrue: [ ^ finderTree setModel: (model := GtkImageModel current) gtkModel ].
-	finderTree setModel: (model := (GtkImageModel current matchRegex: searchEntry getText)) gtkModel
     ]
 
     cancel [

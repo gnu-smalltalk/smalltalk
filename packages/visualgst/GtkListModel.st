@@ -1,19 +1,6 @@
 Object subclass: GtkListModel [
 
-    GtkListModel class >> new [
-	<category: 'instance creation'>
-
-	^ super new
-	    initialize;
-	    yourself
-    ]
-
     | columns contentsBlock item model |
-
-    initialize [
-	<category: 'initialization'>
-
-    ]
 
     columns: anInteger [
 	<category: 'accessing'>
@@ -55,21 +42,13 @@ Object subclass: GtkListModel [
 	<category: 'accessing'>
 
 	^ model ifNil: [
-	    model := GTK.GtkListStore new: self columns size varargs: self columns ]
+	    model := GTK.GtkListStore new: columns size varargs: columns ]
     ]
 
     append: anArray [
 	<category:' model'>
 
-	self gtkModel appendItem: anArray
-    ]
-
-    remove: anObject [
-	<category: 'model'>
-
-	| iter |
-	(iter := self findIter: anObject) ifNil: [ self error: 'item not found' ].
-	self gtkModel remove: iter
+	self gtkModel append: anArray
     ]
 
     clear [
@@ -81,10 +60,10 @@ Object subclass: GtkListModel [
     refresh [
 	<category: 'model'>
 
-	self clear.
+	| elem |
+	self clearModel.
 	self item ifNil: [ ^ self ].
-	(self contentsBlock value: self item) do: [ :each | self append: each ].
-	"self item do: [ :each | self append: (self contentsBlock value: each) ]"
+	self item do: [ :each | self append: self childrenBlock value: each ]
     ]
 
     findIter: anObject ifAbsent: aBlock [
