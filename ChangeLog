@@ -1,3 +1,7 @@
+2009-12-30  Gwenael Casaccio  <mrgwen@gmail.com>
+
+	* kernel/PkgLoader.st: Add <version>, use indirect dispatch.
+
 2009-12-30  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/CharArray.st: Fix #subStrings: for Unicode strings.

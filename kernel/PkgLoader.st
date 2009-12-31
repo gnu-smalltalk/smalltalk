@@ -428,14 +428,13 @@ PackageContainer subclass: PackageDirectory [
 	<category: 'refreshing'>
 	baseDirCache isEmpty ifTrue: [^self].
 	self file exists ifFalse: [^self].
-	self file withReadStreamDo: [ :fileStream |
-	    [self parse: fileStream]
-		on: SystemExceptions.PackageNotAvailable
-	        do: [:ex | ex resignalAs: PackageSkip new]].
+       self file withReadStreamDo: [ :fileStream |
+           [self parse: fileStream]
+               on: SystemExceptions.PackageNotAvailable
+               do: [:ex | ex resignalAs: PackageSkip new]].
  
-	self packages: (self packages reject: [:each | each isDisabled])
+       self packages: (self packages reject: [:each | each isDisabled])
     ]
-
     refreshStarList: dir [
 	<category: 'refreshing'>
 	dir exists ifFalse: [^self].
@@ -1101,19 +1100,121 @@ PackageInfo subclass: StarPackage [
 
 
 
+
+
+
+Namespace current: Kernel [
+
+Object subclass: Version [
+    | major minor patch |
+
+    Version class >> fromString: aString [
+	<category: 'instance creation'>
+
+	| result |
+	result := aString searchRegex: '^(\d+)\.(\d+)(?:\.(\d+))?' .
+        result ifNotMatched: [
+            self error: 'Bad version format ', aString, ' should be xx.yy(.zz)'.
+            ^ nil ].
+
+	^ self
+            major: (result at: 1) asInteger
+            minor: (result at: 2) asInteger
+            patch: ((result at: 3) ifNil: [ 0 ]) asInteger
+    ]
+
+    Version class >> major: major minor: minor patch: patch [
+	<category: 'instance creation'>
+
+       ^ self new
+               major: major minor: minor patch: patch
+    ]
+
+    major: major minor: minor patch: patch [
+       <category: 'initialization'>
+
+       self 
+           major: major;
+           minor: minor;
+           patch: patch
+    ]
+
+    major [
+       <category: 'accessing'>
+
+       ^ major
+    ]
+
+    major: anInteger [
+       <category: 'accessing'>
+
+       major := anInteger
+    ]
+
+    minor [
+       <category: 'accessing'>
+
+       ^ minor
+    ]
+
+    minor: anInteger [
+       <category: 'accessing'>
+
+       minor := anInteger
+    ]
+
+    patch [
+       <category: 'accessing'>
+
+       ^ patch
+    ]
+
+    patch: anInteger [
+       <category: 'accessing'>
+
+       patch := anInteger
+    ]
+]
+]
+
+
 Kernel.PackageInfo subclass: Package [
     | features prerequisites builtFiles files fileIns relativeDirectory
-	baseDirectories libraries modules callouts url namespace sunitScripts
-	startScript stopScript test |
+       baseDirectories libraries modules callouts url namespace sunitScripts
+       startScript stopScript test version |
     
     <category: 'Language-Packaging'>
     <comment: 'I am not part of a standard Smalltalk system. I store internally the
 information on a Smalltalk package, and can output my description in
 XML.'>
 
+    Package class [ | Tags | ]
+
+    Package class >> tags [
+       <category: 'accessing'>
+
+       ^ Tags ifNil: [ Tags := Dictionary from: {      
+                        'file' -> #addFile:.
+                        'filein' -> #addFileIn:.
+                       'prereq' -> #addPrerequisite:.
+                        'provides' -> #addFeature:.
+                        'module' -> #addModule:.
+                        'directory' -> #relativeDirectory:.
+                        'name' -> #name:.
+                        'url' -> #url:.
+                        'version' -> #parseVersion:.
+                        'namespace' -> #namespace:.
+                        'library' -> #addLibrary:.
+                        'built-file' -> #addBuiltFile:.
+                        'sunit' -> #addSunitScript:.
+                        'start' -> #startScript:.
+                        'stop' -> #stopScript:.
+                        'callout' -> #addCallout: } ]
+    ]
+
     Package class >> parse: file [
-	"Answer a package from the XML description in file."
-	<category: 'instance creation'>
+       "Answer a package from the XML description in file."
+       <category: 'instance creation'>
 	| ch tag |
 	
 	[(file upTo: $<) trimSeparators isEmpty 
@@ -1206,83 +1307,132 @@ XML.'>
 	"Set to aString the namespace in which the package is loaded."
 
 	<category: 'accessing'>
-	namespace := aString
+       namespace := aString
+    ]
+
+    addFeature: aString [
+       <category: 'accessing'>
+
+       self features add: aString
     ]
 
     features [
-	"Answer a (modifiable) Set of features provided by the package."
+       "Answer a (modifiable) Set of features provided by the package."
 
 	<category: 'accessing'>
 	features isNil ifTrue: [features := Set new].
-	^features
+       ^features
+    ]
+
+    addPrerequisite: aString [
+       <category: 'accessing'>
+
+       self prerequisites add: aString
     ]
 
     prerequisites [
-	"Answer a (modifiable) Set of prerequisites."
+       "Answer a (modifiable) Set of prerequisites."
 
 	<category: 'accessing'>
 	prerequisites isNil ifTrue: [prerequisites := Set new].
-	^prerequisites
+       ^prerequisites
+    ]
+
+    addBuiltFile: aString [
+       <category: 'accessing'>
+
+       self builtFiles add: aString
     ]
 
     builtFiles [
-	"Answer a (modifiable) OrderedCollection of files that are part of
-	 the package but are not distributed."
-
+       "Answer a (modifiable) OrderedCollection of files that are part of
+        the package but are not distributed."
 	<category: 'accessing'>
 	builtFiles isNil ifTrue: [builtFiles := OrderedCollection new].
-	^builtFiles
+       ^builtFiles
+    ]
+
+    addFile: aString [
+        <category: 'accessing'>
+
+        self files add: aString
     ]
 
     files [
-	"Answer a (modifiable) OrderedCollection of files that are part of
-	 the package."
-
+       "Answer a (modifiable) OrderedCollection of files that are part of
+        the package."
 	<category: 'accessing'>
 	files isNil ifTrue: [files := OrderedCollection new].
-	^files
+       ^files
+    ]
+
+    addFileIn: aString [
+        <category: 'accessing'>
+
+        self fileIns add: aString
     ]
 
     fileIns [
-	"Answer a (modifiable) OrderedCollections of files that are to be
-	 filed-in to load the package.  This is usually a subset of
+       "Answer a (modifiable) OrderedCollections of files that are to be
+        filed-in to load the package.  This is usually a subset of
 	 `files' and `builtFiles'."
 
 	<category: 'accessing'>
 	fileIns isNil ifTrue: [fileIns := OrderedCollection new].
-	^fileIns
+       ^fileIns
+    ]
+
+    addLibrary: aString [
+       <category: 'accessing'>
+
+       self libraries add: aString
     ]
 
     libraries [
-	"Answer a (modifiable) Set of shared library names
-	 that are required to load the package."
-
+       "Answer a (modifiable) Set of shared library names
+        that are required to load the package."
 	<category: 'accessing'>
 	libraries isNil ifTrue: [libraries := Set new].
-	^libraries
+       ^libraries
+    ]
+
+    addModule: aString [
+       <category: 'accessing'>
+
+       self modules add: aString
     ]
 
     modules [
-	"Answer a (modifiable) Set of modules that are
-	 required to load the package."
-
+       "Answer a (modifiable) Set of modules that are
+        required to load the package."
 	<category: 'accessing'>
 	modules isNil ifTrue: [modules := Set new].
-	^modules
+       ^modules
+    ]
+
+    addSunitScript: aString [
+       <category: 'accessing'>
+
+       self sunitScripts add: aString
     ]
 
     sunitScripts [
-	"Answer a (modifiable) OrderedCollection of SUnit scripts that
-	 compose the package's test suite."
-
+       "Answer a (modifiable) OrderedCollection of SUnit scripts that
+        compose the package's test suite."
 	<category: 'accessing'>
 	sunitScripts isNil ifTrue: [sunitScripts := OrderedCollection new].
-	^sunitScripts
+       ^sunitScripts
+    ]
+
+    addCallout: aString [
+       <category: 'accessing'>
+
+       self callouts add: aString
     ]
 
     callouts [
-	"Answer a (modifiable) Set of call-outs that are required to load
-	 the package.  Their presence is checked after the libraries and
+       "Answer a (modifiable) Set of call-outs that are required to load
+        the package.  Their presence is checked after the libraries and
 	 modules are loaded so that you can do a kind of versioning."
 
 	<category: 'accessing'>
@@ -1363,13 +1513,30 @@ XML.'>
 	 the package, to dir."
 
 	<category: 'accessing'>
-	relativeDirectory := dir
+       relativeDirectory := dir
+    ]
+
+    version [
+       <category: 'accessing'>
+
+       ^ version
+    ]
+
+    version: aVersion [
+       <category: 'accessing'>
+
+       version := aVersion
+    ]
+
+    parseVersion: aString [
+	<category: 'version parsing'>
+
+	self version: (Version fromString: aString)
     ]
 
     primFileIn [
-	"Private - File in the given package without paying attention at
-	 dependencies and C callout availability"
-
+       "Private - File in the given package without paying attention at
+        dependencies and C callout availability"
 	<category: 'accessing'>
 	| dir namespace |
 	self loaded ifTrue: [^self].
@@ -1414,30 +1581,14 @@ XML.'>
 			ifTrue: 
 			    [tag := stack removeLast.
 			    file next.
-			    (file upTo: $>) = tag 
-				ifFalse: [^self error: 'error in packages file: unmatched end tag ' , tag].
+                           (file upTo: $>) = tag 
+                               ifFalse: [^self error: 'error in packages file: unmatched end tag ' , tag].
 
-			    "I tried to put these from the most common to the least common"
-			    tag = 'file' ifTrue: [self files add: cdata] ifFalse: [
-			    tag = 'filein' ifTrue: [self fileIns add: cdata] ifFalse: [
-			    tag = 'prereq' ifTrue: [self prerequisites add: cdata] ifFalse: [
-			    tag = 'provides' ifTrue: [self features add: cdata] ifFalse: [
-			    tag = 'module' ifTrue: [self modules add: cdata] ifFalse: [
-			    tag = 'directory' ifTrue: [self relativeDirectory: cdata] ifFalse: [
-			    tag = 'name' ifTrue: [self name: cdata] ifFalse: [
-			    tag = 'url' ifTrue: [self url: cdata] ifFalse: [
-			    tag = 'namespace' ifTrue: [self namespace: cdata] ifFalse: [
-			    tag = 'library' ifTrue: [self libraries add: cdata] ifFalse: [
-			    tag = 'built-file' ifTrue: [self builtFiles add: cdata] ifFalse: [
-			    tag = 'sunit' ifTrue: [self sunitScripts add: cdata] ifFalse: [
-			    tag = 'start' ifTrue: [self startScript: cdata] ifFalse: [
-			    tag = 'stop' ifTrue: [self stopScript: cdata] ifFalse: [
-			    tag = 'callout' ifTrue: [self callouts add: cdata] ifFalse: [
-			    tag = openingTag ifTrue: [^self] ifFalse: [
-				self error: 'invalid tag ' , tag]]]]]]]]]]]]]]]].
-			    cdata := nil].
-		    ch isAlphaNumeric 
-			ifTrue: 
+                           tag = openingTag ifTrue: [ ^ self ].
+                           self perform: (self class tags at: tag ifAbsent: [ self error: 'invalid tag ', tag ]) with: cdata.
+                           cdata := nil].
+                   ch isAlphaNumeric 
+                       ifTrue: 
 			    [tag := file upTo: $>.
 			    tag = 'test' 
 				ifTrue: [self test: (TestPackage new parse: file tag: tag)]
