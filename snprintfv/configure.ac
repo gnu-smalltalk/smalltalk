@@ -1,6 +1,6 @@
 dnl  -*- Mode: M4 -*- 
 dnl configure.in --- GNU autoconf source for toplevel directory.
-dnl Copyright (C) 1998, 1999, 2000 Gary V. Vaughan
+dnl Copyright (C) 1998, 1999, 2000, 2009 Gary V. Vaughan
 dnl Originally by Gary V. Vaughan <gvv@techie.com>, 1998
 dnl This file is part of Snprintfv.
 dnl

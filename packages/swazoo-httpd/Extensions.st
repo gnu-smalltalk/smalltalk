@@ -7,7 +7,7 @@
 
 "======================================================================
 |
-| Copyright 2008 the Swazoo team.
+| Copyright 2008-2009 the Swazoo team.
 |
 | This file is part of Swazoo.
 |

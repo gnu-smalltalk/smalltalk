@@ -1,3 +1,7 @@
+2010-01-01  Paolo Bonzini  <bonzini@gnu.org>
+
+	* Update copyright years.
+
 2009-08-05  Paolo Bonzini  <bonzini@gnu.org>
 
 	* gstGlu.c: Disable gluUnProject4, also not in Win32.

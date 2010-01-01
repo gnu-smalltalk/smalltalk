@@ -1,3 +1,7 @@
+2010-01-01  Paolo Bonzini  <bonzini@gnu.org>
+
+	* Update copyright years.
+
 2009-11-03  Paolo Bonzini  <bonzini@gnu.org>
 
 	* funcs.awk: Point every #free method to unref if there is an unref

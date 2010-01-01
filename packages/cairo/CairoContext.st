@@ -8,7 +8,7 @@
 
 "======================================================================
 |
-| Copyright 2008 Free Software Foundation, Inc.
+| Copyright 2008, 2009 Free Software Foundation, Inc.
 | Written by Tony Garnock-Jones and Michael Bridgen.
 |
 | This file is part of the GNU Smalltalk class library.

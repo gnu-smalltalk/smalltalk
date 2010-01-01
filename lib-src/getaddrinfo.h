@@ -1,5 +1,5 @@
 /* Get address information.
-   Copyright (C) 1996-2002, 2003, 2004, 2005, 2006, 2008
+   Copyright (C) 1996-2002, 2003, 2004, 2005, 2006, 2008, 2009
                  Free Software Foundation, Inc.
    Contributed by Simon Josefsson <simon@josefsson.org>.
 

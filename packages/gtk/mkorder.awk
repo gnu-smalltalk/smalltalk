@@ -6,7 +6,7 @@
 
 #######################################################################
 #
-# Copyright 2004, 2006, 2008 Free Software Foundation, Inc.
+# Copyright 2004, 2006, 2008, 2009 Free Software Foundation, Inc.
 # Written by Mike Anderson and Paolo Bonzini.
 #
 # This file is part of the GNU Smalltalk class library.

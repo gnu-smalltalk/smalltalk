@@ -6,7 +6,7 @@
 
 /***********************************************************************
  *
- * Copyright 2001, 2003, 2006, 2008 Free Software Foundation, Inc.
+ * Copyright 2001, 2003, 2006, 2008, 2009 Free Software Foundation, Inc.
  * Written by Paolo Bonzini, Norman Jordan, Mike S. Anderson.
  *
  * This file is part of GNU Smalltalk.

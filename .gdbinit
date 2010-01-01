@@ -7,7 +7,7 @@
 
 #######################################################################
 #
-# Copyright 2004, 2006, 2007 Free Software Foundation, Inc.
+# Copyright 2004, 2006, 2007, 2009 Free Software Foundation, Inc.
 # Written by Paolo Bonzini
 #
 # This file is part of GNU Smalltalk.

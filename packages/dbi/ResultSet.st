@@ -8,7 +8,7 @@
 "======================================================================
 |
 | Copyright 2006 Mike Anderson
-| Copyright 2007, 2008 Free Software Foundation, Inc.
+| Copyright 2007, 2008, 2009 Free Software Foundation, Inc.
 |
 | Written by Mike Anderson
 |

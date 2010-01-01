@@ -1,7 +1,7 @@
 /*  -*- Mode: C -*-  */
 
 /* printf.c --- printf clone for argv arrays
- * Copyright (C) 1998, 1999, 2000, 2002 Gary V. Vaughan
+ * Copyright (C) 1998, 1999, 2000, 2002, 2009 Gary V. Vaughan
  * Originally by Gary V. Vaughan, 1998
  * This file is part of Snprintfv
  *

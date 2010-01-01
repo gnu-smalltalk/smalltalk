@@ -1,3 +1,7 @@
+2010-01-01  Paolo Bonzini  <bonzini@gnu.org>
+
+	* Update copyright years.
+
 2009-10-08  Paolo Bonzini  <bonzini@gnu.org>
 
 	* Buffers.st: Use pre-f7d0319 implementation of

@@ -8,6 +8,7 @@
 "======================================================================
 |
 | Copyright (c) 2000 Cincom, Inc.
+| Copyright (c) 2009 Free Software Foundation
 |
 | This file is part of the GNU Smalltalk class library.
 |

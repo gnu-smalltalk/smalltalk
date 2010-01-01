@@ -9,9 +9,8 @@
 
 /***********************************************************************
  *
- * Copyright 1992, 1994, 1995, 1999, 2000, 2001, 2002, 2006
+ * Copyright 1992, 1994, 1995, 1999, 2000, 2001, 2002, 2006, 2009
  * Free Software Foundation, Inc.
- * XPM code is Copyright (C) 1989-94 GROUPE BULL
  * Written by Paolo Bonzini.
  *
  * This file is part of GNU Smalltalk.
@@ -53,6 +52,7 @@
  * Foundation, 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.  
  *
  * Here is the copyright notice for the XPM code:
+ * Copyright (C) 1989-94 GROUPE BULL
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to

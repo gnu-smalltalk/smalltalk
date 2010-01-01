@@ -1,7 +1,6 @@
 dnl Hey Emacs, I want this in -*- Autoconf -*- mode, please.
 dnl ---
-dnl Copyright 1992,93,94,95,99,2000,2001,2002,2003,2004,2005,2006,2007,2008
-dnl Free Software Foundation, Inc.
+dnl Copyright 1992-2009 Free Software Foundation, Inc.
 dnl Please see COPYING for a description your rights and responsibilities
 dnl with this software.
 dnl Process this file with autoconf to produce a configure script.
