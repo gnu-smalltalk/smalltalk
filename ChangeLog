@@ -1,3 +1,7 @@
+2010-01-01  Gwenael Casaccio  <mrgwen@gmail.com>
+
+	* scripts/Package.st: Give an error if no arguments are given.
+
 2010-01-01  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/AnsiDates.st: Add some methods for Grease.

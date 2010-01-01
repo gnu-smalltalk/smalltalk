@@ -1129,7 +1129,15 @@ The default target directory is ', Directory image name, '
 '
     ]
 
+    displayHelpAndQuit: anInteger [
+	<category: 'help printing'>
+
+        self helpString displayOn: stderr.
+        ObjectMemory quit: anInteger
+    ]
+
     parseArguments: args [
+	args isEmpty ifTrue: [ self displayHelpAndQuit: 1 ].
         Getopt
             "--kernel-directory and --image-file are processed by gst-tool.
 	     --no-load present for backwards compatibility, it is now the
@@ -1143,8 +1151,7 @@ The default target directory is ', Directory image name, '
 
             do: [ :opt :arg || modeClass |
 	        opt = 'help' ifTrue: [
-		    self helpString displayOn: stdout.
-		    ObjectMemory quit: 0 ].
+		    self displayHelpAndQuit: 0 ].
 
 	        opt = 'version' ifTrue: [
 		    ('gst-package - %1' % {Smalltalk version}) displayNl.
@@ -1159,8 +1166,7 @@ The default target directory is ', Directory image name, '
 			    ifFalse: [ self addOption: opt argument: arg. ]
 			    ifTrue: [ self addArgument: arg ]]]
             ifError: [
-                self helpString displayOn: stderr.
-                ObjectMemory quit: 1 ].
+                self displayHelpAndQuit: 1 ].
     ]
 
     run [
