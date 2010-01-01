@@ -649,17 +649,6 @@ some access and manipulation methods.'>
 	^result
     ]
 
-    , aSequenceableCollection [
-	"Append aSequenceableCollection at the end of the receiver (using #add:),
-	 and answer a new collection"
-
-	<category: 'copying SequenceableCollections'>
-	^(self copyEmpty: self size + aSequenceableCollection size)
-	    addAll: self;
-	    addAll: aSequenceableCollection;
-	    yourself
-    ]
-
     copyWithFirst: anObject [
 	"Answer a new collection holding all the elements of the receiver
 	 after the first occurrence of anObject, up to the last."

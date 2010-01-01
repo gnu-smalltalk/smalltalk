@@ -620,12 +620,12 @@ Stream subclass: OneOfEachStream [
 
 Stream extend [
 
-    , aStream [
+    , anIterable [
 	"Answer a new stream that concatenates the data in the receiver with the
 	 data in aStream.  Both the receiver and aStream should be readable."
 
 	<category: 'filtering'>
-	^Kernel.ConcatenatedStream with: self with: aStream
+	^Kernel.ConcatenatedStream with: self with: anIterable readStream
     ]
 
     lines [

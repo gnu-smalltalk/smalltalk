@@ -272,6 +272,11 @@ time value, and a block execution timing facility.'>
 	^self millisecondClock - startTime
     ]
 
+    asMilliseconds [
+	<category: 'accessing (non ANSI & for Durations)'>
+	^seconds * 1000
+    ]
+
     asSeconds [
 	<category: 'accessing (non ANSI & for Durations)'>
 	^seconds

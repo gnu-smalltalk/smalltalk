@@ -386,10 +386,22 @@ method.'>
     ]
 
     - aDate [
-	"Answer a new Date pointing dayCount before the receiver"
+	"Answer a new Duration counting the number of days between the
+         receiver and aDate."
 
 	<category: 'basic'>
 	^Duration days: self days - aDate days
+    ]
+
+    + aDuration [
+        "Answer a new Date or DateTime pointing aDuration time past the
+         receiver."
+        aDuration seconds = 0
+            ifTrue: [ ^Date fromDays: self days + aDuration days ].
+	^DateTime 
+	    fromDays: self days + aDuration days
+	    seconds: aDuration seconds
+	    offset: Duration zero
     ]
 
     addDays: dayCount [

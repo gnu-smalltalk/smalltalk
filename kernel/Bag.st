@@ -217,6 +217,13 @@ twice, then I will report that that element has been stored twice.'>
 	contents := self dictionaryClass new: size
     ]
 
+    valuesAndCounts [
+        "Answer a dictionary whose keys are distinct elements of the receiver
+         and whose values are the number of occurrences of each element."
+	<category: 'private'>
+	^contents copy
+    ]
+
     contents [
 	<category: 'private'>
 	^contents

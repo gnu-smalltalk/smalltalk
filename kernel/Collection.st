@@ -140,6 +140,17 @@ of objects.'>
 	^true
     ]
 
+    , anIterable [
+	"Append anIterable at the end of a copy of the receiver (using #add:),
+	 and answer a new collection"
+
+	<category: 'copying SequenceableCollections'>
+	^(self copyEmpty: self size + anIterable size)
+	    addAll: self;
+	    addAll: anIterable;
+	    yourself
+    ]
+
     add: newObject [
 	"Add newObject to the receiver, answer it"
 

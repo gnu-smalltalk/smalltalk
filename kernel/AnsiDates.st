@@ -209,7 +209,7 @@ Date subclass: DateTime [
     ]
 
     + aDuration [
-	"Answer a new Date pointing dayCount past the receiver"
+	"Answer a new Date pointing aDuration time past the receiver"
 
 	<category: 'basic'>
 	| newSecs |
@@ -530,6 +530,20 @@ Time subclass: Duration [
 	^self fromSeconds: days * 86400 + secs
     ]
 
+    Duration class >> milliseconds: msec [
+	"Answer a duration of `msec' milliseconds"
+
+	<category: 'instance creation'>
+	^self fromSeconds: msec / 1000
+    ]
+
+    Duration class >> weeks: w [
+	"Answer a duration of `w' weeks"
+
+	<category: 'instance creation'>
+	^self fromSeconds: w * ##(86400 * 7)
+    ]
+
     Duration class >> days: d [
 	"Answer a duration of `d' days"
 
@@ -617,6 +631,13 @@ Time subclass: Duration [
 
 	<category: 'arithmetics'>
 	^Duration fromSeconds: self asSeconds - aDuration asSeconds
+    ]
+
+    isZero [
+	"Answer whether the receiver correspond to a duration of zero seconds."
+
+	<category: 'arithmetics'>
+	^self asSeconds = 0
     ]
 
     abs [

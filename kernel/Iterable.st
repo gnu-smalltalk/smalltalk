@@ -46,6 +46,14 @@ all possible) are left to the subclasses.'>
 	self subclassResponsibility
     ]
 
+    , anIterable [
+	"Answer an iterable that enumerates first the elements of the receiver
+         and then the elements of anIterable."
+
+	<category: 'enumeration'>
+	self subclassResponsibility
+    ]
+
     do: aBlock [
 	"Enumerate each object of the receiver, passing them to aBlock"
 

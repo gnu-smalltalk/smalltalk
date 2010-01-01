@@ -1,3 +1,15 @@
+2010-01-01  Paolo Bonzini  <bonzini@gnu.org>
+
+	* kernel/AnsiDates.st: Add some methods for Grease.
+	* kernel/Bag.st: Likewise.
+	* kernel/Collection.st: Likewise.
+	* kernel/Date.st: Likewise.
+	* kernel/Time.st: Likewise.
+
+	* kernel/Iterable.st: Add abstract #,.
+	* kernel/SeqCollect.st: Remove #, pushed up to Collection.
+	* kernel/StreamOps.st: Make #, accept a Collection argument.
+
 2009-12-30  Gwenael Casaccio  <mrgwen@gmail.com>
 
 	* kernel/PkgLoader.st: Add <version>, use indirect dispatch.
