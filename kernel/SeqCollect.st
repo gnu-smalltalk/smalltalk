@@ -1027,7 +1027,7 @@ some access and manipulation methods.'>
 	    startingAt: 1
     ]
 
-    sortBy: sortBlock [
+    sort: sortBlock [
 	"Sort the contents of the receiver according to the given
 	 sort block, which accepts pair of items and returns true if
 	 the first item is less than the second one."

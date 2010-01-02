@@ -93,6 +93,9 @@ o   Sending mode, file time and owner setters to a recursive directory
     decorator (such as `Directory working all') sets the mode/time/owner
     on all files under the path.
 
+o   SequenceableCollection>>#sortBy: was renamed to #sort:.  The old message
+    is _not_ provided for backwards-compatibility.
+
 o   String>>#subStrings: accepts a single separator character or also, in
     accordance with ANSI, a String holding a list of separators.
 
