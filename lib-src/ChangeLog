@@ -1,3 +1,7 @@
+2010-01-04  Paolo Bonzini  <bonzini@gnu.org>
+
+	* lib-src/ltdl.c (sys_wll_open): Wrap SetErrorMode around LoadLibrary.
+
 2010-01-01  Paolo Bonzini  <bonzini@gnu.org>
 
 	* Update copyright years.

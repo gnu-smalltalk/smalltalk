@@ -1312,6 +1312,7 @@ sys_wll_open (loader_data, filename)
   char	       *searchname = 0;
   char	       *ext;
   char		self_name_buf[MAX_PATH];
+  UINT errormode;
 
   if (!filename)
     {
@@ -1341,6 +1342,12 @@ sys_wll_open (loader_data, filename)
   if (!searchname)
     return 0;
 
+  /* Silence dialog from LoadLibrary on some failures.
+     No way to get the error mode, but to set it,
+     so set it twice to preserve any previous flags. */
+  errormode = SetErrorMode (SEM_FAILCRITICALERRORS);
+  SetErrorMode (errormode | SEM_FAILCRITICALERRORS);
+
 #if __CYGWIN__
   {
     char wpath[MAX_PATH];
@@ -1350,6 +1357,7 @@ sys_wll_open (loader_data, filename)
 #else
   module = LoadLibrary (searchname);
 #endif
+  SetErrorMode (errormode);
   LT_DLFREE (searchname);
 
   /* libltdl expects this function to fail if it is unable
