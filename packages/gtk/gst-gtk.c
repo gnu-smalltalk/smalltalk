@@ -645,10 +645,9 @@ connect_signal (OOP widget,
   
   widget = narrow_oop_for_g_object (G_OBJECT (cWidget), widget);
   closure = create_smalltalk_closure (receiver, selector, user_data,
-				      widget, n_params);
+                                     widget, n_params);
 
-  g_signal_connect_closure (cWidget, event_name, closure, FALSE);
-  return (0);
+  return g_signal_connect_closure (cWidget, event_name, closure, FALSE);
 }
 
 int

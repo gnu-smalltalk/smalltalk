@@ -58,22 +58,28 @@ GLib class extend [
 GObject extend [
 
     connectSignal: name to: handler selector: sel userData: userData [
-	<category: 'C call-outs'>
-	<cCall: 'gstGtkConnectSignal' returning: #void
-	args: #(#selfSmalltalk #string #smalltalk #smalltalk #smalltalk )>
-	
+       <category: 'C call-outs'>
+       <cCall: 'gstGtkConnectSignal' returning: #int
+       args: #(#selfSmalltalk #string #smalltalk #smalltalk #smalltalk )>
+       
     ]
 
     connectSignal: name to: handler selector: sel [
-	<category: 'C call-outs'>
-	<cCall: 'gstGtkConnectSignalNoUserData' returning: #void
-	args: #(#selfSmalltalk #string #smalltalk #smalltalk )>
-	
+       <category: 'C call-outs'>
+       <cCall: 'gstGtkConnectSignalNoUserData' returning: #int
+       args: #(#selfSmalltalk #string #smalltalk #smalltalk )>
+       
+    ]
+
+    disconnectSignal: anInteger [
+       <category: 'C call-outs'>
+       <cCall: 'g_signal_handler_disconnect' returning: #void
+       args: #(#self #int )>
     ]
 
     narrow [
-	<category: 'C call-outs'>
-	<cCall: 'gstGtkNarrowGObjectOOP' returning: #smalltalk
+       <category: 'C call-outs'>
+       <cCall: 'gstGtkNarrowGObjectOOP' returning: #smalltalk
 	args: #(#self #selfSmalltalk )>
 	
     ]

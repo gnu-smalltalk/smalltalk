@@ -1,3 +1,10 @@
+2010-01-05  Gwenael Casaccio  <mrgwen@gmail.com>
+
+	* gst-gtk.c (connect_signal): Return result of
+	g_signal_connect_closure.
+	* MoreFuncs.st: Return value from #connectSignal:... and add
+	#disconnectSignal:.
+
 2010-01-01  Paolo Bonzini  <bonzini@gnu.org>
 
 	* Update copyright years.
