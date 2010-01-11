@@ -1,11 +1,14 @@
 /genbc-decl.c
 /genbc-decl.h
+/genbc-scan.c
 /genbc-impl.c
 /genbc-impl.h
 /genpr-parse.c
 /genpr-parse.h
+/genpr-scan.c
 /genvm-parse.c
 /genvm-parse.h
+/genvm-scan.c
 /match.h
 /match.stamp
 /prims.inl
