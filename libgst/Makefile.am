@@ -63,7 +63,9 @@ genvm_LDADD = @LIBSNPRINTFV@ $(top_builddir)/lib-src/library.la
 genpr-parse.h: genpr-parse.c
 	@:
 
-BUILT_SOURCES = prims.inl match.h builtins.inl vm.inl
+BUILT_SOURCES = prims.inl match.h builtins.inl vm.inl \
+	genbc-decl.c genbc-impl.c genpr-parse.c genvm-parse.c
+
 dist_noinst_DATA = valgrind.supp prims.def byte.def vm.def builtins.gperf
 STAMP_FILES = prims.stamp match.stamp vm.stamp
 
