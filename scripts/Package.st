@@ -1132,12 +1132,12 @@ The default target directory is ', Directory image name, '
     displayHelpAndQuit: anInteger [
 	<category: 'help printing'>
 
-        self helpString displayOn: stderr.
+        self helpString displayOn:
+            (anInteger = 1 ifTrue: [stderr] ifFalse: [stdout]).
         ObjectMemory quit: anInteger
     ]
 
     parseArguments: args [
-	args isEmpty ifTrue: [ self displayHelpAndQuit: 1 ].
         Getopt
             "--kernel-directory and --image-file are processed by gst-tool.
 	     --no-load present for backwards compatibility, it is now the
@@ -1171,6 +1171,7 @@ The default target directory is ', Directory image name, '
 
     run [
 	| command |
+	(args isNil or: [args isEmpty]) ifTrue: [ self displayHelpAndQuit: 1 ].
         command := self mode new.
         command options: self options.
         command executeOnAll: args.

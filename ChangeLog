@@ -1,3 +1,7 @@
+2010-01-10  Paolo Bonzini  <bonzini@gnu.org>
+
+	* scripts/Package.st: Fix previous patch to Package.st.
+
 2010-01-02  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/SeqCollect.st: Rename #sortBy: to #sort: for Grease
