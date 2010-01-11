@@ -71,7 +71,7 @@ genbc-impl.h: genbc-impl.c
 
 BUILT_SOURCES = prims.inl match.h builtins.inl vm.inl \
 	genbc-decl.c genbc-impl.c genbc-scan.c \
-	genpr-parse.c genpr-scan.c genvm-parse.c genvm-scan.c \
+	genpr-parse.c genpr-scan.c genvm-parse.c genvm-scan.c
 
 dist_noinst_DATA = valgrind.supp prims.def byte.def vm.def builtins.gperf
 STAMP_FILES = prims.stamp match.stamp vm.stamp
