@@ -162,7 +162,7 @@ opt_field_list:
 
 field_list:
 	field_list ',' ID
-	  { struct field_info *f = malloc (sizeof (struct field_info *));
+	  { struct field_info *f = malloc (sizeof (struct field_info));
 	    define_var ($3);
 	    f->name = $3;
 	    f->next = NULL;
@@ -171,7 +171,7 @@ field_list:
 	    $$->pnext = &(f->next);
 	  }
 	| ID
-	  { struct field_info *f = malloc (sizeof (struct field_info *));
+	  { struct field_info *f = malloc (sizeof (struct field_info));
 	    define_var ($1);
 	    f->name = $1;
 	    f->next = NULL;

@@ -1,3 +1,7 @@
+2010-01-11  Paolo Bonzini  <bonzini@gnu.org>
+
+	* libgst/genbc-decl.y: Embarrassing typo.
+
 2010-01-08  Paolo Bonzini  <bonzini@gnu.org>
 
 	* libgst/mpz.c: Hack to build with GMP 5.
