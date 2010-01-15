@@ -15,7 +15,8 @@ endif
 include_HEADERS = gstpub.h gst.h
 lib_LTLIBRARIES = libgst.la
 EXTRA_PROGRAMS = genprims genbc genvm
-CLEANFILES = genprims$(EXEEXT) genbc$(EXEEXT) genvm$(EXEEXT)
+CLEANFILES = genprims$(EXEEXT) genbc$(EXEEXT) genvm$(EXEEXT) \
+  genbc-decl.stamp genbc-impl.stamp genpr-parse.stamp genvm-parse.stamp
 
 # definitions for libgst.la
 
@@ -58,20 +59,26 @@ genvm_SOURCES = \
 
 genvm_LDADD = @LIBSNPRINTFV@ $(top_builddir)/lib-src/library.la
 
-# other definitions
+# manually give dependencies involving BUILT_SOURCES.  The input .l/.y files
+# change rarely, so do not bother changing the timestamp file only if the
+# output changed.
 
-genpr-parse.h: genpr-parse.c
-	@:
+genbc-decl.stamp: genbc-decl.c genbc-decl.y; echo stamp > $@
+genbc-impl.stamp: genbc-impl.c genbc-impl.y; echo stamp > $@
+genpr-parse.stamp: genpr-parse.c genpr-parse.y; echo stamp > $@
+genvm-parse.stamp: genvm-parse.c genvm-parse.y; echo stamp > $@
 
-genbc-decl.h: genbc-decl.c
-	@:
- 
-genbc-impl.h: genbc-impl.c
-	@:
+genbc.o: genbc-decl.stamp genbc-impl.stamp
+genbc-scan.o: genbc-decl.stamp genbc-impl.stamp
+genbc-decl.o: genbc-decl.stamp genbc-impl.stamp
+genbc-impl.o: genbc-decl.stamp genbc-impl.stamp
+genpr-scan.o: genpr-parse.stamp
+genvm-scan.o: genvm-parse.stamp
 
 BUILT_SOURCES = prims.inl match.h builtins.inl vm.inl \
-	genbc-decl.c genbc-impl.c genbc-scan.c \
-	genpr-parse.c genpr-scan.c genvm-parse.c genvm-scan.c
+	genbc-decl.c genbc-impl.c genbc-scan.c genbc-decl.h genbc-impl.h \
+	genpr-parse.c genpr-scan.c genpr-parse.h \
+	genvm-parse.c genvm-scan.c genvm-parse.h
 
 dist_noinst_DATA = valgrind.supp prims.def byte.def vm.def builtins.gperf
 STAMP_FILES = prims.stamp match.stamp vm.stamp
