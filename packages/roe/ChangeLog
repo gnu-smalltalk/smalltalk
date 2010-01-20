@@ -1,3 +1,8 @@
+2010-10-20  Nicolas Petton  <nicolas.petton@gmail.com>
+
+	* Array.st: Add #asArray to SQLRelation>>#for:do:, as RASimpleTuple
+	wants numeric indices.
+
 2010-10-20  Paolo Bonzini  <bonzini@gnu.org>
 
 	* Array.st: Rename #sortBy: -> #sort:.

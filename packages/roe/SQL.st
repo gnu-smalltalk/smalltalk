@@ -103,7 +103,7 @@ RAConcreteRelation subclass: RASQLRelation [
     for: aRelation do: aBlock [
 	<category: 'private'>
 	(self query: (self sqlPrinterClass print: aRelation for: self)) 
-	    do: [:ea | aBlock value: (RASimpleTuple relation: aRelation values: ea)]
+	    do: [:ea | aBlock value: (RASimpleTuple relation: aRelation values: ea asArray)]
     ]
 
     for: aRelation update: aBlock [
