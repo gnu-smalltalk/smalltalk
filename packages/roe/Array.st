@@ -145,7 +145,7 @@ RAVisitor subclass: RAEvaluator [
 			ascending 
 			    ifTrue: [(x at: pos) first < (y at: pos) first]
 			    ifFalse: [(x at: pos) first > (y at: pos) first]].
-		result := result sortBy: block].
+		result := result sort: block].
 	^result
     ]
 

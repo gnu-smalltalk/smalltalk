@@ -1,3 +1,7 @@
+2010-10-20  Paolo Bonzini  <bonzini@gnu.org>
+
+	* Array.st: Rename #sortBy: -> #sort:.
+
 2008-03-19  Paolo Bonzini  <bonzini@gnu.org>
 
 	* SQL.st: Fix borked checkin.
