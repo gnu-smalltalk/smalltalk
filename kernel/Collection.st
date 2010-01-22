@@ -295,7 +295,8 @@ of objects.'>
 	"Answer an unspecified element of the collection."
 
 	<category: 'enumeration'>
-	self do: [:each | ^each]
+	self do: [:each | ^each].
+	^SystemExceptions.EmptyCollection signalOn: self
     ]
 
     join [

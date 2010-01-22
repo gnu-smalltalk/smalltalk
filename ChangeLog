@@ -1,3 +1,7 @@
+2010-01-22  Paolo Bonzini  <bonzini@gnu.org>
+
+	* kernel/Collection.st: Error on #anyOne for empty collections.
+
 2010-01-10  Paolo Bonzini  <bonzini@gnu.org>
 
 	* scripts/Package.st: Fix previous patch to Package.st.
