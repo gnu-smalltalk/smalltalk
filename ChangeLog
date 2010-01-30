@@ -1,3 +1,11 @@
+2010-01-30  Paolo Bonzini  <bonzini@gnu.org>
+
+	* kernel/Collection.st: Add #sorted and #sorted:.
+	* kernel/SeqCollect.st: Add #sorted and #sorted:.
+	* kernel/ArrayColl.st: Add #sorted and #sorted:.
+	* kernel/SortCollect.st: Add #sorted and #sorted:, disable #sort
+	and #sort:.
+
 2010-01-22  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/Collection.st: Error on #anyOne for empty collections.

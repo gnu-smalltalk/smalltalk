@@ -135,6 +135,27 @@ above criteria -- actually any object which responds to #value:value:.'>
 	^self basicRemoveLast
     ]
 
+    sort [
+	"Sort the contents of the receiver according to the given
+	 sort block, which accepts pair of items and returns true if
+	 the first item is less than the second one.  Fails if the
+         collections's sort block is not the same as the default sort
+         block."
+        <category: 'sorting'>
+	self sortBlock == self class defaultSortBlock ifTrue: [^self].
+	self shouldNotImplement
+    ]
+
+    sort: sortBlock [
+	"Sort the contents of the receiver according to the given
+	 sort block, which accepts pair of items and returns true if
+	 the first item is less than the second one.  Fails if the
+         sort block is not the same as the collection's sort block."
+        <category: 'sorting'>
+	self sortBlock == sortBlock ifTrue: [^self].
+	self shouldNotImplement
+    ]
+
     sortBlock [
 	"Answer the receiver's sort criteria"
 

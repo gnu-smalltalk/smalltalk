@@ -453,6 +453,30 @@ of objects.'>
 	    yourself
     ]
 
+    sorted [
+	"Return a sequenceable collection with the contents of the receiver
+         sorted according to the default sort block, which uses #<=
+         to compare items."
+        <category: 'sorting'>
+	^(Array new: self size)
+	    replaceFrom: 1
+	    to: self size
+	    with: self asSortedCollection
+	    startingAt: 1
+    ]
+
+    sorted: sortBlock [
+	"Return a sequenceable collection with the contents of the receiver
+         sorted according to the given sort block, which accepts pair of items
+         and returns true if the first item is less than the second one."
+        <category: 'sorting'>
+	^(Array new: self size)
+	    replaceFrom: 1
+	    to: self size
+	    with: (self asSortedCollection: sortBlock)
+	    startingAt: 1
+    ]
+
     asSortedCollection [
 	"Answer a SortedCollection containing all the elements in the receiver
 	 with the default sort block - [ :a :b | a <= b ]"

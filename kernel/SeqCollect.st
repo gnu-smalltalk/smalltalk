@@ -1016,6 +1016,25 @@ some access and manipulation methods.'>
 	      seqColl3 at: each } ]
     ]
 
+    sorted [
+	"Return a copy of the receiver sorted according to the default
+	 sort block, which uses #<= to compare items."
+        <category: 'sorting'>
+	^(self copyEmptyForCollect: self size)
+	    addAll: self asSortedCollection;
+	    yourself
+    ]
+
+    sorted: sortBlock [
+	"Return a copy of the receiver sorted according to the given
+	 sort block, which accepts pair of items and returns true if
+	 the first item is less than the second one."
+        <category: 'sorting'>
+	^(self copyEmptyForCollect: self size)
+	    addAll: (self asSortedCollection: sortBlock);
+	    yourself
+    ]
+
     sort [
 	"Sort the contents of the receiver according to the default
 	 sort block, which uses #<= to compare items."

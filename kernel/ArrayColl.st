@@ -437,6 +437,29 @@ externally; I will not rearrange the order of the elements.'>
 	^result
     ]
 
+    sorted [
+	"Return a copy of the receiver sorted according to the default
+	 sort block, which uses #<= to compare items."
+        <category: 'sorting'>
+	^self copyEmpty
+	    replaceFrom: 1
+	    to: self size
+	    with: self asSortedCollection
+	    startingAt: 1
+    ]
+
+    sorted: sortBlock [
+	"Return a copy of the receiver sorted according to the given
+	 sort block, which accepts pair of items and returns true if
+	 the first item is less than the second one."
+        <category: 'sorting'>
+	^self copyEmpty
+	    replaceFrom: 1
+	    to: self size
+	    with: (self asSortedCollection: sortBlock)
+	    startingAt: 1
+    ]
+
     storeOn: aStream [
 	"Store Smalltalk code compiling to the receiver on aStream"
 
