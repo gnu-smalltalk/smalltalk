@@ -1,3 +1,7 @@
+2010-02-05  Gwenael Casaccio  <mrgwen@gmail.com>
+
+	* libgst/sysdep/posix/events.c: Fix initialization of waiting_thread.
+
 2010-01-11  Paolo Bonzini  <bonzini@gnu.org>
 
 	* libgst/genbc-decl.y: Embarrassing typo.

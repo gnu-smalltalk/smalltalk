@@ -359,7 +359,7 @@ void
 _gst_pause (void)
 {
 #ifdef USE_POSIX_THREADS
-  waiting_thread = pthread_in_use () ? 0 : pthread_self ();
+  waiting_thread = pthread_in_use () ? pthread_self () : 0;
 #endif
   _gst_disable_interrupts (false);
   if (!_gst_have_pending_async_calls ())
