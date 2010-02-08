@@ -214,6 +214,7 @@ end
 # ------------------------------------------------------
 
 handle SIGSEGV noprint
+handle SIGUSR2 noprint
 
 # Don't let abort actually run, as it will make stdio
 # stop working and therefore the commands above as well.
