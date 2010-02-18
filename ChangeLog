@@ -1,3 +1,11 @@
+2010-02-18  Paolo Bonzini  <bonzini@gnu.org>
+
+	* kernel/AnsiExcept.st: Add InvalidState.
+	* kernel/Continuation.st: Add forking of continuations.
+	* kernel/Process.st: Add forking of processes.
+	* tests/processes.st: Add testcase.
+	* tests/processes.ok: Regenerate.
+
 2010-01-30  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/Collection.st: Add #sorted and #sorted:.

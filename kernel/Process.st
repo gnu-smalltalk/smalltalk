@@ -52,6 +52,16 @@ can suspend themselves and resume themselves however they wish.'>
 	    suspend: aBoolean
     ]
 
+    fork [
+        "A Unix-style fork of Smalltalk processes.  Returns nil in the
+         newly-created process, and the child Process in the calling process."
+
+        self isActive ifFalse: [ 
+            ^SystemExceptions.InvalidState signalOn: self
+                reason: 'process not active' ].
+        ^Continuation current ifNotNil: [ :c | c fork ]
+    ]
+
     debugger [
 	"Return the object in charge of debugging the receiver.  This always returns
 	 nil unless the DebugTools package is loaded."

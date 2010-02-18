@@ -687,6 +687,29 @@ Error subclass: InvalidValue [
 
 Namespace current: SystemExceptions [
 
+InvalidValue subclass: InvalidState [
+    | value |
+    
+    <category: 'Language-Exceptions'>
+    <comment: 'I am raised when one invokes a method and the receiver or an argument
+are in an invalid state for the method.'>
+
+    messageText [
+	"Answer an exception's message text."
+
+	<category: 'accessing'>
+	^'%1 is in an invalid state: %2' % 
+		{self value.
+		self basicMessageText}
+    ]
+]
+
+]
+
+
+
+Namespace current: SystemExceptions [
+
 InvalidValue subclass: NotIndexable [
     
     <category: 'Language-Exceptions'>

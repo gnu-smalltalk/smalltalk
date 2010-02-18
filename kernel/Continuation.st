@@ -99,6 +99,50 @@ of continuations, rather than with the concept itself.'>
 	^self resume: cont nextContinuation: nil
     ]
 
+    newProcess [
+	"Run the original continuation in a new Smalltalk process that is
+         left suspended.  Return the new process in the parent, and
+         restart the continuation (returning nil) in the child."
+
+	<category: 'forking'>
+        | c |
+	c := Continuation new stack: stack copyStack.
+        ^[ c oneShotValue ] newProcess
+    ]
+
+    newProcess: anObject [
+	"Run the original continuation in a new Smalltalk process that is
+         left suspended.  Return the new process in the parent, and
+         restart the continuation (returning anObject) in the child."
+
+	<category: 'forking'>
+        | c |
+	c := Continuation new stack: stack copyStack.
+        ^[ c oneShotValue: anObject ] newProcess
+    ]
+
+    fork [
+	"Run the original continuation in a new Smalltalk process.  Return the
+         new process in the parent, and restart the continuation (returning
+         nil) in the child."
+
+	<category: 'forking'>
+        | c |
+	c := Continuation new stack: stack copyStack.
+        ^[ c oneShotValue ] fork
+    ]
+
+    fork: anObject [
+	"Run the original continuation in a new Smalltalk process.  Return the
+         new process in the parent, and restart the continuation (returning
+         anObject) in the child."
+
+	<category: 'forking'>
+        | c |
+	c := Continuation new: stack copyStack.
+        ^[ c oneShotValue: anObject ] fork
+    ]
+
     value [
 	"Return nil to the original continuation, copying the stack to allow
 	 another activation."
