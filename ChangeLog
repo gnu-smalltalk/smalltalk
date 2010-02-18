@@ -1,5 +1,10 @@
 2010-02-18  Paolo Bonzini  <bonzini@gnu.org>
 
+	* kernel/ExcHandling.st: Extract #instantiateDefaultHandler.
+	* kernel/AnsiExcept.st: Override it for UnhandledException.
+
+2010-02-18  Paolo Bonzini  <bonzini@gnu.org>
+
 	* kernel/AnsiExcept.st: Use #instantiateNextHandlerFrom:.
 	* kernel/ExcHandling.st: Likewise.  Move #instantiateNextHandler:from:
 	to Signal and rename it.

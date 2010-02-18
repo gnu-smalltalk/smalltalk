@@ -1558,6 +1558,29 @@ current process.'>
 	thisContext environment continue: nil
     ]
 
+    instantiateDefaultHandler [
+	"Private - Fill the receiver with information on its default handler."
+
+	<category: 'private'>
+        | signalingContext resumeContext |
+
+	"This exception is kind of special, as we forcedly have to find
+         a place to resume---even if the exception was not resumable!
+         This typically will happens when the user steps out of the
+         exception handling gobbledegook in the debugger."
+        signalingContext := thisContext.
+        [resumeContext := signalingContext parentContext.
+        resumeContext isEnvironment not
+            and: [resumeContext isInternalExceptionHandlingContext]]
+                whileTrue: [signalingContext := resumeContext].
+
+	self 
+	    onDoBlock: nil
+	    handlerBlock: self exception actualDefaultHandler
+	    onDoContext: signalingContext
+	    previousState: nil
+    ]
+
     originalException [
 	"Answer the uncaught exception."
 

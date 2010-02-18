@@ -538,7 +538,7 @@ with a lower priority.'>
 
     instantiateNextHandlerFrom: aContext [
 	"Private - Fill the receiver with information on the next handler for
-         it, possibly a handler for a parent or the defaut handler."
+         it, possibly a handler for a parent or the default handler."
 
 	<category: 'private'>
 	aContext parentContext scanBacktraceForAttribute: #exceptionHandlerSearch:reset:
@@ -547,6 +547,14 @@ with a lower priority.'>
 		| status |
 		status := (attr arguments at: 1) value: context value: self.
 		status == #found ifTrue: [^self]].
+
+        self instantiateDefaultHandler.
+    ]
+
+    instantiateDefaultHandler [
+	"Private - Fill the receiver with information on its default handler."
+
+	<category: 'private'>
 	self 
 	    onDoBlock: nil
 	    handlerBlock: self exception actualDefaultHandler
@@ -743,7 +751,7 @@ with a lower priority.'>
 	"Mark the handler that the receiver is using as not active."
 
 	<category: 'private'>
-	context isNil 
+	onDoBlock isNil 
 	    ifFalse: [context at: context numArgs + 1 put: previousState]
     ]
 
