@@ -230,7 +230,7 @@ hold on to a CoreException via a class-instance variable.'>
 	signal := (signalClass new)
 		    initArguments: #();
 		    initException: self.
-	self instantiateNextHandler: signal from: thisContext.
+	signal instantiateNextHandlerFrom: thisContext.
 	^signal activateHandler: false
     ]
 
@@ -244,7 +244,7 @@ hold on to a CoreException via a class-instance variable.'>
 	signal := (signalClass new)
 		    initArguments: {arg};
 		    initException: self.
-	self instantiateNextHandler: signal from: thisContext.
+	signal instantiateNextHandlerFrom: thisContext.
 	^signal activateHandler: false
     ]
 
@@ -261,7 +261,7 @@ hold on to a CoreException via a class-instance variable.'>
 			    {arg.
 			    arg2};
 		    initException: self.
-	self instantiateNextHandler: signal from: thisContext.
+	signal instantiateNextHandlerFrom: thisContext.
 	^signal activateHandler: false
     ]
 
@@ -276,7 +276,7 @@ hold on to a CoreException via a class-instance variable.'>
 	signal := (signalClass new)
 		    initArguments: args;
 		    initException: self.
-	self instantiateNextHandler: signal from: thisContext.
+	signal instantiateNextHandlerFrom: thisContext.
 	^signal activateHandler: false
     ]
 
@@ -328,26 +328,6 @@ hold on to a CoreException via a class-instance variable.'>
 
 	<category: 'private'>
 	depth := anInteger
-    ]
-
-    instantiateNextHandler: aSignal from: aContext [
-	"Private - Tell aSignal what it needs on the next handler for the receiver.
-	 If none is found, look for an handler for our parent, until one
-	 is found or ExAll if reached and there is no handler. In this case, answer
-	 the default handler for anException."
-
-	<category: 'private'>
-	aContext parentContext scanBacktraceForAttribute: #exceptionHandlerSearch:reset:
-	    do: 
-		[:context :attr | 
-		| status |
-		status := (attr arguments at: 1) value: context value: aSignal.
-		status == #found ifTrue: [^self]].
-	aSignal 
-	    onDoBlock: nil
-	    handlerBlock: self actualDefaultHandler
-	    onDoContext: nil
-	    previousState: nil
     ]
 
     actualDefaultHandler [
@@ -556,6 +536,24 @@ with a lower priority.'>
 	^self exception isResumable
     ]
 
+    instantiateNextHandlerFrom: aContext [
+	"Private - Fill the receiver with information on the next handler for
+         it, possibly a handler for a parent or the defaut handler."
+
+	<category: 'private'>
+	aContext parentContext scanBacktraceForAttribute: #exceptionHandlerSearch:reset:
+	    do: 
+		[:context :attr | 
+		| status |
+		status := (attr arguments at: 1) value: context value: self.
+		status == #found ifTrue: [^self]].
+	self 
+	    onDoBlock: nil
+	    handlerBlock: self exception actualDefaultHandler
+	    onDoContext: nil
+	    previousState: nil
+    ]
+
     outer [
 	"Raise the exception that instantiated the receiver, passing the same
 	 parameters.
@@ -570,7 +568,7 @@ with a lower priority.'>
 	| signal |
 	signal := self copy.
 	signal isNested: true.
-        signal exception instantiateNextHandler: signal from: self context.
+        signal instantiateNextHandlerFrom: self context.
         ^signal activateHandler: true
     ]
 
@@ -584,7 +582,7 @@ with a lower priority.'>
 	| signal |
 	signal := self copy.
 	signal isNested: true.
-        signal exception instantiateNextHandler: signal from: self context.
+        signal instantiateNextHandlerFrom: self context.
         ^self return: (signal activateHandler: true)
     ]
 
@@ -641,8 +639,7 @@ with a lower priority.'>
 
 	<category: 'exception handling'>
 	Kernel.CoreException resetAllHandlers.
-        replacementException exception
-	    instantiateNextHandler: replacementException from: thisContext.
+        replacementException instantiateNextHandlerFrom: thisContext.
         ^replacementException return: (replacementException activateHandler: true)
     ]
 

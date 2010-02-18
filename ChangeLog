@@ -1,5 +1,11 @@
 2010-02-18  Paolo Bonzini  <bonzini@gnu.org>
 
+	* kernel/AnsiExcept.st: Use #instantiateNextHandlerFrom:.
+	* kernel/ExcHandling.st: Likewise.  Move #instantiateNextHandler:from:
+	to Signal and rename it.
+
+2010-02-18  Paolo Bonzini  <bonzini@gnu.org>
+
 	* kernel/ExcHandling.st: Small refactoring of Signal part 1,
 	just make the next part more obvious.
 
