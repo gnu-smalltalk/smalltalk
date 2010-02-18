@@ -451,7 +451,7 @@ _gst_install_initial_methods (void)
   _gst_set_compilation_category (_gst_string_new ("private"));
   _gst_alloc_bytecodes ();
   _gst_compile_byte (EXIT_INTERPRETER, 0);
-  _gst_compile_byte (RETURN_CONTEXT_STACK_TOP, 0);
+  _gst_compile_byte (JUMP_BACK, 4);
 
   /* The zeros are primitive, # of args, # of temps, stack depth */
   termination_method = _gst_make_new_method (0, 0, 0, 0, _gst_nil_oop,

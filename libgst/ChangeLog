@@ -1,3 +1,8 @@
+2010-02-18  Paolo Bonzini  <bonzini@gnu.org>
+
+	* libgst/comp.c: Compile the termination method with an infinite
+	loop to avoid falling off the last context.
+
 2010-02-05  Gwenael Casaccio  <mrgwen@gmail.com>
 
 	* libgst/sysdep/posix/events.c: Fix initialization of waiting_thread.
