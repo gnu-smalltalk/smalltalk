@@ -570,7 +570,7 @@ with a lower priority.'>
 	| signal |
 	signal := self copy.
 	signal isNested: true.
-        self exception instantiateNextHandler: signal from: self context.
+        signal exception instantiateNextHandler: signal from: self context.
         ^signal activateHandler: true
     ]
 
@@ -584,7 +584,7 @@ with a lower priority.'>
 	| signal |
 	signal := self copy.
 	signal isNested: true.
-        self exception instantiateNextHandler: signal from: self context.
+        signal exception instantiateNextHandler: signal from: self context.
         ^self return: (signal activateHandler: true)
     ]
 

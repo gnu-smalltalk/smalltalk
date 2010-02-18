@@ -1,5 +1,10 @@
 2010-02-18  Paolo Bonzini  <bonzini@gnu.org>
 
+	* kernel/ExcHandling.st: Small refactoring of Signal part 1,
+	just make the next part more obvious.
+
+2010-02-18  Paolo Bonzini  <bonzini@gnu.org>
+
 	* kernel/AnsiExcept.st: Add InvalidState.
 	* kernel/Continuation.st: Add forking of continuations.
 	* kernel/Process.st: Add forking of processes.
