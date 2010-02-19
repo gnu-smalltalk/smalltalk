@@ -1,4 +1,11 @@
 2010-02-19  Paolo Bonzini  <bonzini@gnu.org>
+            Gwenael Casaccio  <mrgwen@gmail.com>
+	
+	* GtkImpl.st: Rewrite event loop.
+	* MoreFuncs.st: Rewrite event loop.
+	* gst-gtk.c: Rewrite event loop.
+
+2010-02-19  Paolo Bonzini  <bonzini@gnu.org>
 	
 	* GtkImpl.st: Move extensions to/from VisualGST.
 

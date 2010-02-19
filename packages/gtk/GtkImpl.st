@@ -496,23 +496,31 @@ GtkTextBuffer extend [
 
 
 Gtk class extend [
+    | loop |
+
+    mainQuit [
+        loop quit
+    ]
 
     main [
-	"Main loop implementation.  Same as gtk_main, but it lets Smalltalk
-	 processes run.  Like gtk_main, it is ended with Gtk>>#mainQuit."
+	"Main loop implementation.  Same as gtk_main, but it splits
+         g_main_context_run in two threads so that Smalltalk processes
+         run.  Like gtk_main, it is ended with Gtk>>#mainQuit."
 
 	<category: 'event loop'>
-	| sem |
+	| sem newLoop context |
 	sem := Semaphore new.
-	"This call is asynchronous, so it leaves us waiting on the #wait call just
-	 below.  Our loop starts as soon as the next bytecode is executed,
-	 because sem is asynchronously signalled by my_gtk_main."
-	GTK.Gtk main: sem.
-	sem wait.
-	
-	[GTK.Gtk mainIterationDo: false.
-	GTK.Gtk shouldQuit] 
-		whileFalse: [Processor yield]
+	newLoop := GTK.Gtk main: sem.
+        newLoop isNil ifTrue: [ ^self ].
+        loop := newLoop.
+        context := loop getContext.
+
+	[
+            [sem wait.
+            [context acquireWait; dispatch]
+                ensure: [context releaseSignal].
+            loop isRunning] whileTrue]
+                 ensure: [loop unref]
     ]
 
 ]
@@ -578,6 +586,45 @@ GtkContainer extend [
 	[ (child := parent getFocusChild) isNil not ] whileTrue: [
 	    parent := child ].
 	^ aGtkWindow getFocus = parent
+    ]
+]
+
+
+GTK.GtkDialog extend [
+    run [
+        <category: 'services'>
+
+        | signals sema answer modal destroyed |
+        sema := Semaphore new.
+        modal := self getModal.
+        self setModal: true.
+        signals := {
+            self
+                connectSignal: 'response'
+                to: [ :dialog :integer | answer := integer. sema signal ]
+                selector: #value:value:.
+
+            self
+                connectSignal: 'unmap'
+                to: sema
+                selector: #signal.
+
+            self
+                connectSignal: 'delete_event'
+                to: [ answer := Gtk gtkResponseDeleteEvent. sema signal. true ]
+                selector: #value.
+
+            self
+                connectSignal: 'destroy'
+                to: [ destroyed := true ]
+                selector: #value }.
+
+        self show.
+        sema wait.
+        destroyed ifFalse: [
+            self setModal: modal.
+            signals do: [ :each | self disconnectSignal: each ] ].
+        ^answer
     ]
 ]
 

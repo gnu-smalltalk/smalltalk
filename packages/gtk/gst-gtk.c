@@ -80,10 +80,9 @@ typedef struct SmalltalkClosure
   int      n_params;
 } SmalltalkClosure;
 
-VMProxy *_gst_vm_proxy;
+static VMProxy *_gst_vm_proxy;
 
 static GQuark q_gst_object = 0;
-static int pending_quit_count = 0;
 
 static GTypeInfo gtype_oop_info = {
   0,                           /* class_size */
@@ -133,18 +132,7 @@ static const GTypeValueTable gtype_oop_value_table = {
 static GType G_TYPE_OOP;
 
 /* Start the main event loop and then signal OOP.  */
-static void my_gtk_main (OOP semaphore);
-
-/* Wait in the main event loop until there are no pending events.  */
-static void my_gtk_main_iteration ();
-
-/* Wait in the main event loop until there are no pending events.  Never
-   block unless BLOCKING is true.  */
-static void my_gtk_main_iteration_do (gboolean blocking);
-
-/* Answer whether we should leave the current event loop (if gtk_main_quit
-   has been called).  */
-static gboolean should_quit ();
+static GMainLoop *create_main_loop_thread (OOP semaphore);
 
 /* Unref OBJ and detach it from the Smalltalk object that has represented
    it so far.  */
@@ -710,53 +698,163 @@ connect_accel_group_no_user_data (OOP accel_group,
 		              accel_flags, receiver, selector, NULL);
 }
 
-/* Event loop.  The GTK+ event loop in GNU Smalltalk takes place
-   using my_gtk_main_iteration in a separate process.  GtkImpl.st
-   redefines Gtk class>>#main calling this function: the event
-   loop process is sitting on SEMAPHORE, so that after the first event
-   is delivered, SEMAPHORE is unblocked and the real event loop
-   takes place in the semaphore process.  */
+/* Event loop.  The GTK+ event loop in GNU Smalltalk is split between two
+   operating system threads using the low-level g_main_context functions
+   (http://library.gnome.org/devel/glib/unstable/glib-The-Main-Event-Loop.html).
 
-void
-my_gtk_main (OOP semaphore)
+   Everything except dispatching occurs in a separate thread than the one
+   executing Smalltalk code.  After check(), however, the thread releases
+   the context and waits on a condition variable for the Smalltalk code to
+   finish the dispatch phase.
+
+   This ensures that all GTK+ code executes in a single OS thread (avoiding
+   complicated usage of gdk_threads_{enter,leave}) and at the same time
+   allows Smalltalk processes to run in the background while GTK+ events
+   are polled.  */
+
+static GMainLoop *loop;
+static GThread *thread; 
+static GMutex *mutex;
+static GCond *cond;
+static GCond *cond_dispatch;
+static volatile gboolean queued;
+
+static void
+main_context_acquire_wait (GMainContext *context)
 {
+  g_mutex_lock (mutex);
+  g_main_context_wait (context, cond, mutex);
+
+  /* No need to keep the mutex except during g_main_context_acquire_wait
+     and g_main_context_release_signal, i.e. except while we operate on
+     cond.  */
+  g_mutex_unlock (mutex);
+}
+
+static void
+main_context_release_signal (GMainContext *context)
+{
+  g_mutex_lock (mutex);
+  g_main_context_release (context);
+
+  /* Restart the polling thread.  Note that #dispatch is asynchronous, so
+     this might execute before the Smalltalk code finishes running!  At
+     least in theory :-) this allows debugging GTK+ signal handlers.  */
+  queued = false;
+  g_cond_broadcast (cond_dispatch);
+  g_mutex_unlock (mutex);
+}
+
+static gpointer
+main_loop_thread (gpointer semaphore)
+{
+  OOP semaphoreOOP = semaphore;
+  static GPollFD *fds;
+  static int allocated_nfds;
+  GMainContext *context = g_main_loop_get_context (loop);
+
+  if (!fds)
+    {
+      fds = g_new (GPollFD, 20);
+      allocated_nfds = 20;
+    }
+
+  /* Mostly based on g_main_context_iterate (a static function in gmain.c)
+     except that we have to use our own mutex and that g_main_context_dispatch
+     is replaced by signaling semaphoreOOP.  */
+
+  g_mutex_lock (mutex);
+  while (g_main_loop_is_running (loop))
+    {
+      int nfds, maxprio, timeout;
+
+      g_main_context_wait (context, cond, mutex);
+      g_main_context_prepare (context, &maxprio);
+      while ((nfds = g_main_context_query (context, maxprio,
+                                           &timeout, fds, allocated_nfds))
+             > allocated_nfds)
+        {
+          g_free (fds);
+          fds = g_new (GPollFD, nfds);
+          allocated_nfds = nfds;
+        }
+
+      /* Release the context so that the other thread can dispatch while
+         this one polls.  */
+      g_main_context_release (context);
+      g_mutex_unlock (mutex);
+
+      g_poll (fds, nfds, timeout);
+
+      g_mutex_lock (mutex);
+      g_main_context_wait (context, cond, mutex);
+      g_main_context_check (context, maxprio, fds, nfds);
+      g_main_context_release (context);
+
+      /* Dispatch on the other thread and wait for it to rendez-vous.  */
+      queued = true;
+      _gst_vm_proxy->asyncSignal (semaphoreOOP);
+      
+      /* TODO: shouldn't be necessary.  */
+      _gst_vm_proxy->wakeUp ();
+      while (queued)
+        g_cond_wait (cond_dispatch, mutex);
+    }
+
+  g_main_loop_unref (loop);
+  loop = NULL;
+  thread = NULL;
+  g_mutex_unlock (mutex);
+
+  /* TODO: Not thread-safe! */
+  _gst_vm_proxy->unregisterOOP (semaphoreOOP);
+  return NULL;
+}
+
+GMainLoop *
+create_main_loop_thread (OOP semaphore)
+{
+  if (!mutex)
+    {
+      /* One-time initialization.  */
+      mutex = g_mutex_new ();
+      cond = g_cond_new ();
+      cond_dispatch = g_cond_new ();
+    }
+
+  g_mutex_lock (mutex);
+  if (loop)
+    {
+      /* A loop exists.  If it is exiting, wait for it, otherwise
+         leave immediately.  */
+      GThread *loop_thread = thread;
+      gboolean exiting = g_main_loop_is_running (loop);
+      g_mutex_unlock (mutex);
+      if (!exiting)
+        return NULL;
+      if (loop_thread)
+        g_thread_join (loop_thread);
+    }
+  else
+    g_mutex_unlock (mutex);
+
   _gst_vm_proxy->registerOOP (semaphore);
-  _gst_vm_proxy->asyncSignalAndUnregister (semaphore);
-  gtk_main ();
-}
+  loop = g_main_loop_new (NULL, TRUE);
 
-void
-my_gtk_main_iteration ()
-{
-  int pending_quit = FALSE;
-  while (gtk_events_pending ())
-    if (gtk_main_iteration_do (TRUE))
-      {
-	pending_quit_count += !pending_quit;
-	pending_quit = TRUE;
-      }
-}
+  /* Add a second reference to be released when the thread exits.  The first
+     one is passed to Smalltalk ("return loop" below).  */
+  g_main_loop_ref (loop);
+  thread = g_thread_create (main_loop_thread, semaphore, TRUE, NULL);
+  if (!thread)
+    {
+      /* Destroy both references, since the thread won't have any occasion
+         to release his.  */
+      g_main_loop_unref (loop);
+      g_main_loop_unref (loop);
+      return NULL;
+    }
 
-void
-my_gtk_main_iteration_do (gboolean blocking)
-{
-  int pending_quit = FALSE;
-  while (gtk_events_pending ())
-    if (gtk_main_iteration_do (blocking))
-      {
-	pending_quit_count += !pending_quit;
-	pending_quit = TRUE;
-      }
-}
-
-gboolean
-should_quit ()
-{
-  if (!pending_quit_count)
-    return FALSE;
-
-  pending_quit_count--;
-  return TRUE;
+  return loop;
 }
 
 /* Wrappers for GValue users.  */
@@ -1006,7 +1104,10 @@ gst_initModule (proxy)
 
   initialized = gtk_init_check (&argc, &argv);
   if (initialized && !g_thread_supported ())
-    g_thread_init (NULL);
+    {
+      g_thread_init (NULL);
+      gdk_threads_init ();
+    }
 
   q_gst_object = g_quark_from_string ("gst_object");
   g_type_init ();
@@ -1039,10 +1140,9 @@ gst_initModule (proxy)
   _gst_vm_proxy->defineCFunc ("gstGtkConnectAccelGroupNoUserData", connect_accel_group_no_user_data);
   _gst_vm_proxy->defineCFunc ("gstGtkConnectSignal", connect_signal);
   _gst_vm_proxy->defineCFunc ("gstGtkConnectSignalNoUserData", connect_signal_no_user_data);
-  _gst_vm_proxy->defineCFunc ("gstGtkMain", my_gtk_main);
-  _gst_vm_proxy->defineCFunc ("gstGtkMainIteration", my_gtk_main_iteration);
-  _gst_vm_proxy->defineCFunc ("gstGtkMainIterationDo", my_gtk_main_iteration_do);
-  _gst_vm_proxy->defineCFunc ("gstGtkShouldQuit", should_quit);
+  _gst_vm_proxy->defineCFunc ("gstGtkMain", create_main_loop_thread);
+  _gst_vm_proxy->defineCFunc ("gstGtkMainContextAcquireWait", main_context_acquire_wait);
+  _gst_vm_proxy->defineCFunc ("gstGtkMainContextReleaseSignal", main_context_release_signal);
   _gst_vm_proxy->defineCFunc ("gstGtkGetProperty", object_get_property);
   _gst_vm_proxy->defineCFunc ("gstGtkSetProperty", object_set_property);
   _gst_vm_proxy->defineCFunc ("gstGtkGetChildProperty", container_get_child_property);

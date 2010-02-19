@@ -1,4 +1,8 @@
 2010-02-19  Paolo Bonzini  <bonzini@gnu.org>
+
+	* Debugger/GtkDebugger.st: Detach CallinProcesses.
+
+2010-02-19  Paolo Bonzini  <bonzini@gnu.org>
 	
 	* Extensions.st: Move GTK+ extensions to/from VisualGST.
 

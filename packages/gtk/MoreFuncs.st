@@ -1,26 +1,29 @@
+GMainContext extend [
+    dispatch [
+	<category: 'C call-outs'>
+	<asyncCCall: 'g_main_context_dispatch' args: #(#self )>
+	
+    ]
+
+    releaseSignal [
+	<category: 'C call-outs'>
+	<cCall: 'gstGtkMainContextReleaseSignal' returning: #void args: #(#self )>
+	
+    ]
+
+    acquireWait [
+	<category: 'C call-outs'>
+	<cCall: 'gstGtkMainContextAcquireWait' returning: #void args: #(#self )>
+	
+    ]
+]
+
+
 Gtk class extend [
-
-    mainIteration [
-	<category: 'C call-outs'>
-	<asyncCCall: 'gstGtkMainIteration' args: #()>
-	
-    ]
-
-    mainIterationDo: blocking [
-	<category: 'C call-outs'>
-	<asyncCCall: 'gstGtkMainIterationDo' args: #(#boolean )>
-	
-    ]
 
     main: aSemaphore [
 	<category: 'C call-outs'>
-	<asyncCCall: 'gstGtkMain' args: #(#smalltalk )>
-	
-    ]
-
-    shouldQuit [
-	<category: 'C call-outs'>
-	<cCall: 'gstGtkShouldQuit' returning: #boolean args: #()>
+	<cCall: 'gstGtkMain' returning: #{GMainLoop} args: #(#smalltalk )>
 	
     ]
 
