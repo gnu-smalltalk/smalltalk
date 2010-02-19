@@ -1,3 +1,7 @@
+2010-02-19  Paolo Bonzini  <bonzini@gnu.org>
+	
+	* Extensions.st: Move GTK+ extensions to/from VisualGST.
+
 2009-12-30  Gwenael Casaccio  <mrgwen@gmail.com>
 
 	* GtkListModel.st, GtkListWidget.st, GtkTreeModel.st,
