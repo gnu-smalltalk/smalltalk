@@ -39,5 +39,16 @@ Process subclass: CallinProcess [
 execution, so I must store the returned value once my computation
 terminates and I must not survive across image saves (since those who
 invoked me no longer exist).  I am otherwise equivalent to a Process.'>
+
+    returnContext [
+        "Return the base context in the process, i.e. the one that is
+         responsible for passing the return value to C."
+
+        | context |
+        context := self context.
+        [ context parentContext isNil ] whileFalse: [
+            context := context parentContext ].
+        ^context
+    ]
 ]
 

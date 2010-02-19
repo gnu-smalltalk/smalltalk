@@ -1,5 +1,9 @@
 2010-02-18  Paolo Bonzini  <bonzini@gnu.org>
 
+	* kernel/CallinProcess.st: Add a convenience method.
+
+2010-02-18  Paolo Bonzini  <bonzini@gnu.org>
+
 	* kernel/ExcHandling.st: Extract #instantiateDefaultHandler.
 	* kernel/AnsiExcept.st: Override it for UnhandledException.
 
