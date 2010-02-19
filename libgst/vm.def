@@ -925,7 +925,8 @@ operation EXIT_INTERPRETER ( val -- val ) {
     if (IS_NIL (activeProcessOOP))
       abort ();
 
-    process->returnedValue = val;
+    if (process->objClass == _gst_callin_process_class)
+      process->returnedValue = val;
     _gst_terminate_process (activeProcessOOP);
     if (processOOP == activeProcessOOP)
       SET_EXCEPT_FLAG (true);

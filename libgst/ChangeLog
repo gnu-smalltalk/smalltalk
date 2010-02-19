@@ -1,5 +1,10 @@
 2010-02-18  Paolo Bonzini  <bonzini@gnu.org>
 
+	* libgst/vm.def: Make EXIT_INTERPRETER safer since we now can fork
+	CallinProcesses to Processes.
+
+2010-02-18  Paolo Bonzini  <bonzini@gnu.org>
+
 	* libgst/comp.c: Compile the termination method with an infinite
 	loop to avoid falling off the last context.
 
