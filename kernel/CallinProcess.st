@@ -50,5 +50,27 @@ invoked me no longer exist).  I am otherwise equivalent to a Process.'>
             context := context parentContext ].
         ^context
     ]
+
+    detach [
+        "Continue running the receiver as a normal Process, and return
+         nil from the callin."
+        | p |
+        self isActive ifFalse: [ 
+            ^SystemExceptions.InvalidState signalOn: self
+                reason: 'process not active' ].
+
+        p := Process basicNew.
+        Link instSize + 1 to: Process instSize do: [ :i |
+            p instVarAt: i put: (self instVarAt: i) ].
+
+        "Start executing the detached process from here."
+        p suspendedContext: thisContext copy.
+
+        Processor activeProcess == self ifTrue: [
+            "This only runs in the CallinProcess."
+            thisContext parentContext: self returnContext.
+            p resume.
+            ^nil ]
+    ]
 ]
 

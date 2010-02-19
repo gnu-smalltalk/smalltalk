@@ -1,5 +1,10 @@
 2010-02-19  Paolo Bonzini  <bonzini@gnu.org>
 
+	* kernel/CallinProcess.st: Add #detach.
+	* kernel/Process.st: Add #suspendedContext:.
+
+2010-02-19  Paolo Bonzini  <bonzini@gnu.org>
+
 	* kernel/Continuation.st: Remove failed experiment.  Causes too
 	many problems with exception handlers and block closures.  Since
 	I need this only for the GtkDebugger, and not really need all of

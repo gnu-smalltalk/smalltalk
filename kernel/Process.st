@@ -223,6 +223,14 @@ can suspend themselves and resume themselves however they wish.'>
 	^suspendedContext
     ]
 
+    suspendedContext: aContext [
+	"Modify the context that the process was executing at the time it was
+	 suspended."
+
+	<category: 'accessing'>
+	suspendedContext := aContext
+    ]
+
     name [
 	"Answer the user-friendly name of the process."
 
