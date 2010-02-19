@@ -270,7 +270,7 @@ exception handling for those.'>
 	time := Time millisecondsToRun: 
 			[self server respondTo: req.
 			req release]] 
-		on: ExAll
+		on: Error
 		do: 
 		    [:ex | 
 		    "Ignore errors due to bad communication lines."

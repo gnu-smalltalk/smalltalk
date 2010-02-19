@@ -27,9 +27,7 @@
 |
  ======================================================================"
 
-Eval [
-    Smalltalk at: #TestException put: ExAll newChild
-]
+Exception subclass: #TestException!
 
 Eval [
     [

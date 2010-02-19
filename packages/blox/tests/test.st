@@ -123,7 +123,7 @@ Gui class extend [
 	cb := 
 		[[label font: '{%1} %2' % 
 				{name text.
-				size text}] on: ExAll
+				size text}] on: Error
 		    do: [:sig | sig return]].
 	win width: 300 height: 300.
 	name := BDropDownList new: win.
@@ -572,7 +572,7 @@ this line is long - this line is long - this line is long - '.
 	
 	[[win exists] whileTrue: 
 		[(Delay forMilliseconds: 50) wait.
-		[ctl value: (ctl value + 0.01) fractionPart] on: ExAll
+		[ctl value: (ctl value + 0.01) fractionPart] on: Error
 		    do: [:sig | sig return]]] 
 		forkAt: Processor userInterruptPriority]
     ]

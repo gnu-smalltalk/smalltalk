@@ -47,8 +47,8 @@ Eval [
     set addAll: (1 to: 100).
     self should: [set size = 100].
 
-    self should: [[set at: 5. false] on: ExError do: [:ex | ex return: true]].
-    self should: [[set at: 5 put: #abc. false] on: ExError do: [:ex | ex return: true]].
+    self should: [[set at: 5. false] on: Error do: [:ex | ex return: true]].
+    self should: [[set at: 5 put: #abc. false] on: Error do: [:ex | ex return: true]].
 
     set := Set with: 5 with: #abc.
 

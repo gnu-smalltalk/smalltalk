@@ -1,5 +1,11 @@
 2010-02-19  Paolo Bonzini  <bonzini@gnu.org>
 
+	* tests/exceptions.st: Do not use instance-based exceptions.
+	* tests/sets.st: Do not use instance-based exceptions.
+	* tests/exceptions.ok: Regenerate.
+
+2010-02-19  Paolo Bonzini  <bonzini@gnu.org>
+
 	* kernel/CallinProcess.st: Add #detach.
 	* kernel/Process.st: Add #suspendedContext:.
 

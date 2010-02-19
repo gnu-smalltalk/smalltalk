@@ -185,7 +185,7 @@ longer than the traditional
 			[stream littleEndianMagicNumber: #[222 18 4 149]
 			    bigEndianMagicNumber: #[149 4 18 222].
 			stream nextLong = 0] 
-				on: ExError
+				on: Error
 				do: [:ex | ex return: false].
 		found ifTrue: [stream reset] ifFalse: [stream close]].
 	^found 

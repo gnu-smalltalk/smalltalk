@@ -1,0 +1,5 @@
+2010-02-19  Paolo Bonzini  <bonzini@gnu.org>
+
+	* tests/test.st: Do not use instance-based exceptions.
+
+

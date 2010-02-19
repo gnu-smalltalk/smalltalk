@@ -1,3 +1,7 @@
+2010-02-19  Paolo Bonzini  <bonzini@gnu.org>
+
+	* GetText.st: Do not use instance-based exceptions.
+
 2010-01-01  Paolo Bonzini  <bonzini@gnu.org>
 
 	* Update copyright years.

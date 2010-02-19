@@ -160,7 +160,7 @@ A DirectoryResponse formats output of the contents of a Directory object.'>
     sendFileSizeFor: aFile [
 	<category: 'response'>
 	| size type printString |
-	size := [aFile size] on: ExError do: [:ex | ex return: nil].
+	size := [aFile size] on: Error do: [:ex | ex return: nil].
 	size isNil ifTrue: [^self].
 	printString := String new: self maxSizeLength withAll: $ .
 	type := #('Bytes' 'KB' 'MB' 'GB' 'TB') detect: 
@@ -339,7 +339,7 @@ data stream.'>
 	(super file: aFile)
 	    fileStream: fileStream;
 	    yourself] 
-		on: ExError
+		on: Error
 		do: [:ex | ex return: ErrorResponse forbidden]
     ]
 
