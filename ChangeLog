@@ -1,3 +1,13 @@
+2010-02-19  Paolo Bonzini  <bonzini@gnu.org>
+
+	* kernel/Continuation.st: Remove failed experiment.  Causes too
+	many problems with exception handlers and block closures.  Since
+	I need this only for the GtkDebugger, and not really need all of
+	it, I'll special case what is really needed.
+	* kernel/Process.st: Likewise.
+	* tests/processes.st: Likewise.
+	* tests/processes.ok: Likewise.
+
 2010-02-18  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/CallinProcess.st: Add a convenience method.

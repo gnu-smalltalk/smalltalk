@@ -279,13 +279,3 @@ Eval [
 	do: [ :sig | 'nothing should follow' display. sig pass ].
     'failed' displayNl
 ]
-
-"Test forking"
-Eval [ | s p |
-    s := Semaphore new.
-    p := Processor activeProcess fork.
-    p isNil ifTrue: [ (Delay forSeconds: 1) wait ].
-    p printNl.
-    p isNil ifTrue: [ s signal ] ifFalse: [ s wait ]
-]
-

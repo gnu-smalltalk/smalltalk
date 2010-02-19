@@ -74,8 +74,3 @@ returned value is 2
 
 Execution begins...
 nothing should follow... returned value is nil
-
-Execution begins...
-Process(nil at userSchedulingPriority, ready to run)
-nil
-returned value is Semaphore new "<0>"
