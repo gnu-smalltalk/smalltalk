@@ -266,7 +266,7 @@ GtkConcreteWidget subclass: GtkInspectorBrowserWidget [
         dialog
             addButton: 'Cancel' responseId: 0;
             addButton: 'Save' responseId: 1;
-            runBlockingAndDo: [ :dlg :res |
+            showModalOnAnswer: [ :dlg :res |
                 res = 1 ifTrue: saveEvent.
                 dlg destroy ].
     ]

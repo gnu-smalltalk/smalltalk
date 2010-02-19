@@ -116,7 +116,7 @@ Foundation, 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 Please consult the GNU Smalltalk source code for additional permissions
 that are specific to this version of GNU Smalltalk.';
 	    setWebsite: 'http://smalltalk.gnu.org/';
-	    runBlockingAndDestroy
+	    showModalDestroy
     ]
 
     close [

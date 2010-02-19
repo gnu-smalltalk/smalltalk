@@ -329,7 +329,7 @@ GtkMainWindow subclass: GtkInspector [
             addButton: 'Close without saving' responseId: 0;
             addButton: 'Cancel' responseId: 2;
             addButton: 'Save' responseId: 1;
-            runBlockingAndDo: [ :dlg :res |
+            showModalOnAnswer: [ :dlg :res |
                 res = 0 ifTrue: closeEvent.
                 res = 1 ifTrue: saveEvent.
                 dlg destroy ].

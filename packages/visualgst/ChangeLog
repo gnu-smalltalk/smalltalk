@@ -1,5 +1,16 @@
 2010-02-19  Paolo Bonzini  <bonzini@gnu.org>
 
+	* Commands/FileoutCategoryCommand.st, Commands/FileoutClassCommand.st,
+	Commands/FileoutMethodCommand.st, Commands/FileoutNamespaceCommand.st,
+	Debugger/GtkDebugger.st, Extensions.st, GtkAssistant.st,
+	GtkClassBrowser.st, GtkClassBrowserWidget.st, GtkEntryDialog.st,
+	GtkMainWindow.st, GtkWebBrowser.st, Implementors/GtkImplementor.st,
+	Inspector/GtkInspector.st, Inspector/GtkInspectorBrowserWidget.st,
+	SUnit/GtkSUnit.st, Senders/GtkSender.st, Undo/UndoCommand.st,
+	VisualGST.st: Tweak dialog API.
+
+2010-02-19  Paolo Bonzini  <bonzini@gnu.org>
+
 	* Debugger/GtkDebugger.st: Detach CallinProcesses.
 
 2010-02-19  Paolo Bonzini  <bonzini@gnu.org>

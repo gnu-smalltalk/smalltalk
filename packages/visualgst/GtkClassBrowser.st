@@ -32,7 +32,7 @@ THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.';
 	    setComments: 'This is a system browser for GNU Smalltalk.';
 	    "setAuthors: {'Gwenael Casaccio'. 'Nicolas Petton'};"
 	    setProgramName: 'GNU Smalltalk Browser';
-	    runNonBlockingAndDestroy
+	    showModalDestroy
     ]
 
     browser [
@@ -96,7 +96,7 @@ THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.';
 
         | file |
         (GTK.GtkFileChooserDialog selectFolder: 'Save namespace as...' parent: window)
-            runNonBlockingAndDo: [ :dlg :res |
+            showModalOnAnswer: [ :dlg :res |
                 res = GTK.Gtk gtkResponseAccept ifTrue: [ self fileoutNamespace: dlg getCurrentFolder ].
                 dlg destroy ].
     ]
@@ -136,7 +136,7 @@ THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.';
 
         | file |
         (GTK.GtkFileChooserDialog save: 'Save Smalltalk class as...' parent: window)
-            runNonBlockingAndDo: [ :dlg :res |
+            showModalOnAnswer: [ :dlg :res |
                 res = GTK.Gtk gtkResponseAccept ifTrue: [ self fileoutClass: dlg getFilename ].
                 dlg destroy ]
     ]
@@ -200,7 +200,7 @@ THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.';
 
         | file |
         (GTK.GtkFileChooserDialog save: 'Save Smalltalk category as...' parent: window)
-            runNonBlockingAndDo: [ :dlg :res |
+            showModalOnAnswer: [ :dlg :res |
                 res = GTK.Gtk gtkResponseAccept ifTrue: [ self fileoutCategory: dlg getFilename ].
                 dlg destroy ]
     ]
@@ -234,7 +234,7 @@ THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.';
 
         | file |
         (GTK.GtkFileChooserDialog save: 'Save Smalltalk method as...' parent: window)
-            runNonBlockingAndDo: [ :dlg :res |
+            showModalOnAnswer: [ :dlg :res |
                 res = GTK.Gtk gtkResponseAccept ifTrue: [ self fileoutMethod: dlg getFilename ].
                 dlg destroy ]
     ]
@@ -554,7 +554,7 @@ THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.';
             addButton: 'Close without saving' responseId: 0;
             addButton: 'Cancel' responseId: 2;
             addButton: 'Save' responseId: 1;
-            runBlockingAndDo: [ :dlg :res |
+            showModalOnAnswer: [ :dlg :res |
                 res = 0 ifTrue: closeEvent.
                 res = 1 ifTrue: saveEvent.
                 dlg destroy ].

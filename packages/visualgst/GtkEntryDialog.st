@@ -15,7 +15,7 @@ Object subclass: GtkEntryDialog [
 	hasPressedOk := false.
 	dialog := GTK.GtkDialog newWithButtons: aTitle parent: nil flags: 0 varargs: {nil}.
 	self buildCentralWidget: aDescription on: dialog.
-	dialog runBlockingAndDo: [ :dlg :res |
+	dialog showModalOnAnswer: [ :dlg :res |
 		res = GTK.Gtk gtkResponseYes ifTrue: [ hasPressedOk := true ].
 		dlg destroy ]
     ]

@@ -109,7 +109,7 @@ THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.';
 	    setComments: 'This is a GTK+ wrapper for GNU Smalltalk.';
 	    "setAuthors: {'Gwenael Casaccio'. 'Nicolas Petton'. nil};"
 	    setProgramName: 'VisualGST';
-	    runBlockingAndDestroy
+	    showModalDestroy
     ]
 
     browser [
@@ -164,7 +164,7 @@ THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.';
             addButton: 'Exit without saving' responseId: 0;
             addButton: 'Cancel' responseId: 2;
             addButton: 'Save image' responseId: 1;
-            runBlockingAndDo: [ :dlg :res |
+            showModalOnAnswer: [ :dlg :res |
                 res = 0 ifTrue: [ self class exit ].
                 res = 1 ifTrue: [ self saveImage.
 				  self class exit ].
@@ -177,7 +177,7 @@ THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.';
 	| file string |
 	outputs currentWidget  == transcriptWidget ifTrue: [ self error: 'Can not remove the transcript tab' ].
 	(GTK.GtkFileChooserDialog load: 'Load Smalltalk source' parent: window)
-	    runNonBlockingAndDo: [ :dlg :res |
+	    showModalOnAnswer: [ :dlg :res |
 		res = GTK.Gtk gtkResponseAccept ifFalse: [ ^ dlg destroy ].
 		file := FileStream open: dlg getFilename mode: FileStream read.
 		outputs currentWidget text: file upToEnd.
@@ -193,7 +193,7 @@ THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.';
 
 	| file |
         (GTK.GtkFileChooserDialog save: 'Save Smalltalk source as...' parent: window)
-            runNonBlockingAndDo: [ :dlg :res |
+            showModalOnAnswer: [ :dlg :res |
                 res = GTK.Gtk gtkResponseAccept ifFalse: [ ^ dlg destroy ].
 		file := FileStream open: dlg getFilename mode: FileStream write.
 		file nextPutAll: outputs currentWidget text. 
@@ -218,7 +218,7 @@ THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.';
 	<category: 'file events'>
 
 	(GTK.GtkFileChooserDialog save: 'Save image as...' parent: window)
-	    runNonBlockingAndDo: [ :dlg :res |
+	    showModalOnAnswer: [ :dlg :res |
 		imageName := dlg getFilename.
 		dlg destroy.
 		res = GTK.Gtk gtkResponseAccept ifTrue: [ self saveImage: [ ObjectMemory snapshot: imageName ] ] ]

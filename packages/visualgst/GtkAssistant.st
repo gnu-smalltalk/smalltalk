@@ -32,7 +32,7 @@ THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.';
 	    setComments: 'This is a GTK+ wrapper for GNU Smalltalk.';
 	    "setAuthors: {'Gwenael Casaccio'. 'Nicolas Petton'};"
 	    setProgramName: 'GNU Smalltalk Launcher';
-	    runBlockingAndDestroy
+	    showModalDestroy
     ]
 
     initialize [

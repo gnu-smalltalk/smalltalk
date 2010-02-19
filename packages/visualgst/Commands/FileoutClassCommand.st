@@ -10,7 +10,7 @@ Command subclass: FileoutClassCommand [
 
         | file |
         (GTK.GtkFileChooserDialog save: 'Save Smalltalk class as...' parent: nil)
-            runNonBlockingAndDo: [ :dlg :res |
+            showModalOnAnswer: [ :dlg :res |
                 res = GTK.Gtk gtkResponseAccept ifTrue: [ self fileoutClass: dlg getFilename ].
                 dlg destroy ]
     ]

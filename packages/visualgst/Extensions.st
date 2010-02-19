@@ -315,7 +315,7 @@ Symbol extend [
 ]
 
 GTK.GtkDialog extend [
-    runNonBlocking [
+    showModal [
         <category: '*VisualGST'>
 
         self
@@ -323,7 +323,7 @@ GTK.GtkDialog extend [
             showAll 
     ]
 
-    runNonBlockingAndDo: aBlock [
+    showModalOnAnswer: aBlock [
         <category: '*VisualGST'>
 
         self
@@ -332,7 +332,7 @@ GTK.GtkDialog extend [
             showAll 
     ]
     
-    runNonBlockingAndDestroy [
+    showModalDestroy [
         <category: '*VisualGST'>
 
         self
@@ -341,29 +341,12 @@ GTK.GtkDialog extend [
             showAll 
     ]
 
-    runBlocking [
-        <category: '*VisualGST'>
-
-        self
-            setModal: false;
-            showAll
-    ]
-
-    runBlockingAndDo: aBlock [
+    showOnAnswer: aBlock [
         <category: '*VisualGST'>
 
         self
             setModal: false;
             connectSignal: 'response' to: aBlock selector: #cull:cull:;
-            showAll 
-    ]
-
-    runBlockingAndDestroy [
-        <category: '*VisualGST'>
-
-        self
-            setModal: false;
-            connectSignal: 'response' to: self selector: #destroy;
             showAll 
     ]
 ]

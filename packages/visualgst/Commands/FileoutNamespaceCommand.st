@@ -9,7 +9,7 @@ Command subclass: FileoutNamespaceCommand [
     chooseDirectory [
 	| file |
         (GTK.GtkFileChooserDialog selectFolder: 'Save namespace as...' parent: nil)
-            runNonBlockingAndDo: [ :dlg :res |
+            showModalOnAnswer: [ :dlg :res |
                 res = GTK.Gtk gtkResponseAccept ifTrue: [ self fileoutNamespace: dlg getCurrentFolder ].
                 dlg destroy ].
     ]

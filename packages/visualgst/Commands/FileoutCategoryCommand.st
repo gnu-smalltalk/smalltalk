@@ -27,7 +27,7 @@ Command subclass: FileoutCategoryCommand [
 
         | file |
         (GTK.GtkFileChooserDialog save: 'Save Smalltalk category as...' parent: nil)
-            runNonBlockingAndDo: [ :dlg :res |
+            showModalOnAnswer: [ :dlg :res |
                 res = GTK.Gtk gtkResponseAccept ifTrue: [ self fileoutCategory: dlg getFilename ].
                 dlg destroy ]
     ]

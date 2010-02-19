@@ -52,7 +52,7 @@ Object subclass: UndoCommand [
 
         dialog
             addButton: 'Ok' responseId: 1;
-            runBlockingAndDo: [ :dlg :res | dlg destroy ].
+            showModalOnAnswer: [ :dlg :res | dlg destroy ].
     ]
 ]
 
