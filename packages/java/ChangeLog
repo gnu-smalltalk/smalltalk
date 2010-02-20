@@ -1,3 +1,7 @@
+2010-02-20  Paolo Bonzini  <bonzini@gnu.org>
+
+	* JavaExtensions.st: Adjust for removal of instance-based exceptions.
+
 2008-04-07  Paolo Bonzini  <bonzini@gnu.org>
 
 	* JavaClassFiles.st: Use new methods on File.

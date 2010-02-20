@@ -35,326 +35,7 @@
 
 
 
-Eval [
-    Smalltalk at: #ExAll put: nil.
-    Smalltalk at: #ExHalt put: nil.
-    Smalltalk at: #ExError put: nil.
-    Smalltalk at: #ExDoesNotUnderstand put: nil.
-    Smalltalk at: #ExUserBreak put: nil
-]
-
-
-
-Namespace current: Kernel [
-
-Object subclass: TrappableEvent [
-    
-    <category: 'Language-Exceptions'>
-    <comment: '
-I am an abstract class for arguments passed to #on:do:... methods in
-BlockClosure. I define a bunch of methods that apply to CoreExceptions
-and ExceptionSets: they allow you to create ExceptionSets
-and examine all the exceptions to be trapped.'>
-
-    , aTrappableEvent [
-	"Answer an ExceptionSet containing all the exceptions in the
-	 receiver and all the exceptions in aTrappableEvent"
-
-	<category: 'instance creation'>
-	^(ExceptionSet new)
-	    add: self;
-	    add: aTrappableEvent;
-	    yourself
-    ]
-
-    allExceptionsDo: aBlock [
-	"Execute aBlock, passing it an Exception for every exception in the
-	 receiver."
-
-	<category: 'enumerating'>
-	self subclassResponsibility
-    ]
-
-    goodness: exception [
-	"Answer how good the receiver is at handling the given exception.  A
-	 negative value indicates that the receiver is not able to handle
-	 the exception."
-
-	<category: 'enumerating'>
-	self subclassResponsibility
-    ]
-
-    handles: exception [
-	"Answer whether the receiver handles `exception'."
-
-	<category: 'enumerating'>
-	self subclassResponsibility
-    ]
-]
-
-]
-
-
-
-Namespace current: Kernel [
-
-TrappableEvent subclass: CoreException [
-    | parent resumable description defaultHandler signalClass depth |
-    
-    <category: 'Language-Exceptions'>
-    <comment: '
-My instances describe a single event that can be trapped using #on:do:...,
-contain whether such execution can be resumed after such an event, a
-description of what happened, and a block that is used as an handler by
-default. Using my methods you can raise exceptions and create new exceptions.
-Exceptions are organized in a kind of hierarchy (different from the class
-hierarchy): intercepting an exception will intercept all its children too.
-
-CoreExceptions are different from ANSI Exceptions in that the signaled
-exception is not an instance of the CoreException, instead it belongs
-to a different class, Signal.  ANSI Exceptions inherit from Signal but
-hold on to a CoreException via a class-instance variable.'>
-
-    CoreException class >> new [
-	"Create a new exception whose parent is ExAll"
-
-	<category: 'instance creation'>
-	^ExAll newChild
-    ]
-
-    CoreException class >> resetAllHandlers [
-	"Private, class - Reset the handlers for all the exceptions; that is, the
-	 next handlers used will be the first to be declared"
-
-	<category: 'private'>
-	thisContext scanBacktraceForAttribute: #exceptionHandlerSearch:reset:
-	    do: [:context :attr | (attr arguments at: 2) value: context]
-    ]
-
-    postCopy [
-	"Modify the receiver so that the description is deep copied"
-
-	<category: 'basic'>
-	super postCopy.
-	self description: self description copy
-    ]
-
-    defaultHandler [
-	"Answer the default handler for the receiver"
-
-	<category: 'accessing'>
-	^defaultHandler
-    ]
-
-    defaultHandler: aBlock [
-	"Set the default handler of the receiver to aBlock. A Signal object will
-	 be passed to aBlock"
-
-	<category: 'accessing'>
-	defaultHandler := aBlock
-    ]
-
-    description [
-	"Answer a description of the receiver"
-
-	<category: 'accessing'>
-	^description
-    ]
-
-    description: aString [
-	"Set the description of the receiver to aString"
-
-	<category: 'accessing'>
-	description := aString
-    ]
-
-    parent [
-	"Answer the parent of the receiver"
-
-	<category: 'accessing'>
-	^parent
-    ]
-
-    isResumable [
-	"Answer true if the receiver is resumable"
-
-	<category: 'accessing'>
-	^resumable
-    ]
-
-    isResumable: aBoolean [
-	"Set the resumable flag of the receiver to aBoolean"
-
-	<category: 'accessing'>
-	resumable := aBoolean
-    ]
-
-    signalClass [
-	"Answer the subclass of Signal to be passed to handler blocks
-	 that handle the receiver"
-
-	<category: 'accessing'>
-	^signalClass
-    ]
-
-    signalClass: aClass [
-	"Set which subclass of Signal is to be passed to handler blocks
-	 that handle the receiver"
-
-	<category: 'accessing'>
-	signalClass := aClass
-    ]
-
-    newChild [
-	"Answer a child exception of the receiver. Its properties are set to those
-	 of the receiver"
-
-	<category: 'instance creation'>
-	^(self species basicNew)
-	    description: self description copy;
-	    isResumable: self isResumable;
-	    depth: self depth + 1;
-	    defaultHandler: nil;
-	    parent: self;
-	    signalClass: Signal;
-	    yourself
-    ]
-
-    signal [
-	"Raise the exception described by the receiver, passing no parameters"
-
-	"This is not refactored to avoid too long backtraces"
-
-	<category: 'exception handling'>
-	| signal |
-	signal := (signalClass new)
-		    initArguments: #();
-		    initException: self.
-	signal instantiateNextHandlerFrom: thisContext.
-	^signal activateHandler: false
-    ]
-
-    signalWith: arg [
-	"Raise the exception described by the receiver, passing the parameter arg"
-
-	"This is not refactored to avoid too long backtraces"
-
-	<category: 'exception handling'>
-	| signal |
-	signal := (signalClass new)
-		    initArguments: {arg};
-		    initException: self.
-	signal instantiateNextHandlerFrom: thisContext.
-	^signal activateHandler: false
-    ]
-
-    signalWith: arg with: arg2 [
-	"Raise the exception described by the receiver, passing the parameters arg
-	 and arg2"
-
-	"This is not refactored to avoid too long backtraces"
-
-	<category: 'exception handling'>
-	| signal |
-	signal := (signalClass new)
-		    initArguments: 
-			    {arg.
-			    arg2};
-		    initException: self.
-	signal instantiateNextHandlerFrom: thisContext.
-	^signal activateHandler: false
-    ]
-
-    signalWithArguments: args [
-	"Raise the exception described by the receiver, passing the parameters in
-	 args"
-
-	"This is not refactored to avoid too long backtraces"
-
-	<category: 'exception handling'>
-	| signal |
-	signal := (signalClass new)
-		    initArguments: args;
-		    initException: self.
-	signal instantiateNextHandlerFrom: thisContext.
-	^signal activateHandler: false
-    ]
-
-    allExceptionsDo: aBlock [
-	"Private - Evaluate aBlock for every exception in the receiver. As it contains just one
-	 exception, evaluate it just once, passing the receiver"
-
-	<category: 'enumerating'>
-	aBlock value: self
-    ]
-
-    goodness: exception [
-	"Answer how good the receiver is at handling the given exception.  A
-	 negative value indicates that the receiver is not able to handle
-	 the exception."
-
-	<category: 'enumerating'>
-	(self handles: exception) ifFalse: [^-1].
-
-	"In general, the deeper is the exception, the more fine-grained the
-	 control is and the higher is the goodness (as long as the receiver
-	 can handle the exception)."
-	^depth
-    ]
-
-    handles: exceptionOrSignal [
-	"Answer whether the receiver handles `exceptionOrSignal'."
-
-	<category: 'enumerating'>
-	| exc |
-	exceptionOrSignal class == self class 
-	    ifFalse: [^self handles: exceptionOrSignal exception].
-	exc := exceptionOrSignal.
-	
-	[exc == self ifTrue: [^true].
-	exc isNil] whileFalse: [exc := exc parent].
-	^false
-    ]
-
-    depth [
-	"Private - Answer the depth of the receiver in the exception hierarchy"
-
-	<category: 'private'>
-	^depth
-    ]
-
-    depth: anInteger [
-	"Private - Set the depth of the receiver in the exception hierarchy"
-
-	<category: 'private'>
-	depth := anInteger
-    ]
-
-    actualDefaultHandler [
-	"Private - Answer the default handler for the receiver. It differs from
-	 #defaultHandler because if the default handler of the parent has to be
-	 used #defaultHandler answers nil, while #actualDefaultHandler calls
-	 #actualDefaultHandler for the parent and answers its result"
-
-	<category: 'private'>
-	^defaultHandler isNil 
-	    ifTrue: [self parent actualDefaultHandler]
-	    ifFalse: [defaultHandler]
-    ]
-
-    parent: anException [
-	"Private - Set the parent of the receiver to anException"
-
-	<category: 'private - accessing'>
-	parent := anException
-    ]
-]
-
-]
-
-
-
-Kernel.TrappableEvent subclass: ExceptionSet [
+Object subclass: ExceptionSet [
     | collection |
     
     <category: 'Language-Exceptions'>
@@ -369,6 +50,17 @@ code'>
 
 	<category: 'instance creation'>
 	^self basicNew collection: Set new
+    ]
+
+    , aTrappableEvent [
+	"Answer an ExceptionSet containing all the exceptions in the
+	 receiver and all the exceptions in aTrappableEvent"
+
+	<category: 'instance creation'>
+	^(ExceptionSet new)
+	    add: self;
+	    add: aTrappableEvent;
+	    yourself
     ]
 
     allExceptionsDo: aBlock [
@@ -416,45 +108,165 @@ code'>
 
 
 
-Object subclass: Signal [
-    | exception arguments tag messageText resumeBlock onDoBlock handlerBlock context isNested previousState |
+Object subclass: Exception [
+    | creator tag messageText resumeBlock onDoBlock handlerBlock context isNested previousState |
     
     <category: 'Language-Exceptions'>
     <comment: '
 My instances describe an exception that has happened, and are passed to
-exception handlers. Apart from containing information on the generated
-exception and its arguments, they contain methods that allow you to resume
-execution, leave the #on:do:... snippet, and pass the exception to an handler
-with a lower priority.'>
+exception handlers. Classes describe the kind of exception.
+
+Apart from containing information on the generated exception,
+my instances contain methods that allow you to resume
+execution, leave the #on:do:... block, and pass the exception to an
+handler with a lower priority.'>
 
     NoTag := nil.
 
-    argumentCount [
-	"Answer how many arguments the receiver has"
+    Exception class >> resetAllHandlers [
+       "Private, class - Reset the handlers for all the exceptions; that is, the
+        next handlers used will be the first to be declared"
 
-	<category: 'accessing'>
-	^arguments size
+       <category: 'private'>
+       thisContext scanBacktraceForAttribute: #exceptionHandlerSearch:reset:
+           do: [:context :attr | (attr arguments at: 2) value: context]
     ]
 
-    argument [
-	"Answer the first argument of the receiver"
+    Exception class >> new [
+        "Create an instance of the receiver, which you will be able to
+         signal later."
 
-	<category: 'accessing'>
-	^arguments at: 1
+        <category: 'instance creation'>
+        | ctx creator |
+        ctx := thisContext parentContext.
+        [(creator := ctx receiver) == self] whileTrue: [ctx := ctx parentContext].
+        ^self basicNew initialize: creator
     ]
 
-    arguments [
-	"Answer the arguments of the receiver"
+    Exception class >> signal [
+        "Create an instance of the receiver, give it default attributes,
+         and signal it immediately."
 
-	<category: 'accessing'>
-	^arguments
+        <category: 'instance creation'>
+        ^self new signal
+    ]
+
+    Exception class >> signal: messageText [
+        "Create an instance of the receiver, set its message text,
+         and signal it immediately."
+
+        <category: 'instance creation'>
+        ^(self new)
+            messageText: messageText;
+            signal
+    ]
+
+    Exception class >> , aTrappableEvent [
+        "Answer an ExceptionCollection containing all the exceptions in the
+         receiver and all the exceptions in aTrappableEvent"
+
+        <category: 'creating ExceptionCollections'>
+        ^(ExceptionSet new)
+            add: self;
+            add: aTrappableEvent;
+            yourself
+    ]
+
+    Exception class >> allExceptionsDo: aBlock [
+        "Private - Pass ourselves to aBlock"
+
+        <category: 'interoperability with TrappableEvents'>
+        aBlock value: self
+    ]
+
+    Exception class >> goodness: anExceptionClass [
+        "Answer how good the receiver is at handling the given exception.  A
+         negative value indicates that the receiver is not able to handle
+         the exception."
+
+        <category: 'comparison'>
+        | depth found c target |
+        depth := -100000.
+        target := self.
+        c := anExceptionClass.
+        [c == target ifTrue: [ depth := 0 ].
+        c == Exception] whileFalse: [c := c superclass. depth := depth + 1].
+
+        "In general, the deeper is the exception, the more fine-grained the
+         control is and the higher is the goodness (as long as the receiver
+         can handle the exception)."
+        ^depth
+    ]
+
+    Exception class >> handles: anException [
+        "Answer whether the receiver handles `anException'."
+
+        <category: 'comparison'>
+        | target |
+        target := anException class asClass.
+        self == target ifTrue: [^true].
+        ^target inheritsFrom: self
+    ]
+
+    = anObject [
+        "Answer whether the receiver is equal to anObject.  This is true if
+         either the receiver or its class are the same object as anObject."
+
+        <category: 'comparison'>
+        ^self == anObject
+    ]
+
+    initialize: anObject [
+        "Initialize the receiver's instance variables."
+
+        <category: 'private'>
+        creator := anObject.
+        tag := self noTag.
+        self messageText: self description
     ]
 
     description [
-	"Answer the description of the raised exception"
+        "Answer a textual description of the exception."
 
-	<category: 'accessing'>
-	^self exception description
+        <category: 'exception description'>
+        ^'An exception has occurred'
+    ]
+
+    isResumable [
+        "Answer true.  Exceptions are by default resumable."
+
+        <category: 'exception description'>
+        ^true
+    ]
+
+    defaultAction [
+        "Execute the default action that is attached to the receiver."
+
+        <category: 'exception description'>
+        self resignalAsUnhandled: self messageText
+    ]
+
+    signal [
+        "Raise the exceptional event represented by the receiver"
+
+        <category: 'exception signaling'>
+        self instantiateNextHandlerFrom: thisContext.
+        ^self activateHandler: (onDoBlock isNil and: [ self isResumable ])
+    ]
+
+    signal: messageText [
+        "Raise the exceptional event represented by the receiver, setting
+         its message text to messageText."
+
+        <category: 'exception signaling'>
+        ^self
+            messageText: messageText;
+            signal
+    ]
+
+    creator [
+        <category: 'private - copying'>
+        ^creator
     ]
 
     basicMessageText [
@@ -494,13 +306,6 @@ with a lower priority.'>
 	tag := anObject
     ]
 
-    exception [
-	"Answer the CoreException that was raised"
-
-	<category: 'accessing'>
-	^exception
-    ]
-
     postCopy [
 	"Modify the receiver so that it does not refer to any instantiated
 	 exception handler."
@@ -513,13 +318,6 @@ with a lower priority.'>
 	previousState := nil
     ]
 
-    defaultAction [
-	"Execute the default handler for the raised exception"
-
-	<category: 'exception handling'>
-	self exception actualDefaultHandler value: self
-    ]
-
     isNested [
 	"Answer whether the current exception handler is within the scope of
 	 another handler for the same exception."
@@ -527,13 +325,6 @@ with a lower priority.'>
 	<category: 'exception handling'>
 	isNested isNil ifTrue: [isNested := false].
 	^isNested
-    ]
-
-    isResumable [
-	"Answer whether the exception that instantiated the receiver is resumable."
-
-	<category: 'exception handling'>
-	^self exception isResumable
     ]
 
     instantiateNextHandlerFrom: aContext [
@@ -557,7 +348,7 @@ with a lower priority.'>
 	<category: 'private'>
 	self 
 	    onDoBlock: nil
-	    handlerBlock: self exception actualDefaultHandler
+	    handlerBlock: [ :ex | ex defaultAction ]
 	    onDoContext: nil
 	    previousState: nil
     ]
@@ -641,12 +432,12 @@ with a lower priority.'>
     resignalAs: replacementException [
 	"Reinstate all handlers and execute the handler for `replacementException';
 	 control does not return to the currently active exception handler. The
-	 new Signal object that is created has the same arguments as the receiver
+	 new Signal object that is created has the same contents as the receiver
 	 (this might or not be correct -- if it isn't you can use an idiom such
 	 as `sig retryUsing: [ replacementException signal ])"
 
 	<category: 'exception handling'>
-	Kernel.CoreException resetAllHandlers.
+	self class resetAllHandlers.
         replacementException instantiateNextHandlerFrom: thisContext.
         ^replacementException return: (replacementException activateHandler: true)
     ]
@@ -658,7 +449,7 @@ with a lower priority.'>
 	<category: 'exception handling'>
 	onDoBlock isNil 
 	    ifTrue: [self resignalAsUnhandled: 'No exception handler effective - #retry failed'].
-	Kernel.CoreException resetAllHandlers.
+	self class resetAllHandlers.
 	self return: onDoBlock value
     ]
 
@@ -667,7 +458,7 @@ with a lower priority.'>
 	 the #signal method."
 
 	<category: 'exception handling'>
-	Kernel.CoreException resetAllHandlers.
+	self class resetAllHandlers.
 	self return: aBlock value
     ]
 
@@ -695,7 +486,7 @@ with a lower priority.'>
 	<category: 'exception handling'>
 	context isNil 
 	    ifTrue: [self resignalAsUnhandled: 'No exception handler effective - #return failed'].
-	Kernel.CoreException resetAllHandlers.
+	self class resetAllHandlers.
 	context parentContext continue: nil
     ]
 
@@ -705,7 +496,7 @@ with a lower priority.'>
 	<category: 'exception handling'>
 	context isNil 
 	    ifTrue: [self resignalAsUnhandled: 'No exception handler effective - #return: failed'].
-	Kernel.CoreException resetAllHandlers.
+	self class resetAllHandlers.
 	context parentContext continue: anObject
     ]
 
@@ -753,22 +544,6 @@ with a lower priority.'>
 	<category: 'private'>
 	onDoBlock isNil 
 	    ifFalse: [context at: context numArgs + 1 put: previousState]
-    ]
-
-    initArguments: args [
-	"Private - set the Signal's arguments to args."
-
-	<category: 'private'>
-	arguments := args.
-	tag := self noTag
-    ]
-
-    initException: exc [
-	"Private - set the exception that was raised to exc"
-
-	<category: 'private'>
-	exception := exc.
-	messageText := exc description
     ]
 
     noTag [

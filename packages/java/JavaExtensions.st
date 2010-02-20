@@ -34,7 +34,7 @@
 
 value: context value: signal
     | pc low high mid first item |
-    signal exception == JavaException coreException ifFalse: [ ^nil ].
+    signal class == JavaException ifFalse: [ ^nil ].
 
     pc := context ip.
     low := 1.

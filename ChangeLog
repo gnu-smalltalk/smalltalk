@@ -1,3 +1,11 @@
+2010-02-20  Paolo Bonzini  <bonzini@gnu.org>
+
+	* kernel/AnsiExcept.st: Rename to SysExcept.st, leave only subclasses
+	of Exceptions, move everything else to...
+	* kernel/ExcHandling.st: ... here, dropping instance-based exceptions.
+	* kernel/BlkClosure.st: Adjust for above changes.
+	* packages.xml: Adjust for AnsiExcept.st rename.
+
 2010-02-19  Paolo Bonzini  <bonzini@gnu.org>
 
 	* tests/exceptions.st: Do not use instance-based exceptions.

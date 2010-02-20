@@ -269,7 +269,7 @@ static const char standard_files[] = {
   /* Exception handling and ProcessEnvironment */
   "ProcEnv.st\0"
   "ExcHandling.st\0"
-  "AnsiExcept.st\0"
+  "SysExcept.st\0"
 
   /* Virtual filesystem layer */
   "FilePath.st\0"

@@ -31,209 +31,6 @@
 
 
 
-Signal subclass: Exception [
-    | creator |
-    
-    <category: 'Language-Exceptions'>
-    <comment: 'An Exception defines the characteristics of an exceptional event
-in a different way than CoreExceptions.  Instead of creating an
-hierarchy of objects and setting attributes of the objects, you
-create an hierarchy of classes and override methods in those classes;
-instances of those classes are passed to the handlers instead of
-instances of the common class Signal.
-
-Internally, Exception and every subclass of it hold onto a
-CoreException, so the two mechanisms are actually interchangeable.'>
-
-    Exception class [
-	| coreException |
-	
-    ]
-
-    Exception class >> new [
-	"Create an instance of the receiver, which you will be able to
-	 signal later."
-
-	<category: 'instance creation'>
-	| ctx creator |
-	ctx := thisContext parentContext.
-	[(creator := ctx receiver) == self] whileTrue: [ctx := ctx parentContext].
-	^self basicNew initialize: creator
-    ]
-
-    Exception class >> signal [
-	"Create an instance of the receiver, give it default attributes,
-	 and signal it immediately."
-
-	<category: 'instance creation'>
-	^self new signal
-    ]
-
-    Exception class >> signal: messageText [
-	"Create an instance of the receiver, set its message text,
-	 and signal it immediately."
-
-	<category: 'instance creation'>
-	^(self new)
-	    messageText: messageText;
-	    signal
-    ]
-
-    Exception class >> , aTrappableEvent [
-	"Answer an ExceptionCollection containing all the exceptions in the
-	 receiver and all the exceptions in aTrappableEvent"
-
-	<category: 'creating ExceptionCollections'>
-	^(ExceptionSet new)
-	    add: self coreException;
-	    add: aTrappableEvent;
-	    yourself
-    ]
-
-    Exception class >> initialize [
-	"Initialize the `links' between the core exception handling system
-	 and the ANSI exception handling system."
-
-	"Usually, a coreException has no defined `resumable' state, because
-	 Exception overrides Signal>>#isResumable and gives an answer without
-	 asking the core exception.  For backwards compatibility, however, we
-	 must give a state to these (in case someone uses `on: ExAll do: ...')."
-
-	<category: 'initialization'>
-	(ExAll := Kernel.CoreException basicNew)
-	    defaultHandler: [:sig | self resignalAsUnhandled: sig messageText];
-	    depth: 0;
-	    signalClass: Signal;
-	    isResumable: true;
-	    yourself.
-	(coreException := ExAll newChild)
-	    defaultHandler: [:sig | sig defaultAction];
-	    signalClass: self;
-	    isResumable: true;
-	    yourself.
-	(ExError := Error coreException) isResumable: false.
-	(ExDoesNotUnderstand := MessageNotUnderstood coreException) 
-	    isResumable: true.
-	(ExHalt := Halt coreException) isResumable: true.
-	(ExUserBreak := SystemExceptions.UserInterrupt coreException) 
-	    isResumable: false
-    ]
-
-    Exception class >> allExceptionsDo: aBlock [
-	"Private - Pass the coreException to aBlock"
-
-	<category: 'interoperability with TrappableEvents'>
-	aBlock value: self coreException
-    ]
-
-    Exception class >> coreException [
-	"Private - Answer the coreException which represents instances of
-	 the receiver"
-
-	<category: 'interoperability with TrappableEvents'>
-	coreException isNil ifFalse: [^coreException].
-	^coreException := (self superclass coreException newChild)
-		    defaultHandler: [:sig | sig defaultAction];
-		    signalClass: self;
-		    yourself
-    ]
-
-    Exception class >> goodness: anException [
-	"Answer how good the receiver is at handling the given exception.  A
-	 negative value indicates that the receiver is not able to handle
-	 the exception."
-
-	<category: 'comparison'>
-	^self coreException goodness: anException
-    ]
-
-    Exception class >> handles: anException [
-	"Answer whether the receiver handles `anException'."
-
-	<category: 'comparison'>
-	^(anException isKindOf: Exception) 
-	    ifTrue: [anException isKindOf: self]
-	    ifFalse: [self coreException handles: anException]
-    ]
-
-    = anObject [
-	"Answer whether the receiver is equal to anObject.  This is true if
-	 either the receiver or its coreException are the same object as anObject."
-
-	"This definition is needed to make #handles: work for ExceptionCollections.
-	 `(Error, Warning) handles: Error new' must work even if the
-	 ExceptionCollections contains the coreExceptions associated to Error
-	 and Warning (see Exception class>>#,)."
-
-	<category: 'comparison'>
-	^self == anObject or: [self exception == anObject]
-    ]
-
-    hash [
-	"Answer an hash value for the receiver."
-
-	<category: 'comparison'>
-	^self exception hash
-    ]
-
-    initialize: anObject [
-	"Initialize the receiver's instance variables."
-
-	<category: 'private'>
-	creator := anObject.
-	self
-	    initArguments: #();
-	    initException: self class coreException;
-	    messageText: self description
-    ]
-
-    description [
-	"Answer a textual description of the exception."
-
-	<category: 'exception description'>
-	^'An exception has occurred'
-    ]
-
-    isResumable [
-	"Answer true.  Exceptions are by default resumable."
-
-	<category: 'exception description'>
-	^true
-    ]
-
-    defaultAction [
-	"Execute the default action that is attached to the receiver."
-
-	<category: 'exception description'>
-	self resignalAsUnhandled: self messageText
-    ]
-
-    signal [
-	"Raise the exceptional event represented by the receiver"
-
-	<category: 'exception signaling'>
-	self instantiateNextHandlerFrom: thisContext.
-	^self activateHandler: (onDoBlock isNil and: [ self isResumable ])
-    ]
-
-    signal: messageText [
-	"Raise the exceptional event represented by the receiver, setting
-	 its message text to messageText."
-
-	<category: 'exception signaling'>
-	^self
-	    messageText: messageText;
-	    signal
-    ]
-
-    creator [
-	<category: 'private - copying'>
-	^creator
-    ]
-]
-
-
-
 Exception subclass: Error [
     
     <category: 'Language-Exceptions'>
@@ -1576,7 +1373,7 @@ current process.'>
 
 	self 
 	    onDoBlock: nil
-	    handlerBlock: self exception actualDefaultHandler
+	    handlerBlock: [ :ex | ex defaultAction ]
 	    onDoContext: signalingContext
 	    previousState: nil
     ]
@@ -1641,8 +1438,7 @@ Object extend [
 
     error: message [
 	"Display a walkback for the receiver, with the given error message.
-	 Signal an `Error' exception (you can trap it the old way too, with
-	 `ExError'"
+	 Signal an `Error' exception."
 
 	<category: 'error raising'>
 	^Error new signal: message
@@ -1650,8 +1446,7 @@ Object extend [
 
     halt: message [
 	"Display a walkback for the receiver, with the given error message.
-	 Signal an `Halt' exception (you can trap it the old way too, with
-	 `ExHalt')"
+	 Signal an `Halt' exception."
 
 	<category: 'error raising'>
 	^Halt new signal: message
@@ -1662,7 +1457,6 @@ Object extend [
 
 
 Eval [
-    Exception initialize.
     SystemExceptions.ProcessBeingTerminated initialize
 ]
 

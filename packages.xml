@@ -194,7 +194,7 @@
   <file>BindingDict.st</file>
   <file>AbstNamespc.st</file>
   <file>RootNamespc.st</file>
-  <file>AnsiExcept.st</file>
+  <file>SysExcept.st</file>
   <file>HashedColl.st</file>
   <file>FileDescr.st</file>
   <file>FloatD.st</file>

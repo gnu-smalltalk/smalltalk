@@ -65,7 +65,7 @@ creation of Processes from blocks.'>
 		    by: 2
 		    do: 
 			[:i | 
-			goodness := (context at: i) goodness: signal exception.
+			goodness := (context at: i) goodness: signal class.
 			goodness > -1 
 			    ifTrue: 
 				[(activeHandlers bitAt: i) = 1 
@@ -255,8 +255,7 @@ creation of Processes from blocks.'>
 	 raised, the result of evaluating the receiver is returned."
 
 	<category: 'exception handling'>
-	^self on: ExError
-	    do: [:sig | sig return: (aBlock valueWithArguments: sig arguments)]
+	^self on: Error do: [:sig | sig return: (aBlock cull: sig messageText)]
     ]
 
     ensure: aBlock [

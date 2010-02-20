@@ -1,3 +1,7 @@
+2010-02-20  Paolo Bonzini  <bonzini@gnu.org>
+
+	* libgst/files.c: Adjust for AnsiExcept.st rename.
+
 2010-02-18  Paolo Bonzini  <bonzini@gnu.org>
 
 	* libgst/vm.def: Make EXIT_INTERPRETER safer since we now can fork

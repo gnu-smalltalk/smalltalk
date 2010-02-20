@@ -93,6 +93,9 @@ o   Sending mode, file time and owner setters to a recursive directory
     decorator (such as `Directory working all') sets the mode/time/owner
     on all files under the path.
 
+o   The old instance-based exception handling has been removed.  Standard
+    ANSI class-based exceptions have been available since GNU Smalltalk 1.8.2.
+
 o   Collection>>#anyOne gives an error if the receiver is empty.
 
 o   SequenceableCollection>>#sortBy: was renamed to #sort:.  The old message
