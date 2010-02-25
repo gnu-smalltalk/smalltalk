@@ -98,136 +98,6 @@ static const long double cos_c[] = {
 #define SINCOSL_COS_LO 1
 #define SINCOSL_SIN_HI 2
 #define SINCOSL_SIN_LO 3
-static const long double sincosl_table[];
-
-long double
-kernel_sinl (long double x, long double y, int iy)
-{
-  long double h, l, z, sin_l, cos_l_m1;
-  int index, sign;
-
-  sign = 1;
-  if (x < 0)
-    {
-      x = -x;
-      sign = -1;
-    }
-
-  if (x < 0.148375L)		/* |x| < 0.1484375 */
-    {
-      /* Argument is small enough to approximate it by a Chebyshev
-         polynomial of degree 17.  */
-      if (x < 0.000000000000000006938893903907228377647697925567626953125L)	/* |x| < 2^-57 */
-	if (!((int) x))
-	  return x;		/* generate inexact */
-
-      z = x * x;
-      return x + (x * (z * (SIN1 + z * (SIN2 + z * (SIN3 + z * (SIN4 +
-								z * (SIN5 +
-								     z *
-								     (SIN6 +
-								      z *
-								      (SIN7 +
-								       z *
-								       SIN8)))))))));
-    }
-  else
-    {
-      /* So that we don't have to use too large polynomial,  we find
-         l and h such that x = l + h,  where fabsl(l) <= 1.0/256 with 83
-         possible values for h.  We look up cosl(h) and sinl(h) in
-         pre-computed tables,  compute cosl(l) and sinl(l) using a
-         Chebyshev polynomial of degree 10(11) and compute
-         sinl(h+l) = sinl(h)cosl(l) + cosl(h)sinl(l).  */
-      x -= 0.1484375L;
-      index = (int) (x * 128L + 0.5L);
-      h = index / 128.0L;
-      if (iy)
-	l = y - (h - x);
-      else
-	l = x - h;
-
-      z = l * l;
-      sin_l =
-	l * (ONE +
-	     z * (SSIN1 +
-		  z * (SSIN2 + z * (SSIN3 + z * (SSIN4 + z * SSIN5)))));
-      cos_l_m1 =
-	z * (SCOS1 + z * (SCOS2 + z * (SCOS3 + z * (SCOS4 + z * SCOS5))));
-
-      index *= 4;
-      z =
-	sincosl_table[index + SINCOSL_SIN_HI] +
-	(sincosl_table[index + SINCOSL_SIN_LO] +
-	 (sincosl_table[index + SINCOSL_SIN_HI] * cos_l_m1) +
-	 (sincosl_table[index + SINCOSL_COS_HI] * sin_l));
-      return z * sign;
-    }
-}
-
-long double
-kernel_cosl (long double x, long double y)
-{
-  long double h, l, z, sin_l, cos_l_m1;
-  int index;
-
-  if (x < 0)
-    x = -x;
-
-  if (x < 0.1484375L)		/* |x| < 0.1484375 */
-    {
-      /* Argument is small enough to approximate it by a Chebyshev
-         polynomial of degree 16.  */
-      if (x < 0.000000000000000006938893903907228377647697925567626953125L)	/* |x| < 2^-57 */
-	if (!((int) x))
-	  return ONE;		/* generate inexact */
-      z = x * x;
-      return ONE + (z * (COS1 + z * (COS2 + z * (COS3 + z * (COS4 +
-							     z * (COS5 +
-								  z * (COS6 +
-								       z *
-								       (COS7 +
-									z *
-									COS8))))))));
-    }
-  else
-    {
-      /* So that we don't have to use too large polynomial,  we find
-         l and h such that x = l + h,  where fabsl(l) <= 1.0/256 with 83
-         possible values for h.  We look up cosl(h) and sinl(h) in
-         pre-computed tables,  compute cosl(l) and sinl(l) using a
-         Chebyshev polynomial of degree 10(11) and compute
-         sinl(h+l) = sinl(h)cosl(l) + cosl(h)sinl(l).  */
-      x -= 0.1484375L;
-      index = (int) (x * 128L + 0.5L);
-      h = index / 128.0L;
-      l = y - (h - x);
-      z = l * l;
-      sin_l =
-	l * (ONE +
-	     z * (SSIN1 +
-		  z * (SSIN2 + z * (SSIN3 + z * (SSIN4 + z * SSIN5)))));
-      cos_l_m1 =
-	z * (SCOS1 + z * (SCOS2 + z * (SCOS3 + z * (SCOS4 + z * SCOS5))));
-
-      index *= 4;
-      z = sincosl_table [index + SINCOSL_COS_HI]
-          + (sincosl_table [index + SINCOSL_COS_LO]
-             - (sincosl_table [index + SINCOSL_SIN_HI] * sin_l)
-             - (sincosl_table [index + SINCOSL_COS_HI] * cos_l_m1));
-      return z;
-    }
-}
-
-
-/* For 0.1484375 + n/128.0, n=0..82 this table contains
-   first 113 bits of cosine, then at least 113 additional
-   bits and the same for sine.
-   0.1484375+82.0/128.0 is the smallest number among above defined numbers
-   larger than pi/4.
-   Computed using gmp.
- */
-
 static const long double sincosl_table[] = {
 
 /* x =  1.48437500000000000000000000000000000e-01L 3ffc3000000000000000000000000000 */
@@ -894,3 +764,131 @@ static const long double sincosl_table[] = {
   7.09693105363899724959669028139035515e-01L,	/* 3ffe6b5ce50b78219ea2aea708fd1f17 */
   -4.37026016974122945368562319136420097e-36L,	/* bf8973c7d69fc9b58a23fbf2bd9dfe60 */
 };
+
+long double
+kernel_sinl (long double x, long double y, int iy)
+{
+  long double h, l, z, sin_l, cos_l_m1;
+  int index, sign;
+
+  sign = 1;
+  if (x < 0)
+    {
+      x = -x;
+      sign = -1;
+    }
+
+  if (x < 0.148375L)		/* |x| < 0.1484375 */
+    {
+      /* Argument is small enough to approximate it by a Chebyshev
+         polynomial of degree 17.  */
+      if (x < 0.000000000000000006938893903907228377647697925567626953125L)	/* |x| < 2^-57 */
+	if (!((int) x))
+	  return x;		/* generate inexact */
+
+      z = x * x;
+      return x + (x * (z * (SIN1 + z * (SIN2 + z * (SIN3 + z * (SIN4 +
+								z * (SIN5 +
+								     z *
+								     (SIN6 +
+								      z *
+								      (SIN7 +
+								       z *
+								       SIN8)))))))));
+    }
+  else
+    {
+      /* So that we don't have to use too large polynomial,  we find
+         l and h such that x = l + h,  where fabsl(l) <= 1.0/256 with 83
+         possible values for h.  We look up cosl(h) and sinl(h) in
+         pre-computed tables,  compute cosl(l) and sinl(l) using a
+         Chebyshev polynomial of degree 10(11) and compute
+         sinl(h+l) = sinl(h)cosl(l) + cosl(h)sinl(l).  */
+      x -= 0.1484375L;
+      index = (int) (x * 128L + 0.5L);
+      h = index / 128.0L;
+      if (iy)
+	l = y - (h - x);
+      else
+	l = x - h;
+
+      z = l * l;
+      sin_l =
+	l * (ONE +
+	     z * (SSIN1 +
+		  z * (SSIN2 + z * (SSIN3 + z * (SSIN4 + z * SSIN5)))));
+      cos_l_m1 =
+	z * (SCOS1 + z * (SCOS2 + z * (SCOS3 + z * (SCOS4 + z * SCOS5))));
+
+      index *= 4;
+      z =
+	sincosl_table[index + SINCOSL_SIN_HI] +
+	(sincosl_table[index + SINCOSL_SIN_LO] +
+	 (sincosl_table[index + SINCOSL_SIN_HI] * cos_l_m1) +
+	 (sincosl_table[index + SINCOSL_COS_HI] * sin_l));
+      return z * sign;
+    }
+}
+
+long double
+kernel_cosl (long double x, long double y)
+{
+  long double h, l, z, sin_l, cos_l_m1;
+  int index;
+
+  if (x < 0)
+    x = -x;
+
+  if (x < 0.1484375L)		/* |x| < 0.1484375 */
+    {
+      /* Argument is small enough to approximate it by a Chebyshev
+         polynomial of degree 16.  */
+      if (x < 0.000000000000000006938893903907228377647697925567626953125L)	/* |x| < 2^-57 */
+	if (!((int) x))
+	  return ONE;		/* generate inexact */
+      z = x * x;
+      return ONE + (z * (COS1 + z * (COS2 + z * (COS3 + z * (COS4 +
+							     z * (COS5 +
+								  z * (COS6 +
+								       z *
+								       (COS7 +
+									z *
+									COS8))))))));
+    }
+  else
+    {
+      /* So that we don't have to use too large polynomial,  we find
+         l and h such that x = l + h,  where fabsl(l) <= 1.0/256 with 83
+         possible values for h.  We look up cosl(h) and sinl(h) in
+         pre-computed tables,  compute cosl(l) and sinl(l) using a
+         Chebyshev polynomial of degree 10(11) and compute
+         sinl(h+l) = sinl(h)cosl(l) + cosl(h)sinl(l).  */
+      x -= 0.1484375L;
+      index = (int) (x * 128L + 0.5L);
+      h = index / 128.0L;
+      l = y - (h - x);
+      z = l * l;
+      sin_l =
+	l * (ONE +
+	     z * (SSIN1 +
+		  z * (SSIN2 + z * (SSIN3 + z * (SSIN4 + z * SSIN5)))));
+      cos_l_m1 =
+	z * (SCOS1 + z * (SCOS2 + z * (SCOS3 + z * (SCOS4 + z * SCOS5))));
+
+      index *= 4;
+      z = sincosl_table [index + SINCOSL_COS_HI]
+          + (sincosl_table [index + SINCOSL_COS_LO]
+             - (sincosl_table [index + SINCOSL_SIN_HI] * sin_l)
+             - (sincosl_table [index + SINCOSL_COS_HI] * cos_l_m1));
+      return z;
+    }
+}
+
+
+/* For 0.1484375 + n/128.0, n=0..82 this table contains
+   first 113 bits of cosine, then at least 113 additional
+   bits and the same for sine.
+   0.1484375+82.0/128.0 is the smallest number among above defined numbers
+   larger than pi/4.
+   Computed using gmp.
+ */

@@ -303,13 +303,19 @@ gt_FUNC_SETENV
 GST_SOCKETS
 AC_REPLACE_FUNCS(putenv strdup strerror strsignal mkstemp getpagesize \
 	getdtablesize strstr ftruncate floorl ceill sqrtl frexpl ldexpl asinl \
-	acosl atanl logl expl tanl sinl cosl powl truncl lrintl strsep strpbrk \
-	symlink mkdtemp)
+	acosl atanl logl expl tanl sinl cosl powl truncl lrintl truncf lrintf \
+        lrint trunc strsep strpbrk symlink mkdtemp)
 AC_CHECK_FUNCS_ONCE(gethostname memcpy memmove sighold uname usleep lstat \
 	grantpt popen getrusage gettimeofday fork strchr utimes utime readlink \
 	sigsetmask alarm select mprotect madvise waitpid accept4 \
-	setsid spawnl nanosleep pread pwrite _NSGetExecutablePath \
+	setsid spawnl pread pwrite _NSGetExecutablePath \
 	chown getgrnam getpwnam endgrent endpwent setgroupent setpassent)
+
+AC_SEARCH_LIBS([nanosleep], [rt])
+if test "$ac_cv_search_nanosleep" != no; then
+  AC_DEFINE(HAVE_NANOSLEEP, 1, 
+    [Define if the system provides nanosleep.])
+fi
 
 AC_SEARCH_LIBS([clock_gettime], [rt])
 if test "$ac_cv_search_clock_gettime" != no; then

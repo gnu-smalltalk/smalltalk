@@ -1,3 +1,10 @@
+2010-02-25  Paolo Bonzini  <bonzini@gnu.org>
+
+	* lib-src/lrintf.c: New.
+	* lib-src/trunc.c: New.
+	* lib-src/truncf.c: New.
+	* lib-src/sincosl.c: Move initialization of sincosl_table up.
+
 2010-01-04  Paolo Bonzini  <bonzini@gnu.org>
 
 	* lib-src/ltdl.c (sys_wll_open): Wrap SetErrorMode around LoadLibrary.
