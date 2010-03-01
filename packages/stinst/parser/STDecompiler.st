@@ -616,7 +616,7 @@ control-structures-as-messages.'>
 	"Answer the set of statements executed by the receiver"
 
 	<category: 'accessing'>
-	^statements
+	^ statements ifNil: [ #() ]
     ]
 
     statements: aCollection [
@@ -1092,9 +1092,9 @@ Object subclass: STDecompiler [
 	'' displayNl.
 	(self decompile: #bindWith: in: CharacterArray) displayNl.
 	'' displayNl.
-	(self decompile: #detect: in: Collection) displayNl.
+	(self decompile: #detect: in: Iterable) displayNl.
 	'' displayNl.
-	(self decompile: #key:value:environment: in: VariableBinding class) 
+	(self decompile: #key:value:environment: in: HomedAssociation class) 
 	    displayNl.
 	'' displayNl.
 	(self decompile: #storeOn: in: VariableBinding) displayNl.
