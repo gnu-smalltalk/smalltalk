@@ -1,20 +1,8 @@
 GMainContext extend [
-    dispatch [
-	<category: 'C call-outs'>
-	<asyncCCall: 'g_main_context_dispatch' args: #(#self )>
-	
-    ]
+    iterate [
+        <category: 'C call-outs'>
+        <asyncCCall: 'gstGtkMainContextIterate' args: #(#self )>
 
-    releaseSignal [
-	<category: 'C call-outs'>
-	<cCall: 'gstGtkMainContextReleaseSignal' returning: #void args: #(#self )>
-	
-    ]
-
-    acquireWait [
-	<category: 'C call-outs'>
-	<cCall: 'gstGtkMainContextAcquireWait' returning: #void args: #(#self )>
-	
     ]
 ]
 

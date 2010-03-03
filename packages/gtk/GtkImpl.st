@@ -517,8 +517,7 @@ Gtk class extend [
 
 	[
             [sem wait.
-            [context acquireWait; dispatch]
-                ensure: [context releaseSignal].
+	    context iterate.
             loop isRunning] whileTrue]
                  ensure: [loop unref]
     ]

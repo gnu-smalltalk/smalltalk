@@ -1,3 +1,10 @@
+2010-03-03  Gwenael Casaccio  <mrgwen@gmail.com>
+
+	* GtkImpl.st: Move acquire/dispatch/release to a single C call-out for
+	speed.
+	* MoreFuncs.st: Adjust C call-outs.
+	* gst-gtk.c: Add main_context_iterate.
+
 2010-03-03  Paolo Bonzini  <bonzini@gnu.org>
 
 	* structs.awk: Add parent of GdkWindowObject.

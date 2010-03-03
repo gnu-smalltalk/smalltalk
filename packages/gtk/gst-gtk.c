@@ -737,12 +737,20 @@ main_context_release_signal (GMainContext *context)
   g_mutex_lock (mutex);
   g_main_context_release (context);
 
-  /* Restart the polling thread.  Note that #dispatch is asynchronous, so
-     this might execute before the Smalltalk code finishes running!  At
-     least in theory :-) this allows debugging GTK+ signal handlers.  */
+  /* Restart the polling thread.  Note that #iterate is asynchronous, so
+     this might execute before the Smalltalk code finishes running!  This
+     allows debugging GTK+ signal handlers.  */
   queued = false;
   g_cond_broadcast (cond_dispatch);
   g_mutex_unlock (mutex);
+}
+
+static void
+main_context_iterate (GMainContext *context)
+{
+  main_context_acquire_wait (context);
+  g_main_context_dispatch (context);
+  main_context_release_signal (context);
 }
 
 static gpointer
@@ -1141,8 +1149,7 @@ gst_initModule (proxy)
   _gst_vm_proxy->defineCFunc ("gstGtkConnectSignal", connect_signal);
   _gst_vm_proxy->defineCFunc ("gstGtkConnectSignalNoUserData", connect_signal_no_user_data);
   _gst_vm_proxy->defineCFunc ("gstGtkMain", create_main_loop_thread);
-  _gst_vm_proxy->defineCFunc ("gstGtkMainContextAcquireWait", main_context_acquire_wait);
-  _gst_vm_proxy->defineCFunc ("gstGtkMainContextReleaseSignal", main_context_release_signal);
+  _gst_vm_proxy->defineCFunc ("gstGtkMainContextIterate", main_context_iterate);
   _gst_vm_proxy->defineCFunc ("gstGtkGetProperty", object_get_property);
   _gst_vm_proxy->defineCFunc ("gstGtkSetProperty", object_set_property);
   _gst_vm_proxy->defineCFunc ("gstGtkGetChildProperty", container_get_child_property);
