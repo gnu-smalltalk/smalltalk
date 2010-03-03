@@ -1,3 +1,7 @@
+2010-03-03  Paolo Bonzini  <bonzini@gnu.org>
+
+	* structs.awk: Add parent of GdkWindowObject.
+
 2010-02-19  Paolo Bonzini  <bonzini@gnu.org>
             Gwenael Casaccio  <mrgwen@gmail.com>
 	

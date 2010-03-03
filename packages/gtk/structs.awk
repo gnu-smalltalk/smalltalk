@@ -45,6 +45,7 @@ BEGIN {
   known_parent["GtkEditable"] = "GtkWidget"
   known_parent["GObject"] = "GTypeInstance"
   known_parent["GtkObject"] = "GObject"
+  known_parent["GdkWindowObject"] = "GdkDrawable"
 
   # A couple of things that we need from GLib
   known_parent["GOptionGroup"] = "CObject"
