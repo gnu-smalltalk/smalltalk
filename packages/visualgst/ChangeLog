@@ -1,3 +1,7 @@
+2010-03-03  Gwenael Casaccio  <mrgwen@gmail.com>
+
+	* Debugger/GtkDebugger.st: Remove class check before #detach.
+
 2010-02-19  Paolo Bonzini  <bonzini@gnu.org>
 
 	* Commands/FileoutCategoryCommand.st, Commands/FileoutClassCommand.st,

@@ -44,6 +44,7 @@ invoked me no longer exist).  I am otherwise equivalent to a Process.'>
         "Return the base context in the process, i.e. the one that is
          responsible for passing the return value to C."
 
+        <category: 'private'>
         | context |
         context := self context.
         [ context parentContext isNil ] whileFalse: [
@@ -54,6 +55,8 @@ invoked me no longer exist).  I am otherwise equivalent to a Process.'>
     detach [
         "Continue running the receiver as a normal Process, and return
          nil from the callin."
+
+        <category: 'debugging'>
         | p |
         self isActive ifFalse: [ 
             ^SystemExceptions.InvalidState signalOn: self

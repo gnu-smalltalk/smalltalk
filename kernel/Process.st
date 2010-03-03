@@ -476,5 +476,11 @@ can suspend themselves and resume themselves however they wish.'>
 	<primitive: VMpr_Process_yield>
 	
     ]
+
+    detach [
+        "Do nothing, instances of Process are already detached."
+
+        <category: 'debugging'>
+    ]
 ]
 
