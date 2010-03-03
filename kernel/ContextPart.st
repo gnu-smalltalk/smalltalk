@@ -150,7 +150,7 @@ methods that can be used in inspection or debugging.'>
 	(debuggerClass isNil 
 	    or: [currentClass debuggingPriority > debuggerClass debuggingPriority]) 
 		ifTrue: [debuggerClass := currentClass].
-	ctx isNil or: [ctx isEnvironment]]
+	ctx parentContext isNil or: [ctx isEnvironment]]
 		whileFalse: [ctx := ctx parentContext].
 	^debuggerClass
     ]

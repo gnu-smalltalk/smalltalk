@@ -1,4 +1,8 @@
 2010-03-03  Gwenael Casaccio  <mrgwen@gmail.com>
+
+	* kernel/ContextPart.st: Fix thinko in #debuggerClass.
+
+2010-03-03  Gwenael Casaccio  <mrgwen@gmail.com>
 	    Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/Process.st: Add #detach.
