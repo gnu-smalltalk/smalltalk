@@ -100,6 +100,22 @@ AM_MISSING_PROG(AUTOM4TE, autom4te, $missing_dir)
 dnl 
 dnl ------------------------------ SUBDIRS --------------------
 
+AC_ARG_WITH(system-libltdl,
+[  --with-system-libltdl[=PATH]  use system libltdl.la (search in PATH if given)],
+[], [with_system_libltdl=no])
+
+if test $with_system_libltdl = no; then
+  AC_LIBOBJ(ltdl)
+  AC_CONFIG_LINKS([lib-src/ltdl.h:lib-src/ltdl_.h])
+  INCLTDL= LIBLTDL=
+elif test $with_system_libltdl = yes; then
+  INCLTDL= LIBLTDL=-lltdl
+else
+  INCLTDL="-I$withval/../include" LIBLTDL="-L$withval -lltdl"
+fi
+AC_SUBST(INCLTDL)
+AC_SUBST(LIBLTDL)
+
 AC_ARG_WITH(system-libffi,
 [  --with-system-libffi[=PATH]   use system libffi.la (search in PATH if given)],
 [], [with_system_libffi=no])
