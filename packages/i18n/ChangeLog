@@ -1,3 +1,7 @@
+2010-03-11  Paolo Bonzini  <bonzini@gnu.org>
+
+	* Collation.st: Delete.
+
 2010-02-19  Paolo Bonzini  <bonzini@gnu.org>
 
 	* GetText.st: Do not use instance-based exceptions.

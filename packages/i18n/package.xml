@@ -16,6 +16,5 @@
   <file>GetText.st</file>
   <file>Numbers.st</file>
   <file>Times.st</file>
-  <file>Collation.st</file>
   <file>ChangeLog</file>
 </package>
