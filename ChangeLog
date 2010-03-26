@@ -1,3 +1,9 @@
+2010-03-25  Paolo Bonzini <bonzini@gnu.org>
+
+	* kernel/SeqCollect.st: Make #indexOfSubCollection: return true
+	for an empty needle.  Against ANSI, but consistent with
+	#startsWith:/#endsWith:.
+
 2010-03-03  Gwenael Casaccio  <mrgwen@gmail.com>
 
 	* kernel/ContextPart.st: Fix thinko in #debuggerClass.

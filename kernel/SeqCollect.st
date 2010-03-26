@@ -338,6 +338,7 @@ some access and manipulation methods.'>
 	<category: 'basic'>
 	| selfSize subSize |
 	subSize := aSubCollection size.
+        subSize = 0 ifTrue: [ ^anIndex ].
 	selfSize := self size.
 	anIndex + subSize - 1 <= selfSize 
 	    ifTrue: 
