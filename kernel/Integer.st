@@ -7,7 +7,7 @@
 
 "======================================================================
 |
-| Copyright 1988,92,94,95,99,2000,2001,2002,2003,2005,2006,2008,2009
+| Copyright 1988,92,94,95,99,2000,2001,2002,2003,2005,2006,2008,2009,2010
 | Free Software Foundation, Inc.
 | Written by Steve Byrne.
 |
@@ -482,7 +482,7 @@ efficiency.'>
     ]
 
     radix: baseInteger [
-	"Return the base b representation of the receiver, with BBr in
+	"Return the base baseInteger representation of the receiver, with BBr in
 	 front of it.  This method is deprecated, use #printStringRadix:
 	 instead."
 
@@ -491,7 +491,7 @@ efficiency.'>
     ]
 
     printStringRadix: baseInteger [
-	"Return the base b representation of the receiver, with BBr in
+	"Return the base baseInteger representation of the receiver, with BBr in
 	 front of it"
 
 	<category: 'printing'>
@@ -522,7 +522,7 @@ efficiency.'>
     ]
 
     printPaddedWith: padding to: size base: baseInteger [
-	"Return the base 10 representation of the receiver, padded if
+	"Return the base baseInteger representation of the receiver, padded if
 	 necessary to size characters with copies of padding."
 
 	<category: 'printing'>
@@ -548,7 +548,7 @@ efficiency.'>
     ]
 
     printPaddedWith: padding to: size base: baseInteger [
-	"Return the base b representation of the receiver, padded if
+	"Return the base baseInteger representation of the receiver, padded if
 	 necessary to size characters with copies of padding."
 
 	<category: 'printing'>
@@ -570,7 +570,7 @@ efficiency.'>
     ]
 
     printString: baseInteger [
-	"Return the base b representation of the receiver"
+	"Return the base baseInteger representation of the receiver"
 
 	<category: 'printing'>
 	| num string |

@@ -1,3 +1,7 @@
+2010-03-25  Holger Hans Peter Freyther  <zecke@selfish.org>
+
+	* kernel/Integer.st: Refer to the right parameter of the selectors.
+
 2010-03-25  Paolo Bonzini <bonzini@gnu.org>
 
 	* kernel/SeqCollect.st: Make #indexOfSubCollection: return true
