@@ -236,12 +236,14 @@ constantFunction (aiV4mapped, AI_V4MAPPED)
 /* 0 = unknown, 1 = yes, -1 = no.  */
 static mst_Boolean have_sock_cloexec;
 
+/* Return 0 if the operation failed and an error can be returned
+   by the caller.  */
 static inline int
 check_have_sock_cloexec (int fh, int expected_errno)
 {
   if (have_sock_cloexec == 0 && (fh >= 0 || errno == expected_errno))
     have_sock_cloexec = (fh >= 0 ? 1 : -1);
-  return (have_sock_cloexec == 1);
+  return (have_sock_cloexec != 0);
 }
 #endif
 

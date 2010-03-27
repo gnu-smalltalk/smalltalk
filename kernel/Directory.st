@@ -51,7 +51,7 @@ how to use the instances returned by my class methods.'>
 
     Directory class >> primWorking: dirName [
 	<category: 'private-C call-outs'>
-	<cCall: 'chdir' returning: #void args: #(#string)>
+	<cCall: 'chdir' returning: #int args: #(#string)>
 	
     ]
 
@@ -204,8 +204,8 @@ how to use the instances returned by my class methods.'>
 	"Change the current working directory to dirName."
 
 	<category: 'file operations'>
-	self primWorking: dirName asString.
-	File checkError
+	(self primWorking: dirName asString) < 0
+            ifTrue: [File checkError].
     ]
 
     Directory class >> createTemporary: prefix [
@@ -214,8 +214,8 @@ how to use the instances returned by my class methods.'>
 	<category: 'file operations'>
 	| name |
 	name := prefix asString , 'XXXXXX'.
-	self primCreateTemporary: name.
-	File checkError.
+	(self primCreateTemporary: name) isNil
+            ifTrue: [File checkError].
 	^File name: name
     ]
 

@@ -1,3 +1,8 @@
+2010-03-27  Paolo Bonzini <bonzini@gnu.org>
+
+	* AbstractSocketImpl.st: Do not check errno unless a system call
+	fails.
+
 2010-01-01  Paolo Bonzini  <bonzini@gnu.org>
 
 	* Update copyright years.

@@ -1,3 +1,7 @@
+2010-03-25  Paolo Bonzini  <bonzini@gnu.org>
+
+	* libgst/sockets.c: Fix logic for no SOCK_CLOEXEC or no accept4.
+
 2010-02-20  Paolo Bonzini  <bonzini@gnu.org>
 
 	* libgst/files.c: Adjust for AnsiExcept.st rename.

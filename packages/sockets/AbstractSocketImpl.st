@@ -75,7 +75,7 @@ this can be changed by class methods on SocketAddress sublcasses.'>
 		    create: addressClass protocolFamily
 		    type: self socketType
 		    protocol: self protocol.
-	File checkError.
+	descriptor < 0 ifTrue: [ File checkError ].
 	^self on: descriptor
     ]
 
@@ -93,6 +93,7 @@ this can be changed by class methods on SocketAddress sublcasses.'>
 		    accept: fd
 		    peer: peer
 		    addrLen: addrLen.
+        newFD < 0 ifTrue: [ File checkError: self soError ].
 	^(implementationClass on: newFD)
 	    hasBeenBound;
 	    hasBeenConnectedTo: peer;
@@ -108,11 +109,10 @@ this can be changed by class methods on SocketAddress sublcasses.'>
 	addr := ipAddress port: port.
 	
 	(fd := self fd) isNil ifTrue: [ ^self ].
-	[self 
+	[(self 
 	    bind: fd
 	    to: addr
-	    addrLen: addr size.
-	File checkError] 
+	    addrLen: addr size) < 0 ifTrue: [File checkError: self soError] ]
 		ifCurtailed: [self close].
 	self isOpen ifTrue: [self hasBeenBound]
     ]
@@ -527,11 +527,10 @@ implementations.'>
 	addr := ipAddress port: port.
 	
 	[(fd := self fd) isNil ifTrue: [ ^self ].
-	self 
+	(self 
 	    connect: fd
 	    to: addr
-	    addrLen: addr size.
-	File checkError] 
+	    addrLen: addr size) < 0 ifTrue: [File checkError: self soError] ]
 		ifCurtailed: [self close].
 
 	"connect does not block, so wait for"

@@ -1,3 +1,9 @@
+2010-03-27  Paolo Bonzini <bonzini@gnu.org>
+
+	* kernel/File.st: Do not check errno unless a system call fails.
+	* kernel/Directory.st: Likewise.
+	* kernel/FileDescr.st: Likewise.  Remove useless #...ifFail: keywords.
+
 2010-03-25  Holger Hans Peter Freyther  <zecke@selfish.org>
 
 	* kernel/Integer.st: Refer to the right parameter of the selectors.

@@ -262,31 +262,31 @@ FilePath subclass: File [
 
     primSymlink: srcName as: destName [
 	<category: 'private-C call-outs'>
-	<cCall: 'symlink' returning: #void args: #(#string #string)>
+	<cCall: 'symlink' returning: #int args: #(#string #string)>
 	
     ]
 
     primUnlink: fileName [
 	<category: 'private-C call-outs'>
-	<cCall: 'unlink' returning: #void args: #(#string)>
+	<cCall: 'unlink' returning: #int args: #(#string)>
 	
     ]
 
     primRename: oldFileName to: newFileName [
 	<category: 'private-C call-outs'>
-	<cCall: 'rename' returning: #void args: #(#string #string)>
+	<cCall: 'rename' returning: #int args: #(#string #string)>
 	
     ]
 
     primRemoveDir: fileName [
 	<category: 'private-C call-outs'>
-	<cCall: 'rmdir' returning: #void args: #(#string)>
+	<cCall: 'rmdir' returning: #int args: #(#string)>
 	
     ]
 
     primCreateDir: dirName mode: mode [
 	<category: 'private-C call-outs'>
-	<cCall: 'mkdir' returning: #void args: #(#string #int)>
+	<cCall: 'mkdir' returning: #int args: #(#string #int)>
 	
     ]
 
@@ -348,8 +348,8 @@ FilePath subclass: File [
 	 anInteger."
 
 	<category: 'accessing'>
-	self primChmod: self asString mode: (anInteger bitAnd: 4095).
-	File checkError
+	(self primChmod: self asString mode: (anInteger bitAnd: 4095)) < 0
+	    ifTrue: [ File checkError ]
     ]
 
     isFileSystemPath [
@@ -423,8 +423,8 @@ FilePath subclass: File [
 
 	<category: 'accessing'>
 	stat isNil ifTrue: [stat := Kernel.Stat new].
-	self lstatOn: self asString into: stat.
-	File checkError.
+	(self lstatOn: self asString into: stat) < 0
+            ifTrue: [File checkError].
 	isSymbolicLink := (stat stMode bitAnd: 61440) = 40960.	"S_IFLNK"
 	isSymbolicLink 
 	    ifTrue: 
@@ -437,8 +437,8 @@ FilePath subclass: File [
 
 	<category: 'testing'>
 	stat isNil ifTrue: [stat := Kernel.Stat new].
-	self lstatOn: self asString into: stat.
-	File errno == 0 ifFalse: [^false].
+	(self lstatOn: self asString into: stat) < 0
+	    ifTrue: [^false].
 	isSymbolicLink := (stat stMode bitAnd: 61440) = 40960.	"S_IFLNK"
 	isSymbolicLink ifTrue: [self statOn: self asString into: stat].
 	^true
@@ -487,22 +487,22 @@ FilePath subclass: File [
 	"Set the receiver's owner and group to be ownerString and groupString."
 
 	<category: 'file operations'>
-	self class 
+	(self class 
 	    setOwnerFor: self asString
 	    owner: ownerString
-	    group: groupString.
-	File checkError
+	    group: groupString) < 0
+	        ifTrue: [ File checkError ]
     ]
 
     lastAccessTime: accessDateTime lastModifyTime: modifyDateTime [
 	"Set the receiver's timestamps to be accessDateTime and modifyDateTime."
 
 	<category: 'file operations'>
-	self class 
+	(self class 
 	    setTimeFor: self asString
 	    atime: (self secondsFromDateTime: accessDateTime)
-	    mtime: (self secondsFromDateTime: modifyDateTime).
-	File checkError
+	    mtime: (self secondsFromDateTime: modifyDateTime)) < 0
+	        ifTrue: [ File checkError ]
     ]
 
     open: class mode: mode ifFail: aBlock [
@@ -520,26 +520,27 @@ FilePath subclass: File [
 	"Remove the file with the given path name"
 
 	<category: 'file operations'>
-	self isDirectory 
+        | result |
+	result := self isDirectory 
 	    ifTrue: [self primRemoveDir: self asString]
 	    ifFalse: [self primUnlink: self asString].
-	File checkError
+	result < 0 ifTrue: [ File checkError ]
     ]
 
     symlinkFrom: srcName [
 	"Create the receiver as a symlink from path destName"
 
 	<category: 'file operations'>
-	self primSymlink: srcName as: self asString.
-	File checkError
+	(self primSymlink: srcName as: self asString) < 0
+            ifTrue: [ File checkError ]
     ]
 
     renameTo: newFileName [
 	"Rename the file with the given path name to newFileName"
 
 	<category: 'file operations'>
-	self primRename: self asString to: newFileName.
-	File checkError
+	(self primRename: self asString to: newFileName) < 0
+	    ifTrue: [ File checkError ]
     ]
 
     secondsFromDateTime: aDateTime [
@@ -572,8 +573,8 @@ FilePath subclass: File [
 	"Create the receiver as a directory."
 
 	<category: 'directory operations'>
-	self primCreateDir: self asString mode: 511.
-	File checkError
+	(self primCreateDir: self asString mode: 8r777) < 0
+	    ifTrue: [ File checkError ]
     ]
 
     namesDo: aBlock [
@@ -583,13 +584,13 @@ FilePath subclass: File [
 	<category: 'directory operations'>
 	| dir entry |
 	dir := self openDir: self asString.
-	File checkError.
+	dir isNil ifTrue: [^File checkError].
 	
-	[[entry := self readDir: dir.
-	    File checkError.
-	    entry notNil] 
-		whileTrue: [aBlock value: (self extractDirentName: entry)]]
-		    ensure: [self closeDir: dir]
+	[[(entry := self readDir: dir) notNil] 
+	    whileTrue: [aBlock value: (self extractDirentName: entry)]]
+		    ensure: [self closeDir: dir].
+
+	File checkError.
     ]
 
     symlinkAs: destName [

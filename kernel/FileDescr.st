@@ -304,7 +304,6 @@ do arbitrary processing on the files.'>
 	self isOpen ifFalse: [^self].
 	self flush.
 	self fileOp: 19.
-	self checkError.
 	access := 1
     ]
 
@@ -799,8 +798,7 @@ do arbitrary processing on the files.'>
 		    fileOp: 3
 		    with: aCollection
 		    with: position + available
-		    with: (position + n - 1 min: aCollection size)
-		    ifFail: [self checkError].
+		    with: (position + n - 1 min: aCollection size).
 	count := count + available.
 	count = 0 ifTrue: [atEnd := true].
 	^count
@@ -820,8 +818,7 @@ do arbitrary processing on the files.'>
 			    fileOp: 2
 			    with: aCollection
 			    with: cur
-			    with: last
-			    ifFail: [self checkError].
+			    with: last.
 		result = 0 ifTrue: [^cur - position].
 		cur := cur + result].
 	^cur - position
