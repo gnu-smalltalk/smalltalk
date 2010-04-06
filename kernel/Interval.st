@@ -194,6 +194,27 @@ members that my instance represents.'>
 	^(start + stop + stop) * step bitAnd: 1073741823
     ]
 
+    copyFrom: startIndex to: stopIndex [
+	<category: 'basic'>
+        | last |
+        stopIndex < startIndex
+            ifTrue:
+                [stopIndex = (startIndex - 1)
+                    ifTrue: [^Interval from: start to: start - step by: step].
+
+                ^SystemExceptions.ArgumentOutOfRange
+                    signalOn: stopIndex
+                    mustBeBetween: startIndex - 1
+                    and: self size].
+
+        last := self at: stopIndex.
+        self isExact ifFalse: [ last := last + (step / 2) ].
+	^Interval
+            from: (self at: startIndex)
+            to: last
+            by: step
+    ]
+
     printOn: aStream [
 	"Print a representation for the receiver on aStream"
 
