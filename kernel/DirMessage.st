@@ -104,6 +104,14 @@ for a message.'>
 	^receiver perform: self selector with: anObject
     ]
 
+    value: obj1 value: obj2 [
+	"Send the message with the arguments obj1 and obj2 (this message
+	 provides interoperability between DirectedMessages and blocks)"
+
+	<category: 'basic'>
+	^receiver perform: self selector with: obj1 with: obj2
+    ]
+
     valueWithArguments: anArray [
 	"Send the message with the arguments replaced by anArray (this
 	 message provides interoperability between DirectedMessages and blocks)"

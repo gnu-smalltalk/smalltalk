@@ -1,5 +1,9 @@
 2010-04-06  Paolo Bonzini <bonzini@gnu.org>
 
+	* kernel/DirMessage.st: Add #value:value:.
+
+2010-04-06  Paolo Bonzini <bonzini@gnu.org>
+
 	* kernel/Number.st: Add #isExact.
 	* kernel/Float.st: Add #isExact.
 	* kernel/Interval.st: Add #isExact.
