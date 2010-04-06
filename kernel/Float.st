@@ -436,6 +436,14 @@ if the hardware supports it.'>
 	self printOn: aStream special: #('Inf' '-Inf' 'NaN')
     ]
 
+    isExact [
+	"Answer whether the receiver performs exact arithmetic.  Floats
+	 do not."
+
+	<category: 'testing'>
+	^false
+    ]
+
     isLiteralObject [
 	"Answer whether the receiver is expressible as a Smalltalk literal."
 

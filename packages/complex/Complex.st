@@ -422,6 +422,14 @@ numbers, which in turn are created with `Complex i'' or the #i method
 	    nextPutAll: ' i)'
     ]
 
+    isExact [
+	"Answer whether the receiver performs exact arithmetic.  Complex
+	 numbers do so as long as both parts, real and imaginary, are exact."
+
+	<category: 'testing'>
+	^self real isExact and: [self imaginary isExact]
+    ]
+
     isComplex [
 	<category: 'creation/coercion'>
 	^true

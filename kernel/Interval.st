@@ -122,6 +122,15 @@ members that my instance represents.'>
 	^result
     ]
 
+    isExact [
+	"Answer whether elements of the receiver are computed using exact
+         arithmetic.  This is true as long as the start and step value
+	 are exact (i.e. not floating-point)."
+
+	<category: 'testing'>
+	^start isExact and: [step isExact]
+    ]
+
     size [
 	"Answer the number of elements in the receiver."
 

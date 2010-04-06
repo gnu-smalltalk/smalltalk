@@ -491,6 +491,16 @@ implicit type coercing code for binary operations.'>
 	^(self - num) abs / (self abs max: num abs) <= 0.0001
     ]
 
+    isExact [
+	"Answer whether the receiver performs exact arithmetic.  Most
+	 numeric classes do (in fact the only exceptions is Float and
+	 its descendants), so the default is to answer true rather than
+	 calling #subclassResponsibility."
+
+	<category: 'testing'>
+	^true
+    ]
+
     isNaN [
 	"Answer whether the receiver is a Not-A-Number.  Most numeric
 	 classes don't handle nans, so the default is to answer false

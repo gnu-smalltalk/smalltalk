@@ -1,3 +1,9 @@
+2010-04-06  Paolo Bonzini <bonzini@gnu.org>
+
+	* kernel/Number.st: Add #isExact.
+	* kernel/Float.st: Add #isExact.
+	* kernel/Interval.st: Add #isExact.
+
 2010-03-27  Paolo Bonzini <bonzini@gnu.org>
 
 	* kernel/File.st: Do not check errno unless a system call fails.
