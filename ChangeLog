@@ -1,5 +1,10 @@
 2010-04-06  Paolo Bonzini <bonzini@gnu.org>
 
+	* kernel/Interval.st: Fix operations on empty interval, improve
+	printing.
+
+2010-04-06  Paolo Bonzini <bonzini@gnu.org>
+
 	* kernel/DirMessage.st: Add #value:value:.
 
 2010-04-06  Paolo Bonzini <bonzini@gnu.org>

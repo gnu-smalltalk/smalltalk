@@ -131,6 +131,13 @@ members that my instance represents.'>
 	^start isExact and: [step isExact]
     ]
 
+    isEmpty [
+	"Answer whether the receiver is empty."
+
+	<category: 'basic'>
+	^(step > 0) == (stop < start)
+    ]
+
     size [
 	"Answer the number of elements in the receiver."
 
@@ -174,6 +181,8 @@ members that my instance represents.'>
 
 	<category: 'testing'>
 	self class == anInterval class ifFalse: [^false].
+        self isEmpty ifTrue: [ ^anInterval isEmpty ].
+        anInterval isEmpty ifTrue: [ ^false ].
 	^self first = anInterval first and: [self last = anInterval last
 	    and: [self increment = anInterval increment]]
     ]
@@ -202,7 +211,7 @@ members that my instance represents.'>
 		    print: start + step].
 	size > 2 
 	    ifTrue: 
-		[size > 3 ifTrue: [aStream nextPutAll: ' ...'].
+		[(self at: 3) = stop ifFalse: [aStream nextPutAll: ' ...'].
 		aStream
 		    space;
 		    print: stop].
@@ -211,13 +220,17 @@ members that my instance represents.'>
 
     first [
 	<category: 'printing'>
-	^start
+	^self isEmpty
+	    ifTrue: [SystemExceptions.IndexOutOfRange signalOn: self withIndex: 1]
+	    ifFalse: [start]
     ]
 
     last [
 	"Answer the last value."
 	<category: 'printing'>
-	^stop - ((stop - start) \\ step)
+	^self isEmpty
+	    ifTrue: [SystemExceptions.IndexOutOfRange signalOn: self withIndex: 0]
+	    ifFalse: [stop - ((stop - start) \\ step)]
     ]
 
     increment [
