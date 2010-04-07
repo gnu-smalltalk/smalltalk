@@ -60,11 +60,34 @@ AC_HELP_STRING([--disable-threads], [build without multithread safety]),
   LIBTHREAD=
   if test "$gst_use_threads" != no; then
     dnl Check whether the compiler and linker support weak declarations.
-    AC_MSG_CHECKING([whether imported symbols can be declared weak])
-    gst_have_weak=no
-    AC_TRY_LINK([extern void xyzzy ();
-#pragma weak xyzzy], [xyzzy();], [gst_have_weak=yes])
-    AC_MSG_RESULT([$gst_have_weak])
+    AC_CACHE_CHECK([whether imported symbols can be declared weak],
+      [gst_cv_have_weak],
+      [gst_cv_have_weak=no
+       dnl First, test whether the compiler accepts it syntactically.
+       AC_TRY_LINK([extern void xyzzy ();
+#pragma weak xyzzy], [xyzzy();], [gst_cv_have_weak=maybe])
+       if test $gst_cv_have_weak = maybe; then
+         dnl Second, test whether it actually works. On Cygwin 1.7.2, with
+         dnl gcc 4.3, symbols declared weak always evaluate to the address 0.
+         AC_TRY_RUN([
+#include <stdio.h>
+#pragma weak fputs
+int main ()
+{
+  return (fputs == NULL);
+}], [gst_cv_have_weak=yes], [gst_cv_have_weak=no],
+           [dnl When cross-compiling, assume that only ELF platforms support
+            dnl weak symbols.
+            AC_EGREP_CPP([Extensible Linking Format],
+              [#ifdef __ELF__
+               Extensible Linking Format
+               #endif
+              ],
+              [gst_cv_have_weak="guessing yes"],
+              [gst_cv_have_weak="guessing no"])
+           ])
+       fi
+      ])
     if test "$gst_use_threads" = yes || test "$gst_use_threads" = posix; then
       # On OSF/1, the compiler needs the flag -pthread or -D_REENTRANT so that
       # it groks <pthread.h>. It's added above.
