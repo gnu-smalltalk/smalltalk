@@ -33,9 +33,9 @@ SUBDIRS += libgst . $(BUILT_PACKAGES) doc tests
 
 # Running gst inside the build directory...
 
-GST_OPTS = --kernel-dir="@srcdir@/kernel" --image=gst.im
-GST = ./gst$(EXEEXT) --no-user-files $(GST_OPTS)
-GST_PACKAGE = XZIP="$(XZIP)" ./gst-tool$(EXEEXT) gst-package $(GST_OPTS)
+GST_OPTS = --kernel-dir "@srcdir@/kernel" --image gst.im
+GST = $(WINEWRAPPER) ./gst$(EXEEXT) --no-user-files $(GST_OPTS)
+GST_PACKAGE = XZIP="$(XZIP)" $(WINEWRAPPER) ./gst-tool$(EXEEXT) gst-package $(GST_OPTS)
 
 
 ###########################################################
@@ -156,7 +156,7 @@ gsticon.o: gsticon.ico
 	cd $(srcdir) && echo ProgramIcon ICON `$(CYGPATH_W) gsticon.ico` | \
 		$(WINDRES) -o $(abs_builddir)/gsticon.o
 
-gst.im: $(bin_PROGRAMS) $(srcdir)/kernel/stamp-classes
+gst.im: $(bin_PROGRAMS) $(srcdir)/kernel/stamp-classes $(WINEWRAPPERDEP)
 	$(GST) -iQ /dev/null
 
 
@@ -199,7 +199,7 @@ all-local: $(srcdir)/kernel/stamp-classes
 # could actually do without double-colon rules by using another stamp file
 # which depends on packages.xml and rebuilds all the stamp-classes files.
 
-$(srcdir)/kernel/Makefile.frag: $(srcdir)/packages.xml
+$(srcdir)/kernel/Makefile.frag: $(srcdir)/packages.xml $(WINEWRAPPERDEP)
 	(echo '$$(srcdir)/kernel/stamp-classes: \'; \
 	  $(GST_PACKAGE) --list-files Kernel --vpath --srcdir="$(srcdir)" $(srcdir)/packages.xml | \
 	    tr -d \\r | tr \\n ' '; \
@@ -222,20 +222,20 @@ dist-hook::
 # To install the kernel files, we use gst-package in --dist mode.
 install-data-hook::
 	$(GST_PACKAGE) --dist --copy --all-files \
-	  --destdir="$(DESTDIR)" --target-dir="$(pkgdatadir)" \
-	  --srcdir="$(srcdir)" $(srcdir)/packages.xml
+	  --destdir "$(DESTDIR)" --target-dir="$(pkgdatadir)" \
+	  --srcdir "$(srcdir)" $(srcdir)/packages.xml
 	$(mkdir_p) $(DESTDIR)$(imagedir)
 	cd $(DESTDIR)$(imagedir) && \
-	  "@abs_top_builddir@/gst" --no-user-files -iS \
-	    --kernel-dir="$(DESTDIR)$(pkgdatadir)/kernel" \
-	    --image="$(DESTDIR)$(imagedir)/gst.im" \
+	  $(WINEWRAPPER) "$(abs_top_builddir)/gst$(EXEEXT)" --no-user-files -iS \
+	    --kernel-dir "$(DESTDIR)$(pkgdatadir)/kernel" \
+	    --image "$(DESTDIR)$(imagedir)/gst.im" \
 	    -f "@abs_top_srcdir@/scripts/Finish.st" \
 	    "$(imagedir)" $(MODULES)
 
 uninstall-local:: gst-tool$(EXEEXT)
-	$(GST_PACKAGE) \
-	  --uninstall --destdir="$(DESTDIR)" --target-dir="$(pkgdatadir)" \
-	  --srcdir=$(srcdir) $(DESTDIR)$(pkgdatadir)/packages.xml
+	$(WINEWRAPPER) $(GST_PACKAGE) \
+	  --uninstall --destdir "$(DESTDIR)" --target-dir "$(pkgdatadir)" \
+	  --srcdir $(srcdir) $(DESTDIR)$(pkgdatadir)/packages.xml
 	-rm -f $(DESTDIR)$(imagedir)/gst.im
 
 @PACKAGE_RULES@

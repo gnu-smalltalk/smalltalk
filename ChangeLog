@@ -1,5 +1,10 @@
 2010-04-10  Paolo Bonzini <bonzini@gnu.org>
 
+	* winewrapper.c: Support Unix to DOS path conversion.  Always convert
+	argv[1] to a DOS path.
+
+2010-04-10  Paolo Bonzini <bonzini@gnu.org>
+
 	* scripts/Package.st: Use File>>#isAbsolute.
 
 2010-04-06  Paolo Bonzini <bonzini@gnu.org>

@@ -36,30 +36,55 @@
 #include <windows.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stdio.h>
 #include <unistd.h>
 
 typedef char *wine_get_unix_file_name_t (const WCHAR *);
 static wine_get_unix_file_name_t *wine_get_unix_file_name_ptr;
+typedef WCHAR *wine_get_dos_file_name_t (const char *);
+static wine_get_dos_file_name_t *wine_get_dos_file_name_ptr;
 
 /* Based on the source code for winepath.  */
 
 static char *
-maybe_convert_arg (char *arg)
+maybe_convert_arg_to_unix (char *arg)
 {
   if (wine_get_unix_file_name_ptr
+      && arg[0] != '-'
       && (strchr (arg, '\\') || (arg[0] && arg[1] == ':')))
     {
       int len;
-      WCHAR *win_name_wide;
+      WCHAR *dos_name_wide;
       char *unix_name, *ret;
       len = strlen (arg);
-      win_name_wide = malloc (sizeof (WCHAR) * (len + 1));
-      MultiByteToWideChar(CP_ACP, 0, arg, -1, win_name_wide, len + 1);
-      unix_name = wine_get_unix_file_name_ptr (win_name_wide);
+      dos_name_wide = malloc (sizeof (WCHAR) * (len + 1));
+      MultiByteToWideChar(CP_ACP, 0, arg, -1, dos_name_wide, len + 1);
+      unix_name = wine_get_unix_file_name_ptr (dos_name_wide);
       ret = strdup (unix_name);
-      free (win_name_wide);
+      free (dos_name_wide);
       HeapFree (GetProcessHeap(), 0, unix_name);
       return ret;
+    }
+  else
+    return arg;
+}
+
+static char *
+maybe_convert_arg_to_dos (char *arg)
+{
+  if (wine_get_dos_file_name_ptr
+      && arg[0] != '-'
+      && strchr (arg, '/'))
+    {
+      int len;
+      WCHAR *dos_name_wide;
+      char dos_name[MAX_PATH+1];
+      dos_name_wide = wine_get_dos_file_name_ptr (arg);
+      len = wcslen (dos_name_wide);
+      WideCharToMultiByte (CP_ACP, 0, dos_name_wide, -1, dos_name,
+			   MAX_PATH, NULL, NULL);
+      HeapFree (GetProcessHeap(), 0, dos_name_wide);
+      return strdup (dos_name);
     }
   else
     return arg;
@@ -69,18 +94,30 @@ int
 main (int argc, char **argv)
 {
   int i;
+  int ret, cmdlen;
+  char *cmd = argv[1];
 
   wine_get_unix_file_name_ptr = (wine_get_unix_file_name_t *)
     GetProcAddress (GetModuleHandle ("KERNEL32"), "wine_get_unix_file_name");
+  wine_get_dos_file_name_ptr = (wine_get_dos_file_name_t *)
+    GetProcAddress (GetModuleHandle ("KERNEL32"), "wine_get_dos_file_name");
 
-  argv[0] = argv[1];
-  for (i = 2; --argc > 1; i++)
-    argv[i - 1] = maybe_convert_arg (argv[i]);
+  cmdlen = strlen (cmd);
+  argv[0] = maybe_convert_arg_to_dos (cmd);
+  if (cmdlen > 4 && stricmp (cmd + cmdlen - 4, ".exe") == 0)
+    for (i = 2; --argc > 1; i++)
+      argv[i - 1] = maybe_convert_arg_to_dos (argv[i]);
+  else
+    for (i = 2; --argc > 1; i++)
+      argv[i - 1] = maybe_convert_arg_to_unix (argv[i]);
 
   argv[i - 1] = NULL;
-  execvp (argv[0], argv);
+  ret = _spawnvp (_P_WAIT, argv[0], (const char* const *)argv);
+  if (ret == -1)
+    {
+      perror ("winewrapper");
+      ret = 124;
+    }
 
-  /* Error.  */
-  perror ("winewrapper");
-  exit (1);
+  exit (ret);
 }

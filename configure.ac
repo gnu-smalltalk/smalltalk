@@ -73,12 +73,15 @@ fi
 
 # For Wine, compile in GST a generic path to zip.exe.  For build time,
 # wrap the native zip with winewrapper to hide Windows paths from it.
-GST_WINE_IF([WINEWRAPPER='winewrapper$(EXEEXT)'
-	     XZIP='$(abs_top_builddir)/winewrapper$(EXEEXT) '$ZIP
+GST_WINE_IF([WINEWRAPPERDEP='winewrapper$(EXEEXT)'
+	     WINEWRAPPER='$(abs_top_builddir)/winewrapper$(EXEEXT)'
+	     XZIP='$(WINEWRAPPER) '$ZIP
 	     ZIP=zip.exe],
 	    [WINEWRAPPER=
+	     WINEWRAPPERDEP=
 	     XZIP=$ZIP])
 AC_SUBST([WINEWRAPPER])
+AC_SUBST([WINEWRAPPERDEP])
 AC_SUBST([XZIP])
 
 AC_ARG_WITH(emacs, 
@@ -357,7 +360,7 @@ GST_HAVE_GMP
 GST_HAVE_READLINE
 
 GST_PACKAGE_PREFIX([packages])
-GST_PACKAGE_DEPENDENCIES([gst-tool$(EXEEXT) gst.im $(WINEWRAPPER)])
+GST_PACKAGE_DEPENDENCIES([gst-tool$(EXEEXT) gst.im $(WINEWRAPPERDEP)])
 
 GST_PACKAGE_ENABLE([BloxTK], [blox/tk],
    [GST_HAVE_TCLTK],
