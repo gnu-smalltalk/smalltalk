@@ -664,26 +664,31 @@ fi
 
 if test "$relocatable_reason" = yes; then
   case "${acl_final_bindir}" in
+    "${acl_final_exec_prefix}") ;;
     "${acl_final_exec_prefix}"/*) ;;
     /*) relocatable_reason='no, bindir outside exec-prefix' ;;
     *) relocatable_reason='no, relative bindir' ;;
   esac
   case "${acl_final_libexecdir}" in
+    "${acl_final_exec_prefix}") ;;
     ${acl_final_exec_prefix}/*) ;;
     /*) relocatable_reason='no, libexecdir outside exec_prefix' ;;
     *) relocatable_reason='no, relative libexecdir' ;;
   esac
   case "${acl_final_datadir}" in
+    ${acl_final_prefix}) ;;
     ${acl_final_prefix}/*) ;;
     /*) relocatable_reason='no, datadir outside prefix' ;;
     *) relocatable_reason='no, relative datadir' ;;
   esac
   case "${acl_final_imagedir}" in
+    ${acl_final_prefix}) ;;
     ${acl_final_prefix}/*) ;;
     /*) relocatable_reason='no, imagedir outside prefix' ;;
     *) relocatable_reason='no, relative imagedir' ;;
   esac
   case "${acl_final_moduledir}" in
+    ${acl_final_prefix}) ;;
     ${acl_final_prefix}/*) ;;
     /*) relocatable_reason='no, moduledir outside prefix' ;;
     *) relocatable_reason='no, relative moduledir' ;;
