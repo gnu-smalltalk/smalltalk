@@ -12,7 +12,7 @@ LC_UNSET = LANG=C; export LANG; \
 EXTRA_DIST = cpp.awk structs.awk funcs.awk mk_enums.awk mk_sizeof.awk mkorder.awk
 
 gst_module_ldflags = -rpath $(moduleexecdir) -release $(VERSION) -module \
-	-export-symbols-regex gst_initModule
+	-no-undefined -export-symbols-regex gst_initModule
 
 ALL_LIBS = $(GLIB_LIBS) $(GTK_LIBS) $(PANGO_LIBS) $(ATK_LIBS) $(GTHREAD_LIBS) \
 	$(CAIRO_LIBS)
