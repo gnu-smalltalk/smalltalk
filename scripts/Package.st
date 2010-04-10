@@ -498,8 +498,8 @@ Object subclass: Command [
 
     validateDestDir: destdir installDir: instDir [ 
 	instDir isNil ifTrue: [ ^self ].
-	((File name: instDir) name ~= instDir
-	    and: [ destdir notEmpty ]) ifTrue: [
+	(instDir asFile isAbsolute not and: [ destdir notEmpty ])
+            ifTrue: [
 		self error: '--destdir used with relative target directory' ]
     ]
 

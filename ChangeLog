@@ -1,3 +1,7 @@
+2010-04-10  Paolo Bonzini <bonzini@gnu.org>
+
+	* scripts/Package.st: Use File>>#isAbsolute.
+
 2010-04-06  Paolo Bonzini <bonzini@gnu.org>
 
 	* kernel/Interval.st: Add #copyFrom:to:.
