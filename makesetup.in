@@ -1,0 +1,570 @@
+#! /bin/bash
+
+# NSIS installer generator for GNU Smalltalk
+# Written by Paolo Bonzini.
+# Copyright (C) 2010 Free Software Foundation, Inc.
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+# Caveats:
+# 0) Only Fedora is supported as a cross-compilation environment
+# 1) Install all mingw packages and wine; start a random wine app
+#    to ensure you have ~/.wine/drive_c
+# 2) cp -R /usr/i686-pc-mingw32/sys-root/mingw/ ~/.wine/drive_c/mingw
+# 3) Configure gst as follows:
+#   ../configure \
+#      --host=i686-pc-mingw32 \
+#      --prefix=/nonexistent \
+#      --exec-prefix=/nonexistent \
+#      --bindir=/nonexistent \
+#      --datarootdir=/nonexistent \
+#      --with-imagedir=/nonexistent/image \
+#      --with-moduledir=/nonexistent/modules \
+#      --disable-glibtest \
+#      --disable-gtktest \
+#      LDFLAGS=-L/usr/i686-pc-mingw32/sys-root/mingw/lib/
+# 4) Run ./makesetup
+
+unset BASH_ENV CDPATH ENV MAIL MAILPATH
+export LC_ALL=C LANGUAGE=C
+(echo <(echo)) >/dev/null 2>&1 || exec bash "$0" "$@"
+BS="\\"
+set -e
+
+# --------------------------------------------------------------------------
+# Autoconf data
+# --------------------------------------------------------------------------
+
+PACKAGE='@PACKAGE@'
+PACKAGE_NAME='@PACKAGE_NAME@'
+PACKAGE_URL='@PACKAGE_URL@'
+VERSION='@VERSION@'
+prefix='@prefix@'
+exec_prefix='@exec_prefix@'
+datarootdir=@datarootdir@
+datadir=@datadir@
+pkgdatadir=@pkgdatadir@
+bindir=@bindir@
+localstatedir=@localstatedir@
+imagedir=@imagedir@
+libexecdir=@libexecdir@
+moduledir=@moduledir@
+
+# --------------------------------------------------------------------------
+# Extra definitions
+# --------------------------------------------------------------------------
+
+builddir=$PWD
+MINGWROOT=/usr/i686-pc-mingw32/sys-root/mingw
+
+# --------------------------------------------------------------------------
+# Shell functions
+# --------------------------------------------------------------------------
+
+array_set()
+{
+  local name
+  name=$1
+  shift
+  eval "$name=(\"\$@\")"
+}
+
+array_append()
+{
+  local name
+  name=$1
+  shift
+  eval "$name+=(\"\$@\")"
+}
+
+array_copy()
+{
+  eval "$1=(\"\${$2[@]}\")"
+}
+
+array_concat()
+{
+  eval "$1+=(\"\${$2[@]}\")"
+}
+
+array_lines()
+{
+  local template
+  template="%s\n"
+  eval printf \$template "\"\${$1[@]}\""
+}
+
+array_readfile()
+{
+  local IFS
+  IFS=$'\n'
+  read -a $1 -d$'\001' -r < $2 || :
+}
+
+array_sort()
+{
+  local -a _copy
+  local name
+
+  name=$1
+  shift
+  array_copy _copy $name
+  array_readfile $name <(array_lines _copy | sort "$@")
+}
+
+array_sub()
+{
+  local -a _copy
+  array_copy _copy $1
+  array_readfile $1 <(array_lines _copy | grep -Fvxf <(array_lines $2))
+}
+
+xargs_dirname()
+{
+  sed 's/^\(.*[^/]\)\/\/*[^/][^/]*\/*$/\1/; t
+       s/^\(\/\/\)[^/].*/\1/; t
+       s/^\(\/\/\)$/\1/; t
+       s/^\(\/\).*/\1/; t
+       s/.*/./; t'
+}
+
+xargs_basename()
+{
+  sed 's/^.*\/\([^/][^/]*\)\/*$/\1/; t
+       s/^\/\(\/\/\)$/\1/; t
+       s/^\/\(\/\).*/\1/; t
+       s/.*/./; t'
+}
+
+# --------------------------------------------------------------------------
+# Build
+# --------------------------------------------------------------------------
+
+DESTDIR=$builddir/stage
+rm -rf $DESTDIR
+make install DESTDIR=$DESTDIR
+cd $DESTDIR/nonexistent
+
+# not distributed
+rm -f smalltalk/VFSAddOns.star
+
+# libtool stupidity
+ln -sf bin/libgst*.dll .
+
+# --------------------------------------------------------------------------
+# Shell functions to build installation sections
+# --------------------------------------------------------------------------
+
+n=1
+add_section()
+{
+  eval $1=\$n
+  array_append sections "$2"
+  array_append section_descriptions "$3"
+  shift
+  shift
+  shift
+  array_set outfiles$n "$@"
+  ((n++))
+}
+
+add_to_section()
+{
+  local id
+
+  id=$1
+  shift
+  array_append outfiles$id "$@"
+}
+
+distribute_mingw_file()
+{
+  case $1 in
+    /usr/*) return 1 ;;
+    bin/*.dll) return 0 ;;
+    bin/*) return 1 ;;
+    include/*) return 1 ;;
+    */*.def) return 1 ;;
+    */*.o) return 1 ;;
+    */*.a) return 1 ;;
+    */*.la) return 1 ;;
+    */*.pc) return 1 ;;
+    */*.h) return 1 ;;
+    */*.py*) return 1 ;;
+    */*.mo) return 1 ;;   # debatable, but saves 6 MB
+    lib/gettext/*) return 1 ;;
+    share/aclocal/*) return 1 ;;
+    share/doc/*) return 1 ;;
+    share/gtk-2.0/demo/*) return 1 ;;
+    share/gtk-doc) return 1 ;;
+    share/info/*) return 1 ;;
+    share/gettext/*) return 1 ;;
+    share/*/gettext/*) return 1 ;;
+    share/*/gettext-tools.mo) return 1 ;;
+    share/man/*) return 1 ;;
+    *) return 0 ;;
+  esac
+}
+
+add_mingw_rpms ()
+{
+  local -a files instfiles
+  local name package dest
+
+  name=$1
+  shift
+  for package; do
+    rpm -qi $package >/dev/null || exit 1
+    array_readfile files <(rpm -ql $package)
+    array_readfile instfiles <(
+      for i in "${files[@]}"; do
+        test -d "$i" && continue
+        dest=${i#$MINGWROOT/}
+        if distribute_mingw_file $dest; then
+          dest=${dest#bin/}
+          mkdir -p `dirname $dest`
+          ln -sf $i $dest
+          echo $dest
+        fi
+      done)
+    array_concat outfiles$name instfiles
+  done
+}
+
+# --------------------------------------------------------------------------
+# Installation sections
+# --------------------------------------------------------------------------
+
+add_section basic \
+  "Basic installation" \
+  "Basic installation of GNU Smalltalk, including network access" \
+  gst.exe \
+  ./libgst*.dll \
+  image/gst.im
+
+add_mingw_rpms $basic mingw32-runtime
+
+exe=gst.exe
+
+add_section devel \
+  "Module development" \
+  "Files needed to write extension modules for GNU Smalltalk" \
+  gst-config \
+  `find include -type f` \
+  `find lib -type f`
+
+add_section cairo \
+  "Cairo" \
+  "Cairo bindings for GNU Smalltalk" \
+  smalltalk/Cairo.star
+
+add_mingw_rpms $cairo mingw32-cairo mingw32-pixman
+
+add_section sdl \
+  "SDL" \
+  "LibSDL bindings for GNU Smalltalk" \
+  smalltalk/Cairo.star \
+  smalltalk/CairoSDL.star \
+  smalltalk/LibSDL.star \
+  smalltalk/LibSDL_GL.star \
+  smalltalk/OpenGL.star \
+  smalltalk/examples/Cairo*.st \
+  modules/gstopengl*.dll \
+  modules/gstopengl.la \
+  modules/sdl*.dll \
+  modules/sdl.la
+
+add_mingw_rpms $sdl mingw32-cairo mingw32-pixman mingw32-SDL
+
+add_section iconv \
+  "Unicode" \
+  "Unicode support for GNU Smalltalk (required by Iliad and Seaside)" \
+  smalltalk/Iconv.star \
+  modules/iconv*.dll \
+  modules/iconv.la
+
+add_mingw_rpms $iconv mingw32-iconv
+
+add_section zlib \
+  "zlib" \
+  "zlib bindings for GNU Smalltalk" \
+  smalltalk/Zlib.star \
+  modules/zlib*.dll \
+  modules/zlib.la
+
+add_mingw_rpms $zlib mingw32-zlib
+
+add_section sqlite \
+  "sqlite" \
+  "SQLite bindings for GNU Smalltalk" \
+  smalltalk/DBD-SQLite.star \
+  modules/dbd-sqlite3*.dll \
+  modules/dbd-sqlite3.la
+
+add_mingw_rpms $sqlite mingw32-sqlite
+
+add_section gdbm \
+  "GDBM" \
+  "GDBM bindings for GNU Smalltalk" \
+  smalltalk/GDBM.star \
+  modules/gdbm*.dll \
+  modules/gdbm.la
+
+add_mingw_rpms $gdbm mingw32-gdbm
+
+add_section gtk \
+  "Graphics" \
+  "GTK+ bindings and IDE for GNU Smalltalk" \
+  ./gst-blox.exe \
+  ./gst-browser.exe \
+  smalltalk/BLOXBrowser.star \
+  smalltalk/Blox.star \
+  smalltalk/BloxGTK.star \
+  smalltalk/Cairo.star \
+  smalltalk/GTK.star \
+  smalltalk/VisualGST.star \
+  smalltalk/examples/Man.st \
+  smalltalk/examples/Tetris.st \
+  modules/gst-gtk*.dll \
+  modules/gst-gtk.la
+
+add_mingw_rpms $gtk \
+  mingw32-glib2 mingw32-gtk2 mingw32-pango mingw32-atk \
+  mingw32-cairo mingw32-pixman \
+  mingw32-fontconfig mingw32-freetype \
+  mingw32-jasper mingw32-libjpeg mingw32-libpng \
+  mingw32-gettext \
+  mingw32-iconv \
+  mingw32-zlib
+
+add_section expat \
+  "Expat" \
+  "Expat bindings for GNU Smalltalk" \
+  smalltalk/XML-Expat.star \
+  modules/expat*.dll \
+  modules/expat.la
+
+add_mingw_rpms $expat mingw32-expat
+
+
+# Add all other .star files to the Basic section
+
+outfiles=()
+n=1
+for i in "${sections[@]}"; do
+  array_concat outfiles outfiles$n
+  ((n++))
+done
+
+array_readfile packages <(
+  find . -name "gst*.exe"
+  find smalltalk -type f
+  find modules -type f \! -name "*.a")
+array_sub packages outfiles
+add_to_section $basic "${packages[@]}"
+
+# --------------------------------------------------------------------------
+# Prologue
+# --------------------------------------------------------------------------
+
+declare -a outfiles
+
+exec 3>&1
+exec > setup.nsi
+
+cat << EOF
+; ${PACKAGE_NAME} Windows(R) installation script
+; Copyright (C) Free Software Foundation, Inc.
+; Written by Paolo Bonzini <bonzini@gnu.org>
+
+; Product defines
+
+!define PRODUCT_NAME "${PACKAGE_NAME}"
+!define PRODUCT_WEB_SITE "${PACKAGE_URL}"
+!define PRODUCT_VERSION "${VERSION}"
+!define PRODUCT_STARTMENU "${PACKAGE_NAME}"
+!define PRODUCT_EXECUTABLE "${exe}"
+EOF
+
+case ${VERSION} in
+  ?*.*.*.*) echo "!define PRODUCT_VERSIONINFO_VERSION \"${VERSION}\"" ;;
+  ?*.*.*) echo "!define PRODUCT_VERSIONINFO_VERSION \"${VERSION}.0\"" ;;
+  ?*.*) echo "!define PRODUCT_VERSIONINFO_VERSION \"${VERSION}.0.0\"" ;;
+  ?*) echo "!define PRODUCT_VERSIONINFO_VERSION \"${VERSION}.0.0.0\"" ;;
+  '') echo "!define PRODUCT_VERSIONINFO_VERSION \"0.0.0.0\"" ;;
+esac
+
+# --------------------------------------------------------------------------
+
+cat << \EOF
+!define PRODUCT_PUBLISHER "Free Software Foundation, Inc."
+!define PRODUCT_UNINST_ROOT_KEY "HKLM"
+!define PRODUCT_UNINST_KEY "Software\Microsoft\Windows\CurrentVersion\Uninstall\${PRODUCT_NAME}"
+!define PRODUCT_INSTDIR "$PROGRAMFILES\${PRODUCT_NAME}"
+
+!define OUTFILE_NAME "setup.exe"
+
+; Include required libraries
+
+!include "MUI2.nsh"
+!include "LogicLib.nsh"
+!include "WinVer.nsh"
+!include "x64.nsh"
+!include "Sections.nsh"
+
+; MUI Settings
+
+; !define MUI_HEADERIMAGE
+; !define MUI_HEADERIMAGE_BITMAP "graphics\RHrgbjpg.bmp"
+
+!define MUI_ICON "${NSISDIR}\Contrib\Graphics\Icons\modern-install.ico"
+!define MUI_UNICON "${NSISDIR}\Contrib\Graphics\Icons\modern-uninstall.ico"
+!define MUI_LICENSEPAGE_CHECKBOX
+
+; MUI pages
+
+!insertmacro MUI_PAGE_WELCOME
+!insertmacro MUI_PAGE_COMPONENTS
+!insertmacro MUI_PAGE_DIRECTORY
+!insertmacro MUI_PAGE_INSTFILES
+!insertmacro MUI_PAGE_FINISH
+
+; Uninstaller pages
+
+!insertmacro MUI_UNPAGE_CONFIRM
+!insertmacro MUI_UNPAGE_INSTFILES
+
+; Language files
+
+!insertmacro MUI_LANGUAGE "English"
+
+; NSIS declarations
+
+Name "${PRODUCT_NAME} ${PRODUCT_VERSION}"
+OutFile "${OUTFILE_NAME}"
+Icon "${MUI_ICON}"
+UninstallIcon "${MUI_UNICON}"
+InstallDir "${PRODUCT_INSTDIR}"
+RequestExecutionLevel admin
+
+VIProductVersion "${PRODUCT_VERSIONINFO_VERSION}"
+VIAddVersionKey /LANG=${LANG_ENGLISH} "ProductName" "${PRODUCT_NAME}"
+VIAddVersionKey /LANG=${LANG_ENGLISH} "CompanyName" "${PRODUCT_PUBLISHER}"
+VIAddVersionKey /LANG=${LANG_ENGLISH} "LegalCopyright" "Copyright (C) ${PRODUCT_PUBLISHER}"
+VIAddVersionKey /LANG=${LANG_ENGLISH} "FileDescription" "${PRODUCT_NAME} Installer"
+VIAddVersionKey /LANG=${LANG_ENGLISH} "FileVersion" "${PRODUCT_VERSION:-0.0}"
+EOF
+
+# --------------------------------------------------------------------------
+# File list
+# --------------------------------------------------------------------------
+
+n=1
+outfiles=()
+for i in "${sections[@]}"; do
+  echo "Section \"$i\" SEC$n"
+  test $n = 1 && echo '  SectionIn RO'
+  test $n = 1 && echo '  SetOverwrite try'
+
+  array_sort outfiles$n
+  array_concat outfiles outfiles$n
+  array_lines outfiles$n | sort | {
+    prevdir=---
+    while read i; do
+      winpath=`echo "$i" | tr / "$BS$BS" `
+      dir=`dirname $i`
+      test "$dir" = "$prevdir" || {
+        windirpath='$INSTDIR\'`echo "$dir" | tr / "$BS$BS" `
+        echo "  SetOutPath \"$windirpath\""
+      }
+      prevdir=$dir
+      echo "  File \"$winpath\""
+    done
+  }
+  echo SectionEnd
+  echo
+  ((n++))
+done
+
+# --------------------------------------------------------------------------
+# Post-install
+# --------------------------------------------------------------------------
+
+cat << \EOF
+Section -AdditionalIcons
+  CreateDirectory "$SMPROGRAMS\${PRODUCT_STARTMENU}"
+  CreateShortCut "$SMPROGRAMS\${PRODUCT_STARTMENU}\Uninstall.lnk" "$INSTDIR\uninst.exe"
+  CreateShortCut "$SMPROGRAMS\${PRODUCT_STARTMENU}\${PRODUCT_NAME}.lnk" "$INSTDIR\${PRODUCT_EXECUTABLE}"
+EOF
+
+n=1
+for i in "${sections[@]}"; do
+  cat << EOF
+  !insertmacro SectionFlagIsSet SEC$n \${SF_SELECTED} sec${n}_yes sec${n}_no
+    sec${n}_yes:
+    sec${n}_no:
+EOF
+  ((n++))
+done
+
+cat << \EOF
+SectionEnd
+
+Section -Post
+  WriteUninstaller "$INSTDIR\uninst.exe"
+  WriteRegStr ${PRODUCT_UNINST_ROOT_KEY} "${PRODUCT_UNINST_KEY}" "DisplayName" "$(^Name)"
+  WriteRegStr ${PRODUCT_UNINST_ROOT_KEY} "${PRODUCT_UNINST_KEY}" "UninstallString" "$INSTDIR\uninst.exe"
+  WriteRegStr ${PRODUCT_UNINST_ROOT_KEY} "${PRODUCT_UNINST_KEY}" "DisplayVersion" "${PRODUCT_VERSION}"
+  WriteRegStr ${PRODUCT_UNINST_ROOT_KEY} "${PRODUCT_UNINST_KEY}" "URLInfoAbout" "${PRODUCT_WEB_SITE}"
+  WriteRegStr ${PRODUCT_UNINST_ROOT_KEY} "${PRODUCT_UNINST_KEY}" "Publisher" "${PRODUCT_PUBLISHER}"
+SectionEnd
+
+; Section descriptions
+
+!insertmacro MUI_FUNCTION_DESCRIPTION_BEGIN
+EOF
+
+n=1
+for i in "${section_descriptions[@]}"; do
+  echo "!insertmacro MUI_DESCRIPTION_TEXT \${SEC$n} \"$i\""
+  ((n++))
+done
+
+cat << \EOF
+!insertmacro MUI_FUNCTION_DESCRIPTION_END
+
+; Uninstaller
+
+Section Uninstall
+  SetOutPath "\"
+EOF
+
+array_lines outfiles | sort -r | tr '/' "$BS$BS" | \
+  sed 's/.*/  Delete "$INSTDIR\\&"/'
+array_lines outfiles | xargs_dirname | sort -ru | tr '/' "$BS$BS" | \
+  sed '$d; s/.*/  RMDir "$INSTDIR\\&"/'
+
+cat << \EOF
+  RMDir "$INSTDIR"
+  Delete "$SMPROGRAMS\${PRODUCT_STARTMENU}\Uninstall.lnk"
+  Delete "$SMPROGRAMS\${PRODUCT_STARTMENU}\${PRODUCT_NAME}.lnk"
+  RMDir "$SMPROGRAMS\${PRODUCT_STARTMENU}"
+  DeleteRegKey ${PRODUCT_UNINST_ROOT_KEY} "${PRODUCT_UNINST_KEY}"
+SectionEnd
+EOF
+
+exec >&3-
+makensis setup.nsi
+chmod +x setup.exe
+mv setup.nsi setup.exe ../..

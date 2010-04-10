@@ -76,7 +76,8 @@ fi
 GST_WINE_IF([WINEWRAPPERDEP='winewrapper$(EXEEXT)'
 	     WINEWRAPPER='$(abs_top_builddir)/winewrapper$(EXEEXT)'
 	     XZIP='$(WINEWRAPPER) '$ZIP
-	     ZIP=zip.exe],
+	     ZIP=zip.exe,
+             AC_CONFIG_FILES([makesetup], [chmod +x makesetup])],
 	    [WINEWRAPPER=
 	     WINEWRAPPERDEP=
 	     XZIP=$ZIP])
