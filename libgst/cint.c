@@ -185,12 +185,14 @@ static int get_errno (void);
 /* Encapsulate binary incompatibilities between various C libraries.  */
 static int my_stat_old (const char *name,
 		        struct gst_stat_struct * out);
-static int my_lstat_old (const char *name,
-		         struct gst_stat_struct * out);
 static int my_stat (const char *name,
 		    OOP out);
+#ifdef HAVE_LSTAT
+static int my_lstat_old (const char *name,
+		         struct gst_stat_struct * out);
 static int my_lstat (const char *name,
 		     OOP out);
+#endif
 static int my_putenv (const char *str);
 static int my_chdir (const char *str);
 static int my_chown (const char *file, const char *owner, const char *group);
