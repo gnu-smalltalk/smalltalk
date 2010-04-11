@@ -39,6 +39,10 @@
 #include <stdio.h>
 #include <unistd.h>
 
+#ifdef _WIN64
+#error Win64 is not supported. winewrapper must be compiled for Win32.
+#endif
+
 typedef char *wine_get_unix_file_name_t (const WCHAR *);
 static wine_get_unix_file_name_t *wine_get_unix_file_name_ptr;
 typedef WCHAR *wine_get_dos_file_name_t (const char *);
@@ -90,6 +94,52 @@ maybe_convert_arg_to_dos (char *arg)
     return arg;
 }
 
+/* What a mess!  Wine does not honor _P_WAIT for Unix executables, so
+   we have to invoke the system calls manually.  And since we have no
+   access to glibc, we have to do this the hard way.  Luckily only
+   i386 is supported.  */
+int linux_spawnve(int dummy, const char *file, char *argv[], char *envp[])
+{
+#define SYS_fork 2
+#define SYS_waitpid 7
+#define SYS_execve 11
+
+#define ASMFMT_0()
+#define ASMFMT_1(arg1) \
+        , "b" (arg1)
+#define ASMFMT_2(arg1, arg2) \
+        , "b" (arg1), "c" (arg2)
+#define ASMFMT_3(arg1, arg2, arg3) \
+        , "b" (arg1), "c" (arg2), "d" (arg3)
+#define ASMFMT_4(arg1, arg2, arg3, arg4) \
+        , "b" (arg1), "c" (arg2), "d" (arg3), "S" (arg4)
+#define ASMFMT_5(arg1, arg2, arg3, arg4, arg5) \
+        , "b" (arg1), "c" (arg2), "d" (arg3), "S" (arg4), "D" (arg5)
+#define INLINE_SYSCALL(name, nr, args...) ({ \
+  register unsigned int resultvar; \
+  asm volatile ("movl %1, %%eax; int $0x80" : "=a" (resultvar) : \
+    "i" (SYS_##name) ASMFMT_##nr(args) : "memory", "cc"); \
+  (int) resultvar; \
+})
+  
+  int pid = INLINE_SYSCALL (fork, 0);
+  
+  if (pid == -1)
+    return -1;
+
+  if (pid == 0)
+    {
+      INLINE_SYSCALL (execve, 3, file, argv, envp);
+      return 124;
+    }
+  else
+    {
+      int status;
+      INLINE_SYSCALL (waitpid, 3, pid, &status, 0);
+      return 0;
+    }
+}
+
 int
 main (int argc, char **argv)
 {
@@ -103,16 +153,22 @@ main (int argc, char **argv)
     GetProcAddress (GetModuleHandle ("KERNEL32"), "wine_get_dos_file_name");
 
   cmdlen = strlen (cmd);
-  argv[0] = maybe_convert_arg_to_dos (cmd);
   if (cmdlen > 4 && stricmp (cmd + cmdlen - 4, ".exe") == 0)
-    for (i = 2; --argc > 1; i++)
-      argv[i - 1] = maybe_convert_arg_to_dos (argv[i]);
+    {
+      for (i = 1; --argc > 0; i++)
+        argv[i - 1] = maybe_convert_arg_to_dos (argv[i]);
+      argv[i - 1] = NULL;
+      ret = _spawnv (_P_WAIT, argv[0], (const char *const*) argv);
+    }
   else
-    for (i = 2; --argc > 1; i++)
-      argv[i - 1] = maybe_convert_arg_to_unix (argv[i]);
+    {
+      argv[0] = argv[1];
+      for (i = 2; --argc > 1; i++)
+        argv[i - 1] = maybe_convert_arg_to_unix (argv[i]);
+      argv[i - 1] = NULL;
+      ret = linux_spawnve (_P_WAIT, argv[0], argv, environ);
+    }
 
-  argv[i - 1] = NULL;
-  ret = _spawnvp (_P_WAIT, argv[0], (const char* const *)argv);
   if (ret == -1)
     {
       perror ("winewrapper");

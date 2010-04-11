@@ -1,5 +1,11 @@
 2010-04-11  Paolo Bonzini <bonzini@gnu.org>
 
+	* winewrapper.c: Work around spawnl(P_WAIT, "...") and system()
+	not waiting when a Unix program is invoked (see
+	http://bugs.winehq.org/show_bug.cgi?id=22338).
+
+2010-04-11  Paolo Bonzini <bonzini@gnu.org>
+
 	* scripts/Test.st: Fix help message.
 
 2010-04-11  Paolo Bonzini <bonzini@gnu.org>
