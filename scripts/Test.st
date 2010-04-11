@@ -48,7 +48,7 @@ Options:
     -I --image-file=FILE  run tests on the specified image file
        --kernel-dir=PATH  use the specified kernel directory
     -h --help             show this message and exit
-    -v --version          print version information and exit
+       --version          print version information and exit
 
 '.
 
