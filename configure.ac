@@ -719,11 +719,7 @@ fi
     idir=`echo "$idir" | sed -e 's,^//*[^/]*,,'`
   done
   idir=`echo "$idir" | sed -e 's,//*[^/]*,/..,g' -e 's,^/,,' `
-  if test x"$idir$dir" = x; then
-    echo .
-  else
-    echo "$idir$dir"
-  fi
+  echo "${idir:-.}$dir"
 }]
 
 case "$relocatable_reason" in
