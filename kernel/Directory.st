@@ -59,7 +59,7 @@ how to use the instances returned by my class methods.'>
 	"Answer the path to the user's home directory"
 
 	<category: 'reading system defaults'>
-	^File name: (Smalltalk getenv: 'HOME')
+	^(Smalltalk getenv: 'HOME') ifNotNil: [ :path | File name: path ]
     ]
 
     Directory class >> image [
