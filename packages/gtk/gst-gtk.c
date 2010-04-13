@@ -53,7 +53,7 @@
 #include "gstpub.h"
 
 #include <stdio.h>
-#include <ctype.h>
+#include <assert.h>
 #include <errno.h>
 #include <gdk/gdk.h>
 #include <gtk/gtk.h>
@@ -61,6 +61,10 @@
 #include <glib.h>
 
 #include <gobject/gvaluecollector.h>
+
+#ifdef G_WIN32_MSG_HANDLE
+#include <windows.h>
+#endif
 
 #ifdef STDC_HEADERS
 #include <stdlib.h>
@@ -719,6 +723,128 @@ static GCond *cond;
 static GCond *cond_dispatch;
 static volatile gboolean queued;
 
+#ifdef G_WIN32_MSG_HANDLE
+static gint
+gst_gtk_poll (GPollFD *fds,
+	      guint    nfds,
+	      gint     timeout)
+{
+  HANDLE handles[MAXIMUM_WAIT_OBJECTS];
+  gint win32_timeout;
+  gint poll_msgs = -1;
+  GPollFD *f;
+  DWORD ready;
+  gint nhandles = 0;
+
+  for (f = fds; f < &fds[nfds]; ++f)
+      {
+        HANDLE h;
+        assert (f->fd >= 0);
+        if (f->fd == G_WIN32_MSG_HANDLE)
+          {
+            assert (poll_msgs == -1 && nhandles == f - fds);
+            poll_msgs = nhandles;
+#if 1
+            continue;
+#else
+	    /* Once the VM will host the event loop, it will be possible to
+	       have a MsgWaitForMultipleObjects call in the VM thread and use
+	       the result to wake up this side of the loop.  For now resort
+	       to polling; messages are checked by the VM thread every 20ms
+	       (in the GTK check function, called by g_main_context_check).  */
+            h = hWokenUpEvent;
+#endif
+          }
+        else
+          h = (HANDLE) f->fd;
+        if (nhandles == MAXIMUM_WAIT_OBJECTS)
+          {
+            g_warning (G_STRLOC ": Too many handles to wait for!\n");
+            break;
+          }
+        handles[nhandles++] = (HANDLE) f->fd;
+      }
+
+  if (nhandles == 0)
+    {
+      /* Wait for nothing (huh?) */
+      return 0;
+    }
+
+  /* If the VM were idling, it could in principle use MsgWaitForMultipleObjects
+     and tell us when it gets a message on its queue.  This would remove the
+     need for polling.  However, we cannot implement this until the main
+     loop is moved inside the VM.  */
+  if (poll_msgs != -1 /* && !idle */ )
+    win32_timeout = (timeout == -1 || timeout > 20) ? 20 : timeout;
+  else
+    win32_timeout = (timeout == -1) ? INFINITE : timeout;
+
+  ready = WaitForMultipleObjects (nhandles, handles, FALSE, win32_timeout);
+  if (ready == WAIT_FAILED)
+    {
+      gchar *emsg = g_win32_error_message (GetLastError ());
+      g_warning (G_STRLOC ": WaitForMultipleObjects() failed: %s", emsg);
+      g_free (emsg);
+    }
+
+  for (f = fds; f < &fds[nfds]; ++f)
+    f->revents = 0;
+
+#if 1
+  if (poll_msgs != -1)
+    {
+      if (ready >= WAIT_OBJECT_0 + poll_msgs
+	  && ready <= WAIT_OBJECT_0 + nhandles)
+        ready++;
+
+      else if (ready == WAIT_TIMEOUT
+	       && win32_timeout != INFINITE)
+        ready = WAIT_OBJECT_0 + poll_msgs;
+    }
+#endif
+
+  if (ready == WAIT_FAILED)
+    return -1;
+  if (ready == WAIT_TIMEOUT)
+    return 0;
+
+  f = &fds[ready - WAIT_OBJECT_0];
+  if (f->events & (G_IO_IN | G_IO_OUT))
+    {
+      if (f->events & G_IO_IN)
+        f->revents |= G_IO_IN;
+      else
+        f->revents |= G_IO_OUT;
+    }
+
+  return 1;
+}
+
+#if 0
+/* libgst should have something like this: */
+
+static gint
+_gst_pause ()
+{
+  idle = true;
+  ResetEvent (hWakeUpEvent);
+  MsgWaitForMultipleObjects (1, &hWakeUpEvent, FALSE, INFINITE, QS_ALLEVENTS);
+  SetEvent (hWokenUpEvent);
+}
+
+static gint
+_gst_wakeup ()
+{
+  idle = false;
+  SetEvent (hWakeUpEvent);
+}
+#endif
+#else
+#define gst_gtk_poll g_poll
+#endif
+
+
 static void
 main_context_acquire_wait (GMainContext *context)
 {
@@ -799,7 +925,7 @@ main_loop_thread (gpointer semaphore)
       g_mutex_unlock (mutex);
       g_main_context_release (context);
 
-      g_poll (fds, nfds, timeout);
+      gst_gtk_poll (fds, nfds, timeout);
 
       /* Dispatch on the other thread and wait for it to rendez-vous.  */
       g_mutex_lock (mutex);

@@ -1,5 +1,10 @@
 2010-04-13  Paolo Bonzini  <bonzini@gnu.org>
 
+	* gst-gtk.c: Fix Windows deadlock by polling every 20 ms the VM
+	thread.
+
+2010-04-13  Paolo Bonzini  <bonzini@gnu.org>
+
 	* gst-gtk.c: Move check phase to the dispatching thread.
 
 2010-04-13  Paolo Bonzini  <bonzini@gnu.org>
