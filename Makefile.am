@@ -124,8 +124,8 @@ endif
 # we use noinst here.
 noinst_PROGRAMS = gst-tool
 gst_tool_SOURCES = gst-tool.c
-gst_tool_LDADD = libgst/libgst.la lib-src/library.la
-gst_tool_DEPENDENCIES = libgst/libgst.la lib-src/library.la
+gst_tool_LDADD = libgst/libgst.la lib-src/library.la @ICON@
+gst_tool_DEPENDENCIES = libgst/libgst.la lib-src/library.la @ICON@
 gst_tool_LDFLAGS = -export-dynamic $(RELOC_LDFLAGS)
 
 # Used to call the Unix zip from Wine

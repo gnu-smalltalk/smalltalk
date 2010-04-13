@@ -255,7 +255,30 @@ add_section basic \
 
 add_mingw_rpms $basic mingw32-runtime
 
-exe=gst.exe
+add_section ide \
+  "IDE" \
+  "IDE for GNU Smalltalk" \
+  ./gst-browser.exe \
+  ./gst-blox.exe \
+  smalltalk/BLOXBrowser.star \
+  smalltalk/Blox.star \
+  smalltalk/BloxGTK.star \
+  smalltalk/Cairo.star \
+  smalltalk/GTK.star \
+  smalltalk/VisualGST.star \
+  smalltalk/examples/Man.st \
+  smalltalk/examples/Tetris.st \
+  modules/gst-gtk*.dll \
+  modules/gst-gtk.la
+
+add_mingw_rpms $ide \
+  mingw32-glib2 mingw32-gtk2 mingw32-pango mingw32-atk \
+  mingw32-cairo mingw32-pixman \
+  mingw32-fontconfig mingw32-freetype \
+  mingw32-jasper mingw32-libjpeg mingw32-libpng \
+  mingw32-gettext \
+  mingw32-iconv \
+  mingw32-zlib
 
 add_section devel \
   "Module development" \
@@ -263,6 +286,15 @@ add_section devel \
   gst-config \
   `find include -type f` \
   `find lib -type f`
+
+add_section expat \
+  "Expat" \
+  "Expat bindings for GNU Smalltalk" \
+  smalltalk/XML-Expat.star \
+  modules/expat*.dll \
+  modules/expat.la
+
+add_mingw_rpms $expat mingw32-expat
 
 add_section cairo \
   "Cairo" \
@@ -324,10 +356,8 @@ add_section gdbm \
 add_mingw_rpms $gdbm mingw32-gdbm
 
 add_section gtk \
-  "Graphics" \
-  "GTK+ bindings and IDE for GNU Smalltalk" \
-  ./gst-blox.exe \
-  ./gst-browser.exe \
+  "GTK+" \
+  "GTK+ bindings for GNU Smalltalk" \
   smalltalk/BLOXBrowser.star \
   smalltalk/Blox.star \
   smalltalk/BloxGTK.star \
@@ -347,15 +377,6 @@ add_mingw_rpms $gtk \
   mingw32-gettext \
   mingw32-iconv \
   mingw32-zlib
-
-add_section expat \
-  "Expat" \
-  "Expat bindings for GNU Smalltalk" \
-  smalltalk/XML-Expat.star \
-  modules/expat*.dll \
-  modules/expat.la
-
-add_mingw_rpms $expat mingw32-expat
 
 
 # Add all other .star files to the Basic section
@@ -394,7 +415,6 @@ cat << EOF
 !define PRODUCT_WEB_SITE "${PACKAGE_URL}"
 !define PRODUCT_VERSION "${VERSION}"
 !define PRODUCT_STARTMENU "${PACKAGE_NAME}"
-!define PRODUCT_EXECUTABLE "${exe}"
 EOF
 
 case ${VERSION} in
@@ -477,9 +497,8 @@ for i in "${sections[@]}"; do
   test $n = 1 && echo '  SectionIn RO'
   test $n = 1 && echo '  SetOverwrite try'
 
-  array_sort outfiles$n
   array_concat outfiles outfiles$n
-  array_lines outfiles$n | sort | {
+  array_lines outfiles$n | sort -u | {
     prevdir=---
     while read i; do
       winpath=`echo "$i" | tr / "$BS$BS" `
@@ -496,6 +515,7 @@ for i in "${sections[@]}"; do
   echo
   ((n++))
 done
+array_sort outfiles
 
 # --------------------------------------------------------------------------
 # Post-install
@@ -505,7 +525,6 @@ cat << \EOF
 Section -AdditionalIcons
   CreateDirectory "$SMPROGRAMS\${PRODUCT_STARTMENU}"
   CreateShortCut "$SMPROGRAMS\${PRODUCT_STARTMENU}\Uninstall.lnk" "$INSTDIR\uninst.exe"
-  CreateShortCut "$SMPROGRAMS\${PRODUCT_STARTMENU}\${PRODUCT_NAME}.lnk" "$INSTDIR\${PRODUCT_EXECUTABLE}"
 EOF
 
 n=1
@@ -513,8 +532,17 @@ for i in "${sections[@]}"; do
   cat << EOF
   !insertmacro SectionFlagIsSet SEC$n \${SF_SELECTED} sec${n}_yes sec${n}_no
     sec${n}_yes:
-    sec${n}_no:
 EOF
+  exe=`array_lines outfiles$n | grep '\.exe$' | head -1`
+  if test -n "$exe"; then
+    name='\$SMPROGRAMS\\\${PRODUCT_STARTMENU}\\${PRODUCT_NAME}'
+    if test $n != 1; then
+      name="$name $i"
+    fi
+    exe='$INSTDIR\'`echo $exe | tr '/' "$BS$BS" `
+    echo "      CreateShortCut \"$name.lnk\" \"$exe\""
+  fi
+  echo "    sec${n}_no:"
   ((n++))
 done
 
@@ -550,7 +578,7 @@ Section Uninstall
   SetOutPath "\"
 EOF
 
-array_lines outfiles | sort -r | tr '/' "$BS$BS" | \
+array_lines outfiles | sort -ru | tr '/' "$BS$BS" | \
   sed 's/.*/  Delete "$INSTDIR\\&"/'
 array_lines outfiles | xargs_dirname | sort -ru | tr '/' "$BS$BS" | \
   sed '$d; s/.*/  RMDir "$INSTDIR\\&"/'
@@ -558,7 +586,18 @@ array_lines outfiles | xargs_dirname | sort -ru | tr '/' "$BS$BS" | \
 cat << \EOF
   RMDir "$INSTDIR"
   Delete "$SMPROGRAMS\${PRODUCT_STARTMENU}\Uninstall.lnk"
-  Delete "$SMPROGRAMS\${PRODUCT_STARTMENU}\${PRODUCT_NAME}.lnk"
+EOF
+for i in "${sections[@]}"; do
+  if array_lines outfiles$n | grep '\.exe$' > /dev/null 2>&1; then
+    name='\$SMPROGRAMS\\\${PRODUCT_STARTMENU}\\${PRODUCT_NAME}'
+    if test $n != 1; then
+      name="$name $i"
+    fi
+    echo "  Delete \"$name.lnk\""
+  fi
+  ((n++))
+done
+cat << \EOF
   RMDir "$SMPROGRAMS\${PRODUCT_STARTMENU}"
   DeleteRegKey ${PRODUCT_UNINST_ROOT_KEY} "${PRODUCT_UNINST_KEY}"
 SectionEnd
