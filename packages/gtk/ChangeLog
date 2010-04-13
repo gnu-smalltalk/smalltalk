@@ -1,3 +1,8 @@
+2010-04-13  Paolo Bonzini  <bonzini@gnu.org>
+
+	* gst-gtk.c: Fix ordering of unlock and release.  Loop on
+	g_main_context_wait.
+
 2010-03-03  Gwenael Casaccio  <mrgwen@gmail.com>
 
 	* GtkImpl.st: Move acquire/dispatch/release to a single C call-out for

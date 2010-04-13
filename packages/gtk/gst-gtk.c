@@ -723,7 +723,7 @@ static void
 main_context_acquire_wait (GMainContext *context)
 {
   g_mutex_lock (mutex);
-  g_main_context_wait (context, cond, mutex);
+  while (!g_main_context_wait (context, cond, mutex));
 
   /* No need to keep the mutex except during g_main_context_acquire_wait
      and g_main_context_release_signal, i.e. except while we operate on
@@ -734,12 +734,12 @@ main_context_acquire_wait (GMainContext *context)
 static void
 main_context_release_signal (GMainContext *context)
 {
-  g_mutex_lock (mutex);
   g_main_context_release (context);
 
   /* Restart the polling thread.  Note that #iterate is asynchronous, so
      this might execute before the Smalltalk code finishes running!  This
      allows debugging GTK+ signal handlers.  */
+  g_mutex_lock (mutex);
   queued = false;
   g_cond_broadcast (cond_dispatch);
   g_mutex_unlock (mutex);
@@ -776,7 +776,7 @@ main_loop_thread (gpointer semaphore)
     {
       int nfds, maxprio, timeout;
 
-      g_main_context_wait (context, cond, mutex);
+      while (!g_main_context_wait (context, cond, mutex));
       g_main_context_prepare (context, &maxprio);
       while ((nfds = g_main_context_query (context, maxprio,
                                            &timeout, fds, allocated_nfds))
@@ -788,18 +788,21 @@ main_loop_thread (gpointer semaphore)
         }
 
       /* Release the context so that the other thread can dispatch while
-         this one polls.  */
-      g_main_context_release (context);
+         this one polls.  g_main_context_release unlocks the mutex for us.  */
       g_mutex_unlock (mutex);
+      g_main_context_release (context);
 
       g_poll (fds, nfds, timeout);
 
       g_mutex_lock (mutex);
-      g_main_context_wait (context, cond, mutex);
+      while (!g_main_context_wait (context, cond, mutex));
       g_main_context_check (context, maxprio, fds, nfds);
+      g_mutex_unlock (mutex);
+
       g_main_context_release (context);
 
       /* Dispatch on the other thread and wait for it to rendez-vous.  */
+      g_mutex_lock (mutex);
       queued = true;
       _gst_vm_proxy->asyncSignal (semaphoreOOP);
       
