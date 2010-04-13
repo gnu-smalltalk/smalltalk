@@ -899,14 +899,14 @@ RATransformation subclass: RAProjection [
 
 
 RATransformation subclass: RARange [
-    | interval |
+    | offset limit |
     
     <category: 'Roe-Relations-Core'>
     <comment: nil>
 
     RARange class >> of: aSource from: min to: max [
 	<category: 'instance creation'>
-	^self basicNew setSource: aSource interval: (min to: max)
+	^self basicNew setSource: aSource from: min to: max
     ]
 
     acceptRoeVisitor: aVisitor [
@@ -914,35 +914,31 @@ RATransformation subclass: RARange [
 	^aVisitor visitInterval: self
     ]
 
-    interval [
-	<category: 'accessing'>
-	^interval
-    ]
-
     limit [
 	<category: 'accessing-interval'>
-	^self interval size
+	^limit
     ]
 
     offset [
 	<category: 'accessing-interval'>
-	^self interval first - 1
+	^offset
     ]
 
-    setSource: aRelation interval: anInterval [
+    setSource: aRelation from: start to: stop [
 	<category: 'initializing'>
 	source := aRelation.
-	interval := anInterval
+	offset := start - 1.
+        limit := stop - start + 1
     ]
 
     start [
 	<category: 'accessing-interval'>
-	^self interval first
+	^offset + 1
     ]
 
     stop [
 	<category: 'accessing-interval'>
-	^self interval last
+	^offset + limit
     ]
 ]
 

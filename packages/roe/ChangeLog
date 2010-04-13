@@ -1,9 +1,14 @@
-2010-10-20  Nicolas Petton  <nicolas.petton@gmail.com>
+2010-04-13  Paolo Bonzini  <bonzini@gnu.org>
+
+	* Core.st: Do not store intervals, since #first and #last fail
+	when sent to an empty interval.
+
+2010-01-20  Nicolas Petton  <nicolas.petton@gmail.com>
 
 	* Array.st: Add #asArray to SQLRelation>>#for:do:, as RASimpleTuple
 	wants numeric indices.
 
-2010-10-20  Paolo Bonzini  <bonzini@gnu.org>
+2010-01-20  Paolo Bonzini  <bonzini@gnu.org>
 
 	* Array.st: Rename #sortBy: -> #sort:.
 

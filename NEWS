@@ -98,6 +98,10 @@ o   The old instance-based exception handling has been removed.  Standard
 
 o   Collection>>#anyOne gives an error if the receiver is empty.
 
+o   Interval>>#first and Interval>>#last give an error if the interval is
+    empty (i.e. if start > stop and the step is positive, or start < stop
+    and the step is negative).
+
 o   SequenceableCollection>>#sortBy: was renamed to #sort:.  The old message
     is _not_ provided for backwards-compatibility.
 
