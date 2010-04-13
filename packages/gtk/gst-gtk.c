@@ -722,20 +722,12 @@ static volatile gboolean queued;
 static void
 main_context_acquire_wait (GMainContext *context)
 {
-  g_mutex_lock (mutex);
   while (!g_main_context_wait (context, cond, mutex));
-
-  /* No need to keep the mutex except during g_main_context_acquire_wait
-     and g_main_context_release_signal, i.e. except while we operate on
-     cond.  */
-  g_mutex_unlock (mutex);
 }
 
 static void
-main_context_release_signal (GMainContext *context)
+main_context_signal (GMainContext *context)
 {
-  g_main_context_release (context);
-
   /* Restart the polling thread.  Note that #iterate is asynchronous, so
      this might execute before the Smalltalk code finishes running!  This
      allows debugging GTK+ signal handlers.  */
@@ -745,20 +737,35 @@ main_context_release_signal (GMainContext *context)
   g_mutex_unlock (mutex);
 }
 
+static GPollFD *fds;
+static int allocated_nfds, nfds;
+static int maxprio;
+
 static void
 main_context_iterate (GMainContext *context)
 {
+  g_mutex_lock (mutex);
+  if (!fds)
+    {
+      g_mutex_unlock (mutex);
+      return;
+    }
+
+  /* No need to keep the mutex except during g_main_context_acquire_wait
+     and g_main_context_release_signal, i.e. except while we operate on
+     cond.  */
   main_context_acquire_wait (context);
+  g_mutex_unlock (mutex);
+  g_main_context_check (context, maxprio, fds, nfds);
   g_main_context_dispatch (context);
-  main_context_release_signal (context);
+  g_main_context_release (context);
+  main_context_signal (context);
 }
 
 static gpointer
 main_loop_thread (gpointer semaphore)
 {
   OOP semaphoreOOP = semaphore;
-  static GPollFD *fds;
-  static int allocated_nfds;
   GMainContext *context = g_main_loop_get_context (loop);
 
   if (!fds)
@@ -774,9 +781,9 @@ main_loop_thread (gpointer semaphore)
   g_mutex_lock (mutex);
   while (g_main_loop_is_running (loop))
     {
-      int nfds, maxprio, timeout;
+      int timeout;
 
-      while (!g_main_context_wait (context, cond, mutex));
+      main_context_acquire_wait (context);
       g_main_context_prepare (context, &maxprio);
       while ((nfds = g_main_context_query (context, maxprio,
                                            &timeout, fds, allocated_nfds))
@@ -793,13 +800,6 @@ main_loop_thread (gpointer semaphore)
       g_main_context_release (context);
 
       g_poll (fds, nfds, timeout);
-
-      g_mutex_lock (mutex);
-      while (!g_main_context_wait (context, cond, mutex));
-      g_main_context_check (context, maxprio, fds, nfds);
-      g_mutex_unlock (mutex);
-
-      g_main_context_release (context);
 
       /* Dispatch on the other thread and wait for it to rendez-vous.  */
       g_mutex_lock (mutex);
