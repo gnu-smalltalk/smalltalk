@@ -1,3 +1,7 @@
+2010-04-15  Paolo Bonzini <bonzini@gnu.org>
+
+	* kernel/Regex.st: Fix printing a MatchingRegexResults.
+
 2010-04-11  Paolo Bonzini <bonzini@gnu.org>
 
 	* winewrapper.c: Work around spawnl(P_WAIT, "...") and system()

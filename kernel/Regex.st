@@ -302,7 +302,8 @@ RegexResults subclass: MatchingRegexResults [
 		[:each | 
 		aStream
 		    nextPut: ch;
-		    print: (self at: each)].
+		    print: (self at: each).
+                ch := $,].
 	self size > 0 ifTrue: [aStream nextPut: $)]
     ]
 
