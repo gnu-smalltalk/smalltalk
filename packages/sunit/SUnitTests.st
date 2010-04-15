@@ -249,6 +249,24 @@ if the tests are hard to write, something is probably wrong with the design".'>
 	    errors: 1
     ]
 
+    testExpectedFailures [
+        <category: 'Testing'>
+        | result suite expected failed error |
+	suite := TestSuite new.
+	suite addTest: (expected := SUnitClientTest selector: #generateExpectedFailure).
+	suite addTest: (failed := SUnitClientTest selector: #generateUnexpectedSuccess).
+	result := suite run.
+	self assert: (result expectedDefects includes: expected).
+	self assert: (result unexpectedPasses includes: failed).
+
+	self
+	    assertForTestResult: result
+	    runCount: 2
+	    passed: 1
+	    failed: 1
+	    errors: 0
+    ]
+
     assertForTestResult: aResult runCount: aRunCount passed: aPassedCount failed: aFailureCount errors: anErrorCount [
 	<category: 'Private'>
 	self
@@ -429,6 +447,21 @@ will run.'>
     setUp [
 	<category: 'Running'>
 	hasSetup := true
+    ]
+
+    expectedFailures [
+	<category: 'Private'>
+        ^#(#generateExpectedFailure #generateUnexpectedSuccess)
+    ]
+
+    generateExpectedFailure [
+	<category: 'Private'>
+        self assert: false
+    ]
+
+    generateUnexpectedSuccess [
+	<category: 'Private'>
+        self assert: true
     ]
 ]
 
