@@ -300,7 +300,7 @@ This is a Collecting Parameter for the running of a bunch of tests. TestResult i
 
     errors [
 	<category: 'Accessing'>
-	^errors
+	^self unexpectedErrors
     ]
 
     expectedDefectCount [
@@ -366,7 +366,7 @@ This is a Collecting Parameter for the running of a bunch of tests. TestResult i
 
     passed [
 	<category: 'Accessing'>
-	^passed
+	^self expectedPasses, self expectedDefects
     ]
 
     passedCount [
@@ -376,7 +376,7 @@ This is a Collecting Parameter for the running of a bunch of tests. TestResult i
 
     runCount [
 	<category: 'Accessing'>
-	^self passedCount + self failureCount + self errorCount
+	^passed size + failures size + errors size
     ]
 
     tests [
@@ -452,13 +452,16 @@ This is a Collecting Parameter for the running of a bunch of tests. TestResult i
 	aStream
 	    nextPutAll: self runCount printString;
 	    nextPutAll: ' run, ';
-	    nextPutAll: self passedCount printString;
-	    nextPutAll: ' passed, ';
-	    nextPutAll: self failureCount printString;
-	    nextPutAll: ' failed, ';
-	    nextPutAll: self errorCount printString;
-	    nextPutAll: ' error'.
-	self errorCount ~= 1 ifTrue: [aStream nextPut: $s]
+	    nextPutAll: self expectedPassCount printString;
+	    nextPutAll: ' passes, ';
+	    nextPutAll: self expectedDefectCount printString;
+	    nextPutAll: ' expected failures, ';
+	    nextPutAll: self unexpectedFailureCount printString;
+	    nextPutAll: ' failures, ';
+	    nextPutAll: self unexpectedErrorCount printString;
+	    nextPutAll: ' errors, ';
+	    nextPutAll: self unexpectedPassCount printString;
+	    nextPutAll: ' unexpected passes'
     ]
 ]
 

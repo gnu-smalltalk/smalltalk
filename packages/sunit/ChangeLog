@@ -1,5 +1,11 @@
 2010-04-15  Holger Hans Peter Freyther  <zecke@selfish.org>
 
+	* packages/sunit/SUnit.st: Change #errors, #passed,
+	#runCount and #printOn to handle expected failures and
+	unexpected success.
+
+2010-04-15  Holger Hans Peter Freyther  <zecke@selfish.org>
+
 	* packages/sunit/SUnit.st: Add selectors #expectedFailures,
 	#shouldPass to TestCase, add selectors #expectedDefectCount,
 	#expectedDefects, #expectedPassCount, #expectedPasses,

@@ -108,6 +108,8 @@ o   SequenceableCollection>>#sortBy: was renamed to #sort:.  The old message
 o   String>>#subStrings: accepts a single separator character or also, in
     accordance with ANSI, a String holding a list of separators.
 
+o   SUnit supports expected failures.
+
 o   The Continuations package provides delimited continuations via
     BlockClosure>>#shift and BlockClosure>>#reset.  Both methods accept
     a block (1-arg for shift, 0-arg for reset).
