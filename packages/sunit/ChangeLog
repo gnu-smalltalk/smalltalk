@@ -1,3 +1,8 @@
+2010-04-15  Holger Hans Peter Freyther  <zecke@selfish.org>
+
+	* packages/sunit/SUnit.st: Allocate passed, errors and failures
+	of TestResult inside the #initialize.
+
 2009-10-31  Paolo Bonzini  <bonzini@gnu.org>
 
 	* packages/sunit/SUnit.st: Set null logging when running #debug.

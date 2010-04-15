@@ -300,7 +300,6 @@ This is a Collecting Parameter for the running of a bunch of tests. TestResult i
 
     errors [
 	<category: 'Accessing'>
-	errors isNil ifTrue: [errors := Set new].
 	^errors
     ]
 
@@ -311,13 +310,11 @@ This is a Collecting Parameter for the running of a bunch of tests. TestResult i
 
     failures [
 	<category: 'Accessing'>
-	failures isNil ifTrue: [failures := Set new].
 	^failures
     ]
 
     passed [
 	<category: 'Accessing'>
-	passed isNil ifTrue: [passed := OrderedCollection new].
 	^passed
     ]
 
@@ -334,9 +331,9 @@ This is a Collecting Parameter for the running of a bunch of tests. TestResult i
     tests [
 	<category: 'Accessing'>
 	^(OrderedCollection new: self runCount)
-	    addAll: self passed;
-	    addAll: self errors;
-	    addAll: self failures;
+	    addAll: passed;
+	    addAll: errors;
+	    addAll: failures;
 	    yourself
     ]
 
@@ -372,7 +369,9 @@ This is a Collecting Parameter for the running of a bunch of tests. TestResult i
 
     initialize [
 	<category: 'Init / Release'>
-	
+	errors := Set new.
+	failures := Set new.
+	passed := OrderedCollection new.
     ]
 
     runCase: aTestCase [
@@ -385,16 +384,16 @@ This is a Collecting Parameter for the running of a bunch of tests. TestResult i
 		true] sunitOn: self class failure
 			do: 
 			    [:signal | 
-			    self failures add: aTestCase.
+			    failures add: aTestCase.
 			    signal sunitExitWith: false]] 
 			sunitOn: self class error
 			do: 
 			    [:signal | 
-			    (self errors includes: aTestCase) ifFalse: [aTestCase logError: signal].
-			    self errors add: aTestCase.
+			    (errors includes: aTestCase) ifFalse: [aTestCase logError: signal].
+			    errors add: aTestCase.
 			    signal sunitExitWith: false].
 	aTestCase logPolicy flush.
-	testCasePassed ifTrue: [self passed add: aTestCase]
+	testCasePassed ifTrue: [passed add: aTestCase]
     ]
 
     printOn: aStream [
