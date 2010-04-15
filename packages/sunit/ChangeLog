@@ -1,5 +1,14 @@
 2010-04-15  Holger Hans Peter Freyther  <zecke@selfish.org>
 
+	* packages/sunit/SUnit.st: Add selectors #expectedFailures,
+	#shouldPass to TestCase, add selectors #expectedDefectCount,
+	#expectedDefects, #expectedPassCount, #expectedPasses,
+	#unexpectedErrorCount, #unexpectedErrors, #unexpectedFailureCount,
+	#unexpectedFailures, #unexpectedPassCount, #unexpectedPasses to
+	TestClass.
+
+2010-04-15  Holger Hans Peter Freyther  <zecke@selfish.org>
+
 	* packages/sunit/SUnit.st: Allocate passed, errors and failures
 	of TestResult inside the #initialize.
 

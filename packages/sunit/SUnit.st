@@ -303,6 +303,57 @@ This is a Collecting Parameter for the running of a bunch of tests. TestResult i
 	^errors
     ]
 
+    expectedDefectCount [
+	<category: 'Accessing'>
+	^self expectedDefects size
+    ]
+
+    expectedDefects [
+	<category: 'Accessing'>
+	^errors , failures asOrderedCollection
+	    select: [:each | each shouldPass not]
+    ]
+
+    expectedPassCount [
+	<category: 'Accessing'>
+	^self expectedPasses size
+    ]
+
+    expectedPasses [
+	<category: 'Accessing'>
+	^passed select: [:each | each shouldPass]
+    ]
+
+    unexpectedErrorCount [
+	<category: 'Accessing'>
+	^self unexpectedErrors size
+    ]
+
+    unexpectedErrors [
+	<category: 'Accessing'>
+	^errors select: [:each | each shouldPass]
+    ]
+
+    unexpectedFailureCount [
+	<category: 'Accessing'>
+	^self unexpectedFailures size
+    ]
+
+    unexpectedFailures [
+	<category: 'Accessing'>
+	^failures select: [:each | each shouldPass]
+    ]
+
+    unexpectedPassCount [
+	<category: 'Accessing'>
+	^self unexpectedPasses size
+    ]
+
+    unexpectedPasses [
+	<category: 'Accessing'>
+	^passed select: [:each | each shouldPass not]
+    ]
+
     failureCount [
 	<category: 'Accessing'>
 	^self failures size
@@ -984,6 +1035,18 @@ When you are writing a test case method, send #assert: aBoolean when you want to
     tearDown [
 	<category: 'Running'>
 	
+    ]
+
+    expectedFailures [
+	<category: 'Testing'>
+	^Array new
+    ]
+
+    shouldPass [
+	"Unless the selector is in the list we get from #expectedFailures, we expect it to pass"
+
+	<category: 'Testing'>
+	^(self expectedFailures includes: testSelector) not
     ]
 
     executeShould: aBlock inScopeOf: anExceptionalEvent [
