@@ -146,8 +146,6 @@ static input_stream in_stream = NULL;
    POLLHUP) and then perform a read system call.  */
 static int poll_and_read (int fd, char *buf, int n);
 
-static int change_str = -1;
-
 
 /* If true, readline is disabled.  */
 mst_Boolean _gst_no_tty = false;
@@ -750,10 +748,6 @@ _gst_next_char (void)
   else
     {
       ic = my_getc (in_stream);
-
-      if (change_str != -1)
-	_gst_full_write (change_str, &ic, 1);
-
       if (ic == '\n')
 	{			/* a new line that was not pushed back */
 	  in_stream->line++;

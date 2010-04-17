@@ -1,3 +1,7 @@
+2010-04-17  Paolo Bonzini  <bonzini@gnu.org>
+
+	* input.c: Remove dead code.
+
 2010-04-11  Paolo Bonzini  <bonzini@gnu.org>
 
 	* libgst/sysdep/win32/events.c: Ahem, this really could not work.
