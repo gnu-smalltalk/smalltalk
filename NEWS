@@ -2,101 +2,13 @@ List of user-visible changes in GNU Smalltalk
 
 NEWS FROM 3.1 TO 3.2
 
+Backwards-incompatible bug fixes and changes:
+
+o   Collection>>#anyOne gives an error if the receiver is empty.
+
 o   "aNumber raisedToInteger: 0" will raise an exception if and only if
     aNumber is not a floating-point value.  This was backwards in previous
     versions.
-
-o   Packages can be downloaded and updated directly from the network.  The
-    repository of packages is at http://smalltalk.gnu.org/project; the
-    repository holds the location of the package.xml files, which point to
-    the svn or git URL of the code.
-
-    In order to download a package with git, version 1.6.2 is required.
-
-o   Fixed crash on omitting mandatory arguments of short options
-
-o   Support for one-way become (Object>>#becomeForward:)
-
-o   Fixed ##() expressions that return a block
-
-o   Many many fixes to the Windows port.
-
-o   EPIPE is handled correctly.
-
-o   The Complex package uses numerically stable algorithms
-
-o   Speedups for hashed collections
-
-o   The Transcript now uses a RecursionLock.  This fixes crashes when
-    an exception occurred while printing a backtrace.
-
-o   Many improvements to the Gtk bindings.
-
-o   The Sockets package failed to initialize when the machine was not
-    connected to the network; this has been fixed.
-
-o   Floating-point rounding to integer is now correct also for very
-    large numbers; fix contributed by Nicolas Cellier.
-
-o   Floating-point numbers are now read correctly.
-
-o   Swazoo upgraded to version 2.2, plus local fixes.
-
-o   Code running as a Generator now honor exception handlers outside the
-    Generator block.
-
-o   GNU Smalltalk now does not rely anymore on specific (old) versions
-    of libtool.
-
-o   GNU Smalltalk tries to enable Emacs modes automatically on systems
-    that support a site-lisp/site-start.d directory.
-
-o   gst-convert can emit Squeak fileouts.
-
-o   Methods have been added to Integer to print numbers with padding
-    to a specified width.
-
-o   The millisecond clock uses CLOCK_MONOTONIC where available.
-
-o   NetClients supports ESMTP commands.
-
-o   REPL autocompletion includes all symbols including unary messages
-    (and variable names).
-
-o   Running on kernels without SOCK_CLOEXEC support will not fail
-    even if the VM was compiled on a kernel that supported it.
-
-o   In idle times, GNU Smalltalk will perform incremental garbage
-    collection.
-
-o   Fixed copying of Dictionary to not share the underlying associations.
-
-o   Fixes in garbage collection heuristics provide improved performance on
-    programs allocating many long-lived objects.  Contributed by Derek Zhou.
-
-o   New FilePath methods #owner:, #group:, #owner:group: allow setting
-    a file's owner and group.
-
-o   New goodie, the SandstoneDb object persistence framework.
-
-o   New graphical interface VisualGST, loaded with gst-browser.  The old
-    browser is still available, but obsolete.
-
-o   New ProfilerTools package for callgraph profiling of Smalltalk programs.
-    A companion gst-profile tool will create profiles in callgrind-compatible
-    format.  Contributed by Derek Zhou.
-
-o   Process-local variables are now stored in an IdentityDictionary rather
-    than a LookupTable.
-
-o   Sending mode, file time and owner setters to a recursive directory
-    decorator (such as `Directory working all') sets the mode/time/owner
-    on all files under the path.
-
-o   The old instance-based exception handling has been removed.  Standard
-    ANSI class-based exceptions have been available since GNU Smalltalk 1.8.2.
-
-o   Collection>>#anyOne gives an error if the receiver is empty.
 
 o   Interval>>#first and Interval>>#last give an error if the interval is
     empty (i.e. if start > stop and the step is positive, or start < stop
@@ -105,28 +17,103 @@ o   Interval>>#first and Interval>>#last give an error if the interval is
 o   SequenceableCollection>>#sortBy: was renamed to #sort:.  The old message
     is _not_ provided for backwards-compatibility.
 
-o   String>>#subStrings: accepts a single separator character or also, in
-    accordance with ANSI, a String holding a list of separators.
-
-o   SUnit supports expected failures.
-
-o   The Continuations package provides delimited continuations via
-    BlockClosure>>#shift and BlockClosure>>#reset.  Both methods accept
-    a block (1-arg for shift, 0-arg for reset).
-
 o   The semantics of recursive directory descent were adjusted as follows:
     1) the '.' and '..' directory entries are not passed; 2) for #do:, the
     file is passed directly (3.1 used to pass another recursive decorator);
     3) before the descent starts, the directory itself is passed to the block.
+
+o   The XML parser will ignore whitespace if placed in non-validating mode.
+
+o   The suggested way to instantiate an XML parser is now using
+    "SAXParser defaultParserClass", which will work with either of the
+    two available parsers (the existing Smalltalk parsers, and the Expat
+    bindings; see below).
+
+
+New features (base classes):
+
+o   Floating-point rounding to integer is now correct also for very
+    large numbers; fix contributed by Nicolas Cellier.
+
+o   Methods have been added to Integer to print numbers with padding
+    to a specified width.
+
+o   New FilePath methods #owner:, #group:, #owner:group: allow setting
+    a file's owner and group.
+
+o   Sending mode, file time and owner setters to a recursive directory
+    decorator (such as `Directory working all') sets the mode/time/owner
+    on all files under the path.
+
+o   Speedups for hashed collections
+
+o   String>>#subStrings: accepts a single separator character or also, in
+    accordance with ANSI, a String holding a list of separators.
+
+o   The old instance-based exception handling has been removed.  Standard
+    ANSI class-based exceptions have been available since GNU Smalltalk 1.8.2.
 
 o   The text-based #inspect method is now available also as
     Object>>#examine and Object>>#examineOn:, so that it will also work
     on arbitrary streams and will be available when a GUI is loaded.
     Contributed by Stefan Schmiedl.
 
-o   The VM has 0% CPU usage when no process is active.
 
-o   The XML parser will ignore whitespace if placed in non-validating mode.
+New features (tools):
+
+o   gst-convert can emit Squeak fileouts.
+
+o   New graphical interface VisualGST, loaded with gst-browser.  The old
+    browser is still available, but obsolete.
+
+o   New ProfilerTools package for callgraph profiling of Smalltalk programs.
+    A companion gst-profile tool will create profiles in callgrind-compatible
+    format.  Contributed by Derek Zhou.
+
+o   Packages can be downloaded and updated directly from the network.  The
+    repository of packages is at http://smalltalk.gnu.org/project; the
+    repository holds the location of the package.xml files, which point to
+    the svn or git URL of the code.
+
+    In order to download a package with git, version 1.6.2 is required.
+
+o   SUnit supports expected failures.
+
+
+New features (VM):
+
+o   Fixes in garbage collection heuristics provide improved performance on
+    programs allocating many long-lived objects.  Contributed by Derek Zhou.
+
+o   Floating-point numbers are now read correctly.
+
+o   In idle times, GNU Smalltalk will perform incremental garbage
+    collection.  When it finishes, GNU Smalltalk will consume zero CPU.
+
+o   Mostly rewritten Windows port.  It should mostly work except for
+    sockets.  The socket code will be rewritten (for all platforms)
+    for 3.3 anyway.
+
+o   Support for one-way become (Object>>#becomeForward:)
+
+o   The millisecond clock uses CLOCK_MONOTONIC where available.
+
+
+New features (packages):
+
+o   Many improvements to the Gtk bindings.
+
+o   NetClients supports ESMTP commands.
+
+o   New goodie, the SandstoneDb object persistence framework.
+
+o   Swazoo upgraded to version 2.2, plus local fixes.
+
+o   The Complex package uses numerically stable algorithms
+
+o   The Continuations package provides delimited continuations via
+    BlockClosure>>#shift and BlockClosure>>#reset.  Both methods accept
+    a block (1-arg for shift, 0-arg for reset).
 
 o   An XML pull parser is included as package XML-PullParser.  The package
     is based on the VisualWorks and Squeak pull parsers by Anthony Blakey
@@ -137,9 +124,42 @@ o   In addition to the validating XML parser, a non-validating Expat-based
     experimental, but it is very fast and supports both pull and push
     operation.
 
-o   The suggested way to instantiate an XML parser is now using
-    "SAXParser defaultParserClass", which will work with either of the
-    two available parsers.
+
+Bug fixes:
+
+o   Code running as a Generator now honors exception handlers outside the
+    Generator block.
+
+o   Fixed copying of Dictionary to not share the underlying associations.
+
+o   Fixed ##() expressions that return a block
+
+o   EPIPE is handled correctly.
+
+o   Running on kernels without SOCK_CLOEXEC support will not fail
+    even if the VM was compiled on a kernel that supported it.
+
+o   The Sockets package failed to initialize when the machine was not
+    connected to the network; this has been fixed.
+
+o   The Transcript now uses a RecursionLock.  This fixes crashes when
+    an exception occurred while printing a backtrace.
+
+
+Miscellaneous:
+
+o   GNU Smalltalk now does not rely anymore on specific (old) versions
+    of libtool.
+
+o   GNU Smalltalk tries to enable Emacs modes automatically on systems
+    that support a site-lisp/site-start.d directory.
+
+o   REPL autocompletion includes all symbols including unary messages
+    (and variable names).
+
+o   Process-local variables are now stored in an IdentityDictionary rather
+    than a LookupTable.
+
 
 -----------------------------------------------------------------------------
 
