@@ -1,5 +1,9 @@
 2010-04-11  Paolo Bonzini  <bonzini@gnu.org>
 
+	* libgst/sysdep/win32/events.c: Ahem, this really could not work.
+
+2010-04-11  Paolo Bonzini  <bonzini@gnu.org>
+
 	* libgst/cint.c: Fix warnings on platforms with no lstat.
 
 2010-03-25  Paolo Bonzini  <bonzini@gnu.org>

@@ -193,6 +193,30 @@ fhev_new (HANDLE handle, enum fhev_kind kind)
   return ev;
 }
 
+static int
+poll_console_input (HANDLE fh)
+{
+  DWORD avail, nbuffer;
+  INPUT_RECORD *irbuffer;
+  BOOL bRet;
+  int i;
+
+  bRet = GetNumberOfConsoleInputEvents (fh, &nbuffer);
+  if (!bRet || nbuffer == 0)
+    return 0;
+
+  irbuffer = (INPUT_RECORD *) alloca (nbuffer * sizeof (INPUT_RECORD));
+  bRet = PeekConsoleInput (fh, irbuffer, nbuffer, &avail);
+  if (!bRet || avail == 0)
+    return 0;
+
+  for (i = 0; i < avail; i++)
+    
+    if (irbuffer[i].EventType == KEY_EVENT)
+      return 1;
+  return 0;
+}
+
 int
 fhev_poll (struct handle_events *ev)
 {
@@ -274,30 +298,29 @@ signal_semaphores (struct handle_events *ev, LONG lEvents)
     else
       pprev = &node->next;
 }
-
-int
-poll_console_input (HANDLE fh)
-{
-  DWORD avail, nbuffer;
-  INPUT_RECORD *irbuffer;
-  BOOL bRet;
-  int i;
-
-  bRet = GetNumberOfConsoleInputEvents (fh, &nbuffer);
-  if (!bRet || nbuffer == 0)
-    return 0;
-
-  irbuffer = (INPUT_RECORD *) alloca (nbuffer * sizeof (INPUT_RECORD));
-  bRet = PeekConsoleInput (fh, irbuffer, nbuffer, &avail);
-  if (!bRet || avail == 0)
-    return 0;
-
-  for (i = 0; i < avail; i++)
-    if (irbuffer[i].EventType == KEY_EVENT)
-      return 1;
-  return 0;
-}
 	  
+static unsigned
+WaitForMultipleObjectsDispatchMsg (int nhandles, HANDLE *handles,
+				   BOOLEAN bWaitAll, DWORD dwTimeout,
+				   DWORD qsMask)
+{
+  DWORD ret;
+  ret = MsgWaitForMultipleObjects (nhandles, handles, FALSE,
+                                   INFINITE, QS_ALLINPUT);
+  if (ret == WAIT_OBJECT_0 + nhandles)
+    {
+      /* new input of some other kind */
+      BOOL bRet;
+      MSG msg;
+      while ((bRet = PeekMessage (&msg, NULL, 0, 0, PM_REMOVE)) != 0)
+        {
+          TranslateMessage (&msg);
+          DispatchMessage (&msg);
+        }
+    }
+  return ret;
+}
+
 static unsigned WINAPI
 polling_thread (LPVOID unused)
 {
@@ -311,21 +334,7 @@ polling_thread (LPVOID unused)
       int nhandles;
       
       nhandles = hConIn ? 3 : 2;
-      ret = MsgWaitForMultipleObjects (nhandles, handles, FALSE,
-                                       INFINITE, QS_ALLINPUT);
-      if (ret == WAIT_OBJECT_0 + nhandles)
-	{
-	  /* new input of some other kind */
-          BOOL bRet;
-	  MSG msg;
-          while ((bRet = PeekMessage (&msg, NULL, 0, 0, PM_REMOVE)) != 0)
-            {
-              TranslateMessage (&msg);
-              DispatchMessage (&msg);
-            }
-	  continue;
-	}
-
+      ret = WaitForMultipleObjects (nhandles, handles, FALSE, INFINITE);
       h = &handles[ret - WAIT_OBJECT_0];
       EnterCriticalSection (&handle_events_cs);
       if (h == &hSocketEvent)
@@ -378,15 +387,14 @@ polling_thread (LPVOID unused)
 
       else
 	{
-	  assert (hConIn);
-	  if (!poll_console_input (hConIn))
-	    continue;
-	  assert (*h == hConIn);
-
-	  ev = fhev_find (*h);
-	  assert (ev);
-	  signal_semaphores (ev, FD_READ | FD_WRITE);
-	  fhev_unref (ev);
+	  if (poll_console_input (hConIn))
+            {
+              assert (hConIn && *h == hConIn);
+              ev = fhev_find (*h);
+              assert (ev);
+              signal_semaphores (ev, FD_READ | FD_WRITE);
+              fhev_unref (ev);
+            }
 	}
       LeaveCriticalSection (&handle_events_cs);
     }
@@ -398,7 +406,6 @@ _gst_init_async_events (void)
 {
   extern HANDLE WINAPI GetConsoleInputWaitHandle (void);
   DWORD dummy;
-  int i;
 
   /* Starts as non-signaled, so alarm_thread will wait */
   InitializeCriticalSection (&handle_events_cs);
@@ -514,11 +521,12 @@ _gst_get_fd_error (int fd)
 void
 _gst_pause (void)
 {
-  /* Doing an async call between the _gst_have_pending_async_calls
-     and WFSO will set the event again, so that WFSO exits immediately.  */
+  /* Doing an async call between the _gst_have_pending_async_calls and the
+     wait will set the event again, so the wait will exit immediately.  */
   ResetEvent (hWakeUpEvent);
   if (!_gst_have_pending_async_calls ())
-    WaitForSingleObject (hWakeUpEvent, INFINITE);
+    WaitForMultipleObjectsDispatchMsg (1, &hWakeUpEvent, FALSE,
+                                       INFINITE, QS_ALLINPUT);
 }
 
 void
@@ -551,11 +559,13 @@ _gst_async_file_polling (int fd,
     {
       _gst_set_errno (ev->error);
       fhev_unref (ev);
+      LeaveCriticalSection (&handle_events_cs);
       return -1;
     }
   else if ((lEvents & masks[cond]) != 0)
     {
       fhev_unref (ev);
+      LeaveCriticalSection (&handle_events_cs);
       return 1;
     }
 
@@ -579,9 +589,9 @@ _gst_wait_for_input (int fd)
   DWORD dummy;
   if (GetConsoleMode (h, &dummy) != 0)
     {
-      /* The polling thread takes care of messages.  */
       while (!poll_console_input (h))
-	WaitForSingleObject (hConIn, INFINITE);
+        WaitForMultipleObjectsDispatchMsg (1, &h, FALSE,
+                                           INFINITE, QS_ALLINPUT);
     }
 }
 
