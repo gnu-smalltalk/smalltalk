@@ -304,7 +304,7 @@ fix_sockaddr (struct sockaddr *sockaddr)
 }
 
 /* Same as connect, but forces the socket to be in non-blocking mode */
-static void
+static int
 myConnect (int fd, struct sockaddr *sockaddr, int len)
 {
   SOCKET sock = FD_TO_SOCKET (fd);
@@ -335,7 +335,9 @@ myConnect (int fd, struct sockaddr *sockaddr, int len)
   fix_sockaddr (sockaddr);
   connect (sock, sockaddr, len);
   if (is_socket_error (EINPROGRESS) || is_socket_error (EWOULDBLOCK))
-    errno = 0;
+    return 0;
+  else
+    return -1;
 }
 
 static int

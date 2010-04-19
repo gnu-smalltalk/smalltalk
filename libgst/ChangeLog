@@ -1,6 +1,10 @@
+2010-04-19  Paolo Bonzini  <bonzini@gnu.org>
+
+	* libgst/sockets.c: Make connect return int.
+
 2010-04-17  Paolo Bonzini  <bonzini@gnu.org>
 
-	* input.c: Remove dead code.
+	* libgst/input.c: Remove dead code.
 
 2010-04-11  Paolo Bonzini  <bonzini@gnu.org>
 
