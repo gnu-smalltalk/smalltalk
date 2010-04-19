@@ -48,7 +48,7 @@ GtkConcreteWidget subclass: GtkTranscriptWidget [
     update: aString [
 	<category: 'updating'>
 
-	textview getBuffer insertAtEnd: aString
+	textview getBuffer insertAtEnd: aString displayString
     ]
 
     clear [

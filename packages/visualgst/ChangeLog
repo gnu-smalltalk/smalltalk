@@ -1,3 +1,7 @@
+2010-04-19  Paolo Bonzini  <bonzini@gnu.org>
+
+	* GtkTranscriptWidget: Convert what is #show:-ed to a string.
+
 2010-03-03  Gwenael Casaccio  <mrgwen@gmail.com>
 
 	* Debugger/GtkDebugger.st: Remove class check before #detach.
