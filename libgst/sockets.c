@@ -308,6 +308,8 @@ static int
 myConnect (int fd, struct sockaddr *sockaddr, int len)
 {
   SOCKET sock = FD_TO_SOCKET (fd);
+  int rc;
+
 #ifdef __MSVCRT__
   unsigned long iMode = 1;
   ioctlsocket (sock, FIONBIO, &iMode);
@@ -333,8 +335,8 @@ myConnect (int fd, struct sockaddr *sockaddr, int len)
 #endif
   
   fix_sockaddr (sockaddr);
-  connect (sock, sockaddr, len);
-  if (is_socket_error (EINPROGRESS) || is_socket_error (EWOULDBLOCK))
+  rc = connect (sock, sockaddr, len);
+  if (rc == 0 || is_socket_error (EINPROGRESS) || is_socket_error (EWOULDBLOCK))
     return 0;
   else
     return -1;

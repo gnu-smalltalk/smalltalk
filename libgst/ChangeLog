@@ -1,3 +1,7 @@
+2010-04-21  Paolo Bonzini  <bonzini@gnu.org>
+
+	* libgst/sockets.c: Fix previous commit.
+
 2010-04-19  Paolo Bonzini  <bonzini@gnu.org>
 
 	* libgst/sockets.c: Make connect return int.
