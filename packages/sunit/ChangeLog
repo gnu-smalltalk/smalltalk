@@ -1,3 +1,7 @@
+2010-04-21  Paolo Bonzini  <bonzini@gnu.org>
+
+	* packages/sunit/SUnit.st: Change #printOn: to be less verbose.
+
 2010-04-15  Holger Hans Peter Freyther  <zecke@selfish.org>
 
 	* packages/sunit/SUnitTest.st: Add testcase for expected failures
@@ -6,7 +10,7 @@
 2010-04-15  Holger Hans Peter Freyther  <zecke@selfish.org>
 
 	* packages/sunit/SUnit.st: Change #errors, #passed,
-	#runCount and #printOn to handle expected failures and
+	#runCount and #printOn: to handle expected failures and
 	unexpected success.
 
 2010-04-15  Holger Hans Peter Freyther  <zecke@selfish.org>

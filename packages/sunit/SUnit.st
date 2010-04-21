@@ -451,17 +451,32 @@ This is a Collecting Parameter for the running of a bunch of tests. TestResult i
 	<category: 'Printing'>
 	aStream
 	    nextPutAll: self runCount printString;
-	    nextPutAll: ' run, ';
-	    nextPutAll: self expectedPassCount printString;
-	    nextPutAll: ' passes, ';
-	    nextPutAll: self expectedDefectCount printString;
-	    nextPutAll: ' expected failures, ';
-	    nextPutAll: self unexpectedFailureCount printString;
-	    nextPutAll: ' failures, ';
-	    nextPutAll: self unexpectedErrorCount printString;
-	    nextPutAll: ' errors, ';
-	    nextPutAll: self unexpectedPassCount printString;
-	    nextPutAll: ' unexpected passes'
+	    nextPutAll: ' run'.
+        self expectedPassCount > 0 ifTrue: [
+            aStream
+                nextPutAll: ', ';
+	        nextPutAll: self expectedPassCount printString;
+	        nextPutAll: ' passes' ].
+        self expectedDefectCount > 0 ifTrue: [
+            aStream
+                nextPutAll: ', ';
+	        nextPutAll: self expectedDefectCount printString;
+	        nextPutAll: ' expected failures' ].
+        self unexpectedFailureCount > 0 ifTrue: [
+            aStream
+                nextPutAll: ', ';
+	        nextPutAll: self unexpectedFailureCount printString;
+	        nextPutAll: ' failures' ].
+        self unexpectedErrorCount > 0 ifTrue: [
+            aStream
+                nextPutAll: ', ';
+	        nextPutAll: self unexpectedErrorCount printString;
+	        nextPutAll: ' errors' ].
+        self unexpectedPassCount > 0 ifTrue: [
+            aStream
+                nextPutAll: ', ';
+	        nextPutAll: self unexpectedPassCount printString;
+	        nextPutAll: ' unexpected passes' ]
     ]
 ]
 
