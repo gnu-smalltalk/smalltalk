@@ -61,7 +61,7 @@ nodist_pkgconfig_DATA = gnu-smalltalk.pc
 
 module_DATA = libc.la
 noinst_DATA = gst.im
-dist_noinst_DATA += smalltalk-mode-init.el.in gst-mode.el.in
+dist_noinst_DATA += smalltalk-mode-init.el.in gst-mode.el.in \
 	.gdbinit scripts/Finish.st gsticon.ico packages/xml/ChangeLog \
 	packages/seaside/PORTING
 
