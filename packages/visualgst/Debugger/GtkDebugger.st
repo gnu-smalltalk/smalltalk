@@ -180,7 +180,7 @@ THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.';
 	    {'<Control><Shift>S'. '<GtkDebugger>/File/SaveAs'. self. #saveAs}.
 	    {'<Control>Q'. '<GtkDebugger>/File/Close'. self. #close}}.
 
-	^ self createNewMenuEntry: {GTK.GtkMenuItem menuItem: 'New worskpace' connectTo: self selector: #newWorkspace.
+	^ self createNewMenuEntry: {GTK.GtkMenuItem menuItem: 'New workspace' connectTo: self selector: #newWorkspace.
             GTK.GtkMenuItem new.
 	    GTK.GtkMenuItem menuItem: 'Open' accelPath: '<GtkDebugger>/File/Open'.
             GTK.GtkMenuItem menuItem: 'Save' accelPath: '<GtkDebugger>/File/Save'.

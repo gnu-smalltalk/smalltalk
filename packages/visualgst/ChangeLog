@@ -1,3 +1,9 @@
+2010-05-02  Paolo Bonzini  <bonzini@gnu.org>
+
+	* packages/visualgst/Debugger/GtkDebugger.st: Fix misspelling.
+	* packages/visualgst/GtkAssistant.st: Fix misspelling.
+	* packages/visualgst/VisualGST.st: Fix misspelling.
+
 2010-04-19  Paolo Bonzini  <bonzini@gnu.org>
 
 	* GtkTranscriptWidget: Convert what is #show:-ed to a string.
