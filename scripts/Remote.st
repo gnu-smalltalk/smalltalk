@@ -94,6 +94,7 @@ Options:
        --stop=PACKAGE[:DATA]  load package and stop it (defined in package.xml)
        --pid                  print daemon pid
     -h --help                 show this message
+    -v --verbose              print extra information while processing
        --version              print version information and exit
 
 If a remote login name is given, gst-remote will use the SSH environment
@@ -106,7 +107,8 @@ available in the PATH of the remote machine.
 [Smalltalk
     arguments: '-h|--help --version --daemon --server -p|--port: -f|--file:
 		-e|--eval: --pid --kill --snapshot:: --start: --stop:
-		-l|--login: --package: -I|--image: --kernel-directory:'
+		-l|--login: --package: -I|--image: --kernel-directory:
+		-v|-V|--verbose'
     do: [ :opt :arg |
 
     opt = 'help' ifTrue: [
@@ -172,6 +174,10 @@ available in the PATH of the remote machine.
 	    ifTrue: [ commands add: 'ObjectMemory snapshot' ]
 	    ifFalse: [ commands add: 'ObjectMemory snapshot: ',
 			     (Directory working / arg) name storeString ] ].
+
+    opt = 'verbose' ifTrue: [
+	OutputVerbosity := 1.
+	FileStream verbose: true ].
 
     opt isNil ifTrue: [
 	host isNil ifFalse: [ self error: 'multiple hosts are invalid' ].

@@ -7,7 +7,7 @@
 
 /***********************************************************************
  *
- * Copyright 2007, 2008, 2009 Free Software Foundation, Inc.
+ * Copyright 2007, 2008, 2009, 2010 Free Software Foundation, Inc.
  * Written by Paolo Bonzini.
  *
  * This file is part of GNU Smalltalk.
@@ -106,7 +106,7 @@ const struct tool tools[] = {
   },
   {
     "gst-package", "scripts/Package.st",
-    "-h|--help --version --load --no-load --no-install --uninstall --dist \
+    "-h|--help --version -v|-V|--verbose --load --no-load --no-install --uninstall --dist \
         --prepare --test -t|--target-directory: --list-files: --list-packages \
         --srcdir: --distdir|--destdir: --copy --all-files --vpath -n|--dry-run \
         -I|--image-file: --kernel-directory: --update|--download ",
@@ -120,31 +120,31 @@ const struct tool tools[] = {
   },
   {
     "gst-browser", "scripts/Load.st",
-    "-I|--image-file: --kernel-directory:",
+    "-I|--image-file: --kernel-directory: -v|-V|--verbose",
     "--dry-run\0--start\0Browser\0", false
   },
   {
     "gst-blox", "scripts/Load.st",
-    "-I|--image-file: --kernel-directory:",
+    "-I|--image-file: --kernel-directory: -v|-V|--verbose",
     "--dry-run\0--start\0BLOXBrowser\0", false
   },
   {
     "gst-doc", "scripts/GenDoc.st",
     "-h|--help --version -p|--package: -f|--file: -I|--image-file: \
-        -n|--namespace: -o|--output: --kernel-directory: -F|--output-format:",
+        -n|--namespace: -o|--output: --kernel-directory: -F|--output-format: -v|-V|--verbose",
     NULL, true
   },
   {
     "gst-remote", "scripts/Remote.st",
     "-h|--help --version --daemon --server -p|--port: -f|--file: -e|--eval: \
  	-l|--login: --package: --start: --stop: --pid --kill --snapshot:: \
-	-I|--image-file: --kernel-directory:",
+	-I|--image-file: --kernel-directory: -v|-V|--verbose",
     NULL, true
   },
   {
     "gst-profile", "scripts/Profile.st",
     "-f|--file: -e|--eval: -o|--output: -h|--help --version \
-	--no-separate-blocks",
+	--no-separate-blocks -v|-V|--verbose",
     NULL, true
   },
 

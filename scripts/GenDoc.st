@@ -49,6 +49,7 @@ Options:
        --kernel-dir=PATH  use the specified kernel directory
     -F --output-format=KIND   use the given publisher (HTML or default=Texinfo)
     -h --help             show this message
+    -v --verbose          print extra information while processing
        --version          print version information and exit
 
 '.
@@ -60,7 +61,8 @@ Options:
     "Parse the command-line arguments."
     Smalltalk
         arguments: '-h|--help --version -p|--package: -f|--file: -n|--namespace:
-                    -I|--image-file: -o|--output: --kernel-directory: -F|--output-format:'
+                    -I|--image-file: -o|--output: --kernel-directory: -F|--output-format:
+		    -v|-V|--verbose'
         do: [ :opt :arg |
 
         opt = 'help' ifTrue: [
@@ -112,6 +114,10 @@ Options:
                     arg asLowercase = 'texinfo'
                         ifTrue: [ publisher:= STInST.TexinfoDocPublisher ]
                         ifFalse: [ self error: 'unknown --output-format arg' ] ] ].
+
+	opt = 'verbose' ifTrue: [
+	    OutputVerbosity := 1.
+	    FileStream verbose: true ].
 
         opt isNil ifTrue: [ classPatterns add: arg ] ]
 

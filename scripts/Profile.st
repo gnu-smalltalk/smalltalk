@@ -49,6 +49,7 @@ Options:
     -e --eval=CODE            evaluate CODE
     -o --output=FILE          output file for callgrind_annotate
     -h --help                 show this message
+    -v --verbose              print extra information while processing
        --no-separate-blocks   do not track blocks separately
        --version              print version information and exit
 
@@ -61,7 +62,7 @@ or --eval options.
 "Parse the command-line arguments."
 [Smalltalk
     arguments: '-f|--file: -e|--eval: -o|--output: -h|--help --version
-		--no-separate-blocks'
+		--no-separate-blocks -v|-V|--verbose'
     do: [ :opt :arg |
 
     opt = 'help' ifTrue: [
@@ -84,6 +85,11 @@ or --eval options.
 
     opt = 'eval' ifTrue: [
 	commands add: arg ].
+
+    opt = 'verbose' ifTrue: [
+	OutputVerbosity := 1.
+	FileStream verbose: true
+    ].
 
     opt isNil ifTrue: [
 	last isNil

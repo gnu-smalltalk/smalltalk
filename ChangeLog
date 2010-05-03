@@ -1,3 +1,11 @@
+2010-05-03  Holger Hans Peter Freyther <zecke@selfish.org>
+
+	* gst-tool.c: Add -v|-V|--verbose to all tools.
+	* scripts/Package.st: Handle the verbose option.
+	* scripts/GenDoc.st: Likewise.
+	* scripts/Profile.st: Likewise.
+	* scripts/Remote.st: Likewise.
+
 2010-04-15  Paolo Bonzini <bonzini@gnu.org>
 
 	* kernel/Regex.st: Fix printing a MatchingRegexResults.

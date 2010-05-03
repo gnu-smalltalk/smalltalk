@@ -482,7 +482,7 @@ Object subclass: Command [
 
     isValidOption: aString [
 	^#('srcdir' 'target-directory' 'destdir' 'image-file'
-	   'dry-run' 'kernel-directory') includes: aString
+	   'dry-run' 'kernel-directory' 'verbose') includes: aString
     ]
 
     isOption: aString [ ^options includesKey: aString ]
@@ -1100,6 +1100,7 @@ Common suboptions:
         --target-directory DIR  install the files in DIR (unused for --dist)
     -I, --image-file=FILE       load into the specified image
         --kernel-dir=PATH       use the specified kernel directory
+    -v, --verbose               print extra information while processing
 
 --install suboptions:
 	--test                  run unit tests after merging
@@ -1147,7 +1148,7 @@ The default target directory is ', Directory image name, '
                 --dist -t|--target-directory: --list-files: --list-packages
                 --prepare --srcdir: --distdir|--destdir: -n|--dry-run
 		--all-files --vpath --copy -I|--image-file: --kernel-directory:
-		--update|--download --version'
+		--update|--download --version -v|-V|--verbose'
 
             do: [ :opt :arg || modeClass |
 	        opt = 'help' ifTrue: [
@@ -1156,6 +1157,10 @@ The default target directory is ', Directory image name, '
 	        opt = 'version' ifTrue: [
 		    ('gst-package - %1' % {Smalltalk version}) displayNl.
 		    ObjectMemory quit: 0 ].
+
+		opt = 'verbose' ifTrue: [
+		    OutputVerbosity := 1.
+		    FileStream verbose: true ].
 
 		modeClass := self class classForMode: opt.
 		modeClass notNil ifTrue: [ self mode: modeClass ].
