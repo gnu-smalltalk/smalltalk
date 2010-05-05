@@ -14,7 +14,7 @@ MAINTAINER="bonzini@gnu.org"
 dnl CURRENT:REVISION:AGE means this is the REVISION-th version of
 dnl the CURRENT-th interface; all the interface from CURRENT-AGE
 dnl to CURRENT are supported.
-GST_REVISION(7:2:0)
+GST_REVISION(8:0:1)
 AC_CONFIG_AUX_DIR([build-aux])
 AC_CONFIG_MACRO_DIR([build-aux])
 AC_CONFIG_SRCDIR([main.c])
