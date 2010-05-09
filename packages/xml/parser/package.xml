@@ -13,6 +13,7 @@
 
   <prereq>XML-SAXParser</prereq>
   <prereq>XML-DOM</prereq>
+  <prereq>Iconv</prereq>
 
   <filein>XML.st</filein>
   <file>XML.st</file>

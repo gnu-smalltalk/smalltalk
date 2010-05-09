@@ -2950,7 +2950,7 @@ Instance Variables:
 	    ifTrue: 
 		[sax fatalError: (BadCharacterSignal new 
 			    messageText: 'A character with Unicode value %1 is not legal' % {n})].
-	data nextPut: (Character value: n).
+	data display: (Character codePoint: n).
 	self getNextChar
     ]
 

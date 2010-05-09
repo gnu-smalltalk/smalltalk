@@ -1,3 +1,8 @@
+2010-05-09  Paolo Bonzini  <bonzini@gnu.org>
+
+	* parser/XML.st: Use #display: to show entities with Unicode support.
+	* parser/package.xml: Depend on Iconv.
+
 2009-09-23  Paolo Bonzini  <bonzini@gnu.org>
 
 	* expat/ExpatParser.st: New.
