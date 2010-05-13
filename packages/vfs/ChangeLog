@@ -1,3 +1,8 @@
+2010-05-13  Paolo Bonzini  <bonzini@gnu.org>
+
+	* urar: Remove bashism.
+	* uzip: Fix duplicated line.
+
 2009-06-04  Paolo Bonzini  <bonzini@gnu.org>
 
 	* urar: Remove bashism.

@@ -95,7 +95,6 @@ mczipfs_mkdir ()
       (umask 077 && mkdir "$dir")
     } || exit $?
 
-    mkdir $dir
     cd $dir
     mkdir -p "$2"  
     $XZIP "$1" "$2" >/dev/null 2>&1
