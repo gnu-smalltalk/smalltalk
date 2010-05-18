@@ -722,6 +722,8 @@ _gst_execute_statements (tree_node temps,
       else
 	printf ("%O\n", _gst_last_returned_value);
 
+      fflush (stdout);
+      fflush (stderr);
       _gst_execution_tracing = save_execution;
     }
   if (quiet || _gst_verbosity < 3)

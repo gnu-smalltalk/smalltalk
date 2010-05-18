@@ -585,13 +585,23 @@ parse_eval_definition (gst_parser *p)
   if (stmts && !_gst_had_error)
     {
       if (_gst_regression_testing)
-        printf ("\nExecution begins...\n");
+        {
+          printf ("\nExecution begins...\n");
+	  fflush (stdout);
+	  fflush (stderr);
+        }
 
       _gst_execute_statements (tmps, stmts, UNDECLARED_TEMPORARIES,
 			       _gst_regression_testing);
 
-      if (_gst_regression_testing && !_gst_had_error)
-        printf ("returned value is %O\n", _gst_last_returned_value);
+      if (_gst_regression_testing)
+        {
+          if (!_gst_had_error)
+            printf ("returned value is %O\n", _gst_last_returned_value);
+	  fflush (stdout);
+	  fflush (stderr);
+        }
+
       _gst_had_error = false;
     }
 
