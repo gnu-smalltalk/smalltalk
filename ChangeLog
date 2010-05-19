@@ -1,3 +1,7 @@
+2010-05-19  Paolo Bonzini <bonzini@gnu.org>
+
+	* scripts/Remote.st: Gracefully handle #atEnd on the remote socket.
+
 2010-05-03  Holger Hans Peter Freyther <zecke@selfish.org>
 
 	* gst-tool.c: Add -v|-V|--verbose to all tools.

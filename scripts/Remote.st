@@ -262,9 +262,9 @@ server ifTrue: [
 	    "Using #readStream makes it work both for Strings and Files."
 	    s nextPutAll: each readStream; nextPut: $<0>; flush.
 
-	    [ s peekFor: $<0> ] whileFalse: [
-		stdout nextPut: s next.
-		s canRead ifFalse: [ stdout flush ] ] ].
+	    [s canRead ifFalse: [stdout flush].
+	    s atEnd or: [s peekFor: $<0>]]
+                whileFalse: [stdout nextPut: s next].
 	s close ]
 ]
     on: Error
