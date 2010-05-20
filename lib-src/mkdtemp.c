@@ -82,7 +82,7 @@ mkdtemp (template)
   /* The number of times to attempt to generate a temporary file.  To
      conform to POSIX, this must be no smaller than TMP_MAX.  */
 #if defined TMP_MAX
-  unsigned int attempts = ATTEMPTS_MIN < TMP_MAX ? TMP_MAX : ATTEMPS_MIN;
+  unsigned int attempts = ATTEMPTS_MIN < TMP_MAX ? TMP_MAX : ATTEMPTS_MIN;
 #else
   unsigned int attempts = ATTEMPTS_MIN;
 #endif
