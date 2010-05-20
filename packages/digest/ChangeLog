@@ -1,3 +1,9 @@
+2010-05-20  Paolo Bonzini  <bonzini@gnu.org>
+
+	* packages/digest/sha1.h: Do not use stdint.h.  Reported by Rick
+	Flower.
+	* packages/digest/sha1.c: Likewise, do not use uint32_t.
+
 2010-01-01  Paolo Bonzini  <bonzini@gnu.org>
 
 	* Update copyright years.

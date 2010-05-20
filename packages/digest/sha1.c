@@ -75,11 +75,11 @@ sha1_init_ctx (struct sha1_ctx *ctx)
 void *
 sha1_read_ctx (const struct sha1_ctx *ctx, void *resbuf)
 {
-  ((uint32_t *) resbuf)[0] = SWAP (ctx->A);
-  ((uint32_t *) resbuf)[1] = SWAP (ctx->B);
-  ((uint32_t *) resbuf)[2] = SWAP (ctx->C);
-  ((uint32_t *) resbuf)[3] = SWAP (ctx->D);
-  ((uint32_t *) resbuf)[4] = SWAP (ctx->E);
+  ((sha1_uint32 *) resbuf)[0] = SWAP (ctx->A);
+  ((sha1_uint32 *) resbuf)[1] = SWAP (ctx->B);
+  ((sha1_uint32 *) resbuf)[2] = SWAP (ctx->C);
+  ((sha1_uint32 *) resbuf)[3] = SWAP (ctx->D);
+  ((sha1_uint32 *) resbuf)[4] = SWAP (ctx->E);
 
   return resbuf;
 }
@@ -93,7 +93,7 @@ void *
 sha1_finish_ctx (struct sha1_ctx *ctx, void *resbuf)
 {
   /* Take yet unprocessed bytes into account.  */
-  uint32_t bytes = ctx->buflen;
+  sha1_uint32 bytes = ctx->buflen;
   size_t size = (bytes < 56) ? 64 / 4 : 64 * 2 / 4;
 
   /* Now count remaining bytes.  */
@@ -231,7 +231,7 @@ sha1_process_bytes (const void *buffer, size_t len, struct sha1_ctx *ctx)
     {
 #if !_STRING_ARCH_unaligned
 # define alignof(type) offsetof (struct { char c; type x; }, x)
-# define UNALIGNED_P(p) (((size_t) p) % alignof (uint32_t) != 0)
+# define UNALIGNED_P(p) (((size_t) p) % alignof (sha1_uint32) != 0)
       if (UNALIGNED_P (buffer))
 	while (len > 64)
 	  {
@@ -286,15 +286,15 @@ sha1_process_bytes (const void *buffer, size_t len, struct sha1_ctx *ctx)
 void
 sha1_process_block (const void *buffer, size_t len, struct sha1_ctx *ctx)
 {
-  const uint32_t *words = buffer;
-  size_t nwords = len / sizeof (uint32_t);
-  const uint32_t *endp = words + nwords;
-  uint32_t x[16];
-  uint32_t a = ctx->A;
-  uint32_t b = ctx->B;
-  uint32_t c = ctx->C;
-  uint32_t d = ctx->D;
-  uint32_t e = ctx->E;
+  const sha1_uint32 *words = buffer;
+  size_t nwords = len / sizeof (sha1_uint32);
+  const sha1_uint32 *endp = words + nwords;
+  sha1_uint32 x[16];
+  sha1_uint32 a = ctx->A;
+  sha1_uint32 b = ctx->B;
+  sha1_uint32 c = ctx->C;
+  sha1_uint32 d = ctx->D;
+  sha1_uint32 e = ctx->E;
 
   /* First increment the byte count.  RFC 1321 specifies the possible
      length of the file up to 2^64 bits.  Here we only compute the
@@ -303,7 +303,7 @@ sha1_process_block (const void *buffer, size_t len, struct sha1_ctx *ctx)
   if (ctx->total[0] < len)
     ++ctx->total[1];
 
-#define rol(x, n) (((x) << (n)) | ((uint32_t) (x) >> (32 - (n))))
+#define rol(x, n) (((x) << (n)) | ((sha1_uint32) (x) >> (32 - (n))))
 
 #define M(I) ( tm =   x[I&0x0f] ^ x[(I-14)&0x0f] \
 		    ^ x[(I-8)&0x0f] ^ x[(I-3)&0x0f] \
@@ -318,7 +318,7 @@ sha1_process_block (const void *buffer, size_t len, struct sha1_ctx *ctx)
 
   while (words < endp)
     {
-      uint32_t tm;
+      sha1_uint32 tm;
       int t;
       for (t = 0; t < 16; t++)
 	{

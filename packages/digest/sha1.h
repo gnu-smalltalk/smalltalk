@@ -21,20 +21,56 @@
 # define SHA1_H 1
 
 # include <stdio.h>
-# include <stdint.h>
+
+#ifdef _LIBC
+# include <sys/types.h>
+typedef u_int32_t sha1_uint32;
+#else
+# if defined __STDC__ && __STDC__
+#  define UINT_MAX_32_BITS 4294967295U
+# else
+#  define UINT_MAX_32_BITS 0xFFFFFFFF
+# endif
+
+/* If UINT_MAX isn't defined, assume it's a 32-bit type.
+   This should be valid for all systems GNU cares about because
+   that doesn't include 16-bit systems, and only modern systems
+   (that certainly have <limits.h>) have 64+-bit integral types.  */
+
+# ifndef UINT_MAX
+#  define UINT_MAX UINT_MAX_32_BITS
+# endif
+
+# if UINT_MAX == UINT_MAX_32_BITS
+   typedef unsigned int sha1_uint32;
+# else
+#  if USHRT_MAX == UINT_MAX_32_BITS
+    typedef unsigned short sha1_uint32;
+#  else
+#   if ULONG_MAX == UINT_MAX_32_BITS
+     typedef unsigned long sha1_uint32;
+#   else
+     /* The following line is intended to evoke an error.
+        Using #error is not portable enough.  */
+     "Cannot determine unsigned 32-bit data type."
+#   endif
+#  endif
+# endif
+#endif
+
 
 /* Structure to save state of computation between the single steps.  */
 struct sha1_ctx
 {
-  uint32_t A;
-  uint32_t B;
-  uint32_t C;
-  uint32_t D;
-  uint32_t E;
+  sha1_uint32 A;
+  sha1_uint32 B;
+  sha1_uint32 C;
+  sha1_uint32 D;
+  sha1_uint32 E;
 
-  uint32_t total[2];
-  uint32_t buflen;
-  uint32_t buffer[32];
+  sha1_uint32 total[2];
+  sha1_uint32 buflen;
+  sha1_uint32 buffer[32];
 };
 
 
