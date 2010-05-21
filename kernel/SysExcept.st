@@ -240,34 +240,6 @@ handler.'>
 
 
 
-Notification subclass: DynamicVariable [
-
-    <category: 'Language-Utilities'>
-    <comment: 'I am a variable that is visible only in the stackframes outgoing from this one.  Do not use DynamicVariable directly, instead create a subclass for each variable you want to use.'>
-
-    DynamicVariable class >> defaultValue [
-        <category: 'defaults'>
-        ^nil
-    ]
-
-    DynamicVariable class >> use: anObject during: aBlock [
-        <category: 'evaluating'>
-        ^aBlock on: self do: [:notification | notification resume: anObject]
-    ]
-
-    DynamicVariable class >> value [
-        <category: 'evaluating'>
-        ^self signal
-    ]
-
-    defaultAction [
-        <category: 'defaults'>
-        ^self class defaultValue
-    ]
-]
-
-
-
 Namespace current: SystemExceptions [
 
 Notification subclass: ProcessBeingTerminated [

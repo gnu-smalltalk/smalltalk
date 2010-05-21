@@ -1,3 +1,7 @@
+2010-05-21  Paolo Bonzini <bonzini@gnu.org>
+
+	* libgst/files.c: Load DynVariable.st.
+
 2010-05-18  Paolo Bonzini  <bonzini@gnu.org>
 
 	* libgst/comp.c: Flush aggressively around _gst_execute_statements.

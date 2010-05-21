@@ -195,6 +195,7 @@
   <file>AbstNamespc.st</file>
   <file>RootNamespc.st</file>
   <file>SysExcept.st</file>
+  <file>DynVariable.st</file>
   <file>HashedColl.st</file>
   <file>FileDescr.st</file>
   <file>FloatD.st</file>

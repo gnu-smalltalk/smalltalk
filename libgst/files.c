@@ -281,6 +281,7 @@ static const char standard_files[] = {
   "FileStream.st\0"
 
   /* Goodies */
+  "DynVariable.st\0"
   "Autoload.st\0"
   "DLD.st\0"
   "Getopt.st\0"

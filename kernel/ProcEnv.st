@@ -64,6 +64,22 @@ setting for the current process.'>
 	^ProcessEnvironment uniqueInstance
     ]
 
+    use: anObject during: aBlock [
+	"Set the value of this variable to anObject during the execution
+         of aBlock, then restore it."
+	<category: 'accessing'>
+        | oldValue |
+        oldValue := self value.
+        self value: anObject.
+        ^aBlock ensure: [self value: oldValue]
+    ]
+
+    valueIfAbsent: aBlock [
+	"Return the value of this variable in the current process."
+	<category: 'accessing'>
+	^Processor activeProcess environment at: self key ifAbsent: [ nil ]
+    ]
+
     value [
 	"Return the value of this variable in the current process."
 	<category: 'accessing'>
@@ -77,6 +93,7 @@ setting for the current process.'>
 	Processor activeProcess environment at: self key put: anObject
     ]
 ]
+
 
 
 Object subclass: ProcessEnvironment [
