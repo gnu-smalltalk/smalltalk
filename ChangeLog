@@ -1,5 +1,9 @@
 2010-05-21  Paolo Bonzini <bonzini@gnu.org>
 
+	* kernel/FileDescr.st: Fix #atEnd for pipes.
+
+2010-05-21  Paolo Bonzini <bonzini@gnu.org>
+
 	* kernel/DynVariable.st: Reimplement DynamicVariable here.
 	* kernel/ProcEnv.st: Add methods used by DynamicVariable.
 	* kernel/SysExcept.st: Remove old implementation from here.

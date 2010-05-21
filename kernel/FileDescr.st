@@ -740,7 +740,7 @@ do arbitrary processing on the files.'>
 	<category: 'initialize-release'>
 	self addToBeFinalized.
 	access isNil ifTrue: [access := 3].
-	atEnd := false
+	atEnd := nil
     ]
 
     readStream [
