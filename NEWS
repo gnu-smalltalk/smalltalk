@@ -3,6 +3,9 @@ List of user-visible changes in GNU Smalltalk
 NEWS FROM 3.2 TO 3.2.1
 
 
+o   All built-in packages can be disabled with a configure option like
+    --disable-gdbm or --disable-complex.
+
 o   The undocumented DynamicVariable class in GNU Smalltalk 3.2 is now
     documented, but it had a small change in the implementation.  The
     #defaultValue class method is not present anymore, and is replaced by

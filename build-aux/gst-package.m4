@@ -12,10 +12,17 @@ dnl it is important to specify package.xml here if it is automatically
 dnl generated.  LIBS are libraries (possibly with .la extensions) that are
 dnl built and will be preloaded by the wrapper script in `tests/gst'.
 
-AC_DEFUN([GST_PACKAGE_PREFIX], [
-m4_define([_GST_PKG_PREFIX], [$1/])])
+AC_DEFUN([GST_PACKAGE_ALLOW_DISABLING], [dnl
+m4_undefine([_GST_EXTRA_VARS])dnl
+m4_copy([_GST_ENABLE_VAR], [_GST_EXTRA_VARS])])
+m4_define([_GST_EXTRA_VARS]), [])
+m4_define([_GST_ENABLE_VAR], [ enable_[]AS_TR_SH(m4_tolower([$1]))])
 
-AC_DEFUN([GST_PACKAGE_DEPENDENCIES], [
+AC_DEFUN([GST_PACKAGE_PREFIX], [dnl
+m4_define([_GST_PKG_PREFIX], [$1/])])
+m4_define([_GST_PKG_PREFIX], [])
+
+AC_DEFUN([GST_PACKAGE_DEPENDENCIES], [dnl
 m4_define([_GST_PKG_DEPENDENCIES], [$1])])
 m4_define([_GST_PKG_DEPENDENCIES], [])
 
@@ -49,12 +56,11 @@ m4_foreach_w(GST_File, [$1],
 	    [m4_if(GST_File, $2, [m4_define([_GST_COND], [$3])])])dnl
 _GST_COND])
 
-m4_define([_GST_PKG_PREFIX], [])
-
 AC_DEFUN([GST_PACKAGE_ENABLE], [
   $3
   AC_MSG_CHECKING([whether to install $1])
   _GST_RULES_PREPARE
+  m4_define([_GST_PKG_VARS], [$4]m4_quote(_GST_EXTRA_VARS([$1])))dnl
   m4_define([_GST_PKG_DIR], [_GST_PKG_PREFIX[]$2])dnl
   m4_define([_GST_PKG_XML], [_GST_PKG_DIR/package.xml])dnl
   m4_define([_GST_PKG_DISTDIR], [$(distdir)/_GST_PKG_DIR])dnl
@@ -91,13 +97,13 @@ $(srcdir)/_GST_PKG_MK: _GST_PKG_XML_IN
 	echo '	touch $$(srcdir)/_GST_PKG_STAMP') > $(srcdir)/_GST_PKG_MK
 EOF
 
-    m4_if([$4], [],
-      [_GST_PKG_ENABLE([$1], [$5], [$6])
-      AC_MSG_RESULT([yes])],
-
-      [(for i in $4; do
-	eval ac_var='${'$i'-bad}'
-	case "$ac_var" in
+    m4_ifset([_GST_PKG_VARS],
+      [(for i in _GST_PKG_VARS; do
+	case $i in #((
+	  enable_*) eval ac_var='${'$i'-yes}' ;;
+	  *) eval ac_var='${'$i'-bad}' ;;
+        esac
+	case $ac_var in #((
 	  no* )
 	    exit 1 ;;
 	  bad )
@@ -111,7 +117,10 @@ EOF
       else
 	AC_MSG_RESULT([no])
       fi
-      ])
+      ],
+
+      [_GST_PKG_ENABLE([$1], [$5], [$6])
+      AC_MSG_RESULT([yes])])
 
   m4_if([$5], [], [], 
     [_GST_PKG_IF_FILE([$5], [Makefile], [ALL_PACKAGES="$ALL_PACKAGES _GST_PKG_DIR"])
