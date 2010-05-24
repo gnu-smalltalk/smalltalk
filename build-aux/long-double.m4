@@ -36,7 +36,7 @@ else
   gst_cv_long_double_ok=yes
 fi])
 
-if test $gst_cv_long_double_ok != yes; then
+if test "$gst_cv_long_double_ok" != yes; then
   case $host in
     powerpc*-*-darwin*)
       # Darwin provides both 64-bit and 128-bit long double functions in
