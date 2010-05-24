@@ -137,8 +137,6 @@ TestCase subclass: SDActiveRecordTest [
 	    show: lookupTime printString;
 	    cr;
 	    cr."
-	self assert: commitTime < (4*1000) "seconds".
-	self assert: deleteTime < (3*1000) "seconds"
     ]
 
     testCollectionSerialization [

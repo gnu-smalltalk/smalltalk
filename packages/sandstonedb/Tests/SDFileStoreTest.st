@@ -117,7 +117,6 @@ SDActiveRecordTest subclass: SDFileStoreTest [
 	    show: loadTime printString;
 	    cr;
 	    cr."
-	self assert: commitTime < (4*1000) "seconds"
     ]
 
     testSaveMissingFile [
