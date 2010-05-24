@@ -138,7 +138,7 @@ int main ()
           AC_DEFINE([USE_POSIX_THREADS], 1,
             [Define if the POSIX multithreading library can be used.])
           if test -n "$LIBTHREAD"; then
-            if test $gst_have_weak = yes; then
+            if test "$gst_have_weak" = yes; then
               AC_DEFINE([USE_POSIX_THREADS_WEAK], 1,
                 [Define if references to the POSIX multithreading library should be made weak.])
 	      LIBTHREAD=
