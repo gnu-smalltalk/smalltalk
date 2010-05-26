@@ -1,3 +1,8 @@
+2010-05-25  Paolo Bonzini <bonzini@gnu.org>
+
+	* kernel/Object.st: Fix error message for storing UnicodeCharacters
+	into Strings.
+
 2010-05-21  Paolo Bonzini <bonzini@gnu.org>
 
 	* kernel/FileDescr.st: Fix #atEnd for pipes.

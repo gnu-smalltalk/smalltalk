@@ -827,8 +827,8 @@ All classes in the system are subclasses of me.'>
 	    ifTrue: 
 		[^SystemExceptions.ArgumentOutOfRange 
 		    signalOn: object
-		    mustBeBetween: 0 asCharacter
-		    and: 255 asCharacter].
+		    mustBeBetween: (Character value: 0)
+		    and: (Character value: 255)].
 	shape == #utf32 
 	    ifTrue: 
 		[^SystemExceptions.ArgumentOutOfRange 
