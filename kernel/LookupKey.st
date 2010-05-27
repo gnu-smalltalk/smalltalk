@@ -32,7 +32,7 @@
 
 
 Magnitude subclass: LookupKey [
-    | key value |
+    | key |
     
     <category: 'Language-Data types'>
     <comment: 'I represent a key for looking up entries in a data structure. Subclasses

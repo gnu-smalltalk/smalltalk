@@ -1,3 +1,7 @@
+2010-05-27  Gwenael Casaccio  <mrgwen@gmail.com>
+
+	* kernel/LookupKey.st: Remove value instance variable.
+
 2010-05-25  Paolo Bonzini <bonzini@gnu.org>
 
 	* kernel/Object.st: Fix error message for storing UnicodeCharacters
