@@ -1,3 +1,9 @@
+2010-05-28  Paolo Bonzini <bonzini@gnu.org>
+
+	* libgst/sysdep/posix/time.c: Prefer using nanosleep to usleep.
+	usleep is totally broken under Solaris 8 and 9. Reported by Rick
+	Flower.
+
 2010-05-21  Paolo Bonzini <bonzini@gnu.org>
 
 	* libgst/files.c: Load DynVariable.st.

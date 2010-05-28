@@ -96,10 +96,10 @@ _gst_current_time_zone_name (void)
 void
 _gst_usleep (int us)
 {
-#if defined HAVE_USLEEP
-  usleep (us);
-#elif defined HAVE_NANOSLEEP
+#if defined HAVE_NANOSLEEP
   struct timespec ts = { us / 1000, (us % 1000) * 1000 };
   nanosleep (&ts, NULL);
+#elif defined HAVE_USLEEP
+  usleep (us);
 #endif
 }
