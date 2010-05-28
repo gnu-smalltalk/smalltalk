@@ -64,6 +64,8 @@
 
 #ifdef G_WIN32_MSG_HANDLE
 #include <windows.h>
+#else
+#include "poll.h"
 #endif
 
 #ifdef STDC_HEADERS

@@ -422,6 +422,16 @@ GST_PACKAGE_ENABLE([GTK], [gtk], [
         ])
       ])
     ], [], gobject)
+    if test $enable_gtk = yes; then
+      ac_save_LIBS=$LIBS
+      ac_save_CPPFLAGS=$CPPFLAGS
+      LIBS="$LIBS $GLIB_LIBS"
+      CFLAGS="$CFLAGS $GLIB_CFLAGS"
+      AC_CHECK_FUNCS([g_poll])
+      if test $ac_cv_func_g_poll = no; then
+        AC_DEFINE([g_poll], [poll], [Define to poll if your glib does not provide g_poll.])
+      fi
+    fi
   fi],
   [enable_gtk gst_cv_cairo],
   [Makefile], [gst-gtk.la])
