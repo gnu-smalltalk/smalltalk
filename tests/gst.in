@@ -2,4 +2,5 @@
 abs_top_builddir=@abs_top_builddir@
 : ${LIBTOOL=$abs_top_builddir/libtool}
 
+export LTDL_LIBRARY_PATH=$abs_top_builddir${LTDL_LIBRARY_PATH:+:$LTDL_LIBRARY_PATH}
 exec $LIBTOOL --mode=execute @PACKAGE_DLOPEN_FLAGS@ $abs_top_builddir/gst@EXEEXT@ ${1+"$@"}
