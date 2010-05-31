@@ -1,5 +1,6 @@
 enable_mysql_tests='@enable_mysql_tests@'
 host='@host@'
+TIMEOUT='@TIMEOUT@'
 mysqlvars=`echo $enable_mysql_tests | awk '
   BEGIN { FS=":" }
   /^(yes|no)$/ { next }

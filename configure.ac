@@ -67,6 +67,7 @@ PKG_PROG_PKG_CONFIG
 AC_PATH_TOOL(WINDRES, windres, no)
 AC_PATH_PROG(INSTALL_INFO, install-info, :, $PATH:/sbin:/usr/sbin)
 AC_PATH_PROG(ZIP, zip, no, $PATH)
+AC_CHECK_PROG(TIMEOUT, timeout, [timeout 60s], [env])
 if test "$ZIP" = no; then
   AC_MSG_ERROR([Please install InfoZIP to use GNU Smalltalk.])
 fi

@@ -25,8 +25,8 @@ m4_define([AT_CHECK_GST], [
     *) image_path="m4_ifval([$2], [-I $2])" ;;
   esac
 
-  echo "{ (cd m4_ifval([$3], [$3], [$abs_top_builddir]) && gst $image_path $1); echo exit $? > retcode; } | tr -d '\r' | tee stdout; . ./retcode"
-  AT_CHECK([{ (cd m4_ifval([$3], [$3], [$abs_top_builddir]) && gst $image_path $1); echo exit $? > retcode; } | tr -d '\r' | tee stdout; . ./retcode], 0, [$4], [$5])
+  echo "{ (cd m4_ifval([$3], [$3], [$abs_top_builddir]) && $TIMEOUT gst $image_path $1); echo exit $? > retcode; } | tr -d '\r' | tee stdout; . ./retcode"
+  AT_CHECK([{ (cd m4_ifval([$3], [$3], [$abs_top_builddir]) && $TIMEOUT gst $image_path $1); echo exit $? > retcode; } | tr -d '\r' | tee stdout; . ./retcode], 0, [$4], [$5])
 ])
 
 dnl AT_DIFF_TEST([FILE], [XFAILS])
