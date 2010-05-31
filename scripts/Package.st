@@ -201,7 +201,7 @@ Kernel.PackageContainer subclass: PackageCheckout [
 
 	mainPackage := addedPackages first.
 	MainPackage use: mainPackage during: [
-	    mainPackage prerequisites printNl do: [ :each || file |
+	    mainPackage prerequisites do: [ :each || file |
 	        ((each startsWith: mainPackage name, '-') and: [
 		    (file := mainPackage baseDirectories first
 		        / (each copyFrom: mainPackage name size + 2)
@@ -259,7 +259,7 @@ PackageCheckout subclass: GitPackageCheckout [
 		url host = '' ifTrue: [ realUrl := realUrl path ].
 	        command := 'git clone --depth 1 %1 .' % {realUrl} ]
 	    ifTrue: [
-		command := 'git fetch' ].
+		command := 'git pull' ].
 
         ('cd %1 && ' % { self checkoutDirectory }, command) displayNl.
         saveDir := Directory working.
@@ -328,7 +328,7 @@ Kernel.PackageDirectories subclass: PackageFiles [
 			found := true.
 		        each url = urlString ifTrue: [
 			    ^self error: 'infinite loop in package.xml urls' ].
-			self addURL: (NetClients.URL fromString: each url) ]].
+			self addURL: each url ]].
 		found ifTrue: [^self].
 		^self error: 'url element not found in remote XML file' ].
 
