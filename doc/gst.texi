@@ -1866,16 +1866,23 @@ they need other goodies to be loaded first.
 
 The packaging system is implemented by a Smalltalk class,
 @code{PackageLoader}, which looks for information about packages in
-the XML file named (guess what) @file{packages.xml}, in one of three
-places:
+various places:
 @itemize
 @item the kernel directory's parent directory; this is where
   an installed @file{packages.xml} resides, in a system-wide data
   directory such as @file{/usr/local/share/smalltalk};
+@item the above directory's @file{site-packages} subdirectory, for
+  example @file{/usr/local/share/smalltalk/site-packages};
 @item in the file @file{.st/packages.xml}, hosting per-user packages;
 @item finally, there can be a @file{packages.xml} in the same directory
   as the current image.
 @end itemize
+
+Each of this directories can contain package descriptions in an
+XML file named (guess what) @file{packages.xml}, as well as standalone
+packages in files named @file{*.star} (short for @cite{Smalltalk
+archive}).  Later in this section you will find information about
+@command{gst-package}, a program that helps you create @file{.star} files.
 
 There are two ways to load something using the packaging system. The
 first way is to use the PackageLoader's @code{fileInPackage:} and
@@ -2076,8 +2083,9 @@ will be used to find a source code repository (@command{git} or
 @command{svn}) or to download a @file{package.xml} file.
 @end itemize
 
-There is a short form for specifying @file{package.xml} file on
-@gst{}'s web site; the following two commands are equivalent:
+@noindent
+There is also a short form for specifying @file{package.xml} file on
+@gst{}'s web site, so that the following two commands are equivalent:
 
 @example
     gst-package http://smalltalk.gnu.org/project/Iliad/package.xml

@@ -1,3 +1,7 @@
+2010-06-03  Paolo Bonzini <bonzini@gnu.org>
+
+	* kernel/PkgLoader.st: Add /usr/share/smalltalk/site-packages.
+
 2010-05-31  Paolo Bonzini <bonzini@gnu.org>
 
 	* scripts/Package.st: Remove debugging output.  Change "git fetch"

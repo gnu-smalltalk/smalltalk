@@ -1836,6 +1836,10 @@ into a Smalltalk image, correctly handling dependencies.'>
 			    baseDirectories: [
 				{Directory userBase.
 				Directory kernel / '..'}]).
+		root add: (Kernel.PackageDirectory on: self sitePackageFile
+			    baseDirectories: [
+				{Directory userBase.
+				Directory kernel / '../site-packages'}]).
 		root add: (Kernel.PackageDirectory on: self userPackageFile
 			    baseDirectories: [{Directory userBase}]).
 		root add: (Kernel.PackageDirectory on: self localPackageFile
@@ -1889,6 +1893,11 @@ into a Smalltalk image, correctly handling dependencies.'>
     PackageLoader class >> packageFile [
 	<category: 'private - packages file'>
 	^Directory kernel / '../packages.xml'
+    ]
+
+    PackageLoader class >> sitePackageFile [
+	<category: 'private - packages file'>
+	^Directory kernel / '../site-packages/packages.xml'
     ]
 
     PackageLoader class >> userPackageFile [
