@@ -264,8 +264,9 @@ case "$GCC:`$CC -v 2>&1 | sed -n '[s/^gcc version \([0-9.]*\).*/\1/p]'`" in
      AC_MSG_ERROR([GNU Smalltalk requires GCC 3.3 or later.]) ;;
 esac
 
-case $host_cpu in
-   i*86) LIBGST_CFLAGS='-fomit-frame-pointer' ;;
+case '$host_cpu: $CFLAGS ' in
+   i*86:*' -pg '*) ;;
+   i*86:*) LIBGST_CFLAGS='-fomit-frame-pointer' ;;
    *) ;;
 esac
 AC_SUBST(LIBGST_CFLAGS)
