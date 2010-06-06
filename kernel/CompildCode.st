@@ -151,19 +151,13 @@ superclass for blocks and methods'>
     ]
 
     = aMethod [
-	"Answer whether the receiver and aMethod are equal"
+	"Answer whether the receiver is the same object as arg.  Testing
+         for equality could break the browser, since it's possible to put
+         arbitrary objects via ##(...), so this is safer."
 
 	<category: 'basic'>
-	self == aMethod ifTrue: [^true].
-	self class == aMethod class ifFalse: [^false].
-	header = aMethod getHeader ifFalse: [^false].
-	self numLiterals = aMethod numLiterals ifFalse: [^false].
-	self numBytecodes = aMethod numBytecodes ifFalse: [^false].
-	1 to: self numLiterals
-	    do: [:i | (self literalAt: i) = (aMethod literalAt: i) ifFalse: [^false]].
-	1 to: self numBytecodes
-	    do: [:i | (self bytecodeAt: i) = (aMethod bytecodeAt: i) ifFalse: [^false]].
-	^true
+	<primitive: VMpr_Object_identity>
+	
     ]
 
     hash [
