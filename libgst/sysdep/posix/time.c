@@ -97,7 +97,7 @@ void
 _gst_usleep (int us)
 {
 #if defined HAVE_NANOSLEEP
-  struct timespec ts = { us / 1000, (us % 1000) * 1000 };
+  struct timespec ts = { us / 1000000, (us % 1000000) * 1000 };
   nanosleep (&ts, NULL);
 #elif defined HAVE_USLEEP
   usleep (us);

@@ -1,3 +1,8 @@
+2010-06-06  Paolo Bonzini <bonzini@gnu.org>
+
+	* libgst/sysdep/posix/time.c: Fix previous change for millisecond
+	vs. microsecond confusion.
+
 2010-05-28  Paolo Bonzini <bonzini@gnu.org>
 
 	* libgst/sysdep/posix/time.c: Prefer using nanosleep to usleep.
