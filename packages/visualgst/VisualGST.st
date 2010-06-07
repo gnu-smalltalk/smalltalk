@@ -405,7 +405,6 @@ THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.'
 	    {'<Control>X'. '<GtkLauncher>/Edit/Cut'}.
 	    {'<Control>C'. '<GtkLauncher>/Edit/Copy'}.
 	    {'<Control>V'. '<GtkLauncher>/Edit/Paste'}.
-	    {'<Control>A'. '<GtkLauncher>/Edit/SelectAll'}.
 	    {'<Control>F'. '<GtkLauncher>/Edit/Find'}.
 	    {'<Control>H'. '<GtkLauncher>/Edit/Replace'}}.
 

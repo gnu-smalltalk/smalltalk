@@ -3,7 +3,7 @@ AbstractNamespace class extend [
     Categories := nil.
 
     categories [
-        ^ Categories isNil: [ Categories := WeakKeyIdentityDictionary new ]
+        ^ Categories ifNil: [ Categories := WeakKeyIdentityDictionary new ]
     ]
 
     icon [

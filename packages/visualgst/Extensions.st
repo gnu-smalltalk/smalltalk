@@ -577,3 +577,10 @@ GTK.GtkDialog extend [
             showAll 
     ]
 ]
+
+GTK.GtkWidget extend [
+    getFocusChild [
+        <category: '*VisualGST'>
+        ^nil
+    ]
+]

@@ -109,8 +109,7 @@ GtkMainWindow subclass: GtkInspector [
             {'<Control>R'. '<GtkInspector>/Edit/Redo'}.
             {'<Control>X'. '<GtkInspector>/Edit/Cut'}.
             {'<Control>C'. '<GtkInspector>/Edit/Copy'}.
-            {'<Control>V'. '<GtkInspector>/Edit/Paste'}.
-            {'<Control>A'. '<GtkInspector>/Edit/SelectAll'}}.
+            {'<Control>V'. '<GtkInspector>/Edit/Paste'}}.
 
 	^ self createNewMenuEntry: {GTK.GtkMenuItem menuItem: 'Cancel edits' accelPath: '<GtkInspector>/Edit/Cancel' connectTo: self selector: #cancel.
             GTK.GtkMenuItem menuItem: 'Undo' accelPath: '<GtkInspector>/Edit/Undo' connectTo: self selector: #undo.

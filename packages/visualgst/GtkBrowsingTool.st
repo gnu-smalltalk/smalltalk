@@ -74,8 +74,7 @@ GtkMainWindow subclass: GtkBrowsingTool [
             {'<Control>R'. '<GtkBrowsingTool>/Edit/Redo'}.
             {'<Control>X'. '<GtkBrowsingTool>/Edit/Cut'}.
             {'<Control>C'. '<GtkBrowsingTool>/Edit/Copy'}.
-            {'<Control>V'. '<GtkBrowsingTool>/Edit/Paste'}.
-            {'<Control>A'. '<GtkBrowsingTool>/Edit/SelectAll'}}.
+            {'<Control>V'. '<GtkBrowsingTool>/Edit/Paste'}}.
 
         ^ self createNewMenuEntry: {GTK.GtkMenuItem menuItem: 'Cancel edits' accelPath: '<GtkBrowsingTool>/Edit/Cancel' connectTo: self selector: #cancel.
             GTK.GtkMenuItem menuItem: 'Undo' accelPath: '<GtkBrowsingTool>/Edit/Undo' connectTo: self selector: #undo.

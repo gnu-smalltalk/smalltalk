@@ -1,3 +1,11 @@
+2010-06-07  Paolo Bonzini  <bonzini@gnu.org>
+
+	* Category/AbstractNamespace.st: Do not add an instance variable.
+	* Extensions.st: Add #getFocusChild, fixes accelerators on find widget.
+	* GtkBrowsingTool.st: Do not tie Control-A to an accelerator.
+	* Inspector/GtkInspector.st: Do not tie Control-A to an accelerator.
+	* VisualGST.st: Do not tie Control-A to an accelerator.
+
 2010-06-07  Gwenael Casaccio  <mrgwen@gmail.com>
 
 	* many many files: Sync with upstream.
