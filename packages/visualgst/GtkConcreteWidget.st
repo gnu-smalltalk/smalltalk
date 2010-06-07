@@ -31,7 +31,7 @@ Smalltalk.Object subclass: GtkConcreteWidget [
     mainWidget: aGtkWidget [
 	<category: 'accessing'>
 
-	child ifNotNil: [child hideAll].
+	child ifNotNil: [ child hideAll  ].
 	child := aGtkWidget
     ]
 

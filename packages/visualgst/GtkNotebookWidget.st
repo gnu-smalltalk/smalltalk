@@ -78,6 +78,12 @@ GtkConcreteWidget subclass: GtkNotebookWidget [
 	pages size = 1 ifTrue: [ notebook setShowTabs: false ]
     ]
 
+    widgetAt: anInteger [
+	<category: 'accessing'>
+
+	^ pages at: anInteger
+    ]
+
     currentWidget [
 	<category: 'accessing'>
 

@@ -1,5 +1,5 @@
 Smalltalk.Object subclass: GtkClock [
-    | hour minute radius second window x y |
+    | canvas hour minute process radius second window x y |
 
     GtkClock class >> open [
 	<category: 'user interface'>
@@ -20,9 +20,10 @@ Smalltalk.Object subclass: GtkClock [
 	    yourself
     ]
 
-    close [
+    quit [
 	<category: 'events'>
 
+	process terminate.
 	window hide
     ]
 
@@ -36,17 +37,17 @@ Smalltalk.Object subclass: GtkClock [
         second := now second.
     ]
 
-    clearArea: aGtkAllocation on: aCairoContext [
+    clearArea: aGtkAllocation [
 	<category: 'drawing'>
 
 	| res |
         res := aGtkAllocation castTo: (CIntType arrayType: 4).
 
-        Cairo.Cairo 
-	    rectangle: aCairoContext x: (res at: 0) y: (res at: 1) width: (res at: 2) height: (res at: 3);
-	    setOperator: aCairoContext operator: Cairo.Cairo operatorClear;
-	    fill: aCairoContext;
-	    setOperator: aCairoContext operator: Cairo.Cairo operatorOver
+        canvas saveWhile: [
+            canvas
+                rectangle: ((0@0) extent: ((res at: 2) @ (res at: 3)));
+                operator: #clear;
+                fill ]
     ]
 
     drawClockCircle: context [
@@ -114,18 +115,17 @@ Smalltalk.Object subclass: GtkClock [
     ]
 
     expose: aGtkWidget event: aGdkEventExpose [
-	| context cr |
 
-	cr := (GTK.Gdk cairoCreate: aGtkWidget getWindow).
-	context := Cairo.CairoContext context: cr.
+	aGtkWidget getWindow withContextDo: [ :cr |
+	    canvas := cr.
 
-	x := 128.
-	y := 128.
+	    x := 128.
+	    y := 128.
 
-	self 
-	    clearArea: aGtkWidget getAllocation on: cr;
-	    time;
-	    drawClock: context.
+	    self 
+		clearArea: aGtkWidget getAllocation;
+		time;
+		drawClock: cr ].
 
 	^ true
     ]
@@ -136,9 +136,17 @@ Smalltalk.Object subclass: GtkClock [
 	window := (GTK.GtkWindow new: GTK.Gtk gtkWindowToplevel).
 	window 
 	    setColormap: window getScreen getRgbaColormap;
-	    connectSignal: 'expose_event' to: self selector: #'expose:event:' userData: nil.";
-	    setDecorated: false"
+	    connectSignal: 'expose_event' to: self selector: #'expose:event:';
+	    connectSignal: 'delete-event' to: self selector: #'delete:event:';
+	    setDecorated: false.
 	radius := 100
+    ]
+
+    delete: aGtkWidget event: aGdkEvent [
+        <category: 'windows event'>
+
+        self quit.
+        ^ true
     ]
 
     resize: aPoint [
@@ -148,8 +156,10 @@ Smalltalk.Object subclass: GtkClock [
     ]
 
     showAll [
-	window showAll.
+	| delay |
 
-	[ [ true ] whileTrue: [ window queueDraw. Processor yield ] ] forkAt: Processor timingPriority
+	delay := Delay forSeconds: 1.
+	window showAll.
+	process := [ [ true ] whileTrue: [ window queueDraw. delay wait ] ] fork
     ]
 ]

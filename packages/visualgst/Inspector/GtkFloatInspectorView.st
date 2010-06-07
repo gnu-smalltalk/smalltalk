@@ -1,11 +1,10 @@
 GtkObjectInspectorView subclass: GtkFloatInspectorView [
 
-    refreshModel [
-	<category: 'events'>
- 
-	super refreshModel.
-        1 to: self object size do: [ :i |
-            self appendVariable: i displayString ] 
+    values [
+	| i |
+	i := OrderedCollection new.
+	1 to: self object size do: [ :j | i add: j ].
+	^ super values, i
     ]
 
     selectedValue: aString [

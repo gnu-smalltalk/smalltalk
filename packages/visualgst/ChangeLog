@@ -1,3 +1,7 @@
+2010-06-07  Gwenael Casaccio  <mrgwen@gmail.com>
+
+	* many many files: Sync with upstream.
+
 2010-05-02  Paolo Bonzini  <bonzini@gnu.org>
 
 	* packages/visualgst/Debugger/GtkDebugger.st: Fix misspelling.

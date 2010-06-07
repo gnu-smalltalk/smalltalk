@@ -6,15 +6,18 @@ GtkMainWindow subclass: GtkInspector [
 
 	^ (self new)
 	    initialize;
-	    postInitialize;
 	    object: anObject;
 	    showAll;
+	    postInitialize;
 	    yourself
     ]
 
     postInitialize [
         <category: 'initialization'>
 
+	browserWidget postInitialize.
+	inspectorWidget postInitialize.
+	workspaceWidget postInitialize.
         window
             connectSignal: 'delete-event' to: self selector: #'delete:event:' userData: nil
     ]

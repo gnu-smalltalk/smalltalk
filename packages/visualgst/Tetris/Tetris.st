@@ -28,7 +28,7 @@
  ======================================================================"
 
 GtkMainWindow subclass: Tetris [
-    | canvasWidget canvas pause delay grid movingBlocks level score level lines |
+    | canvasWidget canvas process pause delay grid movingBlocks level score level lines |
     
     <category: 'Graphics-Tetris'>
     <comment: nil>
@@ -68,7 +68,15 @@ GtkMainWindow subclass: Tetris [
 
 	canvasWidget grabFocus.
 	window
-	    connectSignal: 'key-press-event' to: self selector: #'keyPressedOn:keyEvent:' userData: nil
+	    connectSignal: 'key-press-event' to: self selector: #'keyPressedOn:keyEvent:';
+	    connectSignal: 'delete-event' to: self selector: #'delete:event:' 
+    ]
+
+    delete: aGtkWidget event: aGdkEvent [
+	<category: 'windows event'>
+
+	self quit.
+	^ true
     ]
 
     createGameMenus [
@@ -102,7 +110,7 @@ GtkMainWindow subclass: Tetris [
 	
 	^ canvasWidget := GTK.GtkDrawingArea new
 	    setSizeRequest: 400 height: 700;
-	    connectSignal: 'expose_event' to: self selector: #'expose:event:' userData: nil;
+	    connectSignal: 'expose_event' to: self selector: #'expose:event:';
 	    yourself
     ]
 
@@ -170,14 +178,15 @@ GtkMainWindow subclass: Tetris [
 
     expose: aGtkWidget event: aGdkEventExpose [
 	<category: 'drawing event'>
-        aGtkWidget getWindow withContextDo: [ :cr |
+
+	aGtkWidget getWindow withContextDo: [ :cr |
             canvas := cr.
             self
                 clearArea: aGtkWidget getAllocation;
-	        drawArea;
-	        drawGrid;
-	        drawScore.
-	].
+		drawArea;
+		drawGrid;
+		drawScore ].
+
         ^ true
     ]
 
@@ -240,10 +249,16 @@ GtkMainWindow subclass: Tetris [
     play [
 	<category: 'game'>
 
-	[ self
-	    initializeGame;
-	    cycle ] fork"At: Processor lowestPriority".
-	Processor activeProcess suspend
+	process := [ self
+			initializeGame;
+			cycle ] fork.
+    ]
+
+    quit [
+	<category: 'game'>
+
+	process terminate.
+	window hideAll
     ]
 
     gameOver [

@@ -1,14 +1,7 @@
-Object subclass: GtkImageModel [
-    GtkImageModel class [ | current | ]
+Object subclass: GtkImage [
+    GtkImage class [ | current | ]
 
-    GtkImageModel class >> release [
-	<category: 'accessing'>
-
-	current := nil.
-        super release
-    ]
-
-    GtkImageModel class >> current [
+    GtkImage class >> current [
 	<category: 'accessing'>
 
 	^ current ifNil: [ current := (self new)
@@ -16,21 +9,13 @@ Object subclass: GtkImageModel [
 					yourself ]
     ]
 
-    GtkImageModel class >> currentModel [
-        <category: 'accessing'>
-
-        ^ self current model
-    ]
-
-    | finderDic isSorted model |
+    | finderDic |
 
     initialize [
 	<category: 'initialize-release'>
 
 	finderDic := Dictionary new.
-	isSorted := false.
 	self
-	    gtkModel;
 	    registerNotifier;
             buildNamespaceModel;
             buildClassModel;
@@ -49,25 +34,6 @@ Object subclass: GtkImageModel [
 	    notify: self ofSystemChangesOfItem: #method change: #Removed using: #'removeMethodEvent:'
     ]
 
-    isSorted [
-	<category: 'testing'>
-
-	^ isSorted
-    ]
-
-    isSorted: aBoolean [
-	<category: 'accessing'>
-
-	isSorted := aBoolean
-    ]
-
-    gtkModel [
-	<category: 'accessing'>
-
-	^ model ifNil: [
-	    model := GTK.GtkListStore new: 1 varargs: {GTK.GValue gTypeString} ]
-    ]
-
     buildNamespaceModel [
         <category: 'model builder'>
 
@@ -78,7 +44,7 @@ Object subclass: GtkImageModel [
         <category: 'model builder'>
 
 	| namespace |
-        finderDic at: aNamespace displayString ifAbsentPut: [ self appendToModel: aNamespace displayString. Dictionary new ].
+        finderDic at: aNamespace displayString ifAbsentPut: [ Dictionary new ].
 	self at: aNamespace displayString addToFinder: (NamespaceFinder on: aNamespace).
 
         aNamespace subspacesDo: [ :each | self appendNamespace: each ]
@@ -89,8 +55,8 @@ Object subclass: GtkImageModel [
 
         | class string |
         Class allSubclassesDo: [ :each |
-            string := ((each displayString) substrings: $.) last.
-            finderDic at: string ifAbsentPut: [ self appendToModel: string. Dictionary new ].
+            string := each asClass name asString, ' '.
+            finderDic at: string ifAbsentPut: [ Dictionary new ].
 	    self at: string addToFinder: (ClassFinder on: each) ]
     ]
 
@@ -100,7 +66,7 @@ Object subclass: GtkImageModel [
 	| method |
         [ CompiledMethod allInstancesDo: [ :each | | selector |
             selector := each selector asString.
-            finderDic at: selector ifAbsentPut: [ self appendToModel: selector. Dictionary new ].
+            finderDic at: selector ifAbsentPut: [ Dictionary new ].
 	    self at: selector addToFinder: (MethodFinder on: each methodClass with: each selector) ] ] forkAt: Processor lowIOPriority
     ]
 
@@ -110,12 +76,6 @@ Object subclass: GtkImageModel [
 	(finderDic at: aSelector)
                 at: aFinderObject displayString
                 put: aFinderObject
-    ]
-
-    appendToModel: aString [
-        <category: 'model builder'>
-
-        self gtkModel insertWithValues: nil position: 0 varargs: {0. aString. -1}
     ]
 
     matchSelector: aSymbol [
@@ -132,22 +92,27 @@ Object subclass: GtkImageModel [
 	finderDic keysAndValuesDo: [ :key :value |
 	    (key matchRegex: aString) ifTrue: [ result at: key put: value ] ].
 	^ (self class new)
-	    finderTreeAsModel: result;
+	    image: result;
+	    registerNotifier;
 	    yourself
     ]
 
-    finderTreeAsModel: aDictionary [
+    image: aDictionary [
+	<category:'accessing'>
+
+	finderDic := aDictionary
+    ]
+
+    do: aBlock [
 	<category: 'model'>
 
-	finderDic := aDictionary.
-	finderDic keysDo: [ :each |
-	    self appendToModel: each ]
+	(finderDic keys asArray sort: [ :a :b | a <= b ]) do: aBlock
     ]
-    
+
     addNamespaceEvent: anEvent [
 	<category: 'events'>
 
-        finderDic at: anEvent item displayString ifAbsentPut: [ self appendToModel: anEvent item displayString. Dictionary new ].
+        finderDic at: anEvent item displayString ifAbsentPut: [ Dictionary new ].
 	self at: anEvent item displayString addToFinder: (NamespaceFinder on: anEvent item).
     ]
 

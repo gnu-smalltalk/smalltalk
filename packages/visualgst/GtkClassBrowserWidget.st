@@ -183,6 +183,12 @@ GtkConcreteWidget subclass: GtkClassBrowserWidget [
 	    showAll
     ]
 
+    postInitialize [
+	<category: 'initialize'>
+
+	codeWidget postInitialize
+    ]
+
     grabFocus [
 	<category: 'user interface'>
 
@@ -204,11 +210,11 @@ GtkConcreteWidget subclass: GtkClassBrowserWidget [
 	    ifTrue: [
 		iMethodWidget hasSelectedMethod 
 		    ifTrue: [ codeWidget sourceCode: iMethodWidget sourceCode ]
-		    ifFalse: [ codeWidget clearCode ] ]
+		    ifFalse: [ codeWidget clear ] ]
 	    ifFalse: [
                 cMethodWidget hasSelectedMethod
                     ifTrue: [ codeWidget sourceCode: cMethodWidget sourceCode ]
-                    ifFalse: [ codeWidget clearCode ] ]
+                    ifFalse: [ codeWidget clear ] ]
     ]
 
     onNamespaceChanged [
@@ -221,10 +227,10 @@ GtkConcreteWidget subclass: GtkClassBrowserWidget [
 	classWidget namespace: namespace category: namespaceWidget selectedCategory.
 
 	classHierarchyUpdate ifFalse: [ classHierarchyWidget emptyModel ].
-	iCategoryWidget emptyModel.
-	cCategoryWidget emptyModel.
-	iMethodWidget emptyModel.
-	cMethodWidget emptyModel.
+	iCategoryWidget clear.
+	cCategoryWidget clear.
+	iMethodWidget clear.
+	cMethodWidget clear.
 	codeWidget namespaceDefinition: (NamespaceSource on: namespace).
 	state := NamespaceState on: self with: namespace
     ]
@@ -259,7 +265,7 @@ GtkConcreteWidget subclass: GtkClassBrowserWidget [
 	classHierarchyUpdate := true.
         aClass := classHierarchyWidget selectedClass.
 	namespaceWidget selectANamespace: aClass environment.
-	classWidget selectAClass: aClass.
+	classWidget selectAClass: aClass class.
 	classHierarchyUpdate := false
     ]
 
@@ -271,7 +277,7 @@ GtkConcreteWidget subclass: GtkClassBrowserWidget [
 	iCategoryWidget hasSelectedCategory ifFalse: [ ^ self ].
 	iMethodWidget class: classWidget selectedClass withCategory: iCategoryWidget selectedCategory.
 
-	codeWidget clearCode.
+	codeWidget clear.
 	state := CategoryState on: self with: classWidget selectedClass -> iCategoryWidget selectedCategory
     ]
 
@@ -282,7 +288,7 @@ GtkConcreteWidget subclass: GtkClassBrowserWidget [
 	cCategoryWidget hasSelectedCategory ifFalse: [ ^ self ].
 	cMethodWidget class: classWidget selectedClass class withCategory: cCategoryWidget selectedCategory.
 
-	codeWidget clearCode.
+	codeWidget clear.
 	state := CategoryState on: self with: classWidget selectedClass class -> cCategoryWidget selectedCategory
     ]
 
@@ -353,7 +359,12 @@ GtkConcreteWidget subclass: GtkClassBrowserWidget [
 
 	codeWidget codeSaved.
         Namespace current: aNamespace.
-        ^ (ReadStream on: codeWidget sourceCode) fileIn
+        (ReadStream on: codeWidget sourceCode) fileIn.
+	(STInST.GSTFileInParser parseSmalltalkStream: (ReadStream on: codeWidget sourceCode) with: (STInST.STClassLoader new)) do: [ :each |
+	    each isClass ifTrue: [
+		self 
+		    selectANamespace: each environment;
+		    selectAClass: each ] ]
     ]
 
     acceptClassDefinition [
@@ -679,23 +690,23 @@ GtkConcreteWidget subclass: GtkClassBrowserWidget [
         classWidget namespace: aNamespace.
 
         classHierarchyWidget emptyModel.
-        iCategoryWidget emptyModel.
-        cCategoryWidget emptyModel.
-        iMethodWidget emptyModel.
-        cMethodWidget emptyModel.
+        iCategoryWidget clear.
+        cCategoryWidget clear.
+        iMethodWidget clear.
+        cMethodWidget clear.
         codeWidget namespaceDefinition: (NamespaceSource on: aNamespace)
     ]
 
     selectAClass: aClass [
 	<category: 'selection'>
 
-        classWidget selectAClass: aClass.
-	classHierarchyWidget classOrMeta: aClass.
+        classWidget selectAClass: aClass class.
+	classHierarchyWidget classOrMeta: aClass class.
         iCategoryWidget classOrMeta: aClass.
         cCategoryWidget classOrMeta: aClass class.
 
-        iMethodWidget emptyModel.
-        cMethodWidget emptyModel
+        iMethodWidget clear.
+        cMethodWidget clear
     ]
 
     select: aSelector in: aMethodWidget withCategory: aCategoryWidget [
@@ -712,7 +723,7 @@ GtkConcreteWidget subclass: GtkClassBrowserWidget [
             aMethodWidget
                 class: class withCategory: (class compiledMethodAt: aSelector) methodCategory ].
 
-	aMethodWidget selectAMethod: aSelector asString
+	aMethodWidget selectAMethod: aSelector
     ]
 
     selectAnInstanceMethod: aSelector [
@@ -830,7 +841,13 @@ GtkConcreteWidget subclass: GtkClassBrowserWidget [
 
 	codeWidget selectAll
     ]
-   
+ 
+    hasSelection [
+	<category:'text testing'>
+
+	^ codeWidget hasSelection
+    ]
+ 
     selectedText [
 	<category: 'text editing'>
 
@@ -900,6 +917,18 @@ GtkConcreteWidget subclass: GtkClassBrowserWidget [
 	<category: 'testing'>
 
 	^ codeWidget hasChanged
+    ]
+
+    showFind [
+	<category: 'user interface'>
+
+	codeWidget showFind
+    ]
+
+    showReplace [
+	<category: 'user interface'>
+
+	codeWidget showReplace
     ]
 ]
 

@@ -1,17 +1,25 @@
 Object subclass: GtkListModel [
 
-    | columns contentsBlock item model |
+    GtkListModel class >> on: aGtkListStore [
+	<category: 'instance creation'>
 
-    columns: anInteger [
-	<category: 'accessing'>
-
-	columns := anInteger
+	^ super new
+	    initialize;
+	    gtkModel: aGtkListStore;
+	    yourself
     ]
 
-    columns [
-	<category:' accessing'>
+    | contentsBlock item model |
 
-	^ columns
+    initialize [
+	<category: 'initialization'>
+
+    ]
+
+    gtkModel: aGtkListStore [
+	<category: 'accessing'>
+
+	model := aGtkListStore
     ]
 
     item: anObject [
@@ -38,39 +46,46 @@ Object subclass: GtkListModel [
 	^ contentsBlock
     ]
 
-    gtkModel [
-	<category: 'accessing'>
-
-	^ model ifNil: [
-	    model := GTK.GtkListStore new: columns size varargs: columns ]
-    ]
-
-    append: anArray [
+    append: anItem [
 	<category:' model'>
 
-	self gtkModel append: anArray
+	model appendItem: ((self contentsBlock value: anItem) copyWith: anItem)
+    ]
+
+    remove: anObject [
+	<category: 'model'>
+
+	| iter |
+	(iter := self findIter: anObject) ifNil: [ self error: 'item not found' ].
+	model remove: iter
     ]
 
     clear [
 	<category: 'model'>
 
-	self gtkModel clear
+	model clear
     ]
 
     refresh [
 	<category: 'model'>
 
-	| elem |
-	self clearModel.
+	self clear.
 	self item ifNil: [ ^ self ].
-	self item do: [ :each | self append: self childrenBlock value: each ]
+	self item do: [ :each | self append: each ]
+    ]
+
+    hasItem: anObject [
+        <category: 'item selection'>
+
+        self findIter: anObject ifAbsent: [ ^ false ].
+        ^ true
     ]
 
     findIter: anObject ifAbsent: aBlock [
 	<category: 'item selection'>
 
-	self gtkModel do: [ :elem :iter |
-	    elem first = anObject ifTrue: [ ^ iter ] ].
+	model do: [ :elem :iter |
+	    elem last = anObject ifTrue: [ ^ iter ] ].
 	aBlock value
     ]
 
@@ -78,13 +93,6 @@ Object subclass: GtkListModel [
 	<category: 'item selection'>
 
 	^ self findIter: anObject ifAbsent: [ self error: 'Item not found' ]
-    ]
-
-    hasItem: anObject [
-        <category: 'item selection'>
-
-        self findIter: anObject ifAbsent: [ ^ false ].
-	^ true 
     ]
 ]
 

@@ -5,7 +5,7 @@ UndoableCommand subclass: AddCategoryCommand [
 
 	| dlg |
         dlg := GtkEntryDialog title: 'Add a category' text: 'Name of the category'.
-        dlg hasPressedOk ifTrue: [ 
+        dlg hasPressedOk: [ 
             self push: (AddCategoryUndoCommand add: dlg result onWidget: target viewedCategoryWidget) ]
 
     ]

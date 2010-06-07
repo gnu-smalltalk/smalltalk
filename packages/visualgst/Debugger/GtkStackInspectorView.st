@@ -1,5 +1,5 @@
 GtkConcreteWidget subclass: GtkStackInspectorView [
-    | object model variables |
+    | object variables |
 
     GtkStackInspectorView class >> openOn: aContext [
 	<category: 'instance creation'>
@@ -19,40 +19,19 @@ GtkConcreteWidget subclass: GtkStackInspectorView [
 	<category: 'accessing'>
 
 	object := anObject.
-	self refreshModel
     ]
 
-    model [
-	<category: 'accessing'>
+    do: aBlock [
+	<category: 'iterating'>
 
-	^ model ifNil: [
-	    model := GTK.GtkListStore new: 1 varargs: {GTK.GValue gTypeString} ]
-    ]
-
-    clearModel [
-        <category: 'accessing'>
-
-        self model clear
-    ]
-
-    refreshModel [
-	<category: 'events'>
-  
-	| i | 
-	self clearModel.
-	variables := Dictionary new.
-	i := 1.
-	self appendVariable: 'thisContext'.
-	self object variablesDo: [ :each |
-		variables at: each displayString put: i.
-		self appendVariable: each displayString.
-		i := i + 1 ]
-    ]
-
-    appendVariable: aString [
-        <category: 'model builder'>
-
-	self model appendItem: {aString}
+	| i |
+        variables := Dictionary new.
+        i := 1.
+	aBlock value: 'thisContext'.
+        self object variablesDo: [ :each |
+                variables at: each displayString put: i.
+		aBlock value: each displayString.
+                i := i + 1 ].
     ]
 
     selectedValue: aString [

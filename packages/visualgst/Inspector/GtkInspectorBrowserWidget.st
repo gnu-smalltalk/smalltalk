@@ -7,6 +7,12 @@ GtkConcreteWidget subclass: GtkInspectorBrowserWidget [
 	^ 'Gtk class browser'
     ]
 
+    postInitialize [
+	<category: 'initialization'>
+
+	codeWidget postInitialize
+    ]
+
     buildBrowser [
 
 	^ GTK.GtkHPaned new

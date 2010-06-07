@@ -1,23 +1,29 @@
 GtkConcreteWidget subclass: GtkMethodWidget [
-    | column methodTree model class category |
+    | model methodTree class category |
 
     GtkMethodWidget >> on: aClass withCategory: aCategory [
-    ^ (self new)
-        initialize;
-	class: aClass withCategory: aCategory;
-        yourself
+	<category: 'instance creation'>
+
+	^ (self new)
+	    initialize;
+	    class: aClass withCategory: aCategory;
+	    yourself
     ]
 
     initialize [
 	<category: 'initialization'>
 
-	self mainWidget: self buildTreeView
+	self 
+	    mainWidget: self buildTreeView;
+	    registerNotifier
     ]
 
-    methodModel [
-	<category: 'accessing'>
+    registerNotifier [
+        <category: 'initialize-release'>
 
-	^ GtkMethodModel
+        (VisualGST uniqueInstance systemChangeNotifier)
+            notify: self ofSystemChangesOfItem: #method change: #Added using: #'addEvent:';
+            notify: self ofSystemChangesOfItem: #method change: #Removed using: #'removeEvent:'
     ]
 
     category [
@@ -30,7 +36,19 @@ GtkConcreteWidget subclass: GtkMethodWidget [
 	<category: 'accessing'>
 
 	category := aString.
-	self refreshModel
+	self classOrMeta methodDictionary ifNil: [ 
+		model clear. 
+		^ self].
+	model 
+	    item: ((self classOrMeta methodDictionary select: [ :each | self category = '*' or: [ each methodCategory = self category ] ]) 
+												    asArray sort: [ :a :b | a selector <= b selector ]);
+	    refresh
+    ]
+
+    classOrMeta [
+	<category: 'accessing'>
+
+	^ class
     ]
 
     class: aClass withCategory: aString [
@@ -40,48 +58,46 @@ GtkConcreteWidget subclass: GtkMethodWidget [
 	self category: aString
     ]
 
-    model [
-	<category: 'accessing'>
-
-	
-	^ model ifNil: [ model := self methodModel on: self classOrMetaSelected withCategory: self category ]
+    gtkModel [
+	^ methodTree getModel
     ]
 
     emptyModel [
         <category: 'accessing'>
 
-        methodTree setModel: (GTK.GtkListStore new: 1 varargs: {GTK.GValue gTypeString})
+	self clear
     ]
 
-    refreshModel [
-	<category: 'events'>
+    clear [
+        <category: 'accessing'>
 
-	model := self methodModel on: self classOrMetaSelected withCategory: self category.
-	methodTree setModel: self model gtkModel.
-        self model isSorted
-            ifFalse: [
-                column signalEmitByName: 'clicked' args: {}.
-                self model sorted: true ].
+	model clear
+    ]
+
+    includesCategory: aSymbol [
+        <category: 'testing'>
+
+        self category = '*' ifTrue: [ ^ true ].
+        (self category = 'still unclassified' and: [ aSymbol isNil ]) ifTrue: [ ^ true ].
+        ^ self category = aSymbol
     ]
 
     buildTreeView [
         <category: 'user interface'>
     
-	methodTree := (GTK.GtkTreeView newWithSortedTextColumn: self model gtkModel title: 'Methods')
+	methodTree := (GTK.GtkTreeView createListWithModel: {{GtkColumnTextType title: 'Methods'}})
                             connectSignal: 'button-press-event' to: self selector: #'onPress:event:' userData: nil;
                             yourself.
-	column := methodTree getColumn: 0.
 	methodTree getSelection setMode: GTK.Gtk gtkSelectionBrowse.
-        self model isSorted
-            ifFalse: [
-                column signalEmitByName: 'clicked' args: {}.
-                self model sorted: true ].
+	(model := GtkListModel on: methodTree getModel)
+					contentsBlock: [ :each | {each selector asString} ].
 	^ GTK.GtkScrolledWindow withChild: methodTree
     ]
 
     isTestMethod [
 	<category: 'button event'>
-	^(self classOrMetaSelected inheritsFrom: TestCase)
+
+	^ (self classOrMetaSelected inheritsFrom: TestCase)
 	    and: [ self selectedMethodSymbol startsWith: 'test' ]
     ]
 
@@ -139,37 +155,20 @@ GtkConcreteWidget subclass: GtkMethodWidget [
     selectedMethodSymbol [
 	<category: 'accessing'>
 
-        | iter string |
-        (iter := methodTree selectedIter) ifNil: [ ^nil ].
-        ^ (self model gtkModel getOop: iter column: 0) asSymbol
+        ^ self selectedMethod selector
     ]
 
     selectedMethod [
 	<category: 'accessing'>
 
-	| symbol |
-	(symbol := self selectedMethodSymbol) ifNil: [ ^nil ].
-	^ self classOrMetaSelected compiledMethodAt: symbol
+	self hasSelectedMethod ifFalse: [ ^ self error: 'nothing is selected' ].
+        ^ methodTree selection 
     ]
 
-    selectAMethod: aString [
+    selectAMethod: aSymbol [
         <category: 'item selection'>
 
-        | selection |
-        selection := methodTree getSelection.
-        selection unselectAll.
-        aString ifNil: [ ^ self ].
-        selection selectIter: (self findIterInAMethod: aString)
-    ]
-
-    findIterInAMethod: aString [
-        <category: 'item selection'>
-
-        | result |
-
-        result := self model findIterInAMethod: aString.
-        methodTree scrollToCell: (self model gtkModel getPath: result) column: nil useAlign: false rowAlign: 0.5 colAlign: 0.5.
-        ^ result
+	methodTree select: (self classOrMeta methodDictionary at: aSymbol)
     ]
 
     sourceCode [
@@ -213,6 +212,20 @@ GtkConcreteWidget subclass: GtkMethodWidget [
         <category: 'method events'>
 
 	FileoutMethodCommand on: self selectedMethod
+    ]
+
+    addEvent: anEvent [
+        <category: 'event'>
+
+        (anEvent item methodClass == self classOrMeta and: [ self includesCategory: anEvent item methodCategory ] ) ifFalse: [ ^ self ].
+        model append: anEvent item
+    ]
+
+    removeEvent: anEvent [
+        <category: 'event'>
+
+        (anEvent item methodClass == self classOrMeta and: [ self includesCategory: anEvent item methodCategory ]) ifFalse: [ ^ self ].
+        model remove: anEvent item
     ]
 ]
 

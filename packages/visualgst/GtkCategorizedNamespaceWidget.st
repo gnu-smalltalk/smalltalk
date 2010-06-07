@@ -1,55 +1,163 @@
-GtkNamespaceWidget subclass: GtkCategorizedNamespaceWidget [
-    model [
-	<category: 'accessing'>
+GtkConcreteWidget subclass: GtkCategorizedNamespaceWidget [
+    | namespacesTree model |
 
-	^ model ifNil: [
-	    model := GtkCategorizedNamespaceModel new
-				    initialize;
-				    yourself.
-	    model gtkModel
-		connectSignal: 'row-has-child-toggled' to: self
-		selector: #childToggled:path:iter:.
+    initialize [
+        <category: 'initialization'>
 
-	    model
-	 ]
+        self mainWidget: self buildTreeView.
+	self registerNotifier
+    ]
+
+    registerNotifier [
+        <category: 'initialize-release'>
+
+        (VisualGST uniqueInstance systemChangeNotifier)
+            notify: self ofSystemChangesOfItem: #namespace change: #Added using: #'addEvent:';
+            notify: self ofSystemChangesOfItem: #namespace change: #Removed using: #'removeEvent:';
+            notify: self ofSystemChangesOfItem: #category change: #Added using: #'addCategoryEvent:';
+            notify: self ofSystemChangesOfItem: #category change: #Removed using: #'removeCategoryEvent:'
+    ]
+
+    buildTreeView [
+        <category: 'user interface'>
+
+        namespacesTree := (GTK.GtkTreeView createTreeWithModel: {{GtkColumnPixbufType visible. GtkColumnTextType title: 'Namespaces'}})
+                            connectSignal: 'button-press-event' to: self selector: #'onPress:event:';
+                            yourself.
+        namespacesTree getSelection setMode: GTK.Gtk gtkSelectionBrowse.
+        (model := GtkTreeModel on: namespacesTree getModel)
+                                        item: FakeNamespace;
+                                        childrenBlock: [ :each | (each subspaces asArray sort: [ :a :b | a name <= b name ]), (each categories values sort: [ :a :b | a name <= b name ]) ];
+                                        contentsBlock: [ :each | {each icon. each name asString} ];
+					connectSignal: 'row-has-child-toggled' to: self selector: #'childToggled:path:iter:';
+					refresh.
+        ^ GTK.GtkScrolledWindow withChild: namespacesTree
+    ]
+
+    onPress: aGtkWidget event: aGdkEvent [
+        <category: 'button event'>
+
+        | menu aGdkButtonEvent |
+        aGdkButtonEvent := aGdkEvent castTo: GTK.GdkEventButton type.
+        aGdkButtonEvent button value = 3 ifFalse: [ ^ false ].
+        menu := GTK.GtkMenu new.
+        menu appendMenuItems: {{'Add a namespace'. self. #newNamespace}.
+            {'Rename a namespace'. self. #renameNamespace}.
+            {'Delete a namespace'. self. #deleteNamespace}.
+            {}.
+            {'Inspect a namespace'. self. #inspectNamespace}.
+            {}.
+            {'File out a namespace'. self. #fileoutNamespace}}.
+        menu attachToWidget: namespacesTree detacher: nil.
+        menu popup: nil parentMenuItem: nil func: nil data: nil button: 3 activateTime: aGdkButtonEvent time value.
+        menu showAll.
+        ^ true
+    ]
+
+    whenSelectionChangedSend: aSelector to: anObject [
+        <category: 'events'>
+
+        namespacesTree getSelection
+            connectSignal: 'changed' to: anObject selector: aSelector
+    ]
+
+    selectANamespace: aNamespace [
+        <category: 'item selection'>
+
+	namespacesTree select: aNamespace
+    ]
+
+    hasSelectedNamespace [
+        <category: 'testing'>
+
+        ^ namespacesTree hasSelectedItem
     ]
 
     selectedNamespace [
-	<category: 'accessing'>
+        <category: 'accessing'>
 
-	| iter path |
-	(self model isIterNamespace: self selectedIter) ifTrue: [ 
-	    ^ self model gtkModel getOop: self selectedIter column: 2 ].
-	path := self model gtkModel getPath: self selectedIter.
-	iter := GTK.GtkTreeIter new.
-	[ path up.
-	  (self model gtkModel getIter: iter path: path) ifFalse: [ self error: 'Selected category not found' ].
-	  (self model isIterNamespace: iter) ] whileFalse.
-	^ self model gtkModel getOop: iter column: 2
+	self hasSelectedNamespace ifFalse: [ self error: 'nothing is selected' ].
+	^ namespacesTree selection namespace
     ]
 
     selectedCategory [
-	<category: 'accessing'>
+        <category: 'accessing'>
 
-	| iter path cat |
-	(self model isIterNamespace: self selectedIter) ifTrue: [ ^ '' ].
-	path := self model gtkModel getPath: self selectedIter.
-        iter := GTK.GtkTreeIter new.
-	cat := self model gtkModel getOop: self selectedIter column: 1.
-        [ path up.
-          (self model gtkModel getIter: iter path: path) ifFalse: [ self error: 'Selected category not found' ].
-          (self model isIterNamespace: iter) ] whileFalse:
-	      [ cat := (self model gtkModel getOop: iter column: 1), '-', cat ].
-	^ cat
+        self hasSelectedNamespace ifFalse: [ self error: 'nothing is selected' ].
+        ^ namespacesTree selection category fullname
     ]
 
     childToggled: model path: path iter: iter [
 	<category: 'signals'>
 
 	namespacesTree collapseRow: path.
-	(self model isIterNamespace: iter) ifTrue: [
-	    ((self model gtkModel at: iter) at: 3) subspaces isEmpty ifFalse: [
+	((model at: iter) at: 3) isNamespace ifTrue: [
+	    ((model at: iter) at: 3) subspaces isEmpty ifFalse: [
 		namespacesTree expandRow: path openAll: false ] ]
+    ]
+
+    newNamespace [
+        <category: 'popup events'>
+
+        AddNamespaceCommand on: self
+    ]
+
+    renameNamespace [
+        <category: 'namespace events'>
+
+        RenameNamespaceCommand on: self
+    ]
+
+    deleteNamespace [
+        <category: 'namespace events'>
+
+        DeleteNamespaceCommand on: self
+    ]
+
+    inspectNamespace [
+        <category: 'namespace events'>
+
+        InspectNamespaceCommand on: self
+    ]
+
+    fileoutNamespace [
+        <category: 'namespace events'>
+
+        FileoutNamespaceCommand on: self selectedNamespace
+    ]
+
+    addEvent: anEvent [
+        <category: 'model event'>
+
+	model append: anEvent item parent: anEvent item superspace
+    ]
+
+    removeEvent: anEvent [
+        <category: 'model event'>
+
+        model remove: anEvent item
+    ]
+
+    removeCategoryEvent: anEvent [
+        <category: 'model event'>
+
+        model remove: anEvent item
+    ]
+
+    addCategoryEvent: anEvent [
+        <category: 'model event'>
+
+	anEvent item isRoot ifTrue: [ ^ self ].
+	model append: anEvent item parent: (anEvent item parent isRoot ifTrue: [ anEvent item namespace ] ifFalse: [ anEvent item parent ])
+    ]
+
+    recategorizedClassEvent: anEvent [
+        <category: 'model event'>
+
+	"anEvent oldCategory = anEvent item category ifTrue: [ ^ self ].
+	 self 
+	    removeEmptyCategory: anEvent item oldCategory;
+	    addCategory: anEvent item category"
     ]
 ]
 

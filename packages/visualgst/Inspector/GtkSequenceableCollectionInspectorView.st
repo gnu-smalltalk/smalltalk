@@ -1,14 +1,10 @@
 GtkObjectInspectorView subclass: GtkSequenceableCollectionInspectorView [
 
-    refreshModel [
-	<category: 'events'>
- 
-	| i | 
-	super refreshModel. 
-	i := 1.
-	self object do: [ :each |
-	    self appendVariable: i displayString.
-	    i := i + 1 ]
+    values [
+	| i |
+	i := OrderedCollection new.
+	1 to: self object size do: [ :j | i add: j ].
+	^ super values, i
     ]
 
     selectedValue: aString [

@@ -1,18 +1,32 @@
 GtkConcreteWidget subclass: GtkClassHierarchyWidget [
-    | classesTree model classOrMeta |
+    | root dic classesTree model classOrMeta |
 
     GtkClassHierarchyWidget >> on: aClass [
+	<category: 'instance creation'>
+
 	^ (self new)
 	    initialize;
-	    class: aClass;
+	    classOrMeta: aClass;
 	    yourself
     ]
 
     initialize [
 	<category: 'initialization'>
 
-	self mainWidget: self buildTreeView
+	dic := Dictionary new.
+	self 
+	    mainWidget: self buildTreeView;
+	    registerNotifier
     ]
+
+    registerNotifier [
+        <category: 'initialize-release'>
+
+       " (VisualGST uniqueInstance systemChangeNotifier)
+            notify: self ofSystemChangesOfItem: #class change: #Added using: #'addEvent:';
+            notify: self ofSystemChangesOfItem: #class change: #Removed using: #'removeEvent:';
+            notify: self ofSystemChangesOfItem: #class change: #Recategorized using: #'recategorizedEvent:'
+   " ]
 
     classOrMeta [
 	<category: 'accessing'>
@@ -24,70 +38,41 @@ GtkConcreteWidget subclass: GtkClassHierarchyWidget [
 	<category: 'accessing'>
 
 	classOrMeta := aClass.
-	self refreshModel
-    ]
-
-    model [
-	<category: 'accessing'>
-
-	^ model ifNil: [
-	    model := GTK.GtkTreeStore new: 1 varargs: {GTK.GValue gTypeString} ]
-    ]
-
-    emptyModel [
-	<category: 'accessing'>
-
-	self model clear
-    ]
-
-    refreshModel [
-	<category: 'events'>
-
-	| iter |
-	
-	self model clear.
-	iter := self buildSuperClassHierarchy.
-	self classOrMeta class subclassesDo: [ :each |
-		self appendClass: each to: iter].
-
+	dic := Dictionary new.
+	self buildSuperclasses.
+	model 
+	    item: #root;
+	    refresh.
 	classesTree expandAll
     ]
 
-    buildSuperClassHierarchy [
-	<category: 'model builder'>
-
-	| iter res parent parentGtkIter |
-	parent := self classOrMeta.
-	res := OrderedCollection new.
-	[parent isNil] whileFalse: [
-	    res addFirst: parent displayString.
-	    parent := parent superclass ].
-
-	res do: [ :each |
-	    iter := GTK.GtkTreeIter new.
-	    self model append: iter parent: parentGtkIter.
-	    self model setOop: iter column: 0 value: each.
-	    parentGtkIter := iter ].
-
-	^ iter
+    emptyModel [
     ]
 
-    appendClass: aClass to: parentGtkIter [
-	<category: 'model builder'>
-    
-	| iter |
-	iter := GTK.GtkTreeIter new.
-	self model append: iter parent: parentGtkIter.
-	self model setOop: iter column: 0 value: (aClass instanceClass displayString).
+    buildSuperclasses [
+	| parent |
 
-	aClass subclassesDo: [ :each |
-	    self appendClass: each to: iter ]
+	parent := self classOrMeta asClass.
+	[ parent isNil ] whileFalse: [
+	    dic at: (parent superclass ifNil: [ #root ]) put: {parent}.
+	    root := parent.
+	    parent := parent superclass ].
     ]
 
     buildTreeView [
 	<category: 'user interface'>
-    
-	^ GTK.GtkScrolledWindow withChild: (classesTree := GTK.GtkTreeView newWithTextColumn: self model title: 'Class')
+   
+        classesTree := GTK.GtkTreeView createTreeWithModel: {{GtkColumnTextType title: 'Classes'}}.
+        classesTree getSelection setMode: GTK.Gtk gtkSelectionBrowse.
+        (model := GtkTreeModel on: classesTree getModel)
+                                        item: #root;
+                                        childrenBlock: [ :each |
+					    dic at: each ifAbsent: [ | col |
+                                                        col := SortedCollection sortBlock: [ :a :b | a asClass name <= b asClass name ].
+							col addAll: each subclasses.
+                                            col ] ];
+                                        contentsBlock: [ :each | {each asClass name asString, ' '} ].
+        ^ GTK.GtkScrolledWindow withChild: classesTree 
     ]
 
     whenSelectionChangedSend: aSelector to: anObject [
@@ -106,22 +91,8 @@ GtkConcreteWidget subclass: GtkClassHierarchyWidget [
     selectedClass [
 	<category: 'accessing'>
 
-	| iter string |
-	(iter := classesTree selectedIter) ifNil: [ ^ self classOrMeta " self error: 'Nothing is selected' " ].
-	string := ((self model getOop: iter column: 0) subStrings: $ ) at: 1.
-
-	^ self lookFor: 1 inside: Smalltalk with: (string subStrings: $.) 
-    ]
-
-    lookFor: anInteger inside: aNamespace with: anArray [
-	<category: 'private'>
-
-	anInteger < anArray size
-	    ifTrue: [ aNamespace subspacesDo: [ :each |
-		each name = (anArray at: anInteger) asSymbol
-		    ifTrue: [ ^ self lookFor: anInteger + 1 inside: each with: anArray ] ].
-		self error: 'Namespace not found' ]
-	    ifFalse: [ ^ aNamespace at: (anArray at: anInteger) asSymbol ifAbsent: [ self error: 'Class not found' ] ]
+	self hasSelectedClass ifFalse: [ ^ self classOrMeta " self error: 'Nothing is selected' " ].
+	^ classesTree selection asClass
     ]
 ]
 

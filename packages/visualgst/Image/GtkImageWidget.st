@@ -1,16 +1,12 @@
 GtkConcreteWidget subclass: GtkImageWidget [
+
     | imageTree model searchEntry |
+
 
     initialize [
 	<category: 'initialization'>
 
 	self mainWidget: self buildMainWidget
-    ]
-
-    model [
-        <category: 'accessing'>
-
-        ^ model ifNil: [ model := GtkImageModel current ]
     ]
 
     buildMainWidget [
@@ -37,11 +33,12 @@ GtkConcreteWidget subclass: GtkImageWidget [
     buildClassAndMethodList [
         <category: 'user interface'>
 
-        imageTree := GTK.GtkTreeView newWithSortedTextColumn: self model gtkModel title: 'Methods and Classes'.
-        self model isSorted ifFalse: [
-            (imageTree getColumn: 0) signalEmitByName: 'clicked' args: {}.
-            self model isSorted: true ].
+        imageTree := (GTK.GtkTreeView createListWithModel: {{GtkColumnTextType title: 'Methods and Classes'}}).
         imageTree setSearchEntry: searchEntry.
+        (model := GtkListModel on: imageTree getModel)
+					item: GtkImage current;
+                                        contentsBlock: [ :each | {each displayString} ];
+					refresh.
         ^ GTK.GtkScrolledWindow withChild: imageTree
     ]
 
@@ -73,16 +70,29 @@ GtkConcreteWidget subclass: GtkImageWidget [
     searchValidate [
 	<category: 'search entry events'>
 
-        searchEntry getText isEmpty ifTrue: [ ^ imageTree setModel: (model := GtkImageModel current) gtkModel ].
-        imageTree setModel: (model := (GtkImageModel current matchRegex: searchEntry getText)) gtkModel
+	searchEntry getText isEmpty 
+		    ifTrue: [ model item: GtkImage current ]
+		    ifFalse: [ model item: (GtkImage current matchRegex: searchEntry getText) ].
+	model refresh
+    ]
+
+    hasSelection [
+	<category: 'accessing'>
+
+	^ imageTree hasSelectedItem
     ]
 
     selection [
 	<category: 'accessing'>
 
-        | iter string |
-        (iter := imageTree selectedIter) ifNil: [ ^ self error: 'Nothing is selected' ].
-        ^ (self model gtkModel at: iter) first
+        self hasSelection ifFalse: [ ^ self error: 'Nothing is selected' ].
+        ^ imageTree selection
+    ]
+
+    matchSelector: aSymbol [
+	<category: 'matching'>
+
+	^ GtkImage current matchSelector: aSymbol
     ]
 ]
 

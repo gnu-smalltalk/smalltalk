@@ -15,15 +15,17 @@ Object subclass: GtkEntryDialog [
 	hasPressedOk := false.
 	dialog := GTK.GtkDialog newWithButtons: aTitle parent: nil flags: 0 varargs: {nil}.
 	self buildCentralWidget: aDescription on: dialog.
-	dialog showModalOnAnswer: [ :dlg :res |
+	"dialog showModalOnAnswer: [ :dlg :res |
 		res = GTK.Gtk gtkResponseYes ifTrue: [ hasPressedOk := true ].
-		dlg destroy ]
+		dlg destroy ]"
     ]
 
-    hasPressedOk [
+    hasPressedOk: aBlock [
 	<category: 'testing'>
 
-	^ hasPressedOk
+        dialog showModalOnAnswer: [ :dlg :res |
+                res = GTK.Gtk gtkResponseYes ifTrue: [ aBlock value ].
+                dlg destroy ]
     ]
 
     result [

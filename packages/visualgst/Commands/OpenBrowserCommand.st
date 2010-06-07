@@ -26,7 +26,7 @@ Command subclass: OpenBrowserCommand [
 	<category: 'parsing'>
 
 	| node token start |
-	node := STInST.RBParser parseExpression: aString.
+	[ node := STInST.RBParser parseExpression: aString ] on: Error do: [ ^ Smalltalk->Object ].
 	node isVariable ifFalse: [ ^ Smalltalk->Object ].
 	token := node name tokenize: '\.'.
 	token size = 1 ifTrue: [ ^ self extractSingleToken: token first ].
@@ -48,10 +48,11 @@ Command subclass: OpenBrowserCommand [
     extractFromSelection [
 	<category: ''>
 
-	| result selection |
-	(selection := VisualGST uniqueInstance onFocusPerform: #selectedText)
-                ifNotNil: [ result := self extractNamespaceAndClassFrom: selection ]
-                ifNil: [ result := Smalltalk->Object ].
+	| result |
+        (VisualGST uniqueInstance notebookHasFocus and:
+            [ VisualGST uniqueInstance onFocusPerform: #hasSelection ])
+                ifTrue: [ result := self extractNamespaceAndClassFrom: (VisualGST uniqueInstance onFocusPerform: #selectedText)]
+                ifFalse: [ result := Smalltalk->Object ].
 	^ result
     ]
 
@@ -60,7 +61,7 @@ Command subclass: OpenBrowserCommand [
 
         ^ VisualGST uniqueInstance browserHasFocus
                     ifTrue: [
-                        (VisualGST uniqueInstance currentWidgetOfBrowser sourceCodeWidgetHasFocus and: [ VisualGST uniqueInstance currentWidgetOfBrowser selectedText isNil not ])
+                        (VisualGST uniqueInstance currentWidgetOfBrowser sourceCodeWidgetHasFocus and: [ VisualGST uniqueInstance currentWidgetOfBrowser hasSelection ])
                                                             ifTrue: [ self extractNamespaceAndClassFrom: VisualGST uniqueInstance currentWidgetOfBrowser selectedText ]
                                                             ifFalse: [ self extractSelectedItems ] ]
                     ifFalse: [ self extractFromSelection ]

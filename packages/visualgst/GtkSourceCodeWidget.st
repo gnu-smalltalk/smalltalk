@@ -1,17 +1,17 @@
-GtkConcreteWidget subclass: GtkSourceCodeWidget [
-    | browser codeText codeBuffer codeView object |
+GtkTextWidget subclass: GtkSourceCodeWidget [
+    | browser codeText object |
 
     initialize [
 	<category: 'initialization'>
 
-	self mainWidget: self buildCodeView.
+	super initialize.
 	self initializeHighlighter
     ]
 
     initializeHighlighter [
 	<category: 'initialization'>
 
-	codeBuffer 
+	(self buffer)
 	    createTag: #classVar varargs: #('foreground' 'cyan4' nil);
 	    createTag: #globalVar varargs: #('foreground' 'cyan4' nil);
 	    createTag: #poolVar varargs: #('foreground' 'cyan4' nil);
@@ -106,38 +106,32 @@ GtkConcreteWidget subclass: GtkSourceCodeWidget [
     sourceCode [
 	<category: 'accessing'>
 
-	^ codeBuffer text
+	^ self buffer text
     ]
 
     namespaceDefinition: aString [
 	<category: 'accessing'>
 
-	codeView emptyStack.
+	self emptyStack.
 	self codeText: aString. 
-	codeBuffer setText: aString
+	self buffer setText: (self codeText)
     ]
 
     classDefinition: aString [
 	<category: 'accessing'>
 
-	codeView emptyStack.
+	self emptyStack.
 	self codeText: aString. 
-	codeBuffer setText: aString
-    ]
-
-    clearCode [
-	<category: 'accessing'>
-
-	codeBuffer setText: ''
+	self buffer setText: (self codeText)
     ]
 
     sourceCode: aString [
 	<category: 'accessing'>
 
-	codeView emptyStack.
+	self emptyStack.
 	self codeText: aString. 
-	codeBuffer setText: aString.
-	self parseSource: aString ifParsed: [ :node | SyntaxHighlighter highlight: node in: codeBuffer ]
+	self buffer setText: (self codeText).
+	self parseSource: aString ifParsed: [ :node | SyntaxHighlighter highlight: node in: self buffer ]
     ]
 
     parseSource: aString ifParsed: aOneArgBlock [
@@ -152,21 +146,19 @@ GtkConcreteWidget subclass: GtkSourceCodeWidget [
 	^ aOneArgBlock value: node
     ]
 
-    buildCodeView [
+    connectSignals [
+        <category: 'initialization'>
+
+	super connectSignals.
+        (self buffer)
+	    connectSignal: 'changed' to: self selector: #'changed' userData: nil
+    ]
+
+    buildWidget [
 	<category: 'user interface'>
-
-        codeView := (GtkTextWidget new)
-			initialize;
-			connectSignal: 'populate-popup' to: self selector: #'popupMenuOn:menu:' userData: nil;
-			yourself.
-
-	codeBuffer := codeView getBuffer.
-
-	codeBuffer 
-	    connectSignal: 'changed' to: self selector: #'changed' userData: nil.
-
+	
         ^ (GTK.GtkFrame new: 'Code')
-            add: (GTK.GtkScrolledWindow withChild: codeView);
+            add: super buildWidget;
             yourself
     ]
 
@@ -174,26 +166,8 @@ GtkConcreteWidget subclass: GtkSourceCodeWidget [
 	<category: 'buffer changed'>
 
 	| node text |
-	(text := codeBuffer text) = '' ifTrue: [ ^ self ].
-	self parseSource: text ifParsed: [ :node | SyntaxHighlighter highlight: node in: codeBuffer ]
-    ]
-
-    hasUndo [
-	<category: 'testing'>
-
-	^ codeView hasUndo
-    ]
-
-    hasChanged [
-	<category: 'testing'>
-
-	^ codeView hasChanged
-    ]
-
-    clearUndo [
-	<category: 'buffer events'>
-
-	codeView clearUndo
+	(text := self buffer text) = '' ifTrue: [ ^ self ].
+	self parseSource: text ifParsed: [ :node | SyntaxHighlighter highlight: node in: self buffer ]
     ]
 
     accept [
@@ -206,19 +180,7 @@ GtkConcreteWidget subclass: GtkSourceCodeWidget [
 	<category: 'buffer events'>
 
 	self clearUndo.
-	codeBuffer setText: self codeText
-    ]
-
-    undo [
-	<category: 'buffer events'>
-
-	codeView undo
-    ]
-
-    redo [
-	<category: 'buffer events'>
-
-	codeView redo
+	self buffer setText: self codeText
     ]
 
     object: anObject [
@@ -231,7 +193,7 @@ GtkConcreteWidget subclass: GtkSourceCodeWidget [
         <category: 'smalltalk event'>
 
 	^ Behavior
-            evaluate: codeBuffer selectedText 
+            evaluate: self buffer selectedText 
             to: object
             ifError: [ :fname :lineNo :errorString | self error: errorString ]
     ]
@@ -248,66 +210,28 @@ GtkConcreteWidget subclass: GtkSourceCodeWidget [
             doItProcess: [ object perform: #Doit ] newProcess
     ]
 
-
     inspectIt [
         <category: 'smalltalk event'>
 
 	GtkInspector openOn: self doIt
     ]
 
-
     printIt [
         <category: 'smalltalk event'>
 
 	| iter start end result |
-        iter := codeBuffer iterOfSelectedText second.
+        iter := self buffer iterOfSelectedText second.
         result := ' ', (self doIt displayString), ' '.
-        codeBuffer insertInteractive: iter text: result len: result size defaultEditable: true.
-        start := codeBuffer getIterAtOffset: (iter getOffset - result size).
-        end := codeBuffer getIterAtOffset: (iter getOffset).
-        codeBuffer selectRange: start bound: end
-    ]
-
-    copy [
-        <category: 'text editing'>
-
-        codeView signalEmitByName: 'copy-clipboard' args: {}
-    ]
-
-    cut [
-        <category: 'text editing'>
-
-        codeView signalEmitByName: 'cut-clipboard' args: {}
-    ]
-
-    paste [
-        <category: 'text editing'>
-
-        codeView signalEmitByName: 'paste-clipboard' args: {}.
-    ]
-
-    selectAll [
-        <category: 'text editing'>
-
-        codeView signalEmitByName: 'select-all' args: {true}.
-    ]
-
-    selectedText [
-        <category: 'text accessing'>
-
-        ^ codeView getBuffer selectedText
-    ]
-
-    textview [
-	<category: 'accessing'>
-
-	^ codeView
+        self buffer insertInteractive: iter text: result len: result size defaultEditable: true.
+        start := self buffer getIterAtOffset: (iter getOffset - result size).
+        end := self buffer getIterAtOffset: (iter getOffset).
+        self buffer selectRange: start bound: end
     ]
 
     codeSaved [
 	<category: 'accessing'>
 
-	codeView textSaved
+	self textSaved
     ]
 
     codeText [
@@ -329,20 +253,9 @@ GtkConcreteWidget subclass: GtkSourceCodeWidget [
     ]
 
     selectedMethodSymbol [
-        | iters stream parser node |
-	stream := self sourceCode readStream.
-        iters := codeBuffer getSelectionBounds.
-        parser := STInST.RBBracketedMethodParser new.
-        parser errorBlock: [:message :position | ^nil].
-        parser 
-            scanner: (parser scannerClass on: stream errorBlock: parser errorBlock).
-        node := parser parseMethod body.
-        node := node bestNodeFor:
-	    (iters first getOffset + 1 to: iters second getOffset + 1).
-        [node isNil ifTrue: [^nil].
-	node isMessage] whileFalse: 
-                [node := node parent].
-        ^node selector
+	<category: 'accessing'>
+
+        ^ STInST.RBParser selectedSymbol: self selectedText
     ]
 
     browseSenders [
@@ -360,7 +273,7 @@ GtkConcreteWidget subclass: GtkSourceCodeWidget [
     appendTag: aSymbol description: anArray [
 	<category: 'text buffer'>
 
-	codeBuffer
+	self buffer
             createTag: aSymbol varargs: anArray
     ]
 
@@ -368,10 +281,9 @@ GtkConcreteWidget subclass: GtkSourceCodeWidget [
 	<category: 'text buffer'>
 
 	| start end |
-	start := codeBuffer getIterAtLine: anInteger - 1.
-	end := codeBuffer getIterAtLine: anInteger.
-	codeBuffer applyTagByName: aSymbol start: start end: end
+	start := self buffer getIterAtLine: anInteger - 1.
+	end := self buffer getIterAtLine: anInteger.
+	self buffer applyTagByName: aSymbol start: start end: end
     ]
-
 ]
 

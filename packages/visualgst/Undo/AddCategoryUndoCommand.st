@@ -6,7 +6,6 @@ UndoCommand subclass: AddCategoryUndoCommand [
 
 	^ (self new)
 	    add: aSymbol onWidget: aGtkCategoryWidget;
-	    "precondition;"
 	    yourself
     ]
 
@@ -27,7 +26,7 @@ UndoCommand subclass: AddCategoryUndoCommand [
         <category: 'checking'>
 
 	category = '*' ifTrue: [ ^ self preconditionFailed: 'Can''t create a * category' ].
-	(categoryWidget hasCategory: category asString) ifTrue: [ ^ self preconditionFailed: 'Category is present' ].
+	(categoryWidget classOrMeta methodDictionary includes: category asString) ifTrue: [ ^ self preconditionFailed: 'Category is present' ].
 	categoryWidget hasSelectedCategory ifTrue: [ selectedCategory := categoryWidget selectedCategory ].
 	^ true
     ]

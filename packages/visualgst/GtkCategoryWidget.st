@@ -13,7 +13,16 @@ GtkConcreteWidget subclass: GtkCategoryWidget [
     initialize [
 	<category: 'initialization'>
 
-	self mainWidget: self buildTreeView
+	self mainWidget: self buildTreeView.
+	self registerNotifier
+    ]
+
+    registerNotifier [
+        <category: 'initialize-release'>
+
+        (VisualGST uniqueInstance systemChangeNotifier)
+            notify: self ofSystemChangesOfItem: #category change: #Added using: #'addEvent:';
+            notify: self ofSystemChangesOfItem: #category change: #Removed using: #'removeEvent:'
     ]
 
     classOrMeta [
@@ -26,45 +35,43 @@ GtkConcreteWidget subclass: GtkCategoryWidget [
 	<category: 'accessing'>
 
 	class := aClass.
-	self refreshModel
+	model
+	    item: self buildCategory;
+	    refresh
     ]
 
-    model [
-	<category: 'accessing'>
+    buildCategory [
+        <category: 'model builder'>
 
-	^ model ifNil: [ model := GtkCategoryModel on: self classOrMeta ]
+        | set |
+        set := Set new.
+        set add: '*'.
+	self classOrMeta methodDictionary ifNil: [ ^ set ].
+        self classOrMeta methodDictionary do: [ :each | set add: each methodCategory ].
+        ^ set asSortedCollection
     ]
 
     emptyModel [
 	<category: 'accessing'>
 
-	categoryTree setModel: (GTK.GtkListStore new: 1 varargs: {GTK.GValue gTypeString})
+	self clear
     ]
 
-    refreshModel [
-	<category: 'events'>
+    clear [
+        <category: 'accessing'>
 
-	model := GtkCategoryModel on: self classOrMeta.
-
-	categoryTree setModel: self model gtkModel.
-	self model isSorted
-            ifFalse: [
-                column signalEmitByName: 'clicked' args: {}.
-		self model sorted: true ]
+        model clear
     ]
 
     buildTreeView [
         <category: 'user interface'>
     
-	categoryTree := (GTK.GtkTreeView newWithSortedTextColumn: self model gtkModel title: 'Method categories')
+	categoryTree := (GTK.GtkTreeView createListWithModel: {{GtkColumnTextType title: 'Method categories'}})
 			    connectSignal: 'button-press-event' to: self selector: #'onPress:event:' userData: nil;
 			    yourself.
-	column := categoryTree getColumn: 0.
 	categoryTree getSelection setMode: GTK.Gtk gtkSelectionBrowse.
-	self model isSorted
-	    ifFalse: [
-		column signalEmitByName: 'clicked' args: {}.
-		self model sorted: true ].
+        (model := GtkListModel on: categoryTree getModel)
+                                        contentsBlock: [ :each | {each displayString} ].
 	^ GTK.GtkScrolledWindow withChild: categoryTree
     ]
 
@@ -105,28 +112,17 @@ GtkConcreteWidget subclass: GtkCategoryWidget [
 	^ categoryTree hasSelectedItem
     ]
 
-    hasCategory: aString [
-        <category: 'testing'>
-
-        ^ self model hasCategory: aString
-    ]
-
     selectedCategory [
 	<category: 'accessing'>
 
-	| iter |
-	(iter := categoryTree selectedIter) ifNil: [self error: 'Nothing is selected'].
-	^ self model gtkModel getOop: iter column: 0
+	self hasSelectedCategory ifFalse: [ self error: 'nothing is selected' ].
+	^ categoryTree selection
     ]
 
     selectACategory: aString [
         <category: 'item selection'>
 
-        | selection |
-        selection := categoryTree getSelection.
-        selection unselectAll.
-	aString ifNil: [ ^ self ].
-        selection selectIter: (self findIterInACategory: aString)
+	categoryTree select: aString
     ]
 
     findIterInACategory: aString [
@@ -173,6 +169,20 @@ GtkConcreteWidget subclass: GtkCategoryWidget [
         <category: 'category events'>
 
         FileoutCategoryCommand on: self classOrMeta categorized: self selectedCategory
+    ]
+
+    addEvent: anEvent [
+        <category: 'event'>
+
+        (anEvent itemClass == self classOrMeta) ifFalse: [ ^ self ].
+        "self appendCategory: anEvent item"
+    ]
+
+    removeEvent: anEvent [
+        <category: 'event'>
+
+        (anEvent itemClass == self classOrMeta) ifFalse: [ ^ self ].
+        "self removeCategory: anEvent item"
     ]
 ]
 

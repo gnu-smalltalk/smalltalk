@@ -1,5 +1,5 @@
-GtkConcreteWidget subclass: GtkWorkspaceWidget [
-    | textview variableTracker object |
+GtkTextWidget subclass: GtkWorkspaceWidget [
+    | variableTracker object |
     
     popupMenuOn: aGtkWidget menu: aGtkMenu [
 	<category: 'events'>
@@ -34,45 +34,11 @@ GtkConcreteWidget subclass: GtkWorkspaceWidget [
     initialize [
 	<category: 'intialization'>
 
-	self mainWidget: self buildTextView.
+	super initialize.
 	variableTracker := (WorkspaceVariableTracker new)
 				initialize;
 				yourself.
-	object := variableTracker objectClass new
-    ]
-
-    buildTextView [
-	<category: 'user interface'>
-
-	textview := (GtkTextWidget newWithBuffer: GTK.GtkTextBuffer new)
-			initialize;
-			connectSignal: 'populate-popup' to: self selector: #'popupMenuOn:menu:' userData: nil;
-			yourself.
-	^ GTK.GtkScrolledWindow withChild: textview
-    ]
-
-    text: aString [
-	<category: 'text accessing'>
-
-	textview getBuffer setText: aString
-    ]
-
-    text [
-	<category: 'text accessing'>
-
-	^ textview getBuffer text
-    ]
-
-    selectedText [
-	<category: 'text accessing'>
-
-	^ textview getBuffer selectedText
-    ]
-
-    iterOfSelectedText [
-	<category: 'text accessing'>
-
-	^ textview getBuffer iterOfSelectedText
+	object := variableTracker objectClass new.
     ]
 
     doIt [
@@ -108,10 +74,10 @@ GtkConcreteWidget subclass: GtkWorkspaceWidget [
 	| iter start end result |
 	iter := self iterOfSelectedText second.
 	result := ' ', (self doIt displayString), ' '.
-	textview getBuffer insertInteractive: iter text: result len: result size defaultEditable: true.
-	start := textview getBuffer getIterAtOffset: (iter getOffset - result size).
-	end := textview getBuffer getIterAtOffset: (iter getOffset).
-	textview getBuffer selectRange: start bound: end
+	self buffer insertInteractive: iter text: result len: result size defaultEditable: true.
+	start := self buffer getIterAtOffset: (iter getOffset - result size).
+	end := self buffer getIterAtOffset: (iter getOffset).
+	self buffer selectRange: start bound: end
     ]
 
     inspectIt [
@@ -124,47 +90,5 @@ GtkConcreteWidget subclass: GtkWorkspaceWidget [
         <category: 'edit events'>
 
         self undo
-    ]
-
-    undo [
-        <category: 'edit events'>
-
-        textview undo
-    ]
-
-    redo [
-        <category: 'edit events'>
-
-        textview redo
-    ]
-
-    copy [
-        <category: 'text editing'>
-
-        textview signalEmitByName: 'copy-clipboard' args: {}
-    ]
-
-    cut [
-        <category: 'text editing'>
-
-        textview signalEmitByName: 'cut-clipboard' args: {}
-    ]
-
-    paste [
-        <category: 'text editing'>
-
-        textview signalEmitByName: 'paste-clipboard' args: {}.
-    ]
-
-    selectAll [
-        <category: 'text editing'>
-
-        textview signalEmitByName: 'select-all' args: {true}.
-    ]
-
-    textview [
-	<category: 'accessing'>
-
-	^ textview
     ]
 ]

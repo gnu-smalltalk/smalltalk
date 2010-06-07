@@ -1,7 +1,7 @@
 GtkMainWindow subclass: VisualGST [
     VisualGST class [ | compileError uniqueInstance | ]
 
-    | browsers outputs saved imageName transcriptWidget windowsMenu systemChangeNotifier |
+    | compilerError browsers outputs saved imageName transcriptWidget windowsMenu systemChangeNotifier |
 
     VisualGST class >> uniqueInstance [
 	<category: 'public'>
@@ -57,7 +57,7 @@ GtkMainWindow subclass: VisualGST [
     VisualGST class >> version [
 	<category: 'accessing'>
 
-	^ '0.6.0'
+	^ '0.7.5'
     ]
 
     VisualGST class >> website [
@@ -84,12 +84,11 @@ GtkMainWindow subclass: VisualGST [
 	compileError := aWorkspace
     ]
 
-    aboutLauncher [
-	<category: 'help events'>
+    VisualGST class >> license [
+	<category: 'accessing'>
 
-	(GTK.GtkAboutDialog new)
-	    setVersion: self class version;
-	    setLicense: 'Permission is hereby granted, free of charge, to any person obtaining
+	^
+'Permission is hereby granted, free of charge, to any person obtaining
 a copy of this software and associated documentation files (the "Software"),
 to deal in the Software without restriction, including without limitation
 the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or
@@ -104,7 +103,15 @@ INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A
 PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
 COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN
 AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH
-THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.';
+THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.'
+    ]
+
+    aboutLauncher [
+	<category: 'help events'>
+
+	(GTK.GtkAboutDialog new)
+	    setVersion: self class version;
+	    setLicense: self class license;
 	    setWebsite: self class website;
 	    setComments: 'This is a GTK+ wrapper for GNU Smalltalk.';
 	    "setAuthors: {'Gwenael Casaccio'. 'Nicolas Petton'. nil};"
@@ -123,6 +130,7 @@ THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.';
 
 	| widget |
 	browsers addWidget: (widget := self buildClassBrowserWidget) labeled: 'Browser'.
+	widget postInitialize.
 	^ widget
     ]
 
@@ -137,6 +145,7 @@ THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.';
 
 	| widget |
 	widget := self buildWorkspaceWidget showAll.
+	widget postInitialize.
 	outputs addWidget: widget labeled: 'Workspace'.
     ]
 
@@ -166,8 +175,7 @@ THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.';
             addButton: 'Save image' responseId: 1;
             showModalOnAnswer: [ :dlg :res |
                 res = 0 ifTrue: [ self class exit ].
-                res = 1 ifTrue: [ self saveImage.
-				  self class exit ].
+                res = 1 ifTrue: [ self saveImageAndQuit ].
                 dlg destroy ].
     ]
 
@@ -178,9 +186,9 @@ THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.';
 	outputs currentWidget  == transcriptWidget ifTrue: [ self error: 'Can not remove the transcript tab' ].
 	(GTK.GtkFileChooserDialog load: 'Load Smalltalk source' parent: window)
 	    showModalOnAnswer: [ :dlg :res |
-		res = GTK.Gtk gtkResponseAccept ifFalse: [ ^ dlg destroy ].
-		file := FileStream open: dlg getFilename mode: FileStream read.
-		outputs currentWidget text: file upToEnd.
+		res = GTK.Gtk gtkResponseAccept 
+				ifTrue: [ file := FileStream open: dlg getFilename mode: FileStream read.
+					  outputs currentWidget text: file upToEnd ].
 		dlg destroy ]
     ]
 
@@ -194,14 +202,24 @@ THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.';
 	| file |
         (GTK.GtkFileChooserDialog save: 'Save Smalltalk source as...' parent: window)
             showModalOnAnswer: [ :dlg :res |
-                res = GTK.Gtk gtkResponseAccept ifFalse: [ ^ dlg destroy ].
-		file := FileStream open: dlg getFilename mode: FileStream write.
-		file nextPutAll: outputs currentWidget text. 
-                dlg destroy ]
+                res = GTK.Gtk gtkResponseAccept 
+				ifTrue: [ file := FileStream open: dlg getFilename mode: FileStream write.
+					  file nextPutAll: outputs currentWidget text ].
+		dlg destroy ]
     ]
 
     print [
 	<category: 'file events'>
+    ]
+
+    saveImageAndQuit [
+        <category: 'file events'>
+
+        "ObjectMemory>>#snapshot breaks hard links due to
+         http://bugzilla.kernel.org/show_bug.cgi?id=9138, so we have to
+         check the permission of the directory rather than the file."
+        imageName asFile parent isWriteable ifFalse: [ self saveImageAsAndQuit ].
+        self saveImage: [ ObjectMemory snapshot: imageName. self class exit ]
     ]
 
     saveImage [
@@ -224,10 +242,25 @@ THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.';
 		res = GTK.Gtk gtkResponseAccept ifTrue: [ self saveImage: [ ObjectMemory snapshot: imageName ] ] ]
     ]
 
+    saveImageAsAndQuit [
+        <category: 'file events'>
+
+        (GTK.GtkFileChooserDialog save: 'Save image as...' parent: window)
+            showModalOnAnswer: [ :dlg :res |
+                imageName := dlg getFilename.
+                dlg destroy.
+                res = GTK.Gtk gtkResponseAccept ifTrue: [ self saveImage: [ ObjectMemory snapshot: imageName ]. self class exit ] ]
+    ]
+
     saveImage: aBlock [
-	| oldMessage oldNotifier |
+	| oldMessage oldNotifier oldCatIcon oldNameIcon |
 	oldNotifier := self systemChangeNotifier.
 	oldMessage := Transcript message.
+
+	oldCatIcon := ClassCategory icon.
+	ClassCategory icon: nil.
+	oldNameIcon := AbstractNamespace icon.
+	AbstractNamespace icon: nil.
 
 	Transcript message: stdout->#nextPutAllFlush:.
 	SystemChangeNotifier root remove: oldNotifier.
@@ -236,6 +269,8 @@ THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.';
 
 	(saved := aBlock value not) ifTrue: [
             self class uniqueInstance: self.
+	    ClassCategory icon: oldCatIcon.
+	    AbstractNamespace icon: oldNameIcon.
 	    systemChangeNotifier := oldNotifier.
 	    SystemChangeNotifier root add: oldNotifier.
 	    Transcript message: oldMessage ]
@@ -277,10 +312,20 @@ THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.';
 	    centralWidget: self buildCentralWidget
     ]
 
+    browserPostInitialize [
+	<category: 'initialization'>
+
+        browsers grabFocus.
+        browsers currentWidget postInitialize.
+        browsers currentWidget selectANamespace: Smalltalk.
+        browsers currentWidget selectAClass: Object.
+    ]
+
     postInitialize [
 	<category: 'initialization'>
 
-	browsers grabFocus.
+	self browserPostInitialize.
+	1 to: 3 do: [ :i | (outputs widgetAt: i) postInitialize ].
 	window
 	    connectSignal: 'key-press-event' to: self selector:  #'keyPressedOn:keyEvent:' userData: nil;
 	    connectSignal: 'delete-event' to: self selector: #'delete:event:' userData: nil
@@ -289,16 +334,15 @@ THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.';
     buildNotebookWorkspaceWidget [
 	<category: 'user interface'>
 
-	| cmp |
 	outputs := GtkNotebookWidget new
 				initialize;
 				parentWindow: window;
 				showAll;
 				yourself.
-	self class setCompilerError: (cmp := self buildWorkspaceWidget).
+	self class setCompilerError: (compilerError := self buildWorkspaceWidget).
 	^ outputs
 	    addPermanentWidget: (transcriptWidget := self buildTranscriptWidget) labeled: 'Transcript';
-	    addPermanentWidget: cmp labeled: 'Compiler error(s)';
+	    addPermanentWidget: compilerError labeled: 'Compiler error(s)';
 	    addWidget: self buildWorkspaceWidget labeled: 'Workspace';
 	    yourself
     ]
@@ -361,7 +405,9 @@ THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.';
 	    {'<Control>X'. '<GtkLauncher>/Edit/Cut'}.
 	    {'<Control>C'. '<GtkLauncher>/Edit/Copy'}.
 	    {'<Control>V'. '<GtkLauncher>/Edit/Paste'}.
-	    {'<Control>A'. '<GtkLauncher>/Edit/SelectAll'}}.
+	    {'<Control>A'. '<GtkLauncher>/Edit/SelectAll'}.
+	    {'<Control>F'. '<GtkLauncher>/Edit/Find'}.
+	    {'<Control>H'. '<GtkLauncher>/Edit/Replace'}}.
 
 	^ self createNewMenuEntry: {GTK.GtkMenuItem menuItem: 'Cancel edits' accelPath: '<GtkLauncher>/Edit/Cancel' connectTo: self selector: #cancel.
 	    GTK.GtkMenuItem menuItem: 'Undo' accelPath: '<GtkLauncher>/Edit/Undo' connectTo: self selector: #undo.
@@ -372,6 +418,9 @@ THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.';
             GTK.GtkMenuItem menuItem: 'Paste' accelPath: '<GtkLauncher>/Edit/Paste' connectTo: self selector: #paste.
             GTK.GtkMenuItem new.
             GTK.GtkMenuItem menuItem: 'Select all' accelPath: '<GtkLauncher>/Edit/SelectAll' connectTo: self selector: #selectAll.
+            GTK.GtkMenuItem new.
+            GTK.GtkMenuItem menuItem: 'Find' accelPath: '<GtkLauncher>/Edit/Find' connectTo: self selector: #find.
+            GTK.GtkMenuItem menuItem: 'Replace' accelPath: '<GtkLauncher>/Edit/Replace' connectTo: self selector: #replace.
             GTK.GtkMenuItem new.
             GTK.GtkMenuItem menuItem: 'Clear Transcript' connectTo: self selector: #clearTranscriptWidget}
     ]
@@ -523,60 +572,60 @@ THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.';
 
 	self
 	    appendToolItem: ((GTK.GtkToolButton newFromStock: 'gtk-new')
-				connectSignal: 'clicked' to: OpenWorkspaceCommand selector: #execute userData: nil;
+				connectSignal: 'clicked' to: OpenWorkspaceCommand selector: #execute;
 				setTooltipText: 'Create a new workspace';
 				yourself);
 	    appendSeparator;
 	    appendToolItem: ((GTK.GtkToolButton newFromStock: 'gtk-save')
-				connectSignal: 'clicked' to: SaveImageCommand selector: #execute userData: nil;
+				connectSignal: 'clicked' to: SaveImageCommand selector: #execute;
 				setTooltipText: 'Save the image';
 				yourself);
 	    appendToolItem: ((GTK.GtkToolButton newFromStock: 'gtk-save-as')
-				connectSignal: 'clicked' to: SaveImageAsCommand selector: #execute userData: nil;
+				connectSignal: 'clicked' to: SaveImageAsCommand selector: #execute;
 				setTooltipText: 'Save the image as';
 				yourself);
 	    appendSeparator;
 	    appendToolItem: ((GTK.GtkToolButton newFromStock: 'gtk-cut')
-				connectSignal: 'clicked' to: self selector: #cut userData: nil;
+				connectSignal: 'clicked' to: self selector: #cut;
 				setTooltipText: 'Cut';
 				yourself);
 	    appendToolItem: ((GTK.GtkToolButton newFromStock: 'gtk-copy')
-				connectSignal: 'clicked' to: self selector: #copy userData: nil;
+				connectSignal: 'clicked' to: self selector: #copy;
 				setTooltipText: 'Copy';
 				yourself);
 	    appendToolItem: ((GTK.GtkToolButton newFromStock: 'gtk-paste')
-				connectSignal: 'clicked' to: self selector: #paste userData: nil;
+				connectSignal: 'clicked' to: self selector: #paste;
 				setTooltipText: 'Paste';
 				yourself);
 	    appendSeparator;
             appendToolItem: ((GTK.GtkToolButton newFromStock: 'gtk-undo')
-				connectSignal: 'clicked' to: self selector: #undo userData: nil;
+				connectSignal: 'clicked' to: self selector: #undo;
 				setTooltipText: 'Undo';
 				yourself);
             appendToolItem: ((GTK.GtkToolButton newFromStock: 'gtk-redo')
-				connectSignal: 'clicked' to: self selector: #redo userData: nil;
+				connectSignal: 'clicked' to: self selector: #redo;
 				setTooltipText: 'Redo';
 				yourself);
             appendSeparator;
 	    appendToolItem: ((GTK.GtkToolButton newFromStock: 'gtk-execute' label: 'Do It')
-				connectSignal: 'clicked' to: self selector: #doIt userData: nil;
+				connectSignal: 'clicked' to: self selector: #doIt;
 				setTooltipText: 'Do It';
 				yourself);
 	    appendToolItem: ((GTK.GtkToolButton newFromStock: 'gtk-print' label: 'Print It')
-				connectSignal: 'clicked' to: self selector: #printIt userData: nil;
+				connectSignal: 'clicked' to: self selector: #printIt;
 				setTooltipText: 'Print It';
 				yourself);
 	    appendToolItem: ((GTK.GtkToolButton newFromStock: 'gtk-convert' label: 'Inspect It')
-				connectSignal: 'clicked' to: self selector: #inspectIt userData: nil;
+				connectSignal: 'clicked' to: self selector: #inspectIt;
 				setTooltipText: 'Inspect It';
 				yourself);
 	    appendToolItem: ((GTK.GtkToolButton newFromStock: 'gtk-sort-descending' label: 'Debug It')
-				connectSignal: 'clicked' to: self selector: #debugIt userData: nil;
+				connectSignal: 'clicked' to: self selector: #debugIt;
 				setTooltipText: 'Debug It';
 				yourself);
 	    appendSeparator;
 	    appendToolItem: ((GTK.GtkToolButton newFromStock: 'gtk-apply' label: 'Accept')
-				connectSignal: 'clicked' to: self selector: #acceptIt userData: nil;
+				connectSignal: 'clicked' to: self selector: #acceptIt;
 				setTooltipText: 'Accept';
 				yourself)
     ]
@@ -654,6 +703,18 @@ THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.';
 	<category: 'edit events'>
 
 	self onFocusPerform: #selectAll
+    ]
+
+    find [
+	<category: 'edit events'>
+
+	browsers currentWidget showFind
+    ]
+
+    replace [
+	<category: 'edit events'>
+
+	browsers currentWidget showReplace
     ]
 
     clearTranscriptWidget [
@@ -864,6 +925,12 @@ THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.';
         <category: 'method events'>
 
 	browsers currentWidget fileoutMethod
+    ]
+
+    notebookHasFocus [
+	<category: 'testing'>
+
+	^ outputs hasFocus
     ]
 
     keyPressedOn: aGtkWidget keyEvent: aGdkEventKey [

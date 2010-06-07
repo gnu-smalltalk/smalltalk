@@ -87,18 +87,18 @@ EventMultiplexer subclass: SystemChangeNotifier [
         self trigger: (RemovedEvent namespace: aNamespace)
     ]
 
-    classCategoryAdded: aClassCategoryName [
+    classCategoryAdded: aClassCategory [
 	<category: 'system triggers'>
 
         self trigger: (AddedEvent
-			    classCategory: aClassCategoryName)
+			    classCategory: aClassCategory)
     ]
 
-    classCategoryRemoved: aClassCategoryName [
+    classCategoryRemoved: aClassCategory [
 	<category: 'system triggers'>
 
         self trigger: (RemovedEvent
-			    classCategory: aClassCategoryName)
+			    classCategory: aClassCategory)
     ]
 
     classCategoryRenamedFrom: anOldClassCategoryName to: aNewClassCategoryName [

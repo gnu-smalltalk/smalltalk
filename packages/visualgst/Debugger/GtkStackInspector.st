@@ -5,8 +5,9 @@ GtkInspectorWidget subclass: GtkStackInspector [
 
         object := aContext.
         objectView := object stackInspectorView openOn: self object.
-        inspectorTree setModel: objectView model.
-        self refreshModel
+        model
+            item: objectView;
+            refresh
     ]
 ]
 

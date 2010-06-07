@@ -103,6 +103,17 @@ Class extend [
 	    environment: aNamespace
 	    subclassOf: self
     ]
+
+    classCategory [
+	<category: '*VisualGST'>
+
+	| category token |
+	token := self category ifNil: [ ^ nil ] ifNotNil: [ self category tokenize: '-' ].
+        category := self environment categories.
+        token do: [ :each | 
+	    category := category at: each ifAbsent: [ ^ nil ] ].
+	^ (category classes includes: self) ifTrue: [ category ] ifFalse: [ ^ nil ]
+    ]
 ]
 
 CompiledCode extend [
@@ -290,6 +301,44 @@ VariableBinding extend [
     ]
 ]
 
+GTK.GtkButton class extend [
+
+    createButton: aStockId [
+        <category: 'instance creation'>
+
+        | image |
+        image := GTK.GtkImage newFromStock: aStockId size: GTK.Gtk gtkIconSizeMenu.
+        ^ (GTK.GtkButton new)
+                setImage: image;
+                setRelief: GTK.Gtk gtkReliefNone;
+                yourself
+    ]
+
+    closeButton [
+	<category: 'instance creation'>
+
+        ^ self createButton: GTK.Gtk gtkStockClose
+    ]
+
+    previousButton [
+	<category: 'instance creation'>
+
+        ^ self createButton: GTK.Gtk gtkStockGoBack
+    ]
+
+    nextButton [
+	<category: 'instance creation'>
+
+         ^ self createButton: GTK.Gtk gtkStockGoForward
+    ]
+
+    replaceButton [
+        <category: 'instance creation'>
+
+         ^ self createButton: GTK.Gtk gtkStockFindAndReplace
+    ]
+]
+
 Metaclass extend [
     displaySymbol [
 	<category: '*VisualGST'>
@@ -314,13 +363,191 @@ Symbol extend [
     ]
 ]
 
+CharacterArray extend [
+
+    deindexOf: aCharacterArray matchCase: aBoolean startingAt: anIndex [
+	"Answer an Interval of indices in the receiver which match the aCharacterArray
+	 pattern. # in aCharacterArray means 'match any character', * in aCharacterArray means
+	 'match any sequence of characters'. The first item of the returned interval
+	 is >= anIndex. If aBoolean is false, the search is case-insensitive, 
+	 else it is case-sensitive. If no Interval matches the pattern, answer nil."
+
+	<category: '*VisualGST'>
+	| result |
+	aBoolean 
+	    ifFalse: 
+		[ ^ self asLowercase 
+		   deindexOf: aCharacterArray asLowercase
+		   matchCase: true
+		   startingAt: anIndex ].
+	1 to: anIndex do: 
+		[ :i | 
+		    result := aCharacterArray 
+				matchSubstring: 1
+				in: self
+				at: anIndex - i + 1.
+		    result notNil ifTrue: [ ^ anIndex - i + 1 to: result ] ].
+	^ nil
+    ]
+]
+
+STInST.RBParser class extend [
+
+    selectedSymbol: aString [
+	<category: '*VisualGST'>
+
+        | stream parser node |
+        stream := aString readStream.
+        parser := STInST.RBBracketedMethodParser new.
+        parser errorBlock: [ :message :position | ^ nil ].
+        parser scanner: (parser scannerClass on: stream errorBlock: parser errorBlock).
+        node := parser parseExpression.
+        node := node bestNodeFor: (1 to: aString size).
+        [ node isNil ifTrue: [ ^ nil ].
+          node isMessage] whileFalse: [ node := node parent ].
+        ^ node selector
+    ]	
+]
+
+GTK.GtkTreeView class extend [
+
+    createModel: aGtkStoreClass with: anArray [
+	<category: '*VisualGST'>
+
+        | model |
+        model := OrderedCollection new.
+        anArray do: [ :each | model addAll: (each collect: [ :elem | elem kind ]) ].
+        model add: VisualGST.GtkColumnOOPType kind.
+        ^ self newWithModel: (aGtkStoreClass new: model size varargs: model asArray)
+    ]
+
+    createTreeViewWith: anArray [
+	<category: '*VisualGST'>
+
+        ^ self createModel: GtkTreeStore with: anArray
+    ]
+
+    createListViewWith: anArray [
+        <category: '*VisualGST'>
+
+        ^ self createModel: GtkListStore with: anArray
+    ]
+
+    createColumnsOn: aGtkTreeView with: anArray [
+        <category: '*VisualGST'>
+
+        | colView i render |
+        anArray do: [ :each |
+            colView := GtkTreeViewColumn new.
+            i := 0.
+            each do: [ :column |
+            column isVisible ifTrue: [
+                colView
+                    packStart: (render := column cellRenderer new) expand: false;
+                    addAttribute: render attribute: column kindName column: i.
+                column hasTitle ifTrue: [ colView setTitle: column title ].
+                i := i + 1 ] ].
+            aGtkTreeView insertColumn: colView position: -1 ]
+    ]
+
+    createListWithModel: anArray [
+        <category: '*VisualGST'>
+
+        | view |
+        view := self createListViewWith: anArray.
+        self createColumnsOn: view with: anArray.
+	^ view 
+    ]
+
+    createTreeWithModel: anArray [
+	<category: '*VisualGST'>
+
+	| view |
+        view := self createTreeViewWith: anArray.
+        self createColumnsOn: view with: anArray.
+	^ view
+    ]
+]
+
+GTK.GtkTreeView extend [
+    | model |
+
+    model: aGtkModel [
+	<category: 'accessing'>
+
+	model := aGtkModel
+    ]
+
+    model [
+	<category: 'accessing'>
+
+	^ model
+    ]
+
+    selection [
+	<category: 'accessing'>
+
+        | iter string |
+        (iter := self selectedIter) ifNil: [ ^ self error: 'nothing is selected' ].
+	^ (self getModel at: iter) last
+    ]
+
+    selections [
+	<category: 'accessing'>
+
+	| glist result |
+	result := OrderedCollection new.
+	(glist := self getSelection getSelectedRows: nil) ifNil: [ ^ result ].
+	glist do: [ :each | | iter path |
+	    path := each castTo: GTK.GtkTreePath type.
+	    iter := self getModel getIter: path.
+	    result add: ((self getModel at: iter) last) ].
+	^ result
+    ]
+
+    select: anObject [
+	<category: 'accessing'>
+
+        self getSelection unselectAll.
+	self getModel do: [ :elem :iter |
+	    elem last = anObject ifTrue: [
+                    self scrollToCell: (self getModel getPath: iter) column: nil useAlign: false rowAlign: 0.5 colAlign: 0.5.
+                    ^ self getSelection selectIter: iter ] ].
+    ]
+
+    selectFirstItem [
+	<category: 'accessing'>
+
+	| selection |
+	(selection := self getSelection) unselectAll.
+        selection unselectAll.
+        selection selectIter: self getModel getIterFirst
+    ]
+
+    selectLastItem [
+	<category: 'accessing'>
+
+	| selection |
+	(selection := self getSelection) unselectAll.	
+	selection unselectAll.
+        selection selectIter: self getModel getIterLast
+    ]
+]
+
 GTK.GtkDialog extend [
+
     showModal [
         <category: '*VisualGST'>
 
         self
             setModal: true;
             showAll 
+    ]
+
+    destroy: aGtkDialog [
+        <category: '*VisualGST'>
+
+	self destroy
     ]
 
     showModalOnAnswer: aBlock [
@@ -337,7 +564,7 @@ GTK.GtkDialog extend [
 
         self
             setModal: true;
-            connectSignal: 'response' to: self selector: #destroy;
+            connectSignal: 'response' to: self selector: #destroy:;
             showAll 
     ]
 

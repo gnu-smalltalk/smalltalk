@@ -1,5 +1,5 @@
 GtkConcreteWidget subclass: GtkContextWidget [
-    | column contextTree model context |
+    | column contextTree model context contextList |
 
     GtkContextWidget class >> on: aContext [
 	<category: 'instance creation'>
@@ -20,31 +20,33 @@ GtkConcreteWidget subclass: GtkContextWidget [
 	<category: 'accessing'>
 
 	context := aContext.
-	model := nil.
-	self refreshModel
+	model
+	    item: self buildListOfContexts;
+	    refresh
     ]
 
-    model [
-	<category: 'accessing'>
+    buildListOfContexts [
+	<category: 'model'>
 
-	^ model ifNil: [ model := (GtkContextModel on: context) model ]
-    ]
-
-    refreshModel [
-	<category: 'events'>
-
-	contextTree setModel: self model
+	| ctxt |
+	contextList := OrderedCollection new.
+        ctxt := context.
+        [ ctxt isNil ] whileFalse: [
+            contextList add: ctxt.
+            ctxt := ctxt parentContext ].
+	^ contextList
     ]
 
     buildTreeView [
         <category: 'user interface'>
     
-	contextTree := (GTK.GtkTreeView newWithSortedTextColumn: (GTK.GtkListStore new: 1 varargs: {GTK.GValue gTypeString}) title: 'Contexts')
-                            connectSignal: 'button-press-event' to: self selector: #'onPress:event:' userData: nil;
+        contextTree := (GTK.GtkTreeView createListWithModel: {{GtkColumnTextType title: 'Contexts'}})
+                            connectSignal: 'button-press-event' to: self selector: #'onPress:event:';
                             yourself.
-	column := contextTree getColumn: 0.
-	contextTree getSelection setMode: GTK.Gtk gtkSelectionBrowse.
-	^ GTK.GtkScrolledWindow withChild: contextTree
+        contextTree getSelection setMode: GTK.Gtk gtkSelectionBrowse.
+        (model := GtkListModel on: contextTree getModel)
+                                        contentsBlock: [ :each | {each printString} ].
+        ^ GTK.GtkScrolledWindow withChild: contextTree
     ]
 
     onPress: aGtkWidget event: aGdkEvent [
@@ -77,19 +79,13 @@ GtkConcreteWidget subclass: GtkContextWidget [
     selectLastContext [
         <category: 'item selection'>
 
-	| selection |
-        selection := contextTree getSelection.
-        selection unselectAll.
-        selection selectIter: self model lastIter
+	contextTree selectLastItem
     ]
 
     selectFirstContext [
         <category: 'item selection'>
 
-        | selection |
-        selection := contextTree getSelection.
-        selection unselectAll.
-        selection selectIter: self model getIterFirst
+	contextTree selectFirstItem
     ]
 
     hasSelectedContext [
@@ -98,24 +94,19 @@ GtkConcreteWidget subclass: GtkContextWidget [
 	^ contextTree hasSelectedItem
     ]
 
-    selectedIter [
-	<category: 'accessing'>
-	
-	^ (contextTree selectedIter) ifNil: [ self error: 'Nothing is selected' ].
-    ]
-
     selectedContext [
 	<category: 'accessing'>
 
-        | iter string |
-        iter := self selectedIter.
-        ^ (self model getOop: iter column: 0) asSymbol
+
+	self hasSelectedContext ifFalse: [ self error: 'Nothing is selected' ].
+        ^ contextTree selection
     ]
 
-    numberOfContext [
+    positionOfSelectedContext [
 	<category: 'accessing'>
 
-	^ self model iterNChildren: nil.
+	self hasSelectedContext ifFalse: [ self error: 'Nothing is selected' ].
+	^ contextList findFirst: [ :each | each == self selectedContext ].
     ]
 ]
 

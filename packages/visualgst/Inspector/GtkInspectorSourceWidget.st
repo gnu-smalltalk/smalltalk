@@ -1,7 +1,9 @@
-GtkConcreteWidget subclass: GtkInspectorSourceWidget [
-    | browser displayBrowserMenu object textview |
+GtkTextWidget subclass: GtkInspectorSourceWidget [
+    | object |
     
     GtkInspectorSourceWidget class >> openOn: anObject [
+	<category: 'instance creation'>
+
 	^ (self new)
 	    object: anObject;
 	    yourself
@@ -43,47 +45,25 @@ GtkConcreteWidget subclass: GtkInspectorSourceWidget [
 	aGtkMenu append: menuitem
     ]
 
-    initialize [
-	<category: 'intialization'>
-
-	self mainWidget: self buildTextView
-    ]
-
-    buildTextView [
-	<category: 'user interface'>
-
-	textview := GtkTextWidget new
-			initialize;
-			connectSignal: 'populate-popup' to: self selector: #'popupMenuOn:menu:' userData: nil;
-			yourself.
-	^ GTK.GtkScrolledWindow withChild: textview
-    ]
-
-    text: aString [
-	<category: 'accessing'>
-
-	textview getBuffer setText: aString
-    ]
-
     doIt [
 	<category: 'events'>
 
 	| text |
-	text := textview getBuffer getHasSelection 
+	text := self buffer getHasSelection 
 		    ifTrue: [ | iter |
-			    iter := textview getBuffer getSelectionBounds ifNil: [^ self].
-			    textview getBuffer getText: (iter at: 1) end: (iter at: 2) includeHiddenChars: false ]
-		    ifFalse: [ textview getBuffer text ].
+			    iter := self buffer getSelectionBounds ifNil: [^ self].
+			    self buffer getText: (iter at: 1) end: (iter at: 2) includeHiddenChars: false ]
+		    ifFalse: [ self buffer text ].
         ^ Behavior
 	    evaluate: text
 	    to: object
-	    ifError: [ :fname :lineNo :errorString | "self displayError: errorString at: lineNo + pos" ]
+	    ifError: [ :fname :lineNo :errorString | ]
     ]
 
     printIt [
 	<category: 'events'>
 
-	textview getBuffer insertAtCursor: (self doIt displayString) 
+	self buffer insertAtCursor: (self doIt displayString) 
     ]
 
     inspectIt [
@@ -91,47 +71,4 @@ GtkConcreteWidget subclass: GtkInspectorSourceWidget [
 
 	GtkInspector openOn: self doIt
     ]
-
-    cancel [
-        <category: 'buffer events'>
-
-	self undo
-    ]
-
-    undo [
-        <category: 'buffer events'>
-
-        textview undo
-    ]
-
-    redo [
-        <category: 'buffer events'>
-
-        textview redo
-    ]
-
-    copy [
-        <category: 'text editing'>
-
-        textview signalEmitByName: 'copy-clipboard' args: {}
-    ]
-
-    cut [
-        <category: 'text editing'>
-
-        textview signalEmitByName: 'cut-clipboard' args: {}
-    ]
-
-    paste [
-        <category: 'text editing'>
-
-        textview signalEmitByName: 'paste-clipboard' args: {}.
-    ]
-
-    selectAll [
-        <category: 'text editing'>
-
-        textview signalEmitByName: 'select-all' args: {true}.
-    ]
-
 ]
