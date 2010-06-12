@@ -304,6 +304,20 @@ implementation objects.'>
 	DefaultAddressClass := class
     ]
 
+    AbstractSocket class >> resolveAddress: ipAddressOrString [
+	| addr |
+
+	ipAddressOrString isString 
+	    ifTrue: [
+		addr := SocketAddress byName: ipAddressOrString.
+		addr isNil 
+		    ifTrue: 
+			[self error: 'cannot resolve host name ' , ipAddressOrString printString]]
+	    ifFalse: [addr := ipAddressOrString].
+
+	^ addr
+    ]
+
     AbstractSocket class >> new: implementation [
 	"Answer a new instance of the receiver, using as the underlying
 	 layer the object passed as the `implementation' parameter; the
@@ -639,13 +653,7 @@ but it is done for cleanliness and symmetry.'>
 
 	<category: 'instance creation'>
 	| localAddr remoteAddr addressClass |
-	ipAddressOrString isString 
-	    ifTrue: [
-		remoteAddr := SocketAddress byName: ipAddressOrString.
-		remoteAddr isNil 
-		    ifTrue: 
-			[self error: 'cannot resolve host name ' , ipAddressOrString printString]]
-	    ifFalse: [remoteAddr := ipAddressOrString].
+	remoteAddr := self resolveAddress: ipAddressOrString.
 	addressClass := remoteAddr isNil 
 		    ifTrue: [self defaultAddressClass]
 		    ifFalse: [remoteAddr class].
@@ -1079,9 +1087,7 @@ This class adds a read buffer to the basic model of AbstractSocket.'>
 
 	<category: 'instance creation'>
 	| localAddr remoteAddr addressClass |
-	remoteAddr := ipAddressOrString isString 
-		    ifTrue: [SocketAddress byName: ipAddressOrString]
-		    ifFalse: [ipAddressOrString].
+	remoteAddr := self resolveAddress: ipAddressOrString.
 	remoteAddr isNil 
 	    ifTrue: 
 		[self error: 'cannot resolve host name ' , ipAddressOrString printString].

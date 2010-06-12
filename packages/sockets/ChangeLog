@@ -1,5 +1,11 @@
 2010-06-12  Holger Hans Peter Freyther  <zecke@selfish.org>
 
+	* Sockets.st: Add AbstractSocket class>>#addressFromString to
+	parse a string into a SocketAddress and use it inside the
+	ServerSocket and DatagramSocket class.
+
+2010-06-12  Holger Hans Peter Freyther  <zecke@selfish.org>
+
 	* Datagram.st: Add #dataSize, #dataSize: and #size.
 	* AbstractSocketImpl.st: Call Datagram>>#dataSize: from the
 	#receive:datagram selector with the bytes read, use
