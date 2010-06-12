@@ -1,4 +1,4 @@
-Command subclass: FileoutNamespaceCommand [
+NamespaceCommand subclass: FileoutNamespaceCommand [
 
     execute [
 	<category: 'command'>
@@ -16,7 +16,9 @@ Command subclass: FileoutNamespaceCommand [
 
     fileoutNamespace: aDirectory [
 
-        self fileoutNamespace: target on: (File name: aDirectory) / target name
+        | namespace |
+        namespace := target selectedNamespace.
+        self fileoutNamespace: namespace on: (File name: aDirectory) / namespace name
     ]
 
     fileoutNamespace: aNamespace on: aDirectory [

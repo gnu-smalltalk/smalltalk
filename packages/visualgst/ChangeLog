@@ -1,3 +1,7 @@
+2010-06-12  Paolo Bonzini  <bonzini@gnu.org>
+
+	* many many files: Sync with upstream.
+
 2010-06-07  Paolo Bonzini  <bonzini@gnu.org>
 
 	* Category/AbstractNamespace.st: Do not add an instance variable.

@@ -44,7 +44,12 @@ Smalltalk.Object subclass: GtkConcreteWidget [
     hasFocus [
 	<category: 'testing'>
 
-	^ child focusChildFor: self parentWindow
+        | parent current |
+        parent := child.
+        [ (current := parent getFocusChild) notNil ] whileTrue: [
+            parent := current ].
+        ^ self parentWindow getFocus = parent
+
     ]
 
     grabFocus [

@@ -575,20 +575,6 @@ GtkButton class extend [
 ]
 
 
-GtkContainer extend [
-
-    focusChildFor: aGtkWindow [
-	<category: '*VisualGST'>
-
-	| child parent |
-	parent := child := self.
-	[ (child := parent getFocusChild) isNil not ] whileTrue: [
-	    parent := child ].
-	^ aGtkWindow getFocus = parent
-    ]
-]
-
-
 GTK.GtkDialog extend [
     run [
         <category: 'services'>

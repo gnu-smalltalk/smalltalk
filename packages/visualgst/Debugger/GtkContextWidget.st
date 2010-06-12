@@ -57,7 +57,6 @@ GtkConcreteWidget subclass: GtkContextWidget [
         aGdkButtonEvent button value = 3 ifFalse: [ ^ false ].
         menu := GTK.GtkMenu new.
         menu appendMenuItems: {{'Add a method'. self. #newMethod}.
-            {'Rename a method'. self. #renameMethod}.
             {'Delete a method'. self. #deleteMethod}.
             {}.
             {'Inspect a method'. self. #inspectMethod}.

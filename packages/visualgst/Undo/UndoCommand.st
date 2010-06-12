@@ -1,6 +1,12 @@
 Object subclass: UndoCommand [
     | description preconditionError |
 
+    UndoCommand class >> undoStack [
+	<category: 'accessing'>
+
+	^ GtkClassBrowserWidget undoStack 
+    ]
+
     description [
 	<category: 'accessing'>
 
@@ -41,18 +47,14 @@ Object subclass: UndoCommand [
     displayError [
         <Category: 'error'>
 
-        | dialog |
-        dialog := GTK.GtkMessageDialog
-                                new: nil
-                                flags: GTK.Gtk gtkDialogDestroyWithParent
-                                type: GTK.Gtk gtkMessageWarning
-                                buttons: GTK.Gtk gtkButtonsNone
-                                message: self description
-                                tip: self error.
+        GtkLauncher displayError: self description message: self error
+    ]
 
-        dialog
-            addButton: 'Ok' responseId: 1;
-            showModalOnAnswer: [ :dlg :res | dlg destroy ].
+    push [
+	<category: 'accessing'>
+
+	self precondition ifFalse: [ ^ self displayError ].
+	self class undoStack push: self
     ]
 ]
 

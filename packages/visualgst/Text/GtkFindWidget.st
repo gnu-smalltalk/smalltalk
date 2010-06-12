@@ -35,7 +35,7 @@ GtkTextPluginWidget subclass: GtkFindWidget [
 	<category: 'user interface'>
 
 	^ super hBox
-	    packStart: (GTK.GtkLabel new: 'find :') expand: false fill: false padding: 2;
+	    packStart: (GTK.GtkLabel new: 'Find:') expand: false fill: false padding: 2;
 	    packStart: self buildEntry expand: false fill: false padding: 15;
 	    packStart: self buildPreviousButton expand: false fill: false padding: 0; 
 	    packStart: self buildNextButton expand: false fill: false padding: 0;

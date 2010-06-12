@@ -9,6 +9,6 @@ Object subclass: FakeNamespace [
     FakeNamespace class >> categories [
 	<category: 'accessing'>
 
-	^ VisualGST.ClassCategory new
+	^ ClassCategory new
     ]
 ]

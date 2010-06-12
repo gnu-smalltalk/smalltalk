@@ -312,5 +312,50 @@ GtkConcreteWidget subclass: GtkTextWidget [
         end := self buffer getIterAtOffset: anEndInt.
 	self buffer selectRange: start bound: end
     ]
+
+    beforeEvaluation [
+        <category: 'smalltalk event'>
+    ]
+
+    doIt: object [
+        <category: 'smalltalk event'>
+
+        self beforeEvaluation.
+        ^ Behavior
+            evaluate: self buffer selectedText
+            to: object
+            ifError: [ :fname :lineNo :errorString | self error: errorString ]
+    ]
+
+    debugIt: object [
+        <category: 'smalltalk event'>
+
+        self beforeEvaluation.
+        object class
+            compile: ('Doit [ ^ [ ', self selectedText , ' ] value ]')
+            ifError:  [ :fname :lineNo :errorString |
+                self error: errorString ].
+        (GtkDebugger open)
+            doItProcess: [ object perform: #Doit ] newProcess
+    ]
+
+    inspectIt: object [
+        <category: 'smalltalk event'>
+
+        GtkInspector openOn: (self doIt: object)
+    ]
+
+    printIt: object [
+        <category: 'smalltalk event'>
+
+        | iter start end result |
+        iter := self buffer iterOfSelectedText second.
+        result := ' ', ((self doIt: object) displayString), ' '.
+        self buffer insertInteractive: iter text: result len: result size defaultEditable: true.
+        start := self buffer getIterAtOffset: (iter getOffset - result size).
+        end := self buffer getIterAtOffset: (iter getOffset).
+        self buffer selectRange: start bound: end
+    ]
+
 ]
 

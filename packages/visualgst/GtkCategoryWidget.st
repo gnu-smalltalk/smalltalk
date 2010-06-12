@@ -20,7 +20,7 @@ GtkConcreteWidget subclass: GtkCategoryWidget [
     registerNotifier [
         <category: 'initialize-release'>
 
-        (VisualGST uniqueInstance systemChangeNotifier)
+        (GtkLauncher uniqueInstance systemChangeNotifier)
             notify: self ofSystemChangesOfItem: #category change: #Added using: #'addEvent:';
             notify: self ofSystemChangesOfItem: #category change: #Removed using: #'removeEvent:'
     ]
@@ -90,7 +90,6 @@ GtkConcreteWidget subclass: GtkCategoryWidget [
         menu := GTK.GtkMenu new.
         menu appendMenuItems: {{'Add a category'. self. #newCategory}.
             {'Rename a category'. self. #renameCategory}.
-            {'Delete a category'. self. #deleteCategory}.
             {}.
             {'File out a category'. self. #fileoutCategory}}.
         menu attachToWidget: categoryTree detacher: nil.
@@ -159,30 +158,24 @@ GtkConcreteWidget subclass: GtkCategoryWidget [
         RenameCategoryCommand on: self
     ]
 
-    deleteCategory [
-        <category: 'category events'>
-
-        DeleteCategoryCommand on: self
-    ]
-
     fileoutCategory [
         <category: 'category events'>
 
-        FileoutCategoryCommand on: self classOrMeta categorized: self selectedCategory
+        FileoutCategoryCommand on: self
     ]
 
     addEvent: anEvent [
         <category: 'event'>
 
         (anEvent itemClass == self classOrMeta) ifFalse: [ ^ self ].
-        "self appendCategory: anEvent item"
+        model append: anEvent item
     ]
 
     removeEvent: anEvent [
         <category: 'event'>
 
         (anEvent itemClass == self classOrMeta) ifFalse: [ ^ self ].
-        "self removeCategory: anEvent item"
+        model remove: anEvent item
     ]
 ]
 

@@ -28,16 +28,10 @@ GtkMainWindow subclass: GtkBrowsingTool [
     ]
 
     showAboutDialog [
-	| gst |
-
-	gst := VisualGST.
-	(gst isKindOf: Namespace)
-	    ifTrue: [gst := gst classAt: 'VisualGST'].
-
         (GTK.GtkAboutDialog new)
-            setVersion: gst version;
-            setLicense: gst license;
-            setWebsite: gst website;
+            setVersion: VisualGST.GtkLauncher version;
+            setLicense: VisualGST.GtkLauncher license;
+            setWebsite: VisualGST.GtkLauncher website;
             setComments: 'This is a GTK+ wrapper for GNU Smalltalk.';
             setProgramName: 'VisualGST ', self windowTitle; 
             showModalDestroy

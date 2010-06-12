@@ -21,7 +21,7 @@ UndoCommand subclass: AddMethodUndoCommand [
     compileError: aString [
 	<category: 'error printing'>
 
-	VisualGST compileError: aString.
+	GtkLauncher compileError: aString.
 	^ self preconditionFailed: aString
     ]
 

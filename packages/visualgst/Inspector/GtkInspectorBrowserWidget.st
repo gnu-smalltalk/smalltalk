@@ -128,6 +128,18 @@ GtkConcreteWidget subclass: GtkInspectorBrowserWidget [
                     ifFalse: [ codeWidget sourceCode: '' ] ]
     ]
 
+    selectedClass [
+        <category: 'accessing'>
+
+	^classHierarchyWidget selectedClass
+    ]
+
+    hasSelectedClass [
+        <category: 'accessing'>
+
+	^classHierarchyWidget hasSelectedClass
+    ]
+
     onClassHierarchyChanged [
 	<category: 'events'>
 
@@ -198,6 +210,60 @@ GtkConcreteWidget subclass: GtkInspectorBrowserWidget [
         cMethodWidget
             class: class withCategory: (class compiledMethodAt: aSelector) methodCategory.
 	state := CategoryState on: self with: class -> '*'
+    ]
+
+    targetObject [
+        <category: 'target'>
+
+        ^self hasSelectedClass ifTrue: [self selectedClass] ifFalse: [nil]
+    ]
+
+    doIt: object [
+	<category: 'smalltalk event'>
+
+	codeWidget doIt: object
+    ]
+
+    debugIt: object [
+	<category: 'smalltalk event'>
+
+        codeWidget debugIt: object
+    ]
+
+    inspectIt: object [
+	<category: 'smalltalk event'>
+
+        codeWidget inspectIt: object
+    ]
+
+    printIt: object [
+	<category: 'smalltalk event'>
+
+        codeWidget printIt: object
+    ]
+
+    doIt [
+	<category: 'smalltalk event'>
+
+	DoItCommand on: self
+    ]
+
+    debugIt [
+	<category: 'smalltalk event'>
+
+	DebugItCommand on: self
+    ]
+
+    inspectIt [
+	<category: 'smalltalk event'>
+
+	InspectItCommand on: self
+    ]
+
+    printIt [
+	<category: 'smalltalk event'>
+
+	PrintItCommand on: self
     ]
 
     cancel [

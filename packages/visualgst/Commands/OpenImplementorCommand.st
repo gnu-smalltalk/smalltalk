@@ -4,25 +4,25 @@ Command subclass: OpenImplementorCommand [
 	<category: 'focus checking'>
 
 
-        (VisualGST uniqueInstance notebookHasFocus and:
-	    [ VisualGST uniqueInstance onFocusPerform: #hasSelection ])
-                ifTrue: [ self openImplementorOn: ( STInST.RBParser selectedSymbol: (VisualGST uniqueInstance onFocusPerform: #selectedText)) ]
+        (GtkLauncher uniqueInstance notebookHasFocus and:
+	    [ GtkLauncher uniqueInstance onFocusPerform: #hasSelection ])
+                ifTrue: [ self openImplementorOn: ( STInST.RBParser selectedSymbol: (GtkLauncher uniqueInstance onFocusPerform: #selectedText)) ]
                 ifFalse: [ GtkImplementor open ]
     ]
 
     focusChecking [
 	<category: 'focus checking'>
 
-	VisualGST uniqueInstance browserHasFocus
+	GtkLauncher uniqueInstance browserHasFocus
                     ifTrue: [
-                        (VisualGST uniqueInstance currentWidgetOfBrowser sourceCodeWidgetHasFocus 
-			    and: [ VisualGST uniqueInstance currentWidgetOfBrowser hasSelection ])
+                        (GtkLauncher uniqueInstance currentWidgetOfBrowser sourceCodeWidgetHasFocus 
+			    and: [ GtkLauncher uniqueInstance currentWidgetOfBrowser hasSelection ])
                                                             ifTrue: [
 								    self openImplementorOn: ( STInST.RBParser selectedSymbol: 
-													    VisualGST uniqueInstance currentWidgetOfBrowser selectedText) ]
+													    GtkLauncher uniqueInstance currentWidgetOfBrowser selectedText) ]
                                                             ifFalse: [ 
-								    VisualGST uniqueInstance currentWidgetOfBrowser hasSelectedMethod ifTrue: [
-									self openImplementorOn: VisualGST uniqueInstance currentWidgetOfBrowser selectedMethodSymbol ]
+								    GtkLauncher uniqueInstance currentWidgetOfBrowser hasSelectedMethod ifTrue: [
+									self openImplementorOn: GtkLauncher uniqueInstance currentWidgetOfBrowser selectedMethodSymbol ]
 																      ifFalse: [ GtkImplementor open ] ] ]
                     ifFalse: [ self openWithSelection ]
     ]

@@ -37,10 +37,10 @@ Command subclass: OpenBrowserCommand [
 	<category: ''>
 
 	| result |
-	VisualGST uniqueInstance currentWidgetOfBrowser hasSelectedClass
-                ifTrue: [ result := VisualGST uniqueInstance currentWidgetOfBrowser selectedNamespace -> VisualGST uniqueInstance currentWidgetOfBrowser selectedClass ]
-                ifFalse: [ VisualGST uniqueInstance currentWidgetOfBrowser hasSelectedNamespace 
-				    ifTrue: [ result := VisualGST uniqueInstance currentWidgetOfBrowser selectedNamespace -> nil ]
+	GtkLauncher uniqueInstance currentWidgetOfBrowser hasSelectedClass
+                ifTrue: [ result := GtkLauncher uniqueInstance currentWidgetOfBrowser selectedNamespace -> GtkLauncher uniqueInstance currentWidgetOfBrowser selectedClass ]
+                ifFalse: [ GtkLauncher uniqueInstance currentWidgetOfBrowser hasSelectedNamespace 
+				    ifTrue: [ result := GtkLauncher uniqueInstance currentWidgetOfBrowser selectedNamespace -> nil ]
 				    ifFalse: [ result := Smalltalk -> Object ] ].
 	^ result 
     ]
@@ -49,9 +49,9 @@ Command subclass: OpenBrowserCommand [
 	<category: ''>
 
 	| result |
-        (VisualGST uniqueInstance notebookHasFocus and:
-            [ VisualGST uniqueInstance onFocusPerform: #hasSelection ])
-                ifTrue: [ result := self extractNamespaceAndClassFrom: (VisualGST uniqueInstance onFocusPerform: #selectedText)]
+        (GtkLauncher uniqueInstance notebookHasFocus and:
+            [ GtkLauncher uniqueInstance onFocusPerform: #hasSelection ])
+                ifTrue: [ result := self extractNamespaceAndClassFrom: (GtkLauncher uniqueInstance onFocusPerform: #selectedText)]
                 ifFalse: [ result := Smalltalk->Object ].
 	^ result
     ]
@@ -59,10 +59,10 @@ Command subclass: OpenBrowserCommand [
     selection [
 	<category: 'accessing'>
 
-        ^ VisualGST uniqueInstance browserHasFocus
+        ^ GtkLauncher uniqueInstance browserHasFocus
                     ifTrue: [
-                        (VisualGST uniqueInstance currentWidgetOfBrowser sourceCodeWidgetHasFocus and: [ VisualGST uniqueInstance currentWidgetOfBrowser hasSelection ])
-                                                            ifTrue: [ self extractNamespaceAndClassFrom: VisualGST uniqueInstance currentWidgetOfBrowser selectedText ]
+                        (GtkLauncher uniqueInstance currentWidgetOfBrowser sourceCodeWidgetHasFocus and: [ GtkLauncher uniqueInstance currentWidgetOfBrowser hasSelection ])
+                                                            ifTrue: [ self extractNamespaceAndClassFrom: GtkLauncher uniqueInstance currentWidgetOfBrowser selectedText ]
                                                             ifFalse: [ self extractSelectedItems ] ]
                     ifFalse: [ self extractFromSelection ]
     ]

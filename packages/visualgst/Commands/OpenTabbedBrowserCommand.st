@@ -4,7 +4,7 @@ OpenBrowserCommand subclass: OpenTabbedBrowserCommand [
 	<category: 'user interface'>
 
 	| browser |
-        browser := VisualGST uniqueInstance classBrowser.
+        browser := GtkLauncher uniqueInstance classBrowser.
         browser selectANamespace: anAssociation key.
         anAssociation value ifNotNil: [ browser selectAClass: anAssociation value ].
     ]

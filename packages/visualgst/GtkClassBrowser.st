@@ -68,17 +68,7 @@ GtkBrowsingTool subclass: GtkClassBrowser [
     fileoutNamespace [
 	<category: 'namespace events'>
 
-        | file |
-        (GTK.GtkFileChooserDialog selectFolder: 'Save namespace as...' parent: window)
-            showModalOnAnswer: [ :dlg :res |
-                res = GTK.Gtk gtkResponseAccept ifTrue: [ self fileoutNamespace: dlg getCurrentFolder ].
-                dlg destroy ].
-    ]
-
-    fileoutNamespace: aString [
-	<category: 'namespace events'>
-
-	browserWidget fileoutNamespace: aString
+        browserWidget fileoutNamespace
     ]
 
     newNamespace [
@@ -108,17 +98,7 @@ GtkBrowsingTool subclass: GtkClassBrowser [
     fileoutClass [
 	<category: 'class events'>
 
-        | file |
-        (GTK.GtkFileChooserDialog save: 'Save Smalltalk class as...' parent: window)
-            showModalOnAnswer: [ :dlg :res |
-                res = GTK.Gtk gtkResponseAccept ifTrue: [ self fileoutClass: dlg getFilename ].
-                dlg destroy ]
-    ]
-
-    fileoutClass: aString [
-	<category: 'class events'>
-
-	browserWidget fileoutClass: aString
+	browserWidget fileoutClass
     ]
 
     newClass [
@@ -157,32 +137,10 @@ GtkBrowsingTool subclass: GtkClassBrowser [
 	browserWidget renameCategory
     ]
 
-    deleteCategory [
-	<category: 'category events'>
-
-	browserWidget deleteCategory
-    ]
-
-    inspectCategory [
-	<category: 'category events'>
-
-	browserWidget inspectCategory
-    ]
-
     fileoutCategory [
         <category: 'method events'>
 
-        | file |
-        (GTK.GtkFileChooserDialog save: 'Save Smalltalk category as...' parent: window)
-            showModalOnAnswer: [ :dlg :res |
-                res = GTK.Gtk gtkResponseAccept ifTrue: [ self fileoutCategory: dlg getFilename ].
-                dlg destroy ]
-    ]
-
-    fileoutCategory: aString [
-        <category: 'method events'>
-
-        browserWidget fileoutCategory: aString
+	browserWidget fileoutCategory
     ]
 
     newMethod [
@@ -206,17 +164,7 @@ GtkBrowsingTool subclass: GtkClassBrowser [
     fileoutMethod [
 	<category: 'method events'>
 
-        | file |
-        (GTK.GtkFileChooserDialog save: 'Save Smalltalk method as...' parent: window)
-            showModalOnAnswer: [ :dlg :res |
-                res = GTK.Gtk gtkResponseAccept ifTrue: [ self fileoutMethod: dlg getFilename ].
-                dlg destroy ]
-    ]
-
-    fileoutMethod: aString [
-        <category: 'method events'>
-
-	browserWidget fileoutMethod: aString
+	browserWidget fileoutMethod
     ]
 
     acceptIt [
@@ -272,9 +220,6 @@ GtkBrowsingTool subclass: GtkClassBrowser [
 
 	^ self createNewMenuEntry: {GTK.GtkMenuItem menuItem: 'Add a category' connectTo: self selector: #newCategory.
             GTK.GtkMenuItem menuItem: 'Rename a category' connectTo: self selector: #renameCategory.
-            GTK.GtkMenuItem menuItem: 'Delete a category' connectTo: self selector: #deleteCategory.
-            GTK.GtkMenuItem new.
-            GTK.GtkMenuItem menuItem: 'Inspect a category' connectTo: self selector: #inspectCategory.
 	    GTK.GtkMenuItem new.
             GTK.GtkMenuItem menuItem: 'File out a category' connectTo: self selector: #fileoutCategory}
     ]
@@ -283,7 +228,6 @@ GtkBrowsingTool subclass: GtkClassBrowser [
 	<category: 'user interface'>
 
 	^ self createNewMenuEntry: {GTK.GtkMenuItem menuItem: 'Add a method' connectTo: self selector: #newMethod.
-	    GTK.GtkMenuItem menuItem: 'Rename a method' connectTo: self selector: #renameMethod.
 	    GTK.GtkMenuItem menuItem: 'Delete a method' connectTo: self selector: #deleteMethod.
 	    GTK.GtkMenuItem new.
 	    GTK.GtkMenuItem menuItem: 'Inspect a method' connectTo: self selector: #inspectMethod.

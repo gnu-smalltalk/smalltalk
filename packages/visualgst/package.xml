@@ -32,7 +32,14 @@
   <filein>Notification/ReorganizedEvent.st</filein>
   <filein>Notification/SystemChangeNotifier.st</filein>
   <filein>Commands/Command.st</filein>
-  <filein>Commands/UndoableCommand.st</filein>
+  <filein>Commands/DoItCommand.st</filein>
+  <filein>Commands/DebugItCommand.st</filein>
+  <filein>Commands/PrintItCommand.st</filein>
+  <filein>Commands/InspectItCommand.st</filein>
+  <filein>Commands/CategoryCommand.st</filein>
+  <filein>Commands/ClassCommand.st</filein>
+  <filein>Commands/MethodCommand.st</filein>
+  <filein>Commands/NamespaceCommand.st</filein>
   <filein>Commands/InspectNamespaceCommand.st</filein>
   <filein>Commands/FileoutNamespaceCommand.st</filein>
   <filein>Commands/AddNamespaceCommand.st</filein>
@@ -45,7 +52,6 @@
   <filein>Commands/RenameClassCommand.st</filein>
   <filein>Commands/FileoutCategoryCommand.st</filein>
   <filein>Commands/AddCategoryCommand.st</filein>
-  <filein>Commands/DeleteCategoryCommand.st</filein>
   <filein>Commands/RenameCategoryCommand.st</filein>
   <filein>Commands/FileoutMethodCommand.st</filein>
   <filein>Commands/InspectMethodCommand.st</filein>
@@ -69,14 +75,13 @@
   <filein>GtkMainWindow.st</filein>
   <filein>GtkBrowsingTool.st</filein>
   <filein>GtkBrowserWrapper.st</filein>
-  <filein>VisualGST.st</filein>
+  <filein>GtkLauncher.st</filein>
   <filein>Text/GtkTextPluginWidget.st</filein>
   <filein>Text/GtkFindWidget.st</filein>
   <filein>Text/GtkReplaceWidget.st</filein>
   <filein>GtkNotebookWidget.st</filein>
   <filein>Image/GtkImageModel.st</filein>
   <filein>Image/GtkImageWidget.st</filein>
-  <filein>GtkTranscriptWidget.st</filein>
   <filein>Debugger/GtkContextWidget.st</filein>
   <filein>Debugger/GtkDebugger.st</filein>
   <filein>BrowserState.st</filein>
@@ -85,6 +90,7 @@
   <filein>CategoryState.st</filein>
   <filein>MethodState.st</filein>
   <filein>GtkWorkspaceWidget.st</filein>
+  <filein>GtkTranscriptWidget.st</filein>
   <filein>GtkCategorizedNamespaceWidget.st</filein>
   <filein>GtkCategorizedClassWidget.st</filein>
   <filein>GtkCategoryWidget.st</filein>
@@ -116,9 +122,7 @@
   <filein>GtkWebView.st</filein>
   <filein>Extensions.st</filein>
   <filein>GtkAssistant.st</filein>
-  <filein>Undo/AddCategoryUndoCommand.st</filein>
   <filein>Undo/RenameCategoryUndoCommand.st</filein>
-  <filein>Undo/DeleteCategoryUndoCommand.st</filein>
   <filein>Undo/AddMethodUndoCommand.st</filein>
   <filein>Undo/DeleteMethodUndoCommand.st</filein>
   <filein>WorkspaceVariableTracker.st</filein>
@@ -185,7 +189,14 @@
   <file>Notification/ReorganizedEvent.st</file>
   <file>Notification/SystemChangeNotifier.st</file>
   <file>Commands/Command.st</file>
-  <file>Commands/UndoableCommand.st</file>
+  <file>Commands/DoItCommand.st</file>
+  <file>Commands/DebugItCommand.st</file>
+  <file>Commands/PrintItCommand.st</file>
+  <file>Commands/InspectItCommand.st</file>
+  <file>Commands/CategoryCommand.st</file>
+  <file>Commands/ClassCommand.st</file>
+  <file>Commands/MethodCommand.st</file>
+  <file>Commands/NamespaceCommand.st</file>
   <file>Commands/InspectNamespaceCommand.st</file>
   <file>Commands/FileoutNamespaceCommand.st</file>
   <file>Commands/AddNamespaceCommand.st</file>
@@ -198,7 +209,6 @@
   <file>Commands/RenameClassCommand.st</file>
   <file>Commands/FileoutCategoryCommand.st</file>
   <file>Commands/AddCategoryCommand.st</file>
-  <file>Commands/DeleteCategoryCommand.st</file>
   <file>Commands/RenameCategoryCommand.st</file>
   <file>Commands/FileoutMethodCommand.st</file>
   <file>Commands/InspectMethodCommand.st</file>
@@ -222,14 +232,13 @@
   <file>GtkMainWindow.st</file>
   <file>GtkBrowsingTool.st</file>
   <file>GtkBrowserWrapper.st</file>
-  <file>VisualGST.st</file>
+  <file>GtkLauncher.st</file>
   <file>Text/GtkTextPluginWidget.st</file>
   <file>Text/GtkFindWidget.st</file>
   <file>Text/GtkReplaceWidget.st</file>
   <file>GtkNotebookWidget.st</file>
   <file>Image/GtkImageModel.st</file>
   <file>Image/GtkImageWidget.st</file>
-  <file>GtkTranscriptWidget.st</file>
   <file>Debugger/GtkContextWidget.st</file>
   <file>Debugger/GtkDebugger.st</file>
   <file>BrowserState.st</file>
@@ -238,6 +247,7 @@
   <file>CategoryState.st</file>
   <file>MethodState.st</file>
   <file>GtkWorkspaceWidget.st</file>
+  <file>GtkTranscriptWidget.st</file>
   <file>GtkCategorizedNamespaceWidget.st</file>
   <file>GtkCategorizedClassWidget.st</file>
   <file>GtkCategoryWidget.st</file>
@@ -269,9 +279,7 @@
   <file>GtkWebView.st</file>
   <file>Extensions.st</file>
   <file>GtkAssistant.st</file>
-  <file>Undo/AddCategoryUndoCommand.st</file>
   <file>Undo/RenameCategoryUndoCommand.st</file>
-  <file>Undo/DeleteCategoryUndoCommand.st</file>
   <file>Undo/AddMethodUndoCommand.st</file>
   <file>Undo/DeleteMethodUndoCommand.st</file>
   <file>WorkspaceVariableTracker.st</file>
@@ -343,6 +351,6 @@
   <file>Icons/NUnit.Running.png</file>
   <file>Icons/NUnit.SuccessAndFailed.png</file>
   <file>Icons/NUnit.Success.png</file>
-  <start>VisualGST.VisualGST open.
+  <start>VisualGST.GtkLauncher open.
     GTK.Gtk main</start>
 </package>

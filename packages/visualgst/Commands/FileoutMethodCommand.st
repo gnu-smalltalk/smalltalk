@@ -1,4 +1,4 @@
-Command subclass: FileoutMethodCommand [
+MethodCommand subclass: FileoutMethodCommand [
 
     execute [
 	<category: 'command'>
@@ -20,7 +20,7 @@ Command subclass: FileoutMethodCommand [
 
         | stream |
         stream := FileStream open: aString mode: FileStream write.
-        (MethodSource write: target on: stream)
+        (MethodSource write: target selectedMethod on: stream)
             source
     ]
 ]

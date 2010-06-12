@@ -1,4 +1,4 @@
-Command subclass: InspectMethodCommand [
+MethodCommand subclass: InspectMethodCommand [
 
     execute [
 	<category: 'command'>

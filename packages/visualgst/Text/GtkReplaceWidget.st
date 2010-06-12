@@ -30,7 +30,7 @@ GtkFindWidget subclass: GtkReplaceWidget [
 
 	| hBox |
 	^ (GTK.GtkHBox new: false spacing: 3)
-            packStart: (GTK.GtkLabel new: 'replace with :') expand: false fill: false padding: 2;
+            packStart: (GTK.GtkLabel new: 'Replace with:') expand: false fill: false padding: 2;
             packStart: self replaceEntry expand: false fill: false padding: 15;
 	    packStart: self replaceButton expand: false fill: false padding: 15;
             packStart: self replaceAllButton expand: false fill: false padding: 15;

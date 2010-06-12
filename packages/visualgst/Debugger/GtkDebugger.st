@@ -1,9 +1,13 @@
 GtkBrowsingTool subclass: GtkDebugger [
-    | codeWidget contextWidget debugger inspectorWidget stackInspectorWidget selectedContext |
+    | codeWidget contextWidget debugger inspectorWidget stackInspectorWidget |
 
     GtkDebugger class >> open: aString [
 	<category: 'user interface'>
 
+        "The current process might be processing an event.  Gtk will
+         block inside g_main_loop_dispatch and won't deliver any
+         other events until this one is processed.  So, fork into a
+         new process and return nil without executing #ensure: blocks."
         Processor activeProcess detach.
 
 	[ :debugger |
@@ -47,6 +51,7 @@ GtkBrowsingTool subclass: GtkDebugger [
 	<category: 'user interface'>
 
 	^ (contextWidget := GtkContextWidget new)
+            parentWindow: window;
 	    initialize;
 	    whenSelectionChangedSend: #contextChanged to: self;
 	    mainWidget
@@ -56,6 +61,7 @@ GtkBrowsingTool subclass: GtkDebugger [
 	<category: 'user interface'>
 
 	^ (inspectorWidget := GtkInspectorWidget new)
+            parentWindow: window;
 	    initialize;
 	    mainWidget
     ]
@@ -76,6 +82,7 @@ GtkBrowsingTool subclass: GtkDebugger [
 	<category: 'user interface'>
 
 	^ (stackInspectorWidget := GtkStackInspector new)
+            parentWindow: window;
 	    initialize;
 	    mainWidget
     ]
@@ -131,8 +138,6 @@ GtkBrowsingTool subclass: GtkDebugger [
     createToolbar [
 	<category: 'user interface'>
 
-	| package |
-	package := PackageLoader packageAt: 'VisualGST'.
 	self
             appendToolItem: ((GTK.GtkToolButton newFromStock: 'gtk-save')
 				connectSignal: 'clicked' to: SaveImageCommand selector: #execute userData: nil;
@@ -183,15 +188,15 @@ GtkBrowsingTool subclass: GtkDebugger [
 				setTooltipText: 'Accept It';
 				yourself);
 	    appendSeparator;
-	    appendToolItem: ((GTK.GtkToolButton new: (GTK.GtkImage newFromFile: (package / 'Icons/go-run.png') file displayString) label: 'Continue')
+	    appendToolItem: ((GTK.GtkToolButton new: (GTK.GtkImage newFromFile: (GtkLauncher / 'Icons/go-run.png') file displayString) label: 'Continue')
 				connectSignal: 'clicked' to: self selector: #run userData: nil;
 				setTooltipText: 'Continue';
 				yourself);
-	    appendToolItem: ((GTK.GtkToolButton new: (GTK.GtkImage newFromFile: (package / 'Icons/go-next.png') file displayString) label: 'Step into')
+	    appendToolItem: ((GTK.GtkToolButton new: (GTK.GtkImage newFromFile: (GtkLauncher / 'Icons/go-next.png') file displayString) label: 'Step into')
 				connectSignal: 'clicked' to: self selector: #stepInto userData: nil;
 				setTooltipText: 'Step into';
 				yourself);
-	    appendToolItem: ((GTK.GtkToolButton new: (GTK.GtkImage newFromFile: (package / 'Icons/go-jump.png') file displayString) label: 'Step to here')
+	    appendToolItem: ((GTK.GtkToolButton new: (GTK.GtkImage newFromFile: (GtkLauncher / 'Icons/go-jump.png') file displayString) label: 'Step to here')
 				connectSignal: 'clicked' to: self selector: #step userData: nil;
 				setTooltipText: 'Step to here';
 				yourself)
@@ -273,10 +278,28 @@ GtkBrowsingTool subclass: GtkDebugger [
 	InspectMethodCommand on: self
     ]
 
+    hasSelectedMethod [
+	<category: 'method events'>
+
+	^self hasSelectedContext
+    ]
+
     selectedMethod [
 	<category: 'method events'>
 
-	^selectedContext ifNotNil: [ selectedContext method ].
+	^self selectedContext method
+    ]
+
+    hasSelectedContext [
+        <category: 'method events'>
+
+        ^contextWidget hasSelectedContext
+    ]
+
+    selectedContext [
+        <category: 'method events'>
+
+        ^contextWidget selectedContext
     ]
 
     contextChanged [
@@ -284,12 +307,10 @@ GtkBrowsingTool subclass: GtkDebugger [
 
 	| iter |
 	self checkCodeWidget.
-	contextWidget hasSelectedContext ifFalse: [ ^ self ].
-	selectedContext := debugger suspendedContext parentContextAt: contextWidget positionOfSelectedContext.
-	codeWidget sourceCode: selectedContext method methodSourceString.
-	codeWidget object: selectedContext receiver.
-	codeWidget applyTag: #debug forLine: selectedContext currentLine.
-	self updateInspectorWidget: selectedContext
+	self hasSelectedContext ifFalse: [ ^ self ].
+	codeWidget sourceCode: self selectedContext method methodSourceString.
+	codeWidget applyTag: #debug forLine: self selectedContext currentLine.
+	self updateInspectorWidget: self selectedContext
     ]
 
     step [
@@ -300,7 +321,7 @@ GtkBrowsingTool subclass: GtkDebugger [
 
 	contextWidget numberOfContext = ((contextWidget model getPath: iter) getIndices value + 1)
 	    ifTrue: [ debugger myStep ]
-	    ifFalse: [ debugger finish: selectedContext ].
+	    ifFalse: [ debugger finish: self selectedContext ].
 	self updateContextWidget
     ]
 
@@ -355,30 +376,78 @@ GtkBrowsingTool subclass: GtkDebugger [
 	AddMethodCommand on: self.
     ]
 
+    targetObject [
+        <category: 'smalltalk event'>
+
+	^self hasSelectedContext ifTrue: [self selectedContext receiver] ifFalse: [nil]
+    ]
+
+    focusedWidget [
+        <category: 'widget'>
+
+        inspectorWidget hasFocus ifTrue: [^inspectorWidget].
+        stackInspectorWidget hasFocus ifTrue: [^stackInspectorWidget].
+        ^codeWidget
+    ]
+
+    onFocusPerform: aSymbol [
+        <category: 'widget'>
+
+        ^self focusedWidget perform: aSymbol
+    ]
+
+    doIt: object [
+        <category: 'smalltalk event'>
+
+        self focusedWidget doIt: object
+    ]
+
+    debugIt: object [
+        <category: 'smalltalk event'>
+
+        self focusedWidget debugIt: object
+    ]
+
+    inspectIt: object [
+        <category: 'smalltalk event'>
+
+        self focusedWidget inspectIt: object
+    ]
+
+    printIt: object [
+        <category: 'smalltalk event'>
+
+        self focusedWidget printIt: object
+    ]
+
+    clearUndo [
+        <category: 'smalltalk event'>
+
+        codeWidget clearUndo
+    ]
+
     doIt [
         <category: 'smalltalk event'>
 
-        codeWidget doIt
+        DoItCommand on: self
     ]
 
     debugIt [
         <category: 'smalltalk event'>
 
-        codeWidget debugIt
+        DebugItCommand on: self
     ]
-
 
     inspectIt [
         <category: 'smalltalk event'>
 
-        codeWidget inspectIt
+        InspectItCommand on: self
     ]
-
 
     printIt [
         <category: 'smalltalk event'>
 
-        codeWidget printIt
+        PrintItCommand on: self
     ]
 
     hasChanged [
@@ -387,7 +456,59 @@ GtkBrowsingTool subclass: GtkDebugger [
 	^ codeWidget hasChanged
     ]
 
-    clearUndo [
+    cancel [
+        <category: 'edit events'>
+
+        self onFocusPerform: #cancel
     ]
+
+    undo [
+        <category: 'edit events'>
+
+        self onFocusPerform: #undo
+    ]
+
+    redo [
+        <category: 'edit events'>
+
+        self onFocusPerform: #redo
+    ]
+
+    cut [
+        <category: 'edit events'>
+
+        self onFocusPerform: #cut
+    ]
+
+    copy [
+        <category: 'edit events'>
+
+        self onFocusPerform: #copy
+    ]
+
+    paste [
+        <category: 'edit events'>
+
+        self onFocusPerform: #paste
+    ]
+
+    selectAll [
+        <category: 'edit events'>
+
+        self onFocusPerform: #selectAll
+    ]
+
+    find [
+        <category: 'edit events'>
+
+        self onFocusPerform: #showFind
+    ]
+
+    replace [
+        <category: 'edit events'>
+
+        self onFocusPerform: #showReplace
+    ]
+
 ]
 

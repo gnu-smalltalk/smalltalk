@@ -45,30 +45,33 @@ GtkTextWidget subclass: GtkInspectorSourceWidget [
 	aGtkMenu append: menuitem
     ]
 
-    doIt [
-	<category: 'events'>
+    targetObject [
+	<category: 'smalltalk event'>
 
-	| text |
-	text := self buffer getHasSelection 
-		    ifTrue: [ | iter |
-			    iter := self buffer getSelectionBounds ifNil: [^ self].
-			    self buffer getText: (iter at: 1) end: (iter at: 2) includeHiddenChars: false ]
-		    ifFalse: [ self buffer text ].
-        ^ Behavior
-	    evaluate: text
-	    to: object
-	    ifError: [ :fname :lineNo :errorString | ]
+	^object
     ]
 
-    printIt [
-	<category: 'events'>
+    doIt [
+	<category: 'smalltalk event'>
 
-	self buffer insertAtCursor: (self doIt displayString) 
+	DoItCommand on: self
+    ]
+
+    debugIt [
+	<category: 'smalltalk event'>
+
+	DebugItCommand on: self
     ]
 
     inspectIt [
-	<category: 'events'>
+	<category: 'smalltalk event'>
 
-	GtkInspector openOn: self doIt
+	InspectItCommand on: self
+    ]
+
+    printIt [
+	<category: 'smalltalk event'>
+
+	PrintItCommand on: self
     ]
 ]

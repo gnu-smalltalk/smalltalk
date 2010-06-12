@@ -8,7 +8,7 @@ Object subclass: ClassCategory [
     ClassCategory class >> icon [
 	<category: '*VisualGST'>
 	
-	^ icon ifNil: [ icon := GTK.GdkPixbuf newFromFile: ((PackageLoader packageAt: 'VisualGST') / 'Icons/category.gif') file displayString error: nil ]
+	^ icon ifNil: [ icon := GTK.GdkPixbuf newFromFile: (GtkLauncher / 'Icons/category.gif') file displayString error: nil ]
     ]
 
     ClassCategory class >> icon: aGdkPixbuf [
@@ -57,10 +57,28 @@ Object subclass: ClassCategory [
 	^ category 
     ]
 
+    ClassCategory class >> named: name for: aParentCategory into: aNamespace [
+	<category: 'instance creation'>
+
+        | token category |
+        token := name ifNil: [ #() ] ifNotNil: [ name tokenize: '-' ].
+        category := aParentCategory.
+        token do: [ :each |
+            category at: each ifAbsentPut: [ self named: each parent: category namespace: aNamespace ].
+            category := category at: each ].
+        ^category
+    ]
+
+    ClassCategory class >> named: name into: aNamespace [
+	<category: 'instance creation'>
+
+        ^self named: name for: aNamespace categories into: aNamespace
+    ]
+
     ClassCategory class >> uniqueInstance [
 	<category: 'accessing'>
 
-	^ uniqueInstance ifNil: [ uniqueInstance := self basicNew ]
+	^ uniqueInstance ifNil: [ uniqueInstance := self basicNew initialize ]
     ]
 
     ClassCategory class >> initialize [
@@ -86,16 +104,29 @@ Object subclass: ClassCategory [
     ClassCategory class >> extractCategory: aClass for: aParentCategory into: aNamespace [
         <category: 'extraction'>
 
-        | category subcat token |
-        token := aClass category ifNil: [ #() ] ifNotNil: [ aClass category tokenize: '-' ].
-        category := aParentCategory.
-        token do: [ :each |
-            category at: each ifAbsentPut: [ self named: each parent: category namespace: aNamespace ].
-            category := category at: each ].
-        category classes add: aClass asClass
+        (self named: aClass category for: aParentCategory into: aNamespace) classes
+            add: aClass asClass
+    ]
+
+    = anObject [
+        <category: 'testing'>
+    
+        ^ self class == anObject class and: [
+	   self parent == anObject parent and: [
+           self namespace == anObject namespace and: [
+           self name = anObject name ]]]
+    ]
+
+    hash [
+        <category: 'testing'>
+    
+	^ (self parent identityHash
+           + self namespace identityHash)
+               bitXor: self name hash
     ]
 
     at: aString ifAbsentPut: aBlock [
+        <category: 'accessing'>
     
 	^ self at: aString ifAbsent: [ self at: aString put: aBlock value ]
     ]
@@ -104,7 +135,7 @@ Object subclass: ClassCategory [
         <category: 'accessing'>
 
 	self categories at: aString put: aCategory.
-	VisualGST.SystemChangeNotifier root classCategoryAdded: aCategory.
+	SystemChangeNotifier root classCategoryAdded: aCategory.
         ^ aCategory
     ]
 
@@ -118,6 +149,29 @@ Object subclass: ClassCategory [
 	<category: 'accessing'>
 
 	^ self categories at: aString ifAbsent: aBlock
+    ]
+
+    registerNotifier [
+        <category: 'initialize-release'>
+
+        "TODO: do not go through GtkLauncher's notifier"
+        (GtkLauncher uniqueInstance systemChangeNotifier)
+            notify: self ofSystemChangesOfItem: #class change: #Recategorized using: #'classRecategorizedEvent:'
+    ]
+
+    classRecategorizedEvent: anEvent [
+        <category: 'model event'>
+
+        | namespace oldCat newCat |
+        namespace := anEvent item environment.
+        oldCat := ClassCategory named: anEvent oldCategory into: namespace.
+        oldCat removeClass: anEvent item
+    ]
+
+    initialize [
+        <category: 'initialize-release'>
+
+        self registerNotifier
     ]
 
     values [
@@ -198,7 +252,7 @@ Object subclass: ClassCategory [
 	self at: aCategory name ifAbsent: [ ^ self ].
 	aCategory parent: nil.
 	self categories removeKey: aCategory name.
-	VisualGST.SystemChangeNotifier root classCategoryRemoved: aCategory.
+	SystemChangeNotifier root classCategoryRemoved: aCategory.
 	(self classes isEmpty and: [ self parent isNil not ]) ifTrue: [ self parent removeCategory: self ]
     ]
 

@@ -1,16 +1,22 @@
-GtkMainWindow subclass: VisualGST [
-    VisualGST class [ | compileError uniqueInstance | ]
+GtkMainWindow subclass: GtkLauncher [
+    GtkLauncher class [ | compileError uniqueInstance | ]
 
     | compilerError browsers outputs saved imageName transcriptWidget windowsMenu systemChangeNotifier |
 
-    VisualGST class >> uniqueInstance [
+    GtkLauncher class >> uniqueInstance [
 	<category: 'public'>
 
 	uniqueInstance ifNil: [ self createInstance ].
         ^ uniqueInstance
     ]
 
-    VisualGST class >> uniqueInstance: anObject [
+    GtkLauncher class >> / path [
+        <category: 'files'>
+
+        ^(PackageLoader packageAt: 'VisualGST') / path
+    ]
+
+    GtkLauncher class >> uniqueInstance: anObject [
         <category: 'private'>
 
 	(uniqueInstance notNil and: [ anObject notNil ])
@@ -18,7 +24,7 @@ GtkMainWindow subclass: VisualGST [
         uniqueInstance := anObject
     ]
 
-    VisualGST class >> createInstance [
+    GtkLauncher class >> createInstance [
         <category: 'private'>
 
         ^(uniqueInstance :=  self basicNew)
@@ -29,62 +35,62 @@ GtkMainWindow subclass: VisualGST [
             yourself
     ]
 
-    VisualGST class >> instanceCreationErrorString [
+    GtkLauncher class >> instanceCreationErrorString [
         <category: 'private'>
 
         ^ 'This is a singleton implementation, so you are not allowed to create instances yourself. Use #uniqueInstance to access the instance.'
     ]
 
-    VisualGST class >> new [
+    GtkLauncher class >> new [
         <category: 'instance creation'>
 
         ^ self error: self instanceCreationErrorString
     ]
 
-    VisualGST class >> exit [
+    GtkLauncher class >> exit [
 	<category: 'exit'>
 
 	GTK.Gtk mainQuit.
 	ObjectMemory quit	
     ]
  
-    VisualGST class >> open [
+    GtkLauncher class >> open [
 	<category: 'user interface'>
 
         self uniqueInstance
     ]
 
-    VisualGST class >> version [
+    GtkLauncher class >> version [
 	<category: 'accessing'>
 
 	^ '0.7.5'
     ]
 
-    VisualGST class >> website [
+    GtkLauncher class >> website [
 	<category: 'accessing'>
 
 	^ 'http://visualgst.bioskop.fr/'
     ]
     
-    VisualGST class >> gstWebsite [
+    GtkLauncher class >> gstWebsite [
 	<category: 'accessing'>
 
 	^ 'http://smalltalk.gnu.org/'
     ]
 
-    VisualGST class >> compileError: aString [
+    GtkLauncher class >> compileError: aString [
 	<category: 'accessing'>
 
 	compileError text: aString
     ]
 
-    VisualGST class >> setCompilerError: aWorkspace [
+    GtkLauncher class >> setCompilerError: aWorkspace [
 	<category: 'accessing'>
 
 	compileError := aWorkspace
     ]
 
-    VisualGST class >> license [
+    GtkLauncher class >> license [
 	<category: 'accessing'>
 
 	^
@@ -104,6 +110,27 @@ PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
 COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN
 AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH
 THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.'
+    ]
+
+    GtkLauncher class >> displayError: title message: error [
+        <category: 'error'>
+
+        | dialog |
+        dialog := GTK.GtkMessageDialog
+                                new: nil
+                                flags: GTK.Gtk gtkDialogDestroyWithParent
+                                type: GTK.Gtk gtkMessageWarning
+                                buttons: GTK.Gtk gtkButtonsNone
+                                message: 'Error'
+                                tip: error.
+
+        dialog
+            addButton: 'Ok' responseId: 1;
+            showModalOnAnswer: [ :dlg :res | dlg destroy ].
+    ]
+
+    GtkLauncher class >> displayError: error [
+        ^self displayError: 'Error' message: error
     ]
 
     aboutLauncher [
@@ -173,6 +200,7 @@ THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.'
             addButton: 'Exit without saving' responseId: 0;
             addButton: 'Cancel' responseId: 2;
             addButton: 'Save image' responseId: 1;
+            setDefaultResponse: 2;
             showModalOnAnswer: [ :dlg :res |
                 res = 0 ifTrue: [ self class exit ].
                 res = 1 ifTrue: [ self saveImageAndQuit ].
@@ -453,9 +481,6 @@ THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.'
 
         ^ self createNewMenuEntry: {GTK.GtkMenuItem menuItem: 'Add a category' connectTo: self selector: #newCategory.
             GTK.GtkMenuItem menuItem: 'Rename a category' connectTo: self selector: #renameCategory.
-            GTK.GtkMenuItem menuItem: 'Delete a category' connectTo: self selector: #deleteCategory.
-            GTK.GtkMenuItem new.
-            GTK.GtkMenuItem menuItem: 'Inspect a category' connectTo: self selector: #inspectCategory.
             GTK.GtkMenuItem new.
             GTK.GtkMenuItem menuItem: 'File out a category' connectTo: self selector: #fileoutCategory}
     ]
@@ -464,7 +489,6 @@ THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.'
         <category: 'user interface'>
 
         ^ self createNewMenuEntry: {GTK.GtkMenuItem menuItem: 'Add a method' connectTo: self selector: #newMethod.
-            GTK.GtkMenuItem menuItem: 'Rename a method' connectTo: self selector: #renameMethod.
             GTK.GtkMenuItem menuItem: 'Delete a method' connectTo: self selector: #deleteMethod.
             GTK.GtkMenuItem new.
             GTK.GtkMenuItem menuItem: 'Inspect a method' connectTo: self selector: #inspectMethod.
@@ -653,30 +677,21 @@ THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.'
 	^ self createNewMenuEntry: menu 
     ]
 
-    isCurrentWidgetTranscript [
-	<category: 'testing'>
-
-	^ outputs currentWidget == transcriptWidget
-    ]
-
     cancel [
 	<category: 'edit events'>
 
-	self isCurrentWidgetTranscript ifTrue: [ outputs currentWidget hasFocus ifTrue: [ ^ self ] ].
 	self onFocusPerform: #cancel
     ]
 
     undo [
 	<category: 'edit events'>
 
-	self isCurrentWidgetTranscript ifTrue: [ outputs currentWidget hasFocus ifTrue: [ ^ self ] ].
 	self onFocusPerform: #undo
     ]
 
     redo [
 	<category: 'edit events'>
 
-	self isCurrentWidgetTranscript ifTrue: [ outputs currentWidget hasFocus ifTrue: [ ^ self ] ].
 	self onFocusPerform: #redo
     ]
 
@@ -882,18 +897,6 @@ THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.'
         <category: 'category events'>
 
         browsers currentWidget renameCategory
-    ]
-
-    deleteCategory [
-        <category: 'category events'>
-
-        browsers currentWidget deleteCategory
-    ]
-
-    inspectCategory [
-        <category: 'category events'>
-
-        browsers currentWidget inspectCategory
     ]
 
     fileoutCategory [

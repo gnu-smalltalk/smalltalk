@@ -144,5 +144,30 @@ GtkConcreteWidget subclass: GtkInspectorWidget [
 	stack isEmpty ifTrue: [ ^ self ].
 	self object: stack removeFirst
     ]
+
+    doIt: object [
+        <category: 'smalltalk event'>
+
+        workspaceWidget doIt: object
+    ]
+
+    debugIt: object [
+        <category: 'smalltalk event'>
+
+        workspaceWidget debugIt: object
+    ]
+
+    inspectIt: object [
+        <category: 'smalltalk event'>
+
+        workspaceWidget inspectIt: object
+    ]
+
+    printIt: object [
+        <category: 'smalltalk event'>
+
+        workspaceWidget printIt: object
+    ]
+
 ]
 

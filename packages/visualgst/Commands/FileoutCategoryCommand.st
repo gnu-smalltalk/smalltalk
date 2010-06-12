@@ -1,29 +1,7 @@
-Command subclass: FileoutCategoryCommand [
-    | class |
-
-    FileoutCategoryCommand class >> on: aClass categorized: aSymbol [
-	<category: 'instance creation'>
-
-	^ (self new)
-	    target: aSymbol;
-	    classOrMeta: aClass;
-	    execute;
-	    yourself
-    ]
-
-    classOrMeta: aClass [
-	<category: 'accessing'>
-
-	class := aClass
-    ]
+CategoryCommand subclass: FileoutCategoryCommand [
 
     execute [
 	<category: 'command'>
-
-	self chooseFile
-    ]
-
-    chooseFile [
 
         | file |
         (GTK.GtkFileChooserDialog save: 'Save Smalltalk category as...' parent: nil)
@@ -37,7 +15,7 @@ Command subclass: FileoutCategoryCommand [
 
         | stream |
         stream := FileStream open: aString mode: FileStream write.
-        (CategorySource write: target of: class on: stream)
+        (CategorySource write: target selectedCategory of: target classOrMeta on: stream)
             source
     ]
 ]

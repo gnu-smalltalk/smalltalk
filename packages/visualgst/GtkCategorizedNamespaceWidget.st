@@ -11,11 +11,10 @@ GtkConcreteWidget subclass: GtkCategorizedNamespaceWidget [
     registerNotifier [
         <category: 'initialize-release'>
 
-        (VisualGST uniqueInstance systemChangeNotifier)
+        (GtkLauncher uniqueInstance systemChangeNotifier)
             notify: self ofSystemChangesOfItem: #namespace change: #Added using: #'addEvent:';
             notify: self ofSystemChangesOfItem: #namespace change: #Removed using: #'removeEvent:';
-            notify: self ofSystemChangesOfItem: #category change: #Added using: #'addCategoryEvent:';
-            notify: self ofSystemChangesOfItem: #category change: #Removed using: #'removeCategoryEvent:'
+            notify: self ofSystemChangesOfItem: #class change: #Recategorized using: #'classRecategorizedEvent:'
     ]
 
     buildTreeView [
@@ -123,7 +122,7 @@ GtkConcreteWidget subclass: GtkCategorizedNamespaceWidget [
     fileoutNamespace [
         <category: 'namespace events'>
 
-        FileoutNamespaceCommand on: self selectedNamespace
+        FileoutNamespaceCommand on: self
     ]
 
     addEvent: anEvent [
@@ -138,26 +137,17 @@ GtkConcreteWidget subclass: GtkCategorizedNamespaceWidget [
         model remove: anEvent item
     ]
 
-    removeCategoryEvent: anEvent [
+    classRecategorizedEvent: anEvent [
         <category: 'model event'>
 
-        model remove: anEvent item
-    ]
+        | namespace newCat place |
+        namespace := anEvent item environment.
+        newCat := ClassCategory named: anEvent item category into: namespace.
+        (model hasItem: newCat) ifTrue: [^self].
 
-    addCategoryEvent: anEvent [
-        <category: 'model event'>
-
-	anEvent item isRoot ifTrue: [ ^ self ].
-	model append: anEvent item parent: (anEvent item parent isRoot ifTrue: [ anEvent item namespace ] ifFalse: [ anEvent item parent ])
-    ]
-
-    recategorizedClassEvent: anEvent [
-        <category: 'model event'>
-
-	"anEvent oldCategory = anEvent item category ifTrue: [ ^ self ].
-	 self 
-	    removeEmptyCategory: anEvent item oldCategory;
-	    addCategory: anEvent item category"
+        [ model hasItem: (place := newCat parent) ] whileFalse: [
+            newCat := place ].
+        model append: newCat parent: place
     ]
 ]
 

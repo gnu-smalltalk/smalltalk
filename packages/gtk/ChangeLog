@@ -1,3 +1,7 @@
+2010-06-12  Paolo Bonzini  <bonzini@gnu.org>
+
+	* GtkImpl.st: Remove method now that's now inlined in VisualGST.
+
 2010-05-28  Paolo Bonzini  <bonzini@gnu.org>
 
 	* gst-gtk.c: Work around missing g_poll in some versions of glib

@@ -318,13 +318,6 @@ EventMultiplexer subclass: SystemChangeNotifier [
 		oldProtocol: oldCategory)
     ]
 
-    traitDefinitionChangedFrom: oldTrait to: newTrait [
-	<category: 'system triggers'>
-
-        self trigger: (ModifiedTraitDefinitionEvent traitDefinitionChangedFrom: oldTrait to: newTrait)
-    ]
-
-
     notify: anObject ofEvents: eventsCollection using: oneArgumentSelector [
 	"Notifies an object of any events in the eventsCollection. Send it back a message #oneArgumentSelector, with as argument the particular system event instance."
 	<category: 'private'>

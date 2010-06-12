@@ -1,9 +1,8 @@
-UndoableCommand subclass: DeleteClassCommand [
+ClassCommand subclass: DeleteClassCommand [
 
     execute [
 	<category: 'command'>
 
-	target hasSelectedClass ifFalse: [ ^ self ].
-        self push: (DeleteClassUndoCommand delete: target selectedClass)
+        (DeleteClassUndoCommand delete: target selectedClass) push
     ]
 ]

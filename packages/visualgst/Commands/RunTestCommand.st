@@ -1,4 +1,4 @@
-Command subclass: RunTestCommand [
+MethodCommand subclass: RunTestCommand [
 
     execute [
 	<category: 'command'>

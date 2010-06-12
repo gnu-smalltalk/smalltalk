@@ -1,5 +1,5 @@
 GtkTextWidget subclass: GtkSourceCodeWidget [
-    | browser codeText object |
+    | browser codeText |
 
     initialize [
 	<category: 'initialization'>
@@ -183,49 +183,28 @@ GtkTextWidget subclass: GtkSourceCodeWidget [
 	self buffer setText: self codeText
     ]
 
-    object: anObject [
-	<category: 'accessing'>
-
-	object := anObject
-    ]
-
     doIt [
         <category: 'smalltalk event'>
 
-	^ Behavior
-            evaluate: self buffer selectedText 
-            to: object
-            ifError: [ :fname :lineNo :errorString | self error: errorString ]
+        ^browser doIt
     ]
-
 
     debugIt [
         <category: 'smalltalk event'>
 
-	object class
-            compile: ('Doit [ ^ [ ', self selectedText , ' ] value ]')
-            ifError:  [ :fname :lineNo :errorString |
-                self error: errorString ].
-        (GtkDebugger open)
-            doItProcess: [ object perform: #Doit ] newProcess
+        ^browser debugIt
     ]
 
     inspectIt [
         <category: 'smalltalk event'>
 
-	GtkInspector openOn: self doIt
+        ^browser inspectIt
     ]
 
     printIt [
         <category: 'smalltalk event'>
 
-	| iter start end result |
-        iter := self buffer iterOfSelectedText second.
-        result := ' ', (self doIt displayString), ' '.
-        self buffer insertInteractive: iter text: result len: result size defaultEditable: true.
-        start := self buffer getIterAtOffset: (iter getOffset - result size).
-        end := self buffer getIterAtOffset: (iter getOffset).
-        self buffer selectRange: start bound: end
+        ^browser printIt
     ]
 
     codeSaved [

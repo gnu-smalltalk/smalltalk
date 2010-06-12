@@ -22,7 +22,7 @@ GtkConcreteWidget subclass: GtkCategorizedClassWidget [
     registerNotifier [
         <category: 'initialize-release'>
 
-        (VisualGST uniqueInstance systemChangeNotifier)
+        (GtkLauncher uniqueInstance systemChangeNotifier)
             notify: self ofSystemChangesOfItem: #class change: #Added using: #'addEvent:';
             notify: self ofSystemChangesOfItem: #class change: #Removed using: #'removeEvent:';
             notify: self ofSystemChangesOfItem: #class change: #Recategorized using: #'recategorizedEvent:'
@@ -185,7 +185,7 @@ GtkConcreteWidget subclass: GtkCategorizedClassWidget [
     fileoutClass [
         <category: 'class events'>
 
-	FileoutClassCommand on: self selectedClass
+	FileoutClassCommand on: self
     ]
 
     addToModel: aClass [

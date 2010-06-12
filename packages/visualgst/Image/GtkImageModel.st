@@ -25,7 +25,7 @@ Object subclass: GtkImage [
     registerNotifier [
 	<category: 'initialize-release'>
 
-	(VisualGST uniqueInstance systemChangeNotifier)
+	(GtkLauncher uniqueInstance systemChangeNotifier)
 	    notify: self ofSystemChangesOfItem: #namespace change: #Added using: #'addNamespaceEvent:';
 	    notify: self ofSystemChangesOfItem: #namespace change: #Removed using: #'removeNamespaceEvent:';
 	    notify: self ofSystemChangesOfItem: #class change: #Added using: #'addClassEvent:';

@@ -1,4 +1,4 @@
-Command subclass: InspectNamespaceCommand [
+NamespaceCommand subclass: InspectNamespaceCommand [
 
     execute [
 	<category: 'command'>
