@@ -32,7 +32,7 @@
 
 
 Object subclass: Datagram [
-    | data address port |
+    | data address port dataSize |
     
     <category: 'Sockets-Protocols'>
     <comment: '
@@ -125,8 +125,36 @@ This class can also be used for receiving data from the network.'>
 	"Set the data attached to the datagram"
 
 	<category: 'accessing'>
-	data := aByteArray
+	data := aByteArray.
+	dataSize := nil.
     ]
+
+    dataSize [
+	"Answer the size of the message."
+
+	<category: 'accessing'>
+
+	^dataSize
+    ]
+
+    dataSize: aSize [
+	"I am called to update the size..."
+
+	<category: 'accessing'>
+
+	dataSize := aSize		
+    ]
+
+    size [
+	"I determine the size of the datagram. It is either an explicitly
+         specified dataSize, or the size of the whole collection."
+
+        <category: 'accessing'>
+        ^dataSize isNil
+	    ifTrue: [data size]
+	    ifFalse: [dataSize].
+    ]
+
 
     get [
 	"Parse the data attached to the datagram through a newly created

@@ -647,12 +647,12 @@ implementations.'>
 	 to only peek for it without removing it from the queue."
 
 	<category: 'socket operations'>
-	| address port data from addrLen fd |
+	| address port data from addrLen fd read |
 	data := ByteArray new: self bufferSize.
 	from := ByteArray new: 128.
 	addrLen := CInt gcValue: 128.
 	(fd := self fd) isNil ifTrue: [ ^SystemExceptions.EndOfStream signal ].
-	self 
+	read := self 
 	    receive: fd
 	    buffer: data
 	    size: data size
@@ -662,6 +662,7 @@ implementations.'>
 	port := ValueHolder new.
 	^aDatagram
 	    data: data;
+	    dataSize: read;
 	    address: (SocketAddress fromSockAddr: from port: port);
 	    port: port value;
 	    yourself
@@ -681,7 +682,7 @@ implementations.'>
 	self 
 	    send: fd
 	    buffer: aDatagram data
-	    size: aDatagram data size
+	    size: aDatagram size
 	    flags: self flags
 	    to: receiver
 	    size: size
