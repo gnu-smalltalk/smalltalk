@@ -1,5 +1,12 @@
 2010-06-12  Holger Hans Peter Freyther  <zecke@selfish.org>
 
+	* Sockets.st: Make DatagramSocket local: string port: int
+	work. Resolve the ipAddress to localAddr early on, use the
+	localAddr instead of ipAddress to determine the addressClass
+	and afterwards fallback to localhost in case localAddr was nil.
+
+2010-06-12  Holger Hans Peter Freyther  <zecke@selfish.org>
+
 	* Sockets.st: Add AbstractSocket class>>#addressFromString to
 	parse a string into a SocketAddress and use it inside the
 	ServerSocket and DatagramSocket class.

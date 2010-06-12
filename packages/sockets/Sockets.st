@@ -654,15 +654,14 @@ but it is done for cleanliness and symmetry.'>
 	<category: 'instance creation'>
 	| localAddr remoteAddr addressClass |
 	remoteAddr := self resolveAddress: ipAddressOrString.
+	localAddr := self resolveAddress: ipAddress.
 	addressClass := remoteAddr isNil 
 		    ifTrue: [self defaultAddressClass]
 		    ifFalse: [remoteAddr class].
-	addressClass := ipAddress isNil 
+	addressClass := localAddr isNil
 		    ifTrue: [addressClass]
-		    ifFalse: [ipAddress class].
-	localAddr := ipAddress isNil 
-		    ifTrue: [addressClass anyLocalAddress]
-		    ifFalse: [ipAddress].
+		    ifFalse: [localAddr class].
+	localAddr isNil ifTrue: [localAddr := addressClass anyLocalAddress].
 	^(addressClass newSocket: self)
 	    remote: remoteAddr
 	    port: remotePort
