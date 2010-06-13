@@ -1,3 +1,8 @@
+2010-06-13  Paolo Bonzini <bonzini@gnu.org>
+
+	* libgst/sockets.c: "Touch" all pointer arguments to socket
+	system calls to avoid EFAULT.
+
 2010-06-06  Paolo Bonzini <bonzini@gnu.org>
 
 	* libgst/sysdep/posix/time.c: Fix previous change for millisecond
