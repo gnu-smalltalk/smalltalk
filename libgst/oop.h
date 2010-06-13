@@ -362,6 +362,12 @@ extern void _gst_dump_oop_table ()
 extern void _gst_copy_an_oop (OOP oop) 
   ATTRIBUTE_HIDDEN;
 
+/* Mark the objects pointed to by the list of pointers to OOPs at CUROOP
+   (included) and finishing at ATENDOOP (excluded).  */
+extern void _gst_mark_oop_range (OOP * curOOP,
+			         OOP * atEndOOP) 
+  ATTRIBUTE_HIDDEN;
+
 /* Copy the objects pointed to by the list of pointers to OOPs at CUROOP
    (included) and finishing at ATENDOOP (excluded).  */
 extern void _gst_copy_oop_range (OOP * curOOP,
@@ -374,19 +380,8 @@ extern void _gst_grey_oop_range (PTR from,
 			         size_t size) 
   ATTRIBUTE_HIDDEN;
 
-/* The transitive marker.  This function works in two ways: a) when
-   OOP is NULL, it walks the list of pointers to OOPs at CUROOP
-   (included) and finishing at ATENDOOP (excluded).  Each object in
-   the list is then marked.  b) when oop is not NULL, it tail recurses
-   telling itself to mark the pointers referred to by the object
-   pointed to by oop. Note that a single function does both these
-   jobs to allow a fast, tail-recursive implementation of
-   single-object marking. 
-
-   This function does not mark weak objects, for obvious reasons.  */
-extern void _gst_mark_an_oop_internal (OOP oop,
-				       OOP * curOOP,
-				       OOP * atEndOOP) 
+/* Mark OOP and the pointers pointed by that.  */
+extern void _gst_mark_an_oop_internal (OOP oop)
   ATTRIBUTE_HIDDEN;
 
 /* Fully initialize the builtin objects, possible after the respective

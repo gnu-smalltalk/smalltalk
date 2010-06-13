@@ -1,5 +1,15 @@
 2010-06-13  Paolo Bonzini <bonzini@gnu.org>
 
+	* libgst/callin.c: Use _gst_copy_oop_range and _gst_mark_oop_range.
+	* libgst/oop.c: Rewrite tail recursion in _gst_mark_an_oop_internal.
+	Add _gst_mark_oop_range.
+	* libgst/oop.h: Add _gst_mark_oop_range, change prototype of
+	_gst_mark_an_oop_internal.
+	* libgst/oop.inl: Remove COPY_OOP_RANGE and MARK_OOP_RANGE, adjust
+	MAYBE_MARK_OOP.
+
+2010-06-13  Paolo Bonzini <bonzini@gnu.org>
+
 	* libgst/sockets.c: "Touch" all pointer arguments to socket
 	system calls to avoid EFAULT.
 

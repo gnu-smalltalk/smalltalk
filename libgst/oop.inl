@@ -60,27 +60,11 @@ static inline OOP alloc_oop (PTR obj, intptr_t flags);
   }							  \
 } while(0)
 
-/* Mark the OOPs starting at STARTOOP (included) and ending at ENDOOP
-   (excluded).  */
-#define COPY_OOP_RANGE(startOOP, endOOP) do {		  \
-  if ((startOOP) < (endOOP)) {				  \
-    _gst_copy_oop_range((startOOP), (endOOP));		  \
-  }							  \
-} while(0)
-
 /* Mark the OOP object because it is part of the root set.  Integers
    and already-marked OOPs are not processed silently.  */
 #define MAYBE_MARK_OOP(oop) do {			  \
   if (IS_OOP(oop) && !IS_OOP_MARKED(oop)) {		  \
-    _gst_mark_an_oop_internal((oop), NULL, NULL);	  \
-  }							  \
-} while(0)
-
-/* Mark the OOPs starting at STARTOOP (included) and ending at ENDOOP
-   (excluded).  */
-#define MARK_OOP_RANGE(startOOP, endOOP) do {		  \
-  if ((startOOP) < (endOOP)) {				  \
-    _gst_mark_an_oop_internal(NULL, (startOOP), (endOOP));\
+    _gst_mark_an_oop_internal((oop));			  \
   }							  \
 } while(0)
 

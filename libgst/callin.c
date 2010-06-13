@@ -1105,7 +1105,7 @@ _gst_copy_registered_oops (void)
 	 lies.  */
       OOP *first = *(k->first);
       OOP *last = *(k->last);
-      COPY_OOP_RANGE (first, last);
+      _gst_copy_oop_range (first, last);
     }
 }
 
@@ -1133,7 +1133,7 @@ _gst_mark_registered_oops (void)
 	 lies.  */
       OOP *first = *(k->first);
       OOP *last = *(k->last);
-      MARK_OOP_RANGE (first, last);
+      _gst_mark_oop_range (first, last);
     }
 }
 

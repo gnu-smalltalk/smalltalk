@@ -2165,134 +2165,137 @@ mark_ephemeron_oops (void)
   _gst_add_buf_data (base, (char *) pDeadOOP - (char *) base);
 }
 
-#define TAIL_MARK_OOP(newOOP) BEGIN_MACRO { \
+#define TAIL_MARK_OOP(newOOP) do { \
   PREFETCH_ADDR ((newOOP)->object, PREF_READ | PREF_NTA); \
   oop = (newOOP); \
-  continue;		/* tail recurse!!! */ \
-} END_MACRO
+  goto markOne;		/* tail recurse!!! */ \
+} while(0)
 
-#define TAIL_MARK_OOPRANGE(firstOOP, oopAtEnd) BEGIN_MACRO { \
+#define TAIL_MARK_OOPRANGE(firstOOP, oopAtEnd) do { \
   PREFETCH_START (firstOOP, PREF_READ | PREF_NTA); \
   curOOP = (OOP *)(firstOOP); \
   atEndOOP = (OOP *)(oopAtEnd); \
   oop = NULL; \
-  continue; \
-} END_MACRO
+  goto markRange; \
+} while(0)
 
 void
-_gst_mark_an_oop_internal (OOP oop,
-			   OOP * curOOP,
-			   OOP * atEndOOP)
+_gst_mark_an_oop_internal (OOP oop)
 {
-  for (;;)
-    {
-      if (!oop)
-	{			/* in the loop! */
+  OOP *curOOP, *atEndOOP;
+  goto markOne;
+
+ markRange:
+  {			/* in the loop! */
 #if defined (GC_DEBUGGING)
-	  gst_object obj = (gst_object) (curOOP - 1);	/* for debugging */
+    gst_object obj = (gst_object) (curOOP - 1);	/* for debugging */
 #endif
-	iterationLoop:
-	  /* in a loop, do next iteration */
-	  oop = *curOOP;
-	  PREFETCH_LOOP (curOOP, PREF_READ | PREF_NTA);
-	  curOOP++;
-	  if (IS_OOP (oop))
-	    {
+    for (;;)
+      {
+        /* in a loop, do next iteration */
+        oop = *curOOP;
+        PREFETCH_LOOP (curOOP, PREF_READ | PREF_NTA);
+        curOOP++;
+        if (IS_OOP (oop))
+          {
 #if defined (GC_DEBUGGING)
-	      if UNCOMMON (!IS_OOP_ADDR (oop))
-		{
-		  printf
-		    ("Error! Invalid OOP %p was found inside %p!\n",
-		     oop, obj);
-		  abort ();
-		}
-	      else
+            if UNCOMMON (!IS_OOP_ADDR (oop))
+              {
+                printf
+                  ("Error! Invalid OOP %p was found inside %p!\n",
+                   oop, obj);
+                abort ();
+              }
+            else
 #endif
-	      if (!IS_OOP_MARKED (oop))
-		{
-		  PREFETCH_START (oop->object, PREF_READ | PREF_NTA);
-		  if COMMON (curOOP < atEndOOP)
-		    {
-		      _gst_mark_an_oop_internal (oop, NULL, NULL);
-		      goto iterationLoop;
-		    }
-		  else
-		    /* On the last object in the set, reuse the
-		       current invocation. oop is valid, so we go to
-		       the single-object case */
-		    continue;
-		}
-	    }
-	  /* We reach this point if the object isn't to be marked.  The 
-	     code above contains a continue to tail recurse, so we
-	     cannot put the loop in a do...while and a goto is
-	     necessary here.  Speed is a requirement, so I'm doing it.  */
-	  if (curOOP < atEndOOP)
-	    goto iterationLoop;
-	}
-      else
-	{			/* just starting with this oop */
-	  OOP objClass;
-	  gst_object object;
-	  uintptr_t size;
+              if (!IS_OOP_MARKED (oop))
+                {
+                  PREFETCH_START (oop->object, PREF_READ | PREF_NTA);
+
+                  /* On the last object in the set, reuse the
+                     current invocation. oop is valid, so we go to
+                     the single-object case */
+                  if UNCOMMON (curOOP == atEndOOP)
+                    goto markOne;
+
+                  _gst_mark_an_oop_internal (oop);
+                  continue;
+                }
+          }
+
+        /* Place the check here so that the continue above skips it.  */
+        if UNCOMMON (curOOP == atEndOOP)
+          return;
+      }
+  }
+
+ markOne:
+  {
+    OOP objClass;
+    gst_object object;
+    uintptr_t size;
 
 #if defined (GC_DEBUGGING)
-	  if UNCOMMON (IS_OOP_FREE (oop))
-	    {
-	      printf ("Error! Free OOP %p is being marked!\n", oop);
-	      abort ();
-	      break;
-	    }
+    if UNCOMMON (IS_OOP_FREE (oop))
+      {
+        printf ("Error! Free OOP %p is being marked!\n", oop);
+        abort ();
+        break;
+      }
 #endif
 
 #if defined(GC_DEBUG_OUTPUT)
-	  printf (">Mark ");
-	  _gst_display_oop (oop);
+    printf (">Mark ");
+    _gst_display_oop (oop);
 #endif
 
-	  /* see if the object has pointers, set up to copy them if so. 
-	   */
-	  oop->flags |= F_REACHABLE;
-	  object = OOP_TO_OBJ (oop);
-	  objClass = object->objClass;
-	  if UNCOMMON (oop->flags & F_CONTEXT)
-	    {
-	      gst_method_context ctx;
-	      intptr_t methodSP;
-	      ctx = (gst_method_context) object;
-	      methodSP = TO_INT (ctx->spOffset);
-	      /* printf("setting up for loop on context %x, sp = %d\n", 
-	         ctx, methodSP); */
-	      TAIL_MARK_OOPRANGE (&ctx->objClass,
-				  ctx->contextStack + methodSP + 1);
+    /* see if the object has pointers, set up to copy them if so. 
+    */
+    oop->flags |= F_REACHABLE;
+    object = OOP_TO_OBJ (oop);
+    objClass = object->objClass;
+    if UNCOMMON (oop->flags & F_CONTEXT)
+      {
+        gst_method_context ctx;
+        intptr_t methodSP;
+        ctx = (gst_method_context) object;
+        methodSP = TO_INT (ctx->spOffset);
+        /* printf("setting up for loop on context %x, sp = %d\n", 
+           ctx, methodSP); */
+        TAIL_MARK_OOPRANGE (&ctx->objClass,
+                            ctx->contextStack + methodSP + 1);
 
-	    }
-	  else if UNCOMMON (oop->flags & (F_EPHEMERON | F_WEAK))
-	    {
-	      if (oop->flags & F_EPHEMERON)
-	        _gst_add_buf_pointer (oop);
+      }
+    else if UNCOMMON (oop->flags & (F_EPHEMERON | F_WEAK))
+      {
+        if (oop->flags & F_EPHEMERON)
+          _gst_add_buf_pointer (oop);
 
-	      /* In general, there will be many instances of a class,
-		 but only the first time will it be unmarked.  So I'm
-		 marking this as uncommon.  */
-	      if UNCOMMON (!IS_OOP_MARKED (objClass))
-		TAIL_MARK_OOP (objClass);
-	    }
-	  else
-	    {
-	      size = NUM_OOPS (object);
-	      if COMMON (size)
-		TAIL_MARK_OOPRANGE (&object->objClass,
-				    object->data + size);
+        /* In general, there will be many instances of a class,
+           but only the first time will it be unmarked.  So I'm
+           marking this as uncommon.  */
+        if UNCOMMON (!IS_OOP_MARKED (objClass))
+          TAIL_MARK_OOP (objClass);
+      }
+    else
+      {
+        size = NUM_OOPS (object);
+        if COMMON (size)
+          TAIL_MARK_OOPRANGE (&object->objClass,
+                              object->data + size);
 
-	      else if UNCOMMON (!IS_OOP_MARKED (objClass))
-		TAIL_MARK_OOP (objClass);
-	    }
-	}
-      /* This point is reached if and only if nothing has to be marked
-         anymore in the current iteration. So exit.  */
-      break;
-    }				/* for(;;) */
+        else if UNCOMMON (!IS_OOP_MARKED (objClass))
+          TAIL_MARK_OOP (objClass);
+      }
+  }
+}
+
+void
+_gst_mark_oop_range (OOP *curOOP, OOP *atEndOOP)
+{
+  OOP *pOOP;
+  for (pOOP = curOOP; pOOP < atEndOOP; pOOP++)
+    MAYBE_MARK_OOP (*pOOP);
 }
 
 
