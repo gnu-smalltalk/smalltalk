@@ -637,7 +637,7 @@ implementations.'>
 	    to: (aDatagram address isNil 
 		    ifTrue: [remoteAddress]
 		    ifFalse: [aDatagram address])
-	    port: (aDatagram port isNil ifTrue: [remotePort] ifFalse: [aDatagram port])
+	    port: (aDatagram port isNil ifTrue: [remotePort] ifFalse: [aDatagram port]).
     ]
 
     receive: flags datagram: aDatagram [
@@ -659,6 +659,7 @@ implementations.'>
 	    flags: (self flags bitOr: flags)
 	    from: from
 	    size: addrLen.
+	read < 0 ifTrue: [ File checkError: self soError ].
 	port := ValueHolder new.
 	^aDatagram
 	    data: data;
@@ -672,20 +673,21 @@ implementations.'>
 	"Send aDatagram on the socket to the given receiver and port"
 
 	<category: 'socket operations'>
-	| size receiver fd |
+	| size receiver fd sent |
 	theReceiver isNil 
 	    ifTrue: [receiver := nil. size := 0]
 	    ifFalse: 
 		[receiver := theReceiver port: port.
 		size := receiver size].
 	(fd := self fd) isNil ifTrue: [ ^SystemExceptions.EndOfStream signal ].
-	self 
+	sent := self 
 	    send: fd
 	    buffer: aDatagram data
 	    size: aDatagram size
 	    flags: self flags
 	    to: receiver
-	    size: size
+	    size: size.
+	sent < 0 ifTrue: [ File checkError: self soError ].
     ]
 
     flags [

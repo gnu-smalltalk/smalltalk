@@ -1,5 +1,10 @@
 2010-06-13  Paolo Bonzini <bonzini@gnu.org>
 
+	* AbstractSocketImpl.st: Check the return value of recvfrom and
+	sendto for errors.
+
+2010-06-13  Paolo Bonzini <bonzini@gnu.org>
+
 	* SocketAddress.st: Avoid infinite mutual recursion between
 	#fromSockAddr:port: and #extractFromSockAddr:port:.  The bug is
 	elsewhere, but this isn't a bad idea anyway.
