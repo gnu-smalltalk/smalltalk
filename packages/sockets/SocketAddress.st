@@ -314,7 +314,7 @@ and vice versa.'>
 	addressFamily := aByteArray at: 2.
 	addressFamily = 0 ifTrue: [ addressFamily := aByteArray at: 1 ].
 
-	self withAllSubclassesDo: [ :each |
+	self allSubclassesDo: [ :each |
 	    each addressFamily = addressFamily ifTrue: [
 		^each fromSockAddr: aByteArray port: portAdaptor ] ].
 
