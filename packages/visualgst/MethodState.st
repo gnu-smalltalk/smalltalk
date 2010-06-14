@@ -30,6 +30,12 @@ BrowserState subclass: MethodState [
         ^ self category
     ]
 
+    hasSelectedClass [
+        <category: 'testing'>
+
+        ^ true
+    ]
+
     classOrMetaSelected [
         <category: 'accessing'>
 

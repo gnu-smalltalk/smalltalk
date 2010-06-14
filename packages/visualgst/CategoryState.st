@@ -34,6 +34,12 @@ BrowserState subclass: CategoryState [
 	^ self category
     ]
 
+    hasSelectedClass [
+        <category: 'testing'>
+
+        ^ true
+    ]
+
     classOrMetaSelected [
         <category: 'accessing'>
 

@@ -14,7 +14,7 @@ ClassCommand subclass: AddCategoryCommand [
 	<category: 'events'>
 
 	category = '*' ifTrue: [ ^GtkLauncher displayError: 'Can''t create a * category' ].
-	(categoryWidget classOrMeta methodDictionary includes: category asString) ifFalse: [
+	(categoryWidget classOrMeta methodDictionary ifNil: [ false ] ifNotNil: [ :each | each includes: category asString ] ) ifFalse: [
 	    SystemChangeNotifier root categoryAdded: category asString inClass: categoryWidget classOrMeta ].
 	categoryWidget selectACategory: category asString
     ]

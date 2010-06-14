@@ -3,11 +3,9 @@ ClassCommand subclass: AddMethodCommand [
     execute [
 	<category: 'command'>
 
-        | category |
-        category := target selectedCategory.
         (AddMethodUndoCommand
 	    add: target sourceCode
-	    classified: category
+	    classified: target selectedCategory 
 	    in: target classOrMetaSelected
 	    browser: target) push
     ]

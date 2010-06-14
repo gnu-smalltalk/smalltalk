@@ -43,7 +43,10 @@ GtkConcreteWidget subclass: GtkClassHierarchyWidget [
 	model 
 	    item: #root;
 	    refresh.
-	classesTree expandAll
+	
+	classesTree 
+		expandAll;
+		select: aClass
     ]
 
     emptyModel [

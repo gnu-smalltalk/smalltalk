@@ -70,24 +70,23 @@ UndoCommand subclass: AddMethodUndoCommand [
 	<category: 'events'>
 
 	| selector |
+        browserWidget ifNotNil: [ browserWidget codeSaved ].
+
 	classOrMeta methodDictionary removeMethod: compiledMethod.
 	oldCompiledMethod 
 	    ifNotNil: [
 		classOrMeta methodDictionary insertMethod: oldCompiledMethod.
 		selector := oldCompiledMethod selector ]
 	    ifNil: [ selector := nil ].
-
-	browserWidget ifNil: [ ^ self ].
-	browserWidget codeSaved
     ]
 
     redo [
 	<category: 'events'>
 
-	classOrMeta methodDictionary insertMethod: compiledMethod.
+	browserWidget ifNotNil: [ browserWidget codeSaved ].
 
-	browserWidget ifNil: [ ^ self ].
-	browserWidget codeSaved
+	oldCompiledMethod ifNotNil: [ classOrMeta methodDictionary removeMethod: oldCompiledMethod ].
+	classOrMeta methodDictionary insertMethod: compiledMethod
     ]
 
     displayError [

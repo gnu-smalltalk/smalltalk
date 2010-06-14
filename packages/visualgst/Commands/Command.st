@@ -5,22 +5,26 @@ Object subclass: Command [
     Command class >> execute [
 	<category: 'instance creation'>
 
-        | cmd |
-        cmd := self new.
-        cmd valid ifFalse: [^cmd].
-	^cmd execute; yourself
+	^ self new
+	    validAndExecute
+    ]
+
+    Command class >> target: anObject [
+        <category: 'instance creation'>
+
+	^ self new
+	    target: anObject;
+	    yourself
     ]
 
     Command class >> on: anObject [
 	<category: 'instance creation'>
     
-        | cmd |
-        cmd := self new.
-        cmd target: anObject.
-        cmd valid ifFalse: [^cmd].
-	^cmd execute; yourself
+	^ (self target: anObject)
+		    validAndExecute
     ]
 
+    
     target: anObject [
 	<category: 'accessing'>
 
@@ -36,7 +40,16 @@ Object subclass: Command [
     valid [
 	<category: 'command'>
 
-	^true
+	^ true
+    ]
+
+    validAndExecute [
+	<category: 'command'>
+
+        self valid ifFalse: [ ^ self ].
+        ^ self
+            execute;
+            yourself
     ]
 ]
 

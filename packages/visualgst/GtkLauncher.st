@@ -817,8 +817,9 @@ THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.'
     closeTab [
 	<category: 'tabs events'>
 
-	browsers numberOfPages > 1 ifTrue: [ browsers currentWidget checkCodeWidget ].
-	browsers closeCurrentPage
+	browsers numberOfPages > 1 
+			    ifTrue: [ browsers currentWidget checkCodeWidgetAndUpdate: [ browsers closeCurrentPage ] ]
+			    ifFalse: [ browsers closeCurrentPage ].
     ]
 
     helpcontents [

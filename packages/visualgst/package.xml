@@ -9,11 +9,14 @@
   <provides>Browser</provides>
   <test>
     <filein>Tests/ExtractLiteralsTest.st</filein>
+    <filein>Tests/CategoryTest.st</filein>
     <filein>Tests/EmptyTest.st</filein>
     <file>Tests/ExtractLiteralsTest.st</file>
+    <file>Tests/CategoryTest.st</file>
     <file>Tests/EmptyTest.st</file>
     <sunit>
       VisualGST.ExtractLiteralsTest
+      VisualGST.CategoryTest
       VisualGST.EmptyTest
     </sunit>
   </test>
@@ -36,8 +39,8 @@
   <filein>Commands/DebugItCommand.st</filein>
   <filein>Commands/PrintItCommand.st</filein>
   <filein>Commands/InspectItCommand.st</filein>
-  <filein>Commands/CategoryCommand.st</filein>
   <filein>Commands/ClassCommand.st</filein>
+  <filein>Commands/CategoryCommand.st</filein>
   <filein>Commands/MethodCommand.st</filein>
   <filein>Commands/NamespaceCommand.st</filein>
   <filein>Commands/InspectNamespaceCommand.st</filein>
@@ -193,8 +196,8 @@
   <file>Commands/DebugItCommand.st</file>
   <file>Commands/PrintItCommand.st</file>
   <file>Commands/InspectItCommand.st</file>
-  <file>Commands/CategoryCommand.st</file>
   <file>Commands/ClassCommand.st</file>
+  <file>Commands/CategoryCommand.st</file>
   <file>Commands/MethodCommand.st</file>
   <file>Commands/NamespaceCommand.st</file>
   <file>Commands/InspectNamespaceCommand.st</file>

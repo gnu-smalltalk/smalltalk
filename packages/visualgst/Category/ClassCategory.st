@@ -3,7 +3,7 @@ Object subclass: ClassCategory [
 
     <category: 'Language-Implementation'>
 
-    ClassCategory class [ | uniqueInstance icon | ]
+    ClassCategory class [ | icon | ]
 
     ClassCategory class >> icon [
 	<category: '*VisualGST'>
@@ -72,33 +72,7 @@ Object subclass: ClassCategory [
     ClassCategory class >> named: name into: aNamespace [
 	<category: 'instance creation'>
 
-        ^self named: name for: aNamespace categories into: aNamespace
-    ]
-
-    ClassCategory class >> uniqueInstance [
-	<category: 'accessing'>
-
-	^ uniqueInstance ifNil: [ uniqueInstance := self basicNew initialize ]
-    ]
-
-    ClassCategory class >> initialize [
-	<category: 'initialize'>
-
-	self extractCategory: Class
-    ]
-
-    ClassCategory class >> extractCategory: aClass [
-	<category: 'extraction'>
-
-	self extractCategory: aClass for: self uniqueInstance.
-	aClass subclassesDo: [ :each |
-	    self extractCategory: each ]
-    ]
-
-    ClassCategory class >> extractCategory: aClass for: aParentCategory [
-        <category: 'extraction'>
-
-	self extractCategory: aClass for: aParentCategory into: nil
+        ^ self named: name for: aNamespace categories into: aNamespace
     ]
 
     ClassCategory class >> extractCategory: aClass for: aParentCategory into: aNamespace [
@@ -135,7 +109,7 @@ Object subclass: ClassCategory [
         <category: 'accessing'>
 
 	self categories at: aString put: aCategory.
-	SystemChangeNotifier root classCategoryAdded: aCategory.
+	"SystemChangeNotifier root classCategoryAdded: aCategory."
         ^ aCategory
     ]
 
@@ -154,19 +128,19 @@ Object subclass: ClassCategory [
     registerNotifier [
         <category: 'initialize-release'>
 
-        "TODO: do not go through GtkLauncher's notifier"
+        "TODO: do not go through GtkLauncher's notifier
         (GtkLauncher uniqueInstance systemChangeNotifier)
-            notify: self ofSystemChangesOfItem: #class change: #Recategorized using: #'classRecategorizedEvent:'
+            notify: self ofSystemChangesOfItem: #class change: #Recategorized using: #'classRecategorizedEvent:'"
     ]
 
-    classRecategorizedEvent: anEvent [
+    "classRecategorizedEvent: anEvent [
         <category: 'model event'>
 
         | namespace oldCat newCat |
         namespace := anEvent item environment.
         oldCat := ClassCategory named: anEvent oldCategory into: namespace.
         oldCat removeClass: anEvent item
-    ]
+    ]"
 
     initialize [
         <category: 'initialize-release'>
@@ -190,19 +164,6 @@ Object subclass: ClassCategory [
         <category: 'accessing'>
 
         namespace := aNamespace
-    ]
-
-    childrenNamespace: aNamespace [
-        <category: 'accessing'>
-
-	self namespace: aNamespace.
-	self values do: [ :each | each childrenNamespace: aNamespace ]
-    ]
-
-    category [
-        <category: 'accessing'>
-
-        ^ self
     ]
 
     name: aString [
@@ -252,7 +213,7 @@ Object subclass: ClassCategory [
 	self at: aCategory name ifAbsent: [ ^ self ].
 	aCategory parent: nil.
 	self categories removeKey: aCategory name.
-	SystemChangeNotifier root classCategoryRemoved: aCategory.
+	"SystemChangeNotifier root classCategoryRemoved: aCategory."
 	(self classes isEmpty and: [ self parent isNil not ]) ifTrue: [ self parent removeCategory: self ]
     ]
 
@@ -292,12 +253,6 @@ Object subclass: ClassCategory [
 	<category: 'testing'>
 
 	^ false
-    ]
-
-    isRoot [
-	<category: 'testing'>
-
-	^ self parent isNil and: [ self name isEmpty]
     ]
 
     icon [
