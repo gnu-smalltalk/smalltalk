@@ -1,3 +1,8 @@
+2010-06-14  Paolo Bonzini <bonzini@gnu.org>
+
+	* Sockets.st: Do not close a datagram socket upon timeout.
+	Reported by Holger Hans Peter Freyther.
+
 2010-06-13  Paolo Bonzini <bonzini@gnu.org>
 
 	* AbstractSocketImpl.st: Check the return value of recvfrom and

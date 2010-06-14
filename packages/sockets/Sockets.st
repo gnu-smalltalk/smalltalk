@@ -520,7 +520,6 @@ implementation objects.'>
 	Timeout // CheckPeriod timesRepeat: 
 		[aBlock value ifTrue: [^resultBlock value].
 		(Delay forMilliseconds: CheckPeriod) wait].
-	self close.
 	^timeoutBlock value
     ]
 
