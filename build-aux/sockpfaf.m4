@@ -26,6 +26,9 @@ AC_DEFUN([GST_SOCKET_FAMILIES],
 #endif
 #ifdef HAVE_WINSOCK2_H
 #include <winsock2.h>
+#endif
+#ifdef HAVE_WS2TCPIP_H
+#include <ws2tcpip.h>
 #endif],
 [int x = AF_INET; struct in_addr y; struct sockaddr_in z;
  if (&x && &y && &z) return 0;],
@@ -46,6 +49,9 @@ AC_DEFUN([GST_SOCKET_FAMILIES],
 #endif
 #ifdef HAVE_WINSOCK2_H
 #include <winsock2.h>
+#endif
+#ifdef HAVE_WS2TCPIP_H
+#include <ws2tcpip.h>
 #endif],
 [int x = AF_INET6; struct in6_addr y; struct sockaddr_in6 z;
  if (&x && &y && &z) return 0;],
