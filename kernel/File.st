@@ -79,7 +79,6 @@ FilePath subclass: File [
 	 If errno >= 1, raise an exception"
 
 	<category: 'file operations'>
-	| errors |
 	errno < 1 ifTrue: [^false].
 	SystemExceptions.FileError signal: (self stringError: errno).
 	^true

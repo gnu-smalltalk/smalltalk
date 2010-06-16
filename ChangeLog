@@ -1,3 +1,7 @@
+2010-06-16  Holger Hans Peter Freyther  <zecke@selfish.org>
+
+	* kernel/File.st: Remove unused local variable.
+
 2010-06-06  Paolo Bonzini <bonzini@gnu.org>
 
 	* kernel/CompildCode.st: Implement #= using identity.  Reported
