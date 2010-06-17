@@ -114,6 +114,11 @@ Object subclass: RBToken [
 	<category: 'testing'>
 	^false
     ]
+
+    isValue [
+	<category: 'accessing'>
+	^false
+    ]
 ]
 
 
@@ -127,6 +132,11 @@ RBToken subclass: RBValueToken [
     RBValueToken class >> value: aString start: anInteger [
 	<category: 'instance creation'>
 	^self new value: aString start: anInteger
+    ]
+
+    isValue [
+	<category: 'accessing'>
+	^true
     ]
 
     value [

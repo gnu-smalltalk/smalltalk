@@ -1,3 +1,8 @@
+2010-06-17  Paolo Bonzini  <bonzini@gnu.org>
+
+	* RBToken.st: Add #isValue.
+	* RBParser.st: Use it.
+
 2010-03-01  Gwenael Casaccio  <mrgwen@gmail.com>
 
 	* STDecompiler.st: Fix some errors.
