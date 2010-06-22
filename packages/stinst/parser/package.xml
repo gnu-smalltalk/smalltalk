@@ -18,6 +18,7 @@
   <filein>SqueakParser.st</filein>
   <filein>SIFParser.st</filein>
   <filein>GSTParser.st</filein>
+  <filein>STEvaluationDriver.st</filein>
   <filein>Exporter.st</filein>
   <filein>NewSyntaxExporter.st</filein>
   <filein>OldSyntaxExporter.st</filein>
@@ -52,6 +53,7 @@
   <file>STFileParser.st</file>
   <file>SIFParser.st</file>
   <file>GSTParser.st</file>
+  <file>STEvaluationDriver.st</file>
   <file>Exporter.st</file>
   <file>NewSyntaxExporter.st</file>
   <file>OldSyntaxExporter.st</file>

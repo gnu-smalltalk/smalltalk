@@ -1,3 +1,7 @@
+2010-06-22  Paolo Bonzini  <bonzini@gnu.org>
+
+	* STEvaluationDriver.st: New, moved from Compiler package.
+
 2010-06-17  Paolo Bonzini  <bonzini@gnu.org>
 
 	* RBToken.st: Add #isValue.
