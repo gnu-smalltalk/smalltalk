@@ -8,6 +8,22 @@ GtkTextBuffer extend [
 ]
 
 
+GtkAlignment class extend [
+    new [
+	<category: 'instance creation'>
+        ^self new: 0 yalign: 0 xscale: 1 yscale: 1
+    ]
+]
+
+
+GObject class extend [
+    new [
+	<category: 'instance creation'>
+        ^self new: self getType varargs: #(nil)
+    ]
+]
+
+
 GList extend [
     do: aOneArgBlock [
 	<category: 'iterating'>

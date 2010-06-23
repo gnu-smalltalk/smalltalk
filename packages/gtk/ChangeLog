@@ -1,3 +1,8 @@
+2010-06-23  Paolo Bonzini  <bonzini@gnu.org>
+
+	* GtkImpl.st: Add GtkAlignment class>>#new and GObject class>>#new.
+	* MoreStructs.st: Add GdkColor.
+
 2010-06-12  Paolo Bonzini  <bonzini@gnu.org>
 
 	* GtkImpl.st: Remove method now that's now inlined in VisualGST.

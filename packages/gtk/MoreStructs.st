@@ -92,6 +92,15 @@ CStruct subclass: GSList [
 
 
 
+CStruct subclass: GdkColor [
+
+    <category: 'GDK'>
+    <comment: nil>
+    <declaration: #(#(#pixel #uint) #(#red #ushort) #(#green #ushort) #(#blue #ushort))>
+
+]
+
+
 "FIXME more events needed"
 
 
