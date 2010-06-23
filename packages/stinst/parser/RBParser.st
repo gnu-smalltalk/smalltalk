@@ -1051,7 +1051,7 @@ Stream subclass: RBScanner [
 	 c) parsed nothing and are sitting on a - sign."
 	currentCharacter == $. 
 	    ifTrue: 
-		[stream peek isDigit 
+		[(self isDigit: stream peek base: base)
 		    ifTrue: 
 			[self step.
 			self 
