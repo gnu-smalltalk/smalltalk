@@ -58,15 +58,15 @@
   <filein>Commands/RenameCategoryCommand.st</filein>
   <filein>Commands/FileoutMethodCommand.st</filein>
   <filein>Commands/InspectMethodCommand.st</filein>
-  <filein>Commands/AddMethodCommand.st</filein>
+  <filein>Commands/AcceptItCommand.st</filein>
   <filein>Commands/DeleteMethodCommand.st</filein>
   <filein>Commands/RunTestCommand.st</filein>
   <filein>Commands/OpenAssistantCommand.st</filein>
-  <filein>Commands/OpenSUnitCommand.st</filein>
   <filein>Commands/OpenWebBrowserCommand.st</filein>
   <filein>FakeNamespace.st</filein>
   <filein>Category/ClassCategory.st</filein>
   <filein>Category/AbstractNamespace.st</filein>
+  <filein>Category/Class.st</filein>
   <filein>GtkConcreteWidget.st</filein>
   <filein>Model/GtkColumnType.st</filein>
   <filein>Model/GtkColumnTextType.st</filein>
@@ -76,12 +76,14 @@
   <filein>GtkTreeModel.st</filein>
   <filein>Text/GtkTextWidget.st</filein>
   <filein>GtkMainWindow.st</filein>
+  <filein>GtkVisualGSTTool.st</filein>
   <filein>GtkBrowsingTool.st</filein>
   <filein>GtkBrowserWrapper.st</filein>
   <filein>GtkLauncher.st</filein>
   <filein>Text/GtkTextPluginWidget.st</filein>
   <filein>Text/GtkFindWidget.st</filein>
   <filein>Text/GtkReplaceWidget.st</filein>
+  <filein>Text/GtkSaveTextWidget.st</filein>
   <filein>GtkNotebookWidget.st</filein>
   <filein>Image/GtkImageModel.st</filein>
   <filein>Image/GtkImageWidget.st</filein>
@@ -98,8 +100,9 @@
   <filein>GtkCategorizedClassWidget.st</filein>
   <filein>GtkCategoryWidget.st</filein>
   <filein>GtkMethodWidget.st</filein>
-  <filein>GtkSourceCodeWidget.st</filein>
+  <filein>Text/GtkSourceCodeWidget.st</filein>
   <filein>GtkClassHierarchyWidget.st</filein>
+  <filein>GtkHistoryWidget.st</filein>
   <filein>Inspector/GtkInspector.st</filein>
   <filein>GtkClassBrowserWidget.st</filein>
   <filein>GtkClassBrowser.st</filein>
@@ -129,6 +132,7 @@
   <filein>Undo/AddMethodUndoCommand.st</filein>
   <filein>Undo/DeleteMethodUndoCommand.st</filein>
   <filein>WorkspaceVariableTracker.st</filein>
+  <filein>GtkVariableTrackerWidget.st</filein>
   <filein>SyntaxHighlighter.st</filein>
   <filein>Undo/Text/InsertTextCommand.st</filein>
   <filein>Undo/Text/DeleteTextCommand.st</filein>
@@ -138,7 +142,11 @@
   <filein>Inspector/GtkInspectorBrowserWidget.st</filein>
   <filein>Inspector/GtkInspectorWidget.st</filein>
   <filein>Inspector/GtkObjectInspectorView.st</filein>
+  <filein>Inspector/GtkCompiledMethodInspectorView.st</filein>
+  <filein>Inspector/GtkCompiledBlockInspectorView.st</filein>
   <filein>Inspector/GtkSequenceableCollectionInspectorView.st</filein>
+  <filein>Inspector/GtkSetInspectorView.st</filein>
+  <filein>Inspector/GtkDictionaryInspectorView.st</filein>
   <filein>Inspector/GtkCharacterInspectorView.st</filein>
   <filein>Inspector/GtkIntegerInspectorView.st</filein>
   <filein>Inspector/GtkFloatInspectorView.st</filein>
@@ -172,6 +180,7 @@
   <filein>Commands/OpenBrowserCommand.st</filein>
   <filein>Commands/OpenWindowedBrowserCommand.st</filein>
   <filein>Commands/OpenTabbedBrowserCommand.st</filein>
+  <filein>Commands/OpenSUnitCommand.st</filein>
   <filein>Commands/OpenWorkspaceCommand.st</filein>
   <filein>Commands/OpenImplementorCommand.st</filein>
   <filein>Commands/OpenSenderCommand.st</filein>
@@ -215,15 +224,15 @@
   <file>Commands/RenameCategoryCommand.st</file>
   <file>Commands/FileoutMethodCommand.st</file>
   <file>Commands/InspectMethodCommand.st</file>
-  <file>Commands/AddMethodCommand.st</file>
+  <file>Commands/AcceptItCommand.st</file>
   <file>Commands/DeleteMethodCommand.st</file>
   <file>Commands/RunTestCommand.st</file>
   <file>Commands/OpenAssistantCommand.st</file>
-  <file>Commands/OpenSUnitCommand.st</file>
   <file>Commands/OpenWebBrowserCommand.st</file>
   <file>FakeNamespace.st</file>
   <file>Category/ClassCategory.st</file>
   <file>Category/AbstractNamespace.st</file>
+  <file>Category/Class.st</file>
   <file>GtkConcreteWidget.st</file>
   <file>Model/GtkColumnType.st</file>
   <file>Model/GtkColumnTextType.st</file>
@@ -233,12 +242,14 @@
   <file>GtkTreeModel.st</file>
   <file>Text/GtkTextWidget.st</file>
   <file>GtkMainWindow.st</file>
+  <file>GtkVisualGSTTool.st</file>
   <file>GtkBrowsingTool.st</file>
   <file>GtkBrowserWrapper.st</file>
   <file>GtkLauncher.st</file>
   <file>Text/GtkTextPluginWidget.st</file>
   <file>Text/GtkFindWidget.st</file>
   <file>Text/GtkReplaceWidget.st</file>
+  <file>Text/GtkSaveTextWidget.st</file>
   <file>GtkNotebookWidget.st</file>
   <file>Image/GtkImageModel.st</file>
   <file>Image/GtkImageWidget.st</file>
@@ -255,8 +266,9 @@
   <file>GtkCategorizedClassWidget.st</file>
   <file>GtkCategoryWidget.st</file>
   <file>GtkMethodWidget.st</file>
-  <file>GtkSourceCodeWidget.st</file>
+  <file>Text/GtkSourceCodeWidget.st</file>
   <file>GtkClassHierarchyWidget.st</file>
+  <file>GtkHistoryWidget.st</file>
   <file>Inspector/GtkInspector.st</file>
   <file>GtkClassBrowserWidget.st</file>
   <file>GtkClassBrowser.st</file>
@@ -286,6 +298,7 @@
   <file>Undo/AddMethodUndoCommand.st</file>
   <file>Undo/DeleteMethodUndoCommand.st</file>
   <file>WorkspaceVariableTracker.st</file>
+  <file>GtkVariableTrackerWidget.st</file>
   <file>SyntaxHighlighter.st</file>
   <file>Undo/Text/InsertTextCommand.st</file>
   <file>Undo/Text/DeleteTextCommand.st</file>
@@ -295,7 +308,11 @@
   <file>Inspector/GtkInspectorBrowserWidget.st</file>
   <file>Inspector/GtkInspectorWidget.st</file>
   <file>Inspector/GtkObjectInspectorView.st</file>
+  <file>Inspector/GtkCompiledMethodInspectorView.st</file>
+  <file>Inspector/GtkCompiledBlockInspectorView.st</file>
   <file>Inspector/GtkSequenceableCollectionInspectorView.st</file>
+  <file>Inspector/GtkSetInspectorView.st</file>
+  <file>Inspector/GtkDictionaryInspectorView.st</file>
   <file>Inspector/GtkCharacterInspectorView.st</file>
   <file>Inspector/GtkIntegerInspectorView.st</file>
   <file>Inspector/GtkFloatInspectorView.st</file>
@@ -329,6 +346,7 @@
   <file>Commands/OpenBrowserCommand.st</file>
   <file>Commands/OpenWindowedBrowserCommand.st</file>
   <file>Commands/OpenTabbedBrowserCommand.st</file>
+  <file>Commands/OpenSUnitCommand.st</file>
   <file>Commands/OpenWorkspaceCommand.st</file>
   <file>Commands/OpenImplementorCommand.st</file>
   <file>Commands/OpenSenderCommand.st</file>

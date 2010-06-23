@@ -1,9 +1,29 @@
-Command subclass: OpenSUnitCommand [
+OpenBrowserCommand subclass: OpenSUnitCommand [
+
+    defaultDestination [
+        <category: 'selection'>
+
+	^Smalltalk->nil
+    ]
+
+    selection [
+        <category: 'selection'>
+
+        | selection |
+	selection := super selection printNl.
+        selection value isNil ifTrue: [^selection].
+        (selection value inheritsFrom: TestCase) ifTrue: [^selection].
+        ^selection key->nil
+    ]
 
     execute [
         <category: 'command'>
 
-	GtkSUnit open
+	| browser selection |
+	browser := GtkSUnit open.
+	selection := self selection.
+	browser selectANamespace: selection key.
+	selection value ifNotNil: [ browser selectAClass: selection value ]
     ]
 ]
 

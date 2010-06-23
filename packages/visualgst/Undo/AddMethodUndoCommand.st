@@ -18,11 +18,17 @@ UndoCommand subclass: AddMethodUndoCommand [
             yourself
     ]
 
-    compileError: aString [
+    compileError: aString line: anInteger [
 	<category: 'error printing'>
 
-	GtkLauncher compileError: aString.
+	browserWidget isNil ifFalse: [ browserWidget compileError: aString line: anInteger ].
 	^ self preconditionFailed: aString
+    ]
+
+    compileError: aString pos: pos [
+	<category: 'error printing'>
+
+	^ self compileError: aString line: nil
     ]
 
     add: aString classified: aCategory in: aClass browser: aGtkBrowserWidget [
@@ -51,18 +57,20 @@ UndoCommand subclass: AddMethodUndoCommand [
     precondition [
         <category: 'checking'>
 
-	| parser |
+	| parser node |
         parser := STInST.RBBracketedMethodParser new
-                    errorBlock: [ :string :pos | ^ self compileError: string ];
+                    errorBlock: [ :string :pos | self compileError: string pos: pos. ^false ];
                     initializeParserWith: method type: #'on:errorBlock:';
                     yourself.
+
 	selector := parser parseMethod selector.
 	oldCompiledMethod := classOrMeta methodDictionary ifNotNil: [ classOrMeta methodDictionary at: selector ifAbsent: [ nil ] ].
+	" TODO: use compile:classified:ifError: if there is no category "
 	compiledMethod := classOrMeta
 				compile: method
-				classified: category
 				ifError: [ :fname :lineNo :errorString |
-				    ^ self compileError: 'Compile error ', errorString ].
+				    self compileError: errorString line: lineNo.
+                                    ^ false ].
 	^ true
     ]
 
@@ -86,7 +94,11 @@ UndoCommand subclass: AddMethodUndoCommand [
 	browserWidget ifNotNil: [ browserWidget codeSaved ].
 
 	oldCompiledMethod ifNotNil: [ classOrMeta methodDictionary removeMethod: oldCompiledMethod ].
-	classOrMeta methodDictionary insertMethod: compiledMethod
+	classOrMeta methodDictionary insertMethod: compiledMethod.
+
+	browserWidget ifNotNil: [ classOrMeta isClass 
+						    ifTrue: [ browserWidget selectAnInstanceMethod: compiledMethod selector ]
+						    ifFalse: [ browserWidget selectAClassMethod: compiledMethod selector ] ].
     ]
 
     displayError [

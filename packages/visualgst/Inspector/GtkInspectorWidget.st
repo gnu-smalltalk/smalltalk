@@ -1,5 +1,5 @@
 GtkConcreteWidget subclass: GtkInspectorWidget [
-    | model object inspectorTree workspaceWidget objectView stack |
+    | inspector model object inspectorTree workspaceWidget objectView stack |
 
     GtkInspectorWidget >> openOn: anObject [
 	<category: 'instance creation'>
@@ -24,6 +24,12 @@ GtkConcreteWidget subclass: GtkInspectorWidget [
 	workspaceWidget postInitialize
     ]
 
+    inspector: aGtkInspector [
+	<category: 'accessing'>
+
+	inspector := aGtkInspector	
+    ]
+
     object [
 	<category: 'accessing'>
 	
@@ -34,7 +40,9 @@ GtkConcreteWidget subclass: GtkInspectorWidget [
 	<category: 'accessing'>
 
 	object := anObject.
-	objectView := object inspectorView openOn: self object.
+	objectView := object inspectorView openOn: anObject.
+	workspaceWidget object: anObject.
+	inspector isNil ifFalse: [ inspector object: anObject ].
 	model 
 	    item: objectView;
 	    refresh
@@ -76,7 +84,7 @@ GtkConcreteWidget subclass: GtkInspectorWidget [
             connectSignal: 'changed' to: anObject selector: aSelector userData: nil
     ]
 
-    hasSelection [
+    hasSelectedValue [
         <category: 'testing'>
 
         ^ inspectorTree hasSelectedItem 
@@ -85,14 +93,14 @@ GtkConcreteWidget subclass: GtkInspectorWidget [
     onVariableChanged [
 	<category: 'events'>
 
-	self hasSelection ifFalse: [ workspaceWidget text: ''. ^ self ].
+	self hasSelectedValue ifFalse: [ workspaceWidget text: ''. ^ self ].
 	workspaceWidget text: self selectedValue displayString
     ]
 
     selectedItem [
 	<category: 'item selection'>
 
-        self hasSelection ifFalse: [self error: 'Nothing is selected'].
+        self hasSelectedValue ifFalse: [self error: 'Nothing is selected'].
         ^ inspectorTree selection
     ]
 
@@ -114,9 +122,6 @@ GtkConcreteWidget subclass: GtkInspectorWidget [
             {'Dive'. self. #dive}.
 	    {'Back'. self. #back}.
             {}.
-            {'Accept'. self. #accept}.
-	    {'Cancel'. self. #cancel}.
-            {}.
             {'File out object'. self. #fileoutObject}}.
         menu attachToWidget: inspectorTree detacher: nil.
         menu popup: nil parentMenuItem: nil func: nil data: nil button: 3 activateTime: aGdkButtonEvent time value.
@@ -135,7 +140,7 @@ GtkConcreteWidget subclass: GtkInspectorWidget [
 
 	(self selectedItem = 'self' or: [ objectView canDive not ]) ifTrue: [ ^ self ].
 	stack addFirst: self object.
-	self object: self selectedValue
+        self object: self selectedValue
     ]
 
     back [
@@ -167,6 +172,42 @@ GtkConcreteWidget subclass: GtkInspectorWidget [
         <category: 'smalltalk event'>
 
         workspaceWidget printIt: object
+    ]
+
+    copy [
+        <category: 'text editing'>
+
+	workspaceWidget copy
+    ]
+
+    cut [
+        <category: 'text editing'>
+
+	workspaceWidget cut
+    ]
+
+    paste [
+        <category: 'text editing'>
+
+	workspaceWidget paste
+    ]
+
+    selectAll [
+        <category: 'text editing'>
+
+	workspaceWidget selectAll
+    ]
+ 
+    hasSelection [
+	<category:'text testing'>
+
+	^ workspaceWidget hasSelection
+    ]
+ 
+    selectedText [
+	<category: 'text editing'>
+
+	^ workspaceWidget selectedText
     ]
 
 ]

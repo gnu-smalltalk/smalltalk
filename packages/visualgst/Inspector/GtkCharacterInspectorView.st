@@ -1,7 +1,8 @@
 GtkObjectInspectorView subclass: GtkCharacterInspectorView [
 
-    values [
-	^ super values, #('hexadecimal' 'octal' 'binary')
+    do: aBlock [
+	super do: aBlock.
+        #('hexadecimal' 'octal' 'binary') do: aBlock
     ]
 
     selectedValue: aString [

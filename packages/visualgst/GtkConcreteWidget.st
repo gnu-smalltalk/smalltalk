@@ -41,6 +41,12 @@ Smalltalk.Object subclass: GtkConcreteWidget [
 	child showAll
     ]
 
+    hideAll [
+	<category: 'user interface'>
+
+	child hideAll
+    ]
+
     hasFocus [
 	<category: 'testing'>
 
@@ -50,6 +56,19 @@ Smalltalk.Object subclass: GtkConcreteWidget [
             parent := current ].
         ^ self parentWindow getFocus = parent
 
+    ]
+
+    focusedWidget [
+	<category: 'focus'>
+
+        self hasFocus ifTrue: [^self].
+        ^nil
+    ]
+
+    onFocusPerform: aSymbol [
+        <category: 'widget'>
+
+        ^self focusedWidget perform: aSymbol
     ]
 
     grabFocus [

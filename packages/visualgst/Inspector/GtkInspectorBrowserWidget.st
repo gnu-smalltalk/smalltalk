@@ -116,66 +116,54 @@ GtkConcreteWidget subclass: GtkInspectorBrowserWidget [
     classInstanceSwitchOn: aGtkNotebook page: aGtkNotebookPage number: aSmallInteger [
 	<category: 'events'>
 
-	self checkCodeWidget.
-	aSmallInteger = 0 
-	    ifTrue: [
-		iMethodWidget hasSelectedMethod 
-		    ifTrue: [ codeWidget sourceCode: iMethodWidget sourceCode ]
-		    ifFalse: [ codeWidget sourceCode: '' ] ]
-	    ifFalse: [
-                cMethodWidget hasSelectedMethod
-                    ifTrue: [ codeWidget sourceCode: cMethodWidget sourceCode ]
-                    ifFalse: [ codeWidget sourceCode: '' ] ]
-    ]
-
-    selectedClass [
-        <category: 'accessing'>
-
-	^classHierarchyWidget selectedClass
-    ]
-
-    hasSelectedClass [
-        <category: 'accessing'>
-
-	^classHierarchyWidget hasSelectedClass
+	self checkCodeWidgetAndUpdate: [
+	    aSmallInteger = 0 
+	        ifTrue: [
+		    iMethodWidget hasSelectedMethod 
+		        ifTrue: [ codeWidget sourceCode: iMethodWidget sourceCode ]
+		        ifFalse: [ codeWidget sourceCode: '' ] ]
+	        ifFalse: [
+                    cMethodWidget hasSelectedMethod
+                        ifTrue: [ codeWidget sourceCode: cMethodWidget sourceCode ]
+                        ifFalse: [ codeWidget sourceCode: '' ] ] ]
     ]
 
     onClassHierarchyChanged [
 	<category: 'events'>
 
 	| aClass |
-	self checkCodeWidget.
-	classHierarchyWidget hasSelectedClass ifFalse: [ ^ self ].
-	classHierarchyUpdate := true.
-        aClass := classHierarchyWidget selectedClass.
+	self checkCodeWidgetAndUpdate: [
+	    classHierarchyWidget hasSelectedClass ifFalse: [ ^ self ].
+	    classHierarchyUpdate := true.
+            aClass := classHierarchyWidget selectedClass.
 
-        iMethodWidget class: aClass withCategory: '*'.
-        cMethodWidget class: aClass class withCategory: '*'.
+            iMethodWidget class: aClass withCategory: '*'.
+            cMethodWidget class: aClass class withCategory: '*'.
 
-        codeWidget sourceCode: ''.
-	state := CategoryState on: self with: classHierarchyWidget selectedClass -> '*' 
+            codeWidget sourceCode: ''.
+	    state := CategoryState on: self with: classHierarchyWidget selectedClass -> '*' ]
     ]
 
     onInstanceSideMethodChanged [
 	<category: 'events'>
 
 	| method |
-	self checkCodeWidget.
-	iMethodWidget hasSelectedMethod ifFalse: [ ^ self ].
-	method := iMethodWidget selectedMethod.
-	codeWidget sourceCode: iMethodWidget sourceCode.
-	state := MethodState on: self with: classHierarchyWidget selectedClass -> method
+	self checkCodeWidgetAndUpdate: [
+	    iMethodWidget hasSelectedMethod ifFalse: [ ^ self ].
+	    method := iMethodWidget selectedMethod.
+	    codeWidget sourceCode: iMethodWidget sourceCode.
+	    state := MethodState on: self with: method ]
     ]
 
     onClassSideMethodChanged [
 	<category: 'events'>
 
 	| method |
-	self checkCodeWidget.
-	cMethodWidget hasSelectedMethod ifFalse: [ ^ self ].
-	method := cMethodWidget selectedMethod.
-	codeWidget sourceCode: cMethodWidget sourceCode.
-	state := MethodState on: self with: classHierarchyWidget selectedClass class -> method
+	self checkCodeWidgetAndUpdate: [
+	    cMethodWidget hasSelectedMethod ifFalse: [ ^ self ].
+	    method := cMethodWidget selectedMethod.
+	    codeWidget sourceCode: cMethodWidget sourceCode.
+	    state := MethodState on: self with: method ]
     ]
 
     selectAClass: aClass [
@@ -215,7 +203,7 @@ GtkConcreteWidget subclass: GtkInspectorBrowserWidget [
     targetObject [
         <category: 'target'>
 
-        ^self hasSelectedClass ifTrue: [self selectedClass] ifFalse: [nil]
+        ^self state classOrMeta
     ]
 
     doIt: object [
@@ -314,33 +302,40 @@ GtkConcreteWidget subclass: GtkInspectorBrowserWidget [
         checkCode := false
     ]
 
-    checkCodeWidget [
+    checkCodeWidgetAndUpdate: aBlock [
         <category: 'text editing'>
 
-        checkCode ifFalse: [ checkCode := true. ^ self ].
-        self hasChanged ifFalse: [ codeWidget clearUndo. ^ self ].
-        self saveCodeOnSave: [ self saveCode ].
-        codeWidget clearUndo
+        self saveCodeOr: aBlock.
     ]
 
-    saveCodeOnSave: saveEvent [
+    saveCodeOr: dropBlock [
         <category: 'saving'>
 
         | dialog |
+        checkCode ifFalse: [ checkCode := true. dropBlock value. ^ self ].
+        self hasChanged ifFalse: [ dropBlock value. ^ self ].
         dialog := GTK.GtkMessageDialog
                                 new: self parentWindow
                                 flags: GTK.Gtk gtkDialogDestroyWithParent
                                 type: GTK.Gtk gtkMessageWarning
                                 buttons: GTK.Gtk gtkButtonsNone
-                                message: 'Save changes to this method?'
-                                tip: 'If you do not save, your changes to %1 will be lost...' % {self stateString}.
+                                message: 'Accept changes to this method?'
+                                tip: 'If you do not accept them, your changes to %1 will be lost...' % {self state}.
 
         dialog
-            addButton: 'Cancel' responseId: 0;
-            addButton: 'Save' responseId: 1;
+            addButton: 'Drop' responseId: 0;
+            addButton: 'Cancel' responseId: 2;
+            addButton: 'Accept' responseId: 1;
             showModalOnAnswer: [ :dlg :res |
-                res = 1 ifTrue: saveEvent.
+                res = 1 ifTrue: [ self acceptIt ].
+                res <= 1 ifTrue: dropBlock.
                 dlg destroy ].
+    ]
+
+    acceptIt [
+	<category: 'smalltalk events'>
+
+        AcceptItCommand on: self
     ]
 
     hasChanged [
@@ -349,16 +344,10 @@ GtkConcreteWidget subclass: GtkInspectorBrowserWidget [
 	^ codeWidget hasChanged
     ]
 
-    stateString [
+    state [
 	<category: 'text editing'>
 
-	^ state displayString
-    ]
-
-    saveCode [
-        <category: 'text saving'>
-
-        state saveSource
+	^ state
     ]
 
     sourceCode [
@@ -367,10 +356,28 @@ GtkConcreteWidget subclass: GtkInspectorBrowserWidget [
 	^ codeWidget sourceCode
     ]
 
+    clearUndo [
+	<category: 'code saved'>
+
+	codeWidget clearUndo
+    ]
+
     codeSaved [
 	<category: 'code saved'>
 
 	codeWidget codeSaved
+    ]
+
+    selectedText [
+        <category: 'smalltalk events'>
+
+        ^codeWidget selectedText
+    ]
+
+    hasSelection [
+        <category: 'smalltalk events'>
+
+        ^codeWidget hasSelection
     ]
 ]
 

@@ -5,8 +5,8 @@ ClassCommand subclass: RenameClassCommand [
 
 	| dlg |
         dlg := GtkEntryDialog title: 'Rename a class' text: 'Name of the class'.
-        dlg hasPressedOk ifTrue: [
-            (RenameClassUndoCommand rename: target selectedClass as: dlg result asSymbol) push ]
+        dlg hasPressedOk: [
+            (RenameClassUndoCommand rename: target state classOrMeta as: dlg result asSymbol) push ]
     ]
 ]
 

@@ -1,5 +1,5 @@
 GtkConcreteWidget subclass: GtkTextPluginWidget [
-    | textWidget|
+    | textWidget closeButton |
 
     GtkTextPluginWidget class >> on: aTextWidget [
 	<category: 'instance creation'>
@@ -19,7 +19,7 @@ GtkConcreteWidget subclass: GtkTextPluginWidget [
     buildCloseButton [
         <category: 'user interface'>
 
-	^ GTK.GtkButton closeButton
+	^(closeButton := GTK.GtkButton closeButton)
 	    connectSignal: 'pressed' to: self selector: #'close' userData: nil;
 	    yourself
     ]
@@ -28,7 +28,7 @@ GtkConcreteWidget subclass: GtkTextPluginWidget [
         <category: 'user interface'>
 
         ^ (GTK.GtkHBox new: false spacing: 3)
-            packStart: self buildCloseButton expand: false fill: false padding: 0;
+            packEnd: self buildCloseButton expand: false fill: false padding: 0;
             yourself
     ]
 

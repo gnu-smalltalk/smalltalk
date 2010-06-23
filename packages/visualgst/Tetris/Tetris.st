@@ -54,55 +54,43 @@ GtkMainWindow subclass: Tetris [
     initialize [
 	<category: 'initialization'>
 
-	super initialize.
 	movingBlocks := false.
-	self 
-	    title: 'Tetris';
-	    createMenus;
-	    createStatusBar;
-	    centralWidget: self buildCentralWidget
+	super initialize.
+    ]
+
+    windowTitle [
+	<category: 'initialization'>
+
+	^'Tetris'
     ]
 
     postInitialize [
 	<category: 'initialization'>
 
-	canvasWidget grabFocus.
+	super postInitialize.
+        canvasWidget grabFocus.
 	window
-	    connectSignal: 'key-press-event' to: self selector: #'keyPressedOn:keyEvent:';
-	    connectSignal: 'delete-event' to: self selector: #'delete:event:' 
+	    connectSignal: 'key-press-event' to: self selector: #'keyPressedOn:keyEvent:'
     ]
 
-    delete: aGtkWidget event: aGdkEvent [
+    onDelete [
 	<category: 'windows event'>
 
 	self quit.
 	^ true
     ]
 
-    createGameMenus [
-        <category: 'user interface'>
-
-        ^ self createNewMenuEntry: {}
-    ]
-
     createHelpMenus [
         <category: 'user interface'>
 
-        ^ self createNewMenuEntry: {GTK.GtkMenuItem menuItem: 'About Tetris' connectTo: self selector: #aboutLauncher.
+        ^{GTK.GtkMenuItem menuItem: 'About Tetris' connectTo: self selector: #aboutLauncher.
             GTK.GtkMenuItem menuItem: 'About GNU Smalltalk' connectTo: self selector: #aboutGst}
     ]
 
     createMenus [
         <category: 'user interface'>
 
-        self createMainMenu: {#('Game' #createGameMenus).
-            #('Help' #createHelpMenus)}
-    ]
-
-    createStatusBar [
-        <category: 'user interface'>
-
-        self statusMessage: 'GST-Tetris'
+        self createMainMenu: #(#('Help' #createHelpMenus))
     ]
 
     buildCentralWidget [

@@ -1,10 +1,8 @@
 GtkObjectInspectorView subclass: GtkSequenceableCollectionInspectorView [
 
-    values [
-	| i |
-	i := OrderedCollection new.
-	1 to: self object size do: [ :j | i add: j ].
-	^ super values, i
+    do: aBlock [
+	super do: aBlock.
+	1 to: self object size do: [ :each | aBlock value: each ]
     ]
 
     selectedValue: aString [

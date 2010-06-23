@@ -83,7 +83,15 @@ GtkConcreteWidget subclass: GtkCategorizedNamespaceWidget [
         <category: 'accessing'>
 
         self hasSelectedNamespace ifFalse: [ self error: 'nothing is selected' ].
-        ^ namespacesTree selection category fullname
+        ^ namespacesTree selection category
+    ]
+
+    state [
+        <category: 'testing'>
+        namespacesTree hasSelectedItem ifFalse: [^BrowserState new].
+        ^(NamespaceState with: namespacesTree selection namespace)
+            classCategory: namespacesTree selection category;
+            yourself
     ]
 
     childToggled: model path: path iter: iter [

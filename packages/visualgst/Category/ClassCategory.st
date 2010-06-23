@@ -78,8 +78,15 @@ Object subclass: ClassCategory [
     ClassCategory class >> extractCategory: aClass for: aParentCategory into: aNamespace [
         <category: 'extraction'>
 
-        (self named: aClass category for: aParentCategory into: aNamespace) classes
-            add: aClass asClass
+	| cat |
+        (cat := (self named: aClass category for: aParentCategory into: aNamespace)) classes add: aClass asClass.
+	^ cat
+    ]
+
+    ClassCategory class >> extractClassCategory: aClass [
+        <category: 'extraction'>
+
+	^ self extractCategory: aClass for: aClass environment categories into: aClass environment
     ]
 
     = anObject [

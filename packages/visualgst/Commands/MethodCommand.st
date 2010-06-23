@@ -3,7 +3,7 @@ Command subclass: MethodCommand [
     valid [
 	<category: 'command'>
 
-	^target hasSelectedMethod
+	^target state hasSelectedMethod
     ]
 ]
 

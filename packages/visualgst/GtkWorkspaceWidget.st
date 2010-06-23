@@ -1,5 +1,5 @@
 GtkTextWidget subclass: GtkWorkspaceWidget [
-    | variableTracker object |
+    | variableWidget variableTracker object |
     
     popupMenuOn: aGtkWidget menu: aGtkMenu [
 	<category: 'events'>
@@ -12,48 +12,86 @@ GtkTextWidget subclass: GtkWorkspaceWidget [
 	menuitem := GTK.GtkMenuItem newWithLabel: 'Do It'.
 	menuitem
 	    show;
-	    connectSignal: 'activate' to: self selector: #doIt userData: nil.
+	    connectSignal: 'activate' to: self selector: #doIt.
 	aGtkMenu append: menuitem.
 	menuitem := GTK.GtkMenuItem newWithLabel: 'Print It'.
 	menuitem
 	    show;
-	    connectSignal: 'activate' to: self selector: #printIt userData: nil.
+	    connectSignal: 'activate' to: self selector: #printIt.
 	aGtkMenu append: menuitem.
 	menuitem := GTK.GtkMenuItem newWithLabel: 'Inspect It'.
 	menuitem
 	    show;
-	    connectSignal: 'activate' to: self selector: #inspectIt userData: nil.
+	    connectSignal: 'activate' to: self selector: #inspectIt.
 	aGtkMenu append: menuitem.
 	menuitem := GTK.GtkMenuItem newWithLabel: 'Debug It'.
 	menuitem
 	    show;
-	    connectSignal: 'activate' to: self selector: #debugIt userData: nil.
-	aGtkMenu append: menuitem
+	    connectSignal: 'activate' to: self selector: #debugIt.
+	aGtkMenu append: menuitem.
+        menuitem := GTK.GtkMenuItem new.
+        menuitem show.
+        aGtkMenu append: menuitem.
+        menuitem := GTK.GtkMenuItem newWithLabel: 'Show/Hide workspace variable(s)'.
+        menuitem
+            show;
+            connectSignal: 'activate' to: self selector: #showIVar.
+        aGtkMenu append: menuitem.
     ]
 
     initialize [
 	<category: 'intialization'>
 
-	super initialize.
 	variableTracker := (WorkspaceVariableTracker new)
 				initialize;
 				yourself.
 	object := variableTracker objectClass new.
+	super initialize.
+    ]
+
+    postInitialize [
+        <category: 'initialize'>
+
+	variableWidget hideAll.
+	super postInitialize
+    ]
+
+    buildWidget [
+        <category: 'user interface'>
+
+        ^ (GTK.GtkHPaned new)
+		    add1: (variableWidget := GtkVariableTrackerWidget on: object) mainWidget;
+		    add2: super buildWidget;
+                    yourself
+    ]
+
+    object: anObject [
+	<category: 'evaluation'>
+
+        variableTracker := nil.
+        object := anObject printNl.
     ]
 
     targetObject [
 	<category: 'evaluation'>
 
-        ^object
+        ^ object
     ]
 
     beforeEvaluation [
         <category: 'smalltalk event'>
 
 	| text nodes |
+        variableTracker isNil ifTrue: [^self].
 	text := self selectedText.
 	nodes := STInST.RBParser parseExpression: text onError: [ :s :p | self error: s ].
-	variableTracker visitNode: nodes.
+	variableTracker visitNode: nodes
+    ]
+
+    afterEvaluation [
+        <category: 'smalltalk event'>
+
+	variableWidget refresh
     ]
 
     doIt [
@@ -79,4 +117,13 @@ GtkTextWidget subclass: GtkWorkspaceWidget [
 
 	PrintItCommand on: self
     ]
+
+    showIVar [
+	<category: 'smalltalk event'>
+
+	variableWidget mainWidget getVisible 
+		ifFalse: [ variableWidget showAll ]
+		ifTrue: [ variableWidget hideAll ].
+    ]
+
 ]

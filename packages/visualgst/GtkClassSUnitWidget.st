@@ -1,5 +1,12 @@
 GtkCategorizedClassWidget subclass: GtkClassSUnitWidget [
 
+    addToModel: aClass [
+
+        (aClass superclass environment == self namespace and: [ (aClass superclass category = self category or: [ self category isEmpty ]) and: [ aClass superclass ~~ Smalltalk.TestCase ] ]) 
+                    ifFalse: [ model append: aClass class ]
+                    ifTrue: [ model append: aClass class parent: aClass superclass class ]
+    ]
+
     root [
 	<category: 'accessing'>
 
@@ -37,7 +44,14 @@ GtkCategorizedClassWidget subclass: GtkClassSUnitWidget [
         <category: 'accessing'>
 
 	self hasSelectedClass ifFalse: [ self error: 'Nothing is selected' ].
-	^ classesTree selections 
+	^ classesTree selections collect: [:each| each asClass]
+    ]
+
+    recategorizedEvent: anEvent [
+        <category: 'model event'>
+
+        (anEvent item inheritsFrom: TestCase) ifFalse: [ ^ self ].
+        super recategorizedEvent: anEvent
     ]
 
     addEvent: anEvent [

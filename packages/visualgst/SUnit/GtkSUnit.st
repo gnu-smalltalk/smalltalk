@@ -1,10 +1,10 @@
 GtkBrowsingTool subclass: GtkSUnit [
-    | namespaceWidget classWidget methodWidget sourceCodeWidget successfullWidget failedWidget errorWidget namespace class |
+    | namespaceWidget classWidget methodWidget sourceCodeWidget successfullWidget failedWidget errorWidget namespace class state |
 
     createRunMenus [
         <category: 'user interface'>
 
-        ^ self createNewMenuEntry: {
+        ^{
 		GTK.GtkMenuItem menuItem: 'Load tests' connectTo: self selector: #loadTests.
 		GTK.GtkMenuItem menuItem: 'Run test' connectTo: self selector: #runTest}
     ]
@@ -15,6 +15,7 @@ GtkBrowsingTool subclass: GtkSUnit [
         self addMenuItem: 'File' withSubmenu: self createFileMenus.
         self addMenuItem: 'Edit' withSubmenu: self createEditMenus.
 	self addMenuItem: 'Run' withSubmenu: self createRunMenus.
+        self addMenuItem: 'Smalltalk' withSubmenu: self createSmalltalkMenus.
         self addMenuItem: 'Tools' withSubmenu: self createToolsMenus.
         self addMenuItem: 'Help' withSubmenu: self createHelpMenus
     ]
@@ -170,15 +171,15 @@ GtkBrowsingTool subclass: GtkSUnit [
     onNamespaceChanged [
 	<category: 'namespace events'>
 
-	self checkCodeWidget.
-        namespaceWidget hasSelectedNamespace ifFalse: [ ^ self ].
-	self selectANamespace: namespaceWidget selectedNamespace
+	self checkCodeWidgetAndUpdate: [
+            namespaceWidget hasSelectedNamespace ifFalse: [ ^ self ].
+	    self selectANamespace: namespaceWidget selectedNamespace ]
     ]
 
     selectANamespace: aNamespace [
 	<category: 'browser methods'>
 
-	aNamespace = namespaceWidget selectedNamespace ifFalse: [
+	(namespaceWidget hasSelectedNamespace and: [aNamespace = namespaceWidget selectedNamespace]) ifFalse: [
             namespaceWidget selectANamespace: aNamespace ].
         namespace := aNamespace.
 	aNamespace isNil ifTrue: [ ^self ].
@@ -189,15 +190,15 @@ GtkBrowsingTool subclass: GtkSUnit [
     onClassChanged [
 	<category: 'class events'>
 
-	self checkCodeWidget.
-        classWidget hasSelectedClass ifFalse: [ ^ self ].
-	self selectAClass: classWidget selectedClass
+	self checkCodeWidgetAndUpdate: [
+            classWidget hasSelectedClass ifFalse: [ ^ self ].
+	    self selectAClass: classWidget selectedClass ]
     ]
 
     selectAClass: aClass [
 	<category: 'browser methods'>
 
-	aClass = classWidget selectedClass ifFalse: [
+	(classWidget hasSelectedClass and: [aClass = classWidget selectedClass]) ifFalse: [
             classWidget selectAClass: aClass ].
         class := aClass.
 	aClass isNil ifTrue: [ ^self ].
@@ -208,32 +209,30 @@ GtkBrowsingTool subclass: GtkSUnit [
     onMethodChanged [
 	<category: 'method events'>
 
-	self checkCodeWidget.
-	self selectAnInstanceMethod: methodWidget selectedMethodSymbol.
+	self checkCodeWidgetAndUpdate: [
+	    methodWidget hasSelectedMethod ifFalse: [^self].
+	    self selectAnInstanceMethod: methodWidget selectedMethodSymbol ]
     ]
 
     selectAnInstanceMethod: aSymbol [
 	<category: 'browser methods'>
 
-	aSymbol = methodWidget selectedMethodSymbol ifFalse: [
+	(methodWidget hasSelectedMethod and: [aSymbol = methodWidget selectedMethodSymbol]) ifFalse: [
             methodWidget selectAMethod: aSymbol asString ].
-	aSymbol isNil ifTrue: [ ^self ].
 	sourceCodeWidget sourceCode: methodWidget sourceCode.
-	state := MethodState on: self with: class -> methodWidget selectedMethod
+	state := MethodState on: self with: methodWidget selectedMethod
     ]
 
-    classOrMetaSelected [
+    state [
+	<category: 'browser methods'>
+
+        ^state
+    ]
+
+    classOrMeta [
 	<category: 'browser methods'>
 
 	^class
-    ]
-
-    selectedCategory [
-	<category: 'browser methods'>
-
-	^ methodWidget selectedMethod
-	    ifNil: [ 'unit tests' ]
-	    ifNotNil: [ :method | method methodCategory ]
     ]
 
     loadTest: aPackage [
@@ -280,18 +279,30 @@ GtkBrowsingTool subclass: GtkSUnit [
 	results failures do: [ :each | each "logPolicy logStatus inspect" printNl ].
     ]
 
-    onFocusPerform: aSymbol [
+    compileError: aString line: line [
+        <category: 'method events'>
+
+        sourceCodeWidget compileError: aString line: line
+    ]
+
+    newMethod [
+        <category: 'method events'>
+
+        AddMethodCommand on: self.
+    ]
+
+    focusedWidget [
 	<category: 'events'>
 
-	sourceCodeWidget hasFocus ifTrue: [ sourceCodeWidget perform: aSymbol ]
+	^sourceCodeWidget focusedWidget
     ]
 
     acceptIt [
-	<category: 'method events'>
+        <category: 'smalltalk events'>
 
-	AddMethodCommand on: self.
+        AcceptItCommand on: self
     ]
-
+    
     cancel [
         <category: 'edit events'>
 
@@ -337,12 +348,13 @@ GtkBrowsingTool subclass: GtkSUnit [
     close [
         <category: 'file events'>
 
-        sourceCodeWidget hasChanged ifFalse: [ ^ super close ].
-        self saveCodeOnClose: [ super close ] onSave: [ state saveSource. super close ]
+        self saveCodeOr: [ super close ]
     ]
 
     clearUndo [
-	^ sourceCodeWidget clearUndo
+        <category: 'source code'>
+
+	sourceCodeWidget clearUndo
     ]
 
     hasChanged [
@@ -361,6 +373,138 @@ GtkBrowsingTool subclass: GtkSUnit [
 	<category: 'code saved'>
 
 	sourceCodeWidget codeSaved
+    ]
+
+    targetObject [
+        <category: 'smalltalk event'>
+
+        ^self state classOrMeta
+    ]
+
+    doIt: object [
+        <category: 'smalltalk event'>
+
+        sourceCodeWidget doIt: object
+    ]
+
+    debugIt: object [
+        <category: 'smalltalk event'>
+
+        sourceCodeWidget debugIt: object
+    ]
+
+    inspectIt: object [
+        <category: 'smalltalk event'>
+
+        sourceCodeWidget inspectIt: object
+    ]
+
+    printIt: object [
+        <category: 'smalltalk event'>
+
+        sourceCodeWidget printIt: object
+    ]
+
+    doIt [
+        <category: 'smalltalk event'>
+
+        DoItCommand on: self
+    ]
+
+    debugIt [
+        <category: 'smalltalk event'>
+
+        DebugItCommand on: self
+    ]
+
+    inspectIt [
+        <category: 'smalltalk event'>
+
+        InspectItCommand on: self
+    ]
+
+    printIt [
+        <category: 'smalltalk event'>
+
+        PrintItCommand on: self
+    ]
+
+    hasChanged [
+	<category: 'testing'>
+
+	^ sourceCodeWidget hasChanged
+    ]
+
+    cancel [
+        <category: 'edit events'>
+
+        self onFocusPerform: #cancel
+    ]
+
+    undo [
+        <category: 'edit events'>
+
+        self onFocusPerform: #undo
+    ]
+
+    redo [
+        <category: 'edit events'>
+
+        self onFocusPerform: #redo
+    ]
+
+    cut [
+        <category: 'edit events'>
+
+        self onFocusPerform: #cut
+    ]
+
+    copy [
+        <category: 'edit events'>
+
+        self onFocusPerform: #copy
+    ]
+
+    paste [
+        <category: 'edit events'>
+
+        self onFocusPerform: #paste
+    ]
+
+    selectAll [
+        <category: 'edit events'>
+
+        self onFocusPerform: #selectAll
+    ]
+
+    find [
+        <category: 'edit events'>
+
+        self onFocusPerform: #showFind
+    ]
+
+    replace [
+        <category: 'edit events'>
+
+        self onFocusPerform: #showReplace
+    ]
+
+    sourceCodeWidgetHasFocus [
+        <category: 'focus'>
+
+        ^ sourceCodeWidget hasFocus
+    ]
+
+    selectedText [
+        <category: 'smalltalk events'>
+
+        ^sourceCodeWidget selectedText
+    ]
+
+    hasSelection [
+        <category: 'smalltalk events'>
+
+        ^sourceCodeWidget hasSelection
     ]
 
 ]

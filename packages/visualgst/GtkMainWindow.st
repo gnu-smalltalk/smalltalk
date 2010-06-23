@@ -129,11 +129,51 @@ that are specific to this version of GNU Smalltalk.';
 	<category: 'intialization'>
 	
 	window := GTK.GtkWindow	new: GTK.Gtk gtkWindowToplevel.
-	window addAccelGroup: self accelGroup
+	window addAccelGroup: self accelGroup.
+        self
+            title: self windowTitle;
+            createMenus;
+            createToolbar;
+            createStatusBar;
+            centralWidget: self buildCentralWidget.
+    ]
+
+    buildCentralWidget [
+	<category: 'initialization'>
+        ^nil
+    ]
+
+    createStatusBar [
+        <category: 'user interface'>
+
+        self statusMessage: self windowTitle
+    ]
+
+    windowTitle [
+	<category: 'initialization'>
+        ^self class name
+    ]
+
+    createToolbar [
+	<category: 'initialization'>
+    ]
+
+    createMenus [
+	<category: 'initialization'>
     ]
 
     postInitialize [
 	<category: 'initialization'>
+
+        window
+            connectSignal: 'delete-event' to: self selector: #'onDelete:event:'
+    ]
+
+    onDelete: aGtkWidget event: aGdkEvent [
+	<category: 'events'>
+
+        window hideAll.
+        ^ true
     ]
 
     addMenuItem: aString [
@@ -142,12 +182,12 @@ that are specific to this version of GNU Smalltalk.';
 	self menuBar append: (GTK.GtkMenuItem newWithLabel: aString)
     ]
 
-    addMenuItem: aString withSubmenu: aGtkMenu [
+    addMenuItem: aString withSubmenu: aGtkMenuItemArray [
 	<category: 'menubar'>
 
 	self menuBar append:
 	    ((GTK.GtkMenuItem newWithLabel: aString)
-		setSubmenu: aGtkMenu)
+		setSubmenu: (self createNewMenuEntry: aGtkMenuItemArray))
     ]
 
     createMainMenu: anArray [
@@ -155,25 +195,6 @@ that are specific to this version of GNU Smalltalk.';
 
 	anArray do: [ :each |
 	    self addMenuItem: each first withSubmenu: (self perform: each second) ]
-    ]
-
-    createMenuEntry: anArray [
-	<category: 'menubar'>
-
-	| menu |
-	menu := (GTK.GtkMenu new)
-		    setAccelGroup: self accelGroup;
-		    yourself.
-	anArray do: [ :each |
-	    menu append: 
-		(each isEmpty
-		    ifTrue: [ GTK.GtkMenuItem new ]
-		    ifFalse: [ (GTK.GtkMenuItem newWithLabel: (each at: 1))
-			    connectSignal: 'activate' to: self selector: (each at: 2) userData: nil;
-			    setAccelPath: (each at: 3);
-			    yourself ]) ].
-
-	^ menu
     ]
 
     createNewMenuEntry: anArray [
@@ -227,5 +248,20 @@ that are specific to this version of GNU Smalltalk.';
 	window 
 	    add: self container;
 	    showAll
+    ]
+
+    focusedWidget [
+        <category: 'focus'>
+
+        self subclassResponsibility
+    ]
+
+    onFocusPerform: aSymbol [
+        <category: 'widget'>
+
+        | widget |
+        widget := self focusedWidget.
+        widget isNil ifTrue: [^self].
+        ^widget perform: aSymbol
     ]
 ]

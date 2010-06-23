@@ -1,37 +1,26 @@
 Command subclass: OpenSenderCommand [
 
-    openWithSelection [
+    selection [
         <category: 'focus checking'>
 
-        (GtkLauncher uniqueInstance notebookHasFocus and:
-            [ GtkLauncher uniqueInstance onFocusPerform: #hasSelection ])
-                ifTrue: [ GtkSender openOn: ( STInST.RBParser selectedSymbol: (GtkLauncher uniqueInstance onFocusPerform: #selectedText)) ]
-                ifFalse: [ GtkSender open ]
-    ]
+        target isNil ifTrue: [^nil].
 
-    focusChecking [
-        <category: 'focus checking'>
+        ((target browserHasFocus not and: [target hasSelection])
+            or: [ target sourceCodeWidgetHasFocus ])
+                ifTrue: [^target selectedMethodSymbol].
 
-        GtkLauncher uniqueInstance browserHasFocus
-                    ifTrue: [
-                        (GtkLauncher uniqueInstance currentWidgetOfBrowser sourceCodeWidgetHasFocus
-                            and: [ GtkLauncher uniqueInstance currentWidgetOfBrowser hasSelection ])
-                                                            ifTrue: [
-                                                                    GtkSender openOn: ( STInST.RBParser selectedSymbol:
-                                                                                                            GtkLauncher uniqueInstance currentWidgetOfBrowser selectedText) ]
-                                                            ifFalse: [
-                                                                    GtkLauncher uniqueInstance currentWidgetOfBrowser hasSelectedMethod ifTrue: [
-                                                                        GtkSender openOn: GtkLauncher uniqueInstance currentWidgetOfBrowser selectedMethodSymbol ]
-																      ifFalse: [ GtkSender open ] ] ]
-                    ifFalse: [ self openWithSelection ]
+        ^target state hasSelectedMethod
+                ifTrue: [ target state selector ]
+                ifFalse: [ nil ]
     ]
 
     execute [
         <category: 'command'>
 
-        target
-	    ifNotNil: [ GtkSender openOn: target selectedMethodSymbol ]
-            ifNil: [ self focusChecking ]
+        | selection |
+        selection := self selection.
+        selection isNil ifTrue: [^GtkSender open].
+	GtkSender openOn: selection
     ]
 ]
 

@@ -1,4 +1,4 @@
-GtkConcreteWidget subclass: GtkObjectInspectorView [
+Object subclass: GtkObjectInspectorView [
     | object model |
 
     GtkObjectInspectorView class >> openOn: anObject [
@@ -24,13 +24,14 @@ GtkConcreteWidget subclass: GtkObjectInspectorView [
     do: aBlock [ 
 	<category: 'iterating'>
 
-	self values do: [ :each | aBlock value: each ]
+	aBlock value: 'self'.
+        self object class allInstVarNames do: aBlock
     ]
 
     values [
 	<category: 'accessing'>
 
-	^ #('self'), self object class allInstVarNames
+	^Array streamContents: [:s | self do: [:value | s nextPut: value]]
     ]
 
     selectedValue: aString [

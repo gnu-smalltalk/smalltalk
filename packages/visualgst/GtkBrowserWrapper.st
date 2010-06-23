@@ -13,10 +13,9 @@ GtkBrowsingTool subclass: GtkBrowserWrapper [
     postInitialize [
         <category: 'initialization'>
 
+        super postInitialize.
         classBrowserWidget postInitialize.
         imageWidget grabFocus.
-        window
-            connectSignal: 'delete-event' to: self selector: #'delete:event:' userData: nil
     ]
 
     resultModel [
@@ -92,6 +91,16 @@ GtkBrowsingTool subclass: GtkBrowserWrapper [
             iter := GTK.GtkTreeIter new.
             self resultModel append: iter parent: nil.
             self resultModel setOop: iter column: 0 value: each ]
+    ]
+
+    createMenus [
+        <category: 'user interface'>
+
+        self addMenuItem: 'File' withSubmenu: self createFileMenus.
+        self addMenuItem: 'Edit' withSubmenu: self createEditMenus.
+        self addMenuItem: 'Smalltalk' withSubmenu: self createSmalltalkMenus.
+        self addMenuItem: 'Tools' withSubmenu: self createToolsMenus.
+        self addMenuItem: 'Help' withSubmenu: self createHelpMenus
     ]
 
     doIt [
@@ -183,5 +192,36 @@ GtkBrowsingTool subclass: GtkBrowserWrapper [
 
         ^ classBrowserWidget hasChanged
     ]
+
+    browserHasFocus [
+        <category: 'testing'>
+
+        ^ classBrowserWidget hasFocus
+    ]
+
+    sourceCodeWidgetHasFocus [
+        <category: 'focus'>
+
+        ^ classBrowserWidget sourceCodeWidgetHasFocus
+    ]
+
+    state [
+        <category: 'focus'>
+
+        ^classBrowserWidget state
+    ]
+
+    selectedText [
+        <category: 'smalltalk events'>
+
+        ^classBrowserWidget selectedText
+    ]
+
+    hasSelection [
+        <category: 'smalltalk events'>
+
+        ^classBrowserWidget hasSelection
+    ]
+
 ]
 

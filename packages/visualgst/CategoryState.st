@@ -34,39 +34,28 @@ BrowserState subclass: CategoryState [
 	^ self category
     ]
 
+    hasSelectedCategory [
+        <category: 'testing'>
+
+        ^ true
+    ]
+
+    hasSelectedNamespace [
+        <category: 'testing'>
+
+        ^ true
+    ]
+
     hasSelectedClass [
         <category: 'testing'>
 
         ^ true
     ]
 
-    classOrMetaSelected [
-        <category: 'accessing'>
-
-        ^ self classOrMeta
-    ]
-
-    sourceCode [
-	<category: 'accessing'>
-
-	^ browser sourceCode
-    ]
-
-    saveSource [
-	<category: 'events'>
-
-	AddMethodCommand on: self
-    ]
-
     displayString [
 	<category: 'printing'>
 
 	^ self classOrMeta displayString
-    ]
-
-    codeSaved [
-
-        browser codeSaved
     ]
 ]
 

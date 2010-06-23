@@ -1,46 +1,25 @@
 Command subclass: OpenImplementorCommand [
 
-    openWithSelection [
-	<category: 'focus checking'>
+    selection [
+        <category: 'focus checking'>
 
+        target isNil ifTrue: [^nil].
 
-        (GtkLauncher uniqueInstance notebookHasFocus and:
-	    [ GtkLauncher uniqueInstance onFocusPerform: #hasSelection ])
-                ifTrue: [ self openImplementorOn: ( STInST.RBParser selectedSymbol: (GtkLauncher uniqueInstance onFocusPerform: #selectedText)) ]
-                ifFalse: [ GtkImplementor open ]
-    ]
+        ((target browserHasFocus not and: [target hasSelection])
+            or: [ target sourceCodeWidgetHasFocus ])
+                ifTrue: [^target selectedMethodSymbol].
 
-    focusChecking [
-	<category: 'focus checking'>
-
-	GtkLauncher uniqueInstance browserHasFocus
-                    ifTrue: [
-                        (GtkLauncher uniqueInstance currentWidgetOfBrowser sourceCodeWidgetHasFocus 
-			    and: [ GtkLauncher uniqueInstance currentWidgetOfBrowser hasSelection ])
-                                                            ifTrue: [
-								    self openImplementorOn: ( STInST.RBParser selectedSymbol: 
-													    GtkLauncher uniqueInstance currentWidgetOfBrowser selectedText) ]
-                                                            ifFalse: [ 
-								    GtkLauncher uniqueInstance currentWidgetOfBrowser hasSelectedMethod ifTrue: [
-									self openImplementorOn: GtkLauncher uniqueInstance currentWidgetOfBrowser selectedMethodSymbol ]
-																      ifFalse: [ GtkImplementor open ] ] ]
-                    ifFalse: [ self openWithSelection ]
+        ^target state hasSelectedMethod
+                ifTrue: [ target state selector ]
+                ifFalse: [ nil ]
     ]
 
     execute [
         <category: 'command'>
 
-        target
-            ifNotNil: [ self openImplementorOn: target selectedMethodSymbol ]
-            ifNil: [ self focusChecking ]
-    ]
-
-    openImplementorOn: aSymbol [
-        <comment: 'I check the symbol for nil'>
-        aSymbol
-            ifNotNil: [ GtkImplementor openOn: aSymbol ]
-            ifNil: [ GtkImplementor open ]
-    
+        | selection |
+        selection := self selection.
+        selection isNil ifTrue: [^GtkImplementor open].
+	GtkImplementor openOn: selection
     ]
 ]
-

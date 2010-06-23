@@ -4,7 +4,7 @@ NamespaceCommand subclass: DeleteNamespaceCommand [
 	<category: 'command'>
 
 	| namespace |
-        namespace := target selectedNamespace.
+        namespace := target state namespace.
         namespace subspaces isEmpty ifFalse: [ self error: 'Namespace has subspaces' ].
         (DeleteNamespaceUndoCommand delete: namespace) push
     ]

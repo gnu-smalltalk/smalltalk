@@ -3,6 +3,6 @@ ClassCommand subclass: InspectClassCommand [
     execute [
 	<category: 'command'>
 
-        GtkInspector openOn: target selectedClass
+        GtkInspector openOn: target state classOrMeta
     ]
 ]

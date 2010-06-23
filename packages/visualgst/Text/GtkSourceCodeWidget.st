@@ -1,5 +1,5 @@
 GtkTextWidget subclass: GtkSourceCodeWidget [
-    | browser codeText |
+    | browser codeText saveWidget |
 
     initialize [
 	<category: 'initialization'>
@@ -61,7 +61,7 @@ GtkTextWidget subclass: GtkSourceCodeWidget [
         menuitem := GTK.GtkMenuItem newWithLabel: 'Accept'.
         menuitem
             show;
-            connectSignal: 'activate' to: self selector: #accept userData: nil.
+            connectSignal: 'activate' to: self selector: #acceptIt userData: nil.
         aGtkMenu append: menuitem.
         menuitem := GTK.GtkMenuItem newWithLabel: 'Cancel'.
         menuitem
@@ -170,46 +170,81 @@ GtkTextWidget subclass: GtkSourceCodeWidget [
 	self parseSource: text ifParsed: [ :node | SyntaxHighlighter highlight: node in: self buffer ]
     ]
 
-    accept [
+    state [
+	<category: 'state'>
+
+        ^browser state
+    ]
+
+    packPluginsInto: vbox [
+	<category: 'user interface'>
+        vbox
+            packStart: ((saveWidget := GtkSaveTextWidget on: self)  mainWidget) expand: false fill: false padding: 0.
+        super packPluginsInto: vbox
+    ]
+
+    showSave: aString [
+        <category: 'user interface'>
+
+        saveWidget label: aString.
+	saveWidget showAll
+    ]
+
+    postInitialize [
+        <category: 'initialize'>
+
+        super postInitialize.
+        saveWidget mainWidget hide
+    ]
+
+    acceptIt [
 	<category: 'buffer events'>
 
 	browser acceptIt
+    ]
+
+    compileError: aString line: line [
+	<category: 'class event'>
+
+        self showSave: aString
     ]
 
     cancel [
 	<category: 'buffer events'>
 
 	self clearUndo.
+        saveWidget hideAll.
 	self buffer setText: self codeText
     ]
 
     doIt [
         <category: 'smalltalk event'>
 
-        ^browser doIt
+        ^ browser doIt
     ]
 
     debugIt [
         <category: 'smalltalk event'>
 
-        ^browser debugIt
+        ^ browser debugIt
     ]
 
     inspectIt [
         <category: 'smalltalk event'>
 
-        ^browser inspectIt
+        ^ browser inspectIt
     ]
 
     printIt [
         <category: 'smalltalk event'>
 
-        ^browser printIt
+        ^ browser printIt
     ]
 
     codeSaved [
 	<category: 'accessing'>
 
+        saveWidget hideAll.
 	self textSaved
     ]
 
@@ -232,9 +267,34 @@ GtkTextWidget subclass: GtkSourceCodeWidget [
     ]
 
     selectedMethodSymbol [
-	<category: 'accessing'>
+	<category: 'method'>
 
-        ^ STInST.RBParser selectedSymbol: self selectedText
+        | iters stream parser node |
+	stream := self sourceCode readStream.
+        iters := self buffer getSelectionBounds.
+        parser := STInST.RBBracketedMethodParser new.
+        parser errorBlock: [:message :position | ^nil].
+        parser 
+            scanner: (parser scannerClass on: stream errorBlock: parser errorBlock).
+        node := parser parseMethod body.
+        node := node bestNodeFor:
+	    (iters first getOffset + 1 to: iters second getOffset + 1).
+        [node isNil ifTrue: [^nil].
+	node isMessage] whileFalse: 
+                [node := node parent].
+        ^node selector
+    ]
+
+    sourceCodeWidgetHasFocus [
+	<category: 'browse'>
+
+	^ true
+    ]
+
+    browserHasFocus [
+	<category: 'browse'>
+
+	^ false
     ]
 
     browseSenders [

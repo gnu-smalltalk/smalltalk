@@ -84,10 +84,11 @@ GtkConcreteWidget subclass: GtkSUnitResult [
         ^ resultTree hasSelectedItem
     ]
 
-    classOrMetaSelected [
-        <category: 'accessing'>
-
-        ^ self selectedResult class
+    state [
+        <category: 'state'>
+        resultTree hasSelectedItem ifTrue: [
+            ^MethodState on: self selectedResult class >> self selectedResult selector ].
+        ^BrowserState new
     ]
 	
     selectedMethodSymbol [

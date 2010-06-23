@@ -1,7 +1,21 @@
-GtkMainWindow subclass: GtkLauncher [
-    GtkLauncher class [ | compileError uniqueInstance | ]
+GtkVisualGSTTool subclass: GtkLauncher [
+    GtkLauncher class [ | history uniqueInstance | ]
 
-    | compilerError browsers outputs saved imageName transcriptWidget windowsMenu systemChangeNotifier |
+    | historyWidget browsers outputs saved imageName transcriptWidget windowsMenu systemChangeNotifier |
+
+    GtkLauncher class >> addHistory: aClass [
+	<category: 'public'>
+
+	self history 
+		add: aClass;
+		changed
+    ]
+
+    GtkLauncher class >> history [
+        <category: 'public'>
+
+        ^ history ifNil: [ history := IdentitySet new ] 
+    ]
 
     GtkLauncher class >> uniqueInstance [
 	<category: 'public'>
@@ -13,7 +27,7 @@ GtkMainWindow subclass: GtkLauncher [
     GtkLauncher class >> / path [
         <category: 'files'>
 
-        ^(PackageLoader packageAt: 'VisualGST') / path
+        ^ (PackageLoader packageAt: 'VisualGST') / path
     ]
 
     GtkLauncher class >> uniqueInstance: anObject [
@@ -27,7 +41,7 @@ GtkMainWindow subclass: GtkLauncher [
     GtkLauncher class >> createInstance [
         <category: 'private'>
 
-        ^(uniqueInstance :=  self basicNew)
+        ^ (uniqueInstance :=  self basicNew)
             initialize;
             showAll;
             postInitialize;
@@ -78,18 +92,6 @@ GtkMainWindow subclass: GtkLauncher [
 	^ 'http://smalltalk.gnu.org/'
     ]
 
-    GtkLauncher class >> compileError: aString [
-	<category: 'accessing'>
-
-	compileError text: aString
-    ]
-
-    GtkLauncher class >> setCompilerError: aWorkspace [
-	<category: 'accessing'>
-
-	compileError := aWorkspace
-    ]
-
     GtkLauncher class >> license [
 	<category: 'accessing'>
 
@@ -133,30 +135,12 @@ THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.'
         ^self displayError: 'Error' message: error
     ]
 
-    aboutLauncher [
-	<category: 'help events'>
-
-	(GTK.GtkAboutDialog new)
-	    setVersion: self class version;
-	    setLicense: self class license;
-	    setWebsite: self class website;
-	    setComments: 'This is a GTK+ wrapper for GNU Smalltalk.';
-	    "setAuthors: {'Gwenael Casaccio'. 'Nicolas Petton'. nil};"
-	    setProgramName: 'VisualGST';
-	    showModalDestroy
-    ]
-
-    browser [
-	<category: 'events'>
-
-	windowsMenu append: (GTK.GtkMenuItem label: 'Browser') showAll
-    ]
-
     classBrowser [
 	<category: 'tools events'>
 
 	| widget |
 	browsers addWidget: (widget := self buildClassBrowserWidget) labeled: 'Browser'.
+        browsers showLastPage.
 	widget postInitialize.
 	^ widget
     ]
@@ -170,17 +154,24 @@ THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.'
     newWorkspace [
 	<category: 'tools events'>
 
+        ^self newWorkspaceLabeled: 'Workspace'
+    ]
+
+    newWorkspaceLabeled: aString [
+	<category: 'tools events'>
+
 	| widget |
 	widget := self buildWorkspaceWidget showAll.
 	widget postInitialize.
-	outputs addWidget: widget labeled: 'Workspace'.
+	outputs addWidget: widget labeled: aString.
+        outputs showLastPage.
+        ^widget
     ]
 
-    delete: aGtkWidget event: aGdkEvent [
+    onDelete: aGtkWidget event: aGdkEvent [
 	<category: 'window events'>
 
 	self quit.
-
 	^ true 
     ]
 
@@ -211,12 +202,12 @@ THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.'
 	<category: 'file events'>
 
 	| file string |
-	outputs currentWidget  == transcriptWidget ifTrue: [ self error: 'Can not remove the transcript tab' ].
 	(GTK.GtkFileChooserDialog load: 'Load Smalltalk source' parent: window)
 	    showModalOnAnswer: [ :dlg :res |
 		res = GTK.Gtk gtkResponseAccept 
-				ifTrue: [ file := FileStream open: dlg getFilename mode: FileStream read.
-					  outputs currentWidget text: file upToEnd ].
+				ifTrue: [ file := File name: dlg getFilename.
+                                          FileStream open: dlg getFilename mode: FileStream read.
+					  (self newWorkspaceLabeled: file stripPath) text: file contents ].
 		dlg destroy ]
     ]
 
@@ -304,12 +295,6 @@ THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.'
 	    Transcript message: oldMessage ]
     ]
 
-    workspace [
-	<category: 'tools events'>
-	
-	self newWorkspace
-    ]
-
     systemChangeNotifier [
 	<category: 'notifications'>
 
@@ -325,19 +310,18 @@ THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.'
     initialize [
 	<category: 'initialization'>
 
-	super initialize.
 	saved := false.
 	imageName := File image asString.
         systemChangeNotifier := SystemChangeNotifier new.
         SystemChangeNotifier root add: systemChangeNotifier.
+	self clearGlobalState.
+	super initialize.
 	window maximize.
-	self
-	    clearGlobalState;
-	    title: 'VisualGST';
-	    createMenus;
-	    createToolbar;
-	    createStatusBar;
-	    centralWidget: self buildCentralWidget
+    ]
+
+    windowTitle [
+        <category: 'widget'>
+        ^'VisualGST'
     ]
 
     browserPostInitialize [
@@ -352,11 +336,12 @@ THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.'
     postInitialize [
 	<category: 'initialization'>
 
-	self browserPostInitialize.
-	1 to: 3 do: [ :i | (outputs widgetAt: i) postInitialize ].
+	super postInitialize.
+        self browserPostInitialize.
+	1 to: 2 do: [ :i | (outputs widgetAt: i) postInitialize ].
+	historyWidget hideAll.
 	window
-	    connectSignal: 'key-press-event' to: self selector:  #'keyPressedOn:keyEvent:' userData: nil;
-	    connectSignal: 'delete-event' to: self selector: #'delete:event:' userData: nil
+	    connectSignal: 'key-press-event' to: self selector:  #'keyPressedOn:keyEvent:' userData: nil
     ]
 
     buildNotebookWorkspaceWidget [
@@ -367,10 +352,8 @@ THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.'
 				parentWindow: window;
 				showAll;
 				yourself.
-	self class setCompilerError: (compilerError := self buildWorkspaceWidget).
 	^ outputs
 	    addPermanentWidget: (transcriptWidget := self buildTranscriptWidget) labeled: 'Transcript';
-	    addPermanentWidget: compilerError labeled: 'Compiler error(s)';
 	    addWidget: self buildWorkspaceWidget labeled: 'Workspace';
 	    yourself
     ]
@@ -378,10 +361,36 @@ THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.'
     buildCentralWidget [
 	<category: 'intialize-release'>
 
-	^ GTK.GtkVPaned new
-	    pack1: self buildClassBrowserTabbedWidget mainWidget resize: true shrink: true;
-	    pack2: self buildNotebookWorkspaceWidget mainWidget resize: true shrink: false;
-	    yourself
+	^ self buildBrowserAndWorkspaceWidget
+    ]
+
+    buildHistoryPaned [
+       <category: 'user interface'>
+
+        ^ GTK.GtkHPaned new
+            pack1: self buildHistoryView resize: true shrink: false;
+            pack2: self buildClassBrowserTabbedWidget mainWidget resize: true shrink: true ;
+            showAll;
+            yourself
+    ]
+
+    buildBrowserAndWorkspaceWidget [
+        <category: 'intialize-release'>
+
+        ^ GTK.GtkVPaned new
+            pack1: self buildHistoryPaned resize: true shrink: true;
+            pack2: self buildNotebookWorkspaceWidget mainWidget resize: true shrink: false;
+            yourself
+    ]
+
+    buildHistoryView [
+       <category: 'user interface'>
+
+        historyWidget := GtkHistoryWidget new
+                                    browser: self;
+                                    yourself.
+        self class history addDependent: historyWidget.
+        ^ historyWidget mainWidget
     ]
 
     buildClassBrowserTabbedWidget [
@@ -427,27 +436,7 @@ THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.'
     createEditMenus [
 	<category: 'user interface'>
 
-	self accelGroup append: {{'<Control><shift>Z'. '<GtkLauncher>/Edit/Cancel'}.
-	    {'<Control>Z'. '<GtkLauncher>/Edit/Undo'}.
-	    {'<Control>R'. '<GtkLauncher>/Edit/Redo'}.
-	    {'<Control>X'. '<GtkLauncher>/Edit/Cut'}.
-	    {'<Control>C'. '<GtkLauncher>/Edit/Copy'}.
-	    {'<Control>V'. '<GtkLauncher>/Edit/Paste'}.
-	    {'<Control>F'. '<GtkLauncher>/Edit/Find'}.
-	    {'<Control>H'. '<GtkLauncher>/Edit/Replace'}}.
-
-	^ self createNewMenuEntry: {GTK.GtkMenuItem menuItem: 'Cancel edits' accelPath: '<GtkLauncher>/Edit/Cancel' connectTo: self selector: #cancel.
-	    GTK.GtkMenuItem menuItem: 'Undo' accelPath: '<GtkLauncher>/Edit/Undo' connectTo: self selector: #undo.
-            GTK.GtkMenuItem menuItem: 'Redo' accelPath: '<GtkLauncher>/Edit/Redo' connectTo: self selector: #redo.
-            GTK.GtkMenuItem new.
-            GTK.GtkMenuItem menuItem: 'Cut' accelPath: '<GtkLauncher>/Edit/Cut' connectTo: self selector: #cut.
-            GTK.GtkMenuItem menuItem: 'Copy' accelPath: '<GtkLauncher>/Edit/Copy' connectTo: self selector: #copy.
-            GTK.GtkMenuItem menuItem: 'Paste' accelPath: '<GtkLauncher>/Edit/Paste' connectTo: self selector: #paste.
-            GTK.GtkMenuItem new.
-            GTK.GtkMenuItem menuItem: 'Select all' accelPath: '<GtkLauncher>/Edit/SelectAll' connectTo: self selector: #selectAll.
-            GTK.GtkMenuItem new.
-            GTK.GtkMenuItem menuItem: 'Find' accelPath: '<GtkLauncher>/Edit/Find' connectTo: self selector: #find.
-            GTK.GtkMenuItem menuItem: 'Replace' accelPath: '<GtkLauncher>/Edit/Replace' connectTo: self selector: #replace.
+	^super createEditMenus, {
             GTK.GtkMenuItem new.
             GTK.GtkMenuItem menuItem: 'Clear Transcript' connectTo: self selector: #clearTranscriptWidget}
     ]
@@ -455,7 +444,7 @@ THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.'
     createNamespaceMenus [
         <category: 'user interface'>
 
-        ^ self createNewMenuEntry: {GTK.GtkMenuItem menuItem: 'Add a namespace' connectTo: self selector: #newNamespace.
+        ^{GTK.GtkMenuItem menuItem: 'Add a namespace' connectTo: self selector: #newNamespace.
             GTK.GtkMenuItem menuItem: 'Rename a namespace' connectTo: self selector: #renameNamespace.
             GTK.GtkMenuItem menuItem: 'Delete a namespace' connectTo: self selector: #deleteNamespace.
             GTK.GtkMenuItem new.
@@ -467,7 +456,7 @@ THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.'
     createClassMenus [
         <category: 'user interface'>
 
-        ^ self createNewMenuEntry: {GTK.GtkMenuItem menuItem: 'Add a class' connectTo: self selector: #newClass.
+        ^{GTK.GtkMenuItem menuItem: 'Add a class' connectTo: self selector: #newClass.
             GTK.GtkMenuItem menuItem: 'Rename a class' connectTo: self selector: #renameClass.
             GTK.GtkMenuItem menuItem: 'Delete a class' connectTo: self selector: #deleteClass.
             GTK.GtkMenuItem new.
@@ -479,7 +468,7 @@ THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.'
     createCategoryMenus [
         <category: 'user interface'>
 
-        ^ self createNewMenuEntry: {GTK.GtkMenuItem menuItem: 'Add a category' connectTo: self selector: #newCategory.
+        ^{GTK.GtkMenuItem menuItem: 'Add a category' connectTo: self selector: #newCategory.
             GTK.GtkMenuItem menuItem: 'Rename a category' connectTo: self selector: #renameCategory.
             GTK.GtkMenuItem new.
             GTK.GtkMenuItem menuItem: 'File out a category' connectTo: self selector: #fileoutCategory}
@@ -488,8 +477,7 @@ THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.'
     createMethodMenus [
         <category: 'user interface'>
 
-        ^ self createNewMenuEntry: {GTK.GtkMenuItem menuItem: 'Add a method' connectTo: self selector: #newMethod.
-            GTK.GtkMenuItem menuItem: 'Delete a method' connectTo: self selector: #deleteMethod.
+        ^{GTK.GtkMenuItem menuItem: 'Delete a method' connectTo: self selector: #deleteMethod.
             GTK.GtkMenuItem new.
             GTK.GtkMenuItem menuItem: 'Inspect a method' connectTo: self selector: #inspectMethod.
             GTK.GtkMenuItem new.
@@ -504,18 +492,12 @@ THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.'
 	    {'<Control><Shift>S'. '<GtkLauncher>/File/SaveAs'}.
 	    {'<Control>Q'. '<GtkLauncher>/File/Quit'}}.
 
-	^ self createNewMenuEntry: {GTK.GtkMenuItem menuItem: 'New workspace' connectTo: self selector: #newWorkspace.
+	^{GTK.GtkMenuItem menuItem: 'New workspace' connectTo: self selector: #newWorkspace.
             GTK.GtkMenuItem new.
 	    GTK.GtkMenuItem menuItem: 'Open' accelPath: '<GtkLauncher>/File/Open' connectTo: self selector: #open.
             GTK.GtkMenuItem menuItem: 'Save' connectTo: self selector: #save.
             GTK.GtkMenuItem menuItem: 'Save as...' accelPath: '<GtkLauncher>/File/SaveAs' connectTo: self selector: #saveAs.
-            GTK.GtkMenuItem new.
-            GTK.GtkMenuItem menuItem: 'Print' connectTo: self selector: #printIt.
-            GTK.GtkMenuItem new.
-            GTK.GtkMenuItem menuItem: 'Save image' connectTo: self selector: #saveImage.
-            GTK.GtkMenuItem menuItem: 'Save image as...' connectTo: self selector: #saveImageAs.
-            GTK.GtkMenuItem new.
-            GTK.GtkMenuItem menuItem: 'Quit' accelPath: '<GtkLauncher>/File/Quit' connectTo: self selector: #quit}
+            GTK.GtkMenuItem new}, super createFileMenus
     ]
 
     createHistoryMenus [
@@ -523,27 +505,13 @@ THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.'
 
 	self accelGroup append:
             {{'<Alt>Left'. '<GtkLauncher>/History/Back'}.
-            {'<Alt>Right'. '<GtkLauncher>/History/Forward'}}.
+            {'<Alt>Right'. '<GtkLauncher>/History/Forward'}.
+            {'<Control>H'. '<GtkLauncher>/History/showHide'}}.
 
-	^ self createNewMenuEntry: {GTK.GtkMenuItem menuItem: 'Back' accelPath: '<GtkLauncher>/History/Back' connectTo: self selector: #back.
-            GTK.GtkMenuItem menuItem: 'Forward' accelPath: '<GtkLauncher>/History/Forward' connectTo: self selector: #forward}
-    ]
-
-    createSmalltalkMenus [
-	<category: 'user interface'>
-
-        self accelGroup append: {{'<Control>D'. '<GtkLauncher>/Smalltalk/DoIt'}.
-            {'<Control>P'. '<GtkLauncher>/Smalltalk/PrintIt'}.
-            {'<Control>I'. '<GtkLauncher>/Smalltalk/InspectIt'}.
-	    {'<Alt>D'. '<GtkLauncher>/Smalltalk/DebugIt'}.
-	    {'<Control>S'. '<GtkLauncher>/Smalltalk/AcceptIt'}}.
-
-        ^ self createNewMenuEntry: {GTK.GtkMenuItem menuItem: 'Do It' accelPath: '<GtkLauncher>/Smalltalk/DoIt' connectTo: self selector: #doIt.
-            GTK.GtkMenuItem menuItem: 'Print It' accelPath: '<GtkLauncher>/Smalltalk/PrintIt' connectTo: self selector: #printIt.
-            GTK.GtkMenuItem menuItem: 'Inspect It' accelPath: '<GtkLauncher>/Smalltalk/InspectIt' connectTo: self selector: #inspectIt.
-            GTK.GtkMenuItem menuItem: 'Debug It' accelPath: '<GtkLauncher>/Smalltalk/DebugIt' connectTo: self selector: #debugIt.
+	^{GTK.GtkMenuItem menuItem: 'Back' accelPath: '<GtkLauncher>/History/Back' connectTo: self selector: #back.
+            GTK.GtkMenuItem menuItem: 'Forward' accelPath: '<GtkLauncher>/History/Forward' connectTo: self selector: #forward.
 	    GTK.GtkMenuItem new.
-	    GTK.GtkMenuItem menuItem: 'Accept It' accelPath: '<GtkLauncher>/Smalltalk/AcceptIt' connectTo: self selector: #acceptIt}
+            GTK.GtkMenuItem menuItem: 'Show/Hide history pane' accelPath: '<GtkLauncher>/History/showHide' connectTo: self selector: #showHideHistory }
     ]
 
     createTabsMenus [
@@ -553,19 +521,21 @@ THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.'
 	    {'<Control>Tab'. '<GtkLauncher>/Tabs/NextTab'}.
 	    {'<Control>w'. '<GtkLauncher>/Tabs/CloseTab'}}.
 
-	^ self createNewMenuEntry: {GTK.GtkMenuItem menuItem: 'Previous Tab' accelPath: '<GtkLauncher>/Tabs/PreviousTab' connectTo: self selector: #previousTab.
+	^{GTK.GtkMenuItem menuItem: 'Previous Tab' accelPath: '<GtkLauncher>/Tabs/PreviousTab' connectTo: self selector: #previousTab.
 	GTK.GtkMenuItem menuItem: 'Next Tab' accelPath: '<GtkLauncher>/Tabs/NextTab' connectTo: self selector: #nextTab.
 	GTK.GtkMenuItem new.
 	GTK.GtkMenuItem menuItem: 'Close Tab' accelPath: '<GtkLauncher>/Tabs/CloseTab' connectTo: self selector: #closeTab.}
     ]
 
-    createHelpMenus [
+    createToolbar [
 	<category: 'user interface'>
 
-	^ self createNewMenuEntry: {GTK.GtkMenuItem menuItem: 'Help Contents' connectTo: self selector: #helpcontents.
-	    GTK.GtkMenuItem new.
-	    GTK.GtkMenuItem menuItem: 'About Launcher' connectTo: self selector: #aboutLauncher.
-	    GTK.GtkMenuItem menuItem: 'About GNU Smalltalk' connectTo: self selector: #aboutGst}
+	self
+	    appendToolItem: ((GTK.GtkToolButton newFromStock: 'gtk-new')
+				connectSignal: 'clicked' to: self selector: #newWorkspace;
+				setTooltipText: 'Create a new workspace';
+				yourself).
+        super createToolbar
     ]
 
     createMenus [
@@ -584,97 +554,19 @@ THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.'
 	    #('Help' #createHelpMenus)}
     ]
 
-    createStatusBar [
-	<category: 'user interface'>
-
-	self statusMessage: 'Gtk Launcher'
-    ]
-
-    createToolbar [
-	<category: 'user interface'>
-
-	self
-	    appendToolItem: ((GTK.GtkToolButton newFromStock: 'gtk-new')
-				connectSignal: 'clicked' to: OpenWorkspaceCommand selector: #execute;
-				setTooltipText: 'Create a new workspace';
-				yourself);
-	    appendSeparator;
-	    appendToolItem: ((GTK.GtkToolButton newFromStock: 'gtk-save')
-				connectSignal: 'clicked' to: SaveImageCommand selector: #execute;
-				setTooltipText: 'Save the image';
-				yourself);
-	    appendToolItem: ((GTK.GtkToolButton newFromStock: 'gtk-save-as')
-				connectSignal: 'clicked' to: SaveImageAsCommand selector: #execute;
-				setTooltipText: 'Save the image as';
-				yourself);
-	    appendSeparator;
-	    appendToolItem: ((GTK.GtkToolButton newFromStock: 'gtk-cut')
-				connectSignal: 'clicked' to: self selector: #cut;
-				setTooltipText: 'Cut';
-				yourself);
-	    appendToolItem: ((GTK.GtkToolButton newFromStock: 'gtk-copy')
-				connectSignal: 'clicked' to: self selector: #copy;
-				setTooltipText: 'Copy';
-				yourself);
-	    appendToolItem: ((GTK.GtkToolButton newFromStock: 'gtk-paste')
-				connectSignal: 'clicked' to: self selector: #paste;
-				setTooltipText: 'Paste';
-				yourself);
-	    appendSeparator;
-            appendToolItem: ((GTK.GtkToolButton newFromStock: 'gtk-undo')
-				connectSignal: 'clicked' to: self selector: #undo;
-				setTooltipText: 'Undo';
-				yourself);
-            appendToolItem: ((GTK.GtkToolButton newFromStock: 'gtk-redo')
-				connectSignal: 'clicked' to: self selector: #redo;
-				setTooltipText: 'Redo';
-				yourself);
-            appendSeparator;
-	    appendToolItem: ((GTK.GtkToolButton newFromStock: 'gtk-execute' label: 'Do It')
-				connectSignal: 'clicked' to: self selector: #doIt;
-				setTooltipText: 'Do It';
-				yourself);
-	    appendToolItem: ((GTK.GtkToolButton newFromStock: 'gtk-print' label: 'Print It')
-				connectSignal: 'clicked' to: self selector: #printIt;
-				setTooltipText: 'Print It';
-				yourself);
-	    appendToolItem: ((GTK.GtkToolButton newFromStock: 'gtk-convert' label: 'Inspect It')
-				connectSignal: 'clicked' to: self selector: #inspectIt;
-				setTooltipText: 'Inspect It';
-				yourself);
-	    appendToolItem: ((GTK.GtkToolButton newFromStock: 'gtk-sort-descending' label: 'Debug It')
-				connectSignal: 'clicked' to: self selector: #debugIt;
-				setTooltipText: 'Debug It';
-				yourself);
-	    appendSeparator;
-	    appendToolItem: ((GTK.GtkToolButton newFromStock: 'gtk-apply' label: 'Accept')
-				connectSignal: 'clicked' to: self selector: #acceptIt;
-				setTooltipText: 'Accept';
-				yourself)
-    ]
-
     createToolsMenus [
 	<category: 'user interface'>
 
-	| menu |
-        self accelGroup append: {{'<Control>B'. '<GtkLauncher>/Tools/TabbedClassBrowser'}.
-	    {'<Control><shift>B'. '<GtkLauncher>/Tools/ClassBrowser'}.
-	    {'<Control>M'. '<GtkLauncher>/Tools/Implementors'}.
-            {'<Control>N'. '<GtkLauncher>/Tools/Senders'}}.
+        self accelGroup append: {{'<Control>B'. '<GtkLauncher>/Tools/TabbedClassBrowser'}}.
 
-	menu := {GTK.GtkMenuItem menuItem: 'Browser' accelPath: '<GtkLauncher>/Tools/TabbedClassBrowser' connectTo: OpenTabbedBrowserCommand selector: #execute.
-            GTK.GtkMenuItem menuItem: 'Browser window' accelPath: '<GtkLauncher>/Tools/ClassBrowser' connectTo: OpenWindowedBrowserCommand selector: #execute.
-            GTK.GtkMenuItem menuItem: 'Workspace' connectTo: OpenWorkspaceCommand selector: #execute.
-            GTK.GtkMenuItem menuItem: 'Implementors' accelPath: '<GtkLauncher>/Tools/Implementors' connectTo: OpenImplementorCommand selector: #execute.
-            GTK.GtkMenuItem menuItem: 'Senders' accelPath: '<GtkLauncher>/Tools/Senders' connectTo: OpenSenderCommand selector: #execute.
-            GTK.GtkMenuItem menuItem: 'SUnit' connectTo: OpenSUnitCommand selector: #execute} asOrderedCollection.
+	^{GTK.GtkMenuItem menuItem: 'Browser' accelPath: '<GtkLauncher>/Tools/TabbedClassBrowser' connectTo: self selector: #newTabbedBrowser},
+            super createToolsMenus.
+    ]
 
-	GtkWebView hasWebkit ifTrue: [ menu addAll: {GTK.GtkMenuItem new.
-            GTK.GtkMenuItem menuItem: 'Assistant' connectTo: OpenAssistantCommand selector: #execute.
-            GTK.GtkMenuItem new.
-            GTK.GtkMenuItem menuItem: 'Smallzilla' connectTo: OpenWebBrowserCommand selector: #execute} ].
+    newTabbedBrowser [
+	<category: 'tools events'>
 
-	^ self createNewMenuEntry: menu 
+	OpenTabbedBrowserCommand on: self
     ]
 
     cancel [
@@ -722,13 +614,13 @@ THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.'
     find [
 	<category: 'edit events'>
 
-	browsers currentWidget showFind
+	self onFocusPerform: #showFind
     ]
 
     replace [
 	<category: 'edit events'>
 
-	browsers currentWidget showReplace
+	self onFocusPerform: #showReplace
     ]
 
     clearTranscriptWidget [
@@ -737,13 +629,10 @@ THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.'
 	transcriptWidget clear
     ]
 
-    onFocusPerform: aSelector [
+    focusedWidget [
 	<category: 'focus'>
 
-	^ self browserHasFocus 
-	    ifTrue: [ browsers currentWidget perform: aSelector ]
-	    ifFalse: [ outputs hasFocus 
-			    ifTrue: [ outputs currentWidget perform: aSelector ] ].
+	^browsers focusedWidget ifNil: [ outputs focusedWidget ]
     ]
 
     browserHasFocus [
@@ -752,10 +641,37 @@ THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.'
 	^ browsers hasFocus
     ]
 
-    currentWidgetOfBrowser [
+    sourceCodeWidgetHasFocus [
 	<category: 'focus'>
 
-	^ browsers currentWidget
+	^ browsers currentWidget sourceCodeWidgetHasFocus
+    ]
+
+    state [
+	<category: 'focus'>
+
+	browsers currentWidget isNil ifTrue: [^BrowserState new].
+	^browsers currentWidget state
+    ]
+
+    selectedText [
+	<category: 'smalltalk events'>
+
+	^self onFocusPerform: #selectedText
+    ]
+
+    selectedMethodSymbol [
+        <category: 'text editing'>
+
+        ^self onFocusPerform: #selectedMethodSymbol
+    ]
+
+    hasSelection [
+	<category: 'smalltalk events'>
+
+        | widget |
+	widget := self focusedWidget.
+	^widget notNil and: [widget hasSelection]
     ]
 
     doIt [
@@ -800,6 +716,14 @@ THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.'
 	browsers currentWidget forward
     ]
 
+    showHideHistory [
+	<category: 'history events'>
+
+        historyWidget mainWidget getVisible
+            ifTrue: [ historyWidget hideAll ]
+            ifFalse: [ historyWidget showAll ]
+    ]
+
     previousTab [
 	<category: 'tabs events'>
 
@@ -820,12 +744,6 @@ THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.'
 	browsers numberOfPages > 1 
 			    ifTrue: [ browsers currentWidget checkCodeWidgetAndUpdate: [ browsers closeCurrentPage ] ]
 			    ifFalse: [ browsers closeCurrentPage ].
-    ]
-
-    helpcontents [
-	<category: 'help events'>
-
-	GtkWebBrowser openOn: 'http://smalltalk.gnu.org/documentation'
     ]
 
     fileoutNamespace [
@@ -904,12 +822,6 @@ THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.'
         <category: 'method events'>
 
 	browsers currentWidget fileoutCategory
-    ]
-
-    newMethod [
-        <category: 'method events'>
-
-        browsers currentWidget newMethod
     ]
 
     deleteMethod [

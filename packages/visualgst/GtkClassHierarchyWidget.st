@@ -50,6 +50,7 @@ GtkConcreteWidget subclass: GtkClassHierarchyWidget [
     ]
 
     emptyModel [
+        classesTree getSelection unselectAll
     ]
 
     buildSuperclasses [

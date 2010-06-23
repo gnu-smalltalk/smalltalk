@@ -14,15 +14,15 @@ GtkConcreteWidget subclass: GtkTextWidget [
 	<category: 'initialization'>
 
 	textWidget
-	    connectSignal: 'populate-popup' to: self selector: #'popupMenuOn:menu:' userData: nil;
-	    connectSignal: 'paste-clipboard' to: self selector: #pasteFromClipboard userData: nil;
-            connectSignal: 'cut-clipboard' to: self selector: #cutFromClipboard userData: nil.
+	    connectSignal: 'populate-popup' to: self selector: #'popupMenuOn:menu:';
+	    connectSignal: 'paste-clipboard' to: self selector: #pasteFromClipboard;
+            connectSignal: 'cut-clipboard' to: self selector: #cutFromClipboard.
 
 	(self buffer)
-            connectSignal: 'begin-user-action' to: self selector: #'beginUserAction' userData: nil;
-            connectSignal: 'end-user-action' to: self selector: #'endUserAction' userData: nil;
-            connectSignal: 'insert-text' to: self selector: #'insert:at:text:size:' userData: nil;
-            connectSignal: 'delete-range' to: self selector: #'delete:from:to:' userData: nil
+            connectSignal: 'begin-user-action' to: self selector: #'beginUserAction';
+            connectSignal: 'end-user-action' to: self selector: #'endUserAction';
+            connectSignal: 'insert-text' to: self selector: #'insert:at:text:size:';
+            connectSignal: 'delete-range' to: self selector: #'delete:from:to:'
     ]
 
     initialize [
@@ -44,17 +44,25 @@ GtkConcreteWidget subclass: GtkTextWidget [
         <category: 'initialize'>
 
         findWidget mainWidget hide.
-        replaceWidget mainWidget hide
+        replaceWidget mainWidget hide.
     ]
 
     buildWidget [
 	<category: 'user interface'>
 
-        ^ (GTK.GtkVBox new: false spacing: 3)
-                    packStart: (GTK.GtkScrolledWindow withChild: textWidget) expand: true fill: true padding: 0;
-                    packEnd: ((findWidget := GtkFindWidget on: self) mainWidget) expand: false fill: false padding: 0;
-                    packEnd: ((replaceWidget := GtkReplaceWidget on: self)  mainWidget) expand: false fill: false padding: 0;
-                    yourself
+        | vbox |
+        vbox := GTK.GtkVBox new: false spacing: 3.
+        self packPluginsInto: vbox.
+        vbox packStart: (GTK.GtkScrolledWindow withChild: textWidget) expand: true fill: true padding: 0.
+        ^vbox
+    ]
+
+    packPluginsInto: vbox [
+	<category: 'user interface'>
+        vbox
+            packEnd: ((findWidget := GtkFindWidget on: self) mainWidget) expand: false fill: false padding: 0;
+            packEnd: ((replaceWidget := GtkReplaceWidget on: self)  mainWidget) expand: false fill: false padding: 0;
+            yourself
     ]
 
     popupMenuOn: aGtkWidget menu: aGtkMenu [
@@ -134,11 +142,7 @@ GtkConcreteWidget subclass: GtkTextWidget [
     hasChanged [
         <category: 'testing'>
 
-        ^ textSaved
-            ifTrue: [ (self lastUndoCommand == lastSavedCommand) not ]
-            ifFalse: [ self hasUndo
-                            ifFalse: [ false ]
-                            ifTrue: [ true ] ]
+        ^ textSaved not and: [ undoStack hasUndo ]
     ]
 
     hasUndo [
@@ -158,6 +162,7 @@ GtkConcreteWidget subclass: GtkTextWidget [
     undo [
         <category: 'buffer events'>
 
+        textSaved := self lastUndoCommand == lastSavedCommand.
         undoStack undo.
         lastCommand := nil.
     ]
@@ -167,6 +172,7 @@ GtkConcreteWidget subclass: GtkTextWidget [
 
         undoStack redo.
         lastCommand := nil.
+        textSaved := self lastUndoCommand == lastSavedCommand.
     ]
 
     emptyStack [
@@ -178,7 +184,7 @@ GtkConcreteWidget subclass: GtkTextWidget [
     lastUndoCommand [
 	<category: 'buffer events'>
 
-	^ undoStack lasUndoCommand
+	^ undoStack lastUndoCommand
     ]
 
     textSaved [
@@ -186,7 +192,7 @@ GtkConcreteWidget subclass: GtkTextWidget [
 
         textSaved := true.
         lastCommand := nil.
-        lastSavedCommand := self lastUndoCommand
+        lastSavedCommand := undoStack lastUndoCommand
     ]
 
     buffer [
@@ -204,19 +210,15 @@ GtkConcreteWidget subclass: GtkTextWidget [
     showFind [
         <category: 'user interface'>
 
-        findWidget mainWidget getVisible ifTrue: [ ^ findWidget mainWidget hide ].
-        replaceWidget mainWidget hide.
-        findWidget mainWidget show.
-	findWidget grabFocus
+        replaceWidget hideAll.
+	findWidget showAll; grabFocus
     ]
 
     showReplace [
         <category: 'user interface'>
 
-        replaceWidget mainWidget getVisible ifTrue: [ ^ replaceWidget mainWidget hide ].
-        findWidget mainWidget hide.
-        replaceWidget mainWidget show.
-	replaceWidget grabFocus
+        findWidget hideAll.
+	replaceWidget showAll; grabFocus
     ]
 
     replace: aSearchString by: aReplaceString [
@@ -261,6 +263,12 @@ GtkConcreteWidget subclass: GtkTextWidget [
         <category: 'text accessing'>
 
 	^ self buffer getHasSelection
+    ]
+
+    selectedMethodSymbol [
+	<category: 'accessing'>
+
+        ^ STInST.RBParser selectedSymbol: self selectedText
     ]
 
     selectedText [
@@ -317,14 +325,21 @@ GtkConcreteWidget subclass: GtkTextWidget [
         <category: 'smalltalk event'>
     ]
 
+    afterEvaluation [
+        <category: 'smalltalk event'>
+    ]
+
     doIt: object [
         <category: 'smalltalk event'>
 
+	| result |
         self beforeEvaluation.
-        ^ Behavior
-            evaluate: self buffer selectedText
-            to: object
-            ifError: [ :fname :lineNo :errorString | self error: errorString ]
+        result := Behavior
+		    evaluate: self buffer selectedText
+		    to: object
+		    ifError: [ :fname :lineNo :errorString | self error: errorString ].
+	self afterEvaluation.
+	^ result
     ]
 
     debugIt: object [
@@ -358,4 +373,3 @@ GtkConcreteWidget subclass: GtkTextWidget [
     ]
 
 ]
-

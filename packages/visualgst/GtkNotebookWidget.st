@@ -90,6 +90,12 @@ GtkConcreteWidget subclass: GtkNotebookWidget [
 	^ currentWidget
     ]
 
+    focusedWidget [
+	<category: 'accessing'>
+
+	^ currentWidget focusedWidget
+    ]
+
     currentPage [
 	<category: 'pages'>
 
@@ -100,6 +106,12 @@ GtkConcreteWidget subclass: GtkNotebookWidget [
 	<category: 'pages'>
 
 	notebook setCurrentPage: aSmallInteger
+    ]
+
+    showLastPage [
+	<category: 'pages'>
+
+	self currentPage: self numberOfPages - 1
     ]
 
     numberOfPages [

@@ -125,7 +125,7 @@ Object subclass: GtkImage [
 
 	| string |
         string := ((anEvent item displayString) substrings: $.) last.
-        finderDic at: string ifAbsentPut: [ self appendToModel: string. Dictionary new ].
+        finderDic at: string ifAbsentPut: [ Dictionary new ].
 	self at: string addToFinder: (ClassFinder on: anEvent item) 
     ]
 

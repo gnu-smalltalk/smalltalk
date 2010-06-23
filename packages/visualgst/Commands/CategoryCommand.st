@@ -3,7 +3,7 @@ Command subclass: CategoryCommand [
     valid [
 	<category: 'command'>
 
-	^target hasSelectedCategory
+	^target state hasSelectedCategory
     ]
 ]
 

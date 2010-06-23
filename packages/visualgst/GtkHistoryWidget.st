@@ -1,0 +1,121 @@
+GtkConcreteWidget subclass: GtkHistoryWidget [
+    | browser model widget |
+
+    GtkHistoryWidget class >> new [
+	<category: 'instance creation'>
+
+	^ super new
+		initialize;
+		yourself
+    ]
+
+    initialize [
+	<category: 'initialization'>
+
+	self mainWidget: self buildListView
+    ]
+
+    browser: aBrowser [
+	<category: 'accessing'>
+
+	browser := aBrowser
+    ]
+
+    buildListView [
+	<category: 'user interface'>
+
+        widget := (GTK.GtkTreeView createListWithModel: {{GtkColumnTextType title: 'History'}})
+                            connectSignal: 'button-press-event' to: self selector: #'onPress:event:';
+                            yourself.
+        widget getSelection setMode: GTK.Gtk gtkSelectionBrowse.
+        (model := GtkListModel on: widget getModel)
+                                        contentsBlock: [ :each | {each name displayString} ].
+        ^ GTK.GtkScrolledWindow withChild: widget
+    ]
+
+    refresh [
+	<category: 'user interface'>
+
+	model
+	    item: GtkLauncher history;
+	    refresh
+    ]
+
+    update: anObject [
+	<category: 'user interface'>
+
+	self refresh
+    ]
+
+    onPress: aGtkWidget event: aGdkEvent [
+        <category: 'button event'>
+
+        | menu aGdkButtonEvent |
+        aGdkButtonEvent := aGdkEvent castTo: GTK.GdkEventButton type.
+        aGdkButtonEvent button value = 3 ifFalse: [ ^ false ].
+        menu := GTK.GtkMenu new.
+        menu appendMenuItems: {{'Inspect a class'. self. #inspectClass}.
+            {'Go to a class'. self. #goClass}.
+            {'Browse a class in a tab'. self. #browseTabbedClass}.
+            {'Browse a class'. self. #browseClass}}.
+        menu attachToWidget: widget detacher: nil.
+        menu popup: nil parentMenuItem: nil func: nil data: nil button: 3 activateTime: aGdkButtonEvent time value.
+        menu showAll.
+        ^ true
+    ]
+
+    targetObject [
+        <category: 'evaluation'>
+
+        ^ widget selection
+    ]
+
+    updateBrowser: aBrowser [
+	<category: 'event'>
+
+        aBrowser 
+	    selectANamespace: self targetObject environment;
+	    selectAClass: self targetObject
+    ]
+    
+    inspectIt: anObject [
+        <category: 'smalltalk event'>
+
+        GtkInspector openOn: anObject
+    ]
+
+    inspectClass [
+	<category: 'event'>
+
+	widget hasSelectedItem ifFalse: [ ^ self ].
+	InspectItCommand on: self
+    ]
+
+    goClass [
+	<category: 'event'>
+
+	widget hasSelectedItem ifFalse: [ ^ self ].
+
+        "TODO: add a #state: method to remove dependency on #currentWidgetOfBrowser"
+	self updateBrowser: browser currentWidgetOfBrowser
+    ]
+
+    browseTabbedClass [
+	<category: 'event'>
+
+        "TODO: should reuse OpenTabbedBrowserCommand by giving a state to
+         GtkHistoryWidget."
+	widget hasSelectedItem ifFalse: [ ^ self ].
+        self updateBrowser: GtkLauncher uniqueInstance classBrowser
+    ]
+
+    browseClass [
+	<category: 'event'>
+
+        "TODO: should reuse OpenWindowedBrowserCommand by giving a state to
+         GtkHistoryWidget."
+	widget hasSelectedItem ifFalse: [ ^ self ].
+        self updateBrowser: GtkClassBrowser open
+    ]
+]
+

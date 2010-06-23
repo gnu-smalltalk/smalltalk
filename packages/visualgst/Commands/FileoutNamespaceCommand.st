@@ -17,7 +17,7 @@ NamespaceCommand subclass: FileoutNamespaceCommand [
     fileoutNamespace: aDirectory [
 
         | namespace |
-        namespace := target selectedNamespace.
+        namespace := target state namespace.
         self fileoutNamespace: namespace on: (File name: aDirectory) / namespace name
     ]
 

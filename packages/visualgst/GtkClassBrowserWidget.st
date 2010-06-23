@@ -156,6 +156,16 @@ GtkConcreteWidget subclass: GtkClassBrowserWidget [
         ^ iMethodWidget mainWidget
     ]
 
+    buildBrowserPaned [
+        <category: 'user interface'>
+
+	^ GTK.GtkVPaned new
+	    pack1: self buildBrowser resize: true shrink: false;
+	    pack2: self buildCodeView resize: true shrink: true ;
+	    showAll;
+	    yourself
+    ]
+
     initializeHistory [
 	<category: 'initialize-release'>
 
@@ -168,25 +178,28 @@ GtkConcreteWidget subclass: GtkClassBrowserWidget [
     initialize [
 	<category: 'initialize-release'>
 
-	| vpaned |
 	state := NamespaceState on: self with: Smalltalk.
 	classHierarchyUpdate := false.
 	checkCode := true.
-	vpaned := GTK.GtkVPaned new.
 
-	self mainWidget: vpaned.
-	self initializeHistory.
- 
-	vpaned
-	    pack1: self buildBrowser resize: true shrink: false;
-	    pack2: self buildCodeView resize: true shrink: true ;
-	    showAll
+	self 
+	    initializeHistory;
+	    mainWidget: self buildBrowserPaned
     ]
 
     postInitialize [
 	<category: 'initialize'>
 
 	codeWidget postInitialize
+    ]
+
+    updateHistory: aClass [
+	<category: 'history'>
+
+        historyUpdate ifTrue: [
+                        GtkLauncher addHistory: aClass.
+                        history push: aClass ]
+
     ]
 
     grabFocus [
@@ -224,7 +237,7 @@ GtkConcreteWidget subclass: GtkClassBrowserWidget [
 	    | namespace |
 	    namespaceWidget hasSelectedNamespace ifFalse: [ ^ self ].
 	    namespace := namespaceWidget selectedNamespace.
-	    classWidget namespace: namespace category: namespaceWidget selectedCategory.
+	    classWidget namespace: namespace category: namespaceWidget selectedCategory fullname.
 
 	    classHierarchyUpdate ifFalse: [ classHierarchyWidget emptyModel ].
 	    iCategoryWidget clear.
@@ -248,7 +261,7 @@ GtkConcreteWidget subclass: GtkClassBrowserWidget [
 	    iCategoryWidget unselectAll.
 	    cCategoryWidget unselectAll.
 
-	    historyUpdate ifTrue: [ history push: aClass ].
+	    self updateHistory: aClass.
 
 	    iMethodWidget emptyModel.
 	    cMethodWidget emptyModel.
@@ -264,7 +277,10 @@ GtkConcreteWidget subclass: GtkClassBrowserWidget [
 	    classHierarchyWidget hasSelectedClass ifFalse: [ ^ self ].
 	    classHierarchyUpdate := true.
 	    aClass := classHierarchyWidget selectedClass.
-	    namespaceWidget selectANamespace: aClass environment.
+	    namespaceWidget selectedNamespace ~= classHierarchyWidget selectedClass environment
+						    ifTrue: [ namespaceWidget selectANamespace: aClass environment ]
+						    ifFalse: [ namespaceWidget selectedCategory ~= aClass classCategory 
+											ifTrue: [ namespaceWidget selectANamespace: aClass environment ] ].
 	    classWidget selectAClass: aClass class.
 	    classHierarchyUpdate := false ]
     ]
@@ -299,7 +315,7 @@ GtkConcreteWidget subclass: GtkClassBrowserWidget [
 	    iMethodWidget hasSelectedMethod ifFalse: [ ^ self ].
 	    method := iMethodWidget selectedMethod.
 	    codeWidget sourceCode: iMethodWidget sourceCode.
-	    state := MethodState on: self with: classWidget selectedClass -> method ]
+	    state := MethodState on: self with: method ]
     ]
 
     onClassSideMethodChanged [
@@ -310,7 +326,7 @@ GtkConcreteWidget subclass: GtkClassBrowserWidget [
 	    cMethodWidget hasSelectedMethod ifFalse: [ ^ self ].
 	    method := cMethodWidget selectedMethod.
 	    codeWidget sourceCode: cMethodWidget sourceCode.
-	    state := MethodState on: self with: classWidget selectedClass class -> method ]
+	    state := MethodState on: self with: method ]
     ]
 
     undoStack [
@@ -322,9 +338,7 @@ GtkConcreteWidget subclass: GtkClassBrowserWidget [
     cancel [
 	<category: 'edit events'>
 
-	codeWidget hasFocus 
-	    ifTrue: [ codeWidget cancel ]
-	    ifFalse: [ self undoStack undo ]
+	codeWidget hasFocus ifTrue: [ ^codeWidget cancel ]
     ]
 
     undo [
@@ -346,35 +360,7 @@ GtkConcreteWidget subclass: GtkClassBrowserWidget [
     acceptIt [
 	<category: 'smalltalk events'>
 
-        self hasSelectedCategory ifFalse: [ ^ self acceptClassDefinition ].
-	self newMethod
-    ]
-    
-    acceptClassDefinitionOn: aNamespace [
-	<category: 'class event'>
-
-	codeWidget codeSaved.
-        Namespace current: aNamespace.
-        (ReadStream on: codeWidget sourceCode) fileIn.
-	(STInST.GSTFileInParser parseSmalltalkStream: (ReadStream on: codeWidget sourceCode) with: (STInST.STClassLoader new)) do: [ :each |
-	    each isClass ifTrue: [
-		self 
-		    selectAClass: (aNamespace at: each name) ] ]
-    ]
-
-    acceptClassDefinition [
-	<category: 'class event'>
-
-	^ self 
-	    acceptClassDefinitionOn: (namespaceWidget hasSelectedNamespace
-					ifTrue: [ namespaceWidget selectedNamespace ]
-					ifFalse: [ Smalltalk ]).
-    ]
-
-    acceptClassDefinitionForState: aState [
-        <category: 'class event'>
-
-        ^ self acceptClassDefinitionOn: aState namespace 
+        AcceptItCommand on: self
     ]
 
     fileoutNamespace [
@@ -383,18 +369,6 @@ GtkConcreteWidget subclass: GtkClassBrowserWidget [
 	FileoutNamespaceCommand on: self
     ]
 
-    hasSelectedNamespace [
-	<category: 'testing'>
-
-	^ namespaceWidget hasSelectedNamespace
-    ]
-
-    selectedNamespace [
-	<category: 'testing'>
-
-	^ namespaceWidget selectedNamespace
-    ]
- 
     newNamespace [
 	<category: 'namespace events'>
 
@@ -437,18 +411,6 @@ GtkConcreteWidget subclass: GtkClassBrowserWidget [
 	^ list
     ]
 
-    hasSelectedClass [
-	<category: 'accessing'>
-
-	^ classWidget hasSelectedClass
-    ]
-
-    selectedClass [
-	<category: 'accessing'>
-
-	^ classWidget selectedClass
-    ]
-
     newClass [
 	<category: 'class events'>
 	
@@ -473,17 +435,6 @@ GtkConcreteWidget subclass: GtkClassBrowserWidget [
 	InspectClassCommand on: self
     ]
 
-    classOrMetaSelected [
-	<category: 'class accessing'>
-
-	| class |
-	classWidget hasSelectedClass ifFalse: [ ^ self ].
-	class := classWidget selectedClass.
-	^ classAndInstanceSide getCurrentPage = 0
-            ifTrue: [ class ]
-            ifFalse: [ class class ]	
-    ]
-
     viewedCategoryWidget [
          <category: 'category events'>
 
@@ -502,19 +453,6 @@ GtkConcreteWidget subclass: GtkClassBrowserWidget [
         <category: 'category events'>
 
 	self viewedCategoryWidget fileoutCategory
-    ]
-
-    hasSelectedCategory [
-	<category: 'testing'>
-	
-	^classWidget hasSelectedClass and: [
-            self viewedCategoryWidget hasSelectedCategory ]
-    ]
-
-    selectedCategory [
-	<category: 'accessing'>
-
-	^ self viewedCategoryWidget selectedCategory
     ]
 
     newCategory [
@@ -537,35 +475,22 @@ GtkConcreteWidget subclass: GtkClassBrowserWidget [
             ifFalse: [ cMethodWidget ]
    ]
 
-    hasSelectedMethod [
-	<category: 'testing'>
-
-	^classWidget hasSelectedClass and: [
-            self viewedMethodWidget hasSelectedMethod ]
-    ]
-
-    selectedMethod [
-	<category: 'accessing'>
-
-	^ self viewedMethodWidget selectedMethod
-    ]
-
-    selectedMethodSymbol [
-	<category: 'accessing'>
-
-	^ self viewedMethodWidget selectedMethodSymbol
-    ]
-
     sourceCode [
 	<category: 'accessing'>
 
 	^ codeWidget sourceCode
     ]
 
+    compileError: aString line: line [
+        <category: 'method events'>
+
+        codeWidget compileError: aString line: line
+    ]
+
     newMethod [
 	<category: 'method events'>
 
-	AddMethodCommand on: self.
+	AcceptItCommand on: self.
     ]
 
     deleteMethod [
@@ -646,7 +571,7 @@ GtkConcreteWidget subclass: GtkClassBrowserWidget [
     targetObject [
         <category: 'target'>
 
-        ^self hasSelectedClass ifTrue: [self selectedClass] ifFalse: [nil]
+        ^state classOrMeta
     ]
 
     doIt: object [
@@ -753,6 +678,12 @@ GtkConcreteWidget subclass: GtkClassBrowserWidget [
 	^ codeWidget hasSelection
     ]
  
+    selectedMethodSymbol [
+        <category: 'text editing'>
+
+        ^codeWidget selectedMethodSymbol
+    ]
+
     selectedText [
 	<category: 'text editing'>
 
@@ -765,52 +696,46 @@ GtkConcreteWidget subclass: GtkClassBrowserWidget [
 	checkCode := false
     ]
 
-    checkCodeWidget [
-        <category: 'text editing'>
-
-	self checkCodeWidgetAndUpdate: []
-    ]
-
     checkCodeWidgetAndUpdate: aBlock [
         <category: 'text editing'>
 
-        checkCode ifFalse: [ checkCode := true. aBlock value. ^ self ].
-        self hasChanged ifFalse: [ codeWidget clearUndo. aBlock value. ^ self ].
-        self saveCodeOnSave: [ self saveCode. aBlock value ] onCancel: [ aBlock value ].
-        codeWidget clearUndo.
+        self saveCodeOr: [ aBlock value. self clearUndo ]
     ]
 
-    saveCodeOnSave: saveEvent onCancel: cancelEvent [
+    saveCodeOr: dropBlock [
         <category: 'saving'>
 
         | dialog |
+        checkCode ifFalse: [ checkCode := true. dropBlock value. ^ self ].
+        self hasChanged ifFalse: [ dropBlock value. ^ self ].
         dialog := GTK.GtkMessageDialog
                                 new: self parentWindow
                                 flags: GTK.Gtk gtkDialogDestroyWithParent
                                 type: GTK.Gtk gtkMessageWarning
                                 buttons: GTK.Gtk gtkButtonsNone
-                                message: 'Save the code before exiting?'
-                                tip: 'If you do not save, your changes to %1 will be lost...' % {self stateString}.
+                                message: 'Accept changes before exiting?'
+                                tip: 'If you do not accept them, your changes to %1 will be lost...' % {self state}.
 
         dialog
-            addButton: 'Cancel' responseId: 0;
-            addButton: 'Save' responseId: 1;
+            addButton: 'Drop' responseId: 0;
+            addButton: 'Cancel' responseId: 2;
+            addButton: 'Accept' responseId: 1;
             showModalOnAnswer: [ :dlg :res |
-                res = 0 ifTrue: cancelEvent.
-                res = 1 ifTrue: saveEvent.
+                res = 1 ifTrue: [ self acceptIt ].
+                res <= 1 ifTrue: dropBlock.
                 dlg destroy ].
     ]
 
-    stateString [
+    state [
 	<category: 'accessing'>
 
-	^ state displayString
+	^ state
     ]
 
-    saveCode [
-	<category: 'text saving'>
+    clearUndo [
+	<category: 'code saved'>
 
-	state saveSource
+	codeWidget clearUndo
     ]
 
     codeSaved [
@@ -822,7 +747,7 @@ GtkConcreteWidget subclass: GtkClassBrowserWidget [
     close [
 	<category: 'user interface'>
 
-	self checkCodeWidget
+	self checkCodeWidgetAndUpdate: []
     ]
 
     hasChanged [

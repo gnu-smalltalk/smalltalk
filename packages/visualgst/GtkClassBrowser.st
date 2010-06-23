@@ -59,10 +59,47 @@ GtkBrowsingTool subclass: GtkClassBrowser [
 
         browserWidget selectAll
     ]
+
     gtkInspector [
 	<category: 'events'>
 	
 	GtkInspector openOn: self
+    ]
+
+    state [
+        <category: 'command protocols'>
+
+        ^browserWidget state
+    ]
+
+    selectedText [
+        <category: 'command protocols'>
+
+        ^browserWidget selectedText
+    ]
+
+    selectedMethodSymbol [
+        <category: 'tools events'>
+
+        ^browserWidget selectedMethodSymbol
+    ]
+
+    hasSelection [
+        <category: 'command protocols'>
+
+        ^browserWidget hasSelection
+    ]
+
+    sourceCodeWidgetHasFocus [
+        <category: 'command protocols'>
+
+        ^browserWidget sourceCodeWidgetHasFocus
+    ]
+
+    browserHasFocus [
+        <category: 'command protocols'>
+
+        ^true
     ]
 
     fileoutNamespace [
@@ -143,12 +180,6 @@ GtkBrowsingTool subclass: GtkClassBrowser [
 	browserWidget fileoutCategory
     ]
 
-    newMethod [
-	<category: 'method events'>
-
-	browserWidget newMethod
-    ]
-
     deleteMethod [
 	<category: 'method events'>
 
@@ -194,7 +225,7 @@ GtkBrowsingTool subclass: GtkClassBrowser [
     createNamespaceMenus [
 	<category: 'user interface'>
 
-	^ self createNewMenuEntry: {GTK.GtkMenuItem menuItem: 'Add a namespace' connectTo: self selector: #newNamespace.
+	^{GTK.GtkMenuItem menuItem: 'Add a namespace' connectTo: self selector: #newNamespace.
 	    GTK.GtkMenuItem menuItem: 'Rename a namespace' connectTo: self selector: #renameNamespace.
 	    GTK.GtkMenuItem menuItem: 'Delete a namespace' connectTo: self selector: #deleteNamespace.
 	    GTK.GtkMenuItem new.
@@ -206,7 +237,7 @@ GtkBrowsingTool subclass: GtkClassBrowser [
     createClassMenus [
 	<category: 'user interface'>
 
-	^ self createNewMenuEntry: {GTK.GtkMenuItem menuItem: 'Add a class' connectTo: self selector: #newClass.
+	^{GTK.GtkMenuItem menuItem: 'Add a class' connectTo: self selector: #newClass.
 	    GTK.GtkMenuItem menuItem: 'Rename a class' connectTo: self selector: #renameClass.
 	    GTK.GtkMenuItem menuItem: 'Delete a class' connectTo: self selector: #deleteClass.
 	    GTK.GtkMenuItem new.
@@ -218,7 +249,7 @@ GtkBrowsingTool subclass: GtkClassBrowser [
     createCategoryMenus [
 	<category: 'user interface'>
 
-	^ self createNewMenuEntry: {GTK.GtkMenuItem menuItem: 'Add a category' connectTo: self selector: #newCategory.
+	^{GTK.GtkMenuItem menuItem: 'Add a category' connectTo: self selector: #newCategory.
             GTK.GtkMenuItem menuItem: 'Rename a category' connectTo: self selector: #renameCategory.
 	    GTK.GtkMenuItem new.
             GTK.GtkMenuItem menuItem: 'File out a category' connectTo: self selector: #fileoutCategory}
@@ -227,8 +258,7 @@ GtkBrowsingTool subclass: GtkClassBrowser [
     createMethodMenus [
 	<category: 'user interface'>
 
-	^ self createNewMenuEntry: {GTK.GtkMenuItem menuItem: 'Add a method' connectTo: self selector: #newMethod.
-	    GTK.GtkMenuItem menuItem: 'Delete a method' connectTo: self selector: #deleteMethod.
+	^{GTK.GtkMenuItem menuItem: 'Delete a method' connectTo: self selector: #deleteMethod.
 	    GTK.GtkMenuItem new.
 	    GTK.GtkMenuItem menuItem: 'Inspect a method' connectTo: self selector: #inspectMethod.
 	    GTK.GtkMenuItem new.
@@ -276,39 +306,15 @@ GtkBrowsingTool subclass: GtkClassBrowser [
     close [
 	<category: 'file events'>
 
-	browserWidget hasChanged ifFalse: [ ^ super close ].
 	browserWidget doNotCheckCode.
-	self saveCodeOnClose: [ super close ] onSave: [ browserWidget saveCode. super close ]
+	self saveCodeOr: [ super close ]
     ]
 
-    delete: aGtkWidget event: aGdkEvent [
+    onDelete: aGtkWidget event: aGdkEvent [
 	<category: 'window events'>
 
-	browserWidget hasChanged ifFalse: [ ^ window hideAll ].
-	self saveCodeOnClose: [ window hideAll ] onSave: [ browserWidget saveCode. window hideAll ].
+	self saveCodeOr: [ window hideAll ].
 	^ true
-    ]
-
-    saveCodeOnClose: closeEvent onSave: saveEvent [
-	<category: 'saving'>
-
-        | dialog |
-        dialog := GTK.GtkMessageDialog
-                                new: window
-                                flags: GTK.Gtk gtkDialogDestroyWithParent
-                                type: GTK.Gtk gtkMessageWarning
-                                buttons: GTK.Gtk gtkButtonsNone
-                                message: 'Save the code before exiting?'
-                                tip: 'If you do not save, your changes to %1 will be lost...' % {browserWidget stateString}.
-
-        dialog
-            addButton: 'Close without saving' responseId: 0;
-            addButton: 'Cancel' responseId: 2;
-            addButton: 'Save' responseId: 1;
-            showModalOnAnswer: [ :dlg :res |
-                res = 0 ifTrue: closeEvent.
-                res = 1 ifTrue: saveEvent.
-                dlg destroy ].
     ]
 
     selectANamespace: aNamespace [
@@ -321,6 +327,18 @@ GtkBrowsingTool subclass: GtkClassBrowser [
 	<category: 'selection'>
 
 	browserWidget selectAClass: aClass
+    ]
+
+    find [
+	<category: 'user interface'>
+
+	browserWidget showFind
+    ]
+
+    replace [
+	<category: 'user interface'>
+
+	browserWidget showReplace
     ]
 ]
 

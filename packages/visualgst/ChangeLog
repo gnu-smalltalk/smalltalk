@@ -1,3 +1,8 @@
+2010-06-23  Paolo Bonzini  <bonzini@gnu.org>
+            Gwenael Casaccio  <mrgwen@gmail.com>
+
+	* many many files: Sync with upstream.
+	
 2010-06-14  Gwenael Casaccio  <mrgwen@gmail.com>
 
 	* Category/ClassCategory.st, CategoryState.st,

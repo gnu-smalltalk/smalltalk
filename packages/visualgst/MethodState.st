@@ -3,25 +3,37 @@ BrowserState subclass: MethodState [
     printOn: aStream [
 	<category: 'printing'>
 
-	aStream print: state value
+	aStream print: state
     ]
 
     namespace [
         <category: 'accessing'>
 
-        ^ state key environment
+        ^ self classOrMeta environment
     ]
 
     classOrMeta [
         <category: 'accessing'>
 
-        ^ state key
+        ^ state methodClass
+    ]
+
+    selector [
+        <category: 'accessing'>
+
+        ^ state selector
+    ]
+
+    method [
+        <category: 'accessing'>
+
+        ^ state method
     ]
 
     category [
         <category: 'accessing'>
 
-        ^ state value methodCategory
+        ^ state methodCategory
     ]
 
     selectedCategory [
@@ -30,33 +42,28 @@ BrowserState subclass: MethodState [
         ^ self category
     ]
 
-    hasSelectedClass [
+    hasSelectedMethod [
         <category: 'testing'>
 
         ^ true
     ]
 
-    classOrMetaSelected [
-        <category: 'accessing'>
+    hasSelectedCategory [
+        <category: 'testing'>
 
-        ^ self classOrMeta
+        ^ true
     ]
 
-    sourceCode [
-        <category: 'accessing'>
+    hasSelectedNamespace [
+        <category: 'testing'>
 
-        ^ browser sourceCode
+        ^ true
     ]
 
-    saveSource [
-	<category: 'events'>
+    hasSelectedClass [
+        <category: 'testing'>
 
-	AddMethodCommand on: self.
-    ]
-
-    codeSaved [
-
-	browser codeSaved
+        ^ true
     ]
 ]
 

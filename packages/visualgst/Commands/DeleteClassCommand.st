@@ -3,6 +3,6 @@ ClassCommand subclass: DeleteClassCommand [
     execute [
 	<category: 'command'>
 
-        (DeleteClassUndoCommand delete: target selectedClass) push
+        (DeleteClassUndoCommand delete: target state classOrMeta) push
     ]
 ]

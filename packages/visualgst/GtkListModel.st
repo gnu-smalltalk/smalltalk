@@ -47,7 +47,7 @@ Object subclass: GtkListModel [
     ]
 
     append: anItem [
-	<category:' model'>
+	<category: 'model'>
 
 	model appendItem: ((self contentsBlock value: anItem) copyWith: anItem)
     ]

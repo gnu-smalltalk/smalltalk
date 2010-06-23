@@ -20,11 +20,43 @@ Object extend [
     ]
 ]
 
+CompiledMethod extend [
+    inspectorView [
+        <category: '*VisualGST'>
+
+        ^ VisualGST.GtkCompiledMethodInspectorView
+    ]
+]
+
+CompiledBlock extend [
+    inspectorView [
+        <category: '*VisualGST'>
+
+        ^ VisualGST.GtkCompiledBlockInspectorView
+    ]
+]
+
 SequenceableCollection extend [
     inspectorView [
         <category: '*VisualGST'>
 
         ^ VisualGST.GtkSequenceableCollectionInspectorView
+    ]
+]
+
+Set extend [
+    inspectorView [
+        <category: '*VisualGST'>
+
+        ^ VisualGST.GtkSetInspectorView
+    ]
+]
+
+Dictionary extend [
+    inspectorView [
+        <category: '*VisualGST'>
+
+        ^ VisualGST.GtkDictionaryInspectorView
     ]
 ]
 
@@ -406,7 +438,7 @@ GTK.GtkTreeView class extend [
         | model |
         model := OrderedCollection new.
         anArray do: [ :each | model addAll: (each collect: [ :elem | elem kind ]) ].
-        model add: VisualGST.GtkColumnOOPType kind.
+        model addLast: VisualGST.GtkColumnOOPType kind.
         ^ self newWithModel: (aGtkStoreClass new: model size varargs: model asArray)
     ]
 
@@ -426,9 +458,9 @@ GTK.GtkTreeView class extend [
         <category: '*VisualGST'>
 
         | colView i render |
+        i := 0.
         anArray do: [ :each |
             colView := GtkTreeViewColumn new.
-            i := 0.
             each do: [ :column |
             column isVisible ifTrue: [
                 colView

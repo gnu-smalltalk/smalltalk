@@ -98,7 +98,7 @@ GtkConcreteWidget subclass: GtkMethodWidget [
 	<category: 'button event'>
 
 	self hasSelectedMethod ifFalse: [^false].
-	^ (self classOrMetaSelected inheritsFrom: TestCase)
+	^ (self classOrMeta inheritsFrom: TestCase)
 	    and: [ self selectedMethodSymbol startsWith: 'test' ]
     ]
 
@@ -132,7 +132,19 @@ GtkConcreteWidget subclass: GtkMethodWidget [
 	    connectSignal: 'changed' to: anObject selector: aSelector userData: nil
     ]
 
-    classOrMetaSelected [
+    browserHasFocus [
+	<category: 'accessing'>
+
+	^ true
+    ]
+
+    sourceCodeWidgetHasFocus [
+	<category: 'accessing'>
+
+	^ false
+    ]
+
+    classOrMeta [
 	<category: 'accessing'>
 
 	^ class
@@ -175,7 +187,14 @@ GtkConcreteWidget subclass: GtkMethodWidget [
 	<category: 'accessing'>
 
 	self hasSelectedMethod ifFalse: [ self error: 'Nothing is selected' ].
-	^ (self classOrMetaSelected compiledMethodAt: self selectedMethodSymbol) methodRecompilationSourceString
+	^ (self classOrMeta compiledMethodAt: self selectedMethodSymbol) methodRecompilationSourceString
+    ]
+
+    state [
+        <category: 'testing'>
+        methodTree hasSelectedItem ifTrue: [
+            ^MethodState with: self selectedMethod ].
+        ^BrowserState new
     ]
 
     deleteMethod [

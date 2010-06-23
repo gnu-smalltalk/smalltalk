@@ -3,6 +3,8 @@ AbstractNamespace class extend [
     Categories := nil.
 
     categories [
+        <category: '*VisualGST'>
+
         ^ Categories ifNil: [ Categories := WeakKeyIdentityDictionary new ]
     ]
 

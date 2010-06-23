@@ -7,6 +7,18 @@ BrowserState subclass: ClassState [
 	    print: self classOrMeta
     ]
 
+    hasSelectedNamespace [
+        <category: 'testing'>
+
+        ^ true
+    ]
+
+    hasSelectedClass [
+        <category: 'testing'>
+
+        ^ true
+    ]
+
     namespace [
 	<category: 'accessing'>
 
@@ -17,12 +29,6 @@ BrowserState subclass: ClassState [
 	<category: 'accessing'>
 
 	^ state
-    ]
-
-    saveSource [
-	<category: 'events'>
-
-	browser acceptClassDefinitionForState: self
     ]
 ]
 

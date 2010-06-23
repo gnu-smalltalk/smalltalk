@@ -31,7 +31,7 @@ Object subclass: UndoStack [
 	undoStack removeFirst
     ]
 
-    lasUndoCommand [
+    lastUndoCommand [
 	<category: 'stack'>
 
 	^ self hasUndo 

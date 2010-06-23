@@ -3,7 +3,7 @@ Command subclass: NamespaceCommand [
     valid [
 	<category: 'command'>
 
-	^target hasSelectedNamespace
+	^target state hasSelectedNamespace
     ]
 ]
 
