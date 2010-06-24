@@ -69,6 +69,7 @@ bin_SCRIPTS = gst-config
 DISTCLEANFILES = termbold termnorm pkgrules.tmp
 CLEANFILES = gst.im $(nodist_lisp_LISP) $(nodist_lispstart_LISP)
 
+lispdir = ${datadir}/emacs/site-lisp
 lispstartdir = $(lispdir)/site-start.d
 
 if WITH_EMACS
