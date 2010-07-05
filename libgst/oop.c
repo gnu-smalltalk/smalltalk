@@ -357,6 +357,8 @@ void _gst_update_object_memory_oop (OOP oop)
 
   /* Ensure the statistics are coherent.  */
   for (;;) {
+    OOP floatOOP;
+
     numScavenges = _gst_mem.numScavenges;
     data = (gst_object_memory) OOP_TO_OBJ (oop);
     data->bytesPerOOP = FROM_INT (sizeof (PTR));
@@ -390,8 +392,9 @@ void _gst_update_object_memory_oop (OOP oop)
     /* Every allocation of a FloatD might cause a garbage
        collection! */
 #define SET_FIELD(x) \
-	data->x = floatd_new (_gst_mem.x); \
-	if (data != (gst_object_memory) OOP_TO_OBJ (oop)) continue;
+	floatOOP = floatd_new (_gst_mem.x); \
+	if (data != (gst_object_memory) OOP_TO_OBJ (oop)) continue; \
+	data->x = floatOOP;
 
     SET_FIELD (timeBetweenScavenges);
     SET_FIELD (timeBetweenGlobalGCs);
@@ -2240,7 +2243,7 @@ _gst_mark_an_oop_internal (OOP oop)
       {
         printf ("Error! Free OOP %p is being marked!\n", oop);
         abort ();
-        break;
+        return;
       }
 #endif
 

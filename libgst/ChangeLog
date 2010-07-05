@@ -1,3 +1,8 @@
+2010-07-04  Paolo Bonzini <bonzini@gnu.org>
+
+	* libgst/oop.c: Fix GC_DEBUGGING compilation.  Fix GC bug in
+	"ObjectMemory current".
+
 2010-06-13  Paolo Bonzini <bonzini@gnu.org>
 
 	* libgst/callin.c: Use _gst_copy_oop_range and _gst_mark_oop_range.
