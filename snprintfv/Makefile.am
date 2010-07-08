@@ -45,7 +45,7 @@ MAINTAINERCLEANFILES	= Makefile.in aclocal.m4 configure config.h.in \
 nodist_noinst_HEADERS   = config.h
 
 aclocaldir              = $(datadir)/aclocal
-dist_aclocal_DATA       = snprintfv.m4
+dist_noinst_DATA        = snprintfv.m4
 
 dist_noinst_SCRIPTS     = gendoc.awk genproto commit
 
