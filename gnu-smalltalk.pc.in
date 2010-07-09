@@ -2,7 +2,9 @@ prefix = @prefix@
 exec_prefix = @exec_prefix@
 libdir = @libdir@
 pkglibdir = ${libdir}/@PACKAGE@
-datadir = ${datadir}/@PACKAGE@
+datarootdir = @datarootdir@
+datadir = @datadir@
+pkgdatadir = ${datadir}/@PACKAGE@
 moduledir = @moduledir@
 includedir = @includedir@
 

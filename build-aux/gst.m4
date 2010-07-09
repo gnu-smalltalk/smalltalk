@@ -30,7 +30,7 @@ gst_prefix="$withval", gst_prefix="")
     export PKG_CONFIG_PATH
     PKG_CHECK_MODULES(GST, [gnu-smalltalk[]m4_if([$1],[],[],[ >= $1])],
 	[gstlibdir=`$PKG_CONFIG --variable=libdir gnu-smalltalk`
-	 gstdatadir=`$PKG_CONFIG --variable=datadir gnu-smalltalk`
+	 gstdatadir=`$PKG_CONFIG --variable=pkgdatadir gnu-smalltalk`
 	 gstmoduledir=`$PKG_CONFIG --variable=moduledir gnu-smalltalk`
          gstmoduleexecdir='${gstmoduledir}'
 	 have_gst=yes],
