@@ -223,48 +223,26 @@ avl_first(register avl_node_t *node, register avl_traverse_t *t)
     node = node->avl_left;
 
   t->node = node;
-  t->parent = NULL;
   return t->node;
 }
 
 avl_node_t *
 avl_next(avl_traverse_t *t)
 {
-  avl_node_t *node = t->node;
-  avl_node_t *parent = t->parent;
-  int rightchild;
+  struct avl_node_t *p = t->node;
+  struct avl_node_t *q = p->avl_right;
 
-  /* If we got the previous node by ascending to a parent node, and it
-     has a right child, visit it.  Since we are in fact visiting its
-     subtree, descend to the left. */
-  if (parent && parent->avl_right)
+  if (q == NULL)
     {
-      /* Visit the right child */
-      node = parent->avl_right;
-      
-      /* Descend to the left */
-      while (node->avl_left)
-	node = node->avl_left;
-      
-      t->node = node;
-      t->parent = node->avl_right && !node->avl_left ? node : NULL;
-      return t->node;
+      while ((q = p->avl_parent) != NULL && p != q->avl_left)
+        p = q;
+    }
+  else
+    {
+      while (q->avl_left != NULL)
+        q = q->avl_left;
     }
 
-  /* Find a parent that has not been visited yet (i.e. one that we
-     don't reach from the right) */
-  do
-    {
-      parent = node->avl_parent;
-      if (!parent)
-	return (t->node = t->parent = NULL);
-      
-      rightchild = parent->avl_right == node;
-      node = parent;
-    }
-  while (rightchild);
-  
-  t->node = node;
-  t->parent = parent;
+  t->node = q;
   return t->node;
 }

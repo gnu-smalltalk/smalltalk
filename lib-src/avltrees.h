@@ -95,7 +95,7 @@ avl_node_t;
 
 typedef struct avl_traverse_t
 {
-  struct avl_node_t *node, *parent;
+  struct avl_node_t *node;
 }
 avl_traverse_t;
 

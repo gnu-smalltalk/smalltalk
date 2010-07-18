@@ -332,48 +332,26 @@ rb_first (register rb_node_t * node, register rb_traverse_t * t)
     node = node->rb_left;
 
   t->node = node;
-  t->parent = NULL;
   return t->node;
 }
 
 rb_node_t *
 rb_next (rb_traverse_t * t)
 {
-  rb_node_t *node = t->node;
-  rb_node_t *parent = t->parent;
-  int rightchild;
+  struct rb_node_t *p = t->node;
+  struct rb_node_t *q = p->rb_right;
 
-  /* If we got the previous node by ascending to a parent node, and it
-     has a right child, visit it.  Since we are in fact visiting its
-     subtree, descend to the left. */
-  if (parent && parent->rb_right)
+  if (q == NULL)
     {
-      /* Visit the right child */
-      node = parent->rb_right;
-
-      /* Descend to the left */
-      while (node->rb_left)
-	node = node->rb_left;
-
-      t->node = node;
-      t->parent = node->rb_right && !node->rb_left ? node : NULL;
-      return t->node;
+      while ((q = p->rb_parent) != NULL && p != q->rb_left) 
+        p = q;
     }
-
-  /* Find a parent that has not been visited yet (i.e. one that we
-     don't reach from the right) */
-  do
+  else
     {
-      parent = node->rb_parent;
-      if (!parent)
-	return (t->node = t->parent = NULL);
-
-      rightchild = parent->rb_right == node;
-      node = parent;
-    }
-  while (rightchild);
-
-  t->node = node;
-  t->parent = parent;
+      while (q->rb_left != NULL) 
+        q = q->rb_left;
+    } 
+  
+  t->node = q;
   return t->node;
 }

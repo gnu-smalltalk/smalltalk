@@ -1,3 +1,9 @@
+2010-07-18  Paolo Bonzini  <bonzini@gnu.org>
+
+	* lib-src/avltrees.c: Rewrite avl_next.  Fixes case where root has
+	no left child, reported by Ildar Mulyukov.
+	* lib-src/rbtrees.c: Rewrite rb_next.  Likewise.
+
 2010-05-20  Paolo Bonzini  <bonzini@gnu.org>
 
 	* lib-src/mkdtemp.c: Fix typo.  Reported by Rick Flower.

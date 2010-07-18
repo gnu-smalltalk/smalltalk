@@ -98,7 +98,7 @@ rb_node_t;
 
 typedef struct rb_traverse_t
 {
-  struct rb_node_t *node, *parent;
+  struct rb_node_t *node;
 }
 rb_traverse_t;
 
