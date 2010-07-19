@@ -42,6 +42,11 @@ Copyright (c) Kazuki Yasumatsu, 1995. All rights reserved.
 '>
     <category: 'NetClients-NNTP'>
 
+    NNTPClient class >> defaultPortNumber [
+	<category: 'constants'>
+	^119
+    ]
+
     NNTPClient class >> exampleHelpOn: host [
 	"self exampleHelpOn: 'localhost'."
 
@@ -386,11 +391,6 @@ NetProtocolInterpreter subclass: NNTPProtocolInterpreter [
 Copyright (c) Kazuki Yasumatsu, 1995. All rights reserved.
 '>
     <category: 'NetClients-NNTP'>
-
-    NNTPProtocolInterpreter class >> defaultPortNumber [
-	<category: 'api'>
-	^119
-    ]
 
     connect [
 	<category: 'connection'>

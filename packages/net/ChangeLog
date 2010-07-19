@@ -1,3 +1,13 @@
+2010-07-19  Paolo Bonzini  <bonzini@gnu.org>
+
+	* Base.st: Move #defaultPortNumber to client class side.
+	* FTP.st: Move #defaultPortNumber to client class side.
+	* HTTP.st: Move #defaultPortNumber to client class side.
+	* IMAP.st: Move #defaultPortNumber to client class side.
+	* NNTP.st: Move #defaultPortNumber to client class side.
+	* POP.st: Move #defaultPortNumber to client class side.
+	* SMTP.st: Move #defaultPortNumber to client class side.
+
 2010-02-19  Paolo Bonzini  <bonzini@gnu.org>
 
 	* NetServer.st: Do not use instance-based exceptions.

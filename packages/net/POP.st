@@ -80,6 +80,11 @@ Copyright (c) Kazuki Yasumatsu, 1995. All rights reserved.
 '>
     <category: 'NetClients-POP3'>
 
+    POPClient class >> defaultPortNumber [
+	<category: 'constants'>
+	^110
+    ]
+
     POPClient class >> example2Host: host username: username password: password [
 	<category: 'examples'>
 	
@@ -221,11 +226,6 @@ NetProtocolInterpreter subclass: POPProtocolInterpreter [
 Copyright (c) Kazuki Yasumatsu, 1995. All rights reserved.
 '>
     <category: 'NetClients-POP3'>
-
-    POPProtocolInterpreter class >> defaultPortNumber [
-	<category: 'private-attributes'>
-	^110
-    ]
 
     POPProtocolInterpreter class >> defaultResponseClass [
 	<category: 'private-attributes'>

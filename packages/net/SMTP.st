@@ -41,21 +41,11 @@ NetClient subclass: SMTPClient [
 Copyright (c) Kazuki Yasumatsu, 1995. All rights reserved.
 '>
     <category: 'NetClients-SMTP'>
-]
 
-]
-
-
-
-Namespace current: NetClients.SMTP [
-
-NetClient subclass: SMTPClient [
-    
-    <import: MIME>
-    <comment: '
-Copyright (c) Kazuki Yasumatsu, 1995. All rights reserved.
-'>
-    <category: 'NetClients-SMTP'>
+    SMTPClient class >> defaultPortNumber [
+	<category: 'constants'>
+	^25
+    ]
 
     SMTPClient class >> example2Host: host [
 	"self example2Host: 'localhost'."
@@ -182,11 +172,6 @@ Copyright (c) Kazuki Yasumatsu, 1995. All rights reserved.
     <category: 'NetClients-SMTP'>
 
     | esmtp |
-
-    SMTPProtocolInterpreter class >> defaultPortNumber [
-	<category: 'private-attributes'>
-	^25
-    ]
 
     checkResponse: response ifError: errorBlock [
 	<category: 'private'>

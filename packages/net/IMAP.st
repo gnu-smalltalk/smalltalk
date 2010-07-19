@@ -498,11 +498,6 @@ NetProtocolInterpreter subclass: IMAPProtocolInterpreter [
 	^'imapv4_'
     ]
 
-    defaultPortNumber [
-	<category: 'constants and defaults'>
-	^143
-    ]
-
     defaultResponseClass [
 	<category: 'constants and defaults'>
 	^IMAPResponse
@@ -708,6 +703,11 @@ NetClient subclass: IMAPClient [
     
     <comment: nil>
     <category: 'NetClients-IMAP'>
+
+    IMAPClient class >> defaultPortNumber [
+	<category: 'constants'>
+	^143
+    ]
 
     protocolInterpreter [
 	<category: 'accessing'>

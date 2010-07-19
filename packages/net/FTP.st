@@ -178,6 +178,11 @@ Copyright (c) Kazuki Yasumatsu, 1995. All rights reserved.
 '>
     <category: 'NetClients-FTP'>
 
+    FTPClient class >> defaultPortNumber [
+	<category: 'constants'>
+	^21
+    ]
+
     FTPClient class >> exampleHost: host [
 	"self exampleHost: 'localhost'."
 
@@ -306,11 +311,6 @@ NetProtocolInterpreter subclass: FTPProtocolInterpreter [
     <import: Sockets>
     <comment: nil>
     <category: 'NetClients-FTP'>
-
-    FTPProtocolInterpreter class >> defaultPortNumber [
-	<category: 'accessing'>
-	^21
-    ]
 
     openDataConnectionDo: controlBlock [
 	<category: 'data connection'>

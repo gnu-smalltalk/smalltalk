@@ -41,6 +41,11 @@ Copyright (c) Kazuki Yasumatsu, 1995. All rights reserved.
 '>
     <category: 'NetClients-HTTP'>
 
+    HTTPClient class >> defaultPortNumber [
+	<category: 'constants'>
+	^80
+    ]
+
     HTTPClient class >> exampleURL: url host: host port: port [
 	"self exampleURL: 'http://www.gnu.org' host: 'www.gnu.org' port: 80."
 
@@ -124,11 +129,6 @@ NetProtocolInterpreter subclass: HTTPProtocolInterpreter [
 Copyright (c) Kazuki Yasumatsu, 1995. All rights reserved.
 '>
     <category: 'NetClients-HTTP'>
-
-    HTTPProtocolInterpreter class >> defaultPortNumber [
-	<category: 'private-attributes'>
-	^80
-    ]
 
     HTTPProtocolInterpreter class >> defaultResponseClass [
 	<category: 'private-attributes'>

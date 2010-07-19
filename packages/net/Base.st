@@ -254,6 +254,11 @@ Object subclass: NetClient [
 Copyright (c) Kazuki Yasumatsu, 1995. All rights reserved.
 '>
 
+    NetClient class >> defaultPortNumber [
+	<category: 'constants'>
+	self subclassResponsibility
+    ]
+
     NetClient class >> connectToHost: aHostname [
 	<category: 'instance creation'>
 	^self new connectToHost: aHostname port: nil
@@ -334,8 +339,8 @@ Copyright (c) Kazuki Yasumatsu, 1995. All rights reserved.
 
     portNumber [
 	<category: 'accessing'>
-	portNumber isNil ifTrue: [^self protocolInterpreter defaultPortNumber].
-	portNumber = 0 ifTrue: [^self protocolInterpreter defaultPortNumber].
+	portNumber isNil ifTrue: [^self class defaultPortNumber].
+	portNumber = 0 ifTrue: [^self class defaultPortNumber].
 	^portNumber
     ]
 
@@ -490,11 +495,6 @@ Object subclass: NetProtocolInterpreter [
     NetProtocolInterpreter class >> new [
 	<category: 'instance creation'>
 	^self basicNew initialize
-    ]
-
-    NetProtocolInterpreter class >> defaultPortNumber [
-	<category: 'private-attributes'>
-	^nil
     ]
 
     NetProtocolInterpreter class >> defaultResponseClass [
