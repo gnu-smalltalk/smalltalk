@@ -3,7 +3,12 @@ dnl
 # serial 2 LIGHTNING_CONFIGURE_IF_NOT_FOUND
 m4_define([LIGHTNING_BACKENDS], [i386:-32 i386:-64 sparc ppc])
 
+AC_DEFUN([LIGHTNING_CONFIGURE_LINKS_PREREQ], [
+lightning_frag=/dev/null
+AC_SUBST_FILE(lightning_frag)])
+
 AC_DEFUN([LIGHTNING_CONFIGURE_LINKS], [
+AC_REQUIRE([LIGHTNING_CONFIGURE_LINKS_PREREQ])
 
 suffix=
 case "$host_cpu" in
@@ -35,9 +40,7 @@ if test -n "$cpu" && test -d "$srcdir/lightning/$cpu"; then
   AC_CONFIG_LINKS(lightning/funcs.h:$funcs_src, [], [funcs_src=$funcs_src])
 else
   $2
-  lightning_frag=/dev/null
 fi
-AC_SUBST_FILE(lightning_frag)
 
 ])
 
@@ -49,11 +52,9 @@ AM_CONDITIONAL(LIGHTNING_MAIN, (exit 1))
 AM_CONDITIONAL(HAVE_INSTALLED_LIGHTNING, test "$ac_cv_header_lightning_h" = yes)
 
 lightning=
-if test "$ac_cv_header_lightning_h" = yes; then
-  lightning=yes
-else
-  LIGHTNING_CONFIGURE_LINKS(lightning=yes, lightning=no)
-fi
+AS_IF([test "$ac_cv_header_lightning_h" = yes],
+  [lightning=yes], 
+  [LIGHTNING_CONFIGURE_LINKS(lightning=yes, lightning=no)])
 
 AS_IF([test "$lightning" = yes], [
   AC_DEFINE(HAVE_LIGHTNING, 1, [Define if GNU lightning can be used])
