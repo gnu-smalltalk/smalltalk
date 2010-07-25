@@ -316,7 +316,7 @@ for command_line_filename in ${1+"$@"}; do
 
   # If the COMMAND_LINE_FILENAME is not absolute (e.g., --debug.tex),
   # prepend `./' in order to avoid that the tools take it as an option.
-  echo "$command_line_filename" | egrep '^(/|[A-z]:/)' >/dev/null \
+  echo "$command_line_filename" | egrep '^(/|[[:alpha:]]:/)' >/dev/null \
   || command_line_filename="./$command_line_filename"
 
   # See if the file exists.  If it doesn't we're in trouble since, even

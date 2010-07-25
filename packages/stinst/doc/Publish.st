@@ -209,7 +209,7 @@ Object subclass: ClassPublisher [
 	 appropriate number of spaces, and escaping characters appropriately"
 
 	<category: 'accessing/delegating'>
-	| hpos |
+	| hpos prev |
 	hpos := 1.
 	aString do: 
 		[:ch | 
@@ -219,12 +219,18 @@ Object subclass: ClassPublisher [
 			[self nextPut: Character space.
 			hpos := hpos + 1.
 			hpos \\ 8 = 1] 
-				whileFalse: []]
+				whileFalse: [].
+                        prev := Character space]
 		    ifFalse: 
-			[(self escaped includes: ch) 
+			[self nextPutAllChar: ch after: prev.
+			hpos := hpos + 1.
+                        prev := ch]]
+    ]
+
+    nextPutAllChar: ch after: prev [
+       (self escaped includes: ch) 
 			    ifTrue: [self printEscaped: ch]
 			    ifFalse: [self nextPut: ch].
-			hpos := hpos + 1]]
     ]
 
     nl [

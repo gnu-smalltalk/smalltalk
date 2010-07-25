@@ -1,3 +1,9 @@
+2010-07-25  Paolo Bonzini  <bonzini@gnu.org>
+
+	* Publish.st: Introduce #nextPutAllChar:after:.
+	* Texinfo.st: Handle correctly occurrences of #{ #} #[ #] in comments.
+	Do not escape : and # except within words.
+
 2010-01-01  Paolo Bonzini  <bonzini@gnu.org>
 
 	* Update copyright years.

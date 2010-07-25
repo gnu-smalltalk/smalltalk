@@ -266,7 +266,7 @@ Classes documented in this manual are @b{boldfaced}.
 		    [j := i.
 		    
 		    [j := j + 1.
-		    j > comment size or: [#($, $' $. $( $) $ $; $<10>) includes: (comment at: j)]]
+		    j > comment size or: [#(${ $} $[ $] $, $' $. $( $) $ $; $<10>) includes: (comment at: j)]]
 			    whileFalse.
 		    i + 1 < j 
 			ifTrue: 
@@ -413,25 +413,29 @@ Classes documented in this manual are @b{boldfaced}.
 
     escaped [
 	"Answer a set of characters that must be passed through #printEscaped: -
-	 i.e. @, {, }.  Also add # and : so that we can insert hyphenation signs
-	 and avoid overfull hboxes long ABC>>#def signatures are encountered"
+	 i.e. @, {, }."
 
 	<category: 'subclassed'>
-	^'@{}#:'
+	^'@{}'
     ]
 
     printEscaped: ch [
 	"Print ch with a @ in front of it."
 
 	<category: 'subclassed'>
-	ch = $: 
-	    ifTrue: 
-		[^self
-		    nextPut: ch;
-		    nextPutAll: '@-'].
 	self nextPut: $@.
-	ch = $# ifTrue: [self nextPut: $-].
 	self nextPut: ch
+    ]
+
+    nextPutAllChar: ch after: prev [
+        "Treat # and : specially so that we can insert hyphenation signs
+	 and avoid overfull hboxes long ABC>>#def signatures are encountered."
+
+	<category: 'subclassed'>
+        (prev isNil or: [ prev isSeparator ]) ifFalse: [
+	    ch = $# ifTrue: [^self nextPutAll: '@-#'].
+	    ch = $: ifTrue: [^self nextPutAll: ':@-']].
+	^super nextPutAllChar: ch after: prev
     ]
 ]
 
