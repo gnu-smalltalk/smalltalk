@@ -264,7 +264,8 @@ server ifTrue: [
 
 	    [s canRead ifFalse: [stdout flush].
 	    s atEnd or: [s peekFor: $<0>]]
-                whileFalse: [stdout nextPut: s next].
+                whileFalse: [stdout nextPut: s next]].
+
 	s close ]
 ]
     on: Error
