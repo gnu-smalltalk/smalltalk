@@ -1,7 +1,20 @@
 List of user-visible changes in GNU Smalltalk
 
-NEWS FROM 3.2 TO 3.2.1
+NEWS FROM 3.2.1 TO 3.2.2
 
+o   Fixes to gst-remote.
+
+o   Fixes to the Emacs mode.
+
+o   Fixes to compilation warnings.
+
+o   Generational GC is broken on SPARC and is now disabled.
+
+o   When compiling a 32-bit version on a 64-bit system, detection of
+    which packages to install was improved.
+
+
+NEWS FROM 3.2 TO 3.2.1
 
 o   All built-in packages can be disabled with a configure option like
     --disable-gdbm or --disable-complex.
