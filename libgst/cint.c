@@ -1537,6 +1537,8 @@ my_chown (const char *file, const char *user, const char *group)
     return 0;
   else
     return chown (file, uid, gid);
+#else
+  return 0;
 #endif
 }
 

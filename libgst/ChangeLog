@@ -1,3 +1,11 @@
+2010-07-27  Paolo Bonzini <bonzini@gnu.org>
+
+	* libgst/cint.c: Fix warnings.
+	* libgst/real.c: Fix out-of-bounds array access (which is actually
+	unreachable, but GCC still warns).
+	* libgst/prims.def: Fix two warnings.
+	* libgst/sysdep/win32/signals.c: Fix warning.
+
 2010-07-04  Paolo Bonzini <bonzini@gnu.org>
 
 	* libgst/oop.c: Fix GC_DEBUGGING compilation.  Fix GC bug in

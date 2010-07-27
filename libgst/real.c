@@ -394,7 +394,7 @@ _gst_real_mul (struct real *r, struct real *s)
   if (s->sign == 0)
      memset (r, 0, sizeof (struct real));
 
-  for (i = 0; i <= SIGSZ && s->sig[i] == 0; )
+  for (i = 0; i < SIGSZ && s->sig[i] == 0; )
     i++;
   do_mul (r, s, i);
 }

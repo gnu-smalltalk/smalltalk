@@ -73,8 +73,6 @@ int _gst_signal_count;
 void
 _gst_disable_interrupts (mst_Boolean from_signal_handler)
 {
-  int i;
-  
   __sync_synchronize ();
   if (_gst_signal_count++ == 0)
     {

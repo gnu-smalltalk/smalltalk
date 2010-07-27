@@ -2934,7 +2934,6 @@ primitive VMpr_Process_yield [succeed,check_interrupt]
 primitive VMpr_Processor_pause [succeed,check_interrupt]
 {
   OOP oop1;
-  OOP activeProcessOOP;
 
   _gst_primitives_executed++;
   oop1 = POP_OOP ();
@@ -5032,7 +5031,7 @@ primitive VMpr_String_ByteArray_asCData :
 	{
 	  OOP cObjectOOP = COBJECT_NEW (data, oop2, _gst_c_object_class);
 	  memcpy (data, OOP_TO_OBJ (oop1)->data, size);
-	  POP_OOP ();
+	  POP_N_OOPS (1);
 	  SET_STACKTOP (cObjectOOP);
 	  PRIM_SUCCEEDED;
 	}

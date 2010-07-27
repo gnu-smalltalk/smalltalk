@@ -1,3 +1,8 @@
+2010-07-27  Paolo Bonzini  <bonzini@gnu.org>
+
+	* configure.ac: Do not use wint_t under Windows, it is useless
+	as it causes a warning when passed to va_arg.
+
 2009-07-12  Paolo Bonzini  <bonzini@gnu.org>
 
 	* snprintfv/dl-yes.c: Delete.

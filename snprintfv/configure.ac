@@ -156,6 +156,8 @@ AC_CHECK_TYPE(wchar_t)
 AC_CHECK_TYPE(wint_t)
 AC_CHECK_TYPE(intmax_t)
 AC_TYPE_SIZE_T
+AC_CHECK_SIZEOF(int)
+AC_CHECK_SIZEOF(wint_t)
 
 # ----------------------------------------------------------------------
 # Checks for floating-point features
@@ -233,7 +235,7 @@ _EOF_
     else
       echo 'typedef wchar_t snv_wchar_t;' >> $tmpfile
     fi
-    if test x$ac_cv_type_wint_t = xno; then
+    if test x$ac_cv_type_wint_t = xno || test $ac_cv_sizeof_wint_t -lt $ac_cv_sizeof_int; then
       echo 'typedef unsigned int snv_wint_t;' >> $tmpfile
     else
       echo 'typedef wint_t snv_wint_t;' >> $tmpfile
@@ -342,6 +344,8 @@ _EOF_
   ac_cv_type_size_t=$ac_cv_type_size_t
   ac_cv_type_wchar_t=$ac_cv_type_wchar_t
   ac_cv_type_wint_t=$ac_cv_type_wint_t
+  ac_cv_sizeof_wint_t=$ac_cv_sizeof_wint_t
+  ac_cv_sizeof_int=$ac_cv_sizeof_int
   snv_cv_static_inline=$snv_cv_static_inline
   srcdir=$srcdir
 ])
