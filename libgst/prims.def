@@ -5527,14 +5527,14 @@ primitive VMpr_FileDescriptor_fileOp [succeed,fail]
 	  char *data = STRING_OOP_CHARS (oopVec[1]);
 	  intptr_t from = TO_INT (oopVec[2]);
 	  intptr_t to = TO_INT (oopVec[3]);
-	  int result;
+	  ssize_t result;
 	  if (to >= from - 1
 	      && from > 0 && to <= NUM_INDEXABLE_FIELDS (oopVec[1]))
 	    {
 	      result = _gst_write (fd, data + from - 1, to - from + 1);
-	      if (result >= 0)
+	      if (result != -1)
 		{
-		  resultOOP = FROM_INT (result);
+		  resultOOP = FROM_C_ULONG ((size_t) result);
 		  goto succeed;
 		}
 	    }
@@ -5548,7 +5548,7 @@ primitive VMpr_FileDescriptor_fileOp [succeed,fail]
 	  char *data = STRING_OOP_CHARS (oopVec[1]);
 	  intptr_t from = TO_INT (oopVec[2]);
 	  intptr_t to = TO_INT (oopVec[3]);
-	  int result;
+	  ssize_t result;
 	  if (to >= from - 1
 	      && from > 0 && to <= NUM_INDEXABLE_FIELDS (oopVec[1]))
 	    {
@@ -5558,9 +5558,9 @@ primitive VMpr_FileDescriptor_fileOp [succeed,fail]
 	      _gst_grey_oop_range (data + from - 1, to - from + 1);
 	      result = _gst_read (fd, data + from - 1, to - from + 1);
 
-	      if (result >= 0)
+	      if (result != -1)
 		{
-		  resultOOP = FROM_INT (result);
+		  resultOOP = FROM_C_ULONG ((size_t) result);
 		  goto succeed;
 		}
 	    }
@@ -5576,7 +5576,7 @@ primitive VMpr_FileDescriptor_fileOp [succeed,fail]
 	  intptr_t from = TO_INT (oopVec[2]);
 	  intptr_t to = TO_INT (oopVec[3]);
 	  off_t ofs = TO_OFF_T (oopVec[4]);
-	  int result;
+	  ssize_t result;
 
 	  if (to >= from - 1
 	      && from > 0 && to <= NUM_INDEXABLE_FIELDS (oopVec[1]))
@@ -5600,9 +5600,9 @@ primitive VMpr_FileDescriptor_fileOp [succeed,fail]
 	      }
 #endif
 
-	      if (result >= 0)
+	      if (result != -1)
 		{
-		  resultOOP = FROM_INT (result);
+		  resultOOP = FROM_C_ULONG ((size_t) result);
 		  goto succeed;
 		}
 	    }
@@ -5618,7 +5618,7 @@ primitive VMpr_FileDescriptor_fileOp [succeed,fail]
 	  intptr_t from = TO_INT (oopVec[2]);
 	  intptr_t to = TO_INT (oopVec[3]);
 	  off_t ofs = TO_OFF_T (oopVec[4]);
-	  int result;
+	  ssize_t result;
 
 	  if (to >= from - 1
 	      && from > 0 && to <= NUM_INDEXABLE_FIELDS (oopVec[1]))
@@ -5642,9 +5642,9 @@ primitive VMpr_FileDescriptor_fileOp [succeed,fail]
 	      }
 #endif
 
-	      if (result >= 0)
+	      if (result != -1)
 		{
-		  resultOOP = FROM_INT (result);
+		  resultOOP = FROM_C_ULONG ((size_t) result);
 		  goto succeed;
 		}
 	    }
@@ -5786,17 +5786,15 @@ primitive VMpr_FileDescriptor_socketOp [succeed,fail]
 	  char *data = STRING_OOP_CHARS (oopVec[1]);
 	  intptr_t from = TO_INT (oopVec[2]);
 	  intptr_t to = TO_INT (oopVec[3]);
-	  int result;
+	  ssize_t result;
 	  if (to >= from - 1
 	      && from > 0 && to <= NUM_INDEXABLE_FIELDS (oopVec[1]))
 	    {
 	      clear_socket_error ();
 	      result = _gst_send (fd, data + from - 1, to - from + 1, 0);
-	      if (is_socket_error (EFAULT))
-		abort ();
-	      if (result >= 0)
+	      if (result != -1)
 		{
-		  resultOOP = FROM_INT (result);
+		  resultOOP = FROM_C_ULONG ((size_t) result);
 		  goto succeed;
 		}
 	    }
@@ -5810,7 +5808,7 @@ primitive VMpr_FileDescriptor_socketOp [succeed,fail]
 	  char *data = STRING_OOP_CHARS (oopVec[1]);
 	  intptr_t from = TO_INT (oopVec[2]);
 	  intptr_t to = TO_INT (oopVec[3]);
-	  int result;
+	  ssize_t result;
 	  if (to >= from - 1
 	      && from > 0 && to <= NUM_INDEXABLE_FIELDS (oopVec[1]))
 	    {
@@ -5818,19 +5816,11 @@ primitive VMpr_FileDescriptor_socketOp [succeed,fail]
 		 generate a SIGSEGV and for this reason we must
 		 touch them manually.  */
 	      _gst_grey_oop_range (data + from - 1, to - from + 1);
-	      do
+	      clear_socket_error ();
+	      result = _gst_recv (fd, data + from - 1, to - from + 1, 0);
+	      if (result != -1)
 		{
-	          clear_socket_error ();
-		  errno = 0;
-		  result = _gst_recv (fd, data + from - 1, to - from + 1, 0);
-	          if (is_socket_error (EFAULT))
-		    abort ();
-		} 
-	      while ((result == -1) && is_socket_error (EINTR));
-
-	      if (result >= 0)
-		{
-		  resultOOP = FROM_INT (result);
+		  resultOOP = FROM_C_ULONG ((size_t) result);
 		  goto succeed;
 		}
 	    }

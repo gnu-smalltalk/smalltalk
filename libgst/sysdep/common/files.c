@@ -325,14 +325,14 @@ _gst_is_pipe (int fd)
 #endif
 }
 
-int
+ssize_t
 _gst_recv (int fd,
 	   PTR buffer,
-	   int size,
+	   size_t size,
 	   int flags)
 {
 #ifdef HAVE_SOCKETS
-  int result;
+  ssize_t result;
   int save_errno = errno;
 
   for (;;)
@@ -357,14 +357,14 @@ _gst_recv (int fd,
 #endif
 }
 
-int
+ssize_t
 _gst_send (int fd,
 	   PTR buffer,
-	   int size,
+	   size_t size,
 	   int flags)
 {
 #ifdef HAVE_SOCKETS
-  int result;
+  ssize_t result;
   int save_errno = errno;
 
   for (;;)
@@ -389,12 +389,12 @@ _gst_send (int fd,
 #endif
 }
 
-int
+ssize_t
 _gst_read (int fd,
 	   PTR buffer,
-	   int size)
+	   size_t size)
 {
-  int result;
+  ssize_t result;
   int save_errno = errno;
 
   do
@@ -403,19 +403,19 @@ _gst_read (int fd,
       if (errno == EFAULT)
         abort ();
     }
-  while ((result == -1) && (errno == EINTR));
+  while (result == -1 && errno == EINTR);
   if (errno == EINTR)
     errno = save_errno;
 
   return result;
 }
 
-int
+ssize_t
 _gst_write (int fd,
 	    PTR buffer,
-	    int size)
+	    size_t size)
 {
-  int result;
+  ssize_t result;
   int save_errno = errno;
 
   do
@@ -424,7 +424,7 @@ _gst_write (int fd,
       if (errno == EFAULT)
         abort ();
     }
-  while ((result == -1) && (errno == EINTR));
+  while (result == -1 && errno == EINTR);
   if (errno == EINTR)
     errno = save_errno;
 

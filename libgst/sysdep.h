@@ -223,29 +223,29 @@ extern int _gst_open_file (const char *filename,
   ATTRIBUTE_HIDDEN;
 
 /* Read SIZE bytes into BUFFER from the file descriptor, FD.  */
-extern int _gst_read (int fd,
-		      PTR buffer,
-		      int size)
+extern ssize_t _gst_read (int fd,
+		          PTR buffer,
+		          size_t size)
   ATTRIBUTE_HIDDEN;
 
 /* Write SIZE bytes of BUFFER into the file descriptor, FD.  */
-extern int _gst_write (int fd,
-		       PTR buffer,
-		       int size)
+extern ssize_t _gst_write (int fd,
+		           PTR buffer,
+		           size_t size)
   ATTRIBUTE_HIDDEN;
 
-/* Read SIZE bytes into BUFFER from the file descriptor, FD.  */
-extern int _gst_recv (int fd,
-		      PTR buffer,
-		      int size,
-		      int flags)
+/* Read SIZE bytes into BUFFER from the file descriptor for a socket, FD.  */
+extern ssize_t _gst_recv (int fd,
+		          PTR buffer,
+		          size_t size,
+		          int flags)
   ATTRIBUTE_HIDDEN;
 
-/* Write SIZE bytes of BUFFER into the socket descriptor, FD.  */
-extern int _gst_send (int fd,
-		      PTR buffer,
-		      int size,
-		      int flags)
+/* Write SIZE bytes of BUFFER into the file descriptor for a socket, FD.  */
+extern ssize_t _gst_send (int fd,
+		          PTR buffer,
+		          size_t size,
+		          int flags)
   ATTRIBUTE_HIDDEN;
 
 /* Writes a debug message with the given formatting.  */

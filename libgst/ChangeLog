@@ -1,5 +1,11 @@
 2010-07-27  Paolo Bonzini <bonzini@gnu.org>
 
+	* libgst/sysdep.h: Correctly use size_t/ssize_t.
+	* libgst/sysdep/common/files.c: Likewise.
+	* libgst/prims.def: Likewise.  Remove duplicate checks.
+
+2010-07-27  Paolo Bonzini <bonzini@gnu.org>
+
 	* libgst/sysdep.h: Remove _gst_full_write.
 	* libgst/sysdep/common/files.c: Move _gst_full_write...
 	* libgst/save.c: ... here.  longjmp out to _gst_save_to_file when
