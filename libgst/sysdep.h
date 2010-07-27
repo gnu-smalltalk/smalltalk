@@ -228,13 +228,6 @@ extern int _gst_read (int fd,
 		      int size)
   ATTRIBUTE_HIDDEN;
 
-/* Ensures that exactly SIZE bytes of BUFFER are written into the
-   file descriptor, FD.  */
-extern int _gst_full_write (int fd,
-		            PTR buffer,
-		            int size)
-  ATTRIBUTE_HIDDEN;
-
 /* Write SIZE bytes of BUFFER into the file descriptor, FD.  */
 extern int _gst_write (int fd,
 		       PTR buffer,

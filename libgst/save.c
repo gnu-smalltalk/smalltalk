@@ -136,6 +136,12 @@ static off_t file_pos;
 static mst_Boolean buf_used_mmap;
 
 
+/* This function tries to write SIZE bytes to FD starting at BUFFER,
+   and longjmps out of SAVE_JMPBUF if something goes wrong.  */
+static void full_write (int fd,
+			PTR buffer,
+			size_t size);
+
 /* This function establishes a buffer of size NUMBYTES for writes.  */
 static void buffer_write_init (int imageFd,
 			       int numBytes);
@@ -174,14 +180,12 @@ static void buffer_read (int imageFd,
 static void buffer_fill (int imageFd);
 
 /* This function saves the object pointed to by OOP on the image-file
-   whose descriptor is IMAGEFD.  The object pointers are made relative
-   to the beginning of the object data-area.  */
+   whose descriptor is IMAGEFD.  */
 static void save_object (int imageFd,
 			 OOP oop);
 
-/* This function copies NUMBYTES from SRC to DEST, converting the first
-   NUMPOINTERS absolute addresses into relative ones (these are the
-   instance variables of the object).  */
+/* This function copies NUMBYTES from SRC to DEST, tweaking some fields
+   depending on the class.  */
 static inline void fixup_object (OOP oop, gst_object dest, gst_object src,
 				 int numBytes);
 
@@ -206,6 +210,10 @@ static void load_oop_table (int imageFd);
    copy-on-write is used, return the end address of the loaded data.  */
 static char *load_normal_oops (int imageFd);
 
+/* Do the bulk of the save to IMAGEFD.  Calling the hooks and reporting
+   errors is left to the callers.  */
+static void save_to_fd (int imageFd);
+
 /* This function stores the header, HEADERP, of the image file into the file
    whose descriptor is IMAGEFD.  */
 static void save_file_version (int imageFd,
@@ -217,12 +225,13 @@ static void save_file_version (int imageFd,
 static mst_Boolean load_file_version (int imageFd,
 				      save_file_header * headerp);
 
-/* This function walks the OOP table and converts all the relative
-   addresses for the instance variables to absolute ones.  */
+/* This function walks the OOP table and adjusts all the OOP addresses,
+   to account for the difference between the OOP table address at save
+   time and now.  */
 static inline void restore_all_pointer_slots (void);
 
-/* This function converts all the relative addresses for OOP's
-   instance variables to absolute ones.  */
+/* This and adjusts all the addresses in OOPto account for the difference
+   between the OOP table address at save time and now.  */
 static inline void restore_oop_pointer_slots (OOP oop);
 
 /* This function prepares the OOP table to be written to the image
@@ -254,6 +263,9 @@ static int num_used_oops = 0;
    the one we allocate now.  */
 static intptr_t ot_delta;
 
+/* Used when writing the image fails.  */
+static jmp_buf save_jmpbuf;
+
 /* Convert from relative offset to actual oop table address.  */
 #define OOP_ABSOLUTE(obj) \
   ( (OOP)((intptr_t)(obj) + ot_delta) )
@@ -265,20 +277,44 @@ mst_Boolean
 _gst_save_to_file (const char *fileName)
 {
   int imageFd;
-  save_file_header header;
+  int save_errno;
+  mst_Boolean success;
 
   _gst_invoke_hook (GST_ABOUT_TO_SNAPSHOT);
   _gst_global_gc (0);
   _gst_finish_incremental_gc ();
 
+  success = false;
   unlink (fileName);
   imageFd = _gst_open_file (fileName, "w");
-  if (imageFd < 0)
+  if (imageFd >= 0)
     {
-      _gst_invoke_hook (GST_FINISHED_SNAPSHOT);
-      return (false);
-    }
+      if (setjmp(save_jmpbuf) == 0)
+        {
+          save_to_fd (imageFd);
+          success = true;
+        }
 
+      save_errno = errno;
+      close (imageFd);
+      if (!success)
+        unlink (fileName);
+      if (myOOPTable)
+        xfree (myOOPTable);
+      myOOPTable = NULL;
+    }
+  else
+    save_errno = errno;
+
+  _gst_invoke_hook (GST_FINISHED_SNAPSHOT);
+  errno = save_errno;
+  return success;
+}
+
+void
+save_to_fd (int imageFd)
+{
+  save_file_header header;
   memzero (&header, sizeof (header));
   myOOPTable = make_oop_table_to_be_saved (&header);
 
@@ -299,8 +335,10 @@ _gst_save_to_file (const char *fileName)
 	  lseek (imageFd, 0, SEEK_CUR));
 #endif /* SNAPSHOT_TRACE */
 
-  save_all_objects (imageFd);
   xfree (myOOPTable);
+  myOOPTable = NULL;
+
+  save_all_objects (imageFd);
 
 #ifdef SNAPSHOT_TRACE
   printf ("After saving all objects: %lld\n",
@@ -308,11 +346,6 @@ _gst_save_to_file (const char *fileName)
 #endif /* SNAPSHOT_TRACE */
 
   buffer_write_flush (imageFd);
-  close (imageFd);
-
-  _gst_invoke_hook (GST_FINISHED_SNAPSHOT);
-
-  return (true);
 }
 
 
@@ -792,9 +825,30 @@ buffer_write_init (int imageFd, int numBytes)
 }
 
 void
+full_write (int fd,
+	         PTR buffer,
+	         size_t size)
+{
+  char *buf = (char *) buffer;
+  ssize_t num = SSIZE_MAX;
+
+  for (; num > 0 && size; buf += num, size -= num)
+    num = _gst_write (fd, buf, size);
+
+  if (num == 0)
+    {
+      errno = ENOSPC;
+      num = -1;
+    }
+
+  if (num == -1)
+    longjmp(save_jmpbuf, 1);
+}
+
+void
 buffer_write_flush (int imageFd)
 {
-  _gst_full_write (imageFd, buf, buf_pos);
+  full_write (imageFd, buf, buf_pos);
   xfree (buf);
   buf_pos = 0;
 }
@@ -806,12 +860,12 @@ buffer_write (int imageFd,
 {
   if UNCOMMON (buf_pos + numBytes > buf_size)
     {
-      _gst_full_write (imageFd, buf, buf_pos);
+      full_write (imageFd, buf, buf_pos);
       buf_pos = 0;
     }
 
   if UNCOMMON (numBytes > buf_size)
-    _gst_full_write (imageFd, data, numBytes);
+    full_write (imageFd, data, numBytes);
   else
     {
       memcpy (buf + buf_pos, data, numBytes);

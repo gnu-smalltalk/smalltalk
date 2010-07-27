@@ -430,20 +430,6 @@ _gst_write (int fd,
 
   return result;
 }
-
-int
-_gst_full_write (int fd,
-	         PTR buffer,
-	         int size)
-{
-  char *buf = (char *) buffer;
-  int num = 0, sofar = 0;
-
-  for (; size; buf += num, size -= num, sofar += num)
-    num = _gst_write (fd, buf, size);
-
-  return (num < 0 ? num : sofar);
-}
 
 
 void

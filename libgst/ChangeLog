@@ -1,5 +1,12 @@
 2010-07-27  Paolo Bonzini <bonzini@gnu.org>
 
+	* libgst/sysdep.h: Remove _gst_full_write.
+	* libgst/sysdep/common/files.c: Move _gst_full_write...
+	* libgst/save.c: ... here.  longjmp out to _gst_save_to_file when
+	it fails.
+
+2010-07-27  Paolo Bonzini <bonzini@gnu.org>
+
 	* libgst/cint.c: Fix warnings.
 	* libgst/real.c: Fix out-of-bounds array access (which is actually
 	unreachable, but GCC still warns).
