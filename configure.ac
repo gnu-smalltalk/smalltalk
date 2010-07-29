@@ -153,7 +153,7 @@ AC_ARG_ENABLE(generational-gc,
 [case $host in
 	*-k*bsd-gnu | \
         *-*-cygwin* | *-*-mingw* | \
-	ia64-*-* | alpha*-*-* )
+	ia64-*-* | alpha*-*-* | sparc*-*-* )
 	  enable_generational_gc=no ;;
         *)
 	  enable_generational_gc=yes ;;

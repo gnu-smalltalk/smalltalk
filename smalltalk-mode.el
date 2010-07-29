@@ -66,9 +66,10 @@
       (while (<= c ?z)
 	(setq c (1+ c))
 	(modify-syntax-entry c "w   " table)))
+    (modify-syntax-entry 10  " >  " table) ; Comment (generic)
     (modify-syntax-entry ?:  ".   " table) ; Symbol-char
     (modify-syntax-entry ?_  "_   " table) ; Symbol-char
-    (modify-syntax-entry ?\" "!   " table) ; Comment (generic)
+    (modify-syntax-entry ?\" "!1  " table) ; Comment (generic)
     (modify-syntax-entry ?'  "\"  " table) ; String
     (modify-syntax-entry ?#  "'   " table) ; Symbol or Array constant
     (modify-syntax-entry ?\( "()  " table) ; Grouping
@@ -88,7 +89,7 @@
     (modify-syntax-entry ?+  ".   " table) ; math
     (modify-syntax-entry ?-  ".   " table) ; math
     (modify-syntax-entry ?*  ".   " table) ; math
-    (modify-syntax-entry ?/  ".   " table) ; math
+    (modify-syntax-entry ?/  ".2  " table) ; math
     (modify-syntax-entry ?=  ".   " table) ; bool/assign
     (modify-syntax-entry ?%  ".   " table) ; valid selector
     (modify-syntax-entry ?&  ".   " table) ; boolean
