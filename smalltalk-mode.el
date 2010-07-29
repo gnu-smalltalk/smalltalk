@@ -267,10 +267,10 @@
 			 (progn
 			   (forward-sexp 1)
 			   (if (and (< (point) here)
-				(= (char-before) ?]))
-			     (progn 
-			       (skip-syntax-forward " \t")
-			       (setq prev (point)))))
+				    (= (char-before) ?\]))
+			       (progn 
+				 (skip-syntax-forward " \t")
+				 (setq prev (point)))))
 		       (error t))
 		     (goto-char prev)
 		     (beginning-of-line)
@@ -753,9 +753,9 @@ following on the same line."
 	  (and (bolp)
 	       (progn (smalltalk-backward-whitespace)
 		      (= (preceding-char) ?!))))
-      (= (line-number-at-pos)
-	 (progn (smalltalk-begin-of-scope)
-		(line-number-at-pos))))))
+      (let ((curr-line-pos (line-number-at-pos)))
+	(if (smalltalk-begin-of-scope)
+	    (= curr-line-pos (line-number-at-pos)))))))
 
 (defun smalltalk-at-begin-of-defun ()
   "Returns T if at the beginning of a method definition, otherwise nil"
@@ -766,10 +766,9 @@ following on the same line."
 	  (and (bolp)
 	       (progn (smalltalk-backward-whitespace)
 		      (= (preceding-char) ?!))))
-      (= (line-number-at-pos)
-	 (progn (smalltalk-begin-of-defun)
-		(line-number-at-pos))))))
-
+      (let ((curr-line-pos (line-number-at-pos)))
+	(if (smalltalk-begin-of-defun)
+	    (= curr-line-pos (line-number-at-pos)))))))
 
 (defun smalltalk-indent-for-colon ()
   (let (indent-amount c start-line state done default-amount
