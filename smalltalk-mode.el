@@ -261,9 +261,20 @@
 		     (forward-sexp 1))
 		 (error t))
 	       (if prev
-		   (progn (goto-char prev)
-			  (beginning-of-line)
-			  (skip-chars-forward " \t"))
+		   (progn
+		     (goto-char prev)
+		     (condition-case nil
+			 (progn
+			   (forward-sexp 1)
+			   (if (and (< (point) here)
+				(= (char-before) ?]))
+			     (progn 
+			       (skip-syntax-forward " \t")
+			       (setq prev (point)))))
+		       (error t))
+		     (goto-char prev)
+		     (beginning-of-line)
+		     (skip-chars-forward " \t"))
 		 (goto-char start))))))
 
 (defun smalltalk-begin-of-defun ()
