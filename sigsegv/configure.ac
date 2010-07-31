@@ -75,7 +75,7 @@ AC_CHECK_HEADERS([sys/signal.h])
 dnl List of signals that are sent when an invalid virtual memory address
 dnl is accessed, or when the stack overflows.
 case "$host_os" in
-  sunos4* | freebsd* | openbsd* | netbsd* | kfreebsd* | knetbsd*)
+  sunos4* | freebsd* | openbsd* | netbsd* | dragonfly* | kfreebsd* | knetbsd*)
     CFG_SIGNALS=signals-bsd.h ;;
   hpux*)
     CFG_SIGNALS=signals-hpux.h ;;
@@ -299,7 +299,7 @@ if test -z "$CFG_FAULT" && test "$sv_cv_fault_hurd" = yes; then
 fi
 if test -z "$CFG_FAULT" && test "$sv_cv_fault_bsd" = yes; then
   case "$host_os" in
-    freebsd* | kfreebsd*)
+    freebsd* | dragonfly* | kfreebsd*)
       case "$host_cpu" in
         i?86 | x86_64)
           CFG_FAULT=fault-freebsd-i386.h
@@ -625,7 +625,7 @@ if test $sv_cv_procfsvma = yes; then
 else
   case "$host_os" in
     linux*) CFG_STACKVMA=stackvma-linux.c ;;
-    freebsd*) CFG_STACKVMA=stackvma-freebsd.c ;;
+    freebsd*|dragonfly*) CFG_STACKVMA=stackvma-freebsd.c ;;
     beos*) CFG_STACKVMA=stackvma-beos.c ;;
     macos* | darwin*)
       AC_CHECK_FUNC([vm_region], [CFG_STACKVMA=stackvma-mach.c]) ;;
