@@ -13,12 +13,23 @@ AC_CACHE_CHECK([how to link with OpenGL libraries], gst_cv_opengl_libs, [
        test $ac_cv_header_GL_glu_h = no; then
     gst_cv_opengl_libs='not found'
   else
+    save_LIBS=$LIBS
     case $host in
       *-*-mingw* | *-*-cygwin*) gst_cv_opengl_libs='-lopengl32 -lglu32' ;;
       *-*-beos* | *-*-qnx*) gst_cv_opengl_libs='-lGL' ;;
       *-*-darwin*) gst_cv_opengl_libs='-Wl,-framework,OpenGL' ;;
-      *) gst_cv_opengl_libs='-lGL -lGLU $(X_LIBS) $(X_PRE_LIBS) -lX11' ;;
+      *) gst_cv_opengl_libs="-lGL -lGLU $X_LIBS $X_PRE_LIBS -lX11" ;;
     esac
+
+    LIBS="$LIBS $gst_cv_opengl_libs"
+    AC_LINK_IFELSE([AC_LANG_PROGRAM([
+      #ifdef HAVE_GL_GL_H
+      #include <GL/gl.h>
+      #else
+      #include <OpenGL/gl.h>
+      #endif], [glBegin(GL_TRIANGLES)])],
+                   [], [gst_cv_opengl_libs='not found'])
+    LIBS=$save_LIBS
   fi
 ])
 

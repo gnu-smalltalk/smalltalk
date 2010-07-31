@@ -484,6 +484,19 @@ GST_PACKAGE_ENABLE([LibSDL], [sdl/libsdl],
     *) gst_cv_sdl_uses_cocoa=no ;;
   esac
 
+  save_CFLAGS=$CFLAGS
+  save_LIBS=$LIBS
+  CFLAGS="$CFLAGS $SDL_CFLAGS"
+  LIBS="$LIBS $SDL_LIBS"
+  AC_LINK_IFELSE([
+      #include <SDL.h>
+      #include <SDL_main.h>
+      int main(int argc, char **argv) { SDL_Init(0); return 0; }],
+    [], [gst_cv_sdl=no])
+
+  LIBS=$save_LIBS
+  CFLAGS=$save_CFLAGS
+
   # We do SDLmain's job on our own, and mingw32 is linked automatically
   # into the DLL.  If we do not do this, libtool refuses to create a DLL
   # for the SDL module.
@@ -531,8 +544,9 @@ GST_PACKAGE_ENABLE([XML-DOM], [xml/dom])
 GST_PACKAGE_ENABLE([XML-ParserTests], [xml/tests])
 GST_PACKAGE_ENABLE([XML-PullParser], [xml/pullparser])
 GST_PACKAGE_ENABLE([XML-Expat], [xml/expat],
-  [AC_CHECK_HEADER([expat.h])],
-  [ac_cv_header_expat_h],
+  [AC_CHECK_HEADER([expat.h])
+   GST_HAVE_LIB(expat, XML_ParserCreateNS)],
+  [ac_cv_header_expat_h ac_cv_lib_expat_XML_ParserCreateNS],
   [Makefile], [expat.la])
 GST_PACKAGE_ENABLE([XML-XMLParser], [xml/parser])
 GST_PACKAGE_ENABLE([XML-SAXDriver], [xml/saxdriver])
@@ -541,8 +555,9 @@ GST_PACKAGE_ENABLE([XPath], [xml/xpath])
 GST_PACKAGE_ENABLE([XSL], [xml/xsl])
 GST_PACKAGE_ENABLE([ZLib],
   [zlib],
-  [AC_CHECK_HEADER([zlib.h])],
-  [ac_cv_header_zlib_h],
+  [AC_CHECK_HEADER([zlib.h])
+   GST_HAVE_LIB(z, inflate)],
+  [ac_cv_header_zlib_h ac_cv_lib_z_inflate],
   [Makefile], [zlib.la])
 
 if test "$enable_gtk" = blox; then
