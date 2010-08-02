@@ -569,7 +569,7 @@ expressions."
 
 		       ;; we're top level
 		       (setq indent-amount (smalltalk-toplevel-indent nil))))
-		    ((= (preceding-char) ?.) ;at end of statement
+		    ((smalltalk-at-end-of-statement) ;end of statement or after temps
 		     (smalltalk-find-statement-begin)
 		     (setq indent-amount (smalltalk-current-column)))
 		    ((= (preceding-char) ?:)
@@ -589,6 +589,21 @@ expressions."
 		  (error (beginning-of-line)))
 	      (+ (smalltalk-current-column)
 		 smalltalk-indent-amount)))))))
+
+(defun smalltalk-at-end-of-statement ()
+  (save-excursion
+    (or (= (preceding-char) ?.)
+	(and (= (preceding-char) ?|)
+	     (progn
+	       (backward-char 1)
+	       (while (and (not (bobp)) (looking-back "[ \t\na-zA-Z]"))
+		 (skip-chars-backward " \t\n")
+		 (skip-chars-backward "a-zA-Z"))
+	       (if (= (preceding-char) ?|) 
+		   (progn
+		     (backward-char 1)
+		     (skip-chars-backward " \t\n")))
+	       (bobp))))))
 
 (defun smalltalk-calculate-indent ()
     (cond
@@ -632,7 +647,6 @@ or non-white space, non-comment character"
 		(= (preceding-char) ?\"))
     (search-backward "\"" nil t 2)))
 	
-
 (defun smalltalk-current-column ()
   "Returns the current column of the given line, regardless of narrowed buffer."
   (save-restriction
