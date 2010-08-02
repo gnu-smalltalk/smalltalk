@@ -67,6 +67,5 @@ GtkVisualGSTTool subclass: GtkBrowsingTool [
 	
         self subclassResponcibility
     ]
-
 ]
 

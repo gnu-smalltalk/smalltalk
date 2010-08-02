@@ -54,6 +54,7 @@ GtkConcreteWidget subclass: GtkInspectorBrowserWidget [
 
 	codeWidget := (GtkSourceCodeWidget new)
 			initialize;
+			parentWindow: self parentWindow;
 			browser: self;
 			showAll;
 			yourself.
@@ -118,11 +119,11 @@ GtkConcreteWidget subclass: GtkInspectorBrowserWidget [
 
 	self checkCodeWidgetAndUpdate: [
 	    aSmallInteger = 0 
-	        ifTrue: [
+		ifTrue: [
 		    iMethodWidget hasSelectedMethod 
-		        ifTrue: [ codeWidget sourceCode: iMethodWidget sourceCode ]
-		        ifFalse: [ codeWidget sourceCode: '' ] ]
-	        ifFalse: [
+			ifTrue: [ codeWidget sourceCode: iMethodWidget sourceCode ]
+			ifFalse: [ codeWidget sourceCode: '' ] ]
+		ifFalse: [
                     cMethodWidget hasSelectedMethod
                         ifTrue: [ codeWidget sourceCode: cMethodWidget sourceCode ]
                         ifFalse: [ codeWidget sourceCode: '' ] ] ]
@@ -371,13 +372,19 @@ GtkConcreteWidget subclass: GtkInspectorBrowserWidget [
     selectedText [
         <category: 'smalltalk events'>
 
-        ^codeWidget selectedText
+        ^ codeWidget selectedText
     ]
 
     hasSelection [
         <category: 'smalltalk events'>
 
-        ^codeWidget hasSelection
+        ^ codeWidget hasSelection
+    ]
+
+    hasChanged [
+        <category: 'close events'>
+
+        ^ codeWidget hasChanged
     ]
 ]
 

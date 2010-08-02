@@ -1,4 +1,4 @@
-GtkVisualGSTTool subclass: GtkInspector [
+GtkBrowsingTool subclass: GtkInspector [
     | object notebookWidget inspectorWidget browserWidget workspaceWidget |
 
     GtkInspector class >> openOn: anObject [
@@ -162,36 +162,6 @@ GtkVisualGSTTool subclass: GtkInspector [
         self saveCodeOr: [ super close ]
     ]
 
-    onDelete [
-        <category: 'window events'>
-
-        self saveCodeOr: [ window hideAll ].
-        ^ true
-    ]
-
-    saveCodeOr: dropBlock [
-        <category: 'saving'>
-
-        | dialog |
-        self hasChanged ifFalse: [ dropBlock value. ^self ].
-        dialog := GTK.GtkMessageDialog
-                                new: window
-                                flags: GTK.Gtk gtkDialogDestroyWithParent
-                                type: GTK.Gtk gtkMessageWarning
-                                buttons: GTK.Gtk gtkButtonsNone
-                                message: 'Save the code before exiting?'
-                                tip: 'If you do not save, your changes to %1 will be lost...' % {browserWidget state}.
-
-        dialog
-            addButton: 'Drop' responseId: 0;
-            addButton: 'Cancel' responseId: 2;
-            addButton: 'Accept' responseId: 1;
-            showModalOnAnswer: [ :dlg :res |
-                res = 0 ifTrue: [ self acceptIt ].
-                res <= 1 ifTrue: dropBlock.
-                dlg destroy ].
-    ]
-
     doIt [
         <category: 'smalltalk events'>
 
@@ -257,8 +227,20 @@ GtkVisualGSTTool subclass: GtkInspector [
 
         | widget |
         widget := self focusedWidget.
-        widget isNil ifTrue: [^false].
-        ^widget hasSelection
+        widget isNil ifTrue: [ ^ false ].
+        ^ widget hasSelection
+    ]
+
+    clearUndo [
+	<category: 'undo'>
+
+	browserWidget clearUndo
+    ]
+
+    hasChanged [
+	<category: 'close events'>
+
+	^ browserWidget hasChanged
     ]
 ]
 

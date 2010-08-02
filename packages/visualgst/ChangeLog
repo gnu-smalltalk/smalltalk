@@ -1,3 +1,11 @@
+2010-08-02  Gwenael Casaccio  <mrgwen@gmail.com>
+
+	* GtkBrowsingTool.st: Whitespace change.
+	* Inspector/GtkInspector.st: Inherit from GtkBrowsingTool.
+	Implement abstract methods, remove those now in the superclass.
+	* Inspector/GtkInspectorBrowserWidget.st: Add #hasChanged,
+	some whitespace changes.
+
 2010-06-23  Paolo Bonzini  <bonzini@gnu.org>
             Gwenael Casaccio  <mrgwen@gmail.com>
 
