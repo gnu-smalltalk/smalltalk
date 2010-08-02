@@ -51,21 +51,10 @@
 
 (defvar smalltalk-mode-syntax-table 
   (let ((table (make-syntax-table)))
-    (setq smalltalk-mode-syntax-table (make-syntax-table))
     ;; Make sure A-z0-9 are set to "w   " for completeness
-    (let ((c 0))
-      (setq c ?0)
-      (while (<= c ?9)
-	(setq c (1+ c))
-	(modify-syntax-entry c "w   " table))
-      (setq c ?A)
-      (while (<= c ?Z)
-	(setq c (1+ c))
-	(modify-syntax-entry c "w   " table))
-      (setq c ?a)
-      (while (<= c ?z)
-	(setq c (1+ c))
-	(modify-syntax-entry c "w   " table)))
+    (modify-syntax-entry '(?0 . ?9) "w   " table)
+    (modify-syntax-entry '(?a . ?z) "w   " table)
+    (modify-syntax-entry '(?A . ?Z) "w   " table)
     (modify-syntax-entry 10  " >  " table) ; Comment (generic)
     (modify-syntax-entry ?:  ".   " table) ; Symbol-char
     (modify-syntax-entry ?_  "_   " table) ; Symbol-char
@@ -959,7 +948,7 @@ Whitespace is defined as spaces, tabs, and comments."
 	curr-hit-point curr-hit new-hit-point new-hit)
     (save-excursion
       (if (setq curr-hit-point
-		(search-backward-regexp "^![ \t]*\\(\\w+\\)[ \t]+" nil t))
+		(search-backward-regexp "^![ \t]*\\(\\(\\w+\\.\\)*\\w+)[ \t]+" nil t))
 	  (setq curr-hit (buffer-substring
 			  (match-beginning 1)
 			  (match-end 1)))))
@@ -992,10 +981,10 @@ Whitespace is defined as spaces, tabs, and comments."
     (save-excursion
       (if (setq new-hit-point
 		(search-backward-regexp
-		 "^[ \t]*\\w+[ \t]+\\(variable\\|variableWord\\|variableByte\\)?subclass:[ \t]+#?\\(\\w+\\)" nil t))
+		 "^[ \t]*\\(\\w+\\.\\)*\\w+[ \t]+\\(variable\\|variableWord\\|variableByte\\)?subclass:[ \t]+#?\\(\\w+\\)" nil t))
 	  (setq new-hit (buffer-substring
-			 (match-beginning 2)
-			 (match-end 2)))))
+			 (match-beginning 3)
+			 (match-end 3)))))
     (if (and new-hit-point
 	     (or (not curr-hit-point) (> new-hit-point curr-hit-point)))
 	(progn (setq curr-hit-point new-hit-point)
