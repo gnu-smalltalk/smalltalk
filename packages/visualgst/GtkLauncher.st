@@ -842,6 +842,12 @@ THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.'
 	browsers currentWidget fileoutMethod
     ]
 
+    currentWidgetOfBrowser [
+	<category: 'browsers'>
+
+	^ browsers currentWidget
+    ]
+
     notebookHasFocus [
 	<category: 'testing'>
 

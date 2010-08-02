@@ -1,5 +1,10 @@
 2010-08-02  Gwenael Casaccio  <mrgwen@gmail.com>
 
+	* GtkClassBrowser.st: Add missing #hasChanged.
+	* GtkLauncher.st: Add missing #currentWidgetOfBrowser.
+
+2010-08-02  Gwenael Casaccio  <mrgwen@gmail.com>
+
 	* GtkBrowsingTool.st: Whitespace change.
 	* Inspector/GtkInspector.st: Inherit from GtkBrowsingTool.
 	Implement abstract methods, remove those now in the superclass.

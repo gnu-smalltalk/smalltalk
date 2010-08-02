@@ -317,6 +317,12 @@ GtkBrowsingTool subclass: GtkClassBrowser [
 	^ true
     ]
 
+    hasChanged [
+        <category: 'testing'>
+
+        ^ browserWidget hasChanged
+    ]
+
     selectANamespace: aNamespace [
 	<category: 'selection'>
 
