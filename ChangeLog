@@ -1,3 +1,7 @@
+2010-08-05  Paolo Bonzini <bonzini@gnu.org>
+
+	* kernel/URL.st: Add #scheme:host:path:, fix #scheme:path:.
+
 2010-07-26  Paolo Bonzini <bonzini@gnu.org>
 
 	* scripts/Remote.st: Fix typo.

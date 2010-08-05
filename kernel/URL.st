@@ -177,6 +177,19 @@ Copyright (c) Kazuki Yasumatsu, 1995. All rights reserved.
 	    yourself
     ]
 
+
+    URL class >> scheme: schemeString host: hostString path: pathString [
+	"Answer an URL object made from all the parts passed as arguments."
+
+	<category: 'instance creation'>
+	^(self new)
+	    scheme: schemeString;
+	    host: hostString;
+	    port: 0;
+	    path: pathString;
+	    yourself
+    ]
+
     URL class >> scheme: schemeString path: pathString [
 	"Answer an URL object made from all the parts passed as arguments."
 
@@ -184,7 +197,7 @@ Copyright (c) Kazuki Yasumatsu, 1995. All rights reserved.
 	^(self new)
 	    scheme: schemeString;
 	    host: nil;
-	    port: nil;
+	    port: 0;
 	    path: pathString;
 	    yourself
     ]
