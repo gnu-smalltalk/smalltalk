@@ -948,7 +948,7 @@ Whitespace is defined as spaces, tabs, and comments."
 	curr-hit-point curr-hit new-hit-point new-hit)
     (save-excursion
       (if (setq curr-hit-point
-		(search-backward-regexp "^![ \t]*\\(\\(\\w+\\.\\)*\\w+)[ \t]+" nil t))
+		(search-backward-regexp "^![ \t]*\\(\\(\\w+\\.\\)*\\w+\\)[ \t]+" nil t))
 	  (setq curr-hit (buffer-substring
 			  (match-beginning 1)
 			  (match-end 1)))))
@@ -969,7 +969,7 @@ Whitespace is defined as spaces, tabs, and comments."
     (save-excursion
       (if (setq new-hit-point
 		(search-backward-regexp
-		 "^[ \t]*\\(\\w+\\)[ \t]+extend[ \t]+\\[" nil t))
+		 "^[ \t]*\\(\\w+\\.\\)*\\(\\w+\\)[ \t]+extend[ \t]+\\[" nil t))
 	  (setq new-hit (buffer-substring
 			 (match-beginning 1)
 			 (match-end 1)))))
@@ -991,23 +991,23 @@ Whitespace is defined as spaces, tabs, and comments."
 	       (setq curr-hit new-hit)))
     (cons curr-hit curr-hit-point)))
 
-(defun smalltalk-current-scope-point ()
-  (let ((curr-hit-point (smalltalk-current-class-point))
-	new-hit-point)
-    (save-excursion
-      (setq new-hit-point
-		(search-backward-regexp "^[ \t]*Eval[ \t]+\\[" nil t)))
-    (if (and new-hit-point
-	     (or (not curr-hit-point) (> new-hit-point curr-hit-point)))
-	(setq curr-hit-point new-hit-point))
-    
-    (save-excursion
-      (setq new-hit-point
-	    (search-backward-regexp "^[ \t]*Namespace[ \t]+current:[ \t]+[A-Za-z0-9_.]+[ \t]+\\[" nil t)))
-    (if (and new-hit-point
-	     (or (not curr-hit-point) (> new-hit-point curr-hit-point)))
-	(setq curr-hit-point new-hit-point))
 
+
+(defun smalltalk-current-scope-point ()
+  (defun smalltalk-update-hit-point (current search)
+    (save-excursion
+      (let ((new-hit-point (funcall search)))
+	(if (and new-hit-point
+		 (or (not current) (> new-hit-point current)))
+	    (new-hit-point)
+	  current))))
+  (let ((curr-hit-point (smalltalk-current-class-point)))
+    (setq curr-hit-point 
+	  (smalltalk-update-hit-point curr-hit-point 
+				      #'(lambda ()(search-backward-regexp "^[ \t]*Eval[ \t]+\\[" nil t))))
+    (setq curr-hit-point 
+	  (smalltalk-update-hit-point curr-hit-point 
+				      #'(lambda ()(search-backward-regexp "^[ \t]*Namespace[ \t]+current:[ \t]+[A-Za-z0-9_.]+[ \t]+\\[" nil t))))
     curr-hit-point))
 
 (defun smalltalk-current-class-point ()
