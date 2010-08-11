@@ -52,9 +52,19 @@
 (defvar smalltalk-mode-syntax-table 
   (let ((table (make-syntax-table)))
     ;; Make sure A-z0-9 are set to "w   " for completeness
-    (modify-syntax-entry '(?0 . ?9) "w   " table)
-    (modify-syntax-entry '(?a . ?z) "w   " table)
-    (modify-syntax-entry '(?A . ?Z) "w   " table)
+    (let ((c 0))
+      (setq c ?0)
+      (while (<= c ?9)
+	(setq c (1+ c))
+	(modify-syntax-entry c "w   " table))
+      (setq c ?A)
+      (while (<= c ?Z)
+	(setq c (1+ c))
+	(modify-syntax-entry c "w   " table))
+      (setq c ?a)
+      (while (<= c ?z)
+	(setq c (1+ c))
+	(modify-syntax-entry c "w   " table)))
     (modify-syntax-entry 10  " >  " table) ; Comment (generic)
     (modify-syntax-entry ?:  ".   " table) ; Symbol-char
     (modify-syntax-entry ?_  "_   " table) ; Symbol-char
