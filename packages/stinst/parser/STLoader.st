@@ -341,7 +341,7 @@ doMethodsFor: receiver selector: selector arguments: argumentNodes
 
 resolveClass: node
     | object |
-    (node isMessage and: [ node selector = #class ])
+    (node isMessage and: [ node selector = #class or: [ node selector = #classSide ]])
 	ifTrue: [ ^(self resolveClass: node receiver) asMetaclass ].
     node isLiteral ifTrue: [
         "Dictionary cannot have nil as a key, use the entire RBLiteralNode."
