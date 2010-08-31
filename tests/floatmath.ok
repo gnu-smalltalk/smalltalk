@@ -310,6 +310,18 @@ true->1.0d101
 returned value is 1.00000d+101
 
 Execution begins...
+true->9.46
+returned value is 9.46000
+
+Execution begins...
+true->0.3
+returned value is 0.300000
+
+Execution begins...
+true->0.30000000000000004
+returned value is 0.300000
+
+Execution begins...
 returned value is true
 
 Execution begins...

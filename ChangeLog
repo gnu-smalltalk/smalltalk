@@ -1,5 +1,13 @@
 2010-08-31  Paolo Bonzini <bonzini@gnu.org>
 
+	* kernel/Float.st: Correctly print numbers that require extra
+	digits to be distinguished.  Also try rounding down to eliminate
+	long sequence of zeros.  Reported by Nicolas Petton.
+	* tests/floatmath.st: Add testcases.
+	* tests/floatmath.ok: Regenerate.
+
+2010-08-31  Paolo Bonzini <bonzini@gnu.org>
+
 	* kernel/Number.st: Read base-10 exponents.
 
 2010-08-05  Paolo Bonzini <bonzini@gnu.org>

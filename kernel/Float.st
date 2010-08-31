@@ -494,7 +494,8 @@ if the hardware supports it.'>
 	<category: 'private'>
 	"First, take care of the easy cases."
 
-	| me exponential small num weight prevWeight digit eps precision digits digitStream exponent dotPrinted allNines |
+	| me exponential small num numDigits change weight prevWeight digit eps
+          precision digits digitStream exponent dotPrinted allNines adjust |
 	self isNaN 
 	    ifTrue: [^aStream nextPutAll: (whatToPrintArray at: 3) % {self class}].
 	self = self class infinity 
@@ -519,27 +520,44 @@ if the hardware supports it.'>
 	exponent := (num floorLog: 10) + 1.
 	digits := 0.
 	weight := 10 raisedToInteger: exponent - 1.
-	allNines := true.
-	me class decimalDigits timesRepeat: 
-		[digit := num // weight.
-		allNines := allNines and: [digit = 9].
-		digits := digits * 10 + digit.
-		num := num - (digit * weight).
-		prevWeight := weight.
-		weight := weight / 10].
 
 	"Smallest number such that me + eps ~= eps"
 	eps := 2 raisedToInteger: me exponent - me class precision + 1.
-	"For large numbers, don't let round-to-even bite us."
-	eps isInteger ifTrue: [eps := eps / 2].
 
-         "Round the last digit if it is a better approximation, or if it
-	  allows to save trailing nines while not changing the meaning."
-	((num - prevWeight) abs < num or: [
-	    digit = 9 and: [ num - prevWeight > (eps / -2) ]])
-		ifTrue: [
-		    digits := digits + 1.
-		    allNines ifTrue: [allNines := false. exponent := exponent + 1]].
+	allNines := true.
+        change := false.
+        numDigits := me class decimalDigits.
+
+        [digit := num // weight.
+	allNines := allNines and: [digit = 9].
+        change := change or: [(num + eps) // weight > digit].
+	digits := digits * 10 + digit.
+	num := num - (digit * weight).
+	prevWeight := weight.
+	weight := weight / 10.
+        numDigits := numDigits - 1.
+	numDigits <= 0 and: [change]] whileFalse.
+
+         "Round the last digit if it is a better approximation.
+	  For large numbers, don't let round-to-even bite us."
+
+	eps isInteger ifTrue: [eps := eps / 2].
+	adjust := 0.
+	(digit = 0 and: [ num < (eps / 2) ]) ifFalse: [
+            (num - prevWeight) abs < num ifTrue: [adjust := 1].
+            (num + prevWeight) abs < num ifTrue: [adjust := -1]].
+
+        "... or if it allows to save trailing digits while not changing
+         the meaning."
+	(digit <= 5 and: [num + (digit * prevWeight) < (eps / 2)])
+            ifTrue: [adjust := digit negated].
+	(digit > 5 and: [num + ((digit - 10) * prevWeight) > (eps / -2)])
+            ifTrue: [adjust := 10 - digit].
+
+	digits := digits + adjust.
+	(adjust > 0 and: [allNines])
+            ifTrue: [allNines := false. exponent := exponent + 1].
+
 	digits := digits printString.
 
 	"Print the non-significant zeros."
