@@ -1,3 +1,7 @@
+2010-08-31  Paolo Bonzini <bonzini@gnu.org>
+
+	* kernel/Number.st: Read base-10 exponents.
+
 2010-08-05  Paolo Bonzini <bonzini@gnu.org>
 
 	* kernel/URL.st: Add #scheme:host:path:, fix #scheme:path:.
