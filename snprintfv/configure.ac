@@ -104,19 +104,6 @@ else
 fi
 AC_SUBST(LIBSNPRINTFVC_PRINT_FLOATS)
 
-AC_ARG_ENABLE(debug,
-[  --enable-debug          enable/disable debugging code [no]], ,
-enable_debug=no)
-AC_MSG_CHECKING([whether runtime debugging is wanted])
-AC_MSG_RESULT([$enable_debug])
-if test x$enable_debug = xyes; then
-  CPPFLAGS="-DDEBUG $CPPFLAGS"
-  CFLAGS="-g `echo $CFLAGS|sed 's%-g *%%g'`"
-  if test x$GCC != xyes; then
-    CFLAGS=`echo $CFLAGS|sed 's%-O[[0-9]]* *%%g'`
-  fi
-fi
-
 AM_WITH_DMALLOC
 
 # ----------------------------------------------------------------------
