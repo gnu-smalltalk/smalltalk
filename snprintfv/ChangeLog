@@ -1,5 +1,9 @@
 2010-09-13  Paolo Bonzini  <bonzini@gnu.org>
 
+	* configure.ac: Fix cut-and-paste mistake.
+
+2010-09-13  Paolo Bonzini  <bonzini@gnu.org>
+
 	* configure.ac: Remove --enable-debug support.
 
 2010-07-27  Paolo Bonzini  <bonzini@gnu.org>

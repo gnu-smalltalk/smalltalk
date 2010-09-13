@@ -88,7 +88,7 @@ if test x"${enable_snprintfv_convenience-no}" != xno; then
 fi
 AC_SUBST(convenience_libsnprintfv)
 
-AC_ARG_ENABLE(debug,
+AC_ARG_ENABLE(convenience-float-printing,
 [  --enable-convenience-float-printing     enable/disable printing floats
 					   in convenience snprintfv [yes]], ,
 enable_convenience_float_printing=yes)
