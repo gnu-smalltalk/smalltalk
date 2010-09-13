@@ -253,7 +253,7 @@ STInST.STFileInParser subclass: GSTFileInParser [
                      self evaluateStatement: stmt]
             ifFalse: [self evaluateMessageOn: taggee
                            selector: selector
-                           argument: argument token value]
+                           argument: argument value]
     ]
     
     parseClassVariable [ 
