@@ -1,3 +1,8 @@
+2010-09-13  Paolo Bonzini <bonzini@gnu.org>
+
+	* tests/cobjects.st: Add CPtr testcase.
+	* tests/cobjects.ok: Regenerate.
+
 2010-08-31  Paolo Bonzini <bonzini@gnu.org>
 
 	* kernel/Float.st: Correctly print numbers that require extra

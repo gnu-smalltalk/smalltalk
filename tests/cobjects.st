@@ -189,5 +189,18 @@ Eval [
     cObj storage printNl
 ]
 
+" Play with CPtrs"
+
+Eval [
+    t := CStringType ptrType.
+    c := t new: 2.
+    c value: (CString value: 'abc').
+    (c+1) value: (CString value: 'def').
+    c value value printNl.
+    (c at: 0) value printNl.
+    (c at: 1) value printNl.
+    c
+]
+
 " ### need a lot more!"
 

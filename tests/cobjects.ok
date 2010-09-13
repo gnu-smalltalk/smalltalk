@@ -130,3 +130,9 @@ returned value is nil
 Execution begins...
 ByteArray (0 0 0 0 65 0 0 0 )
 returned value is ByteArray new: 8 "<0>"
+
+Execution begins...
+'abc'
+'abc'
+'def'
+returned value is CPtr new: 1 "<0>"
