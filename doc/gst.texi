@@ -3214,7 +3214,7 @@ However, there is no special significance to which class receives the
 method; it could have just as well been Float, but it might look kind of
 strange to see:
 @example
-   1701.0 system: 'mail help-smalltalk@@gnu.org' !
+   1701.0 system: 'mail help-smalltalk@@g@:nu.org' !
 @end example
 
 The various keyword arguments are described below.
