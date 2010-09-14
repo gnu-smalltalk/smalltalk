@@ -1,3 +1,8 @@
+2010-09-13  Holger Hand Peter Freyther  <zecke@selfish.org>
+
+	* tests/strings.st: Tests for String>>asNumber.
+	* tests/strings.ok: Regenerate.
+
 2010-09-13  Paolo Bonzini <bonzini@gnu.org>
 
 	* tests/cobjects.st: Add CPtr testcase.

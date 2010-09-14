@@ -127,3 +127,17 @@ Eval [ ('xaxbxcx' allOccurrencesOfRegex: 'x*') size ]
 Eval [ ('xaxbxxcx' allOccurrencesOfRegex: 'x*') size ]
 Eval [ ('f' allOccurrencesOfRegex: 'o*\Z') size ]		"1"
 Eval [ ('fo' allOccurrencesOfRegex: 'o*\Z') size ]
+
+"Some basic number parsing tests"
+Eval [ '10' asNumber ]                                         "10"
+Eval [ '10.0' asNumber ]                                       "10.0"
+Eval [ '10.0e0' asNumber ]                                     "10.0"
+Eval [ '10.0e1' asNumber ]                                     "100.0"
+Eval [ '10.0e+1' asNumber ]                                    "100.0"
+Eval [ '10.0e-1' asNumber ]                                    "1.0"
+Eval [ '1e0' asNumber ]                                        "1"
+Eval [ '1e-0' asNumber ]                                       "1"
+Eval [ '1e-1' asNumber ]                                       "0.1"
+Eval [ '1e+0' asNumber ]                                       "1"
+Eval [ '1e+1' asNumber ]                                       "10"
+
