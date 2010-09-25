@@ -1,5 +1,9 @@
 2010-09-25  Paolo Bonzini <bonzini@gnu.org>
 
+	* kernel/SysExcept.st: Fix duplicate instance variable declaration.
+
+2010-09-25  Paolo Bonzini <bonzini@gnu.org>
+
 	* kernel/Behavior.st: Fix #instanceVariableNames: to always recompile
 	when needed.  Reported by Mathieu Suen.
 	* tests/classes.st: Add testcase.

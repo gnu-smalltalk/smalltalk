@@ -457,7 +457,6 @@ Error subclass: InvalidValue [
 Namespace current: SystemExceptions [
 
 InvalidValue subclass: InvalidState [
-    | value |
     
     <category: 'Language-Exceptions'>
     <comment: 'I am raised when one invokes a method and the receiver or an argument
