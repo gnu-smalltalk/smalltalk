@@ -1,3 +1,7 @@
+2010-09-25  Gwenael Casaccio  <mrgwen@gmail.com>
+
+	* libgst/gst-parse.c: Support multi-keyword class attributes.
+
 2010-07-27  Paolo Bonzini <bonzini@gnu.org>
 
 	* libgst/sysdep.h: Correctly use size_t/ssize_t.
