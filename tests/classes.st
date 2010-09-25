@@ -222,3 +222,86 @@ Eval [ 			Rocky get ]
 "Test out parsing bad instance variable names"
 Eval [ Rambo instanceVariableNames: 'd99ogABCRblammo 9whammo loser! dogbert++' ]
 Eval [ Rambo instanceVariableNames: 'dog!,blammo whammo? loser! dogbert++' ]
+
+"Test mutation"
+
+Eval [
+    (Object subclass: #AB)
+        instanceVariableNames: 'a'.
+    (AB subclass: #C)
+        instanceVariableNames: 'c';
+        createGetMethod: 'c';
+        createSetMethod: 'c'.
+
+    cObj := C new.
+    cObj c: 34.
+    Smalltalk at: #TestObj put: cObj.
+    ^C instSize
+]
+
+Eval [
+    ^TestObj c
+]
+
+Eval [
+    ^TestObj instVarAt: 2
+]
+
+Eval [
+    AB
+        instanceVariableNames: 'a b';
+        createGetMethod: 'b';
+        createSetMethod: 'b'.
+    ^C instSize
+]
+
+Eval [
+    ^TestObj c
+]
+
+Eval [
+    ^TestObj instVarAt: 3
+]
+
+Eval [
+    TestObj b: 12.
+    AB instanceVariableNames: 'b'.
+    ^C instSize
+]
+
+Eval [
+    ^TestObj b
+]
+
+Eval [
+    ^TestObj instVarAt: 1
+]
+
+Eval [
+    ^TestObj c
+]
+
+Eval [
+    ^TestObj instVarAt: 2
+]
+
+Eval [
+    AB instanceVariableNames: 'b a'.
+    ^C instSize
+]
+
+Eval [
+    ^TestObj b
+]
+
+Eval [
+    ^TestObj instVarAt: 1
+]
+
+Eval [
+    ^TestObj c
+]
+
+Eval [
+    ^TestObj instVarAt: 3
+]

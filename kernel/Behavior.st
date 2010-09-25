@@ -84,7 +84,7 @@ method dictionary, and iterating over the class hierarchy.'>
          in instVarNames"
 
         <category: 'instance variables'>
-        | variableArray oldInstVarNames |
+        | variableArray oldInstVarNames oldSize removed changed added |
         variableArray := self parseInstanceVariableString: instVarNames.
         variableArray := self subclassInstVarNames, variableArray.
         oldInstVarNames := self allInstVarNames.
@@ -94,14 +94,32 @@ method dictionary, and iterating over the class hierarchy.'>
         variableArray = oldInstVarNames ifTrue: [^self].
         self updateInstanceVars: variableArray shape: self shape.
 
-        "If no variable has been removed, no need to recompile"
-        (oldInstVarNames allSatisfy: [:each | variableArray includes: each])
-            ifTrue: [^self].
-        Transcript
-            nextPutAll: 'Recompiling classes...';
-            nl.
-        self compileAll.
+        "If this class or the subclasses' variables changed, need to recompile."
+        oldSize := oldInstVarNames size.
+        changed := variableArray size < oldSize or: [
+            (variableArray first: oldSize) ~= (oldInstVarNames first: oldSize)].
+        removed := oldInstVarNames anySatisfy: [:each |
+            (variableArray includes: each) not].
+        added := variableArray anySatisfy: [:each |
+            (oldInstVarNames includes: each) not].
+
+        changed | (removed | added and: [self subclassesNeedRecompilation])
+            ifFalse: [^self].
+
+        Transcript isNil ifFalse: [
+            Transcript
+                nextPutAll: 'Recompiling classes...';
+                nl ].
+
+        changed ifTrue: [self compileAll].
         self compileAllSubclasses
+    ]
+
+    subclassesNeedRecompilation [
+        <category: 'private'>
+
+        ^self allSubclasses anySatisfy: [ :each |
+            each methodDictionary size > 0 ]
     ]
 
     parseInstanceVariableString: variableString [

@@ -1,3 +1,10 @@
+2010-09-25  Paolo Bonzini <bonzini@gnu.org>
+
+	* kernel/Behavior.st: Fix #instanceVariableNames: to always recompile
+	when needed.  Reported by Mathieu Suen.
+	* tests/classes.st: Add testcase.
+	* tests/classes.ok: Regenerate.
+
 2010-09-13  Holger Hand Peter Freyther  <zecke@selfish.org>
 
 	* tests/strings.st: Tests for String>>asNumber.
