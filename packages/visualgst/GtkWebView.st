@@ -6,6 +6,7 @@ GTK.GtkWidget subclass: GtkWebView [
         <category: 'initialize'>
 
         DLD addLibrary: 'libwebkit-1.0'.
+        DLD addLibrary: 'libwebkitgtk-1.0'.
         ObjectMemory addDependent: self.
     ]
 

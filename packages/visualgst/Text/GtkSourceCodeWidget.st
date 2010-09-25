@@ -45,7 +45,7 @@ GtkTextWidget subclass: GtkSourceCodeWidget [
         menuitem
 	    setSensitive: symbol notNil;
             show;
-            connectSignal: 'activate' to: self selector: #browseSenders userData: nil.
+            connectSignal: 'activate' to: self selector: #browseSenders.
         aGtkMenu append: menuitem.
         menuitem := GTK.GtkMenuItem newWithLabel: 'Browse implementors'.
         menuitem

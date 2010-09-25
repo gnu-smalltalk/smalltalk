@@ -1,12 +1,11 @@
 Object subclass: GtkImage [
-    GtkImage class [ | current | ]
 
-    GtkImage class >> current [
-	<category: 'accessing'>
+    GtkImage class >> new [
+	<category: 'instance creation'>
 
-	^ current ifNil: [ current := (self new)
-					initialize;
-					yourself ]
+	^ self basicNew
+		initialize;
+		yourself
     ]
 
     | finderDic |
@@ -47,7 +46,8 @@ Object subclass: GtkImage [
         finderDic at: aNamespace displayString ifAbsentPut: [ Dictionary new ].
 	self at: aNamespace displayString addToFinder: (NamespaceFinder on: aNamespace).
 
-        aNamespace subspacesDo: [ :each | self appendNamespace: each ]
+        aNamespace subspacesDo: [ :each | self appendNamespace: each ].
+	Processor activeProcess yield
     ]
 
     buildClassModel [
@@ -55,6 +55,7 @@ Object subclass: GtkImage [
 
         | class string |
         Class allSubclassesDo: [ :each |
+	    Processor activeProcess yield.
             string := each asClass name asString, ' '.
             finderDic at: string ifAbsentPut: [ Dictionary new ].
 	    self at: string addToFinder: (ClassFinder on: each) ]
@@ -64,10 +65,11 @@ Object subclass: GtkImage [
         <category: 'model builder'>
 
 	| method |
-        [ CompiledMethod allInstancesDo: [ :each | | selector |
+        CompiledMethod allInstancesDo: [ :each | | selector |
+	    Processor activeProcess yield.
             selector := each selector asString.
             finderDic at: selector ifAbsentPut: [ Dictionary new ].
-	    self at: selector addToFinder: (MethodFinder on: each methodClass with: each selector) ] ] forkAt: Processor lowIOPriority
+	    self at: selector addToFinder: (MethodFinder on: each methodClass with: each selector) ]
     ]
 
     at: aSelector addToFinder: aFinderObject [

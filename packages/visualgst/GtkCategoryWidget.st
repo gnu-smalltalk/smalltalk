@@ -13,9 +13,14 @@ GtkConcreteWidget subclass: GtkCategoryWidget [
     initialize [
 	<category: 'initialization'>
 
-	categories := Set new.
+	self initializeCategories.
 	self mainWidget: self buildTreeView.
 	self registerNotifier
+    ]
+
+    initializeCategories [
+
+	categories := Set new.
     ]
 
     registerNotifier [
@@ -67,7 +72,7 @@ GtkConcreteWidget subclass: GtkCategoryWidget [
         <category: 'user interface'>
     
 	categoryTree := (GTK.GtkTreeView createListWithModel: {{GtkColumnTextType title: 'Method categories'}})
-			    connectSignal: 'button-press-event' to: self selector: #'onPress:event:' userData: nil;
+			    connectSignal: 'button-press-event' to: self selector: #'onPress:event:';
 			    yourself.
 	categoryTree getSelection setMode: GTK.Gtk gtkSelectionBrowse.
         (model := GtkListModel on: categoryTree getModel)
@@ -102,7 +107,7 @@ GtkConcreteWidget subclass: GtkCategoryWidget [
 	<category: 'events'>
 
 	categoryTree getSelection
-	    connectSignal: 'changed' to: anObject selector: aSelector userData: nil
+	    connectSignal: 'changed' to: anObject selector: aSelector
     ]
 
     state [
@@ -196,5 +201,6 @@ GtkConcreteWidget subclass: GtkCategoryWidget [
         (anEvent item methodClass == self classOrMeta and: [ (model hasItem: anEvent item methodCategory) not ]) ifFalse: [ ^ self ].
 	self removeEmptyCategory
     ]
+
 ]
 

@@ -198,8 +198,9 @@ Object subclass: ClassSource [
 	<category: 'printing'>
 
 	aClass methodDictionary ifNotNil: [ 
-	    aClass methodDictionary do: [ :each | 
-		self outputMethod: each ] ]
+	    (aClass methodDictionary asSortedCollection: [ :a :b | 
+		    a methodCategory < b methodCategory ]) do: [ :each | 
+			self outputMethod: each ] ]
     ]
 
     outputMethods [

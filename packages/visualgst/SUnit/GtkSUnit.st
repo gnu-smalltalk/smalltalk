@@ -6,7 +6,8 @@ GtkBrowsingTool subclass: GtkSUnit [
 
         ^{
 		GTK.GtkMenuItem menuItem: 'Load tests' connectTo: self selector: #loadTests.
-		GTK.GtkMenuItem menuItem: 'Run test' connectTo: self selector: #runTest}
+		GTK.GtkMenuItem menuItem: 'Run test' connectTo: self selector: #runTest.
+		GTK.GtkMenuItem menuItem: 'Debug test' connectTo: self selector: #debugTest}
     ]
 
     createMenus [
@@ -277,6 +278,17 @@ GtkBrowsingTool subclass: GtkSUnit [
 	errorWidget results: results errors.
 
 	results failures do: [ :each | each "logPolicy logStatus inspect" printNl ].
+    ]
+
+    debugTest [
+	<category: 'run events'>
+
+	classWidget hasSelectedClass ifFalse: [ ^ self ].
+	classWidget selectedClasses do: [ :elem | | test |
+	    test := elem new.
+	    elem selectors do: [ :each |
+		(each matchRegex: 'test' from: 1 to: 4)
+		    ifTrue: [ test setTestSelector: each. test debug ] ] ].
     ]
 
     compileError: aString line: line [

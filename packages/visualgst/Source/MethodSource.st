@@ -4,7 +4,7 @@ Object subclass: MethodSource [
     MethodSource class >> display: aCompiledMethod [
 	<category: 'instance creation'>
 
-	^ (self write: aCompiledMethod on: (WriteStream on: String new))
+	^ (self write: {aCompiledMethod} on: (WriteStream on: String new))
 	    method 
     ]
 
@@ -12,15 +12,24 @@ Object subclass: MethodSource [
 	<category: 'instance creation'>
 
 	^ self new
-	    printMethod: aCompiledMethod;
 	    stream: aStream;
+	    printMethod: {aCompiledMethod};
 	    yourself
     ]
 
-    printMethod: aCompiledMethod [
+    MethodSource class >> writeMethods: aCollection on: aStream [
+        <category: 'instance creation'>
+
+        ^ self new
+            stream: aStream;
+            printMethod: aCollection;
+            yourself
+    ]
+
+    printMethod: aCollection [
 	<category: 'accessing'>
 
-	printMethod := aCompiledMethod
+	printMethod := aCollection
     ]
 
     stream: aStream [
@@ -35,19 +44,19 @@ Object subclass: MethodSource [
 	^ printMethod methodSourceString 
     ]
 
-    methodSource [
+    methodSourceFor: aCompiledMethod [
         <category: 'accessing'>
 
-        ^ (printMethod methodSourceString
+        ^ (aCompiledMethod methodSourceString
                     ifNil: [ printMethod selector asString, ' [', Character nl asString, '    ]', Character nl asString ])
             copyReplacingAllRegex: '\t' with: '    '
     ]
 
-    outputMethod: aMethod [
+    outputMethod: aString [
         <category: 'printing'>
 
         | lines |
-        lines := self methodSource lines.
+        lines := aString lines.
         1 to: lines size - 1 do: [ :i |
             stream
                 space: 4;
@@ -62,10 +71,13 @@ Object subclass: MethodSource [
 	<category: 'accessing'>
 
         stream
-            nextPutAll: printMethod methodClass displayString;
+            nextPutAll: printMethod first methodClass displayString;
             nextPutAll: ' extend [';
             nl.
-        self outputMethod: self methodSource.
+
+	printMethod do: [ :each |
+	    self outputMethod: (self methodSourceFor: each) ].
+
 	stream
             nextPutAll: ']';
             nl.
@@ -76,7 +88,8 @@ Object subclass: MethodSource [
     sourceWithoutClassHeader [
         <category: 'accessing'>
 
-        self outputMethod: self methodSource.
+	printMethod do: [ :each |
+	    self outputMethod: (self methodSourceFor: each) ].
 
         stream nl. 
         ^ stream contents

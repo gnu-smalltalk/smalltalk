@@ -1,5 +1,5 @@
 Object subclass: AbstractFinder [
-    updateBrowserWidget: aGtkClassBrowserWidget [
+    updateBrowser: aGtkClassBrowserWidget [
 	<category: 'events'>
 
 	self subclassResponsibility

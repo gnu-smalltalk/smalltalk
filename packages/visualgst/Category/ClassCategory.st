@@ -61,8 +61,9 @@ Object subclass: ClassCategory [
 	<category: 'instance creation'>
 
         | token category |
-        token := name ifNil: [ #() ] ifNotNil: [ name tokenize: '-' ].
+        token := name ifNil: [ #() ] ifNotNil: [ (name tokenize: '-') asOrderedCollection ].
         category := aParentCategory.
+	token isEmpty ifFalse: [ token first = aNamespace name asString ifTrue: [ token removeFirst ] ].
         token do: [ :each |
             category at: each ifAbsentPut: [ self named: each parent: category namespace: aNamespace ].
             category := category at: each ].

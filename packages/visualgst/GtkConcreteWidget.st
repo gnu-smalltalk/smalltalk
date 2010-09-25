@@ -1,5 +1,14 @@
-Smalltalk.Object subclass: GtkConcreteWidget [
+GtkAbstractConcreteWidget subclass: GtkConcreteWidget [
     | child parentWindow |
+
+    GtkConcreteWidget class >> parentWindow: aGtkWindow [
+	<category: 'instance creation'>
+
+        ^ self new
+            parentWindow: aGtkWindow;
+            initialize;
+            yourself
+    ]
 
     GtkConcreteWidget class >> showAll [
 	<category: 'instance creation'>
@@ -8,6 +17,11 @@ Smalltalk.Object subclass: GtkConcreteWidget [
 	    initialize;
 	    showAll;
 	    yourself
+    ]
+
+    initialize [
+	<category: 'initialize'>
+
     ]
 
     parentWindow: aGtkWindow [
@@ -47,6 +61,12 @@ Smalltalk.Object subclass: GtkConcreteWidget [
 	child hideAll
     ]
 
+    isVisible [
+	<category: 'testing'>
+
+	^ child getVisible
+    ]
+
     hasFocus [
 	<category: 'testing'>
 
@@ -61,14 +81,14 @@ Smalltalk.Object subclass: GtkConcreteWidget [
     focusedWidget [
 	<category: 'focus'>
 
-        self hasFocus ifTrue: [^self].
-        ^nil
+        self hasFocus ifTrue: [ ^ self ].
+        ^ nil
     ]
 
     onFocusPerform: aSymbol [
         <category: 'widget'>
 
-        ^self focusedWidget perform: aSymbol
+        ^ self focusedWidget perform: aSymbol
     ]
 
     grabFocus [

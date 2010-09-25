@@ -86,7 +86,7 @@ GtkConcreteWidget subclass: GtkMethodWidget [
         <category: 'user interface'>
     
 	methodTree := (GTK.GtkTreeView createListWithModel: {{GtkColumnTextType title: 'Methods'}})
-                            connectSignal: 'button-press-event' to: self selector: #'onPress:event:' userData: nil;
+                            connectSignal: 'button-press-event' to: self selector: #'onPress:event:';
                             yourself.
 	methodTree getSelection setMode: GTK.Gtk gtkSelectionBrowse.
 	(model := GtkListModel on: methodTree getModel)
@@ -129,7 +129,7 @@ GtkConcreteWidget subclass: GtkMethodWidget [
 	<category: 'events'>
 
 	methodTree getSelection
-	    connectSignal: 'changed' to: anObject selector: aSelector userData: nil
+	    connectSignal: 'changed' to: anObject selector: aSelector
     ]
 
     browserHasFocus [

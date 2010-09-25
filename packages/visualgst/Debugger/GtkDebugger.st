@@ -49,32 +49,24 @@ GtkBrowsingTool subclass: GtkDebugger [
     buildContextWidget [
 	<category: 'user interface'>
 
-	^ (contextWidget := GtkContextWidget new)
-            parentWindow: window;
-	    initialize;
-	    whenSelectionChangedSend: #contextChanged to: self;
-	    mainWidget
+	^ contextWidget := (GtkContextWidget parentWindow: window)
+				whenSelectionChangedSend: #contextChanged to: self;
+				yourself
     ]
 
     buildInspectorWidget [
 	<category: 'user interface'>
 
-	^ (inspectorWidget := GtkInspectorWidget new)
-            parentWindow: window;
-	    initialize;
-	    mainWidget
+	^ inspectorWidget := GtkInspectorWidget parentWindow: window
     ]
 
     buildSourceWidget [
 	<category: 'user interface'>
 
-	^ (codeWidget := GtkSourceCodeWidget new)
-            initialize;
-	    appendTag: #debug
-		description: #('paragraph-background' 'grey83' 'foreground' 'black' nil);
-	    parentWindow: window;
-	    browser: self;
-            mainWidget
+	^ codeWidget := (GtkSourceCodeWidget parentWindow: window) 
+			    appendTag: #debug description: #('paragraph-background' 'grey83' 'foreground' 'black' nil);
+			    browser: self;
+			    yourself
     ]
 
     buildStackInspectorWidget [
@@ -89,28 +81,19 @@ GtkBrowsingTool subclass: GtkDebugger [
     buildInspectorsWidget [
 	<category: 'user interface'>
 
-	^ (GTK.GtkHPaned new)
-            pack1: self buildInspectorWidget resize: true shrink: false;
-            pack2: self buildStackInspectorWidget resize: true shrink: true;
-            yourself
+	^ GTK.GtkHPaned addAll: {self buildInspectorWidget mainWidget. self buildStackInspectorWidget}
     ]
 
     buildCodeAndStateWidget [
 	<category: 'intialize-release'>
 
-	^ (GTK.GtkVPaned new)
-	    pack1: self buildSourceWidget resize: true shrink: false;
-	    pack2: self buildInspectorsWidget resize: true shrink: true;
-	    yourself
+	^ GTK.GtkVPaned addAll: {self buildSourceWidget mainWidget. self buildInspectorsWidget}
     ]
 
     buildCentralWidget [
 	<category: 'intialize-release'>
 
-	^ (GTK.GtkVPaned new)
-	    pack1: self buildContextWidget resize: true shrink: false;
-	    pack2: self buildCodeAndStateWidget resize: true shrink: true;
-	    yourself
+	^ GTK.GtkVPaned addAll: {self buildContextWidget mainWidget. self buildCodeAndStateWidget}
     ]
 
     createExecuteMenus [

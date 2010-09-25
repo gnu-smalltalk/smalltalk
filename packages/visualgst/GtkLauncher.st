@@ -1,7 +1,7 @@
 GtkVisualGSTTool subclass: GtkLauncher [
     GtkLauncher class [ | history uniqueInstance | ]
 
-    | historyWidget browsers outputs saved imageName transcriptWidget windowsMenu systemChangeNotifier |
+    | leftSidebar rightSidebar topSidebar packageBuilderWidget implementorResultWidget senderResultWidget senderWidget implementorWidget historyWidget browsers outputs saved imageName transcriptWidget windowsMenu systemChangeNotifier |
 
     GtkLauncher class >> addHistory: aClass [
 	<category: 'public'>
@@ -72,46 +72,6 @@ GtkVisualGSTTool subclass: GtkLauncher [
 	<category: 'user interface'>
 
         self uniqueInstance
-    ]
-
-    GtkLauncher class >> version [
-	<category: 'accessing'>
-
-	^ '0.7.5'
-    ]
-
-    GtkLauncher class >> website [
-	<category: 'accessing'>
-
-	^ 'http://visualgst.bioskop.fr/'
-    ]
-    
-    GtkLauncher class >> gstWebsite [
-	<category: 'accessing'>
-
-	^ 'http://smalltalk.gnu.org/'
-    ]
-
-    GtkLauncher class >> license [
-	<category: 'accessing'>
-
-	^
-'Permission is hereby granted, free of charge, to any person obtaining
-a copy of this software and associated documentation files (the "Software"),
-to deal in the Software without restriction, including without limitation
-the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or
-sell copies of the Software, and to permit persons to whom the Software is furnished
-to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in
-all copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,
-INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A
-PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
-COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN
-AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH
-THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.'
     ]
 
     GtkLauncher class >> displayError: title message: error [
@@ -304,7 +264,6 @@ THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.'
     clearGlobalState [
 	<category: 'initialization cleanup'>
 
-	GtkImageModel release
     ]
 
     initialize [
@@ -316,12 +275,13 @@ THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.'
         SystemChangeNotifier root add: systemChangeNotifier.
 	self clearGlobalState.
 	super initialize.
-	window maximize.
+	window maximize
     ]
 
     windowTitle [
         <category: 'widget'>
-        ^'VisualGST'
+
+        ^ 'VisualGST'
     ]
 
     browserPostInitialize [
@@ -339,9 +299,11 @@ THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.'
 	super postInitialize.
         self browserPostInitialize.
 	1 to: 2 do: [ :i | (outputs widgetAt: i) postInitialize ].
-	historyWidget hideAll.
+	leftSidebar postInitialize.
+	topSidebar postInitialize.
+	rightSidebar postInitialize.
 	window
-	    connectSignal: 'key-press-event' to: self selector:  #'keyPressedOn:keyEvent:' userData: nil
+	    connectSignal: 'key-press-event' to: self selector:  #'keyPressedOn:keyEvent:'
     ]
 
     buildNotebookWorkspaceWidget [
@@ -364,23 +326,67 @@ THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.'
 	^ self buildBrowserAndWorkspaceWidget
     ]
 
-    buildHistoryPaned [
+    buildImplementorPaned [
        <category: 'user interface'>
 
-        ^ GTK.GtkHPaned new
-            pack1: self buildHistoryView resize: true shrink: false;
-            pack2: self buildClassBrowserTabbedWidget mainWidget resize: true shrink: true ;
-            showAll;
-            yourself
+	leftSidebar := GtkHSidebarWidget new
+			    initialize;
+			    addAll: {self buildImplementorView -> 'Implementor'. self buildSenderView -> 'Sender'. self buildHistoryView -> 'History'};
+			    yourself.
+	^ leftSidebar mainWidget
+    ]
+
+    buildPackageBuilderView [
+	<category: 'user interface'>
+
+	packageBuilderWidget := GtkPackageBuilderWidget new
+						    initialize;
+						    yourself.
+	^ packageBuilderWidget mainWidget
+    ]
+
+    buildRightSidebarPaned [
+       <category: 'user interface'>
+
+        rightSidebar := GtkHSidebarWidget new
+                            initialize;
+                            addAll: {self buildPackageBuilderView -> 'Package Builder'};
+                            yourself.
+        ^ rightSidebar mainWidget
     ]
 
     buildBrowserAndWorkspaceWidget [
         <category: 'intialize-release'>
 
-        ^ GTK.GtkVPaned new
-            pack1: self buildHistoryPaned resize: true shrink: true;
-            pack2: self buildNotebookWorkspaceWidget mainWidget resize: true shrink: false;
-            yourself
+        ^ GTK.GtkVPaned addAll: {
+		    GTK.GtkHPaned addAll: {self buildImplementorPaned. self buildBottomPanedAndClassBrowser. self buildRightSidebarPaned}. 
+		    self buildNotebookWorkspaceWidget mainWidget}
+    ]
+
+    buildImplementorView [
+       <category: 'user interface'>
+
+        implementorWidget := self buildImageView
+			    whenSelectionChangedSend: #implementorSelected to: self;
+			    yourself.
+        ^ implementorWidget mainWidget
+    ]
+
+    buildSenderView [
+       <category: 'user interface'>
+
+        senderWidget := self buildImageView
+			    whenSelectionChangedSend: #senderSelected to: self;
+			    yourself.
+        ^ senderWidget mainWidget
+    ]
+
+    buildImageView [
+       <category: 'user interface'>
+
+        ^ GtkImageWidget new
+			initialize;
+                        yourself
     ]
 
     buildHistoryView [
@@ -393,50 +399,72 @@ THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.'
         ^ historyWidget mainWidget
     ]
 
+    buildImplementorResultList [
+        <category: 'user interface'>
+
+        ^ implementorResultWidget := GtkImplementorResultsWidget new
+					    initialize;
+					    whenSelectionChangedSend: #resultImplementorSelected to: self;
+					    yourself
+    ]
+
+    buildSenderResultList [
+        <category: 'user interface'>
+
+        ^ senderResultWidget := GtkSenderResultsWidget new
+					    initialize;
+					    whenSelectionChangedSend: #resultSenderSelected to: self;
+					    yourself
+    ]
+
+    buildTopSidebar [
+        <category: 'user interface'>
+
+        topSidebar := GtkHSidebarWidget new
+                            initialize;
+                            addAll: {self buildImplementorResultList mainWidget -> ''. self buildSenderResultList mainWidget -> ''};
+			    hideTabs;
+                            yourself.
+        ^ topSidebar mainWidget
+    ]
+
+    buildBottomPanedAndClassBrowser [
+        <category: 'user interface'>
+
+	^ GTK.GtkVPaned addAll: {self buildTopSidebar. self buildClassBrowserTabbedWidget mainWidget}
+    ]
+
     buildClassBrowserTabbedWidget [
 	<category: 'user interface'>
 
-	browsers := GtkNotebookWidget new
-					initialize;
-					parentWindow: window;
-					showAll;
-					yourself.
-	browsers addWidget: self buildClassBrowserWidget labeled: 'Browser'.
-	^ browsers
-	    
+	^ browsers := (GtkNotebookWidget parentWindow: window)
+				    showAll;
+				    addWidget: self buildClassBrowserWidget labeled: 'Browser';
+				    yourself
     ]
 
     buildClassBrowserWidget [
 	<category: 'user interface'>
 
-	^ (GtkClassBrowserWidget new)
-	    parentWindow: window;
-	    initialize;
-	    yourself
+	^ GtkClassBrowserWidget parentWindow: window
     ]
 
     buildTranscriptWidget [
 	<category: 'user interface'>
 
-	^ GtkTranscriptWidget new
-	    parentWindow: window;
-	    initialize;
-	    yourself
+	^ GtkTranscriptWidget parentWindow: window
     ]
 
     buildWorkspaceWidget [
 	<category: 'user interface'>
 
-	^ GtkWorkspaceWidget new
-	    parentWindow: window;
-	    initialize;
-	    yourself
+	^ GtkWorkspaceWidget parentWindow: window
     ]
 
     createEditMenus [
 	<category: 'user interface'>
 
-	^super createEditMenus, {
+	^ super createEditMenus, {
             GTK.GtkMenuItem new.
             GTK.GtkMenuItem menuItem: 'Clear Transcript' connectTo: self selector: #clearTranscriptWidget}
     ]
@@ -650,20 +678,20 @@ THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.'
     state [
 	<category: 'focus'>
 
-	browsers currentWidget isNil ifTrue: [^BrowserState new].
-	^browsers currentWidget state
+	browsers currentWidget ifNil: [ ^ BrowserState new ].
+	^ browsers currentWidget state
     ]
 
     selectedText [
 	<category: 'smalltalk events'>
 
-	^self onFocusPerform: #selectedText
+	^ self onFocusPerform: #selectedText
     ]
 
     selectedMethodSymbol [
         <category: 'text editing'>
 
-        ^self onFocusPerform: #selectedMethodSymbol
+        ^ self onFocusPerform: #selectedMethodSymbol
     ]
 
     hasSelection [
@@ -671,7 +699,7 @@ THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.'
 
         | widget |
 	widget := self focusedWidget.
-	^widget notNil and: [widget hasSelection]
+	^ widget notNil and: [widget hasSelection]
     ]
 
     doIt [
@@ -704,6 +732,73 @@ THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.'
 	browsers currentWidget acceptIt
     ]
 
+    showImplementorOn: aSymbol [
+        <category: 'image events'>
+
+	(self showHideWithSelectorOn: implementorWidget at: 1)
+	    ifTrue: [ self imageSelectorForImplementor: aSymbol ]
+    ]
+
+    showHideImplementor [
+        <category: 'image events'>
+
+	self showHideOn: implementorWidget at: 1
+    ]
+
+    showSenderOn: aSymbol [
+        <category: 'image events'>
+
+	(self showHideWithSelectorOn: senderWidget at: 2)
+	    ifTrue: [ self imageSelectorForSender: aSymbol ]
+    ]
+
+    showHideSender [
+        <category: 'image events'>
+
+	self showHideOn: senderWidget at: 2
+    ]
+
+    hideSidebars [
+
+        leftSidebar hide.
+        topSidebar hide.
+        rightSidebar hide.
+    ]
+
+    showHideOn: aGtkWidget at: anIndex [
+
+        | isVisible |
+        isVisible := aGtkWidget isVisible.
+	self hideSidebars.
+        isVisible
+            ifFalse: [
+                topSidebar show: anIndex.
+                leftSidebar show: anIndex ]
+    ]
+
+    showHideWithSelectorOn: aGtkWidget at: anIndex [
+        <category: 'image events'>
+
+        | isVisible |
+        isVisible := aGtkWidget isVisible.
+	self hideSidebars.
+        isVisible ifTrue: [ ^ false ].
+        leftSidebar show: anIndex.
+        topSidebar show: anIndex.
+	^ true
+    ]
+
+    showHidePackageBuilder [
+        <category: 'image events'>
+
+        | isVisible |
+        isVisible := packageBuilderWidget isVisible.
+	self hideSidebars.
+        isVisible
+            ifFalse: [
+                rightSidebar show: 1 ]
+    ]
+
     back [
 	<category: 'history events'>
 
@@ -719,9 +814,11 @@ THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.'
     showHideHistory [
 	<category: 'history events'>
 
-        historyWidget mainWidget getVisible
-            ifTrue: [ historyWidget hideAll ]
-            ifFalse: [ historyWidget showAll ]
+	| isVisible |
+        isVisible := historyWidget isVisible.
+	leftSidebar hide.
+	topSidebar hide.
+	isVisible ifFalse: [ leftSidebar show: 3 ]
     ]
 
     previousTab [
@@ -852,6 +949,51 @@ THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.'
 	<category: 'testing'>
 
 	^ outputs hasFocus
+    ]
+
+    senderSelected [
+        <category: 'events'>
+
+        senderWidget hasSelection ifFalse: [ ^ self ].
+        self findInMethod: (senderWidget matchSelector: senderWidget selection) values first element
+    ]
+
+    implementorSelected [
+        <category: 'events'>
+
+        implementorWidget hasSelection ifFalse: [ ^ self ].
+        self imageSelectorForImplementor: implementorWidget selection
+    ]
+
+    senderSelected [
+	<category: 'events'>
+
+        senderWidget hasSelection ifFalse: [ ^ self ].
+        self imageSelectorForSender: senderWidget selection
+    ]
+
+    imageSelectorForImplementor: aSymbol [
+        <category: 'events'>
+
+	implementorResultWidget appendImplementorResults: (implementorWidget matchSelector: aSymbol)
+    ]
+
+    imageSelectorForSender: aSymbol [
+        <category: 'events'>
+
+	senderResultWidget appendSenderResults: (senderWidget matchSelector: aSymbol)
+    ]
+
+    resultImplementorSelected [
+        <category: 'events'>
+
+	implementorResultWidget selectedResult: self currentWidgetOfBrowser
+    ]
+
+    resultSenderSelected [
+        <category: 'events'>
+
+        senderResultWidget selectedResult: self currentWidgetOfBrowser
     ]
 
     keyPressedOn: aGtkWidget keyEvent: aGdkEventKey [

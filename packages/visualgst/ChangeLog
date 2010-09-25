@@ -1,3 +1,7 @@
+2010-09-25  Gwenael Casaccio  <mrgwen@gmail.com>
+
+	* many many files: Sync with upstream.
+
 2010-08-02  Gwenael Casaccio  <mrgwen@gmail.com>
 
 	* GtkClassBrowser.st: Add missing #hasChanged.

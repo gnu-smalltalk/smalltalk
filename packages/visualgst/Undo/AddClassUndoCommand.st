@@ -50,9 +50,11 @@ UndoCommand subclass: AddClassUndoCommand [
 	    ifTrue: [
 		newClass := parentClass subclass: newClassName environment: namespace.
 		namespace at: newClass name put: newClass.
-                newClass category: classCategory fullName.
+                newClass category: classCategory fullname.
 		first := false ]
-	    ifFalse: [ namespace insertClass: newClass ]
+	    ifFalse: [ 
+		parentClass addSubclass: newClass.
+		namespace insertClass: newClass ]
     ]
 ]
 

@@ -33,7 +33,7 @@ AbstractFinder subclass: MethodFinder [
 
 	aGtkClassBrowserWidget
 	    selectANamespace: class environment;
-	    selectAClass: (class isClass ifTrue: [ class ] ifFalse: [ class instanceClass ]).
+	    selectAClass: class asClass.
 	class isClass 
 	    ifTrue: [ aGtkClassBrowserWidget selectAnInstanceMethod: selector ]
 	    ifFalse: [ aGtkClassBrowserWidget selectAClassMethod: selector  ]

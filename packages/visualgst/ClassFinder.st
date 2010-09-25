@@ -32,7 +32,7 @@ AbstractFinder subclass: ClassFinder [
 
 	aGtkClassBrowserWidget 
 	    selectANamespace: class environment;
-	    selectAClass: class instanceClass
+	    selectAClass: class asClass
     ]
 ]
 

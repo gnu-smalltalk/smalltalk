@@ -1,6 +1,6 @@
 GtkConcreteWidget subclass: GtkImageWidget [
 
-    | imageTree model searchEntry |
+    | imageTree image model searchEntry |
 
 
     initialize [
@@ -22,7 +22,7 @@ GtkConcreteWidget subclass: GtkImageWidget [
         <category: 'user interface'>
 
         searchEntry := GTK.GtkEntry new
-			    connectSignal: 'activate' to: self selector: #searchValidate userData: nil;
+			    connectSignal: 'activate' to: self selector: #searchValidate;
 			    yourself.
         ^ (GTK.GtkHBox new: true spacing: 3)
             add: (GTK.GtkLabel new: 'Class or method :');
@@ -35,10 +35,10 @@ GtkConcreteWidget subclass: GtkImageWidget [
 
         imageTree := (GTK.GtkTreeView createListWithModel: {{GtkColumnTextType title: 'Methods and Classes'}}).
         imageTree setSearchEntry: searchEntry.
-        (model := GtkListModel on: imageTree getModel)
-					item: GtkImage current;
+        [ (model := GtkListModel on: imageTree getModel)
+					item: (image := GtkImage new);
                                         contentsBlock: [ :each | {each displayString} ];
-					refresh.
+					refresh ] fork.
         ^ GTK.GtkScrolledWindow withChild: imageTree
     ]
 
@@ -46,13 +46,13 @@ GtkConcreteWidget subclass: GtkImageWidget [
         <category: 'events'>
 
         imageTree getSelection
-            connectSignal: 'changed' to: anObject selector: aSelector userData: nil
+            connectSignal: 'changed' to: anObject selector: aSelector
     ]
 
     whenTextChangedSend: aSelector to: anObject [
 	<category: 'events'>
 
-        searchEntry connectSignal: 'activate' to: anObject selector: aSelector userData: nil
+        searchEntry connectSignal: 'activate' to: anObject selector: aSelector
     ]
 
     grabFocus [
@@ -71,8 +71,8 @@ GtkConcreteWidget subclass: GtkImageWidget [
 	<category: 'search entry events'>
 
 	searchEntry getText isEmpty 
-		    ifTrue: [ model item: GtkImage current ]
-		    ifFalse: [ model item: (GtkImage current matchRegex: searchEntry getText) ].
+		    ifTrue: [ model item: image ]
+		    ifFalse: [ model item: (image matchRegex: searchEntry getText) ].
 	model refresh
     ]
 
@@ -92,7 +92,7 @@ GtkConcreteWidget subclass: GtkImageWidget [
     matchSelector: aSymbol [
 	<category: 'matching'>
 
-	^ GtkImage current matchSelector: aSymbol
+	^ image matchSelector: aSymbol
     ]
 ]
 

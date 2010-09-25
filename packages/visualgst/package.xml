@@ -8,16 +8,43 @@
   <prereq>DebugTools</prereq>
   <provides>Browser</provides>
   <test>
+    <filein>Tests/AddNamespaceUndoCommandTest.st</filein>
+    <filein>Tests/GtkMethodWidgetTest.st</filein>
     <filein>Tests/ExtractLiteralsTest.st</filein>
     <filein>Tests/CategoryTest.st</filein>
+    <filein>Tests/GtkAssistantTest.st</filein>
     <filein>Tests/EmptyTest.st</filein>
+    <filein>Tests/AddClassUndoCommandTest.st</filein>
+    <filein>Tests/GtkCategoryWidgetTest.st</filein>
+    <filein>Tests/StateTest.st</filein>
+    <filein>Tests/FinderTest.st</filein>
+    <filein>Tests/PragmaTest.st</filein>
+    <filein>Tests/GtkConcreteWidgetTest.st</filein>
+    <file>Tests/AddNamespaceUndoCommandTest.st</file>
+    <file>Tests/GtkMethodWidgetTest.st</file>
     <file>Tests/ExtractLiteralsTest.st</file>
     <file>Tests/CategoryTest.st</file>
+    <file>Tests/GtkAssistantTest.st</file>
     <file>Tests/EmptyTest.st</file>
+    <file>Tests/AddClassUndoCommandTest.st</file>
+    <file>Tests/GtkCategoryWidgetTest.st</file>
+    <file>Tests/StateTest.st</file>
+    <file>Tests/FinderTest.st</file>
+    <file>Tests/PragmaTest.st</file>
+    <file>Tests/GtkConcreteWidgetTest.st</file>
     <sunit>
+      VisualGST.AddNamespaceUndoCommandTest
+      VisualGST.GtkMethodWidgetTest
       VisualGST.ExtractLiteralsTest
       VisualGST.CategoryTest
+      VisualGST.GtkAssistantTest
       VisualGST.EmptyTest
+      VisualGST.AddClassUndoCommandTest
+      VisualGST.GtkCategoryWidgetTest
+      VisualGST.StateTest
+      VisualGST.FinderTest
+      VisualGST.PragmasTest
+      VisualGST.GtkConcreteWidgetTest
     </sunit>
   </test>
   <filein>Notification/AbstractEvent.st</filein>
@@ -63,11 +90,17 @@
   <filein>Commands/RunTestCommand.st</filein>
   <filein>Commands/OpenAssistantCommand.st</filein>
   <filein>Commands/OpenWebBrowserCommand.st</filein>
+  <filein>Pragmas/Pragmas.st</filein>
   <filein>FakeNamespace.st</filein>
   <filein>Category/ClassCategory.st</filein>
   <filein>Category/AbstractNamespace.st</filein>
   <filein>Category/Class.st</filein>
+  <filein>GtkAbstractConcreteWidget.st</filein>
   <filein>GtkConcreteWidget.st</filein>
+  <filein>GtkEntryWidget.st</filein>
+  <filein>GtkSidebarWidget.st</filein>
+  <filein>GtkHSidebarWidget.st</filein>
+  <filein>GtkVSidebarWidget.st</filein>
   <filein>Model/GtkColumnType.st</filein>
   <filein>Model/GtkColumnTextType.st</filein>
   <filein>Model/GtkColumnPixbufType.st</filein>
@@ -75,10 +108,10 @@
   <filein>GtkListModel.st</filein>
   <filein>GtkTreeModel.st</filein>
   <filein>Text/GtkTextWidget.st</filein>
+  <filein>GtkPackageBuilderWidget.st</filein>
   <filein>GtkMainWindow.st</filein>
   <filein>GtkVisualGSTTool.st</filein>
   <filein>GtkBrowsingTool.st</filein>
-  <filein>GtkBrowserWrapper.st</filein>
   <filein>GtkLauncher.st</filein>
   <filein>Text/GtkTextPluginWidget.st</filein>
   <filein>Text/GtkFindWidget.st</filein>
@@ -105,7 +138,6 @@
   <filein>GtkHistoryWidget.st</filein>
   <filein>Inspector/GtkInspector.st</filein>
   <filein>GtkClassBrowserWidget.st</filein>
-  <filein>GtkClassBrowser.st</filein>
   <filein>GtkEntryDialog.st</filein>
   <filein>HistoryStack.st</filein>
   <filein>Undo/UndoStack.st</filein>
@@ -150,8 +182,9 @@
   <filein>Inspector/GtkCharacterInspectorView.st</filein>
   <filein>Inspector/GtkIntegerInspectorView.st</filein>
   <filein>Inspector/GtkFloatInspectorView.st</filein>
-  <filein>Implementors/GtkImplementor.st</filein>
-  <filein>Senders/GtkSender.st</filein>
+  <filein>Implementors/GtkImageResultsWidget.st</filein>
+  <filein>Implementors/GtkImplementorResultsWidget.st</filein>
+  <filein>Implementors/GtkSenderResultsWidget.st</filein>
   <filein>Notification/Kernel/AbstractNamespace.st</filein>
   <filein>Notification/Kernel/Metaclass.st</filein>
   <filein>Notification/Kernel/Class.st</filein>
@@ -178,12 +211,12 @@
   <filein>GtkMethodSUnitWidget.st</filein>
   <filein>SUnit/GtkSUnit.st</filein>
   <filein>Commands/OpenBrowserCommand.st</filein>
-  <filein>Commands/OpenWindowedBrowserCommand.st</filein>
   <filein>Commands/OpenTabbedBrowserCommand.st</filein>
   <filein>Commands/OpenSUnitCommand.st</filein>
   <filein>Commands/OpenWorkspaceCommand.st</filein>
   <filein>Commands/OpenImplementorCommand.st</filein>
   <filein>Commands/OpenSenderCommand.st</filein>
+  <filein>Commands/OpenPackageBuilderCommand.st</filein>
   <filein>Commands/SaveImageCommand.st</filein>
   <filein>Commands/SaveImageAsCommand.st</filein>
   <file>Notification/AbstractEvent.st</file>
@@ -229,11 +262,17 @@
   <file>Commands/RunTestCommand.st</file>
   <file>Commands/OpenAssistantCommand.st</file>
   <file>Commands/OpenWebBrowserCommand.st</file>
+  <file>Pragmas/Pragmas.st</file>
   <file>FakeNamespace.st</file>
   <file>Category/ClassCategory.st</file>
   <file>Category/AbstractNamespace.st</file>
   <file>Category/Class.st</file>
+  <file>GtkAbstractConcreteWidget.st</file>
   <file>GtkConcreteWidget.st</file>
+  <file>GtkEntryWidget.st</file>
+  <file>GtkSidebarWidget.st</file>
+  <file>GtkHSidebarWidget.st</file>
+  <file>GtkVSidebarWidget.st</file>
   <file>Model/GtkColumnType.st</file>
   <file>Model/GtkColumnTextType.st</file>
   <file>Model/GtkColumnPixbufType.st</file>
@@ -241,10 +280,10 @@
   <file>GtkListModel.st</file>
   <file>GtkTreeModel.st</file>
   <file>Text/GtkTextWidget.st</file>
+  <file>GtkPackageBuilderWidget.st</file>
   <file>GtkMainWindow.st</file>
   <file>GtkVisualGSTTool.st</file>
   <file>GtkBrowsingTool.st</file>
-  <file>GtkBrowserWrapper.st</file>
   <file>GtkLauncher.st</file>
   <file>Text/GtkTextPluginWidget.st</file>
   <file>Text/GtkFindWidget.st</file>
@@ -271,7 +310,6 @@
   <file>GtkHistoryWidget.st</file>
   <file>Inspector/GtkInspector.st</file>
   <file>GtkClassBrowserWidget.st</file>
-  <file>GtkClassBrowser.st</file>
   <file>GtkEntryDialog.st</file>
   <file>HistoryStack.st</file>
   <file>Undo/UndoStack.st</file>
@@ -316,8 +354,9 @@
   <file>Inspector/GtkCharacterInspectorView.st</file>
   <file>Inspector/GtkIntegerInspectorView.st</file>
   <file>Inspector/GtkFloatInspectorView.st</file>
-  <file>Implementors/GtkImplementor.st</file>
-  <file>Senders/GtkSender.st</file>
+  <file>Implementors/GtkImageResultsWidget.st</file>
+  <file>Implementors/GtkImplementorResultsWidget.st</file>
+  <file>Implementors/GtkSenderResultsWidget.st</file>
   <file>Notification/Kernel/AbstractNamespace.st</file>
   <file>Notification/Kernel/Metaclass.st</file>
   <file>Notification/Kernel/Class.st</file>
@@ -344,12 +383,12 @@
   <file>GtkMethodSUnitWidget.st</file>
   <file>SUnit/GtkSUnit.st</file>
   <file>Commands/OpenBrowserCommand.st</file>
-  <file>Commands/OpenWindowedBrowserCommand.st</file>
   <file>Commands/OpenTabbedBrowserCommand.st</file>
   <file>Commands/OpenSUnitCommand.st</file>
   <file>Commands/OpenWorkspaceCommand.st</file>
   <file>Commands/OpenImplementorCommand.st</file>
   <file>Commands/OpenSenderCommand.st</file>
+  <file>Commands/OpenPackageBuilderCommand.st</file>
   <file>Commands/SaveImageCommand.st</file>
   <file>Commands/SaveImageAsCommand.st</file>
   <file>Icons/category.gif</file>

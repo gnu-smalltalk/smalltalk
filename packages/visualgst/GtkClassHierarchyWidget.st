@@ -83,7 +83,7 @@ GtkConcreteWidget subclass: GtkClassHierarchyWidget [
 	<category: 'events'>
 
 	classesTree getSelection
-	    connectSignal: 'changed' to: anObject selector: aSelector userData: nil
+	    connectSignal: 'changed' to: anObject selector: aSelector
     ]
 
     hasSelectedClass [

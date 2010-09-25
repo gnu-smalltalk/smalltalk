@@ -126,5 +126,10 @@ Object subclass: GtkTreeModel [
 
 	^ self findIter: anObject ifAbsent: [ self error: 'Item not found' ]
     ]
+
+    includes: anObject [
+	self findIter: anObject ifAbsent: [ ^ false ].
+	^ true
+    ]
 ]
 

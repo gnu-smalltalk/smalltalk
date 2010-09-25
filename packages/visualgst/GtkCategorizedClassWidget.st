@@ -87,7 +87,7 @@ GtkConcreteWidget subclass: GtkCategorizedClassWidget [
 	<category: 'user interface'>
    
         classesTree := (GTK.GtkTreeView createTreeWithModel: {{GtkColumnTextType title: 'Classes'}})
-                            connectSignal: 'button-press-event' to: self selector: #'onPress:event:' userData: nil;
+                            connectSignal: 'button-press-event' to: self selector: #'onPress:event:';
                             yourself.
         classesTree getSelection setMode: self selectionMode.
         (model := GtkTreeModel on: classesTree getModel)
@@ -124,7 +124,7 @@ GtkConcreteWidget subclass: GtkCategorizedClassWidget [
 	<category: 'events'>
 
 	classesTree getSelection
-	    connectSignal: 'changed' to: anObject selector: aSelector userData: nil
+	    connectSignal: 'changed' to: anObject selector: aSelector
     ]
 
     selectionMode: aSelectionMode [
@@ -153,11 +153,12 @@ GtkConcreteWidget subclass: GtkCategorizedClassWidget [
 
     state [
         <category: 'testing'>
-        self hasSelectedClass
-            ifTrue: [ ^ClassState with: self selectedClass ].
-        namespace isNil
-            ifFalse: [ ^NamespaceState with: namespace ].
-        ^BrowserState new
+
+        self hasSelectedClass ifTrue: [ ^ ClassState with: self selectedClass ].
+        namespace ifNotNil: [ ^ (NamespaceState with: namespace)
+				    classCategory: namespace category;
+				    yourself ].
+        ^ BrowserState new
     ]
 
     selectedClass [
@@ -205,6 +206,7 @@ GtkConcreteWidget subclass: GtkCategorizedClassWidget [
 
     addToModel: aClass [
 
+	(model includes: aClass class) ifTrue: [ ^ self ].
 	(aClass superclass environment == self namespace and: [ aClass superclass category = self category or: [ self category isEmpty ] ]) 
 				    ifFalse: [ model append: aClass class ] 
 				    ifTrue: [ model append: aClass class parent: aClass superclass class ]
@@ -230,9 +232,8 @@ GtkConcreteWidget subclass: GtkCategorizedClassWidget [
         <category: 'model event'>
 
         anEvent item environment == self namespace ifFalse: [ ^ self ].
-        anEvent oldCategory = anEvent item category ifTrue: [ ^ self ].
-        (anEvent oldCategory = self category or: [ self category isEmpty ]) ifTrue: [ model remove: anEvent item class ].
-        (anEvent item category = self category or: [ self category isEmpty ]) ifTrue: [ self addToModel: anEvent item ]
+        (anEvent oldCategory = self category or: [ anEvent oldCategory isNil and: [ self category isEmpty and: [ model includes: anEvent item ] ] ]) ifTrue: [ model remove: anEvent item class ].
+        (anEvent item category = self category or: [ anEvent item category isNil and: [ self category isEmpty ] ]) ifTrue: [ self addToModel: anEvent item ]
     ]
 ]
 

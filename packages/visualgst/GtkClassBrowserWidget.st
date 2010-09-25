@@ -19,38 +19,22 @@ GtkConcreteWidget subclass: GtkClassBrowserWidget [
 
     buildBrowser [
 
-	^ GTK.GtkHPaned new
-	    pack1: self buildCategoryClassesAndHierarchy resize: true shrink: false;
-	    pack2: self buildProtocolAndMethod resize: true shrink: false;
-	    showAll;
-	    yourself
+	^ GTK.GtkHPaned addAll: {self buildCategoryClassesAndHierarchy. self buildProtocolAndMethod}
     ]
 
     buildCategoryAndClass [
 
-	^ GTK.GtkHPaned new
-	    pack1: self buildNamespaceView resize: true shrink: false;
-            pack2: self buildClassView resize: true shrink: false;
-	    showAll;
-	    yourself
+	^ GTK.GtkHPaned addAll: {self buildNamespaceView. self buildClassView}
     ]
 
     buildClassBrowser [
 
-	^ GTK.GtkHPaned new
-            pack1: self buildClassCategoryView resize: true shrink: false;
-            pack2: self buildClassMethodView resize: true shrink: false;
-	    showAll;
-	    yourself
+	^ GTK.GtkHPaned addAll: {self buildClassCategoryView. self buildClassMethodView}
     ]
 
     buildInstanceBrowser [
 
-	^ GTK.GtkHPaned new
-	    pack1: self buildInstanceCategoryView resize: true shrink: false;
-	    pack2: self buildInstanceMethodView resize: true shrink: false;
-	    showAll;
-	    yourself
+	^ GTK.GtkHPaned addAll: {self buildInstanceCategoryView. self buildInstanceMethodView}
     ]
 
     buildProtocolAndMethod [
@@ -60,7 +44,7 @@ GtkConcreteWidget subclass: GtkClassBrowserWidget [
 	    appendPage: self buildClassBrowser tabLabel: (GTK.GtkLabel new: 'Class');
 	    showAll;
 	    setCurrentPage: 0;
-	    connectSignal: 'switch-page' to: self selector: #'classInstanceSwitchOn:page:number:' userData: nil;
+	    connectSignal: 'switch-page' to: self selector: #'classInstanceSwitchOn:page:number:';
 	    yourself
     ]
 
@@ -71,28 +55,22 @@ GtkConcreteWidget subclass: GtkClassBrowserWidget [
 	    appendPage: self buildHierarchy tabLabel: (GTK.GtkLabel new: 'Hierarchy');
 	    showAll;
 	    setCurrentPage: 0;
-	    connectSignal: 'switch-page' to: self selector: #'namespaceHierarchySwitchOn:page:number:' userData: nil;
+	    connectSignal: 'switch-page' to: self selector: #'namespaceHierarchySwitchOn:page:number:';
 	    yourself
     ]
 
     buildNamespaceView [
 	<category: 'user interface'>
 
-	namespaceWidget := GtkCategorizedNamespaceWidget showAll
-				whenSelectionChangedSend: #onNamespaceChanged to: self;
-				yourself.
-
-	^ namespaceWidget mainWidget
+	^ (namespaceWidget := self buildWidget: GtkCategorizedNamespaceWidget whenSelectionChangedSend: #onNamespaceChanged)
+	    mainWidget
     ]
 
     buildClassView [
 	<category: 'user interface'>
 
-	classWidget := GtkCategorizedClassWidget showAll
-			    whenSelectionChangedSend: #onClassChanged to: self;
-			    yourself.
-
-	^ classWidget mainWidget
+	^ (classWidget := self buildWidget: GtkCategorizedClassWidget whenSelectionChangedSend: #onClassChanged)
+	    mainWidget
     ]
 
     buildCodeView [
@@ -106,54 +84,47 @@ GtkConcreteWidget subclass: GtkClassBrowserWidget [
 	^ codeWidget mainWidget
     ]
 
+    buildWidget: aClass whenSelectionChangedSend: aSymbol [
+	<category: 'user interface'>
+
+	^ aClass showAll
+                whenSelectionChangedSend: aSymbol to: self;
+                yourself
+    ]
+
     buildHierarchy [
 	<category: 'user interface'>
 
-	classHierarchyWidget := GtkClassHierarchyWidget showAll
-				    whenSelectionChangedSend: #onClassHierarchyChanged to: self;
-				    yourself.
-
-	^ classHierarchyWidget mainWidget
+	^ (classHierarchyWidget := self buildWidget: GtkClassHierarchyWidget whenSelectionChangedSend: #onClassHierarchyChanged)
+	    mainWidget
     ]
 
     buildInstanceCategoryView [
         <category: 'user interface'>
 
-        iCategoryWidget := GtkCategoryWidget showAll
-                            whenSelectionChangedSend: #onInstanceSideCategoryChanged to: self;
-                            yourself.
-
-        ^ iCategoryWidget mainWidget
+        ^ (iCategoryWidget := self buildWidget: GtkCategoryWidget whenSelectionChangedSend: #onInstanceSideCategoryChanged)
+	    mainWidget
     ]
 
     buildClassCategoryView [
 	<category: 'user interface'>
 
-	cCategoryWidget := GtkCategoryWidget showAll
-			    whenSelectionChangedSend: #onClassSideCategoryChanged to: self;
-			    yourself.
-
-	^ cCategoryWidget mainWidget
+	^ (cCategoryWidget := self buildWidget: GtkCategoryWidget whenSelectionChangedSend: #onClassSideCategoryChanged)
+	    mainWidget
     ]
 
     buildClassMethodView [
 	<category: 'user interface'>
 
-	cMethodWidget := GtkMethodWidget showAll
-			    whenSelectionChangedSend: #onClassSideMethodChanged to: self;
-			    yourself.
-
-	^ cMethodWidget mainWidget
+	^ (cMethodWidget := self buildWidget: GtkMethodWidget whenSelectionChangedSend: #onClassSideMethodChanged)
+	    mainWidget
     ]
 
     buildInstanceMethodView [
         <category: 'user interface'>
 
-        iMethodWidget := GtkMethodWidget showAll
-                            whenSelectionChangedSend: #onInstanceSideMethodChanged to: self;
-                            yourself.
-
-        ^ iMethodWidget mainWidget
+        ^ (iMethodWidget := self buildWidget: GtkMethodWidget whenSelectionChangedSend: #onInstanceSideMethodChanged)
+	    mainWidget
     ]
 
     buildBrowserPaned [
@@ -179,6 +150,7 @@ GtkConcreteWidget subclass: GtkClassBrowserWidget [
 	<category: 'initialize-release'>
 
 	state := NamespaceState on: self with: Smalltalk.
+	state classCategory: Smalltalk category.
 	classHierarchyUpdate := false.
 	checkCode := true.
 
@@ -245,7 +217,8 @@ GtkConcreteWidget subclass: GtkClassBrowserWidget [
 	    iMethodWidget clear.
 	    cMethodWidget clear.
 	    codeWidget namespaceDefinition: (NamespaceSource on: namespace).
-	    state := NamespaceState on: self with: namespace ]
+	    state := NamespaceState on: self with: namespace.
+	    state classCategory: namespace category ]
     ]
 
     onClassChanged [
@@ -699,7 +672,7 @@ GtkConcreteWidget subclass: GtkClassBrowserWidget [
     checkCodeWidgetAndUpdate: aBlock [
         <category: 'text editing'>
 
-        self saveCodeOr: [ aBlock value. self clearUndo ]
+        self saveCodeOr: [ self clearUndo. aBlock value ]
     ]
 
     saveCodeOr: dropBlock [

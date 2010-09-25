@@ -12,7 +12,7 @@ NamespaceCommand subclass: AddClassCommand [
             (AddClassUndoCommand
                 add: dlg result asSymbol
                 to: target state namespace
-                category: target state classCategory
+                classCategory: target state classCategory
                 withSuperclass: superclass) push ]
     ]
 ]

@@ -1,6 +1,46 @@
 GtkMainWindow subclass: GtkVisualGSTTool [
     <comment: 'I am the base for various tools of VisualGST.'>
 
+    GtkVisualGSTTool class >> version [
+        <category: 'accessing'>
+
+        ^ '0.8.0'
+    ]
+
+    GtkVisualGSTTool class >> website [
+        <category: 'accessing'>
+
+        ^ 'http://github.com/MrGwen/gst-visualgst'
+    ]
+
+    GtkVisualGSTTool class >> gstWebsite [
+        <category: 'accessing'>
+
+        ^ 'http://smalltalk.gnu.org/'
+    ]
+
+    GtkVisualGSTTool class >> license [
+        <category: 'accessing'>
+
+        ^
+'Permission is hereby granted, free of charge, to any person obtaining
+a copy of this software and associated documentation files (the "Software"),
+to deal in the Software without restriction, including without limitation
+the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or
+sell copies of the Software, and to permit persons to whom the Software is furnished
+to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in
+all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,
+INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A
+PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
+COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN
+AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH
+THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.'
+    ]
+
     aboutTitle [
         <category: 'widget-skeleton'>
         <comment: 'I return the visible name for the Help->About entry'>
@@ -80,8 +120,6 @@ GtkMainWindow subclass: GtkVisualGSTTool [
             {'<Alt>D'. '<GtkVisualGSTTool>/Smalltalk/DebugIt'. self. #printIt}.
             {'<Control>P'. '<GtkVisualGSTTool>/Smalltalk/PrintIt'. self. #printIt}.
             {'<Control>I'. '<GtkVisualGSTTool>/Smalltalk/InspectIt'. self. #inspectIt}.
-            "{'<Control>M'. '<GtkVisualGSTTool>/Smalltalk/Implementors'. self. #implementors}.
-            {'<Control>N'. '<GtkVisualGSTTool>/Smalltalk/Senders'. self. #senders}."
             {'<Control>S'. '<GtkVisualGSTTool>/Smalltalk/AcceptIt'. self. #acceptIt}}.
 
         ^{GTK.GtkMenuItem menuItem: 'Do It' accelPath: '<GtkVisualGSTTool>/Smalltalk/DoIt' connectTo: self selector: #doIt.
@@ -89,9 +127,6 @@ GtkMainWindow subclass: GtkVisualGSTTool [
             GTK.GtkMenuItem menuItem: 'Inspect It' accelPath: '<GtkVisualGSTTool>/Smalltalk/InspectIt' connectTo: self selector: #inspectIt.
             GTK.GtkMenuItem menuItem: 'Debug It' accelPath: '<GtkVisualGSTTool>/Smalltalk/DebugIt' connectTo: self selector: #debugIt.
             GTK.GtkMenuItem new.
-            "GTK.GtkMenuItem menuItem: 'Implementors' accelPath: '<GtkVisualGSTTool>/Smalltalk/Implementors' connectTo: self selector: #implementors.
-            GTK.GtkMenuItem menuItem: 'Senders' accelPath: '<GtkVisualGSTTool>/Smalltalk/Senders' connectTo: self selector: #senders.
-            GTK.GtkMenuItem new."
             GTK.GtkMenuItem menuItem: 'Accept' accelPath: '<GtkVisualGSTTool>/Smalltalk/AcceptIt' connectTo: self selector: #acceptIt}
     ]
 
@@ -99,14 +134,14 @@ GtkMainWindow subclass: GtkVisualGSTTool [
         <category: 'user interface'>
 
         | menu |
-        self accelGroup append: {{'<Control><shift>B'. '<GtkVisualGSTTool>/Tools/ClassBrowser'}.
-            {'<Control>M'. '<GtkVisualGSTTool>/Tools/Implementors'}.
-            {'<Control>N'. '<GtkVisualGSTTool>/Tools/Senders'}}.
+        self accelGroup append: {{'<Control>M'. '<GtkVisualGSTTool>/Tools/Implementors'}.
+            {'<Control>N'. '<GtkVisualGSTTool>/Tools/Senders'}.
+            {'<Alt>P'. '<GtkVisualGSTTool>/Tools/PackageBuilder'}}.
 
-        menu := {GTK.GtkMenuItem menuItem: 'Browser window' accelPath: '<GtkVisualGSTTool>/Tools/ClassBrowser' connectTo: self selector: #newClassBrowser.
-            GTK.GtkMenuItem menuItem: 'Implementors' accelPath: '<GtkVisualGSTTool>/Tools/Implementors' connectTo: self selector: #newImplementorBrowser.
+        menu := {GTK.GtkMenuItem menuItem: 'Implementors' accelPath: '<GtkVisualGSTTool>/Tools/Implementors' connectTo: self selector: #newImplementorBrowser.
             GTK.GtkMenuItem menuItem: 'Senders' accelPath: '<GtkVisualGSTTool>/Tools/Senders' connectTo: self selector: #newSenderBrowser.
-            GTK.GtkMenuItem menuItem: 'SUnit' connectTo: self selector: #newSUnitBrowser} asOrderedCollection.
+            GTK.GtkMenuItem menuItem: 'SUnit' connectTo: self selector: #newSUnitBrowser.
+            GTK.GtkMenuItem menuItem: 'PackageBuilder' accelPath: '<GtkVisualGSTTool>/Tools/PackageBuilder' connectTo: self selector: #packageBuilder} asOrderedCollection.
 
         GtkWebView hasWebkit ifTrue: [ menu := menu, {GTK.GtkMenuItem new.
             GTK.GtkMenuItem menuItem: 'Assistant' connectTo: OpenAssistantCommand selector: #execute.
@@ -159,12 +194,6 @@ GtkMainWindow subclass: GtkVisualGSTTool [
 	OpenSUnitCommand on: self
     ]
 
-    newClassBrowser [
-	<category: 'tools events'>
-
-	OpenWindowedBrowserCommand on: self
-    ]
-
     newSenderBrowser [
 	<category: 'tools events'>
 
@@ -175,6 +204,12 @@ GtkMainWindow subclass: GtkVisualGSTTool [
 	<category: 'tools events'>
 
 	OpenImplementorCommand on: self
+    ]
+
+    packageBuilder [
+        <category: 'tools events'>
+
+        OpenPackageBuilderCommand on: self
     ]
 
     helpContents [

@@ -303,7 +303,8 @@ Behavior extend [
     debuggerClass [
 	<category: '*VisualGST'>
 
-	^ VisualGST.GtkDebugger
+	^ nil
+	"^ VisualGST.GtkDebugger"
     ]
 ]
 
@@ -430,16 +431,48 @@ STInST.RBParser class extend [
     ]	
 ]
 
-GTK.GtkTreeView class extend [
-
-    createModel: aGtkStoreClass with: anArray [
-	<category: '*VisualGST'>
+GTK.GtkTreeModel class extend [
+    createModelWith: anArray [
+        <category: '*VisualGST'>
 
         | model |
         model := OrderedCollection new.
         anArray do: [ :each | model addAll: (each collect: [ :elem | elem kind ]) ].
         model addLast: VisualGST.GtkColumnOOPType kind.
-        ^ self newWithModel: (aGtkStoreClass new: model size varargs: model asArray)
+        ^ self new: model size varargs: model asArray
+    ]
+]
+
+GTK.GtkListStore class extend [
+    createModelWith: anArray [
+        <category: '*VisualGST'>
+
+        | model |
+        model := OrderedCollection new.
+        anArray do: [ :each | model addAll: (each collect: [ :elem | elem kind ]) ].
+        model addLast: VisualGST.GtkColumnOOPType kind.
+        ^ self new: model size varargs: model asArray
+    ]
+]
+
+GTK.GtkTreeStore class extend [
+    createModelWith: anArray [
+        <category: '*VisualGST'>
+
+        | model |
+        model := OrderedCollection new.
+        anArray do: [ :each | model addAll: (each collect: [ :elem | elem kind ]) ].
+        model addLast: VisualGST.GtkColumnOOPType kind.
+        ^ self new: model size varargs: model asArray
+    ]
+]
+
+GTK.GtkTreeView class extend [
+
+    createModel: aGtkStoreClass with: anArray [
+	<category: '*VisualGST'>
+
+	^ self newWithModel: (aGtkStoreClass createModelWith: anArray)
     ]
 
     createTreeViewWith: anArray [
@@ -603,5 +636,52 @@ GTK.GtkWidget extend [
     getFocusChild [
         <category: '*VisualGST'>
         ^nil
+    ]
+]
+
+GTK.GtkPaned class extend [
+
+    addAll: anArray [
+
+	^ self addAll: anArray from: 1
+    ]
+
+    addAll: anArray from: anInteger [
+
+        ^ anArray size - anInteger = 0 
+                ifTrue: [ self new
+                                pack1: (anArray at: anInteger) resize: true shrink: true;
+                                yourself ]
+                ifFalse: [ 
+                    anArray size - anInteger > 1 ifTrue: [ 
+					    self new
+                                                    pack1: (anArray at: anInteger) resize: true shrink: true;
+                                                    pack2: (self addAll: anArray from: anInteger + 1) resize: true shrink: false;
+                                                    yourself ]
+                                    ifFalse: [ self new
+                                                    pack1: (anArray at: anInteger) resize: true shrink: true;
+                                                    pack2: (anArray at: anInteger + 1) resize: true shrink: false;
+                                                    yourself ] ]
+    ]
+
+]
+
+GTK.GtkScrolledWindow class extend [
+
+    withViewport: aGtkWidget [
+	<category: 'instance creation'>
+
+	^ (GTK.GtkScrolledWindow new: nil vadjustment: nil)
+	    addWithViewport: aGtkWidget;
+	    setPolicy: GTK.Gtk gtkPolicyAutomatic vscrollbarPolicy: GTK.Gtk gtkPolicyAutomatic;
+	    yourself
+    ]
+]
+
+Smalltalk.PackageLoader class extend [
+    root [
+	<category: 'accessing'>
+
+	^ root
     ]
 ]

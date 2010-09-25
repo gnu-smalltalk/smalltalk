@@ -19,7 +19,7 @@ Command subclass: OpenImplementorCommand [
 
         | selection |
         selection := self selection.
-        selection isNil ifTrue: [^GtkImplementor open].
-	GtkImplementor openOn: selection
+        selection isNil ifTrue: [ ^ GtkLauncher uniqueInstance showHideImplementor ].
+	GtkLauncher uniqueInstance showImplementorOn: selection
     ]
 ]
