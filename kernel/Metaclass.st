@@ -341,10 +341,7 @@ it should be...the Smalltalk metaclass system is strange and complex.'>
 	 can be cleaned up later"
 	needToRecompileClasses | needToRecompileMetaclasses 
 	    ifTrue: 
-		[Transcript
-		    nextPutAll: 'Recompiling classes...';
-		    nl.
-		aClass compileAll.
+		[aClass compileAll.
 		needToRecompileMetaclasses ifTrue: [aClass class compileAll].
 		aClass compileAllSubclasses.
 		needToRecompileMetaclasses ifTrue: [aClass class compileAllSubclasses]].

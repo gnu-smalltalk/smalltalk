@@ -1,3 +1,9 @@
+2010-09-27  Paolo Bonzini <bonzini@gnu.org>
+
+	* kernel/Behavior.st: Remove "Recompiling" messages.
+	* kernel/CompildMeth.st: Remove "Recompiling" messages.
+	* kernel/Metaclass.st: Remove "Recompiling" messages.
+
 2010-09-25  Paolo Bonzini <bonzini@gnu.org>
 
 	* kernel/SysExcept.st: Fix duplicate instance variable declaration.

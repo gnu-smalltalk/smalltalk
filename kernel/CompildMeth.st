@@ -420,12 +420,6 @@ instances.'>
                         on: Error
                         do: [:ex | ex return: false].
         ok ifFalse: [^nil].
-        RegressionTesting
-            ifFalse:
-                [Transcript
-                    nextPutAll: 'Recompiling selector: ';
-                    print: self selector asSymbol;
-                    nl].
         ^self methodClass compile: source classified: category
     ]
 
@@ -442,12 +436,6 @@ instances.'>
                         on: Error
                         do: [:ex | ex return: false].
         ok ifFalse: [^nil].
-        RegressionTesting
-            ifFalse:
-                [Transcript
-                    nextPutAll: 'Recompiling selector: ';
-                    print: self selector asSymbol;
-                    nl].
         ^self methodClass
 	    compile: source
 	    classified: category

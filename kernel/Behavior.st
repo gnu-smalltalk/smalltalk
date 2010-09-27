@@ -106,11 +106,6 @@ method dictionary, and iterating over the class hierarchy.'>
         changed | (removed | added and: [self subclassesNeedRecompilation])
             ifFalse: [^self].
 
-        Transcript isNil ifFalse: [
-            Transcript
-                nextPutAll: 'Recompiling classes...';
-                nl ].
-
         changed ifTrue: [self compileAll].
         self compileAllSubclasses
     ]
@@ -413,13 +408,7 @@ method dictionary, and iterating over the class hierarchy.'>
 	<category: 'method dictionary'>
 	self methodDictionary notNil 
 	    ifTrue: 
-		[RegressionTesting 
-		    ifFalse: 
-			[Transcript
-			    nextPutAll: 'Recompiling class: ';
-			    print: self;
-			    nl].
-		self methodDictionary do: [:method | method recompile]]
+		[self methodDictionary do: [:method | method recompile]]
     ]
 
     compileAll: aNotifier [
@@ -429,13 +418,7 @@ method dictionary, and iterating over the class hierarchy.'>
 	<category: 'method dictionary'>
 	self methodDictionary notNil 
 	    ifTrue: 
-		[RegressionTesting 
-		    ifFalse: 
-			[Transcript
-			    nextPutAll: 'Recompiling class: ';
-			    print: self;
-			    nl].
-		self methodDictionary do: [:method | method recompileNotifying: aNotifier]]
+		[self methodDictionary do: [:method | method recompileNotifying: aNotifier]]
     ]
 
     evalString: aString to: anObject [
