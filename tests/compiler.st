@@ -250,3 +250,14 @@ Eval [
     (Object >> #a) descriptor sourceCode class
 ]
 
+"Test scoped method within class block."
+Object subclass: A [
+    A class [
+        A class >> a [] "valid"
+        A >> a []       "invalid"
+    ]
+]
+
+Eval [A class >> #a]
+Eval [A >> #a]
+

@@ -1,5 +1,10 @@
 2010-09-27  Paolo Bonzini <bonzini@gnu.org>
 
+	* libgst/gst-parse.c: Correctly handle scoped methods within
+	a class block.
+
+2010-09-27  Paolo Bonzini <bonzini@gnu.org>
+
 	* libgst/gst-parse.c: Fix NULL pointer dereference.
 
 2010-09-25  Gwenael Casaccio  <mrgwen@gmail.com>

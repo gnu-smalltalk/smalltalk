@@ -899,12 +899,17 @@ parse_class_definition (gst_parser *p, OOP classOOP, mst_Boolean extend)
 static void 
 parse_scoped_method (gst_parser *p, OOP classOOP)
 {
-  OOP class;
+  OOP class, classInstanceOOP;
   tree_node class_node;
   mst_Boolean class_method = false;
 
   class_node = parse_variable_primary (p);
   class = parse_class (class_node);
+
+  if (OOP_CLASS (classOOP) == _gst_metaclass_class)
+    classInstanceOOP = METACLASS_INSTANCE (classOOP);
+  else
+    classInstanceOOP = classOOP;
 
   if (token (p, 0) == IDENTIFIER)
     {
@@ -923,13 +928,19 @@ parse_scoped_method (gst_parser *p, OOP classOOP)
   else
     _gst_errorf ("expected `>>'");
   
-  if (!class)
+  if (!class_method && OOP_CLASS (classOOP) == _gst_metaclass_class)
+    {
+      _gst_skip_compilation = true;
+      _gst_errorf ("class method expected inside class block");
+    }
+
+  else if (!class)
     {
       _gst_skip_compilation = true;
       class = classOOP;
     }
 
-  else if (!_gst_class_is_kind_of (classOOP, class))
+  else if (!_gst_class_is_kind_of (classInstanceOOP, class))
     {
       _gst_skip_compilation = true;
       _gst_errorf ("%#O is not %#O or one of its superclasses",

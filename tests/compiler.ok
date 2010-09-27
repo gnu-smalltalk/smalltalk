@@ -74,3 +74,11 @@ returned value is FileSegment
 
 Execution begins...
 returned value is String
+compiler.st:257: class method expected inside class block
+
+Execution begins...
+returned value is CompiledMethod new: 0 "<0>"
+
+Execution begins...
+ error: Invalid argument #a: key not found
+returned value is nil
