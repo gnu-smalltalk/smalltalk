@@ -1,3 +1,8 @@
+2010-09-28  Holger Hans Peter Freyther  <zecke@selfish.org>
+
+	* tests/classes.ok: Remove "Recompiling" messages.
+	* tests/mutate.ok: Remove "Recompiling" messages.
+
 2010-09-28  Paolo Bonzini <bonzini@gnu.org>
 
 	* kernel/Behavior.st: Recompile this class is "removed" is true.
