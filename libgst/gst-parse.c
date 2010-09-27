@@ -541,10 +541,10 @@ parse_scoped_definition (gst_parser *p, tree_node first_stmt)
 	       && receiver->v_expr.selector == _gst_intern_string ("class"))
  	{
  	  classOOP = parse_class (receiver->v_expr.receiver);
-	  classOrMetaclassOOP = OOP_CLASS (classOOP);
+	  classOrMetaclassOOP = classOOP ? OOP_CLASS (classOOP) : NULL;
  	}	   
       if (classOrMetaclassOOP != NULL) 
- 	{ 
+ 	{
  	  OOP namespace_new = ((gst_class) OOP_TO_OBJ (classOOP))->environment; 
 	  
 	  /* When creating the image, current namespace is not available. */

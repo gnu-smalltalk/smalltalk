@@ -1,3 +1,7 @@
+2010-09-27  Paolo Bonzini <bonzini@gnu.org>
+
+	* libgst/gst-parse.c: Fix NULL pointer dereference.
+
 2010-09-25  Gwenael Casaccio  <mrgwen@gmail.com>
 
 	* libgst/gst-parse.c: Support multi-keyword class attributes.
