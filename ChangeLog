@@ -1,5 +1,9 @@
 2010-09-28  Holger Hans Peter Freyther  <zecke@selfish.org>
 
+	* kernel/FileDescr.st: Fix a typo.
+
+2010-09-28  Holger Hans Peter Freyther  <zecke@selfish.org>
+
 	* tests/classes.ok: Remove "Recompiling" messages.
 	* tests/mutate.ok: Remove "Recompiling" messages.
 
