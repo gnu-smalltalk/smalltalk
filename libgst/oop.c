@@ -95,7 +95,7 @@ int _gst_gc_message = true;
 /* This is != 0 in the middle of a GC.  */
 int _gst_gc_running = 0;
 
-/* These is the memory area which holds the object table.  */
+/* This is the memory area which holds the object table.  */
 static heap oop_heap;
 
 /* This vector holds the storage for all the Character objects in the
