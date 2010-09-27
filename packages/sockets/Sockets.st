@@ -1317,13 +1317,13 @@ This class adds a read buffer to the basic model of AbstractSocket.'>
     newReadBuffer: size [
 	<category: 'private - buffering'>
 	^(ReadBuffer on: (String new: size)) fillBlock: 
-		[:data :size | 
+		[:data :size || n | 
 		self implementation ensureReadable.
-		self implementation isOpen 
+		n := self implementation isOpen 
 		    ifTrue: [self implementation nextAvailable: size into: data startingAt: 1]
-		    ifFalse: 
-			[self deleteBuffers.
-			0]]
+                    ifFalse: [0].
+		n = 0 ifTrue: [self deleteBuffers].
+		n]
     ]
 
     readBuffer [
