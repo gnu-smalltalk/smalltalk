@@ -1,3 +1,9 @@
+2010-09-28  Paolo Bonzini <bonzini@gnu.org>
+
+	* kernel/Behavior.st: Recompile this class is "removed" is true.
+	Remove #subclassesNeedRecompilation since it's useless now with no
+	"Recompiling" messages.
+
 2010-09-27  Paolo Bonzini <bonzini@gnu.org>
 
 	* kernel/Behavior.st: Remove "Recompiling" messages.

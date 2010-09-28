@@ -103,18 +103,9 @@ method dictionary, and iterating over the class hierarchy.'>
         added := variableArray anySatisfy: [:each |
             (oldInstVarNames includes: each) not].
 
-        changed | (removed | added and: [self subclassesNeedRecompilation])
-            ifFalse: [^self].
-
-        changed ifTrue: [self compileAll].
+        changed | removed | added ifFalse: [^self].
+        changed | removed ifTrue: [self compileAll].
         self compileAllSubclasses
-    ]
-
-    subclassesNeedRecompilation [
-        <category: 'private'>
-
-        ^self allSubclasses anySatisfy: [ :each |
-            each methodDictionary size > 0 ]
     ]
 
     parseInstanceVariableString: variableString [
