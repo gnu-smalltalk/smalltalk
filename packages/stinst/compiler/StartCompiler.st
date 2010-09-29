@@ -45,6 +45,13 @@ Behavior extend [
 	^STInST.GSTFileInParser
     ]
 
+    parserClass [
+	"Answer the class used by to parse methods passed to #compile:."
+
+	<category: 'compiling'>
+	^STInST.RBBracketedMethodParser
+    ]
+
 ]
 
 
@@ -115,7 +122,7 @@ Behavior extend [
 	(self compilerClass canCompile: code) 
 	    ifTrue: 
 		[| dummyParser |
-		dummyParser := STInST.RBParser new.
+		dummyParser := self parserClass new.
 		dummyParser errorBlock: 
 			[:m :l | 
 			^block 
@@ -144,7 +151,7 @@ Behavior extend [
 	source := aString isString 
 		    ifTrue: [aString]
 		    ifFalse: [source := aString contents].
-	parser := STInST.RBParser new.
+	parser := self parserClass new.
 	parser initializeParserWith: source type: #on:errorBlock:.
 	^self compilerClass 
 	    compile: (parser parseMethod: source)
@@ -159,7 +166,7 @@ Behavior extend [
 	source := aString isString 
 		    ifTrue: [aString]
 		    ifFalse: [source := aString contents].
-	parser := STInST.RBParser new.
+	parser := self parserClass new.
 	parser errorBlock: 
 		[:m :l | 
 		^aBlock 
