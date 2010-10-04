@@ -1,3 +1,7 @@
+2010-10-04  Paolo Bonzini  <bonzini@gnu.org>
+
+	* lib-src/qsort.c: Obsolete, remove.
+
 2010-07-18  Paolo Bonzini  <bonzini@gnu.org>
 
 	* lib-src/avltrees.c: Rewrite avl_next.  Fixes case where root has
