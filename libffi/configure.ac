@@ -72,7 +72,7 @@ case "$host" in
 	TARGET=PA_HPUX; TARGETDIR=pa
 	;;
 
-  i?86-*-freebsd* | i?86-*-openbsd*)
+  i?86-*-freebsd* | i?86-*-openbsd* | i?86-*-dragonfly*)
 	TARGET=X86_FREEBSD; TARGETDIR=x86
 	;;
   i?86-win32* | i?86-*-cygwin* | i?86-*-mingw* | i?86-*-os2*)
