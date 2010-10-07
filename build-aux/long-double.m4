@@ -5,10 +5,10 @@ AC_DEFUN([GST_C_LONG_DOUBLE],
 [gst_cv_c_wno_long_double=no
 save_CFLAGS="$CFLAGS"
 CFLAGS="$CFLAGS -Werror"
-AC_COMPILE_IFELSE([[long double a;]],
+AC_COMPILE_IFELSE([AC_LANG_SOURCE([long double a;])],
                   [gst_cv_c_wno_long_double=no; break],
 		  [CFLAGS="$CFLAGS -Wno-long-double"
-		   AC_COMPILE_IFELSE([[long double a;]],
+		   AC_COMPILE_IFELSE([AC_LANG_SOURCE([long double a;])],
 		                     [gst_cv_c_wno_long_double=yes; break],
 				     [AC_MSG_ERROR([compiler does not have long double])])])
 CFLAGS="$save_CFLAGS"

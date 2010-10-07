@@ -5,7 +5,7 @@ AC_DEFUN([GST_C_HIDDEN_VISIBILITY],
 [gst_cv_c_visibility_hidden=no
 save_CFLAGS="$CFLAGS"
 CFLAGS="$CFLAGS -Werror"
-AC_COMPILE_IFELSE([[char *c __attribute__ ((visibility ("hidden")));]],
+AC_COMPILE_IFELSE([AC_LANG_SOURCE([char *c __attribute__ ((visibility ("hidden")));])],
                   [gst_cv_c_visibility_hidden=yes; break])
 CFLAGS="$save_CFLAGS"
 ])

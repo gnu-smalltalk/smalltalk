@@ -211,10 +211,11 @@ AC_C_RESTRICT
 
 dnl Test for broken solaris include file.  Should be moved to gnulib maybe?
 AC_MSG_CHECKING([for broken sys/avl.h])
-AC_PREPROC_IFELSE([#include <sys/avl.h>
+AC_PREPROC_IFELSE([AC_LANG_SOURCE([#include <sys/avl.h>
   #ifndef _AVL_H
-  would be useless anyway :-(
-  #endif], [
+  would be useless anyway
+  #endif
+])], [
   AC_MSG_RESULT(yes)
   AC_DEFINE(_AVL_H, 1,
     [Define to 1 if, like Solaris, your system has a sys/avl.h header that
@@ -488,10 +489,10 @@ GST_PACKAGE_ENABLE([LibSDL], [sdl/libsdl],
   save_LIBS=$LIBS
   CFLAGS="$CFLAGS $SDL_CFLAGS"
   LIBS="$LIBS $SDL_LIBS"
-  AC_LINK_IFELSE([
+  AC_LINK_IFELSE([AC_LANG_SOURCE([
       #include <SDL.h>
       #include <SDL_main.h>
-      int main(int argc, char **argv) { SDL_Init(0); return 0; }],
+      int main(int argc, char **argv) { SDL_Init(0); return 0; }])],
     [], [gst_cv_sdl=no])
 
   LIBS=$save_LIBS
