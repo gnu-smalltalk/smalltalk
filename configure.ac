@@ -168,6 +168,14 @@ if test $enable_generational_gc = no; then
 else
   AC_DEFINE(HAVE_SIGSEGV_H, 1, [Define to 1 if libsigsegv is being used])
   if test $with_system_libsigsegv = no; then
+    case $host in
+      x86_64-apple-darwin*)
+        AC_MSG_ERROR(dnl
+[a pre-installed libsigsegv is required on 64-bit Darwin.  To
+configure: error: proceed without it, use the --disable-generational-gc
+configure: error: option for configure.])
+        ;;
+    esac
     AC_CONFIG_SUBDIRS(sigsegv)
     INCSIGSEGV='-I$(top_srcdir)/sigsegv/src -I$(top_builddir)/sigsegv/src'
     LIBSIGSEGV='$(top_builddir)/sigsegv/src/libsigsegv_convenience.la'
