@@ -106,37 +106,58 @@ AM_MISSING_PROG(AUTOM4TE, autom4te, $missing_dir)
 dnl 
 dnl ------------------------------ SUBDIRS --------------------
 
+dnl Throw all these away in 3.3, and just require the system
+dnl lib{ltdl,ffi,sigsegv}.  Before that, however, we need to
+dnl ensure Fedora has a cross-compiled libffi and libsigsegv.
+
 AC_ARG_WITH(system-libltdl,
 [  --with-system-libltdl[=PATH]  use system libltdl.la (search in PATH if given)],
-[], [with_system_libltdl=no])
+[], [with_system_libltdl=detect])
+
+GST_HAVE_LIB([ltdl], [lt_dlopen])
+if test $with_system_libltdl = detect; then
+  with_system_libltdl=$ac_cv_lib_ltdl_lt_dlopen
+fi
 
 if test $with_system_libltdl = no; then
+  AC_MSG_WARN([using included copy of libltdl])
+  AC_MSG_WARN([this is deprecated and will go away])
+  AC_MSG_WARN([it is suggested to install libltdl])
   AC_LIBOBJ(ltdl)
   AC_CONFIG_LINKS([lib-src/ltdl.h:lib-src/ltdl_.h])
   INCLTDL= LIBLTDL=
 elif test $with_system_libltdl = yes; then
   INCLTDL= LIBLTDL=-lltdl
 else
-  INCLTDL="-I$withval/../include" LIBLTDL="-L$withval -lltdl"
+  INCLTDL="-I$with_system_libltdl/../include"
+  LIBLTDL="-L$with_system_libltdl -lltdl"
 fi
 AC_SUBST(INCLTDL)
 AC_SUBST(LIBLTDL)
 
 AC_ARG_WITH(system-libffi,
 [  --with-system-libffi[=PATH]   use system libffi.la (search in PATH if given)],
-[], [with_system_libffi=no])
+[], [with_system_libffi=detect])
 
+PKG_CHECK_MODULES(LIBFFI, libffi,
+                  [ac_cv_lib_libffi_ffi_prep_cif=yes],
+                  [GST_HAVE_LIB(libffi, ffi_prep_cif)])
+if test $with_system_libffi = detect; then
+  with_system_libffi=$ac_cv_lib_libffi_ffi_prep_cif
+fi
 if test $with_system_libffi = no; then
+  AC_MSG_WARN([using included copy of libffi])
+  AC_MSG_WARN([this is deprecated and will go away])
+  AC_MSG_WARN([it is suggested to install libffi])
   AC_CONFIG_SUBDIRS(libffi)
   INCFFI='-I$(top_srcdir)/libffi/include -I$(top_builddir)/libffi/include'
   LIBFFI='$(top_builddir)/libffi/libffi.la'
 elif test $with_system_libffi = yes; then
-  PKG_CHECK_MODULES(FFI, libffi,
-    [ INCFFI="$FFI_CFLAGS" LIBFFI="$FFI_LIBS" ],
-    [ INCFFI= LIBFFI=-lffi ]
-  )
+  INCFFI=$LIBFFI_CFLAGS
+  LIBFFI=${LIBFFI_LIBS:-'-lffi'}
 else
-  INCFFI="-I$withval/../include" LIBFFI="-L$withval -lffi"
+  INCFFI="-I$with_system_libffi/../include"
+  LIBFFI="-L$with_system_libffi -lffi"
 fi
 case $host in
   *-*-darwin[[912]]* ) LIBFFI_EXECUTABLE_LDFLAGS=-Wl,-allow_stack_execute ;;
@@ -166,7 +187,12 @@ esac])
 
 AC_ARG_WITH(system-libsigsegv,
 [  --with-system-libsigsegv[=PATH]   use system libsigsegv.la likewise],
-[], [with_system_libsigsegv=no])
+[], [with_system_libsigsegv=detect])
+
+GST_HAVE_LIB([sigsegv], [sigsegv_install_handler])
+if test $with_system_libsigsegv = detect; then
+  with_system_libsigsegv=$ac_cv_lib_sigsegv_sigsegv_install_handler
+fi
 
 if test $enable_generational_gc = no; then
   INCSIGSEGV= LIBSIGSEGV=
@@ -180,6 +206,10 @@ else
 configure: error: proceed without it, use the --disable-generational-gc
 configure: error: option for configure.])
         ;;
+      *)
+       AC_MSG_WARN([using included copy of libsigsegv])
+       AC_MSG_WARN([this is deprecated and will go away])
+       AC_MSG_WARN([it is suggested to install libsigsegv])
     esac
     AC_CONFIG_SUBDIRS(sigsegv)
     INCSIGSEGV='-I$(top_srcdir)/sigsegv/src -I$(top_builddir)/sigsegv/src'
@@ -187,7 +217,8 @@ configure: error: option for configure.])
   elif test $with_system_libsigsegv = yes; then
     INCSIGSEGV= LIBSIGSEGV=-lsigsegv
   else
-    INCSIGSEGV="-I$withval/../include" LIBSIGSEGV="-L$withval -lsigsegv"
+    INCSIGSEGV="-I$with_system_libsigsegv/../include"
+    LIBSIGSEGV="-L$with_system_libsigsegv -lsigsegv"
   fi
 fi
 AC_SUBST(INCSIGSEGV)
