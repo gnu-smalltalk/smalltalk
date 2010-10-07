@@ -1,5 +1,5 @@
 /* -----------------------------------------------------------------------
-   sysv.S - Copyright (c) 1996, 1998, 2001-2003, 2005, 2008  Red Hat, Inc.
+   sysv.S - Copyright (c) 1996, 1998, 2001-2003, 2005, 2008, 2010  Red Hat, Inc.
    
    X86 Foreign Function Interface 
 
@@ -47,6 +47,9 @@ ffi_call_SYSV:
 	/* Make room for all of the new args.  */
 	movl  16(%ebp),%ecx
 	subl  %ecx,%esp
+
+        /* Align the stack pointer to 16-bytes */
+        andl  $0xfffffff0, %esp
 
 	movl  %esp,%eax
 
@@ -242,9 +245,20 @@ ffi_closure_SYSV:
 
 #if !FFI_NO_RAW_API
 
+/* Precalculate for e.g. the Solaris 10/x86 assembler.  */
+#if FFI_TRAMPOLINE_SIZE == 10
+#define RAW_CLOSURE_CIF_OFFSET 12
+#define RAW_CLOSURE_FUN_OFFSET 16
+#define RAW_CLOSURE_USER_DATA_OFFSET 20
+#elif FFI_TRAMPOLINE_SIZE == 24
+#define RAW_CLOSURE_CIF_OFFSET 24
+#define RAW_CLOSURE_FUN_OFFSET 28
+#define RAW_CLOSURE_USER_DATA_OFFSET 32
+#else
 #define RAW_CLOSURE_CIF_OFFSET ((FFI_TRAMPOLINE_SIZE + 3) & ~3)
 #define RAW_CLOSURE_FUN_OFFSET (RAW_CLOSURE_CIF_OFFSET + 4)
 #define RAW_CLOSURE_USER_DATA_OFFSET (RAW_CLOSURE_FUN_OFFSET + 4)
+#endif
 #define CIF_FLAGS_OFFSET 20
 
 	.align	4
@@ -320,10 +334,20 @@ ffi_closure_raw_SYSV:
 .LSCIE1:
 	.long	0x0	/* CIE Identifier Tag */
 	.byte	0x1	/* CIE Version */
+#ifdef HAVE_AS_ASCII_PSEUDO_OP
 #ifdef __PIC__
 	.ascii "zR\0"	/* CIE Augmentation */
 #else
 	.ascii "\0"	/* CIE Augmentation */
+#endif
+#elif defined HAVE_AS_STRING_PSEUDO_OP
+#ifdef __PIC__
+	.string "zR"	/* CIE Augmentation */
+#else
+	.string ""	/* CIE Augmentation */
+#endif
+#else
+#error missing .ascii/.string
 #endif
 	.byte	0x1	/* .uleb128 0x1; CIE Code Alignment Factor */
 	.byte	0x7c	/* .sleb128 -4; CIE Data Alignment Factor */
@@ -343,10 +367,12 @@ ffi_closure_raw_SYSV:
 	.long	.LEFDE1-.LASFDE1	/* FDE Length */
 .LASFDE1:
 	.long	.LASFDE1-.Lframe1	/* FDE CIE offset */
-#ifdef __PIC__
+#if defined __PIC__ && defined HAVE_AS_X86_PCREL
 	.long	.LFB1-.	/* FDE initial location */
+#elif defined __PIC__
+	.long	.LFB1@rel
 #else
-	.long	.LFB1	/* FDE initial location */
+	.long	.LFB1
 #endif
 	.long	.LFE1-.LFB1	/* FDE address range */
 #ifdef __PIC__
@@ -368,8 +394,10 @@ ffi_closure_raw_SYSV:
 	.long	.LEFDE2-.LASFDE2	/* FDE Length */
 .LASFDE2:
 	.long	.LASFDE2-.Lframe1	/* FDE CIE offset */
-#ifdef __PIC__
+#if defined __PIC__ && defined HAVE_AS_X86_PCREL
 	.long	.LFB2-.	/* FDE initial location */
+#elif defined __PIC__
+	.long	.LFB2@rel
 #else
 	.long	.LFB2
 #endif
@@ -402,8 +430,10 @@ ffi_closure_raw_SYSV:
 	.long	.LEFDE3-.LASFDE3	/* FDE Length */
 .LASFDE3:
 	.long	.LASFDE3-.Lframe1	/* FDE CIE offset */
-#ifdef __PIC__
+#if defined __PIC__ && defined HAVE_AS_X86_PCREL
 	.long	.LFB3-.	/* FDE initial location */
+#elif defined __PIC__
+	.long	.LFB3@rel
 #else
 	.long	.LFB3
 #endif

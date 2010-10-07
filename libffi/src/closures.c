@@ -1,6 +1,6 @@
 /* -----------------------------------------------------------------------
    closures.c - Copyright (c) 2007  Red Hat, Inc.
-   Copyright (C) 2007 Free Software Foundation, Inc
+   Copyright (C) 2007, 2009 Free Software Foundation, Inc
 
    Code to allocate and deallocate memory for closures.
 
@@ -42,6 +42,13 @@
    locations in the virtual memory space, one location writable and
    another executable.  */
 #  define FFI_MMAP_EXEC_WRIT 1
+#  define HAVE_MNTENT 1
+# endif
+# if defined(X86_WIN32) || defined(X86_WIN64) || defined(__OS2__)
+/* Windows systems may have Data Execution Protection (DEP) enabled, 
+   which requires the use of VirtualMalloc/VirtualFree to alloc/free
+   executable memory. */
+#  define FFI_MMAP_EXEC_WRIT 1
 # endif
 #endif
 
@@ -60,7 +67,11 @@
 
 #define USE_LOCKS 1
 #define USE_DL_PREFIX 1
+#ifdef __GNUC__
+#ifndef USE_BUILTIN_FFS
 #define USE_BUILTIN_FFS 1
+#endif
+#endif
 
 /* We need to use mmap, not sbrk.  */
 #define HAVE_MORECORE 0
@@ -90,10 +101,15 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <errno.h>
+#ifndef _MSC_VER
 #include <unistd.h>
+#endif
 #include <string.h>
 #include <stdio.h>
+#if !defined(X86_WIN32) && !defined(X86_WIN64)
+#ifdef HAVE_MNTENT
 #include <mntent.h>
+#endif /* HAVE_MNTENT */
 #include <sys/param.h>
 #include <pthread.h>
 
@@ -130,7 +146,7 @@ selinux_enabled_check (void)
       p = strchr (p + 1, ' ');
       if (p == NULL)
         break;
-      if (strncmp (p + 1, "selinuxfs ", 10) != 0)
+      if (strncmp (p + 1, "selinuxfs ", 10) == 0)
         {
           free (buf);
           fclose (f);
@@ -149,7 +165,16 @@ selinux_enabled_check (void)
 
 #define is_selinux_enabled() 0
 
-#endif
+#endif /* !FFI_MMAP_EXEC_SELINUX */
+
+#elif defined (__CYGWIN__)
+
+#include <sys/mman.h>
+
+/* Cygwin is Linux-like, but not quite that Linux-like.  */
+#define is_selinux_enabled() 0
+
+#endif /* !defined(X86_WIN32) && !defined(X86_WIN64) */
 
 /* Declare all functions defined in dlmalloc.c as static.  */
 static void *dlmalloc(size_t);
@@ -168,9 +193,11 @@ static int dlmalloc_trim(size_t) MAYBE_UNUSED;
 static size_t dlmalloc_usable_size(void*) MAYBE_UNUSED;
 static void dlmalloc_stats(void) MAYBE_UNUSED;
 
+#if !(defined(X86_WIN32) || defined(X86_WIN64) || defined(__OS2__)) || defined (__CYGWIN__)
 /* Use these for mmap and munmap within dlmalloc.c.  */
 static void *dlmmap(void *, size_t, int, int, int, off_t);
 static int dlmunmap(void *, size_t);
+#endif /* !(defined(X86_WIN32) || defined(X86_WIN64) || defined(__OS2__)) || defined (__CYGWIN__) */
 
 #define mmap dlmmap
 #define munmap dlmunmap
@@ -179,6 +206,8 @@ static int dlmunmap(void *, size_t);
 
 #undef mmap
 #undef munmap
+
+#if !(defined(X86_WIN32) || defined(X86_WIN64) || defined(__OS2__)) || defined (__CYGWIN__)
 
 /* A mutex used to synchronize access to *exec* variables in this file.  */
 static pthread_mutex_t open_temp_exec_file_mutex = PTHREAD_MUTEX_INITIALIZER;
@@ -232,6 +261,7 @@ open_temp_exec_file_env (const char *envvar)
   return open_temp_exec_file_dir (value);
 }
 
+#ifdef HAVE_MNTENT
 /* Open a temporary file in an executable and writable mount point
    listed in the mounts file.  Subsequent calls with the same mounts
    keep searching for mount points in the same file.  Providing NULL
@@ -264,7 +294,7 @@ open_temp_exec_file_mnt (const char *mounts)
       struct mntent mnt;
       char buf[MAXPATHLEN * 3];
 
-      if (getmntent_r (last_mntent, &mnt, buf, sizeof (buf)))
+      if (getmntent_r (last_mntent, &mnt, buf, sizeof (buf)) == NULL)
 	return -1;
 
       if (hasmntopt (&mnt, "ro")
@@ -278,6 +308,7 @@ open_temp_exec_file_mnt (const char *mounts)
 	return fd;
     }
 }
+#endif /* HAVE_MNTENT */
 
 /* Instructions to look for a location to hold a temporary file that
    can be mapped in for execution.  */
@@ -292,8 +323,10 @@ static struct
   { open_temp_exec_file_dir, "/var/tmp", 0 },
   { open_temp_exec_file_dir, "/dev/shm", 0 },
   { open_temp_exec_file_env, "HOME", 0 },
+#ifdef HAVE_MNTENT
   { open_temp_exec_file_mnt, "/etc/mtab", 1 },
   { open_temp_exec_file_mnt, "/proc/mounts", 1 },
+#endif /* HAVE_MNTENT */
 };
 
 /* Current index into open_temp_exec_file_opts.  */
@@ -488,6 +521,8 @@ segment_holding_code (mstate m, char* addr)
   }
 }
 #endif
+
+#endif /* !(defined(X86_WIN32) || defined(X86_WIN64) || defined(__OS2__)) || defined (__CYGWIN__) */
 
 /* Allocate a chunk of memory with the given size.  Returns a pointer
    to the writable address, and sets *CODE to the executable

@@ -1,6 +1,6 @@
 /* -----------------------------------------------------------------*-C-*-
-   ffitarget.h - Copyright (c) 1996-2003  Red Hat, Inc.
-   Target configuration macros for S390.
+   ffitarget.h - Copyright (c) 2009  Bradley Smith <brad@brad-smith.co.uk>
+   Target configuration macros for AVR32.
 
    Permission is hereby granted, free of charge, to any person obtaining
    a copy of this software and associated documentation files (the
@@ -27,14 +27,6 @@
 #ifndef LIBFFI_TARGET_H
 #define LIBFFI_TARGET_H
 
-#if defined (__s390x__)
-#ifndef S390X
-#define S390X
-#endif
-#endif
-
-/* ---- System specific configurations ----------------------------------- */
-
 #ifndef LIBFFI_ASM
 typedef unsigned long          ffi_arg;
 typedef signed long            ffi_sarg;
@@ -47,16 +39,12 @@ typedef enum ffi_abi {
 } ffi_abi;
 #endif
 
+#define FFI_EXTRA_CIF_FIELDS unsigned int rstruct_flag
 
-/* ---- Definitions for closures ----------------------------------------- */
+/* Definitions for closures */
 
 #define FFI_CLOSURES 1
-#ifdef S390X
-#define FFI_TRAMPOLINE_SIZE 32
-#else
-#define FFI_TRAMPOLINE_SIZE 16
-#endif
+#define FFI_TRAMPOLINE_SIZE 36
 #define FFI_NATIVE_RAW_API 0
 
 #endif
-
