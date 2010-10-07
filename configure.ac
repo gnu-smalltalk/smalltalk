@@ -138,8 +138,13 @@ elif test $with_system_libffi = yes; then
 else
   INCFFI="-I$withval/../include" LIBFFI="-L$withval -lffi"
 fi
+case $host in
+  *-*-darwin[[912]]* ) LIBFFI_EXECUTABLE_LDFLAGS=-Wl,-allow_stack_execute ;;
+  *) LIBFFI_EXECUTABLE_LDFLAGS= ;;
+esac
 AC_SUBST(INCFFI)
 AC_SUBST(LIBFFI)
+AC_SUBST(LIBFFI_EXECUTABLE_LDFLAGS)
 
 case $ac_configure_args in
   *--enable-subdir) ;;
