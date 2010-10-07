@@ -1,3 +1,8 @@
+2010-10-07  Paolo Bonzini <bonzini@gnu.org>
+
+	* tests/testsuite.at: Mark packages depending on Iconv as optional.
+	* tests/testsuite: Regenerate.
+
 2010-09-28  Holger Hans Peter Freyther  <zecke@selfish.org>
 
 	* kernel/FileDescr.st: Fix a typo.
