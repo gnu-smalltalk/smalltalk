@@ -170,7 +170,7 @@ else
   if test $with_system_libsigsegv = no; then
     AC_CONFIG_SUBDIRS(sigsegv)
     INCSIGSEGV='-I$(top_srcdir)/sigsegv/src -I$(top_builddir)/sigsegv/src'
-    LIBSIGSEGV='$(top_builddir)/sigsegv/src/libsigsegv.la'
+    LIBSIGSEGV='$(top_builddir)/sigsegv/src/libsigsegv_convenience.la'
   elif test $with_system_libsigsegv = yes; then
     INCSIGSEGV= LIBSIGSEGV=-lsigsegv
   else

@@ -22,7 +22,7 @@ AUTOMAKE_OPTIONS = 1.5 gnits no-dependencies
 
 RM = rm -f
 
-lib_LTLIBRARIES = libsigsegv.la
+noinst_LTLIBRARIES = libsigsegv_convenience.la
 
 noinst_HEADERS = \
   fault.h fault-aix3.h fault-aix3-powerpc.h fault-aix5.h fault-aix5-powerpc.h \
@@ -57,9 +57,9 @@ EXTRA_DIST = \
 INCLUDES = -I. -I$(srcdir)
 DEFS = @DEFS@
 
-libsigsegv_la_SOURCES = handler.c stackvma.c leave.c dispatcher.c version.c
+libsigsegv_convenience_la_SOURCES = handler.c stackvma.c leave.c dispatcher.c version.c
 
-libsigsegv_la_LDFLAGS = -lc -no-undefined
+libsigsegv_convenience_la_LDFLAGS = -lc -no-undefined
 
 # Dependencies.
 handler.$(OBJEXT) : ../config.h sigsegv.h @CFG_HANDLER@ $(noinst_HEADERS) 
