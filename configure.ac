@@ -442,6 +442,8 @@ GST_PACKAGE_ENABLE([GTK], [gtk], [
       if test $ac_cv_func_g_poll = no; then
         AC_DEFINE([g_poll], [poll], [Define to poll if your glib does not provide g_poll.])
       fi
+      LIBS=$ac_save_LIBS
+      CPPFLAGS=$ac_save_CPPFLAGS
     fi
   fi],
   [enable_gtk gst_cv_cairo],
