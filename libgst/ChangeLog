@@ -1,3 +1,7 @@
+2010-10-08 Paolo Bonzini <bonzini@gnu.org>
+
+	* libgst/cint.c: Retrieve CCallbackDescriptor on image load.
+
 2010-09-27  Holger Hans Peter Freyther  <zecke@selfish.org>
 
 	* libgst/oop.c: Fix a typo.

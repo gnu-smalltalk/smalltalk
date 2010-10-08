@@ -714,7 +714,7 @@ static const class_definition class_info[] = {
    NULL, NULL },
 
   {&_gst_c_callback_descriptor_class, &_gst_c_callable_class,
-   GST_ISP_ULONG, false, 1,
+   GST_ISP_ULONG, true, 1,
    "CCallbackDescriptor",
    "block",
    NULL, NULL },
