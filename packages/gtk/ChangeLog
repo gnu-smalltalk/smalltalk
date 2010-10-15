@@ -1,3 +1,9 @@
+2010-10-15  Paolo Bonzini  <bonzini@gnu.org>
+
+	* funcs.awk: Improve conversion for functions that have a single
+	argument before the variadic ones, and have that argument merged
+	with the "...".
+
 2010-06-23  Paolo Bonzini  <bonzini@gnu.org>
 
 	* GtkImpl.st: Add GtkAlignment class>>#new and GObject class>>#new.

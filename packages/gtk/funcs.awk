@@ -224,7 +224,9 @@ match_function_first_line($0) {
       # remove last argument if it was actually the first variadic argument
       if (decl ~ /: first/ && save_decl !~ /: first/) {
         strip_variadic = 1
-        decl = save_decl
+        if (save_decl != "")
+          decl = save_decl " varargs: varargs"
+        break
       }
 
       decl = decl " varargs: varargs"
