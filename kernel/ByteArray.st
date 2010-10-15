@@ -503,17 +503,24 @@ a String''s elements are characters.'>
 	^self size
     ]
 
+    castTo: type [
+	"Give access to the receiver as a value with the given CType."
+
+	<category: 'CObject'>
+	^(CObject new storage: self) castTo: type
+    ]
+
     type: type at: index [
-	"Private - Use Memory class to access in the receiver a value with the
-	 given type."
+	"Private - Access in the receiver a value with the given type
+         at the given 1-based index."
 
 	<category: 'private'>
 	^(CObject new storage: self) at: index - 1 type: type
     ]
 
     type: type at: index put: value [
-	"Private - Use Memory class to write to the receiver a value with the
-	 given type."
+	"Private - Write to the receiver a value with the given type
+         at the given 1-based index."
 
 	<category: 'private'>
 	self isReadOnly ifTrue: [^SystemExceptions.ReadOnlyObject signal].
