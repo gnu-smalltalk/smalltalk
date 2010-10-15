@@ -1,5 +1,9 @@
 2010-10-15  Paolo Bonzini  <bonzini@gnu.org>
 
+	* GtkImpl.st: Return nil when gtk_tree_model_get_iter returns FALSE.
+
+2010-10-15  Paolo Bonzini  <bonzini@gnu.org>
+
 	* funcs.awk: Improve conversion for functions that have a single
 	argument before the variadic ones, and have that argument merged
 	with the "...".

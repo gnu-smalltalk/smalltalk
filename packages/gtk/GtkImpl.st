@@ -299,8 +299,7 @@ GtkTreeModel extend [
 	<category: 'accessing'>
 	| iter |
 	iter := GTK.GtkTreeIter new.
-	self getIter: iter path: path.
-	^iter
+	^(self getIter: iter path: path) ifTrue: [iter] ifFalse: [nil]
     ]
 
     getIterFirst [
