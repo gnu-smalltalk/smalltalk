@@ -1,3 +1,8 @@
+2010-10-16  Paolo Bonzini <bonzini@gnu.org>
+
+	* scripts/GenDoc.st: Handle warnings from STClassLoader, document
+	all loaded classes rather than only the fully defined ones.
+
 2010-10-15  Paolo Bonzini <bonzini@gnu.org>
 
 	* kernel/ByteArray.st: Add #castTo:.

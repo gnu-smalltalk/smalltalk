@@ -1,3 +1,8 @@
+2010-10-16  Paolo Bonzini <bonzini@gnu.org>
+
+	* STLoaderObjs.st: Add UndefinedClassWarning and use it to return
+	a (not quite) reasonable value from UndefinedClass>>#superclass.
+
 2010-09-13  Holger Hans Peter Freyther  <zecke@selfish.org>
 
 	* GSTParser.st: GSTFileInParser>>parseClassTag pass the argument

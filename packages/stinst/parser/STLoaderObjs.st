@@ -32,6 +32,39 @@
 STInST addSubspace: #STClassLoaderObjects!
 Namespace current: STClassLoaderObjects!
 
+Warning subclass: #UndefinedClassWarning
+        instanceVariableNames: 'undefinedClass'
+        classVariableNames: ''
+        poolDictionaries: ''
+        category: 'System-Compiler'!
+
+!UndefinedClassWarning class methodsFor: 'exception handling'!
+
+signal: anObject
+    ^self new
+        undefinedClass: anObject;
+        signal
+! !
+
+!UndefinedClassWarning methodsFor: 'exception handling'!
+
+description
+    ^'undefined class'
+!
+
+messageText
+    ^'undefined class %1' % {self undefinedClass name asString}
+!
+
+undefinedClass
+    ^undefinedClass
+!
+
+undefinedClass: anObject
+    undefinedClass := anObject
+! !
+
+
 Object subclass: #PseudoBehavior
         instanceVariableNames: 'subclasses methods loader'
         classVariableNames: ''
@@ -821,6 +854,11 @@ environment
 
 environment: aNamespace
     environment := aNamespace.
+!
+
+superclass
+    UndefinedClassWarning signal: self.
+    ^nil
 ! !
 
 !UndefinedClass methodsFor: 'printing'!

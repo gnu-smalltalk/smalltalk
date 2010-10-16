@@ -31,9 +31,10 @@
 "Load the prerequisites"
 PackageLoader fileInPackage: #ClassPublisher!
 
-| package location publisher files classes classPatterns loader defaultNamespace |
+| package location publisher files classes classPatterns loader defaultNamespace warnings |
 
 classPatterns := OrderedCollection new.
+warnings := Set new.
 defaultNamespace := Smalltalk.
 
 helpString :=
@@ -129,12 +130,12 @@ Options:
 
     classPatterns isEmpty
         ifTrue: [
-            classes := loader fullyDefinedLoadedClasses.
+            classes := loader loadedClasses.
             classes isEmpty
 	        ifTrue: [ self error: 'specify -p, -f, or a class name' ] ]
         ifFalse: [
 	    allClasses :=
-	        loader fullyDefinedLoadedClasses,
+	        loader loadedClasses,
 	        (Class allSubclasses collect: [ :each | each instanceClass ]).
 
 	    classes := IdentitySet new.
@@ -157,6 +158,14 @@ Options:
         ifFalse: [
 	    publisher publishAll: classes toLocation: location ]
 ]
+    on: Warning
+    do: [ :ex |
+        (warnings includes: ex messageText) ifFalse: [
+            warnings add: ex messageText.
+            ('gst-doc: warning: ', ex messageText, '
+') displayOn: Transcript ].
+        ex resume ]
+
     on: Error
     do: [ :ex |
         ('gst-doc: ', ex messageText, '
