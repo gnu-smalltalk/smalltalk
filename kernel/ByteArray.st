@@ -618,8 +618,17 @@ a String''s elements are characters.'>
 	    startingAt: replaceStart
     ]
 
+    asCData [
+	"Allocate memory with malloc for a copy of the receiver, and return
+         a pointer to it as a CByte."
+
+	<category: 'CObject'>
+	^self asCData: CByteType
+    ]
+
     asCData: aCType [
-	"Convert the receiver to a CObject with the given type"
+	"Allocate memory with malloc for a copy of the receiver, and return
+         it converted to a CObject with the given type"
 
 	<category: 'built ins'>
 	<primitive: VMpr_ByteArray_asCData>

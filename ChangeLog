@@ -1,5 +1,10 @@
 2010-10-16  Paolo Bonzini <bonzini@gnu.org>
 
+	* kernel/ByteArray.st: Add #asCData.
+	* kernel/String.st: Add #asCData.
+
+2010-10-16  Paolo Bonzini <bonzini@gnu.org>
+
 	* scripts/GenDoc.st: Handle warnings from STClassLoader, document
 	all loaded classes rather than only the fully defined ones.
 
