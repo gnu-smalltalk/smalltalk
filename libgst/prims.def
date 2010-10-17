@@ -5026,15 +5026,15 @@ primitive VMpr_String_ByteArray_asCData :
   if (is_a_kind_of (OOP_CLASS (oop2), _gst_c_type_class))
     {
       int size = NUM_INDEXABLE_FIELDS (oop1);
-      PTR data = xmalloc (size);
-      if (data)
-	{
-	  OOP cObjectOOP = COBJECT_NEW (data, oop2, _gst_c_object_class);
-	  memcpy (data, OOP_TO_OBJ (oop1)->data, size);
-	  POP_N_OOPS (1);
-	  SET_STACKTOP (cObjectOOP);
-	  PRIM_SUCCEEDED;
-	}
+      int alloc_size = (id == prim_id (VMpr_String_asCData)) ? size + 1 : size;
+      char *data = xmalloc (alloc_size);
+      OOP cObjectOOP = COBJECT_NEW (data, oop2, _gst_c_object_class);
+      memcpy (data, OOP_TO_OBJ (oop1)->data, size);
+      if (id == prim_id (VMpr_String_asCData))
+	data[size] = 0;
+      POP_N_OOPS (1);
+      SET_STACKTOP (cObjectOOP);
+      PRIM_SUCCEEDED;
     }
   PRIM_FAILED;
 }

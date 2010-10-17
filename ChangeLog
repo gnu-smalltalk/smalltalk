@@ -1,5 +1,10 @@
 2010-10-17  Paolo Bonzini <bonzini@gnu.org>
 
+	* kernel/String.st: Document NULL-termination of output of
+	#asCData and #asCData:.
+
+2010-10-17  Paolo Bonzini <bonzini@gnu.org>
+
 	* kernel/UndefObject.st: Add #inheritsFrom:
 	* scripts/Test.st: Automatically load SUnit.
 

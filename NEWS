@@ -34,6 +34,8 @@ o   Number class>>#readFrom: can parse numbers in scientific notation.
 o   Scoped methods ("A class >> a") can be used in an "A class [ ... ]"
     block.
 
+o   String>>#asCData: and String>>#asCData NULL-terminate their output.
+
 o   Updated VisualGST.
 
 
