@@ -1,3 +1,8 @@
+2010-10-17  Paolo Bonzini <bonzini@gnu.org>
+
+	* kernel/UndefObject.st: Add #inheritsFrom:
+	* scripts/Test.st: Automatically load SUnit.
+
 2010-10-16  Paolo Bonzini <bonzini@gnu.org>
 
 	* kernel/ByteArray.st: Add #asCData.

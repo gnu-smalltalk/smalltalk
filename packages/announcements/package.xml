@@ -1,0 +1,13 @@
+<package>
+  <name>Announcements</name>
+
+  <filein>Announcements.st</filein>
+
+  <test>
+   <sunit>AnnouncementsTest</sunit>
+   <filein>AnnouncementsTests.st</filein>
+  </test>
+
+  <file>Announcements.st</file>
+  <file>AnnouncementsTests.st</file>
+</package>

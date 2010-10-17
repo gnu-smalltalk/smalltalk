@@ -29,6 +29,7 @@
  ======================================================================"
 
 Smalltalk arguments isEmpty ifTrue: [ ObjectMemory quit ]!
+PackageLoader fileInPackage: 'SUnit'!
 
 | helpString verbose script suite result quiet |
 quiet := false.

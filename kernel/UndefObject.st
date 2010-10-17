@@ -435,5 +435,11 @@ instance, which is the object "nil".'>
 	<category: 'private'>
 	
     ]
+
+    inheritsFrom: aClass [
+        "Always return false, as nil inherits from nothing."
+
+        ^false
+    ]
 ]
 
