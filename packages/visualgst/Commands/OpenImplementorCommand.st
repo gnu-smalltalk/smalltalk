@@ -14,12 +14,19 @@ Command subclass: OpenImplementorCommand [
                 ifFalse: [ nil ]
     ]
 
+    precondition [
+        <category: 'temporary'>
+        "HACK!"
+
+        ^target launcher notNil
+    ]
+
     execute [
         <category: 'command'>
 
         | selection |
         selection := self selection.
-        selection isNil ifTrue: [ ^ GtkLauncher uniqueInstance showHideImplementor ].
-	GtkLauncher uniqueInstance showImplementorOn: selection
+        selection isNil ifTrue: [ ^ target launcher showHideImplementor ].
+	target launcher showImplementorOn: selection
     ]
 ]

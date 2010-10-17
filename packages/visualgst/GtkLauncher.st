@@ -1,21 +1,7 @@
 GtkVisualGSTTool subclass: GtkLauncher [
-    GtkLauncher class [ | history uniqueInstance | ]
+    GtkLauncher class [ | uniqueInstance | ]
 
     | leftSidebar rightSidebar topSidebar packageBuilderWidget implementorResultWidget senderResultWidget senderWidget implementorWidget historyWidget browsers outputs saved imageName transcriptWidget windowsMenu systemChangeNotifier |
-
-    GtkLauncher class >> addHistory: aClass [
-	<category: 'public'>
-
-	self history 
-		add: aClass;
-		changed
-    ]
-
-    GtkLauncher class >> history [
-        <category: 'public'>
-
-        ^ history ifNil: [ history := IdentitySet new ] 
-    ]
 
     GtkLauncher class >> uniqueInstance [
 	<category: 'public'>
@@ -103,12 +89,6 @@ GtkVisualGSTTool subclass: GtkLauncher [
         browsers showLastPage.
 	widget postInitialize.
 	^ widget
-    ]
-
-    classBrowserInAWindow [
-	<category: 'tools events'>
-
-	GtkClassBrowser open
     ]
 
     newWorkspace [
@@ -275,7 +255,8 @@ GtkVisualGSTTool subclass: GtkLauncher [
         SystemChangeNotifier root add: systemChangeNotifier.
 	self clearGlobalState.
 	super initialize.
-	window maximize
+	window maximize.
+	window setIcon: (GTK.GdkPixbuf newFromFile: (self class / 'Icons/visualgst.png') file displayString error: nil)
     ]
 
     windowTitle [
@@ -395,7 +376,6 @@ GtkVisualGSTTool subclass: GtkLauncher [
         historyWidget := GtkHistoryWidget new
                                     browser: self;
                                     yourself.
-        self class history addDependent: historyWidget.
         ^ historyWidget mainWidget
     ]
 
@@ -437,8 +417,9 @@ GtkVisualGSTTool subclass: GtkLauncher [
     buildClassBrowserTabbedWidget [
 	<category: 'user interface'>
 
-	^ browsers := (GtkNotebookWidget parentWindow: window)
+	^ (browsers := GtkNotebookWidget parentWindow: window)
 				    showAll;
+                                    whenSelectionChangedSend: #historyChanged to: self;
 				    addWidget: self buildClassBrowserWidget labeled: 'Browser';
 				    yourself
     ]
@@ -446,7 +427,9 @@ GtkVisualGSTTool subclass: GtkLauncher [
     buildClassBrowserWidget [
 	<category: 'user interface'>
 
-	^ GtkClassBrowserWidget parentWindow: window
+	^ (GtkClassBrowserWidget parentWindow: window)
+             launcher: self;
+             yourself
     ]
 
     buildTranscriptWidget [
@@ -595,6 +578,12 @@ GtkVisualGSTTool subclass: GtkLauncher [
 	<category: 'tools events'>
 
 	OpenTabbedBrowserCommand on: self
+    ]
+
+    launcher [
+	<category: 'accessing'>
+
+	^self
     ]
 
     cancel [
@@ -819,6 +808,13 @@ GtkVisualGSTTool subclass: GtkLauncher [
 	leftSidebar hide.
 	topSidebar hide.
 	isVisible ifFalse: [ leftSidebar show: 3 ]
+    ]
+
+    historyChanged [
+	<category: 'public'>
+
+	self currentWidgetOfBrowser ifNotNil: [ :w |
+	    historyWidget refresh: w historyStack ]
     ]
 
     previousTab [

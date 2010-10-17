@@ -7,22 +7,62 @@ Object subclass: HistoryStack [
 
 	previousStack := OrderedCollection new.
 	nextStack := OrderedCollection new.
-	browser := aGtkClassBrowserWidget
+	browser := aGtkClassBrowserWidget.
     ]
 
     clear [
 	<category: 'stack'>
 
-	previousStack empty.
-	nextStack empty
+        previousStack empty.
+        nextStack empty.
+    ]
+
+    current [
+	<category: 'stack'>
+        ^previousStack isEmpty ifTrue: [ nil ] ifFalse: [ previousStack first ]
     ]
 
     push: aClass [
 	<category: 'stack'>
 
+	(aClass isNil or: [self current == aClass]) ifTrue: [ ^ self ].
 	nextStack empty.
-	(previousStack isEmpty not and: [ previousStack first == aClass ]) ifTrue: [ ^ self ].
 	previousStack addFirst: aClass
+    ]
+
+    size [
+        <category: 'iteration'>
+
+        ^nextStack size + previousStack size
+    ]
+
+    do: aBlock [
+        <category: 'iteration'>
+
+        nextStack reverseDo: aBlock.
+        previousStack do: aBlock.
+    ]
+
+    selectedIndex [
+	<category: 'undo-redo'>
+
+        ^nextStack size + 1
+    ]
+
+    selectItem: anInteger [
+	<category: 'undo-redo'>
+
+        | n |
+        (anInteger between: 1 and: self size)
+            ifFalse: [self error: 'index out of range'].
+
+        [ self selectedIndex < anInteger ] whileTrue: [
+            nextStack addFirst: previousStack removeFirst ].
+        [ self selectedIndex > anInteger ] whileTrue: [
+            previousStack addFirst: nextStack removeFirst ].
+
+        browser selectANamespace: self current environment.
+        browser selectAClass: self current
     ]
 
     previous [
@@ -31,8 +71,8 @@ Object subclass: HistoryStack [
 	previousStack size <= 1 ifTrue: [ ^ self ].
 
 	nextStack addFirst: previousStack removeFirst.
-	browser selectANamespace: previousStack first environment.
-	browser updateClass: previousStack first.
+        browser selectANamespace: self current environment.
+        browser selectAClass: self current
     ]
 
     next [
@@ -40,9 +80,9 @@ Object subclass: HistoryStack [
 
 	nextStack isEmpty ifTrue: [ ^ self ].
 
-	browser selectANamespace: nextStack first environment.
-        browser updateClass: nextStack first.
-        previousStack addFirst: nextStack removeFirst.
+	previousStack addFirst: nextStack removeFirst.
+        browser selectANamespace: self current environment.
+        browser selectAClass: self current
     ]
 ]
 

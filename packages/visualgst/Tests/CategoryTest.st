@@ -17,9 +17,9 @@ Smalltalk.TestCase subclass: CategoryTest [
 
 	| p |
 	p := ClassCategory new.
-	ClassCategory extractCategory: CategoryA for: p.
+	ClassCategory extractCategory: CategoryA for: p into: CategoryA environment.
         self assert: p categories isEmpty.
-	ClassCategory extractCategory: CategoryB for: p.
+	ClassCategory extractCategory: CategoryB for: p into: CategoryB environment.
 	self assert: (p categories includesKey: 'Language').
 	self assert: (p at: 'Language') isCategory.
 	self assert: (p at: 'Language') isNamespace not.
@@ -62,7 +62,7 @@ Smalltalk.TestCase subclass: CategoryTest [
 	p := Object classCategory.
 	self assert: p name = 'Implementation'.
 	p := Kernel.Stat classCategory.
-	self assert: p isNil.
+	self assert: p name isEmpty.
     ]
 
     testChangeCategory [
@@ -70,8 +70,8 @@ Smalltalk.TestCase subclass: CategoryTest [
 
 	| p language implementation |
 	p := ClassCategory new.
-        ClassCategory extractCategory: CategoryB for: p.
-        ClassCategory extractCategory: CategoryC for: p.
+        ClassCategory extractCategory: CategoryB for: p into: CategoryB environment.
+        ClassCategory extractCategory: CategoryC for: p into: CategoryC environment.
         (implementation := (language := p at: 'Language') at: 'Implementation') removeClass: CategoryB.
         self assert: implementation classes isEmpty.
         self assert: implementation parent isNil.
@@ -91,7 +91,7 @@ Smalltalk.TestCase subclass: CategoryTest [
 	p removeClass: CategoryC.
 	self assert: (p classes includes: CategoryC) not.
 	self assert: p parent isNil.
-        ClassCategory extractCategory: CategoryC for: CategoryC environment categories.
+        ClassCategory extractCategory: CategoryC for: CategoryC environment categories into: CategoryC environment.
 	self assert: (((CategoryC environment categories at: 'Foo') at: 'Bar') classes includes: CategoryC)
     ]
 ]

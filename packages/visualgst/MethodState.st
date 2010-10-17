@@ -65,5 +65,11 @@ BrowserState subclass: MethodState [
 
         ^ true
     ]
+
+    updateBrowser: aGtkClassBrowserWidget [
+        <category: 'events'>
+
+        aGtkClassBrowserWidget displayMethodSource: self method methodRecompilationSourceString
+    ]
 ]
 

@@ -20,7 +20,76 @@ Object extend [
     ]
 ]
 
+CompiledMethod class extend [
+    ExtensionIcon := nil.
+    OverrideIcon := nil.
+    OverriddenIcon := nil.
+
+    extensionIcon [
+        <category: '*VisualGST'>
+
+        ^ ExtensionIcon ifNil: [ ExtensionIcon := GTK.GdkPixbuf newFromFile: (VisualGST.GtkLauncher / 'Icons/extension.png') file displayString error: nil ]
+    ]
+
+    extensionsIcon: aGdkPixbuf [
+        <category: '*VisualGST'>
+
+        ExtensionIcon := aGdkPixbuf
+    ]
+
+    overrideIcon [
+        <category: '*VisualGST'>
+
+        ^ OverrideIcon ifNil: [ OverrideIcon := GTK.GdkPixbuf newFromFile: (VisualGST.GtkLauncher / 'Icons/override.png') file displayString error: nil ]
+    ]
+
+    overrideIcon: aGdkPixbuf [
+        <category: '*VisualGST'>
+
+        OverrideIcon := aGdkPixbuf
+    ]
+
+    overriddenIcon [
+        <category: '*VisualGST'>
+
+        ^ OverriddenIcon ifNil: [ OverriddenIcon := GTK.GdkPixbuf newFromFile: (VisualGST.GtkLauncher / 'Icons/overridden.png') file displayString error: nil ]
+    ]
+
+    overriddenIcon: aGdkPixbuf [
+        <category: '*VisualGST'>
+
+        OverriddenIcon := aGdkPixbuf
+    ]
+]
+
 CompiledMethod extend [
+    override [
+	<category: '*VisualGST'>
+
+	self methodClass superclass ifNil: [ ^ false ].
+	^ (self methodClass superclass lookupSelector: self selector) isNil not
+    ]
+
+    overridden [
+        <category: '*VisualGST'>
+
+	| set |
+	set := Set new.
+	set addAll: self methodClass subclasses.
+	set do: [ :each |
+	    each methodDictionary ifNotNil: [ :dic | dic at: self selector ifPresent: [ :mth | ^ true ] ] ].
+	^ false
+    ]
+
+    methodViewIcon [
+        <category: '*VisualGST'>
+
+	self methodCategory first = $* ifTrue: [ ^ self class extensionIcon ].
+        self overridden ifTrue: [ ^ self class overriddenIcon ].
+        self override ifTrue: [ ^ self class overrideIcon ].
+        ^ nil
+    ]
+
     inspectorView [
         <category: '*VisualGST'>
 
@@ -303,8 +372,8 @@ Behavior extend [
     debuggerClass [
 	<category: '*VisualGST'>
 
-	^ nil
-	"^ VisualGST.GtkDebugger"
+	"^ nil"
+	^ VisualGST.GtkDebugger
     ]
 ]
 
@@ -567,6 +636,18 @@ GTK.GtkTreeView extend [
 	    elem last = anObject ifTrue: [
                     self scrollToCell: (self getModel getPath: iter) column: nil useAlign: false rowAlign: 0.5 colAlign: 0.5.
                     ^ self getSelection selectIter: iter ] ].
+    ]
+
+    selectNth: anInteger [
+	<category: 'accessing'>
+
+        | path iter |
+        self getSelection unselectAll.
+        anInteger = 0 ifTrue: [^self].
+        path := GtkTreePath newFromIndices: {anInteger - 1. -1}.
+	(self getModel getIter: path) isNil ifTrue: [^self].
+        self scrollToCell: path column: nil useAlign: false rowAlign: 0.5 colAlign: 0.5.
+        self getSelection selectPath: path
     ]
 
     selectFirstItem [

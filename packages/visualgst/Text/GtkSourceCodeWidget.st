@@ -297,6 +297,12 @@ GtkTextWidget subclass: GtkSourceCodeWidget [
 	^ false
     ]
 
+    launcher [
+	<category: 'browse'>
+
+	^browser ifNotNil: [ browser launcher ]
+    ]
+
     browseSenders [
 	<category: 'browse'>
 

@@ -8,43 +8,58 @@
   <prereq>DebugTools</prereq>
   <provides>Browser</provides>
   <test>
-    <filein>Tests/AddNamespaceUndoCommandTest.st</filein>
-    <filein>Tests/GtkMethodWidgetTest.st</filein>
-    <filein>Tests/ExtractLiteralsTest.st</filein>
-    <filein>Tests/CategoryTest.st</filein>
-    <filein>Tests/GtkAssistantTest.st</filein>
-    <filein>Tests/EmptyTest.st</filein>
-    <filein>Tests/AddClassUndoCommandTest.st</filein>
-    <filein>Tests/GtkCategoryWidgetTest.st</filein>
-    <filein>Tests/StateTest.st</filein>
     <filein>Tests/FinderTest.st</filein>
+    <filein>Tests/GtkCategorizedClassWidgetTest.st</filein>
+    <filein>Tests/CompiledMethodTest.st</filein>
+    <filein>Tests/ExtractLiteralsTest.st</filein>
+    <filein>Tests/StateTest.st</filein>
+    <filein>Tests/AddClassUndoCommandTest.st</filein>
+    <filein>Tests/GtkAssistantTest.st</filein>
+    <filein>Tests/GtkSimpleListWidgetTest.st</filein>
+    <filein>Tests/GtkScrollTreeWidgetTest.st</filein>
     <filein>Tests/PragmaTest.st</filein>
+    <filein>Tests/GtkCategoryWidgetTest.st</filein>
     <filein>Tests/GtkConcreteWidgetTest.st</filein>
-    <file>Tests/AddNamespaceUndoCommandTest.st</file>
-    <file>Tests/GtkMethodWidgetTest.st</file>
-    <file>Tests/ExtractLiteralsTest.st</file>
-    <file>Tests/CategoryTest.st</file>
-    <file>Tests/GtkAssistantTest.st</file>
-    <file>Tests/EmptyTest.st</file>
-    <file>Tests/AddClassUndoCommandTest.st</file>
-    <file>Tests/GtkCategoryWidgetTest.st</file>
-    <file>Tests/StateTest.st</file>
+    <filein>Tests/GtkCategorizedNamespaceWidgetTest.st</filein>
+    <filein>Tests/GtkMethodWidgetTest.st</filein>
+    <filein>Tests/CategoryTest.st</filein>
+    <filein>Tests/AddNamespaceUndoCommandTest.st</filein>
+    <filein>Tests/EmptyTest.st</filein>
     <file>Tests/FinderTest.st</file>
+    <file>Tests/GtkCategorizedClassWidgetTest.st</file>
+    <file>Tests/CompiledMethodTest.st</file>
+    <file>Tests/ExtractLiteralsTest.st</file>
+    <file>Tests/StateTest.st</file>
+    <file>Tests/AddClassUndoCommandTest.st</file>
+    <file>Tests/GtkAssistantTest.st</file>
+    <file>Tests/GtkSimpleListWidgetTest.st</file>
+    <file>Tests/GtkScrollTreeWidgetTest.st</file>
     <file>Tests/PragmaTest.st</file>
+    <file>Tests/GtkCategoryWidgetTest.st</file>
     <file>Tests/GtkConcreteWidgetTest.st</file>
+    <file>Tests/GtkCategorizedNamespaceWidgetTest.st</file>
+    <file>Tests/GtkMethodWidgetTest.st</file>
+    <file>Tests/CategoryTest.st</file>
+    <file>Tests/AddNamespaceUndoCommandTest.st</file>
+    <file>Tests/EmptyTest.st</file>
     <sunit>
-      VisualGST.AddNamespaceUndoCommandTest
-      VisualGST.GtkMethodWidgetTest
-      VisualGST.ExtractLiteralsTest
-      VisualGST.CategoryTest
-      VisualGST.GtkAssistantTest
-      VisualGST.EmptyTest
-      VisualGST.AddClassUndoCommandTest
-      VisualGST.GtkCategoryWidgetTest
-      VisualGST.StateTest
       VisualGST.FinderTest
+      VisualGST.GtkCategorizedClassWidgetTest
+      VisualGST.CompiledMethodTest
+      VisualGST.ExtractLiteralsTest
+      VisualGST.StateTest
+      VisualGST.AddClassUndoCommandTest
+      VisualGST.GtkAssistantTest
+      VisualGST.GtkSimpleListWidgetTest
+      VisualGST.GtkScrollTreeWidgetTest
       VisualGST.PragmasTest
+      VisualGST.GtkCategoryWidgetTest
       VisualGST.GtkConcreteWidgetTest
+      VisualGST.GtkCategorizedNamespaceWidgetTest
+      VisualGST.GtkMethodWidgetTest
+      VisualGST.CategoryTest
+      VisualGST.AddNamespaceUndoCommandTest
+      VisualGST.EmptyTest
     </sunit>
   </test>
   <filein>Notification/AbstractEvent.st</filein>
@@ -97,6 +112,8 @@
   <filein>Category/Class.st</filein>
   <filein>GtkAbstractConcreteWidget.st</filein>
   <filein>GtkConcreteWidget.st</filein>
+  <filein>GtkScrollTreeWidget.st</filein>
+  <filein>GtkSimpleListWidget.st</filein>
   <filein>GtkEntryWidget.st</filein>
   <filein>GtkSidebarWidget.st</filein>
   <filein>GtkHSidebarWidget.st</filein>
@@ -269,6 +286,8 @@
   <file>Category/Class.st</file>
   <file>GtkAbstractConcreteWidget.st</file>
   <file>GtkConcreteWidget.st</file>
+  <file>GtkScrollTreeWidget.st</file>
+  <file>GtkSimpleListWidget.st</file>
   <file>GtkEntryWidget.st</file>
   <file>GtkSidebarWidget.st</file>
   <file>GtkHSidebarWidget.st</file>
@@ -411,6 +430,10 @@
   <file>Icons/NUnit.Running.png</file>
   <file>Icons/NUnit.SuccessAndFailed.png</file>
   <file>Icons/NUnit.Success.png</file>
+  <file>Icons/extension.png</file>
+  <file>Icons/overridden.png</file>
+  <file>Icons/override.png</file>
+  <file>Icons/visualgst.png</file>
   <start>VisualGST.GtkLauncher open.
     GTK.Gtk main</start>
 </package>

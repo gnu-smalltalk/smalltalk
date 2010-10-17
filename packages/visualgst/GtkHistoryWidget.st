@@ -28,23 +28,20 @@ GtkConcreteWidget subclass: GtkHistoryWidget [
                             connectSignal: 'button-press-event' to: self selector: #'onPress:event:';
                             yourself.
         widget getSelection setMode: GTK.Gtk gtkSelectionBrowse.
+        widget getSelection connectSignal: 'changed' to: self selector: #onSelectionChanged.
         (model := GtkListModel on: widget getModel)
                                         contentsBlock: [ :each | {each name displayString} ].
         ^ GTK.GtkScrolledWindow withChild: widget
     ]
 
-    refresh [
+    refresh: historyStack [
 	<category: 'user interface'>
 
 	model
-	    item: GtkLauncher history;
-	    refresh
-    ]
+	    item: historyStack;
+	    refresh.
 
-    update: anObject [
-	<category: 'user interface'>
-
-	self refresh
+        widget selectNth: historyStack selectedIndex.
     ]
 
     onPress: aGtkWidget event: aGdkEvent [
@@ -55,9 +52,8 @@ GtkConcreteWidget subclass: GtkHistoryWidget [
         aGdkButtonEvent button value = 3 ifFalse: [ ^ false ].
         menu := GTK.GtkMenu new.
         menu appendMenuItems: {{'Inspect a class'. self. #inspectClass}.
-            {'Go to a class'. self. #goClass}.
-            {'Browse a class in a tab'. self. #browseTabbedClass}.
-            {'Browse a class'. self. #browseClass}}.
+            {'Open in new tab'. self. #browseTabbedClass}.
+            "{'Open in new window'. self. #browseClass}"}.
         menu attachToWidget: widget detacher: nil.
         menu popup: nil parentMenuItem: nil func: nil data: nil button: 3 activateTime: aGdkButtonEvent time value.
         menu showAll.
@@ -91,13 +87,12 @@ GtkConcreteWidget subclass: GtkHistoryWidget [
 	InspectItCommand on: self
     ]
 
-    goClass [
+    onSelectionChanged [
 	<category: 'event'>
 
 	widget hasSelectedItem ifFalse: [ ^ self ].
-
-        "TODO: add a #state: method to remove dependency on #currentWidgetOfBrowser"
-	self updateBrowser: browser currentWidgetOfBrowser
+        model item selectedIndex = widget selectedIndex ifTrue: [^self].
+        model item selectItem: widget selectedIndex.
     ]
 
     browseTabbedClass [
@@ -109,13 +104,10 @@ GtkConcreteWidget subclass: GtkHistoryWidget [
         self updateBrowser: GtkLauncher uniqueInstance classBrowser
     ]
 
-    browseClass [
-	<category: 'event'>
+    state [
+        <category: 'state'>
 
-        "TODO: should reuse OpenWindowedBrowserCommand by giving a state to
-         GtkHistoryWidget."
-	widget hasSelectedItem ifFalse: [ ^ self ].
-        self updateBrowser: GtkClassBrowser open
+        ^model item current
     ]
 ]
 

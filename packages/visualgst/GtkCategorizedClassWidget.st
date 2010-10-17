@@ -13,8 +13,8 @@ GtkConcreteWidget subclass: GtkCategorizedClassWidget [
     initialize [
 	<category: 'initialization'>
 
-	category := ''.
-	self 
+	self
+	    category: '';
 	    mainWidget: self buildTreeView;
 	    registerNotifier
     ]
@@ -81,6 +81,12 @@ GtkConcreteWidget subclass: GtkCategorizedClassWidget [
 	<category: 'accessing'>
 
 	^ GTK.Gtk gtkSelectionBrowse
+    ]
+
+    clear [
+        <category: 'accessing'>
+
+        model clear
     ]
 
     buildTreeView [

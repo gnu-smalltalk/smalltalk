@@ -1,6 +1,6 @@
 GtkConcreteWidget subclass: GtkPackageBuilderWidget [
 
-    | packName namespace provide test classCategory prereq entries |
+    | classList ressourceList packName namespace provide provideList test classCategory prereq prereqList entries |
 
     initialize [
         <category: 'initialization'>
@@ -17,27 +17,13 @@ GtkConcreteWidget subclass: GtkPackageBuilderWidget [
 	    add: self buildNamespaceEntry mainWidget;
             add: self buildPackageEntry mainWidget;
 	    add: self buildPrereq;
-	    add: self buildProvideEntry mainWidget;
+	    add: self buildProvideEntry;
 	    add: self buildTestsEntry mainWidget;
 	    add: self buildClassCategoryEntry mainWidget;
 	    add: self buildClassCategory;
 	    add: self buildRessourcesEntry;
 	    add: self buildButtons;
             yourself
-    ]
-
-    buildList: aSymbol labeled: aString [
-
-	| widget |
-	entries
-            at: aSymbol
-	    put: (widget := (GTK.GtkTreeView createListWithModel: {{GtkColumnTextType title: aString}})
-				    connectSignal: 'button-press-event' to: self selector: #'onPress:event:';
-				    yourself).
-        widget getSelection setMode: GTK.Gtk gtkSelectionBrowse.
-        (GtkListModel on: widget getModel)
-                                        contentsBlock: [ :each | {each displayString} ].
-        ^ GTK.GtkScrolledWindow withChild: widget
     ]
 
     buildPackageNameEntry [
@@ -97,7 +83,8 @@ GtkConcreteWidget subclass: GtkPackageBuilderWidget [
     buildPrereqEntry [
         <category: 'user interface'>
 
-	^ self buildList: #prereq labeled: 'Packages prerequired :'
+	prereqList := GtkSimpleListWidget named: 'Packages prerequired :'.
+	^ prereqList mainWidget
     ]
 
     buildPrereq [
@@ -125,7 +112,8 @@ GtkConcreteWidget subclass: GtkPackageBuilderWidget [
     buildProvideEntry [
         <category: 'user interface'>
 
-	^ provide := GtkEntryWidget labeled: 'Provides :'
+	provideList := GtkSimpleListWidget named: 'Provides :'.
+	^ provideList mainWidget
     ]
 
     buildTestsEntry [
@@ -184,43 +172,43 @@ GtkConcreteWidget subclass: GtkPackageBuilderWidget [
     buildFilesEntry [
         <category: 'user interface'>
 
-	^ self buildList: #classes labeled: 'Classes category :'
+        classList := GtkSimpleListWidget named: 'Class category :'.
+        ^ classList mainWidget
     ]
 
     buildRessourcesEntry [
         <category: 'user interface'>
 
-	^ self buildList: #ressources labeled: 'Ressources :'
+        ressourceList := GtkSimpleListWidget named: 'Ressources :'.
+        ^ ressourceList mainWidget
     ]
 
     buildButtons [
         <category: 'user interface'>
 
-        | hbox add remove |
+        | hbox add cancel |
         hbox := GTK.GtkHBox new: false spacing: 0.
 
         add := GTK.GtkButton createButton: GTK.Gtk gtkStockAdd.
         add
-            setTooltipText: 'Add a file into the package';
+            setTooltipText: 'Save the package';
             connectSignal: 'clicked' to: self selector: #buildPackage.
 
         hbox packStart: add expand: false fill: true padding: 3.
 
-        remove := GTK.GtkButton createButton: GTK.Gtk gtkStockRemove.
-        remove
-            setTooltipText: 'Remove the selected file from the list'.
-        hbox packStart: remove expand: false fill: true padding: 3.
+        cancel := GTK.GtkButton createButton: GTK.Gtk gtkStockRemove.
+        cancel
+            setTooltipText: 'Cancel'.
+        hbox packStart: cancel expand: false fill: true padding: 3.
         ^ hbox
     ]
 
     addPrereq [
 
-	(entries at: #prereq) getModel appendItem: {prereq text}
+	prereqList getModel appendItem: {prereq text}
     ]
 
     addCategory [
-
-	(entries at: #classes) getModel appendItem: {packName text}
     ]
 
     buildPackage [

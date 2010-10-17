@@ -32,5 +32,13 @@ BrowserState subclass: NamespaceState [
 
 	^ state
     ]
+
+    updateBrowser: aGtkClassBrowserWidget [
+        <category: 'events'>
+   
+	aGtkClassBrowserWidget 
+			updateNamespaceOfClass: self namespace classCategory: self classCategory;
+			displayNamespaceSource: self namespace
+    ]
 ]
 

@@ -20,88 +20,79 @@ GtkConcreteWidget subclass: GtkCategorizedNamespaceWidget [
     buildTreeView [
         <category: 'user interface'>
 
-        namespacesTree := (GTK.GtkTreeView createTreeWithModel: {{GtkColumnPixbufType visible. GtkColumnTextType title: 'Namespaces'}})
-                            connectSignal: 'button-press-event' to: self selector: #'onPress:event:';
-                            yourself.
-        namespacesTree getSelection setMode: GTK.Gtk gtkSelectionBrowse.
-        (model := GtkTreeModel on: namespacesTree getModel)
+	namespacesTree := GtkScrollTreeWidget createTreeWithModel: {{GtkColumnPixbufType visible. GtkColumnTextType title: 'Namespaces'}}.
+	namespacesTree connectToWhenPopupMenu: [ :menu | self buildPopupMenu: menu ].
+	namespacesTree treeView getSelection setMode: GTK.Gtk gtkSelectionBrowse.
+	(model := GtkTreeModel on: namespacesTree treeView getModel)
                                         item: FakeNamespace;
                                         childrenBlock: [ :each | (each subspaces asArray sort: [ :a :b | a name <= b name ]), (each categories values sort: [ :a :b | a name <= b name ]) ];
                                         contentsBlock: [ :each | {each icon. each name asString} ];
-					connectSignal: 'row-has-child-toggled' to: self selector: #'childToggled:path:iter:';
-					refresh.
-        ^ GTK.GtkScrolledWindow withChild: namespacesTree
+                                        connectSignal: 'row-has-child-toggled' to: self selector: #'childToggled:path:iter:';
+                                        refresh.
+	^ namespacesTree mainWidget
     ]
 
-    onPress: aGtkWidget event: aGdkEvent [
+    buildPopupMenu: aGtkMenu [
         <category: 'button event'>
 
-        | menu aGdkButtonEvent |
-        aGdkButtonEvent := aGdkEvent castTo: GTK.GdkEventButton type.
-        aGdkButtonEvent button value = 3 ifFalse: [ ^ false ].
-        menu := GTK.GtkMenu new.
-        menu appendMenuItems: {{'Add a namespace'. self. #newNamespace}.
+        aGtkMenu appendMenuItems: {{'Add a namespace'. self. #newNamespace}.
             {'Rename a namespace'. self. #renameNamespace}.
             {'Delete a namespace'. self. #deleteNamespace}.
             {}.
             {'Inspect a namespace'. self. #inspectNamespace}.
             {}.
-            {'File out a namespace'. self. #fileoutNamespace}}.
-        menu attachToWidget: namespacesTree detacher: nil.
-        menu popup: nil parentMenuItem: nil func: nil data: nil button: 3 activateTime: aGdkButtonEvent time value.
-        menu showAll.
-        ^ true
+            {'File out a namespace'. self. #fileoutNamespace}}
     ]
 
     whenSelectionChangedSend: aSelector to: anObject [
         <category: 'events'>
 
-        namespacesTree getSelection
+        namespacesTree treeView getSelection
             connectSignal: 'changed' to: anObject selector: aSelector
     ]
 
     selectANamespace: aNamespace [
         <category: 'item selection'>
 
-	namespacesTree select: aNamespace
+	namespacesTree treeView select: aNamespace
     ]
 
     hasSelectedNamespace [
         <category: 'testing'>
 
-        ^ namespacesTree hasSelectedItem
+        ^ namespacesTree treeView hasSelectedItem
     ]
 
     selectedNamespace [
         <category: 'accessing'>
 
 	self hasSelectedNamespace ifFalse: [ self error: 'nothing is selected' ].
-	^ namespacesTree selection namespace
+	^ namespacesTree treeView selection namespace
     ]
 
     selectedCategory [
         <category: 'accessing'>
 
         self hasSelectedNamespace ifFalse: [ self error: 'nothing is selected' ].
-        ^ namespacesTree selection category
+        ^ namespacesTree treeView selection category
     ]
 
     state [
-        <category: 'testing'>
+        <category: 'events'>
 
-        namespacesTree hasSelectedItem ifFalse: [ ^ BrowserState new ].
-        ^ (NamespaceState with: namespacesTree selection namespace)
-            classCategory: namespacesTree selection category;
+        self hasSelectedNamespace ifFalse: [ ^ BrowserState new ].
+        ^ (NamespaceState with: self selectedNamespace)
+            classCategory: self selectedCategory;
             yourself
     ]
 
     childToggled: model path: path iter: iter [
 	<category: 'signals'>
 
-	namespacesTree collapseRow: path.
+	namespacesTree treeView collapseRow: path.
 	((model at: iter) at: 3) isNamespace ifTrue: [
 	    ((model at: iter) at: 3) subspaces isEmpty ifFalse: [
-		namespacesTree expandRow: path openAll: false ] ]
+		namespacesTree treeView expandRow: path openAll: false ] ]
     ]
 
     newNamespace [

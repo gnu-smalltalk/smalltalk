@@ -1,5 +1,5 @@
 GtkConcreteWidget subclass: GtkMethodWidget [
-    | model methodTree class category |
+    | browser model methodTree class category |
 
     GtkMethodWidget >> on: aClass withCategory: aCategory [
 	<category: 'instance creation'>
@@ -24,6 +24,18 @@ GtkConcreteWidget subclass: GtkMethodWidget [
         (GtkLauncher uniqueInstance systemChangeNotifier)
             notify: self ofSystemChangesOfItem: #method change: #Added using: #'addEvent:';
             notify: self ofSystemChangesOfItem: #method change: #Removed using: #'removeEvent:'
+    ]
+
+    browser [
+	<category: 'accessing'>
+
+	^ browser
+    ]
+
+    browser: anObject [
+	<category: 'accessing'>
+
+	browser := anObject.
     ]
 
     category [
@@ -85,12 +97,12 @@ GtkConcreteWidget subclass: GtkMethodWidget [
     buildTreeView [
         <category: 'user interface'>
     
-	methodTree := (GTK.GtkTreeView createListWithModel: {{GtkColumnTextType title: 'Methods'}})
+	methodTree := (GTK.GtkTreeView createListWithModel: {{GtkColumnPixbufType visible. GtkColumnTextType title: 'Methods'}})
                             connectSignal: 'button-press-event' to: self selector: #'onPress:event:';
                             yourself.
 	methodTree getSelection setMode: GTK.Gtk gtkSelectionBrowse.
 	(model := GtkListModel on: methodTree getModel)
-					contentsBlock: [ :each | {each selector asString} ].
+					contentsBlock: [ :each | {each methodViewIcon. each selector asString} ].
 	^ GTK.GtkScrolledWindow withChild: methodTree
     ]
 
@@ -130,6 +142,12 @@ GtkConcreteWidget subclass: GtkMethodWidget [
 
 	methodTree getSelection
 	    connectSignal: 'changed' to: anObject selector: aSelector
+    ]
+
+    launcher [
+	<category: 'accessing'>
+
+	^ browser ifNotNil: [ browser launcher ]
     ]
 
     browserHasFocus [
@@ -192,9 +210,9 @@ GtkConcreteWidget subclass: GtkMethodWidget [
 
     state [
         <category: 'testing'>
-        methodTree hasSelectedItem ifTrue: [
-            ^MethodState with: self selectedMethod ].
-        ^BrowserState new
+
+        self hasSelectedMethod ifFalse: [ ^ BrowserState new ].
+        ^ MethodState with: self selectedMethod
     ]
 
     deleteMethod [

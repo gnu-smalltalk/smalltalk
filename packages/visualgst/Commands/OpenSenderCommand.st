@@ -14,13 +14,20 @@ Command subclass: OpenSenderCommand [
                 ifFalse: [ nil ]
     ]
 
+    precondition [
+        <category: 'temporary'>
+        "HACK!"
+
+        ^target launcher notNil
+    ]
+
     execute [
         <category: 'command'>
 
         | selection |
         selection := self selection.
-        selection isNil ifTrue: [ ^ GtkLauncher uniqueInstance showHideSender ].
-	GtkLauncher uniqueInstance showSenderOn: selection
+        selection isNil ifTrue: [ ^ target launcher showHideSender ].
+	target launcher showSenderOn: selection
     ]
 ]
 

@@ -30,5 +30,13 @@ BrowserState subclass: ClassState [
 
 	^ state
     ]
+
+    updateBrowser: aGtkClassBrowserWidget [
+        <category: 'events'>
+
+        aGtkClassBrowserWidget 
+                        updateClassOfCategory: self classOrMeta;
+                        displayClassSource: self classOrMeta
+    ]
 ]
 
