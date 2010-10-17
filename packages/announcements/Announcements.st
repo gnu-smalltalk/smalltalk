@@ -165,12 +165,6 @@ Object subclass: Announcer [
     when: anAnnouncementClassOrCollection send: aSelector to: anObject [
 	<category: 'subscriptions'>
 	| subscriptions |
-	anAnnouncementClassOrCollection isSymbol 
-	    ifTrue: 
-		[^super 
-		    when: anAnnouncementClassOrCollection
-		    send: aSelector
-		    to: anObject].
 	subscriptions := SubscriptionCollection new.
 	anAnnouncementClassOrCollection do: 
 		[:each | 

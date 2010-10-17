@@ -1,0 +1,9 @@
+2010-10-17  Paolo Bonzini  <bonzini@gnu.org>
+
+	* Announcements.st: Remove super call in #when:send:to: making
+	sense only for Squeak.
+
+2010-10-17  Paolo Bonzini  <bonzini@gnu.org>
+
+	* Announcements.st: New file.
+	* AnnouncementsTests.st: New file.
