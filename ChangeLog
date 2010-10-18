@@ -1,3 +1,9 @@
+2010-10-17  Holger Hans Peter Freyther  <zecke@selfish.org>
+
+	* tests/cobject.st: Add client code for ByteArray>>#asCData and
+	String>>#asCData.
+	* tests/cobject.ok: Update the result.
+
 2010-10-17  Paolo Bonzini <bonzini@gnu.org>
 
 	* kernel/String.st: Document NULL-termination of output of

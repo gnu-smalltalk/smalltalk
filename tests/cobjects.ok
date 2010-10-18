@@ -136,3 +136,16 @@ Execution begins...
 'abc'
 'def'
 returned value is CPtr new: 1 "<0>"
+
+Execution begins...
+1
+2
+3
+returned value is nil
+
+Execution begins...
+$1
+$2
+$3
+$<0>
+returned value is nil
