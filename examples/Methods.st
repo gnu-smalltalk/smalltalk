@@ -45,6 +45,7 @@ test
     "InterpretedMethod test"
     | b |
     b := Behavior new.
+    b superclass: Object.
     b interpretedMethodAt: #testInterp1 put: #(#push 3 #push 4 #add #return).
     b interpretedMethodAt: #testInterp2 put: #(#push 6 #push 7 #mul #return).
     Transcript show: '3 + 4 = '. b new testInterp1 printNl.

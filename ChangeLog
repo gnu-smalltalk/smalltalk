@@ -1,3 +1,7 @@
+2010-10-19  Paolo Bonzini <bonzini@gnu.org>
+
+	* examples/Methods.st: Fix bitrot.
+
 2010-10-17  Holger Hans Peter Freyther  <zecke@selfish.org>
 
 	* tests/cobject.st: Add client code for ByteArray>>#asCData and
