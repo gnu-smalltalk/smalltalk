@@ -373,32 +373,42 @@ doStepCommand
 !
 
 doProcessCommand
-    | id proc |
+    | id processes terminated |
     ('TSKb' includes: command) ifFalse: [ ^false ].
 
     (commandArg isEmpty and: [ command == $b ]) ifTrue: [
 	activeContext backtrace.
 	^true ].
 
-    proc := debugger process.
-    commandArg notEmpty ifTrue: [
-	id := Number readFrom: commandArg onError: nil.
+    processes := commandArg collect: [ :each || stream proc |
+	stream := each readStream.
+	id := Number readFrom: stream.
+	stream atEnd
+	    ifFalse: [ 'please supply a valid process id' displayNl. ^true ].
 
 	proc := id asObject.
 	(proc isKindOf: Process)
 	    ifFalse: [ 'please supply a valid process id' displayNl. ^true ].
-    ].
 
-    proc suspendedContext isNil
-	ifTrue: [ 'process was terminated' displayNl. ^true ].
+        proc ].
 
-    (command == $b) ifTrue: [ proc context backtrace ].
-    (command == $S) ifTrue: [ proc suspend ].
-    (command == $K) ifTrue: [ proc primTerminate ].
-    (command == $T) ifTrue: [
-	proc terminate.
-	proc == debugger process ifTrue: [ self continue ]
-    ].
+    processes isEmpty ifTrue: [ processes := {debugger process} ].
+    terminated := false.
+    processes do: [ :proc |
+        proc suspendedContext isNil
+	    ifTrue: [('%1: process was terminated' % { proc asOop }) displayNl]
+            ifFalse: [
+                (command == $b) ifTrue: [
+                    processes size > 1 ifTrue: [
+                        ('backtrace for process %1' % { proc asOop }) displayNl].
+                    proc context backtrace ].
+                (command == $S) ifTrue: [ proc suspend ].
+                (command == $K) ifTrue: [ proc primTerminate ].
+                (command == $T) ifTrue: [
+                    proc terminate.
+                    terminated := terminated or: [proc == debugger process]]]].
+
+    terminated ifTrue: [ self continue ].
     ^true
 !
 
@@ -436,34 +446,33 @@ showPrompt
 
 help
     ^'Control flow commands:
-    s [n].. step N times
-    n [n].. next (step over send) N times
-    f [n].. finish current method N times
-    c ..... continue
+    s [n]      step N times
+    n [n]      next (step over send) N times
+    f [n]      finish current method N times
+    c          continue
 
 Process commands: no ID means debugged process
-    P ..... show process list
-    T [id]. terminate process
-    K [id]. kill process - no unwinds or cleanup
-    b [id]. backtrace
+    P          show process list
+    T [id]...  terminate process
+    K [id]...  kill process - no unwinds or cleanup
+    b [id]...  backtrace
  
 Examining state:
-    r ..... print receiver on stdout
-    i ..... inspect (enter MiniInspector on current receiver)
-    I ..... inspect context (enter MiniInspector on current context)
-    e ..... eval (enter read-eval-print loop on current receiver)
+    r          print receiver on stdout
+    i          inspect (enter MiniInspector on current receiver)
+    I          inspect context (enter MiniInspector on current context)
+    e          eval (enter read-eval-print loop on current receiver)
 
 Examining the call stack:
-    u [n].. go N frames up
-    d [n].. go N frames down
-    l ..... print current method
-    w ..... print current frame
+    u [n]      go N frames up (default 1)
+    d [n]      go N frames down (default 1)
+    l          print current method
+    w          print current frame
 
 Other commands:
-    P ..... list processes
-    g ..... collect all garbage
-    X ..... exit Smalltalk, and dump core
-    x ..... exit Smalltalk'
+    g          collect all garbage
+    X          exit Smalltalk, and dump core
+    x          exit Smalltalk'
 ! !
 
 !MiniDebugger methodsFor: 'private'!
