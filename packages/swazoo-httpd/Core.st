@@ -122,7 +122,7 @@ Object subclass: SwazooResource [
 
     match: anIdentifier [
 	<category: 'private'>
-	^self uriPattern match: anIdentifier
+	^self uriPattern = anIdentifier
     ]
 
     onResourceCreated [
@@ -265,6 +265,11 @@ SwazooResource subclass: CompositeResource [
 	^self uriPattern = '/'
     ]
 
+    match: anIdentifier [
+	<category: 'private'>
+	^self uriPattern match: anIdentifier
+    ]
+
     printUrlOn: aWriteStream [
 	<category: 'accessing'>
 	super printUrlOn: aWriteStream.
@@ -303,15 +308,7 @@ CompositeResource subclass: SwazooSite [
 
     addAlias: anAlias [
 	<category: 'accessing'>
-	self ip isNil 
-	    ifTrue: 
-		["initial uriPattern not yet setup"
-
-		self 
-		    host: anAlias host
-		    ip: anAlias ip
-		    port: anAlias port]
-	    ifFalse: [self uriPattern add: anAlias]
+	self uriPattern add: anAlias
     ]
 
     aliases [
@@ -336,13 +333,12 @@ CompositeResource subclass: SwazooSite [
 	 There can be many sites with different hostnames on the same ip !!"
 
 	<category: 'accessing'>
-	self uriPattern isEmpty ifTrue: [^''].
-	^self uriPattern first host
+	^self uriIdentifier host
     ]
 
     host: aString [
 	<category: 'private'>
-	self uriPattern first host: aString
+	self uriIdentifier host: aString
     ]
 
     host: aHostString ip: anIPString port: aNumber [
@@ -355,28 +351,9 @@ CompositeResource subclass: SwazooSite [
 	site := SwazooServer singleton siteHostnamed: aHostString.
 	(site notNil and: [site ~= self]) 
 	    ifTrue: [^SwazooSiteError error: 'Site with that hostname already exist!'].
-	self uriPattern isEmpty ifTrue: [self uriPattern add: SiteIdentifier new].
-	self uriPattern first 
+	self uriIdentifier 
 	    setIp: anIPString
 	    port: aNumber
-	    host: aHostString
-    ]
-
-    host: aHostString ip: anIPString port: aNumber sslPort: aSSLNumber [
-	"see comments in methods host and ip !!"
-
-	"hostname must be unique!!"
-
-	<category: 'accessing'>
-	self 
-	    host: aHostString
-	    ip: anIPString
-	    port: aNumber.
-	self uriPattern size < 2 
-	    ifTrue: [self uriPattern add: SSLSiteIdentifier new].
-	(self uriPattern at: 2) 
-	    setIp: anIPString
-	    port: aSSLNumber
 	    host: aHostString
     ]
 
@@ -395,7 +372,6 @@ CompositeResource subclass: SwazooSite [
     initUriPattern [
 	<category: 'initialize-release'>
 	self uriPattern: OrderedCollection new.
-	self uriPattern add: SiteIdentifier new
     ]
 
     initialize [
@@ -411,12 +387,12 @@ CompositeResource subclass: SwazooSite [
 	 IP can be a number or full DNS name. For example: server.ibm.com or 234.12.45.66"
 
 	<category: 'accessing'>
-	^self uriPattern first ip
+	^self uriIdentifier ip
     ]
 
     ip: aString [
 	<category: 'private'>
-	self uriPattern first ip: aString
+	self uriIdentifier ip: aString
     ]
 
     isRootPath [
@@ -431,9 +407,9 @@ CompositeResource subclass: SwazooSite [
 	^serving notNil and: [serving]
     ]
 
-    match: aSiteIdentifier [
+    match: aRequest [
 	<category: 'private'>
-	self uriPattern detect: [:each | each match: aSiteIdentifier]
+	self uriPattern detect: [:each | each requestMatch: aRequest]
 	    ifNone: [^false].
 	^true
     ]
@@ -479,17 +455,17 @@ CompositeResource subclass: SwazooSite [
 
     port [
 	<category: 'accessing'>
-	^self uriPattern first port
+	^self uriIdentifier port
     ]
 
     port: aNumber [
 	<category: 'private'>
-	self uriPattern first port: aNumber
+	self uriIdentifier port: aNumber
     ]
 
     printUrlOn: aWriteStream [
 	<category: 'private'>
-	self uriPattern first printUrlOn: aWriteStream
+	self uriIdentifier printUrlOn: aWriteStream
     ]
 
     readCompositeFrom: aStream storingInto: aComposite [
@@ -573,6 +549,12 @@ CompositeResource subclass: SwazooSite [
 				[swazoo removeServer: httpServer.
 				httpServer stop]]].
 	self serving: false
+    ]
+
+    uriIdentifier [
+	<category: 'private'>
+	self uriPattern isEmpty ifTrue: [self uriPattern add: SiteIdentifier new].
+	^self uriPattern first
     ]
 
     uriPattern [

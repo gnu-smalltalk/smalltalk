@@ -73,7 +73,7 @@ Object subclass: HTTPMessage [
 
 
 HTTPMessage subclass: HTTPRequest [
-    | requestLine peer timestamp ip environmentData resolution encrypted authenticated |
+    | requestLine peer timestamp ip environmentData resolution encrypted authenticated host |
     
     <category: 'Swazoo-Messages'>
     <comment: nil>
@@ -226,7 +226,19 @@ HTTPMessage subclass: HTTPRequest [
 
     host [
 	<category: 'accessing-headers'>
-	^(self headers fieldOfClass: HTTPHostField ifNone: [^String new]) hostName
+        host isNil ifTrue: [host := self computeHost].
+        ^host
+    ]
+
+    computeHost [
+	<category: 'private'>
+	| value |
+        value := self headers
+	    fieldOfClass: HTTPHostField
+	    ifPresent: [:field | field hostName]
+	    ifAbsent: [self requestLine requestURI hostname].
+
+        ^value notNil ifTrue: [value] ifFalse: ['']
     ]
 
     httpVersion [

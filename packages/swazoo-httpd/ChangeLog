@@ -1,3 +1,13 @@
+2010-10-24  Paolo Bonzini  <bonzini@gnu.org>
+
+	* Core.st, HTTP.st: Lazily create a default SiteIdentifier.
+	Add defaults for host and IP.  Complete resolution double-dispatch
+	and let SiteIdentifiers match requests directly without creating
+	a temporary identifier.
+	* Messages.st: Add caching to HTTPRequest>>#host.
+	* SCGI.st: New.
+	* Tests.st: Adjust for Core.st and HTTP.st changes.
+
 2010-01-29  Paolo Bonzini  <bonzini@gnu.org>
 
 	* Buffer.st: Delete.

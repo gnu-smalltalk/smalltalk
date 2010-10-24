@@ -36,6 +36,9 @@ o   Scoped methods ("A class >> a") can be used in an "A class [ ... ]"
 
 o   String>>#asCData: and String>>#asCData NULL-terminate their output.
 
+o   Swazoo supports SCGI.  Its configuration however is still manual,
+    since the Seaside and Iliad adaptors do not know about it.
+
 o   Updated VisualGST.
 
 

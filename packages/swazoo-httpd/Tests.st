@@ -1494,6 +1494,17 @@ TestCase subclass: ResourceTest [
 	<category: 'testing'>
 	self assert: resource isValidlyConfigured
     ]
+
+    testLeafMatch [
+	<category: 'testing'>
+	self assert: (resource match: 'foo')
+    ]
+
+    testLeafMismatch [
+	<category: 'testing'>
+	self deny: (resource match: 'Foo')
+    ]
+
 ]
 
 
@@ -1617,6 +1628,36 @@ TestCase subclass: SiteTest [
 	aSite currentUrl = 'http://swazoo.org'.
 	aSite currentUrl = 'http://swazoo.org'
     ]
+
+    testRequestMatch [
+	<category: 'testing'>
+	| request site visitor |
+	request := HTTPGet 
+		    request: 'foo'
+		    from: 'myhosthost:1234'
+		    at: '1.2.3.4'.
+	visitor := URIResolution new initializeRequest: request.
+	site := SwazooSite new 
+		    host: 'myhosthost'
+		    ip: '1.2.3.4'
+		    port: 1234.
+	self assert: (site match: request)
+    ]
+
+    testRequestMismatch [
+	<category: 'testing'>
+	| request site |
+	request := HTTPGet 
+		    request: 'foo'
+		    from: 'localhost:1234'
+		    at: '1.2.3.4'.
+	site := SwazooSite new 
+		    host: 'remotehost'
+		    ip: '1.2.3.4'
+		    port: 1234.
+	self deny: (site match: request)
+    ]
+
 ]
 
 
@@ -2723,8 +2764,6 @@ TestCase subclass: URIResolutionTest [
 	<category: 'testing'>
 	| resource request response |
 	resource := SwazooSite new 
-		    host: 'foo.com'
-		    ip: '1.2.3.4'
 		    port: 80.
 	resource addResource: (HelloWorldResource uriPattern: '/').
 	request := HTTPGet 
@@ -2739,50 +2778,52 @@ TestCase subclass: URIResolutionTest [
 
     testSiteMatch [
 	<category: 'testing'>
-	| request site visitor |
+	| request site response |
 	request := HTTPGet 
-		    request: 'foo'
+		    request: '/'
 		    from: 'myhosthost:1234'
 		    at: '1.2.3.4'.
-	visitor := URIResolution new initializeRequest: request.
 	site := SwazooSite new 
 		    host: 'myhosthost'
 		    ip: '1.2.3.4'
 		    port: 1234.
-	self assert: (visitor siteMatch: site)
+	site addResource: (HelloWorldResource uriPattern: '/').
+	response := URIResolution resolveRequest: request startingAt: site.
+	self assert: response code = 200.
     ]
 
     testSiteMismatch [
 	<category: 'testing'>
-	| request site visitor |
+	| request site response |
 	request := HTTPGet 
-		    request: 'foo'
+		    request: '/'
 		    from: 'localhost:1234'
 		    at: '1.2.3.4'.
-	visitor := URIResolution new initializeRequest: request.
 	site := SwazooSite new 
 		    host: 'remotehost'
 		    ip: '1.2.3.4'
 		    port: 1234.
-	self deny: (visitor siteMatch: site)
+	site addResource: (HelloWorldResource uriPattern: '/').
+	response := URIResolution resolveRequest: request startingAt: site.
+	self assert: response isNil.
     ]
 
     testStringMatch [
 	<category: 'testing'>
-	| request visitor resource |
+	| request response resource |
 	request := HTTPGet request: 'foo'.
-	visitor := URIResolution new initializeRequest: request.
 	resource := HelloWorldResource uriPattern: 'foo'.
-	self assert: (visitor stringMatch: resource)
+	response := URIResolution resolveRequest: request startingAt: resource.
+	self assert: response code = 200.
     ]
 
     testStringMismatch [
 	<category: 'testing'>
-	| request visitor resource |
+	| request response resource |
 	request := HTTPGet request: 'foo'.
-	visitor := URIResolution new initializeRequest: request.
 	resource := HelloWorldResource uriPattern: 'Foo'.
-	self deny: (visitor stringMatch: resource)
+	response := URIResolution resolveRequest: request startingAt: resource.
+	self assert: response isNil.
     ]
 
     testTailPath [

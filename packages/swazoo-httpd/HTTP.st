@@ -1667,12 +1667,17 @@ Object subclass: URIIdentifier [
 	    and: [self valueMatch: anotherIdentifier]
     ]
 
+    requestMatch: aRequest [
+	<category: 'testing'>
+	^self valueMatch: aRequest
+    ]
+
     typeMatch: anotherIdentifier [
 	<category: 'private'>
 	^self class == anotherIdentifier class
     ]
 
-    valueMatch: anotherIdentifier [
+    valueMatch: aRequestOrIdentifier [
 	<category: 'private'>
 	^self subclassResponsibility
     ]
@@ -1685,6 +1690,11 @@ URIIdentifier subclass: SiteIdentifier [
     
     <category: 'Swazoo-HTTP'>
     <comment: nil>
+
+    SiteIdentifier class >> defaultPort [
+	<category: 'accessing'>
+	^80
+    ]
 
     SiteIdentifier class >> host: hostName ip: anIP port: aPort [
 	<category: 'instance creation'>
@@ -1712,6 +1722,7 @@ URIIdentifier subclass: SiteIdentifier [
 
     host [
 	<category: 'accessing'>
+	host isNil ifTrue: [host := '*'].
 	^host
     ]
 
@@ -1729,6 +1740,7 @@ URIIdentifier subclass: SiteIdentifier [
 
     ip [
 	<category: 'accessing'>
+	ip isNil ifTrue: [ip := '*'].
 	^ip
     ]
 
@@ -1772,6 +1784,7 @@ URIIdentifier subclass: SiteIdentifier [
 
     port [
 	<category: 'accessing'>
+	port isNil ifTrue: [port := self class defaultPort].
 	^port
     ]
 
@@ -1823,10 +1836,11 @@ URIIdentifier subclass: SiteIdentifier [
 	self host: hostName
     ]
 
-    valueMatch: aSiteIdentifier [
+    valueMatch: aRequestOrIdentifier [
 	<category: 'private-comparing'>
-	^(self portMatch: aSiteIdentifier) 
-	    and: [(self ipMatch: aSiteIdentifier) and: [self hostMatch: aSiteIdentifier]]
+	^(self portMatch: aRequestOrIdentifier) 
+	    and: [(self ipMatch: aRequestOrIdentifier)
+	    and: [self hostMatch: aRequestOrIdentifier]]
     ]
 ]
 
@@ -1909,7 +1923,8 @@ Object subclass: URIResolution [
 
     resolveLeafResource: aResource [
 	<category: 'resolving'>
-	(aResource canAnswer and: [self stringMatch: aResource]) ifFalse: [^nil].
+	(aResource canAnswer and: [aResource match: self currentIdentifier])
+	    ifFalse: [^nil].
 	^self getAnswerFrom: aResource
     ]
 
@@ -1920,7 +1935,7 @@ Object subclass: URIResolution [
 
     resolveSite: aSite [
 	<category: 'resolving'>
-	(aSite canAnswer and: [self siteMatch: aSite]) ifFalse: [^nil].
+	(aSite canAnswer and: [aSite match: self request]) ifFalse: [^nil].
 	^self visitChildrenOf: aSite advancing: false
     ]
 
@@ -1938,25 +1953,6 @@ Object subclass: URIResolution [
 	<category: 'private'>
 	self position: self position - 1.
 	^nil
-    ]
-
-    siteMatch: aSite [
-	<category: 'private'>
-	| siteIdentifier hostName |
-	hostName := self request headers 
-		    fieldOfClass: HTTPHostField
-		    ifPresent: [:field | field hostName]
-		    ifAbsent: [self request requestLine requestURI hostname].
-	siteIdentifier := SiteIdentifier 
-		    host: (hostName notNil ifTrue: [hostName] ifFalse: [''])
-		    ip: self request ip
-		    port: self request port.
-	^aSite match: siteIdentifier
-    ]
-
-    stringMatch: aResource [
-	<category: 'private'>
-	^aResource uriPattern = self currentIdentifier
     ]
 
     tailPath [

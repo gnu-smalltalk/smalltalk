@@ -54,6 +54,7 @@
   <filein>Resources.st</filein>
   <filein>HTTP.st</filein>
   <filein>Protocol.st</filein>
+  <filein>SCGI.st</filein>
   <filein>Extensions.st</filein>
 
   <file>Exceptions.st</file>
@@ -65,5 +66,6 @@
   <file>Protocol.st</file>
   <file>Extensions.st</file>
   <file>Tests.st</file>
+  <file>SCGI.st</file>
   <file>PORTING</file>
 </package>
