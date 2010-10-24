@@ -54,6 +54,32 @@ all possible) are left to the subclasses.'>
 	self subclassResponsibility
     ]
 
+    ifNil: nilBlock ifNotNilDo: iterableBlock [
+        "Evaluate nilBlock if the receiver is nil, else evaluate
+         iterableBlock with each element of the receiver (which
+         should be an Iterable)."
+
+        <category: 'iteration'>
+        self do: iterableBlock
+    ]
+
+    ifNotNilDo: iterableBlock [
+        "Evaluate iterableBlock with each element of the receiver (which
+         should be an Iterable) if not nil.  Else answer nil"
+
+        <category: 'iteration'>
+        self do: iterableBlock
+    ]
+
+    ifNotNilDo: iterableBlock ifNil: nilBlock [
+        "Evaluate nilBlock if the receiver is nil, else evaluate
+         iterableBlock, passing each element of the receiver (which
+         should be an Iterable)."
+
+        <category: 'iteration'>
+        self do: iterableBlock
+    ]
+
     do: aBlock [
 	"Enumerate each object of the receiver, passing them to aBlock"
 

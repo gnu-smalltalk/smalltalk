@@ -108,6 +108,32 @@ instance, which is the object "nil".'>
 	^nilBlock value
     ]
 
+    ifNil: nilBlock ifNotNilDo: iterableBlock [
+	"Evaluate nilBlock if the receiver is nil, else evaluate
+	 iterableBlock with each element of the receiver (which
+         should be an Iterable)."
+
+	<category: 'iteration'>
+	^nilBlock value
+    ]
+
+    ifNotNilDo: iterableBlock [
+	"Evaluate iterableBlock with each element of the receiver (which
+         should be an Iterable) if not nil.  Else answer nil"
+
+	<category: 'iteration'>
+	^nil
+    ]
+
+    ifNotNilDo: iterableBlock ifNil: nilBlock [
+	"Evaluate nilBlock if the receiver is nil, else evaluate
+	 iterableBlock, passing each element of the receiver (which
+         should be an Iterable)."
+
+	<category: 'iteration'>
+	^nilBlock value
+    ]
+
     addDependent: ignored [
 	"Fail, nil does not support dependents."
 

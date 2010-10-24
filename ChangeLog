@@ -1,3 +1,8 @@
+2010-10-24  Paolo Bonzini <bonzini@gnu.org>
+
+	* kernel/Iterable.st: Add #ifNil:ifNotNilDo: and friends.
+	* kernel/UndefObject.st: Likewise.
+
 2010-10-23  Paolo Bonzini <bonzini@gnu.org>
 
 	* examples/MiniDebugger.st: Fix and improve process commands.
