@@ -1,3 +1,8 @@
+2010-10-28  Paolo Bonzini  <bonzini@gnu.org>
+
+	* MoreFuncs.st: Fix 64-bit cleanliness bug in #oopType.  Reported
+	by Mathieu Suen.
+
 2010-10-15  Paolo Bonzini  <bonzini@gnu.org>
 
 	* GtkImpl.st: Return nil when gtk_tree_model_get_iter returns FALSE.

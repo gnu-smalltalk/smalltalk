@@ -39,7 +39,7 @@ GLib class extend [
 
     oopType [
 	<category: 'C call-outs'>
-	<cCall: 'gstTypeOOP' returning: #int
+	<cCall: 'gstTypeOOP' returning: #long
 	args: #()>
     ]
 ]
