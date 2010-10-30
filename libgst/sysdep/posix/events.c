@@ -59,21 +59,20 @@
 #ifdef HAVE_UTIME_H
 # include <utime.h>
 #endif
-
 #ifdef HAVE_SYS_TIMES_H
 # include <sys/times.h>
 #endif
-
 #ifdef HAVE_SYS_IOCTL_H
 # include <sys/ioctl.h>
 #endif
-
 #ifdef HAVE_TERMIOS_H
 # include <termios.h>
 #endif
-
 #ifdef HAVE_STROPTS_H
-#include <stropts.h>
+# include <stropts.h>
+#endif
+#ifdef USE_POSIX_THREADS
+# include <pthread.h>
 #endif
 
 static SigHandler sigio_handler = SIG_IGN;

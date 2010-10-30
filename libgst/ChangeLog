@@ -1,3 +1,7 @@
+2010-10-30 Paolo Bonzini <bonzini@gnu.org>
+
+	* libgst/sysdep/posix/events.c: Include pthread.h if using pthreads.
+
 2010-10-17 Paolo Bonzini <bonzini@gnu.org>
 
 	* libgst/prims.def: NULL-terminate the output of VMpr_String_asCData.
