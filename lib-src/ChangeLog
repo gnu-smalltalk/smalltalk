@@ -1,3 +1,7 @@
+2010-10-31  Aleksej Saushev  <asau@inbox.ru>
+
+	* lib-src/mathl.h: Add missing prototypes.
+
 2010-10-04  Paolo Bonzini  <bonzini@gnu.org>
 
 	* lib-src/qsort.c: Obsolete, remove.

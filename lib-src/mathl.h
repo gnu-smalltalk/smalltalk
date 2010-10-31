@@ -66,5 +66,13 @@ extern long double logl(long double x);
 extern long double sinl (long double x);
 extern long double sqrtl(long double x);
 extern long double tanl (long double x);
+extern long double truncl(long double x);
+
+extern double trunc(double x);
+extern float truncf(float x);
+
+extern long lrintl(long double x);
+extern long lrint(double x);
+extern long lrintf(float x);
 
 #endif
