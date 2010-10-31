@@ -331,10 +331,6 @@ dnl ------------------------------- C LIBRARY -----------------
 AC_TYPE_SIGNAL
 AC_TYPE_PID_T
 AC_TYPE_SIZE_T
-AC_CACHE_CHECK([the value of NSIG], ac_cv_lib_NSIG, [
-  AC_COMPUTE_INT([ac_cv_lib_NSIG], [NSIG], [#include <signal.h>])])
-AC_DEFINE_UNQUOTED([STDLIB_NSIG], [$ac_cv_lib_NSIG],
-		   [The value given by libc to NSIG])
 
 AC_HEADER_ASSERT
 AC_CHECK_HEADERS_ONCE(stdint.h inttypes.h unistd.h poll.h sys/ioctl.h \
