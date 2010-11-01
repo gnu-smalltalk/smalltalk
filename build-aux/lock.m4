@@ -59,35 +59,6 @@ AC_HELP_STRING([--disable-threads], [build without multithread safety]),
   gst_threads_api=none
   LIBTHREAD=
   if test "$gst_use_threads" != no; then
-    dnl Check whether the compiler and linker support weak declarations.
-    AC_CACHE_CHECK([whether imported symbols can be declared weak],
-      [gst_cv_have_weak],
-      [gst_cv_have_weak=no
-       dnl First, test whether the compiler accepts it syntactically.
-       AC_TRY_LINK([extern void xyzzy ();
-#pragma weak xyzzy], [xyzzy();], [gst_cv_have_weak=maybe])
-       if test $gst_cv_have_weak = maybe; then
-         dnl Second, test whether it actually works. On Cygwin 1.7.2, with
-         dnl gcc 4.3, symbols declared weak always evaluate to the address 0.
-         AC_TRY_RUN([
-#include <stdio.h>
-#pragma weak fputs
-int main ()
-{
-  return (fputs == NULL);
-}], [gst_cv_have_weak=yes], [gst_cv_have_weak=no],
-           [dnl When cross-compiling, assume that only ELF platforms support
-            dnl weak symbols.
-            AC_EGREP_CPP([Extensible Linking Format],
-              [#ifdef __ELF__
-               Extensible Linking Format
-               #endif
-              ],
-              [gst_cv_have_weak="guessing yes"],
-              [gst_cv_have_weak="guessing no"])
-           ])
-       fi
-      ])
     if test "$gst_use_threads" = yes || test "$gst_use_threads" = posix; then
       # On OSF/1, the compiler needs the flag -pthread or -D_REENTRANT so that
       # it groks <pthread.h>. It's added above.
@@ -137,13 +108,6 @@ int main ()
           gst_threads_api=posix
           AC_DEFINE([USE_POSIX_THREADS], 1,
             [Define if the POSIX multithreading library can be used.])
-          if test -n "$LIBTHREAD"; then
-            if test "$gst_have_weak" = yes; then
-              AC_DEFINE([USE_POSIX_THREADS_WEAK], 1,
-                [Define if references to the POSIX multithreading library should be made weak.])
-	      LIBTHREAD=
-            fi
-          fi
           # OSF/1 4.0 and MacOS X 10.1 lack the pthread_rwlock_t type and the
           # pthread_rwlock_* functions.
           AC_CHECK_TYPE([pthread_rwlock_t],

@@ -1,3 +1,8 @@
+2010-10-31  Paolo Bonzini  <bonzini@gnu.org>
+
+	* lib-src/lock.c: Remove PTHREAD_IN_USE stuff.
+	* lib-src/lock.h: Remove PTHREAD_IN_USE stuff.
+
 2010-10-31  Aleksej Saushev  <asau@inbox.ru>
 
 	* lib-src/mathl.h: Add missing prototypes.

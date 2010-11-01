@@ -1,3 +1,7 @@
+2010-10-31 Paolo Bonzini <bonzini@gnu.org>
+
+	* libgst/sysdep/posix/events.c: Remove pthread_in_use.
+
 2010-10-30 Paolo Bonzini <bonzini@gnu.org>
 
 	* libgst/sysdep/posix/events.c: Include pthread.h if using pthreads.

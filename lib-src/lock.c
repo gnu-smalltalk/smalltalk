@@ -29,45 +29,6 @@
 
 /* Use the POSIX threads library.  */
 
-# if PTHREAD_IN_USE_DETECTION_HARD
-
-/* The function to be executed by a dummy thread.  */
-static void *
-dummy_thread_func (void *arg)
-{
-  return arg;
-}
-
-int
-glthread_in_use (void)
-{
-  static int tested;
-  static int result; /* 1: linked with -lpthread, 0: only with libc */
-
-  if (!tested)
-    {
-      pthread_t thread;
-
-      if (pthread_create (&thread, NULL, dummy_thread_func, NULL) != 0)
-	/* Thread creation failed.  */
-	result = 0;
-      else
-	{
-	  /* Thread creation works.  */
-	  void *retval;
-	  if (pthread_join (thread, &retval) != 0)
-	    abort ();
-	  result = 1;
-	}
-      tested = 1;
-    }
-  return result;
-}
-
-# endif
-
-/* -------------------------- gl_lock_t datatype -------------------------- */
-
 /* ------------------------- gl_rwlock_t datatype ------------------------- */
 
 # if HAVE_PTHREAD_RWLOCK
@@ -75,7 +36,7 @@ glthread_in_use (void)
 #  if !defined PTHREAD_RWLOCK_INITIALIZER
 
 int
-glthread_rwlock_init_multithreaded (gl_rwlock_t *lock)
+glthread_rwlock_init (gl_rwlock_t *lock)
 {
   int err;
 
@@ -87,7 +48,7 @@ glthread_rwlock_init_multithreaded (gl_rwlock_t *lock)
 }
 
 int
-glthread_rwlock_rdlock_multithreaded (gl_rwlock_t *lock)
+glthread_rwlock_rdlock (gl_rwlock_t *lock)
 {
   if (!lock->initialized)
     {
@@ -98,7 +59,7 @@ glthread_rwlock_rdlock_multithreaded (gl_rwlock_t *lock)
 	return err;
       if (!lock->initialized)
 	{
-	  err = glthread_rwlock_init_multithreaded (lock);
+	  err = glthread_rwlock_init (lock);
 	  if (err != 0)
 	    {
 	      pthread_mutex_unlock (&lock->guard);
@@ -113,7 +74,7 @@ glthread_rwlock_rdlock_multithreaded (gl_rwlock_t *lock)
 }
 
 int
-glthread_rwlock_wrlock_multithreaded (gl_rwlock_t *lock)
+glthread_rwlock_wrlock (gl_rwlock_t *lock)
 {
   if (!lock->initialized)
     {
@@ -124,7 +85,7 @@ glthread_rwlock_wrlock_multithreaded (gl_rwlock_t *lock)
 	return err;
       if (!lock->initialized)
 	{
-	  err = glthread_rwlock_init_multithreaded (lock);
+	  err = glthread_rwlock_init (lock);
 	  if (err != 0)
 	    {
 	      pthread_mutex_unlock (&lock->guard);
@@ -139,7 +100,7 @@ glthread_rwlock_wrlock_multithreaded (gl_rwlock_t *lock)
 }
 
 int
-glthread_rwlock_unlock_multithreaded (gl_rwlock_t *lock)
+glthread_rwlock_unlock (gl_rwlock_t *lock)
 {
   if (!lock->initialized)
     return EINVAL;
@@ -147,7 +108,7 @@ glthread_rwlock_unlock_multithreaded (gl_rwlock_t *lock)
 }
 
 int
-glthread_rwlock_destroy_multithreaded (gl_rwlock_t *lock)
+glthread_rwlock_destroy (gl_rwlock_t *lock)
 {
   int err;
 
@@ -165,7 +126,7 @@ glthread_rwlock_destroy_multithreaded (gl_rwlock_t *lock)
 # else
 
 int
-glthread_rwlock_init_multithreaded (gl_rwlock_t *lock)
+glthread_rwlock_init (gl_rwlock_t *lock)
 {
   int err;
 
@@ -184,7 +145,7 @@ glthread_rwlock_init_multithreaded (gl_rwlock_t *lock)
 }
 
 int
-glthread_rwlock_rdlock_multithreaded (gl_rwlock_t *lock)
+glthread_rwlock_rdlock (gl_rwlock_t *lock)
 {
   int err;
 
@@ -213,7 +174,7 @@ glthread_rwlock_rdlock_multithreaded (gl_rwlock_t *lock)
 }
 
 int
-glthread_rwlock_wrlock_multithreaded (gl_rwlock_t *lock)
+glthread_rwlock_wrlock (gl_rwlock_t *lock)
 {
   int err;
 
@@ -240,7 +201,7 @@ glthread_rwlock_wrlock_multithreaded (gl_rwlock_t *lock)
 }
 
 int
-glthread_rwlock_unlock_multithreaded (gl_rwlock_t *lock)
+glthread_rwlock_unlock (gl_rwlock_t *lock)
 {
   int err;
 
@@ -296,7 +257,7 @@ glthread_rwlock_unlock_multithreaded (gl_rwlock_t *lock)
 }
 
 int
-glthread_rwlock_destroy_multithreaded (gl_rwlock_t *lock)
+glthread_rwlock_destroy (gl_rwlock_t *lock)
 {
   int err;
 
@@ -321,7 +282,7 @@ glthread_rwlock_destroy_multithreaded (gl_rwlock_t *lock)
 #  if defined PTHREAD_RECURSIVE_MUTEX_INITIALIZER || defined PTHREAD_RECURSIVE_MUTEX_INITIALIZER_NP
 
 int
-glthread_recursive_lock_init_multithreaded (gl_recursive_lock_t *lock)
+glthread_recursive_lock_init (gl_recursive_lock_t *lock)
 {
   pthread_mutexattr_t attributes;
   int err;
@@ -350,7 +311,7 @@ glthread_recursive_lock_init_multithreaded (gl_recursive_lock_t *lock)
 #  else
 
 int
-glthread_recursive_lock_init_multithreaded (gl_recursive_lock_t *lock)
+glthread_recursive_lock_init (gl_recursive_lock_t *lock)
 {
   pthread_mutexattr_t attributes;
   int err;
@@ -378,7 +339,7 @@ glthread_recursive_lock_init_multithreaded (gl_recursive_lock_t *lock)
 }
 
 int
-glthread_recursive_lock_lock_multithreaded (gl_recursive_lock_t *lock)
+glthread_recursive_lock_lock (gl_recursive_lock_t *lock)
 {
   if (!lock->initialized)
     {
@@ -389,7 +350,7 @@ glthread_recursive_lock_lock_multithreaded (gl_recursive_lock_t *lock)
 	return err;
       if (!lock->initialized)
 	{
-	  err = glthread_recursive_lock_init_multithreaded (lock);
+	  err = glthread_recursive_lock_init (lock);
 	  if (err != 0)
 	    {
 	      pthread_mutex_unlock (&lock->guard);
@@ -404,7 +365,7 @@ glthread_recursive_lock_lock_multithreaded (gl_recursive_lock_t *lock)
 }
 
 int
-glthread_recursive_lock_unlock_multithreaded (gl_recursive_lock_t *lock)
+glthread_recursive_lock_unlock (gl_recursive_lock_t *lock)
 {
   if (!lock->initialized)
     return EINVAL;
@@ -412,7 +373,7 @@ glthread_recursive_lock_unlock_multithreaded (gl_recursive_lock_t *lock)
 }
 
 int
-glthread_recursive_lock_destroy_multithreaded (gl_recursive_lock_t *lock)
+glthread_recursive_lock_destroy (gl_recursive_lock_t *lock)
 {
   int err;
 
@@ -430,7 +391,7 @@ glthread_recursive_lock_destroy_multithreaded (gl_recursive_lock_t *lock)
 # else
 
 int
-glthread_recursive_lock_init_multithreaded (gl_recursive_lock_t *lock)
+glthread_recursive_lock_init (gl_recursive_lock_t *lock)
 {
   int err;
 
@@ -443,7 +404,7 @@ glthread_recursive_lock_init_multithreaded (gl_recursive_lock_t *lock)
 }
 
 int
-glthread_recursive_lock_lock_multithreaded (gl_recursive_lock_t *lock)
+glthread_recursive_lock_lock (gl_recursive_lock_t *lock)
 {
   pthread_t self = pthread_self ();
   if (lock->owner != self)
@@ -464,7 +425,7 @@ glthread_recursive_lock_lock_multithreaded (gl_recursive_lock_t *lock)
 }
 
 int
-glthread_recursive_lock_unlock_multithreaded (gl_recursive_lock_t *lock)
+glthread_recursive_lock_unlock (gl_recursive_lock_t *lock)
 {
   if (lock->owner != pthread_self ())
     return EPERM;
@@ -480,7 +441,7 @@ glthread_recursive_lock_unlock_multithreaded (gl_recursive_lock_t *lock)
 }
 
 int
-glthread_recursive_lock_destroy_multithreaded (gl_recursive_lock_t *lock)
+glthread_recursive_lock_destroy (gl_recursive_lock_t *lock)
 {
   if (lock->owner != (pthread_t) 0)
     return EBUSY;
@@ -488,26 +449,6 @@ glthread_recursive_lock_destroy_multithreaded (gl_recursive_lock_t *lock)
 }
 
 # endif
-
-/* -------------------------- gl_once_t datatype -------------------------- */
-
-static const pthread_once_t fresh_once = PTHREAD_ONCE_INIT;
-
-int
-glthread_once_singlethreaded (pthread_once_t *once_control)
-{
-  /* We don't know whether pthread_once_t is an integer type, a floating-point
-     type, a pointer type, or a structure type.  */
-  char *firstbyte = (char *)once_control;
-  if (*firstbyte == *(const char *)&fresh_once)
-    {
-      /* First time use of once_control.  Invert the first byte.  */
-      *firstbyte = ~ *(const char *)&fresh_once;
-      return 1;
-    }
-  else
-    return 0;
-}
 
 #endif
 
