@@ -59,7 +59,10 @@ dist_noinst_SCRIPTS = build-aux/texi2dvi build-aux/texi2html \
 pkgconfigdir = $(libdir)/pkgconfig
 nodist_pkgconfig_DATA = gnu-smalltalk.pc
 
+if NEED_LIBC_LA
 module_DATA = libc.la
+endif
+
 noinst_DATA = gst.im
 dist_noinst_DATA += smalltalk-mode-init.el.in gst-mode.el.in \
 	.gdbinit scripts/Finish.st gsticon.ico packages/xml/ChangeLog \

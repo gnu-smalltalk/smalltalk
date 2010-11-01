@@ -295,8 +295,6 @@ AC_CHECK_SIZEOF(wchar_t, , [[
 AC_CHECK_SIZEOF(OOP, , [[
 typedef void *OOP;]])
 
-GST_LIBC_SO_NAME
-
 AC_LIBTOOL_DLOPEN
 AC_LIBTOOL_WIN32_DLL
 AC_PROG_LIBTOOL
@@ -400,6 +398,7 @@ dnl ------------------------- OTHER LIBRARIES -------------------
 
 { echo; echo "${term_bold}Auxiliary libraries:${term_norm}"; } >& AS_MESSAGE_FD
 
+GST_LIBC_SO_NAME
 GST_HAVE_GMP
 GST_HAVE_READLINE
 
@@ -877,7 +876,6 @@ AC_CONFIG_FILES(gnu-smalltalk.pc)
 AC_CONFIG_FILES(gst-config, chmod +x gst-config)
 AC_CONFIG_FILES(tests/gst, chmod +x tests/gst)
 AC_CONFIG_FILES(tests/atlocal)
-AC_CONFIG_FILES(libc.la)
 
 dnl Master Makefile
 AC_CONFIG_FILES(Makefile)

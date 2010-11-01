@@ -9,7 +9,30 @@ dnl the same distribution terms as the rest of that program.
 dnl Sets the variables LIBC_SO_NAME and LIBC_SO_DIR to the directory
 dnl and basename for the C library.
 AC_DEFUN([GST_LIBC_SO_NAME],
-[AC_CACHE_CHECK([how to dlopen the C library], gst_cv_libc_so_name, [
+[AC_CACHE_CHECK([whether lt_dlopenext("libc") works], gst_cv_libc_dlopen_works,
+[save_CFLAGS=$CFLAGS
+save_LIBS=$LIBS
+CFLAGS="$CFLAGS $INCLTDL"
+LIBS="$CFLAGS $LIBLTDL"
+AC_RUN_IFELSE(AC_LANG_PROGRAM([[
+#include <ltdl`test $with_system_libltdl = no && echo _`.h>
+`test $with_system_libltdl = no && echo '#include "ltdl.c"' `
+]], [[
+lt_dlinit();
+return lt_dlopenext("libc") == NULL ? 1 : 0;
+]]), [gst_cv_libc_dlopen_works=yes],
+     [gst_cv_libc_dlopen_works=no],
+     [gst_cv_libc_dlopen_works=no])
+CFLAGS=$save_CFLAGS
+LIBS=$save_LIBS
+])
+
+AM_CONDITIONAL([NEED_LIBC_LA], [test "$gst_cv_libc_dlopen_works" = no])
+if test "$gst_cv_libc_dlopen_works" = no; then
+  AC_CONFIG_FILES(libc.la)
+fi
+
+AC_CACHE_CHECK([how to dlopen the C library], gst_cv_libc_so_name, [
   if test $GCC = yes; then
     gst_lib_path=`$CC --print-multi-os-directory $CFLAGS $CPPFLAGS`
     case $gst_lib_path in
