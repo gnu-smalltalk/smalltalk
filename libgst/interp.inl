@@ -51,10 +51,19 @@
  ***********************************************************************/
 
 
-/* Multiply a*b and in case of an overflow, answer OVERFLOWING_INT so
-   that we can work it out the same way we do with adds and
-   subtracts.  */
-static inline intptr_t mul_with_check (intptr_t a, intptr_t b);
+/* Do an arithmetic operation between A and B and set OVERFLOW to
+   false or true depending on overflow.  */
+static inline OOP add_with_check (OOP op1, OOP op2,
+                                  mst_Boolean *overflow);
+static inline OOP sub_with_check (OOP op1, OOP op2,
+                                  mst_Boolean *overflow);
+static inline OOP mul_with_check (OOP op1, OOP op2,
+                                  mst_Boolean *overflow);
+
+/* These do not need overflow checking.  */
+static inline OOP tagged_and (OOP op1, OOP op2);
+static inline OOP tagged_or (OOP op1, OOP op2);
+static inline OOP tagged_xor (OOP op1, OOP op2);
 
 /* using STACK_AT is correct: numArgs == 0 means that there's just the
  * receiver on the stack, at 0.  numArgs = 1 means that at location 0 is
@@ -67,10 +76,84 @@ static inline intptr_t mul_with_check (intptr_t a, intptr_t b);
 } while(0)
 
 
-intptr_t
-mul_with_check (intptr_t a, intptr_t b)
+
+OOP
+tagged_and (OOP op1, OOP op2)
 {
+  intptr_t iop1 = (intptr_t) op1;
+  intptr_t iop2 = (intptr_t) op2;
+  return (OOP) (iop1 & iop2);
+}
+
+OOP
+tagged_or (OOP op1, OOP op2)
+{
+  intptr_t iop1 = (intptr_t) op1;
+  intptr_t iop2 = (intptr_t) op2;
+  return (OOP) (iop1 | iop2);
+}
+
+OOP
+tagged_xor (OOP op1, OOP op2)
+{
+  intptr_t iop1 = (intptr_t) op1;
+  intptr_t iop2 = ((intptr_t) op2) - 1;
+  return (OOP) (iop1 ^ iop2);
+}
+
+OOP
+add_with_check (OOP op1, OOP op2, mst_Boolean *overflow)
+{
+  intptr_t iop1 = TO_INT (op1);
+  intptr_t iop2 = TO_INT (op2);
+  intptr_t iresult = no_opt (iop1 + iop2);
+  *overflow = false;
+  if (iresult < iop1)
+    {
+      if (iop2 < 0)
+        return FROM_INT (iresult);
+    }
+  else
+    {
+      if (iop2 >= 0)
+        return FROM_INT (iresult);
+    }
+
+  if UNCOMMON (INT_OVERFLOW (iresult))
+    *overflow = true;
+  return FROM_INT (iresult);
+}
+
+OOP
+sub_with_check (OOP op1, OOP op2, mst_Boolean *overflow)
+{
+  intptr_t iop1 = TO_INT (op1);
+  intptr_t iop2 = TO_INT (op2);
+  intptr_t iresult = no_opt (iop1 - iop2);
+  *overflow = false;
+  if (iresult < iop1)
+    {
+      if (iop2 >= 0)
+        return FROM_INT (iresult);
+    }
+  else
+    {
+      if (iop2 < 0)
+        return FROM_INT (iresult);
+    }
+
+  if UNCOMMON (INT_OVERFLOW (iresult))
+    *overflow = true;
+  return FROM_INT (iresult);
+}
+
+OOP
+mul_with_check (OOP op1, OOP op2, mst_Boolean *overflow)
+{
+  intptr_t a = TO_INT (op1);
+  intptr_t b = TO_INT (op2);
   intmax_t result = (intmax_t)a * b;
+  *overflow = false;
 
   /* We define the largest int type in stdintx.h, but we can
      only use it if it is two times the width of an intptr_t.  */
@@ -78,19 +161,22 @@ mul_with_check (intptr_t a, intptr_t b)
   if (sizeof (intmax_t) >= 2 * sizeof (intptr_t))
     {
       if UNCOMMON (result > MAX_ST_INT || result < MIN_ST_INT)
-        return (OVERFLOWING_INT);
+        *overflow = true;
       else
-        return (result);
+        return FROM_INT (result);
     }
 
   /* This fallback method uses a division to do overflow check */
   else
     {
-      if COMMON (((uintptr_t) (a | b)) < (1L << (ST_INT_SIZE / 2))
-	         || b == 0
-	         || result / b == a)
-        return (result);
+      if COMMON ((((uintptr_t) (a | b)) < (1L << (ST_INT_SIZE / 2))
+	          || b == 0
+	          || result / b == a)
+                 && !INT_OVERFLOW (result))
+        return FROM_INT (result);
       else
-        return (OVERFLOWING_INT);
+        *overflow = true;
     }
+
+  return FROM_INT (0);
 }

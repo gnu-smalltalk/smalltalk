@@ -99,12 +99,10 @@
 
 #define RAW_INT_OP(op, op1, op2, iop)                           \
 {                                                               \
-  intptr_t iarg1, iarg2;                                        \
-  iarg1 = TO_INT(op1);                                          \
-  iarg2 = TO_INT(op2);                                          \
-  iop;                                                          \
-  if(COMMON (!INT_OVERFLOW(iarg1))) {                           \
-    op = FROM_INT(iarg1);                                       \
+  mst_Boolean overflow;                                         \
+  OOP result = iop;                                             \
+  if(COMMON (!overflow)) {                                      \
+    op = result;                                                \
     break;                                                      \
   }                                                             \
 }
@@ -229,32 +227,9 @@ operation INVALID arg ( -- ) {
 }
 
 operation PLUS_SPECIAL ( op1 op2 -- op ) {
-  if COMMON (ARE_INTS(op1, op2))
-    {
-      intptr_t iop1 = (intptr_t) op1;
-      intptr_t iop2 = ((intptr_t) op2) - 1;
-      intptr_t iresult = no_opt (iop1 + iop2);
-      if (iresult < iop1)
-        {
-	  if (iop2 < 0)
-	    {
-	      op = (OOP) iresult;
-	      break;
-	    }
-        }
-      else
-        {
-	  if (iop2 >= 0)
-	    {
-	      op = (OOP) iresult;
-	      break;
-	    }
-        }
-    }
-  else if COMMON ((IS_INT (op1) || OOP_CLASS(op1) == _gst_floatd_class)
-                  && (IS_INT (op2) || OOP_CLASS(op2) == _gst_floatd_class))
-    RAW_FLOATD_OP(op, op1, op2, farg1 + farg2);
-
+  INTERP_BASIC_OP (op, op1, op2,
+                   add_with_check (op1, op2, &overflow),
+                   farg1 + farg2);
   PREPARE_STACK ();
   EXPORT_REGS ();
   SEND_MESSAGE (_gst_builtin_selectors[PLUS_SPECIAL].symbol, 1);
@@ -263,32 +238,9 @@ operation PLUS_SPECIAL ( op1 op2 -- op ) {
 }
 
 operation MINUS_SPECIAL ( op1 op2 -- op ) {
-  if COMMON (ARE_INTS(op1, op2))
-    {
-      intptr_t iop1 = (intptr_t) op1;
-      intptr_t iop2 = ((intptr_t) op2) - 1;
-      intptr_t iresult = no_opt (iop1 - iop2);
-      if (iresult < iop1)
-        {
-	  if (iop2 >= 0)
-	    {
-	      op = (OOP) iresult;
-	      break;
-	    }
-        }
-      else
-        {
-	  if (iop2 < 0)
-	    {
-	      op = (OOP) iresult;
-	      break;
-	    }
-        }
-    }
-  else if COMMON ((IS_INT (op1) || OOP_CLASS(op1) == _gst_floatd_class)
-                  && (IS_INT (op2) || OOP_CLASS(op2) == _gst_floatd_class))
-    RAW_FLOATD_OP(op, op1, op2, farg1 - farg2);
-
+  INTERP_BASIC_OP (op, op1, op2,
+                   sub_with_check (op1, op2, &overflow),
+                   farg1 - farg2);
   PREPARE_STACK ();
   EXPORT_REGS ();
   SEND_MESSAGE (_gst_builtin_selectors[MINUS_SPECIAL].symbol, 1);
@@ -351,7 +303,9 @@ operation NOT_EQUAL_SPECIAL ( op1 op2 -- op ) {
 }
 
 operation TIMES_SPECIAL ( op1 op2 -- op ) {
-  INTERP_BASIC_OP (op, op1, op2, iarg1 = mul_with_check (iarg1, iarg2), farg1 * farg2);
+  INTERP_BASIC_OP (op, op1, op2,
+                   mul_with_check (op1, op2, &overflow),
+                   farg1 * farg2);
   PREPARE_STACK ();
   EXPORT_REGS ();
   SEND_MESSAGE (_gst_builtin_selectors[TIMES_SPECIAL].symbol, 1);
@@ -401,7 +355,7 @@ operation REMAINDER_SPECIAL ( op1 op2 -- op ) {
 operation BIT_XOR_SPECIAL ( op1 op2 -- op ) {
   if COMMON (ARE_INTS (op1, op2))
     {
-      op = FROM_INT (TO_INT (op1) ^ TO_INT (op2));
+      op = tagged_xor (op1, op2);
       break;
     }
 
@@ -461,11 +415,9 @@ operation INTEGER_DIVIDE_SPECIAL ( op1 op2 -- op1 op2 ) {
 }
 
 operation BIT_AND_SPECIAL ( op1 op2 -- op ) {
-  if COMMON (ARE_INTS (op1, op2))
-    {
-      op = FROM_INT (TO_INT (op1) & TO_INT (op2));
-      break;
-    }
+  op = tagged_and (op1, op2);
+  if COMMON (IS_INT (op))
+    break;
 
   PREPARE_STACK ();
   EXPORT_REGS ();
@@ -477,7 +429,7 @@ operation BIT_AND_SPECIAL ( op1 op2 -- op ) {
 operation BIT_OR_SPECIAL ( op1 op2 -- op ) {
   if COMMON (ARE_INTS (op1, op2))
     {
-      op = FROM_INT (TO_INT (op1) | TO_INT (op2));
+      op = tagged_or (op1, op2);
       break;
     }
 

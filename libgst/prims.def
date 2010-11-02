@@ -84,6 +84,7 @@
 #define INT_BIN_OP(op, noOverflow) {            \
     OOP	oop1;					\
     OOP	oop2;					\
+    mst_Boolean overflow;                       \
     oop2 = POP_OOP();				\
     oop1 = POP_OOP();				\
     if COMMON (RECEIVER_IS_INT(oop1) && IS_INT(oop2)) {\
@@ -91,9 +92,9 @@
       iarg1 = TO_INT(oop1);			\
       iarg2 = TO_INT(oop2);			\
 						\
-      op;                                       \
-      if COMMON (noOverflow || !INT_OVERFLOW(iarg1)) {	\
-        PUSH_INT(iarg1);			\
+      oop1 = op;                                \
+      if COMMON (noOverflow || !overflow) {	\
+        PUSH_OOP(oop1);				\
         PRIM_SUCCEEDED;				\
       }                                         \
     }						\
@@ -119,14 +120,14 @@
 primitive VMpr_SmallInteger_plus [succeed,fail]
 {
   _gst_primitives_executed++;
-  INT_BIN_OP (iarg1 += iarg2, false);
+  INT_BIN_OP (add_with_check (oop1, oop2, &overflow), false);
 }
 
 /* SmallInteger - arg */
 primitive VMpr_SmallInteger_minus [succeed,fail]
 {
   _gst_primitives_executed++;
-  INT_BIN_OP (iarg1 -= iarg2, false);
+  INT_BIN_OP (sub_with_check (oop1, oop2, &overflow), false);
 }
 
 /* SmallInteger < arg */
@@ -175,7 +176,7 @@ primitive VMpr_SmallInteger_ne [succeed,fail]
 primitive VMpr_SmallInteger_times [succeed,fail]
 {
   _gst_primitives_executed++;
-  INT_BIN_OP (iarg1 = mul_with_check (iarg1, iarg2), false);
+  INT_BIN_OP (mul_with_check (oop1, oop2, &overflow), false);
 }
 
 /* SmallInteger / arg */
@@ -289,21 +290,21 @@ primitive VMpr_SmallInteger_quo [succeed,fail]
 primitive VMpr_SmallInteger_bitAnd [succeed,fail]
 {
   _gst_primitives_executed++;
-  INT_BIN_OP (iarg1 &= iarg2, true);
+  INT_BIN_OP (tagged_and (oop1, oop2), true);
 }
 
 /* SmallInteger bitOr: arg */
 primitive VMpr_SmallInteger_bitOr [succeed,fail]
 {
   _gst_primitives_executed++;
-  INT_BIN_OP (iarg1 |= iarg2, true);
+  INT_BIN_OP (tagged_or (oop1, oop2), true);
 }
 
 /* SmallInteger bitXor: arg */
 primitive VMpr_SmallInteger_bitXor [succeed,fail]
 {
   _gst_primitives_executed++;
-  INT_BIN_OP (iarg1 ^= iarg2, true);
+  INT_BIN_OP (tagged_xor (oop1, oop2), true);
 }
 
 /* SmallInteger bitShift: arg */
