@@ -1,3 +1,9 @@
+2010-11-02  Paolo Bonzini <bonzini@gnu.org>
+
+	* libgst/comp.c: Reorder printing of statistics so that the results
+	are not influenced by printing the result and by the #afterEval
+	hooks.
+
 2010-10-31 Paolo Bonzini <bonzini@gnu.org>
 
 	* libgst/sysdep/posix/events.c: Remove pthread_in_use.

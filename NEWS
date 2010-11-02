@@ -31,6 +31,8 @@ o   New goodie: Announcements.
 
 o   Number class>>#readFrom: can parse numbers in scientific notation.
 
+o   Performance statistics printed by -V are now correct.
+
 o   Scoped methods ("A class >> a") can be used in an "A class [ ... ]"
     block.
 

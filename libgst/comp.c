@@ -696,20 +696,68 @@ _gst_execute_statements (tree_node temps,
   getrusage (RUSAGE_SELF, &endRusage);
 #endif
 
-  _gst_invoke_hook (GST_AFTER_EVAL);
+  if (!quiet && _gst_verbosity >= 3)
+    {
+      deltaTime = endTime - startTime;
+#ifdef ENABLE_JIT_TRANSLATION
+      printf ("Execution took %.3f seconds", deltaTime / 1000.0);
+#else
+      printf ("%lu byte codes executed\nwhich took %.3f seconds",
+              _gst_bytecode_counter, deltaTime / 1000.0);
+#endif
 
-  INC_RESTORE_POINTER (incPtr);
+#ifdef HAVE_GETRUSAGE
+      deltaTime = ((endRusage.ru_utime.tv_sec * 1000) +
+                   (endRusage.ru_utime.tv_usec / 1000)) -
+        ((startRusage.ru_utime.tv_sec * 1000) +
+         (startRusage.ru_utime.tv_usec / 1000));
+      printf (" (%.3fs user", deltaTime / 1000.0);
+
+      deltaTime = ((endRusage.ru_stime.tv_sec * 1000) +
+                   (endRusage.ru_stime.tv_usec / 1000)) -
+        ((startRusage.ru_stime.tv_sec * 1000) +
+         (startRusage.ru_stime.tv_usec / 1000));
+      printf ("+%.3fs sys)", deltaTime / 1000.0);
+#endif
+      printf ("\n");
+
+#ifndef ENABLE_JIT_TRANSLATION
+      if (_gst_bytecode_counter)
+        {
+          printf ("%lu primitives, percent %.2f\n", _gst_primitives_executed,
+                  100.0 * _gst_primitives_executed / _gst_bytecode_counter);
+          printf ("self returns %lu, inst var returns %lu, literal returns %lu\n",
+                  _gst_self_returns, _gst_inst_var_returns, _gst_literal_returns);
+          printf ("%lu method cache lookups since last cleanup, percent %.2f\n",
+                  _gst_sample_counter,
+                  100.0 * _gst_sample_counter / _gst_bytecode_counter);
+        }
+#endif
+
+      if (_gst_sample_counter)
+        {
+#ifdef ENABLE_JIT_TRANSLATION
+          printf
+            ("%lu primitives, %lu inline cache misses since last cache cleanup\n",
+             _gst_primitives_executed, _gst_sample_counter);
+#endif
+          cacheHits = _gst_sample_counter - _gst_cache_misses;
+          printf ("%lu method cache hits, %lu misses", cacheHits,
+                  _gst_cache_misses);
+          if (cacheHits || _gst_cache_misses)
+            printf (", %.2f percent hits\n", (100.0 * cacheHits) / _gst_sample_counter);
+          else
+            printf ("\n");
+        }
+
+      /* Do more frequent flushing to ensure the result are well placed */
+      printf ("returned value is ");
+      fflush(stdout);
+    }
 
   if (!quiet)
     {
       int save_execution;
-
-      /* Do more frequent flushing to ensure the result are well placed */
-      if (_gst_verbosity >= 3)
-	{
-          printf ("returned value is ");
-          fflush(stdout);
-	}
 
       save_execution = _gst_execution_tracing;
       if (_gst_execution_tracing == 1)
@@ -726,60 +774,9 @@ _gst_execute_statements (tree_node temps,
       fflush (stderr);
       _gst_execution_tracing = save_execution;
     }
-  if (quiet || _gst_verbosity < 3)
-    return (_gst_last_returned_value);
 
-  deltaTime = endTime - startTime;
-#ifdef ENABLE_JIT_TRANSLATION
-  printf ("Execution took %.3f seconds", deltaTime / 1000.0);
-#else
-  printf ("%lu byte codes executed\nwhich took %.3f seconds",
-	  _gst_bytecode_counter, deltaTime / 1000.0);
-#endif
-
-#ifdef HAVE_GETRUSAGE
-  deltaTime = ((endRusage.ru_utime.tv_sec * 1000) +
-	       (endRusage.ru_utime.tv_usec / 1000)) -
-    ((startRusage.ru_utime.tv_sec * 1000) +
-     (startRusage.ru_utime.tv_usec / 1000));
-  printf (" (%.3fs user", deltaTime / 1000.0);
-
-  deltaTime = ((endRusage.ru_stime.tv_sec * 1000) +
-	       (endRusage.ru_stime.tv_usec / 1000)) -
-    ((startRusage.ru_stime.tv_sec * 1000) +
-     (startRusage.ru_stime.tv_usec / 1000));
-  printf ("+%.3fs sys)", deltaTime / 1000.0);
-#endif
-  printf ("\n");
-
-#ifdef ENABLE_JIT_TRANSLATION
-  if (!_gst_sample_counter)
-    return (_gst_last_returned_value);
-
-  printf
-    ("%lu primitives, %lu inline cache misses since last cache cleanup\n",
-     _gst_primitives_executed, _gst_sample_counter);
-#else
-  if (!_gst_bytecode_counter)
-    return (_gst_last_returned_value);
-
-  printf ("%lu primitives, percent %.2f\n", _gst_primitives_executed,
-	  100.0 * _gst_primitives_executed / _gst_bytecode_counter);
-  printf ("self returns %lu, inst var returns %lu, literal returns %lu\n",
-          _gst_self_returns, _gst_inst_var_returns, _gst_literal_returns);
-  printf ("%lu method cache lookups since last cleanup, percent %.2f\n",
-	  _gst_sample_counter,
-	  100.0 * _gst_sample_counter / _gst_bytecode_counter);
-#endif
-
-  cacheHits = _gst_sample_counter - _gst_cache_misses;
-  printf ("%lu method cache hits, %lu misses", cacheHits,
-	  _gst_cache_misses);
-  if (cacheHits || _gst_cache_misses)
-    printf (", %.2f percent hits\n", (100.0 * cacheHits) / _gst_sample_counter);
-  else
-    printf ("\n");
-
+  _gst_invoke_hook (GST_AFTER_EVAL);
+  INC_RESTORE_POINTER (incPtr);
   return (_gst_last_returned_value);
 }
 
