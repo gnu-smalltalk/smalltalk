@@ -76,6 +76,13 @@ static inline OOP tagged_xor (OOP op1, OOP op2);
 } while(0)
 
 
+#if defined __i386__
+#define OP_SUFFIX "l"
+#define OP_CONSTRAINT "rmi"
+#else
+#define OP_SUFFIX "q"
+#define OP_CONSTRAINT "rme"
+#endif
 
 OOP
 tagged_and (OOP op1, OOP op2)
@@ -104,6 +111,17 @@ tagged_xor (OOP op1, OOP op2)
 OOP
 add_with_check (OOP op1, OOP op2, mst_Boolean *overflow)
 {
+#if (defined __i386__ || defined __x86_64__)
+  intptr_t iop1 = (intptr_t) op1;
+  intptr_t iop2 = ((intptr_t) op2) - 1;
+  intptr_t iresult;
+  int of = 0;
+  asm ("add" OP_SUFFIX " %3, %2\n"
+       "seto %b1" : "=r" (iresult), "+&q" (of) : "0" (iop1), OP_CONSTRAINT (iop2));
+
+  *overflow = of;
+  return (OOP) iresult;
+#else
   intptr_t iop1 = TO_INT (op1);
   intptr_t iop2 = TO_INT (op2);
   intptr_t iresult = no_opt (iop1 + iop2);
@@ -122,11 +140,23 @@ add_with_check (OOP op1, OOP op2, mst_Boolean *overflow)
   if UNCOMMON (INT_OVERFLOW (iresult))
     *overflow = true;
   return FROM_INT (iresult);
+#endif
 }
 
 OOP
 sub_with_check (OOP op1, OOP op2, mst_Boolean *overflow)
 {
+#if (defined __i386__ || defined __x86_64__)
+  intptr_t iop1 = (intptr_t) op1;
+  intptr_t iop2 = ((intptr_t) op2) - 1;
+  intptr_t iresult;
+  int of = 0;
+  asm ("sub" OP_SUFFIX " %3, %2\n"
+       "seto %b1" : "=r" (iresult), "+&q" (of) : "0" (iop1), OP_CONSTRAINT (iop2));
+
+  *overflow = of;
+  return (OOP) iresult;
+#else
   intptr_t iop1 = TO_INT (op1);
   intptr_t iop2 = TO_INT (op2);
   intptr_t iresult = no_opt (iop1 - iop2);
@@ -145,6 +175,7 @@ sub_with_check (OOP op1, OOP op2, mst_Boolean *overflow)
   if UNCOMMON (INT_OVERFLOW (iresult))
     *overflow = true;
   return FROM_INT (iresult);
+#endif
 }
 
 OOP

@@ -1,5 +1,10 @@
 2010-11-02  Paolo Bonzini <bonzini@gnu.org>
 
+	* libgst/interp.inl: Add optimized x86 versions of tagged arithmetic
+	operations.
+
+2010-11-02  Paolo Bonzini <bonzini@gnu.org>
+
 	* libgst/interp.inl: Add here functions for SmallInteger OOP arithmetic.
 	* libgst/prims.def: Use the new functions.
 	* libgst/vm.def: Use the new functions.
