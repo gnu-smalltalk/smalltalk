@@ -1,5 +1,9 @@
 2010-11-02  Paolo Bonzini <bonzini@gnu.org>
 
+	* libgst/md-config.h: Tune for x86-64.
+
+2010-11-02  Paolo Bonzini <bonzini@gnu.org>
+
 	* libgst/interp.inl: Add optimized x86 versions of tagged arithmetic
 	operations.
 

@@ -1,3 +1,8 @@
+2010-11-02  Paolo Bonzini <bonzini@gnu.org>
+
+	* examples/Bench.st: Increase runtime to keep up with newer
+	computers.
+
 2010-10-24  Paolo Bonzini <bonzini@gnu.org>
 
 	* kernel/Iterable.st: Add #ifNil:ifNotNilDo: and friends.

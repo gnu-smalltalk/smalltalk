@@ -80,4 +80,4 @@ benchmark
     ^count
 ! !
 
-Transcript showCr: 10 tinyBenchmarks!
+Transcript showCr: 12 tinyBenchmarks!

@@ -90,6 +90,14 @@
 # define __DECL_REG3 /* no more caller-save regs if PIC is in use!  */
 #endif
 
+#if !defined(__DECL_REG1) && defined(__x86_64__)
+# define REG_AVAILABILITY 1
+# define __DECL_REG1 __asm("%r12")
+# define __DECL_REG2 __asm("%r13")
+# define __DECL_REG3 __asm("%rbx")
+# define L1_CACHE_SHIFT 6
+#endif
+
 #if !defined(__DECL_REG1) && defined(PPC) || defined(_POWER) || defined(_IBMR2)
 # define REG_AVAILABILITY 2
 # define __DECL_REG1 __asm("26")
