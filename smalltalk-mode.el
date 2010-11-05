@@ -1009,7 +1009,7 @@ Whitespace is defined as spaces, tabs, and comments."
       (let ((new-hit-point (funcall search)))
 	(if (and new-hit-point
 		 (or (not current) (> new-hit-point current)))
-	    (new-hit-point)
+	    new-hit-point
 	  current))))
   (let ((curr-hit-point (smalltalk-current-class-point)))
     (setq curr-hit-point 
