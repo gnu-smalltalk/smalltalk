@@ -206,7 +206,22 @@ some access and manipulation methods.'>
 	"Put anObject at every index in the receiver"
 
 	<category: 'basic'>
-	1 to: self size do: [:i | self at: i put: anObject]
+
+        | to size |
+        "Unroll completely for small collections..."
+        (size := self size) = 0 ifTrue: [ ^self ].
+        self at: 1 put: anObject. size = 1 ifTrue: [ ^self ].
+        self at: 2 put: anObject. size = 2 ifTrue: [ ^self ].
+        self at: 3 put: anObject. size = 3 ifTrue: [ ^self ].
+        self at: 4 put: anObject. to := 4.
+
+        "... and use memcpy repeatedly for larger ones."
+        [ size > to ] whileTrue: [
+            self
+                replaceFrom: to + 1
+                to: ((to := to + to) min: size)
+                with: self
+                startingAt: 1 ].
     ]
 
     after: oldObject [

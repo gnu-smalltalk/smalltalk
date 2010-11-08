@@ -1,3 +1,8 @@
+2010-11-08  Paolo Bonzini <bonzini@gnu.org>
+
+	* kernel/SeqCollect.st: Optimize #atAllPut:.
+	* examples/Bench.st: Use #atAllPut: for array initialization.
+
 2010-11-02  Paolo Bonzini <bonzini@gnu.org>
 
 	* examples/Bench.st: Increase runtime to keep up with newer
