@@ -895,25 +895,44 @@ prepare_context (gst_context_part context,
 		 int args,
 		 int temps)
 {
-  REGISTER (1, OOP * mySP);
-  _gst_temporaries = mySP = context->contextStack;
+  REGISTER (1, OOP *stackBase);
+  _gst_temporaries = stackBase = context->contextStack;
   if (args)
     {
-      REGISTER (2, int num);
-      REGISTER (3, OOP * src);
-      num = args;
-      src = &sp[1 - num];
-
-#define UNROLL_OP(n) mySP[n] = src[n]
-#define UNROLL_ADV(n) mySP += n, src += n
-      UNROLL_BY_8 (num);
-#undef UNROLL_OP
-#undef UNROLL_ADV
-
-      mySP += num;
+      REGISTER (2, OOP * src);
+      src = &sp[1 - args];
+      stackBase[0] = src[0];
+      if (args > 1)
+        {
+          stackBase[1] = src[1];
+          if (args > 2)
+            {
+              stackBase[2] = src[2];
+              if (args > 3)
+                memcpy (&stackBase[3], &src[3], (args - 3) * sizeof (OOP));
+            }
+        }
+      stackBase += args;
     }
-  sp = mySP + temps - 1;
-  nil_fill (mySP, temps);
+  if (temps)
+    {
+      REGISTER (2, OOP src);
+      src = _gst_nil_oop;
+      stackBase[0] = src;
+      if (temps > 1)
+        {
+          stackBase[1] = src;
+          if (temps > 2)
+            {
+              int n = 2;
+              do
+                stackBase[n] = src;
+              while UNCOMMON (n++ < temps);
+            }
+        }
+      stackBase += temps;
+    }
+  sp = stackBase - 1;
 }
 
 mst_Boolean

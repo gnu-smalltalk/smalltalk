@@ -124,13 +124,26 @@ static inline gst_object new_instance_with (OOP class_oop,
 static inline gst_object new_instance (OOP class_oop,
 				       OOP *p_oop);
 
+/* Returns a new, initialized instance of CLASS_OOP within an
+   object of size NUMBYTES.  INSTANCESPEC is used to find the
+   number of fixed instance variables and initialize them to
+   _gst_nil_oop.  The pointer to the object data is returned,
+   the OOP is stored in P_OOP.  The OOP is not adjusted to reflect
+   any variance in size (such as a string that's shorter than a word
+   boundary).  */
+static inline gst_object
+instantiate_numbytes (OOP class_oop,
+	              OOP *p_oop,
+                      intptr_t instanceSpec,
+                      size_t numBytes);
+
 /* Returns a new, initialized instance of CLASS_OOP with
    NUMINDEXFIELDS indexable fields.  If the instance contains
    pointers, they are initialized to _gst_nil_oop, else they are set
    to the SmallInteger 0.  The pointer to the object data is returned,
    the OOP is stored in P_OOP.  The OOP is adjusted to reflect any
    variance in size (such as a string that's shorter than a word
-   boundary.  */
+   boundary).  */
 static inline gst_object instantiate_with (OOP class_oop,
 					   size_t numIndexFields,
 					   OOP *p_oop);
@@ -626,12 +639,28 @@ nil_fill (OOP * oopPtr,
   REGISTER (3, OOP nilObj);
 
   nilObj = _gst_nil_oop;
+  while (oopCount >= 8)
+    {
+      oopPtr[0] = oopPtr[1] = oopPtr[2] = oopPtr[3] =
+        oopPtr[4] = oopPtr[5] = oopPtr[6] = oopPtr[7] = nilObj;
+      oopPtr += 8;
+      oopCount -= 8;
+    }
 
-#define UNROLL_OP(n) oopPtr[n] = nilObj
-#define UNROLL_ADV(n) oopPtr += n
-  UNROLL_BY_8 (oopCount);
-#undef UNROLL_OP
-#undef UNROLL_ADV
+  if (oopCount & 4)
+    {
+      oopPtr[0] = oopPtr[1] = oopPtr[2] = oopPtr[3] = nilObj;
+      oopPtr += 4;
+    }
+
+  if (oopCount & 2)
+    {
+      oopPtr[0] = oopPtr[1] = nilObj;
+      oopPtr += 2;
+    }
+
+  if (oopCount & 1)
+    oopPtr[0] = nilObj;
 }
 
 gst_object
@@ -680,6 +709,46 @@ new_instance (OOP class_oop,
 
 
 gst_object
+instantiate_numbytes (OOP class_oop,
+	              OOP *p_oop,
+                      intptr_t instanceSpec,
+                      size_t numBytes)
+{
+  gst_object p_instance;
+  int n;
+  OOP src, *dest;
+
+  p_instance = _gst_alloc_obj (numBytes, p_oop);
+  p_instance->objClass = class_oop;
+  (*p_oop)->flags |= (class_oop->flags & F_UNTRUSTED);
+
+  n = instanceSpec >> ISP_NUMFIXEDFIELDS;
+  if UNCOMMON (n == 0)
+    return p_instance;
+
+  src = _gst_nil_oop;
+  dest = p_instance->data;
+  dest[0] = src;
+  if UNCOMMON (n == 1)
+    return p_instance;
+
+  dest[1] = src;
+  if UNCOMMON (n == 2)
+    return p_instance;
+
+  dest[2] = src;
+  if UNCOMMON (n == 3)
+    return p_instance;
+
+  dest += 3;
+  n -= 3;
+  do
+    *dest++ = src;
+  while (--n > 0);
+  return p_instance;
+}
+
+gst_object
 instantiate_with (OOP class_oop,
 		  size_t numIndexFields,
 		  OOP *p_oop)
@@ -700,20 +769,22 @@ instantiate_with (OOP class_oop,
     + SIZE_TO_BYTES(instanceSpec >> ISP_NUMFIXEDFIELDS)
     + indexedBytes;
 
-  alignedBytes = ROUNDED_BYTES (numBytes);
-  p_instance = _gst_alloc_obj (alignedBytes, p_oop);
-  INIT_UNALIGNED_OBJECT (*p_oop, alignedBytes - numBytes);
-
-  p_instance->objClass = class_oop;
-  (*p_oop)->flags |= (class_oop->flags & F_UNTRUSTED);
-
-  instanceSpec = CLASS_INSTANCE_SPEC (class_oop);
   if COMMON ((instanceSpec & ISP_INDEXEDVARS) == GST_ISP_POINTER)
-    nil_fill (p_instance->data,
-	      (instanceSpec >> ISP_NUMFIXEDFIELDS) + numIndexFields);
+    {
+      p_instance = _gst_alloc_obj (numBytes, p_oop);
+      p_instance->objClass = class_oop;
+      (*p_oop)->flags |= (class_oop->flags & F_UNTRUSTED);
+      nil_fill (p_instance->data,
+	        (instanceSpec >> ISP_NUMFIXEDFIELDS) + numIndexFields);
+    }
   else
     {
-      nil_fill (p_instance->data, instanceSpec >> ISP_NUMFIXEDFIELDS);
+      alignedBytes = ROUNDED_BYTES (numBytes);
+      p_instance = instantiate_numbytes (class_oop,
+                                         p_oop,
+                                         instanceSpec,
+                                         alignedBytes);
+      INIT_UNALIGNED_OBJECT (*p_oop, alignedBytes - numBytes);
       memzero (&p_instance->data[instanceSpec >> ISP_NUMFIXEDFIELDS],
 	       indexedBytes);
     }
@@ -727,19 +798,13 @@ instantiate (OOP class_oop,
 {
   size_t numBytes;
   intptr_t instanceSpec;
-  gst_object p_instance;
 
   instanceSpec = CLASS_INSTANCE_SPEC (class_oop);
   numBytes = sizeof (gst_object_header) + 
     SIZE_TO_BYTES(instanceSpec >> ISP_NUMFIXEDFIELDS);
-
-  p_instance = _gst_alloc_obj (numBytes, p_oop);
-  p_instance->objClass = class_oop;
-
-  (*p_oop)->flags |= (class_oop->flags & F_UNTRUSTED);
-
-  nil_fill (p_instance->data, instanceSpec >> ISP_NUMFIXEDFIELDS);
-  return p_instance;
+  return instantiate_numbytes (class_oop,
+                               p_oop,
+                               instanceSpec, numBytes);
 }
 
 

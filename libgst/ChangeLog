@@ -1,3 +1,12 @@
+2010-11-08  Paolo Bonzini <bonzini@gnu.org>
+
+	* libgst/dict.inl: Add instantiate_numbytes, use it for instantiate
+	and non-pointer instantiate_with; do not unroll nil initialization
+	since N is usually small here.  Rewrite nil_fill.
+	* libgst/interp.c: Unroll the first few itertaions of prepare_context.
+	Do not use nil_fill.
+	* libgst/md-config.h: Remove loop unrolling macros.
+
 2010-11-02  Paolo Bonzini <bonzini@gnu.org>
 
 	* libgst/md-config.h: Tune for x86-64.
