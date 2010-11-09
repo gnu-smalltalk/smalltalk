@@ -5407,7 +5407,7 @@ primitive VMpr_FileDescriptor_fileOp [succeed,fail]
         {
 	  fileMode = _gst_to_cstring (oopVec[2]);
           fd = _gst_open_file ((char *) fileName, (char *) fileMode);
-	  memzero (&st, sizeof (st));
+	  memset (&st, 0, sizeof (st));
           fstat (fd, &st);
 	  is_pipe =
 	    S_ISFIFO(st.st_mode) ? true :

@@ -1,5 +1,19 @@
 2010-11-08  Paolo Bonzini <bonzini@gnu.org>
 
+	* libgst/memzero.h: Remove.
+	* libgst/dict.c: Replace memzero with memset.
+	* libgst/dict.inl: Replace memzero with memset.
+	* libgst/gstpriv.h: Replace memzero with memset.
+	* libgst/heap.c: Replace memzero with memset.
+	* libgst/lex.c: Replace memzero with memset.
+	* libgst/mpz.c: Replace memzero with memset.
+	* libgst/opt.c: Replace memzero with memset.
+	* libgst/prims.def: Replace memzero with memset.
+	* libgst/save.c: Replace memzero with memset.
+	* libgst/xlat.c: Replace memzero with memset.
+
+2010-11-08  Paolo Bonzini <bonzini@gnu.org>
+
 	* libgst/interp.c: Streamline unwind_context even more.  The compiler
 	can do enough optimization that we can use the free_lifo_context
 	global directly.  Also, _gst_nil_oop is kept in a register so

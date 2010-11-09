@@ -85,7 +85,7 @@ STAMP_FILES = prims.stamp match.stamp vm.stamp
 
 noinst_HEADERS = \
 	gstpriv.h files.h lex.h str.h re.h \
-	tree.h byte.h interp.h comp.h memzero.h \
+	tree.h byte.h interp.h comp.h \
 	sym.h dict.h oop.h save.h cint.h xlat.h \
 	sysdep.h callin.h gstpub.h opt.h mpz.h \
 	md-config.h heap.h real.h jitpriv.h oop.inl \

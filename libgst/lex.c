@@ -1108,7 +1108,7 @@ scan_large_integer (mst_Boolean negative,
     negative ? _gst_large_negative_integer_class :
     _gst_large_positive_integer_class;
   result = bo->body;
-  memzero (result, size);
+  memset (result, 0, size);
 
   /* On each pass, multiply the previous partial result by the base,
      and sum each of the digits as they were retrieved by scan_digits. 

@@ -3704,7 +3704,7 @@ _gst_init_translator (void)
     {
       initialized = true;
       generate_run_time_code ();
-      memzero (methods_table, sizeof (methods_table));
+      memset (methods_table, 0, sizeof (methods_table));
     }
 }
 

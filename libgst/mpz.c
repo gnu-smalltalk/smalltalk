@@ -41,7 +41,7 @@
 
 /* Zero NLIMBS *limbs* AT DST.  */
 #define MPN_ZERO(DST, NLIMBS) \
-  memzero((DST), (NLIMBS) * SIZEOF_MP_LIMB_T)
+  memset((DST), 0, (NLIMBS) * SIZEOF_MP_LIMB_T)
 
 /* Initialize the gst_mpz X with space for NLIMBS limbs.
    X should be a temporary variable, and it will be automatically

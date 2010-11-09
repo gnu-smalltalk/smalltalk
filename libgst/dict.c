@@ -2152,7 +2152,7 @@ _gst_set_file_stream_file (OOP fileStreamOOP,
   if (buffered)
     {
       char buffer[1024];
-      memzero (buffer, sizeof (buffer));
+      memset (buffer, 0, sizeof (buffer));
       fileStream->collection =
 	_gst_counted_string_new (buffer, sizeof (buffer));
       fileStream->ptr = FROM_INT (1);

@@ -947,8 +947,8 @@ _gst_compute_stack_positions (gst_uchar * bp,
   int bc_len;
 
   bb_start = alloca ((1 + size) * sizeof (basic_block_item *));
-  memzero (bb_start, (1 + size) * sizeof (basic_block_item *));
-  memzero (pos, (1 + size) * sizeof (PTR *));
+  memset (bb_start, 0, (1 + size) * sizeof (basic_block_item *));
+  memset (pos, 0, (1 + size) * sizeof (PTR *));
 
   /* Allocate the first and last basic block specially */
   ALLOCA_BASIC_BLOCK (bb_start, 0, bp, 0);
@@ -1150,7 +1150,7 @@ make_destination_table (gst_uchar * bp,
   gst_uchar *end, *bp_first;
   int count;
 
-  memzero (dest, sizeof (char) * size);
+  memset (dest, 0, sizeof (char) * size);
 
   for (count = 0, end = bp + size; bp != end;
        dest += bp - bp_first)
@@ -1404,7 +1404,7 @@ _gst_verify_method (OOP methodOOP, int *num_outer_temps, int depth)
   depth++;
 
   bb_start = alloca ((1 + size) * sizeof (basic_block_item *));
-  memzero (bb_start, (1 + size) * sizeof (basic_block_item *));
+  memset (bb_start, 0, (1 + size) * sizeof (basic_block_item *));
 
   /* Allocate the first and last basic block specially */
   ALLOCA_BASIC_BLOCK(bb_start, stack_depth, bp, num_temps);

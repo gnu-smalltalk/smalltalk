@@ -315,7 +315,7 @@ void
 save_to_fd (int imageFd)
 {
   save_file_header header;
-  memzero (&header, sizeof (header));
+  memset (&header, 0, sizeof (header));
   myOOPTable = make_oop_table_to_be_saved (&header);
 
   buffer_write_init (imageFd, WRITE_BUFFER_SIZE);

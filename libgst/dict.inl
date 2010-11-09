@@ -785,8 +785,8 @@ instantiate_with (OOP class_oop,
                                          instanceSpec,
                                          alignedBytes);
       INIT_UNALIGNED_OBJECT (*p_oop, alignedBytes - numBytes);
-      memzero (&p_instance->data[instanceSpec >> ISP_NUMFIXEDFIELDS],
-	       indexedBytes);
+      memset (&p_instance->data[instanceSpec >> ISP_NUMFIXEDFIELDS], 0,
+	      indexedBytes);
     }
 
   return p_instance;

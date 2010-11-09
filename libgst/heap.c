@@ -122,7 +122,7 @@ _gst_heap_create (PTR address, int size)
      values for.  */
 
   hdp = &mtemp;
-  memzero ((char *) hdp, sizeof (mtemp));
+  memset ((char *) hdp, 0, sizeof (mtemp));
   hdp->areasize = size;
   hdp->base = _gst_osmem_reserve (address, size);
 

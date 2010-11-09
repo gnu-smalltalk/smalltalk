@@ -590,7 +590,6 @@ extern OOP _gst_nil_oop
 #include "strspell.h"
 #include "alloc.h"
 #include "md-config.h"
-#include "memzero.h"
 #include "avltrees.h"
 #include "rbtrees.h"
 
