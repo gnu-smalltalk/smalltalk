@@ -1034,11 +1034,9 @@ unwind_context (void)
 {
   gst_method_context oldContext, newContext;
   OOP oldContextOOP, newContextOOP;
-  int numLifoContexts;
 
   newContextOOP = _gst_this_context_oop;
   newContext = (gst_method_context) OOP_TO_OBJ (newContextOOP);
-  numLifoContexts = free_lifo_context - lifo_contexts;
 
   do
     {
@@ -1048,21 +1046,18 @@ unwind_context (void)
       /* Descend in the chain...  */
       newContextOOP = oldContext->parentContext;
 
-      if COMMON (numLifoContexts > 0)
-	{
-	  dealloc_stack_context ((gst_context_part) oldContext);
-	  numLifoContexts--;
-	}
+      if COMMON (free_lifo_context > lifo_contexts)
+        dealloc_stack_context ((gst_context_part) oldContext);
 
-      else
-	/* This context cannot be deallocated in a LIFO way.  We must
-	   keep it around so that the blocks it created can reference
-	   arguments and temporaries in it. Method contexts, however,
-	   need to be marked as non-returnable so that attempts to
-	   return from them to an undefined place will lose; doing
-	   that for block contexts too, we skip a test and are also
-	   able to garbage collect more context objects.  */
-	oldContext->parentContext = _gst_nil_oop;
+      /* This context cannot be deallocated in a LIFO way.  We must
+         keep it around so that the blocks it created can reference
+         arguments and temporaries in it. Method contexts, however,
+         need to be marked as non-returnable so that attempts to
+         return from them to an undefined place will lose; doing
+         that for block contexts too, we skip a test and are also
+         able to garbage collect more context objects.  And doing
+         that for _all_ method contexts is more icache-friendly.  */
+      oldContext->parentContext = _gst_nil_oop;
 
       newContext = (gst_method_context) OOP_TO_OBJ (newContextOOP);
     }

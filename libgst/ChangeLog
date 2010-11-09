@@ -1,5 +1,12 @@
 2010-11-08  Paolo Bonzini <bonzini@gnu.org>
 
+	* libgst/interp.c: Streamline unwind_context even more.  The compiler
+	can do enough optimization that we can use the free_lifo_context
+	global directly.  Also, _gst_nil_oop is kept in a register so
+	icache-wise it pays to always do the store into parentContext.
+
+2010-11-08  Paolo Bonzini <bonzini@gnu.org>
+
 	* libgst/dict.inl: Add instantiate_numbytes, use it for instantiate
 	and non-pointer instantiate_with; do not unroll nil initialization
 	since N is usually small here.  Rewrite nil_fill.
