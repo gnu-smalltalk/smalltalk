@@ -33,7 +33,7 @@
 
 
 Object subclass: Delay [
-    | resumptionTime delayDuration delaySemaphore |
+    | resumptionTime delayDuration delaySemaphore waitingProcess |
     
     <category: 'Kernel-Processes'>
     <comment: 'I am the ultimate agent for frustration in the world.  I cause things to wait 
@@ -207,16 +207,41 @@ created.'>
     signal [
         "Wake the process that is waiting on this delay."
 	<category: 'private'>
-        | sema |
-        sema := delaySemaphore.
-        delaySemaphore := nil.
-        sema isNil ifFalse: [sema signal].
+        | sema process |
+        waitingProcess isNil
+            ifTrue: [
+	        sema := delaySemaphore.
+	        delaySemaphore := nil.
+                sema isNil ifFalse: [sema signal]]
+            ifFalse: [
+                process := waitingProcess.
+                waitingProcess := nil.
+                process isNil ifFalse: [process suspend; resume]].
     ]
 
     isActive [
         "Answer whether this Delay is being waited on."
 	<category: 'testing'>
-        ^delaySemaphore notNil
+        ^delaySemaphore notNil or: [waitingProcess notNil]
+    ]
+
+    timedWaitOn: aSemaphore [
+	"Schedule this Delay and wait on it. The current process will be
+	 suspended for the amount of time specified when this Delay was created,
+         or until aSemaphore is signaled."
+
+	<category: 'delaying'>
+        self isActive ifTrue: [self error: 'delay already in use'].
+	[self start.
+        waitingProcess := Processor activeProcess.
+        self notifyChange.
+
+        "This can already signal the semaphore!"
+        waitingProcess == nil ifFalse: [aSemaphore wait]] ensure: [
+            waitingProcess == nil ifFalse: [waitingProcess := nil. self notifyChange]].
+
+        "#reset will have been called by #unscheduleDelay:, either through
+         the second call to #notifyChange, or because the timeout fired."
     ]
 
     wait [
@@ -225,17 +250,23 @@ created.'>
 
 	<category: 'delaying'>
         self isActive ifTrue: [self error: 'delay already in use'].
-	[delaySemaphore := Semaphore new.
-	resumptionTime isNil
-	    ifTrue: [ resumptionTime := Time millisecondClockValue + delayDuration ].
+	[self start.
+        delaySemaphore := Semaphore new.
         self notifyChange.
 
         "This can already signal the semaphore!"
         delaySemaphore == nil ifFalse: [delaySemaphore wait]] ensure: [
-            self isActive ifTrue: [delaySemaphore := nil. self notifyChange]]
+            delaySemaphore == nil ifFalse: [delaySemaphore := nil. self notifyChange]].
 
         "#reset will have been called by #unscheduleDelay:, either through
          the second call to #notifyChange, or because the timeout fired."
+    ]
+
+    start [
+        "Prepare to wait on the delay."
+	<category: 'private'>
+	resumptionTime isNil
+	    ifTrue: [ resumptionTime := Time millisecondClockValue + delayDuration ].
     ]
 
     reset [

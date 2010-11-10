@@ -1,5 +1,11 @@
 2010-11-10  Paolo Bonzini <bonzini@gnu.org>
 
+	* kernel/Delay.st: Add #timedWaitOn:.
+	* testsuite/delays.st: Add testcases.
+	* testsuite/delays.ok: Regenerate.
+
+2010-11-10  Paolo Bonzini <bonzini@gnu.org>
+
 	* kernel/Delay.st: Fix race.
 
 2010-11-10  Paolo Bonzini <bonzini@gnu.org>

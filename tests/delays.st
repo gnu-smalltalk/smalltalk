@@ -42,3 +42,18 @@ Eval [
         i > 1
     ] whileTrue
 ]
+
+Eval [
+    Smalltalk at: #MySemaphore put: Semaphore new.
+    (Delay forSeconds: 1) timedWaitOn: MySemaphore
+]
+
+Eval [
+    | msec s |
+    s := Semaphore new.
+    [ (Delay forSeconds: 3) wait. s signal ] fork.
+    msec := Time millisecondsToRun: [
+        (Delay forSeconds: 10) timedWaitOn: s ].
+    ^msec between: 2500 and: 4500
+]
+
