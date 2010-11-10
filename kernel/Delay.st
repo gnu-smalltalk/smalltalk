@@ -229,7 +229,9 @@ created.'>
 	resumptionTime isNil
 	    ifTrue: [ resumptionTime := Time millisecondClockValue + delayDuration ].
         self notifyChange.
-        delaySemaphore wait] ensure: [
+
+        "This can already signal the semaphore!"
+        delaySemaphore == nil ifFalse: [delaySemaphore wait]] ensure: [
             self isActive ifTrue: [delaySemaphore := nil. self notifyChange]]
 
         "#reset will have been called by #unscheduleDelay:, either through
