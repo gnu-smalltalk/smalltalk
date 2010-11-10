@@ -1,5 +1,10 @@
 2010-11-10  Paolo Bonzini <bonzini@gnu.org>
 
+	* kernel/Delay.st: Add #asAbsolute, #isAbsolute.  Add #postCopy
+	to make copied delays reusable.
+
+2010-11-10  Paolo Bonzini <bonzini@gnu.org>
+
 	* kernel/Semaphore.st: Document return value of #wait.  Use it to
 	simplify #critical:.
 	* kernel/Delay.st: Add return value from #timedWaitOn:.

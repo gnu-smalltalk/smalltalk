@@ -285,6 +285,31 @@ created.'>
 	^resumptionTime
     ]
 
+    isAbsolute [
+	"Answer whether the receiver waits until an absolute time on the
+         millisecond clock."
+	<category: 'accessing'>
+	^delayDuration isNil
+    ]
+
+    asAbsolute [
+	"Answer a delay that waits until the current delay's resumptionTime,
+         or delayDuration milliseconds from now if that would be nil.  May
+         answer the receiver if it is already waiting until an absolute time."
+	<category: 'accessing'>
+	self isAbsolute ifTrue: [ ^self ].
+        ^Delay untilMilliseconds: Time millisecondClockValue + delayDuration.
+    ]
+
+    postCopy [
+        "Adjust the current delay so that it behaves as if it had just been
+         created."
+	<category: 'copying'>
+        self isAbsolute ifFalse: [ resumptionTime := nil ].
+        delaySemaphore := nil.
+        waitingProcess := nil
+    ]
+
     delayDuration [
 	"Answer the time I have left to wait, in milliseconds."
 	<category: 'accessing'>
