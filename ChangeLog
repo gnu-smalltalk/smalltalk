@@ -1,5 +1,12 @@
 2010-11-10  Paolo Bonzini <bonzini@gnu.org>
 
+	* kernel/Delay.st: Add delaySemaphore to detect reentrant usage
+	of a Delay.  Change DelayEvent to DelayRequestor throughout, changing
+	it and ActiveDelay to not be an Association anymore.  Use #isActive
+	to distinguish between schedule and unschedule requests.
+
+2010-11-10  Paolo Bonzini <bonzini@gnu.org>
+
 	* kernel/Delay.st: Slight simplification of #wait.
 
 2010-11-08  Paolo Bonzini <bonzini@gnu.org>
