@@ -1,3 +1,7 @@
+2010-11-10  Paolo Bonzini <bonzini@gnu.org>
+
+	* kernel/Delay.st: Slight simplification of #wait.
+
 2010-11-08  Paolo Bonzini <bonzini@gnu.org>
 
 	* kernel/SeqCollect.st: Optimize #atAllPut:.

@@ -139,6 +139,7 @@ created.'>
 	 is the only one that manipulates Queue."
 
 	<category: 'timer process'>
+	aDelay reset.
 	ActiveDelay key == aDelay 
 	    ifTrue: 
 		[Queue isEmpty 
@@ -224,8 +225,16 @@ created.'>
 	 suspended for the amount of time specified when this Delay was created."
 
 	<category: 'delaying'>
-	[[self schedule wait] ifCurtailed: [self unschedule]]
-	    ensure: [delayDuration isNil ifFalse: [resumptionTime := nil]].
+	[self schedule wait] ifCurtailed: [self unschedule]
+
+        "#reset will have been called by #unscheduleDelay:, either through
+         #ifCurtailed: and #unschedule, or because the timeout fired."
+    ]
+
+    reset [
+        "Prepare to wait again on the delay."
+	<category: 'private'>
+	delayDuration isNil ifFalse: [resumptionTime := nil].
     ]
 
     resumptionTime [
