@@ -1582,10 +1582,13 @@ mst_Boolean
 _gst_sync_signal (OOP semaphoreOOP, mst_Boolean incr_if_empty)
 {
   gst_semaphore sem;
-  OOP freedOOP;
+  gst_process process;
+  gst_method_context suspendedContext;
+  OOP processOOP;
+  int spOffset;
 
   sem = (gst_semaphore) OOP_TO_OBJ (semaphoreOOP);
-  for (;;)
+  do
     {
       /* printf ("signal %O %O\n", semaphoreOOP, sem->firstLink); */
       if (is_empty (semaphoreOOP))
@@ -1595,12 +1598,20 @@ _gst_sync_signal (OOP semaphoreOOP, mst_Boolean incr_if_empty)
 	  return false;
 	}
 
-      freedOOP = remove_first_link (semaphoreOOP);
+      processOOP = remove_first_link (semaphoreOOP);
 
       /* If they terminated this process, well, try another */
-      if (resume_process (freedOOP, false))
-	return true;
     }
+  while (!resume_process (processOOP, false));
+
+  /* Put the semaphore at the stack top as a marker that the
+     wait was not interrupted.  This assumes that _gst_sync_wait
+     is only called from primitives.  */
+  process = (gst_process) OOP_TO_OBJ (processOOP);
+  suspendedContext = (gst_method_context) OOP_TO_OBJ (process->suspendedContext);
+  spOffset = TO_INT (suspendedContext->spOffset);
+  suspendedContext->contextStack[spOffset] = semaphoreOOP;
+  return true;
 }
 
 static void
@@ -1680,7 +1691,12 @@ _gst_sync_wait (OOP semaphoreOOP)
   sem = (gst_semaphore) OOP_TO_OBJ (semaphoreOOP);
   if (TO_INT (sem->signals) <= 0)
     {
-      /* have to suspend, move this to the end of the list */
+      /* Have to suspend.  Prepare return value for #wait and move
+         this process to the end of the list.
+
+         Tweaking the stack top means that this function should only
+	 be called from a primitive.  */
+      SET_STACKTOP (_gst_nil_oop);
       add_last_link (semaphoreOOP, get_active_process ());
       if (IS_NIL (ACTIVE_PROCESS_YIELD ()))
         {

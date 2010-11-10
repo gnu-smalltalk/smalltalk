@@ -64,23 +64,20 @@ I also provide some methods for implementing critical sections.'>
 	"Look out for race conditions!"
 
 	<category: 'mutual exclusion'>
-	| caught |
-	caught := false.
+	| ownedSem c |
 	^[
-	    [
-		"The VM will not preempt the process between the two statements.
-		 Note that it is *wrong* to set the variable to true before
-		 obtaining the semaphore, but the exception handler straightens
-		 that.  On the other hand, setting the variable to true after the
-		 wait would be wrong if the process was preempted and terminated
-		 after the wait (hence, with `caught' still set to false and the
-	         semaphore obtained)."
-	        caught := true.
-	        self wait ] on: ProcessBeingTerminated do: [ :ex |
-		    ex semaphore isNil ifFalse: [ caught := false ].
-		    ex pass ].
-	    aBlock value ]
-		ensure: [caught ifTrue: [self signal] ]
+	    "With a little help from the VM we can easily ascertain
+             whether we did get a signal.  It is still necessary to
+             trap process termination however, because if we did
+             simply `ownedSem := self wait' we might be terminated
+             after the wait has ended, and yet before the variable
+             is assigned.  Pushing self and sending #wait is atomic
+             thanks to superoperators."
+            ownedSem := [c := thisContext. self wait]
+                on: ProcessBeingTerminated
+                do: [:ex | ownedSem := c at: 1. ex pass].
+            ownedSem == self ifTrue: [aBlock value]]
+		ensure: [ownedSem == self ifTrue: [self signal]]
     ]
 
     name [
@@ -173,7 +170,8 @@ I also provide some methods for implementing critical sections.'>
 
     wait [
 	"Wait for the receiver to be signalled, suspending the executing process
-	 if it is not yet"
+	 if it is not yet.  Return nil if the wait was interrupted, the
+         receiver otherwise."
 
 	<category: 'builtins'>
 	<primitive: VMpr_Semaphore_wait>

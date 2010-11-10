@@ -231,17 +231,22 @@ created.'>
          or until aSemaphore is signaled."
 
 	<category: 'delaying'>
+        | expired |
         self isActive ifTrue: [self error: 'delay already in use'].
 	[self start.
         waitingProcess := Processor activeProcess.
         self notifyChange.
 
         "This can already signal the semaphore!"
-        waitingProcess == nil ifFalse: [aSemaphore wait]] ensure: [
+        waitingProcess == nil ifFalse: [expired := aSemaphore wait]] ensure: [
             waitingProcess == nil ifFalse: [waitingProcess := nil. self notifyChange]].
 
         "#reset will have been called by #unscheduleDelay:, either through
-         the second call to #notifyChange, or because the timeout fired."
+         the second call to #notifyChange, or because the timeout fired.
+         If the suspend/resume pair in #signal was executed, expired will
+         be nil, otherwise it will be the semaphore.  This is guaranteed
+         by the VM.  Use this fact to return the correct value."
+        ^expired == nil
     ]
 
     wait [

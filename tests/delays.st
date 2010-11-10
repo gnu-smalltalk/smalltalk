@@ -49,11 +49,11 @@ Eval [
 ]
 
 Eval [
-    | msec s |
+    | msec s expired |
     s := Semaphore new.
     [ (Delay forSeconds: 3) wait. s signal ] fork.
     msec := Time millisecondsToRun: [
-        (Delay forSeconds: 10) timedWaitOn: s ].
-    ^msec between: 2500 and: 4500
+        expired := (Delay forSeconds: 10) timedWaitOn: s ].
+    ^expired not and: [ msec between: 2500 and: 4500 ]
 ]
 

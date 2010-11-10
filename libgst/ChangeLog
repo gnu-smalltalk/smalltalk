@@ -1,3 +1,9 @@
+2010-11-10  Paolo Bonzini <bonzini@gnu.org>
+
+	* libgst/interp.c: Change the stack top to nil in _gst_sync_wait
+	and put the semaphore back in _gst_sync_signal.  This allows
+	Smalltalk code to distinguish interruptions from successful waits.
+
 2010-11-08  Paolo Bonzini <bonzini@gnu.org>
 
 	* libgst/memzero.h: Remove.

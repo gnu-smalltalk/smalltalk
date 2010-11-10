@@ -4342,24 +4342,13 @@ methods to the object but, rather, to use:
 
 The @code{sync} in the name of this function distinguishes it from
 @code{asyncSignal}, in that it can only be called from a procedure
-already scheduled with @code{asyncCall}, or from a call-in.  It
-cannot be called from other threads than the Smalltalk thread.
+already scheduled with @code{asyncCall}.  It cannot be called from
+a call-in, or from other threads than the interpreter thread.
 @end deftypefun
 
 @deftypefun void syncWait (OOP)
-This functions accepts an OOP for a @code{Semaphore} object and puts the
-current process to sleep, unless the semaphore has excess signals on it.
-Since a Smalltalk call-in is not an atomic operation, the correct way to
-signal a semaphore is not to send the @code{wait} method to the object
-but, rather, to use:
-
-@example
-    syncWait(semaphoreOOP)
-@end example
-
-As for @code{syncSignal}, this function can only be called from a
-procedure already scheduled with @code{asyncCall}, or from a call-in.
-It cannot be called from other threads than the Smalltalk thread.
+This function is present for backwards-compatibility only and
+should not be used.
 @end deftypefun
 
 @deftypefun void showBacktrace (FILE *)
