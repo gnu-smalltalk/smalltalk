@@ -279,11 +279,35 @@ methods that can be used in inspection or debugging.'>
 
     size [
 	"Answer the number of valid fields for the receiver. Any read
-	 access from (self size + 1) to (self basicSize) has undefined
-	 results - even crashing"
+	 access from (self size + 1) to (self basicSize) will give nil."
 
 	<category: 'accessing'>
 	^self sp + 1
+    ]
+
+    at: index [
+	"Answer the index-th slot in the receiver. Any read
+	 access from (self size + 1) to (self basicSize) will give nil."
+
+	<category: 'accessing'>
+        (index > self size and: [ index <= self basicSize ]) ifTrue: [^nil].
+	^super at: index
+    ]
+
+    at: index put: anObject [
+	"Answer the index-th slot in the receiver. Any write
+	 access from (self size + 1) to (self basicSize) will give an error
+         unless nil is being written.  This is because doing such an access
+         first, and then updating sp, is racy: the garbage collector may
+         trigger in the middle and move anObject, but the slot in the
+         context won't be adjusted."
+
+	<category: 'accessing'>
+        (index > self size and: [ index <= self basicSize ]) ifTrue: [
+            anObject isNil ifFalse: [
+                ^SystemExceptions.InvalidArgument signalOn: self ] ].
+
+	^super at: index put: anObject
     ]
 
     sp [
@@ -320,11 +344,12 @@ methods that can be used in inspection or debugging.'>
 	"Push an object on the receiver's stack."
 
 	"Since the newly accessible slots may have contained garbage, this method
-	 stores into the cell *before* they become accessible."
+	 makes them valid *before* they become accessible."
 
 	<category: 'accessing'>
-	self at: self size + 1 put: anObject.
-	sp := sp + 1
+	self at: sp + 1 put: nil.
+	sp := sp + 1.
+	self at: sp put: anObject.
     ]
 
     sp: newSP [

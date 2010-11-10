@@ -1,5 +1,10 @@
 2010-11-10  Paolo Bonzini <bonzini@gnu.org>
 
+	* kernel/ContextPart.st: Make accesses to out of bounds stack
+	slots safe.
+
+2010-11-10  Paolo Bonzini <bonzini@gnu.org>
+
 	* kernel/Delay.st: Add #asAbsolute, #isAbsolute.  Add #postCopy
 	to make copied delays reusable.
 
