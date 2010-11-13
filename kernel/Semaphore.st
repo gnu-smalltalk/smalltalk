@@ -73,6 +73,7 @@ I also provide some methods for implementing critical sections.'>
              after the wait has ended, and yet before the variable
              is assigned.  Pushing self and sending #wait is atomic
              thanks to superoperators."
+            c := #(nil).
             ownedSem := [c := thisContext. self wait]
                 on: ProcessBeingTerminated
                 do: [:ex | ownedSem := c at: 1. ex pass].
