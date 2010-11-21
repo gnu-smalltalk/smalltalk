@@ -100,13 +100,15 @@ BEGIN {
     ptr_type["#cObject"] = "#cObject"
 
     # Fix asymmetry
-    method_regexp = "^g_param_values?_|^g_param_type_|^gtk_file_chooser_|^gdk_window_"
+    method_regexp = "^g_param_values?_|^g_param_type_|^gtk_file_chooser_|^gdk_window_|^g_bus_"
     prefix_class["g_param_value_"] = "GParamSpec"
     prefix_class["g_param_values_"] = "GParamSpec"
     prefix_class["g_param_type_"] = "GParamSpec"
+    prefix_class["g_bus_"] = "GDBusConnection"
     self_class["g_param_value_"] = "GParamSpec"
     self_class["g_param_values_"] = "GParamSpec"
     self_class["g_param_type_"] = "GParamSpec"
+    self_class["g_bus_"] = "GDBusConnection"
 
     # Methods that we do not need
     method_skip_regexp = "(^$)|(_error_quark$)"
@@ -153,6 +155,11 @@ match_function_first_line($0) {
       prefixClassName = prefix_class[substr(first_line[2], 1, RLENGTH)]
       selfClassName = self_class[substr(first_line[2], 1, RLENGTH)]
     }
+
+  # For types that are not classes, do not create the getType method
+  else if (first_line[2] ~ /get_type$/)
+    next
+
   else if (match (first_line[2], /^(g_)?[a-z]*_/))
     prefixClassName = selfClassName = smalltalkize(toupper(substr(first_line[2], 1, RLENGTH - 1)))
 
@@ -162,10 +169,6 @@ match_function_first_line($0) {
     selfClassName = correct_case[tolower(selfClassName)]
 
   first_line[2] = substr(first_line[2], RLENGTH + 1)
-
-  # For types that are not classes, do not create the getType method
-  if (first_line[2] == "get_type" && (prefixClassName in type))
-    next
 
   # Move object creation methods to the class side.  We have a single
   # special case for an API exception: gtk_ui_manager_new_merge_id
@@ -326,7 +329,7 @@ match_function_first_line($0) {
   print "    <cCall: '" cFuncName "' returning: " retType
   print "\targs: #(" argdecl " )>! !\n"
 
-  if (decl == "getType")
+  if (decl == "getType" && !self)
     print "GLib registerType: " prefixClassName "!\n"
 }
 
@@ -427,8 +430,8 @@ function method_prefix(name, i, ch, prev_up)
   prefix = ""
   prev_up = 0
   # Initialize so that the heuristic for consecutive uppercase
-  # characters fires for GObject, GParam, etc.
-  prev_notup = -2
+  # characters fires for GObject, GParam, GDBusConnection, etc.
+  prev_notup = -10000
   for (i = 1; i < length (name); i++)
     {
       ch = substr (name, i, 1)
@@ -447,7 +450,11 @@ function method_prefix(name, i, ch, prev_up)
 
   # Add final character.
   prefix = prefix substr (name, length (name))
-  return tolower (prefix) "_"
+  prefix = tolower (prefix) "_"
+
+  # Hack.
+  sub (/^g_d_bus_/, "g_dbus_", prefix)
+  return prefix
 }
 
 
@@ -465,10 +472,17 @@ function break_word_before_uppercase(name, cur_index, prev_up, prev_notup)
   if (cur_index < prev_notup + 3)
     return 0
 
+  # Always break two consecutive uppercase characters at the beginning ("GXyz")
+  if (prev_notup < 0 && cur_index == 2)
+    return 1
+
   # ...if last char was capitalised, this is, but next isn't.
   # This is for things like ui_manager => UIManager amongst others.
   ch = substr(name, cur_index + 1, 1)
-  return ch < "A" || ch > "Z"
+  if (ch < "A" || ch > "Z")
+    return 1
+
+  return 0
 }
 
 # emulate gawk match(word, REGEX, first_line)
