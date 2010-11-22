@@ -92,6 +92,7 @@ with_emacs=yes)
 test "$with_emacs" = no && EMACS=no
 
 AM_PATH_LISPDIR
+GST_PATH_LISPSTARTDIR
 GST_EMACS_PACKAGE(comint)
 
 AM_CONDITIONAL(WITH_EMACS, test "$EMACS" != no)
