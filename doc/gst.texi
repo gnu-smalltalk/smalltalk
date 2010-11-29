@@ -3323,6 +3323,11 @@ passed as @code{wchar_t}
 @item string      
 passed as @code{char *}
 
+@item byteArrayOut   
+passed as @code{char *}.  The contents are expected to be overwritten
+with a new C string, and copied back to the object that was passed
+on return from the C function
+
 @item stringOut   
 passed as @code{char *}, the contents are expected to be overwritten
 with a new C string, and the object that was passed becomes the new
