@@ -10,11 +10,5 @@
   <filein>Times.st</filein>
 
   <module>i18n</module>
-
-  <file>Locale.st</file>
-  <file>Expression.st</file>
-  <file>GetText.st</file>
-  <file>Numbers.st</file>
-  <file>Times.st</file>
   <file>ChangeLog</file>
 </package>

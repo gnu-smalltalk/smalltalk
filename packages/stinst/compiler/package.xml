@@ -4,7 +4,6 @@
   <prereq>Parser</prereq>
   <filein>StartCompiler.st</filein>
 
-  <file>StartCompiler.st</file>
   <file>test.st</file>
   <file>ChangeLog</file>
 </package>

@@ -1,3 +1,7 @@
+2010-12-04  Paolo Bonzini  <bonzini@gnu.org>
+
+	* package.xml: Remove now superfluous <file> tags.
+
 2007-08-13  Paolo Bonzini  <bonzini@gnu.org>
 
 	* gdbm-c.st: Switch to the new syntax for "returning:".

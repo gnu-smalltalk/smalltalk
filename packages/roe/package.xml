@@ -13,11 +13,4 @@
     <sunit>ROE.RATestMapping ROE.RATestEvaluatorSemantics ROE.RATestSyntax 
 	ROE.RATestSQLiteSemantics</sunit>
   </test>
-
-  <file>Array.st</file>
-  <file>Core.st</file>
-  <file>SQLiteTests.st</file>
-  <file>SQL.st</file>
-  <file>Tests.st</file>
-  <file>Extensions.st</file>
 </package>

@@ -5,13 +5,8 @@
     <filein>Test.st</filein>
     <filein>AmbTest.st</filein>
     <filein>ShiftResetTest.st</filein>
-    <file>Test.st</file>
-    <file>AmbTest.st</file>
-    <file>ShiftResetTest.st</file>
   </test>
 
   <filein>Amb.st</filein>
-  <file>Amb.st</file>
   <filein>ShiftReset.st</filein>
-  <file>ShiftReset.st</file>
 </package>

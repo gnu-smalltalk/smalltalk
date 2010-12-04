@@ -17,10 +17,7 @@
   <built-file>Structs.st</built-file>
   <built-file>Enums.st</built-file>
   <built-file>Funcs.st</built-file>
-  <file>GtkDecl.st</file>
-  <file>GtkImpl.st</file>
-  <file>MoreFuncs.st</file>
-  <file>MoreStructs.st</file>
+
   <file>example_arrow.st</file>
   <file>example_aspectframe.st</file>
   <file>example_buttonbox.st</file>

@@ -11,14 +11,11 @@
 	Magritte.MAObjectTest*
 	Magritte.MATableModelTest*</sunit>
     <filein>magritte-tests.st</filein>
-    <file>magritte-tests.st</file>
   </test>
 
   <filein>magritte-gst.st</filein>
   <filein>magritte-model.st</filein>
 
-  <file>magritte-gst.st</file>
-  <file>magritte-model.st</file>
   <file>PORTING</file>
   <file>ChangeLog</file>
 </package>

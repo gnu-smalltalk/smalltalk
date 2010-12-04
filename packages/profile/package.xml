@@ -1,8 +1,5 @@
 <package>
   <name>ProfileTools</name>
-
   <filein>Profiler.st</filein>
-
-  <file>Profiler.st</file>
   <file>ChangeLog</file>
 </package>

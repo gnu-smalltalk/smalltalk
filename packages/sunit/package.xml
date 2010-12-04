@@ -11,10 +11,4 @@
     <filein>SUnitTests.st</filein>
     <filein>SUnitScriptTests.st</filein>
   </test>
-
-  <file>SUnit.st</file>
-  <file>SUnitPreload.st</file>
-  <file>SUnitTests.st</file>
-  <file>SUnitScript.st</file>
-  <file>SUnitScriptTests.st</file>
 </package>

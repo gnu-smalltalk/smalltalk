@@ -17,17 +17,5 @@
     <sunit>Dhb.DhbTestCase*</sunit>
     <filein>NumericsTests.st</filein>
   </test>
-
-  <file>NumericsTests.st</file>
-  <file>Approximation.st</file>
-  <file>Basic.st</file>
-  <file>Distributions.st</file>
-  <file>Functions.st</file>
-  <file>Integration.st</file>
-  <file>Matrixes.st</file>
-  <file>Optimization.st</file>
-  <file>RNG.st</file>
-  <file>Statistics.st</file>
-  <file>NumericsAdds.st</file>
   <file>ChangeLog</file>
 </package>

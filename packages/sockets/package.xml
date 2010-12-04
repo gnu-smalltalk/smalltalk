@@ -1,6 +1,9 @@
 <package>
   <name>Sockets</name>
   <namespace>Sockets</namespace>
+
+  <callout>TCPaccept</callout>
+
   <filein>Buffers.st</filein>
   <filein>Datagram.st</filein>
   <filein>SocketAddress.st</filein>
@@ -12,19 +15,5 @@
   <filein>Tests.st</filein>
   <filein>cfuncs.st</filein>
   <filein>init.st</filein>
-
-  <callout>TCPaccept</callout>
-
-  <file>Buffers.st</file>
-  <file>Datagram.st</file>
-  <file>SocketAddress.st</file>
-  <file>AbstractSocketImpl.st</file>
-  <file>IPSocketImpl.st</file>
-  <file>IP6SocketImpl.st</file>
-  <file>UnixSocketImpl.st</file>
-  <file>Sockets.st</file>
-  <file>Tests.st</file>
-  <file>cfuncs.st</file>
-  <file>init.st</file>
   <file>ChangeLog</file>
 </package>

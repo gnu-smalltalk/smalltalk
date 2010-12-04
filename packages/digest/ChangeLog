@@ -1,3 +1,7 @@
+2010-12-04  Paolo Bonzini  <bonzini@gnu.org>
+
+	* package.xml: Remove now superfluous <file> tags.
+
 2010-05-20  Paolo Bonzini  <bonzini@gnu.org>
 
 	* packages/digest/sha1.h: Do not use stdint.h.  Reported by Rick

@@ -2,15 +2,11 @@
   <name>ClassPublisher</name>
   <namespace>STInST</namespace>
   <prereq>Parser</prereq>
+
   <filein>Publish.st</filein>
   <filein>PSFileOut.st</filein>
   <filein>HTML.st</filein>
   <filein>Texinfo.st</filein>
-
-  <file>Publish.st</file>
-  <file>PSFileOut.st</file>
-  <file>HTML.st</file>
-  <file>Texinfo.st</file>
   <file>ChangeLog</file>
 </package>
 

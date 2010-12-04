@@ -6,8 +6,6 @@
 
   <filein>Seaside-Examples.st</filein>
   <filein>Seaside-Tests-Functional.st</filein>
-  <file>Seaside-Examples.st</file>
-  <file>Seaside-Tests-Functional.st</file>
   <file>ChangeLog</file>
 </package>
 

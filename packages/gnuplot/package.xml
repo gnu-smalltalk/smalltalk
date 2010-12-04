@@ -9,13 +9,5 @@
   <filein>Expressions.st</filein>
   <filein>2D.st</filein>
   <filein>Examples.st</filein>
-
-  <file>Base.st</file>
-  <file>Objects.st</file>
-  <file>Series.st</file>
-  <file>Terminals.st</file>
-  <file>Expressions.st</file>
-  <file>2D.st</file>
-  <file>Examples.st</file>
   <file>ChangeLog</file>
 </package>

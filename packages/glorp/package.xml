@@ -13,9 +13,4 @@
     <sunit>Glorp.GlorpTestCase*</sunit>
     <filein>GlorpTest.st</filein>
   </test>
-
-  <file>GlorpPort.st</file>
-  <file>Glorp.st</file>
-  <file>GlorpMySQL.st</file>
-  <file>GlorpTest.st</file>
 </package>

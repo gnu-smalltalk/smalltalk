@@ -9,6 +9,4 @@
   <prereq>Magritte</prereq>
 
   <filein>magritte-seaside.st</filein>
-
-  <file>magritte-seaside.st</file>
 </package>

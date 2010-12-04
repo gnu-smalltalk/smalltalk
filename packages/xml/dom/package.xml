@@ -5,5 +5,4 @@
   <prereq>XML-SAXDriver</prereq>
 
   <filein>DOM.st</filein>
-  <file>DOM.st</file>
 </package>

@@ -35,31 +35,5 @@
   <filein>Debugger.st</filein>
   <filein>Notifier.st</filein>
 
-
-  <file>BrowShell.st</file>
-  <file>Inspector.st</file>
-  <file>Notifier.st</file>
-  <file>View.st</file>
-  <file>BrowserMain.st</file>
-  <file>Load.st</file>
-  <file>PCode.st</file>
-  <file>bear.gif</file>
-  <file>ClassBrow.st</file>
-  <file>Manager.st</file>
-  <file>PList.st</file>
-  <file>ButtonForm.st</file>
-  <file>ClassHierBrow.st</file>
-  <file>Menu.st</file>
-  <file>PText.st</file>
-  <file>DebugSupport.st</file>
-  <file>Debugger.st</file>
-  <file>MethInspect.st</file>
-  <file>RadioForm.st</file>
-  <file>NamespBrow.st</file>
-  <file>DictInspect.st</file>
-  <file>MethSetBrow.st</file>
-  <file>GuiData.st</file>
-  <file>ModalDialog.st</file>
-  <file>StrcInspect.st</file>
   <file>ChangeLog</file>
 </package>

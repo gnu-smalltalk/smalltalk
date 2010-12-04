@@ -8,8 +8,4 @@
     <sunit>GDBMTest</sunit>
     <filein>gdbmtests.st</filein>
   </test>
-
-  <file>gdbm.st</file>
-  <file>gdbm-c.st</file>
-  <file>gdbmtests.st</file>
 </package>

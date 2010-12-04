@@ -27,27 +27,4 @@
 
   <library>libSDL</library>
   <module>sdl</module>
-
-  <file>SDL.st</file>
-  <file>SDL_active.st</file>
-  <file>SDL_byteorder.st</file>
-  <file>SDL_cpuinfo.st</file>
-  <file>SDL_endian.st</file>
-  <file>SDL_error.st</file>
-  <file>SDL_events.st</file>
-  <file>SDL_joystick.st</file>
-  <file>SDL_keyboard.st</file>
-  <file>SDL_keysym.st</file>
-  <file>SDL_loadso.st</file>
-  <file>SDL_mouse.st</file>
-  <file>SDL_mutex.st</file>
-  <file>SDL_name.st</file>
-  <file>SDL_rwops.st</file>
-  <file>SDL_syswm.st</file>
-  <file>SDL_thread.st</file>
-  <file>SDL_timer.st</file>
-  <file>SDL_video.st</file>
-
-  <file>Display.st</file>
-  <file>EventSource.st</file>
 </package>

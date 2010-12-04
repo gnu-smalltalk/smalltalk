@@ -9,8 +9,4 @@
   </test>
 
   <filein>sport.st</filein>
-
-  <file>sport.st</file>
-  <file>sporttests.st</file>
-  <file>sportsocktests.st</file>
 </package>

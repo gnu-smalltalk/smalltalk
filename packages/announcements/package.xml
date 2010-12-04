@@ -7,7 +7,4 @@
    <sunit>AnnouncementsTest</sunit>
    <filein>AnnouncementsTests.st</filein>
   </test>
-
-  <file>Announcements.st</file>
-  <file>AnnouncementsTests.st</file>
 </package>

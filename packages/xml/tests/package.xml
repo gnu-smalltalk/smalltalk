@@ -8,5 +8,4 @@
   <prereq>SUnit</prereq>
 
   <filein>XMLPullParserTests.st</filein>
-  <file>XMLPullParserTests.st</file>
 </package>

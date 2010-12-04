@@ -6,5 +6,4 @@
   <prereq>Cairo</prereq>
 
   <filein>CairoSDL.st</filein>
-  <file>CairoSDL.st</file>
 </package>

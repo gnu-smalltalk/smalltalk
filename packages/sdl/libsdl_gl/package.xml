@@ -6,6 +6,4 @@
   <prereq>OpenGL</prereq>
 
   <filein>Display.st</filein>
-
-  <file>Display.st</file>
 </package>

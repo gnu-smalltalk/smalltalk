@@ -12,16 +12,6 @@
     <filein>Tests/SDActiveRecordTest.st</filein>
     <filein>Tests/SDMemoryStoreTest.st</filein>
     <filein>Tests/SDFileStoreTest.st</filein>
-    <file>Tests/SDGrandChildMock.st</file>
-    <file>Tests/SDChildMock.st</file>
-    <file>Tests/FooObject.st</file>
-    <file>Tests/Extensions.st</file>
-    <file>Tests/SDManMock.st</file>
-    <file>Tests/SDWomanMock.st</file>
-    <file>Tests/SDActiveRecordTest.st</file>
-    <file>Tests/SDFileStoreTest.st</file>
-    <file>Tests/SDPersonMock.st</file>
-    <file>Tests/SDMemoryStoreTest.st</file>
 
     <sunit>
       SandstoneDb.SDFileStoreTest
@@ -42,18 +32,4 @@
   <filein>Core/SDError.st</filein>
   <filein>Core/SDLoadError.st</filein>
   <filein>Core/SDCommitError.st</filein>
-
-  <file>Core/Extensions.st</file>
-  <file>Core/SDRecordMarker.st</file>
-  <file>Core/SDAbstractStore.st</file>
-  <file>Core/SDCachedStore.st</file>
-  <file>Store/SDFileStore.st</file>
-  <file>Store/SDMemoryStore.st</file>
-  <file>Core/SDConcurrentDictionary.st</file>
-  <file>Core/UUID.st</file>
-  <file>Core/SDCheckPointer.st</file>
-  <file>Core/SDActiveRecord.st</file>
-  <file>Core/SDError.st</file>
-  <file>Core/SDLoadError.st</file>
-  <file>Core/SDCommitError.st</file>
 </package>

@@ -5,6 +5,4 @@
   <filein>SDL_mixer.st</filein>
 
   <library>libSDL_mixer</library>
-
-  <file>SDL_mixer.st</file>
 </package>

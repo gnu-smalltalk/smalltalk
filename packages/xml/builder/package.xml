@@ -6,5 +6,4 @@
   <prereq>XML-SAXParser</prereq>
 
   <filein>NodeBuilder.st</filein>
-  <file>NodeBuilder.st</file>
 </package>

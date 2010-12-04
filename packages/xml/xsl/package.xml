@@ -6,5 +6,4 @@
   <prereq>XML-XMLNodeBuilder</prereq>
   <prereq>XML-XMLParser</prereq>
   <filein>XSL.st</filein>
-  <file>XSL.st</file>
 </package>

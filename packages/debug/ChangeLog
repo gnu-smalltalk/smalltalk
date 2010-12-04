@@ -1,3 +1,7 @@
+2010-12-04  Paolo Bonzini  <bonzini@gnu.org>
+
+	* package.xml: Remove now superfluous <file> tags.
+
 2008-03-03  Paolo Bonzini  <bonzini@gnu.org>
 
 	* debugtests.st: Use #newProcess to start a suspended process.

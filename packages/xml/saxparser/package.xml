@@ -5,5 +5,4 @@
   <prereq>XML-SAXDriver</prereq>
 
   <filein>Parser.st</filein>
-  <file>Parser.st</file>
 </package>

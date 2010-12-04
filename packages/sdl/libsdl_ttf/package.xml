@@ -5,6 +5,4 @@
   <filein>SDL_ttf.st</filein>
 
   <library>libSDL_ttf</library>
-
-  <file>SDL_ttf.st</file>
 </package>

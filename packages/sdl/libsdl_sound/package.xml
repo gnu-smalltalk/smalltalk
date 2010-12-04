@@ -7,8 +7,4 @@
   <filein>SDL_sound.st</filein>
 
   <library>libSDL_sound</library>
-
-  <file>SDL_audio.st</file>
-  <file>SDL_cdrom.st</file>
-  <file>SDL_sound.st</file>
 </package>

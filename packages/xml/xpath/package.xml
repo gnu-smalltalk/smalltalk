@@ -4,5 +4,4 @@
 
   <prereq>XML-DOM</prereq>
   <filein>XPath.st</filein>
-  <file>XPath.st</file>
 </package>

@@ -1,3 +1,7 @@
+2010-12-04  Paolo Bonzini  <bonzini@gnu.org>
+
+	* package.xml: Remove now superfluous <file> tags.
+
 2008-06-07  Daniele Sciascia  <daniele.sciascia@gmail.com>
 
 	* SQLite.st: Add bindings for prepared statements.

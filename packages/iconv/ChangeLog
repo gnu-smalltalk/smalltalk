@@ -1,5 +1,9 @@
 2010-12-04  Paolo Bonzini  <bonzini@gnu.org>
 
+	* package.xml: Remove now superfluous <file> tags.
+
+2010-12-04  Paolo Bonzini  <bonzini@gnu.org>
+
 	* UTF7.st: Small optimizations and fixes.
 	* iconvtests.st: Cover UTF7 more thoroughly.
 

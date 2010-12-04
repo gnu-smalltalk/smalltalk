@@ -8,12 +8,6 @@
   <filein>STT.st</filein>
   <filein>Haiku.st</filein>
 
-
-  <file>FileServer.st</file>
-  <file>Haiku.st</file>
-  <file>STT.st</file>
-  <file>WebServer.st</file>
-  <file>WikiServer.st</file>
   <file>edit.jpg</file>
   <file>example1.stt</file>
   <file>example2.stt</file>

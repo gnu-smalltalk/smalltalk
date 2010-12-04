@@ -11,8 +11,4 @@
   <module>gstglut</module>
 
   <file>ChangeLog</file>
-  <file>OpenGlut.st</file>
-  <file>OpenGlutEnum.st</file>
-  <file>OpenGlutCallbacks.st</file>
-  <file>OpenGlutExampleObjects.st</file>
 </package>

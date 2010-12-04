@@ -29,13 +29,5 @@
   <filein>Seaside-Adapters-GST.st</filein>
   <filein>Seaside-Core.st</filein>
   <filein>Seaside-GST-Override.st</filein>
-
-  <file>Seaside-Core.st</file>
-  <file>Seaside-GST.st</file>
-  <file>Seaside-GST-Override.st</file>
-  <file>Seaside-Tests.st</file>
-  <file>Seaside-Adapters-Core.st</file>
-  <file>Seaside-Adapters-GST.st</file>
-  <file>Seaside-Adapters-Tests.st</file>
   <file>ChangeLog</file>
 </package>

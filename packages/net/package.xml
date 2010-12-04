@@ -4,7 +4,6 @@
   
   <test>
     <filein>IMAPTests.st</filein>
-    <file>IMAPTests.st</file>
   </test>
 
   <filein>MIME.st</filein>
@@ -22,15 +21,4 @@
   <namespace>NetClients</namespace>
 
   <file>ChangeLog</file>
-  <file>Base.st</file>
-  <file>ContentHandler.st</file>
-  <file>FTP.st</file>
-  <file>HTTP.st</file>
-  <file>IMAP.st</file>
-  <file>MIME.st</file>
-  <file>NNTP.st</file>
-  <file>NetServer.st</file>
-  <file>POP.st</file>
-  <file>SMTP.st</file>
-  <file>URIResolver.st</file>
 </package>

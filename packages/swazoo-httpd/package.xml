@@ -57,15 +57,5 @@
   <filein>SCGI.st</filein>
   <filein>Extensions.st</filein>
 
-  <file>Exceptions.st</file>
-  <file>Headers.st</file>
-  <file>Messages.st</file>
-  <file>Core.st</file>
-  <file>Resources.st</file>
-  <file>HTTP.st</file>
-  <file>Protocol.st</file>
-  <file>Extensions.st</file>
-  <file>Tests.st</file>
-  <file>SCGI.st</file>
   <file>PORTING</file>
 </package>

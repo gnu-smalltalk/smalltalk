@@ -11,5 +11,4 @@
   </test>
 
   <filein>XMLPullParser.st</filein>
-  <file>XMLPullParser.st</file>
 </package>

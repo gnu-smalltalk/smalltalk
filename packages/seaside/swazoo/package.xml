@@ -13,6 +13,5 @@
   <stop>Seaside.SwazooSeaside stop</stop>
 
   <filein>Seaside-Adapters-Swazoo.st</filein>
-  <file>Seaside-Adapters-Swazoo.st</file>
   <file>ChangeLog</file>
 </package>

@@ -9,10 +9,4 @@
   <filein>CairoPattern.st</filein>
 
   <library>libcairo</library>
-
-  <file>CairoFuncs.st</file>
-  <file>CairoContext.st</file>
-  <file>CairoTransform.st</file>
-  <file>CairoSurface.st</file>
-  <file>CairoPattern.st</file>
 </package>

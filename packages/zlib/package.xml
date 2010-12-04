@@ -11,9 +11,4 @@
    <sunit>ZlibStreamTest</sunit>
    <filein>zlibtests.st</filein>
   </test>
-
-  <file>ZLibStream.st</file>
-  <file>ZLibReadStream.st</file>
-  <file>ZLibWriteStream.st</file>
-  <file>zlibtests.st</file>
 </package>

@@ -1,3 +1,16 @@
+2010-12-04  Paolo Bonzini  <bonzini@gnu.org>
+
+	* builder/package.xml: Remove now superfluous <file> tags.
+	* dom/package.xml: Remove now superfluous <file> tags.
+	* expat/package.xml: Remove now superfluous <file> tags.
+	* parser/package.xml: Remove now superfluous <file> tags.
+	* pullparser/package.xml: Remove now superfluous <file> tags.
+	* saxdriver/package.xml: Remove now superfluous <file> tags.
+	* saxparser/package.xml: Remove now superfluous <file> tags.
+	* tests/package.xml: Remove now superfluous <file> tags.
+	* xpath/package.xml: Remove now superfluous <file> tags.
+	* xsl/package.xml: Remove now superfluous <file> tags.
+
 2010-05-09  Paolo Bonzini  <bonzini@gnu.org>
 
 	* parser/XML.st: Use #display: to show entities with Unicode support.

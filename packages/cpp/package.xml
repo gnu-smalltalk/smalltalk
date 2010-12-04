@@ -17,22 +17,6 @@
   <filein>CDeclNode.st</filein>
   <filein>CSymbolTable.st</filein>
   <filein>CParseType.st</filein>
-
-  <file>StreamWrapper.st</file>
-  <file>PushBackStream.st</file>
-  <file>CToken.st</file>
-  <file>LineTokenStream.st</file>
-  <file>CPStrUnq.st</file>
-  <file>CPStrConc.st</file>
-  <file>StreamStack.st</file>
-  <file>ExpansionStreamStack.st</file>
-  <file>CExpressionNode.st</file>
-  <file>CParseExpr.st</file>
-  <file>CPP.st</file>
-  <file>CSymbol.st</file>
-  <file>CDeclNode.st</file>
-  <file>CSymbolTable.st</file>
-  <file>CParseType.st</file>
   <file>README</file>
   <file>ChangeLog</file>
 </package>

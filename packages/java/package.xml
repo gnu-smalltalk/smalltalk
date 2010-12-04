@@ -3,7 +3,6 @@
   <prereq>Sockets</prereq>
   <filein>Java.st</filein>
 
-  <file>Java.st</file>
   <file>JavaClassFiles.st</file>
   <file>JavaMetaobjects.st</file>
   <file>JavaTranslation.st</file>

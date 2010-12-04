@@ -19,14 +19,5 @@
     <filein>MySQLTests.st</filein>
   </test>
 
-  <file>Column.st</file>
-  <file>Connection.st</file>
-  <file>Extensions.st</file>
-  <file>MySQLTests.st</file>
-  <file>ResultSet.st</file>
-  <file>Row.st</file>
-  <file>Statement.st</file>
-  <file>Table.st</file>
-  <file>TableColumnInfo.st</file>
   <file>ChangeLog</file>
 </package>

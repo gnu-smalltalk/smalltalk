@@ -1,3 +1,7 @@
+2010-12-04  Paolo Bonzini  <bonzini@gnu.org>
+
+	* package.xml: Remove now superfluous <file> tags.
+
 2009-05-05  Paolo Bonzini  <bonzini@gnu.org>
 
 	* magritte-model.st: Merge Magritte-Model-lr.345 (which was
