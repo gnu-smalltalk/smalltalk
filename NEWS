@@ -4,25 +4,42 @@ NEWS FROM 3.2.2 TO 3.2.3
 
 o   Class attributes can have more than 1 keyword.
 
-o   "gst-convert -f squeak" reads binary selectors with more than two
-    characters; however they should be shortened with rewrite rules
-    to use the output.
+o   Documented #byteArrayOut C call argument passing mode.
 
-o   Fixed Socket>>#isPeerAlive falsely returning true.
+o   Fixed crash when an invalid UnicodeString was created using
+    #changeClassTo:
 
 o   Fixed bugs when adding instance variables to an existing class.
 
+o   Fixed Socket>>#isPeerAlive falsely returning true.
+
+o   Fixed some bugs in UTF-7 conversion.
+
 o   FreeBSD port and 64-bit Darwin port.  The latter requires a
     pre-installed libsigsegv.
+
+o   "gst-convert -f squeak" reads binary selectors with more than two
+    characters; however they should be shortened with rewrite rules
+    to use the output.
 
 o   gst-doc can generate sensible documentation for a package if
     some of its prerequisite are not loaded, even if some of the
     package's classes subclass from the prerequisite.
 
+o   GTK+ bindings are generated correctly for newer versions of GLib
+    (tested up to 2.26).
+
 o   If found, pre-installed libsigsegv, libffi and libltdl are used by
     default.
 
-o   Improvements for Emacs mode.
+o   Improvements for Emacs mode.  Installation of Emacs mode detects
+    Debian's /etc/emacs/site-start.d, and a --with-lispstartdir option
+    is provided for distributions that are not Red Hat- or Debian-based.
+
+o   Machine-specific optimizations for x86-64, and other microoptimizations
+    resulting in small but consistent performance improvements.
+
+o   More out of memory conditions are detected.
 
 o   New methods: ByteArray>>#castTo:, ByteArray>>#asCData,
     String>>#asCData, UndefinedObject>>#inheritsFrom:
@@ -36,7 +53,12 @@ o   Performance statistics printed by -V are now correct.
 o   Scoped methods ("A class >> a") can be used in an "A class [ ... ]"
     block.
 
+o   Semaphore>>#wait returns nil if the wait was interrupted externally
+    (e.g. from Process>>#resume).
+
 o   String>>#asCData: and String>>#asCData NULL-terminate their output.
+
+o   Support for timeouts when waiting on a Semaphore.
 
 o   Swazoo supports SCGI.  Its configuration however is still manual,
     since the Seaside and Iliad adaptors do not know about it.
