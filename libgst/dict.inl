@@ -157,7 +157,7 @@ static inline gst_object instantiate (OOP class_oop,
 				      OOP *p_oop);
 
 /* Return the Character object for the Unicode value C.  */
-static inline OOP char_new (int codePoint);
+static inline OOP char_new (unsigned codePoint);
 
 /* Answer the associated containing KEYOOP in the Dictionary (or a
    subclass having the same representation) DICTIONARYOOP.  */
@@ -312,7 +312,7 @@ static inline int64_t to_c_int_64 (OOP oop);
   ( !IS_NIL(oop) && (OOP_CLASS(oop) ==  _gst_symbol_class) )
 
 /* Return the Character object for ASCII value C.  */
-#define CHAR_OOP_AT(c)      (&_gst_mem.ot[(c) + CHAR_OBJECT_BASE])
+#define CHAR_OOP_AT(c)      (&_gst_mem.ot[(int)(c) + CHAR_OBJECT_BASE])
 
 /* Answer the code point of the character OOP, charOOP.  */
 #define CHAR_OOP_VALUE(charOOP) \
@@ -586,14 +586,15 @@ floatq_new (long double f)
 }
 
 OOP
-char_new (int codePoint)
+char_new (unsigned codePoint)
 {
   gst_char charObject;
   OOP charOOP;
 
-  assert (codePoint >= 0 && codePoint <= 0x10FFFF);
   if (codePoint <= 127)
     return CHAR_OOP_AT (codePoint);
+  if UNCOMMON (codePoint > 0x10FFFF)
+    codePoint = 0xFFFD;
 
   charObject = (gst_char) new_instance (_gst_unicode_character_class, &charOOP);
 

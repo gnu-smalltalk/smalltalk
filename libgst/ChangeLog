@@ -1,3 +1,7 @@
+2010-12-04  Paolo Bonzini <bonzini@gnu.org>
+
+	* libgst/dict.inl: Avoid crash on #changeClassTo: and UnicodeString.
+
 2010-11-10  Paolo Bonzini <bonzini@gnu.org>
 
 	* libgst/heap.c: Detect out-of-memory.

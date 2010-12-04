@@ -1,3 +1,8 @@
+2010-12-04  Paolo Bonzini <bonzini@gnu.org>
+
+	* tests/strings.st: Add testcase.
+	* tests/strings.ok: Regenerate.
+
 2010-11-13  Paolo Bonzini <bonzini@gnu.org>
 
 	* kernel/Semaphore.st: Fix race.

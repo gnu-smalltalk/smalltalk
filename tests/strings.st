@@ -141,3 +141,6 @@ Eval [ '1e-1' asNumber ]                                       "0.1"
 Eval [ '1e+0' asNumber ]                                       "1"
 Eval [ '1e+1' asNumber ]                                       "10"
 
+"This returns 0xFFFD"
+Eval [ (ByteArray new: 4 withAll: 255) changeClassTo: UnicodeString; first ]
+
