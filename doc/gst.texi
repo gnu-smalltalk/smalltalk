@@ -1998,18 +1998,8 @@ this:
   <filein>Table.st</filein>
   <filein>TableColumnInfo.st</filein>
 
-  <!-- @i{@r{The @code{file} tag identifies files that
+  <!-- @i{@r{The @code{file} tag identifies extra files that
        compose this package's distribution.}} -->
-  <file>SQLite.st</file>
-  <file>Connection.st</file>
-  <file>ResultSet.st</file>
-  <file>Statement.st</file>
-  <file>Row.st</file>
-  <file>ColumnInfo.st</file>
-  <file>Table.st</file>
-  <file>TableColumnInfo.st</file>
-
-  <!-- @i{@r{Test files or extra files can also be included.}} -->
   <file>SQLiteTests.st</file>
   <file>ChangeLog</file>
 </package>
@@ -2067,7 +2057,8 @@ To install your package, you only have to do
 
 @command{gst-package} is a Smalltalk script which will create
 a @file{.star} archive in the current image directory, with the
-files specified in the @code{file} tags.  By default the package is
+files specified in the @code{file}, @code{filein} and
+@code{built-file} tags.  By default the package is
 placed in the system-wide package directory; you can use the option
 @option{--target-directory} to create the @file{.star} file elsewhere.
 
@@ -2080,7 +2071,7 @@ will be downloaded if necessary, and copied to the target directory;
 @item
 a URL to a @file{package.xml} file.  The @code{url} tag in the file
 will be used to find a source code repository (@command{git} or
-@command{svn}) or to download a @file{package.xml} file.
+@command{svn}) or as a redirect to another @file{package.xml} file.
 @end itemize
 
 @noindent
@@ -2238,9 +2229,8 @@ insights into the @gst{} virtual machine.
 
 The second is the automatic documentation extractor.  @code{gst-doc} is able
 to create documentation even if the library cannot be loaded (for example,
-if loading it requires a running X server).  To do so
-it uses @file{packages/stinst/parser/STLoader.st} and
-@file{packages/stinst/parser/STLoaderObjs.st} to load and interpret
+if loading it requires a running X server).  To do so it uses
+@code{STClassLoader} from the @file{Parser} package to load and interpret
 Smalltalk source code, creating objects for the classes and methods being
 read in; then, polymorphism allows one to treat these exactly like usual
 classes.
@@ -3131,11 +3121,6 @@ you will have to add the name of the module in a package file
    <sunit>MD5Test SHA1Test</sunit>
    <filein>mdtests.st</filein>
   </test>
-
-  <file>digest.st</file>
-  <file>md5.st</file>
-  <file>sha1.st</file>
-  <file>mdtests.st</file>
 </package>
 @end example
 

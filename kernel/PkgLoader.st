@@ -621,11 +621,6 @@ XML.'>
 	    indent: indent.
 	self 
 	    printXmlOn: aStream
-	    collection: self fileIns
-	    tag: 'filein'
-	    indent: indent.
-	self 
-	    printXmlOn: aStream
 	    collection: self libraries asSortedCollection
 	    tag: 'library'
 	    indent: indent.
@@ -649,7 +644,12 @@ XML.'>
 		    space: indent].
 	self 
 	    printXmlOn: aStream
-	    collection: self files
+	    collection: self fileIns
+	    tag: 'filein'
+	    indent: indent.
+	self 
+	    printXmlOn: aStream
+	    collection: (self files copy removeAll: self fileIns ifAbsent: []; yourself)
 	    tag: 'file'
 	    indent: indent.
 	self 
@@ -1359,11 +1359,15 @@ XML.'>
     ]
 
     files [
-       "Answer a (modifiable) OrderedCollection of files that are part of
-        the package."
+        "Answer a (modifiable) OrderedCollection of files that are part of
+         the package."
 	<category: 'accessing'>
 	files isNil ifTrue: [files := OrderedCollection new].
-       ^files
+	^files,
+         (self fileIns copy
+                removeAll: self builtFiles ifAbsent: [];
+                removeAll: files ifAbsent: [];
+                yourself)
     ]
 
     addFileIn: aString [

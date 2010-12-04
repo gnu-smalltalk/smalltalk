@@ -1,5 +1,11 @@
 2010-12-04  Paolo Bonzini <bonzini@gnu.org>
 
+	* kernel/PkgLoader.st: Add <filein> tags that do not have a matching
+	<built-file> tag to #files.  Do not print <file> tags for files
+	that are already printed with <filein>.
+
+2010-12-04  Paolo Bonzini <bonzini@gnu.org>
+
 	* tests/strings.st: Add testcase.
 	* tests/strings.ok: Regenerate.
 

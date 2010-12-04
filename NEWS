@@ -48,6 +48,12 @@ o   New goodie: Announcements.
 
 o   Number class>>#readFrom: can parse numbers in scientific notation.
 
+o   Package descriptions do not need to include a <file> item for each
+    <filein> item.  However, it is still possible to include them for
+    backwards compatibility, and it is possible to include a source file
+    as both <filein> and <built-file> (so that gst-package --dist will
+    skip it).
+
 o   Performance statistics printed by -V are now correct.
 
 o   Scoped methods ("A class >> a") can be used in an "A class [ ... ]"
