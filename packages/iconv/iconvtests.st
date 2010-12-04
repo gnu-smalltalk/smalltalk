@@ -184,8 +184,12 @@ TestCase subclass: IconvTest [
 	self assert: (str asString: 'UTF-7') asString = '+BBgEOA-'.
 	str := str copyWith: $<16r0419>.
 	self assert: (str asString: 'UTF-7') asString = '+BBgEOAQZ-'.
-	str := UnicodeString with: $<16r10FFFF>.
-	self assert: (str asString: 'UTF-7') asString = '+2//f/w-'.
+	str := UnicodeString with: $<16r10FFFE>.
+	self assert: (str asString: 'UTF-7') asString = '+2//f/g-'.
+	str := (UnicodeString with: $<16r0438>), str.
+	self assert: (str asString: 'UTF-7') asString = '+BDjb/9/+-'.
+	str := (UnicodeString with: $<16r0438>), str.
+	self assert: (str asString: 'UTF-7') asString = '+BDgEONv/3/4-'.
 
 	"Test that, if there are no bits left to emit, we exit base64 immediately."
 	str := UnicodeString with: $<12376> with: $<12435> with: $\ with: $u.

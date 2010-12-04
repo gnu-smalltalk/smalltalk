@@ -1,3 +1,8 @@
+2010-12-04  Paolo Bonzini  <bonzini@gnu.org>
+
+	* UTF7.st: Small optimizations and fixes.
+	* iconvtests.st: Cover UTF7 more thoroughly.
+
 2008-08-06  Paolo Bonzini  <bonzini@gnu.org>
 
 	* Sets.st: Add #nextAvailable:putAllOn:, remove #nextHunkPutAllOn:

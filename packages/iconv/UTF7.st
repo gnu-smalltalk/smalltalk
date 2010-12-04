@@ -94,7 +94,7 @@ encoded characters to UTF-32 values (encoded as 32-bit Integers).'>
 	"Answer the next character that the receiver can produce."
 
 	<category: 'conversion'>
-	| ch |
+	| ch next |
 	left = 0 
 	    ifTrue: 
 		["Base64 encoding inactive"
@@ -103,7 +103,7 @@ encoded characters to UTF-32 values (encoded as 32-bit Integers).'>
 		(self isDirect: ch) ifTrue: [^ch asCharacter].
 		ch = 43 
 		    ifTrue: 
-			[left := -2.
+			[left := -256.
 			lookahead := $-.
 			^$+].
 		ch < 65536 
@@ -111,20 +111,24 @@ encoded characters to UTF-32 values (encoded as 32-bit Integers).'>
 			[left := 16.
 			value := ch.
 			^$+].
-		ch >= 1114112 ifTrue: [InvalidSequenceError signal].
+		"ch >= 1114112 ifTrue: [InvalidSequenceError signal]."
 
-		"Convert to a surrogate pair"
-		ch := ch - 65536.
-		left := 32.
-		value := ((ch bitAnd: 1023) + 55296 bitShift: 16) 
-			    + ((ch bitShift: -10) + 56320).
+		"Convert to a surrogate pair.  First character is always $2.
+                 Compare with the other surrogate pair case below."
+		left := ##(26 bitOr: -256).
+		lookahead := 50. "(self toBase64: 16r36) asInteger"
+		value := ((ch bitAnd: 16r1FFFC00) bitShift: 6)
+                            + (ch bitAnd: 16r3FF)
+			    + ##(16rDC00 - 16r400000).
 		^$+].
 	left < 0 
 	    ifTrue: 
 		["if at end of input output -.  otherwise:
-		 left = -2 ---> output the lookahead character and go to 0
-		 left = -1 ---> if there's a lookahead output it; if -, go to -2
-		 without advancing in the input.; otherwise go to 0"
+		 left = -256..-1 ---> output the lookahead character and go to
+                 (left bitAnd: 255).
+		 left = -512 ---> if there's no lookahead, output $-.  if there
+                 is lookahead and $- needed, output $- and go to -256; if there
+                 is lookahead but no $- needed, output lookahead and go to 0"
 
 		lookahead isNil 
 		    ifTrue: 
@@ -132,13 +136,13 @@ encoded characters to UTF-32 values (encoded as 32-bit Integers).'>
 			self atEndOfInput ifTrue: [^$-]]
 		    ifFalse: 
 			[ch := lookahead.
-			^(left = -1 and: [self isBase64: ch]) 
+			^(left = -512 and: [self isBase64: ch]) 
 			    ifTrue: 
-				[left := -2.
+				[left := -256.
 				$-]
 			    ifFalse: 
 				[lookahead := nil.
-				left := 0.
+				left := left bitAnd: 255.
 				ch asCharacter]]].
 	left < 6 
 	    ifTrue: 
@@ -147,32 +151,43 @@ encoded characters to UTF-32 values (encoded as 32-bit Integers).'>
 		(self atEndOfInput or: [self isDirect: (ch := self nextInput codePoint)]) 
 		    ifTrue: 
 			[lookahead := ch.
-			left = 0 ifTrue: [left := -2. ^$-].
+			left = 0 ifTrue: [left := -256. ^$-].
 			"Terminate the stream by left-aligning the last byte"
-			value := value bitShift: 6 - (left \\ 6).
-			left := left + 6 - (left \\ 6)]
+			value := value bitShift: 6 - left.
+			left := 6]
 		    ifFalse: 
 			[ch < 65536 
 			    ifTrue: 
 				[left := left + 16.
 				value := (value bitShift: 16) + ch]
 			    ifFalse: 
-				[ch >= 1114112 ifTrue: [InvalidSequenceError signal].
+				["ch >= 1114112 ifTrue: [InvalidSequenceError signal]."
 
-				"Convert to a surrogate pair"
-				ch := ch - 65536.
-				left := left + 32.
-				value := (value bitShift: 32) + ((ch bitAnd: 4095) + 55296 bitShift: 16) 
-					    + ((ch bitShift: -10) + 56320)]]].
+                                "Inline the computation of the next base64
+                                 character to avoid creating LargeIntegers.
+                                 16r36 is the high 6 bits of 16rD800.  Bits
+                                 that do not fit in `next' are placed in
+                                 `value' below (with 16r18000000 bitAnd: ...)."
+                                next := ((value bitShift: 6) + 16r36) bitShift: 0 - left.
+                                "Here 16rD8000000 would be necessary, but we
+                                 know left > 0 so the first two bits will never
+                                 be used.  This avoids LargeInteger math."
+                                value := (16r18000000 bitAnd: (16r3C00000 bitShift: left))
+				         + ((ch bitAnd: 16r1FFC00) bitShift: 6)
+                                         + (ch bitAnd: 16r3FF)
+					 + ##(16rDC00 - 16r400000).
+
+				left := left + 26.
+                                ^self toBase64Char: next]]].
 
 	"Take 6 bits out of the Base-64 encoded stream"
 	left := left - 6.
-	ch := value bitShift: 0 - left.
-	value := value bitXor: (ch bitShift: left).
+	next := value bitShift: 0 - left.
+	value := value bitXor: (next bitShift: left).
 
 	"Exit base64 if at end of input or next char is direct."
-	left = 0 ifTrue: [left := -1].
-	^self toBase64Char: ch
+	left = 0 ifTrue: [left := -512].
+	^self toBase64Char: next
     ]
 ]
 
@@ -330,23 +345,26 @@ ToUTF32 subclass: FromUTF7 [
 		shift := shift - 6.
 		^nil].
 	wc1 := wch + (value bitShift: shift).
-	wch := (value bitShift: shift + 16) bitAnd: 64512.
+	wch := (value bitShift: shift + 16) bitAnd: 16rFC00.
 	shift := shift + 10.
-	wc1 < 55296 ifTrue: [^Character codePoint: wc1].
-	wc1 < 56320 
+	wc1 < 16rD800 ifTrue: [^Character codePoint: wc1].
+	wc1 < 16rDC00 
 	    ifTrue: 
-		["Read a High Surrogate. D7C0 = D800 - (16r10000 bitShift: -6)"
+		["After a High Surrogate, leave bits 20..10 of the Unicode
+                  character being encoded in bits 26..16 of wch; the offset
+                  wc1 - D7C0 = wc1 - D800 + (16r10000 bitShift: -10).  Then
+                  wait for the Low Surrogate."
 
-		wch := wch + (wc1 - 55232 bitShift: 16).
+		wch := wch + ((wc1 - 16rD7C0) bitShift: 16).
 		^nil].
-	wc1 < 57344 ifTrue: [^InvalidSequenceError signal].
-	wc1 <= 65535 ifTrue: [^Character codePoint: wc1].
+	wc1 <= 16rDFFF ifTrue: [^InvalidSequenceError signal].
+	wc1 <= 16rFFFF ifTrue: [^Character codePoint: wc1].
 
-	"After an High Surrogate, verify that the next character
-	 is indeed a Low Surrogate"
-	((wc1 bitAnd: 65535) between: 56320 and: 57343) 
+	"We have read the UTF-16 element after an High Surrogate.  Verify that
+	 it is is indeed a Low Surrogate, and return the resulting character."
+	((wc1 bitAnd: 16rFFFF) between: 16rDC00 and: 16rDFFF)
 	    ifFalse: [^InvalidSequenceError signal].
-	wc1 := ((wc1 bitAnd: 134152192) bitShift: -6) + (wc1 bitAnd: 1023).
+	wc1 := ((wc1 bitAnd: 16r7FF0000) bitShift: -6) + (wc1 bitAnd: 16r3FF).
 	^Character codePoint: wc1
     ]
 ]
