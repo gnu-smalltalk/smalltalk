@@ -319,6 +319,8 @@ Copyright (c) Kazuki Yasumatsu, 1995. All rights reserved.
 
     clientPI [
 	<category: 'accessing'>
+	clientPI isNil ifTrue: [
+            self clientPI: (self protocolInterpreter client: self)].
 	^clientPI
     ]
 
@@ -404,7 +406,6 @@ Copyright (c) Kazuki Yasumatsu, 1995. All rights reserved.
 
     connect [
 	<category: 'connection'>
-	self clientPI: (self protocolInterpreter client: self).
 	self createSocket.
 	self clientPI connected.
     ]

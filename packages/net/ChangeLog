@@ -1,5 +1,9 @@
 2010-12-05  Paolo Bonzini  <bonzini@gnu.org>
 
+	* Base.st: Use lazy initialization for clientPI.
+
+2010-12-05  Paolo Bonzini  <bonzini@gnu.org>
+
 	* Base.st: Move connectionStream from ProtocolInterpreter to Client.
 	* HTTP.st: Adjust direct uses of the instance variable.
 	* IMAP.st: Adjust direct uses of the instance variable.
