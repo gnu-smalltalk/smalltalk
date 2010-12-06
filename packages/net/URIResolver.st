@@ -140,6 +140,7 @@ Copyright (c) Kazuki Yasumatsu, 1995. All rights reserved.
 		^self postContentsNoSignal: contents].
 	scheme := url scheme.
 	scheme = 'http' ifTrue: [client := HTTP.HTTPClient new. ^entity := self getHttpContents].
+	scheme = 'https' ifTrue: [client := HTTP.HTTPClient new. client isSSL: true. ^entity := self getHttpContents].
 	scheme = 'ftp' ifTrue: [client := FTP.FTPClient new. ^entity := self getFtpContents].
 	scheme = 'news' ifTrue: [client := NNTP.NNTPClient new. ^entity := self getNewsContents].
 	scheme = 'nntp' ifTrue: [client := NNTP.NNTPClient new. ^entity := self getNntpContents].
@@ -164,6 +165,7 @@ Copyright (c) Kazuki Yasumatsu, 1995. All rights reserved.
 	url hasPostData ifTrue: [^self errorContents: 'Unsupported post'].
 	scheme := url scheme.
 	scheme = 'http' ifTrue: [client := HTTP.HTTPClient new. ^self getHttpHead].
+	scheme = 'https' ifTrue: [client := HTTP.HTTPClient new. client isSSL: true. ^self getHttpHead].
 	^self errorContents: 'Unsupported protocol'
     ]
 
@@ -196,6 +198,7 @@ Copyright (c) Kazuki Yasumatsu, 1995. All rights reserved.
 	| scheme |
 	scheme := url scheme.
 	scheme = 'http' ifTrue: [client := HTTP.HTTPClient new. ^self postHttpContents: contents].
+	scheme = 'https' ifTrue: [client := HTTP.HTTPClient new. client isSSL: true. ^self postHttpContents: contents].
 	^self errorContents: 'Unsupported protocol'
     ]
 

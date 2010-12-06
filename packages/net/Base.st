@@ -246,7 +246,7 @@ Object subclass: NetEnvironment [
 
 
 Object subclass: NetClient [
-    | hostName portNumber user reporter clientPI connectionStream |
+    | hostName portNumber user reporter clientPI connectionStream isSSL |
     
     <import: Sockets>
     <category: 'NetClients-Framework'>
@@ -339,6 +339,17 @@ Copyright (c) Kazuki Yasumatsu, 1995. All rights reserved.
 	hostName := aString
     ]
 
+    isSSL [
+	<category: 'accessing'>
+	isSSL isNil ifTrue: [isSSL := false].
+	^isSSL
+    ]
+
+    isSSL: aBoolean [
+	<category: 'accessing'>
+	isSSL := aBoolean
+    ]
+
     portNumber [
 	<category: 'accessing'>
 	portNumber isNil ifTrue: [^self class defaultPortNumber].
@@ -418,6 +429,7 @@ Copyright (c) Kazuki Yasumatsu, 1995. All rights reserved.
     createSocket [
 	<category: 'connection'>
 	| connection messageText |
+        self isSSL ifTrue: [ ^self notYetImplemented ].
 	connection := [Socket remote: self hostName port: self portNumber] 
 		    on: Error
 		    do: 
