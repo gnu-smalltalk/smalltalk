@@ -1,5 +1,10 @@
 2010-12-05  Paolo Bonzini  <bonzini@gnu.org>
 
+	* URIResolver.st: Create NetClient objects outside of the
+	methods that actually speak to the NetClient.
+
+2010-12-05  Paolo Bonzini  <bonzini@gnu.org>
+
 	* URIResolver.st: Remove broken support for mailto and postto.
 
 2010-12-05  Paolo Bonzini  <bonzini@gnu.org>

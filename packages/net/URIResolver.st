@@ -75,18 +75,19 @@ Copyright (c) Kazuki Yasumatsu, 1995. All rights reserved.
 	^entity stream
     ]
 
-    createClient: class [
+    connectClient [
 	<category: 'private'>
 	| host |
 	host := url host isNil 
 		    ifTrue: [SocketAddress localHostName]
 		    ifFalse: [url host].
-	client := class connectToHost: host port: url port
+	self connectClientToHost: host port: url port
     ]
 
-    createClient: class host: host port: port [
+    connectClientToHost: host port: port [
 	<category: 'private'>
-	client := class connectToHost: host port: port
+        client closed ifFalse: [client close].
+	client hostName: host; portNumber: port; connect
     ]
 
     connect [
@@ -138,10 +139,10 @@ Copyright (c) Kazuki Yasumatsu, 1995. All rights reserved.
 			    yourself.
 		^self postContentsNoSignal: contents].
 	scheme := url scheme.
-	scheme = 'http' ifTrue: [^entity := self getHttpContents].
-	scheme = 'ftp' ifTrue: [^entity := self getFtpContents].
-	scheme = 'news' ifTrue: [^entity := self getNewsContents].
-	scheme = 'nntp' ifTrue: [^entity := self getNntpContents].
+	scheme = 'http' ifTrue: [client := HTTP.HTTPClient new. ^entity := self getHttpContents].
+	scheme = 'ftp' ifTrue: [client := FTP.FTPClient new. ^entity := self getFtpContents].
+	scheme = 'news' ifTrue: [client := NNTP.NNTPClient new. ^entity := self getNewsContents].
+	scheme = 'nntp' ifTrue: [client := NNTP.NNTPClient new. ^entity := self getNntpContents].
 	url isFileScheme ifTrue: [^entity := self getFileContents].
 	^self errorContents: 'Unsupported protocol'
     ]
@@ -162,7 +163,7 @@ Copyright (c) Kazuki Yasumatsu, 1995. All rights reserved.
 	| scheme |
 	url hasPostData ifTrue: [^self errorContents: 'Unsupported post'].
 	scheme := url scheme.
-	scheme = 'http' ifTrue: [^self getHttpHead].
+	scheme = 'http' ifTrue: [client := HTTP.HTTPClient new. ^self getHttpHead].
 	^self errorContents: 'Unsupported protocol'
     ]
 
@@ -194,7 +195,7 @@ Copyright (c) Kazuki Yasumatsu, 1995. All rights reserved.
 	<category: 'accessing'>
 	| scheme |
 	scheme := url scheme.
-	scheme = 'http' ifTrue: [^self postHttpContents: contents].
+	scheme = 'http' ifTrue: [client := HTTP.HTTPClient new. ^self postHttpContents: contents].
 	^self errorContents: 'Unsupported protocol'
     ]
 
@@ -292,7 +293,7 @@ Copyright (c) Kazuki Yasumatsu, 1995. All rights reserved.
 	| contents path tmpFile type stream |
 	contents := self getProxyContentsHost: 'ftpProxyHost' port: 'ftpProxyPort'.
 	contents notNil ifTrue: [^contents].
-	self createClient: FTP.FTPClient.
+	self connectClient.
 	
 	[| user mail |
 	user := NetUser new.
@@ -483,7 +484,7 @@ Copyright (c) Kazuki Yasumatsu, 1995. All rights reserved.
 	contents := self getProxyContentsHost: 'httpProxyHost'
 		    port: 'httpProxyPort'.
 	contents notNil ifTrue: [^contents].
-	self createClient: HTTP.HTTPClient.
+	self connectClient.
 	^self requestHttpContents: url requestString
     ]
 
@@ -557,7 +558,7 @@ Copyright (c) Kazuki Yasumatsu, 1995. All rights reserved.
 	| contents |
 	contents := self getProxyHeadHost: 'httpProxyHost' port: 'httpProxyPort'.
 	contents notNil ifTrue: [^contents].
-	self createClient: HTTP.HTTPClient.
+	self connectClient.
 	^self requestHttpHead: url requestString
     ]
 
@@ -634,7 +635,7 @@ Copyright (c) Kazuki Yasumatsu, 1995. All rights reserved.
 		    host: 'httpProxyHost'
 		    port: 'httpProxyPort'.
 	replyContents notNil ifTrue: [^replyContents].
-	self createClient: HTTP.HTTPClient.
+	self connectClient.
 	^self postHttpContents: contents urlString: url requestString
     ]
 
@@ -948,7 +949,7 @@ Copyright (c) Kazuki Yasumatsu, 1995. All rights reserved.
 	host isNil ifTrue: [^self invalidURL].
 	string := url path.
 	string isNil ifTrue: [^self invalidURL].
-	self createClient: NNTP.NNTPClient.
+	self connectClient.
 	
 	[
 	[(string indexOf: $@) > 0 
@@ -994,7 +995,7 @@ Copyright (c) Kazuki Yasumatsu, 1995. All rights reserved.
 		from := Integer readFrom: read.
 		from = 0 ifTrue: [^self invalidURL].
 		to := nil].
-	self createClient: NNTP.NNTPClient.
+	self connectClient.
 	^
 	[
 	[to isNil 
@@ -1294,10 +1295,8 @@ Copyright (c) Kazuki Yasumatsu, 1995. All rights reserved.
 	(host isString and: [host notEmpty]) ifFalse: [^nil].
 	port := UserProfileSettings default settingAt: portKey.
 	port isInteger ifFalse: [^nil].
-	self 
-	    createClient: HTTP.HTTPClient
-	    host: host
-	    port: port.
+        client := HTTP.HTTPClient new.
+	self connectClientToHost: host port: port.
 	^self requestHttpContents: url fullRequestString
     ]
 
@@ -1311,10 +1310,8 @@ Copyright (c) Kazuki Yasumatsu, 1995. All rights reserved.
 	(host isString and: [host notEmpty]) ifFalse: [^nil].
 	port := UserProfileSettings default settingAt: portKey.
 	port isInteger ifFalse: [^nil].
-	self 
-	    createClient: HTTP.HTTPClient
-	    host: host
-	    port: port.
+        client := HTTP.HTTPClient new.
+	self connectClientToHost: host port: port.
 	^self requestHttpHead: url fullRequestString
     ]
 
@@ -1345,10 +1342,8 @@ Copyright (c) Kazuki Yasumatsu, 1995. All rights reserved.
 	(host isString and: [host notEmpty]) ifFalse: [^nil].
 	port := UserProfileSettings default settingAt: portKey.
 	port isInteger ifFalse: [^nil].
-	self 
-	    createClient: HTTP.HTTPClient
-	    host: host
-	    port: port.
+        client := HTTP.HTTPClient new.
+	self connectClientToHost: host port: port.
 	^self postHttpContents: contents urlString: url fullRequestString
     ]
 
