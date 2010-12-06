@@ -140,10 +140,8 @@ Copyright (c) Kazuki Yasumatsu, 1995. All rights reserved.
 	scheme := url scheme.
 	scheme = 'http' ifTrue: [^entity := self getHttpContents].
 	scheme = 'ftp' ifTrue: [^entity := self getFtpContents].
-	scheme = 'mailto' ifTrue: [^entity := self getMailToContents].
 	scheme = 'news' ifTrue: [^entity := self getNewsContents].
 	scheme = 'nntp' ifTrue: [^entity := self getNntpContents].
-	scheme = 'postto' ifTrue: [^entity := self getPostToContents].
 	url isFileScheme ifTrue: [^entity := self getFileContents].
 	^self errorContents: 'Unsupported protocol'
     ]
@@ -197,8 +195,6 @@ Copyright (c) Kazuki Yasumatsu, 1995. All rights reserved.
 	| scheme |
 	scheme := url scheme.
 	scheme = 'http' ifTrue: [^self postHttpContents: contents].
-	scheme = 'mailto' ifTrue: [^self postMailToContents: contents].
-	scheme = 'postto' ifTrue: [^self postPostToContents: contents].
 	^self errorContents: 'Unsupported protocol'
     ]
 
@@ -740,25 +736,6 @@ Copyright (c) Kazuki Yasumatsu, 1995. All rights reserved.
 	^message
     ]
 
-    getMailToContents [
-	<category: 'mailto accessing'>
-	^(self emptyMailMessage)
-	    body: (String with: Character nl) 
-			, (UserProfileSettings default settingAt: #signature);
-	    yourself
-    ]
-
-    postMailToContents: contents [
-	<category: 'mailto accessing'>
-	| message |
-	message := self emptyMailMessage.
-	message parseFieldFrom: 'MIME-Version: 1.0' readStream.
-	message 
-	    parseFieldFrom: ('Content-Type: ' , contents contentType) readStream.
-	message body: contents asString.
-	^message
-    ]
-
     getNewsArticleContents: articleId [
 	<category: 'news accessing'>
 	| tmpFile stream contents |
@@ -1253,25 +1230,6 @@ Copyright (c) Kazuki Yasumatsu, 1995. All rights reserved.
 	message 
 	    parseFieldFrom: ('X-Newsreader: GNU-Smalltalk/' , Smalltalk version) 
 		    readStream.
-	^message
-    ]
-
-    getPostToContents [
-	<category: 'postto accessing'>
-	^(self emptyNewsMessage)
-	    body: (String with: Character nl) 
-			, (UserProfileSettings default settingAt: 'signature' ifAbsent: [String new]);
-	    yourself
-    ]
-
-    postPostToContents: contents [
-	<category: 'postto accessing'>
-	| message |
-	message := self emptyNewsMessage.
-	message parseFieldFrom: 'MIME-Version: 1.0' readStream.
-	message 
-	    parseFieldFrom: ('Content-Type: ' , contents contentType) readStream.
-	message body: contents asString.
 	^message
     ]
 
