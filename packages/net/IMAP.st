@@ -488,7 +488,7 @@ NetProtocolInterpreter subclass: IMAPProtocolInterpreter [
 	<category: 'connection'>
 	super connect.
 	self resetCommandSequence.
-	responseStream := connectionStream.
+	responseStream := self connectionStream.
 	commandSequencer reset.
 	self getResponse
     ]
@@ -725,11 +725,10 @@ NetClient subclass: IMAPClient [
 	state client: self
     ]
 
-    connectToHost: aString port: aNumber [
+    connected [
 	"Establish a connection to the host <aString>."
 
 	<category: 'connection'>
-	super connectToHost: aString port: aNumber.
 	self state: IMAPNonAuthenticatedState new
     ]
 

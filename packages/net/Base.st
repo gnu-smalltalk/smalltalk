@@ -246,7 +246,7 @@ Object subclass: NetEnvironment [
 
 
 Object subclass: NetClient [
-    | hostName portNumber user reporter clientPI |
+    | hostName portNumber user reporter clientPI connectionStream |
     
     <import: Sockets>
     <category: 'NetClients-Framework'>
@@ -261,12 +261,12 @@ Copyright (c) Kazuki Yasumatsu, 1995. All rights reserved.
 
     NetClient class >> connectToHost: aHostname [
 	<category: 'instance creation'>
-	^self new connectToHost: aHostname port: nil
+	^self new hostName: aHostname; connect
     ]
 
     NetClient class >> connectToHost: aHostname port: aPort [
 	<category: 'instance creation'>
-	^self new connectToHost: aHostname port: aPort
+	^self new hostName: aHostname; portNumber: aPort; connect
     ]
 
     NetClient class >> loginToHost: aHostName asUser: userString withPassword: passwdString [
@@ -365,36 +365,84 @@ Copyright (c) Kazuki Yasumatsu, 1995. All rights reserved.
 	self subclassResponsibility
     ]
 
+    binary [
+	<category: 'connection'>
+	connectionStream class == CrLfStream 
+	    ifTrue: [connectionStream := connectionStream stream]
+    ]
+
+    isBinary [
+	<category: 'connection'>
+	^connectionStream class ~~ CrLfStream
+    ]
+
+    text [
+	<category: 'connection'>
+	self binary.
+	self clientPI lineEndConvention = LineEndCRLF 
+	    ifTrue: [connectionStream := CrLfStream on: connectionStream]
+    ]
+
     close [
 	<category: 'connection'>
 	^self logout
     ]
 
+    closeConnection [
+	<category: 'connection'>
+	self closed 
+	    ifFalse: 
+		[connectionStream close.
+		connectionStream := nil].
+	self liveAcrossSnapshot ifTrue: [ObjectMemory removeDependent: self]
+    ]
+
+    closed [
+	<category: 'connection'>
+	^connectionStream == nil
+    ]
+
     connect [
 	<category: 'connection'>
-	self connectToHost: self hostName port: self portNumber
+	self clientPI: (self protocolInterpreter client: self).
+	self createSocket.
+	self clientPI connected.
     ]
 
     connectIfClosed [
 	<category: 'connection'>
-	self clientPI closed ifTrue: [self connect]
+	self closed ifTrue: [self connect]
     ]
 
-    connectToHost: aString [
-	"Establish a connection to the host <aString>."
-
+    createSocket [
 	<category: 'connection'>
-	^self connectToHost: aString port: nil
+	| connection messageText |
+	connection := [Socket remote: self hostName port: self portNumber] 
+		    on: Error
+		    do: 
+			[:ex | 
+			ex.
+			messageText := ex messageText.
+			ex return: nil].
+	connection isNil ifTrue: [^self connectionFailedError: messageText].
+	self connectionStream: connection
     ]
 
-    connectToHost: aString port: aNumber [
-	"Establish a connection to the host <aString>."
-
+    connectionStream [
 	<category: 'connection'>
-	self hostName: aString.
-	self portNumber: aNumber.
-	self clientPI: (self protocolInterpreter client: self).
-	self clientPI connect
+	^connectionStream
+    ]
+
+    connectionStream: aSocket [
+	<category: 'connection'>
+	connectionStream := aSocket.
+	self text.
+	self liveAcrossSnapshot ifTrue: [ObjectMemory addDependent: self]
+    ]
+
+    liveAcrossSnapshot [
+	<category: 'private-attributes'>
+	^false
     ]
 
     login [
@@ -428,7 +476,7 @@ Copyright (c) Kazuki Yasumatsu, 1995. All rights reserved.
 
     reconnect [
 	<category: 'connection'>
-	self clientPI close.
+	self closeConnection.
 	self connect
     ]
 ]
@@ -436,7 +484,7 @@ Copyright (c) Kazuki Yasumatsu, 1995. All rights reserved.
 
 
 Object subclass: NetProtocolInterpreter [
-    | client connectionStream |
+    | client |
     
     <import: TCP>
     <category: 'NetClients-Framework'>
@@ -589,72 +637,56 @@ Object subclass: NetProtocolInterpreter [
 
     binary [
 	<category: 'connection'>
-	connectionStream class == CrLfStream 
-	    ifTrue: [connectionStream := connectionStream stream]
+	client binary
     ]
 
     isBinary [
 	<category: 'connection'>
-	^connectionStream class ~~ CrLfStream
+	^client isBinary
     ]
 
     text [
 	<category: 'connection'>
-	self binary.
-	self lineEndConvention = LineEndCRLF 
-	    ifTrue: [connectionStream := CrLfStream on: connectionStream]
+	client text
     ]
 
     close [
 	<category: 'connection'>
-	self closed 
-	    ifFalse: 
-		[connectionStream close.
-		connectionStream := nil].
-	self liveAcrossSnapshot ifTrue: [ObjectMemory removeDependent: self]
+        client closeConnection
     ]
 
     closed [
 	<category: 'connection'>
-	^connectionStream == nil
+	^client closed
     ]
 
     connectionStream [
 	<category: 'connection'>
-	^connectionStream
+	^client connectionStream
     ]
 
     connectionStream: aSocket [
 	<category: 'connection'>
-	connectionStream := aSocket.
-	self text.
-	self liveAcrossSnapshot ifTrue: [ObjectMemory addDependent: self]
+	client connectionStream: aSocket
+    ]
+
+    connected [
+	<category: 'callbacks'>
     ]
 
     connect [
 	<category: 'connection'>
-	| connection messageText |
-	connection := [Socket remote: client hostName port: client portNumber] 
-		    on: Error
-		    do: 
-			[:ex | 
-			ex.
-			messageText := ex messageText.
-			ex return: nil].
-	connection isNil ifTrue: [^self connectionFailedError: messageText].
-	self connectionStream: connection
+	client connect
     ]
 
     connectIfClosed [
 	<category: 'connection'>
-	self closed ifTrue: [self connect]
+	client connectIfClosed
     ]
 
     reconnect [
 	<category: 'connection'>
-	self
-	    close;
-	    connect
+	client reconnect
     ]
 
     decode: aString [
@@ -736,19 +768,14 @@ Object subclass: NetProtocolInterpreter [
 	^LineEndCRLF
     ]
 
-    liveAcrossSnapshot [
-	<category: 'private-attributes'>
-	^false
-    ]
-
     atEnd [
 	<category: 'stream accessing'>
-	^connectionStream atEnd
+	^self connectionStream atEnd
     ]
 
     contents [
 	<category: 'stream accessing'>
-	^self decode: connectionStream contents
+	^self decode: self connectionStream contents
     ]
 
     cr [
@@ -756,11 +783,11 @@ Object subclass: NetProtocolInterpreter [
 	| conv |
 	conv := self lineEndConvention.
 	(conv = LineEndCR or: [conv = LineEndTransparent]) 
-	    ifTrue: [^connectionStream nextPut: Character cr].
-	conv = LineEndLF ifTrue: [^connectionStream nextPut: Character nl].
+	    ifTrue: [^self connectionStream nextPut: Character cr].
+	conv = LineEndLF ifTrue: [^self connectionStream nextPut: Character nl].
 	conv = LineEndCRLF 
 	    ifTrue: 
-		[^connectionStream
+		[^self connectionStream
 		    nextPut: Character cr;
 		    nextPut: Character nl].
 	self error: 'Undefined line-end convention'
@@ -768,33 +795,33 @@ Object subclass: NetProtocolInterpreter [
 
     flush [
 	<category: 'stream accessing'>
-	connectionStream flush
+	self connectionStream flush
     ]
 
     next [
 	<category: 'stream accessing'>
-	^connectionStream next
+	^self connectionStream next
     ]
 
     next: anInteger [
 	<category: 'stream accessing'>
-	^self decode: (connectionStream next: anInteger)
+	^self decode: (self connectionStream next: anInteger)
     ]
 
     nextAvailable: anInteger [
 	<category: 'stream accessing'>
-	^self decode: (connectionStream nextAvailable: anInteger)
+	^self decode: (self connectionStream nextAvailable: anInteger)
     ]
 
     nextLine [
 	<category: 'stream accessing'>
 	| write byte |
 	write := WriteStream on: (String new: 128).
-	[connectionStream atEnd] whileFalse: 
-		[byte := connectionStream next.
+	[self connectionStream atEnd] whileFalse: 
+		[byte := self connectionStream next.
 		byte == Character cr 
 		    ifTrue: 
-			[connectionStream peekFor: Character nl.
+			[self connectionStream peekFor: Character nl.
 			^self decode: write contents].
 		byte == Character nl ifTrue: [^self decode: write contents].
 		write nextPut: byte].
@@ -803,25 +830,25 @@ Object subclass: NetProtocolInterpreter [
 
     nextPut: aCharacter [
 	<category: 'stream accessing'>
-	connectionStream nextPutAll: (self encode: (String with: aCharacter))
+	self connectionStream nextPutAll: (self encode: (String with: aCharacter))
     ]
 
     nextPutAll: aString [
 	<category: 'stream accessing'>
 	aString isEmpty ifTrue: [^self].
-	connectionStream nextPutAll: (self encode: aString)
+	self connectionStream nextPutAll: (self encode: aString)
     ]
 
     nl [
 	<category: 'stream accessing'>
 	| conv |
 	conv := self lineEndConvention.
-	conv = LineEndCR ifTrue: [^connectionStream nextPut: Character cr].
+	conv = LineEndCR ifTrue: [^self connectionStream nextPut: Character cr].
 	(conv = LineEndLF or: [conv = LineEndTransparent]) 
-	    ifTrue: [^connectionStream nextPut: Character nl].
+	    ifTrue: [^self connectionStream nextPut: Character nl].
 	conv = LineEndCRLF 
 	    ifTrue: 
-		[^connectionStream
+		[^self connectionStream
 		    nextPut: Character cr;
 		    nextPut: Character nl].
 	self error: 'Undefined line-end convention'
@@ -829,7 +856,7 @@ Object subclass: NetProtocolInterpreter [
 
     species [
 	<category: 'stream accessing'>
-	^connectionStream species
+	^self connectionStream species
     ]
 
     upTo: aCharacter [
@@ -838,8 +865,8 @@ Object subclass: NetProtocolInterpreter [
 	aCharacter = Character cr ifTrue: [^self nextLine].
 	byte := self encode: (String with: aCharacter).
 	byte size = 1 
-	    ifTrue: [^self decode: (connectionStream upTo: byte)]
-	    ifFalse: [^self decode: (connectionStream upToAll: byte)]
+	    ifTrue: [^self decode: (self connectionStream upTo: byte)]
+	    ifFalse: [^self decode: (self connectionStream upToAll: byte)]
     ]
 
     update: aSymbol [

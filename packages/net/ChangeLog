@@ -1,3 +1,10 @@
+2010-12-05  Paolo Bonzini  <bonzini@gnu.org>
+
+	* Base.st: Move connectionStream from ProtocolInterpreter to Client.
+	* HTTP.st: Adjust direct uses of the instance variable.
+	* IMAP.st: Adjust direct uses of the instance variable.
+	* NNTP.st: Adjust direct uses of the instance variable.
+
 2010-12-04  Paolo Bonzini  <bonzini@gnu.org>
 
 	* package.xml: Remove now superfluous <file> tags.

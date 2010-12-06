@@ -207,7 +207,7 @@ Copyright (c) Kazuki Yasumatsu, 1995. All rights reserved.
 		totalByte := totalByte value trimSeparators asInteger.
 		self reporter totalByte: totalByte].
 	self reporter startTransfer.
-	readStream := connectionStream stream.
+	readStream := self connectionStream stream.
 	response preReadBytes isEmpty 
 	    ifFalse: 
 		[self reporter readByte: response preReadBytes size.
@@ -288,7 +288,7 @@ Copyright (c) Kazuki Yasumatsu, 1995. All rights reserved.
 	    cr.
 	self putRequestHeaders: requestHeaders.
 	binary 
-	    ifTrue: [connectionStream stream nextPutAll: data]
+	    ifTrue: [self connectionStream stream nextPutAll: data]
 	    ifFalse: [self nextPutAll: data].
 	^self readResponseInto: aStream
     ]
