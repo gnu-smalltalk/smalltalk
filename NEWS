@@ -9,6 +9,8 @@ o   Documented #byteArrayOut C call argument passing mode.
 o   Fixed crash when an invalid UnicodeString was created using
     #changeClassTo:
 
+o   Fixed deadlock with #atEnd and two-way pipes.
+
 o   Fixed bugs when adding instance variables to an existing class.
 
 o   Fixed Socket>>#isPeerAlive falsely returning true.

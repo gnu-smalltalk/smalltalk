@@ -1,3 +1,8 @@
+2010-12-05  Paolo Bonzini <bonzini@gnu.org>
+
+	* kernel/FileDescr.st: Fix deadlock when reading last byte from
+	a two-way pipe.
+
 2010-12-04  Paolo Bonzini <bonzini@gnu.org>
 
 	* kernel/PkgLoader.st: Add <filein> tags that do not have a matching

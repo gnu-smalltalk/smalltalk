@@ -695,8 +695,7 @@ do arbitrary processing on the files.'>
 	self isPipe ifFalse: [^self fileOp: 6].
 	atEnd isNil 
 	    ifTrue: 
-		[self ensureReadable.
-		self peek.
+		[peek isNil ifTrue: [self ensureReadable. self peek].
 		atEnd isNil ifTrue: [^false]].
 	^atEnd
     ]
