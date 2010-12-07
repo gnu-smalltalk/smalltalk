@@ -2849,6 +2849,14 @@ MailScanner subclass: RFC822Scanner [
 	^token
     ]
 
+    assertNoLookahead [
+	"Fail if the parser has lookahead."
+
+	<category: 'test'>
+
+        lookahead isNil ifFalse: [ self error: 'unexpected parsing state' ]
+    ]
+
     shouldFoldLine [
 	"Answers true if next line is to be folded in, that is, if CRLF is followed by at least one white space"
 

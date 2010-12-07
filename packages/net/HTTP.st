@@ -519,9 +519,8 @@ Copyright (c) Kazuki Yasumatsu, 1995. All rights reserved.
 	self parseStatusLine: aClient.
 	messageHeaderParser := MIME.MimeEntity parser on: aClient connectionStream.
 	messageHeader parseFieldsFrom: messageHeaderParser.
-
-	"Empty the lookahead buffer of the parser"
-	preReadBytes := String with: messageHeaderParser next
+	messageHeaderParser assertNoLookahead.
+	preReadBytes := #().
     ]
 
     printOn: aStream [
