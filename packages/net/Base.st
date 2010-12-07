@@ -259,6 +259,11 @@ Copyright (c) Kazuki Yasumatsu, 1995. All rights reserved.
 	self subclassResponsibility
     ]
 
+    NetClient class >> defaultSSLPortNumber [
+	<category: 'constants'>
+	self subclassResponsibility
+    ]
+
     NetClient class >> connectToHost: aHostname [
 	<category: 'instance creation'>
 	^self new hostName: aHostname; connect
@@ -350,10 +355,17 @@ Copyright (c) Kazuki Yasumatsu, 1995. All rights reserved.
 	isSSL := aBoolean
     ]
 
+    defaultPortNumber [
+	<category: 'accessing'>
+	^self isSSL
+            ifFalse: [self class defaultPortNumber]
+	    ifTrue: [self class defaultSSLPortNumber]
+    ]
+
     portNumber [
 	<category: 'accessing'>
-	portNumber isNil ifTrue: [^self class defaultPortNumber].
-	portNumber = 0 ifTrue: [^self class defaultPortNumber].
+	portNumber isNil ifTrue: [^self defaultPortNumber].
+	portNumber = 0 ifTrue: [^self defaultPortNumber].
 	^portNumber
     ]
 
@@ -417,7 +429,16 @@ Copyright (c) Kazuki Yasumatsu, 1995. All rights reserved.
 
     connect [
 	<category: 'connection'>
-	self createSocket.
+	| connection messageText |
+	[connection := self createSocket]
+		    on: Error
+		    do: 
+			[:ex | 
+			ex.
+			messageText := ex messageText.
+			ex return: nil].
+	connection isNil ifTrue: [^self connectionFailedError: messageText].
+	self connectionStream: connection.
 	self clientPI connected.
     ]
 
@@ -426,19 +447,28 @@ Copyright (c) Kazuki Yasumatsu, 1995. All rights reserved.
 	self closed ifTrue: [self connect]
     ]
 
+    createSSLWrapper [
+	<category: 'connection'>
+	| connection messageText |
+        (self hostName anySatisfy: [ :ch |
+            '''"\${}()*?' includes: ch ])
+                 ifTrue: [ self error: 'invalid host name' ].
+        (self portNumber isInteger not and: [self anySatisfy: [ :ch |
+            '''"\${}()*?' includes: ch ]])
+                 ifTrue: [ self error: 'invalid port name' ].
+        Directory libexec isNil
+            ifTrue: [ self error: 'cannot find gnutls-wrapper' ].
+	^FileDescriptor
+            popen: '%1 %2 %3' % { Directory libexec / 'gnutls-wrapper'.
+                self hostName. self portNumber }
+            dir: 'r+'
+    ]
+
     createSocket [
 	<category: 'connection'>
 	| connection messageText |
-        self isSSL ifTrue: [ ^self notYetImplemented ].
-	connection := [Socket remote: self hostName port: self portNumber] 
-		    on: Error
-		    do: 
-			[:ex | 
-			ex.
-			messageText := ex messageText.
-			ex return: nil].
-	connection isNil ifTrue: [^self connectionFailedError: messageText].
-	self connectionStream: connection
+        self isSSL ifTrue: [ ^self createSSLWrapper ].
+	^Socket remote: self hostName port: self portNumber
     ]
 
     connectionStream [

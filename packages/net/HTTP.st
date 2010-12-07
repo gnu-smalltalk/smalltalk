@@ -46,6 +46,11 @@ Copyright (c) Kazuki Yasumatsu, 1995. All rights reserved.
 	^80
     ]
 
+    HTTPClient class >> defaultSSLPortNumber [
+	<category: 'constants'>
+	^443
+    ]
+
     HTTPClient class >> exampleURL: url host: host port: port [
 	"self exampleURL: 'http://www.gnu.org' host: 'www.gnu.org' port: 80."
 

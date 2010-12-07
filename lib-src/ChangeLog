@@ -1,3 +1,7 @@
+2010-12-05  Paolo Bonzini  <bonzini@gnu.org>
+
+	* lib-src/socketx.h: Provide O_NONBLOCK.
+
 2010-10-31  Paolo Bonzini  <bonzini@gnu.org>
 
 	* lib-src/lock.c: Remove PTHREAD_IN_USE stuff.

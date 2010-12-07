@@ -315,23 +315,13 @@ myConnect (int fd, struct sockaddr *sockaddr, int len)
   ioctlsocket (sock, FIONBIO, &iMode);
 
 #elif defined F_GETFL
-  int oldflags = fcntl (sock, F_GETFL, NULL);
-
 #ifndef O_NONBLOCK             
-#ifdef O_NDELAY
-#define O_NONBLOCK O_NDELAY
-#else
-#ifdef FNDELAY
-#define O_NONBLOCK FNDELAY
-#else
 #warning Non-blocking I/O could not be enabled
-#define O_NONBLOCK 0
-#endif
-#endif
-#endif
-
+#else
+  int oldflags = fcntl (sock, F_GETFL, NULL);
   if (!(oldflags & O_NONBLOCK))
     fcntl (sock, F_SETFL, oldflags | O_NONBLOCK);
+#endif
 #endif
   
   fix_sockaddr (sockaddr);

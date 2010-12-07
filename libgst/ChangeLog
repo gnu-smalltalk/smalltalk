@@ -1,3 +1,7 @@
+2010-12-05  Paolo Bonzini  <bonzini@gnu.org>
+
+	* lib-src/sockets.c: Use O_NONBLOCK from socketx.h.
+
 2010-12-04  Paolo Bonzini <bonzini@gnu.org>
 
 	* libgst/dict.inl: Avoid crash on #changeClassTo: and UnicodeString.

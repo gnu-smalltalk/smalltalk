@@ -107,6 +107,13 @@ AM_MISSING_PROG(AUTOM4TE, autom4te, $missing_dir)
 dnl 
 dnl ------------------------------ SUBDIRS --------------------
 
+PKG_CHECK_MODULES(GNUTLS, gnutls,
+                  [ac_cv_lib_gnutls_gnutls_global_init=yes],
+                  [GST_HAVE_LIB(gnutls, gnutls_global_init)])
+if test "$ac_cv_lib_gnutls_gnutls_global_init" = yes; then
+  AC_DEFINE(HAVE_GNUTLS, 1, [Define to 1 if gnutls is being used])
+fi
+
 dnl Throw all these away in 3.3, and just require the system
 dnl lib{ltdl,ffi,sigsegv}.  Before that, however, we need to
 dnl ensure Fedora has a cross-compiled libffi and libsigsegv.
@@ -510,7 +517,7 @@ GST_PACKAGE_ENABLE([NCurses],
   [ncurses],
   [GST_HAVE_LIB(ncurses, initscr)],
   [ac_cv_lib_ncurses_initscr])
-GST_PACKAGE_ENABLE([NetClients], [net])
+GST_PACKAGE_ENABLE([NetClients], [net], [], [], [Makefile])
 GST_PACKAGE_ENABLE([DhbNumericalMethods], [numerics])
 GST_PACKAGE_ENABLE([OpenGL], [opengl],
    [GST_HAVE_OPENGL],

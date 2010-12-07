@@ -105,6 +105,7 @@ extern int win_close(int filehandle);
 #include <sys/types.h>
 #include <sys/time.h>
 #include <unistd.h>
+#include <fcntl.h>
 #include <errno.h>
 #ifdef HAVE_SYS_SELECT_H
 #include <sys/select.h>
@@ -123,6 +124,17 @@ typedef int SOCKET;
 #ifndef SOCKET_ERROR
 #define SOCKET_ERROR		  (-1)
 #endif
+
+#ifndef O_NONBLOCK
+#ifdef O_NDELAY
+#define O_NONBLOCK O_NDELAY
+#else
+#ifdef FNDELAY
+#define O_NONBLOCK FNDELAY
+#endif
+#endif
+#endif
+
 #endif /* !__MSVCRT__ */
 
 #include "getaddrinfo.h"

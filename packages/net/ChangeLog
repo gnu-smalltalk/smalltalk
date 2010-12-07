@@ -1,5 +1,11 @@
 2010-12-07  Paolo Bonzini  <bonzini@gnu.org>
 
+	* gnutls-wrapper.c: New.
+	* Base.st: Support SSL sockets.
+	* HTTP.st: Declare SSL port number.
+
+2010-12-07  Paolo Bonzini  <bonzini@gnu.org>
+
 	* Base.st: Add stub https support.
 	* URIResolver.st: Use it.
 
