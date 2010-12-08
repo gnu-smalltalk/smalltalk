@@ -56,6 +56,9 @@ o   Package descriptions do not need to include a <file> item for each
     as both <filein> and <built-file> (so that gst-package --dist will
     skip it).
 
+o   Packages can be downloaded using HTTPS if GnuTLS libraries are
+    present.
+
 o   Performance statistics printed by -V are now correct.
 
 o   Scoped methods ("A class >> a") can be used in an "A class [ ... ]"
