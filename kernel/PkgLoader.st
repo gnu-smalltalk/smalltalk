@@ -1355,19 +1355,21 @@ XML.'>
     addFile: aString [
         <category: 'accessing'>
 
-        self files add: aString
+	files isNil ifTrue: [files := OrderedCollection new].
+        files add: aString
     ]
 
     files [
         "Answer a (modifiable) OrderedCollection of files that are part of
          the package."
 	<category: 'accessing'>
-	files isNil ifTrue: [files := OrderedCollection new].
-	^files,
-         (self fileIns copy
-                removeAll: self builtFiles ifAbsent: [];
-                removeAll: files ifAbsent: [];
-                yourself)
+        | f |
+        f := self fileIns copy.
+        f removeAll: self builtFiles ifAbsent: [].
+	files isNil ifFalse: [
+            f removeAll: files ifAbsent: [].
+            f addAll: files ].
+        ^f
     ]
 
     addFileIn: aString [

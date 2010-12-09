@@ -1,3 +1,7 @@
+2010-12-09  Paolo Bonzini <bonzini@gnu.org>
+
+	* kernel/PkgLoader.st: Do not modify "self files".
+
 2010-12-05  Paolo Bonzini <bonzini@gnu.org>
 
 	* kernel/FileDescr.st: Fix deadlock when reading last byte from
