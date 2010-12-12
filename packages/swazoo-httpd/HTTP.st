@@ -1955,6 +1955,11 @@ Object subclass: URIResolution [
 	^nil
     ]
 
+    siteMatch: aSite [
+	<category: 'backwards compatibility'>
+	^aSite match: self request
+    ]
+
     tailPath [
 	<category: 'accessing'>
 	| fullPath |
