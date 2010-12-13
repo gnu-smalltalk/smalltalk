@@ -2,6 +2,9 @@
 
 	* STFileParser.st: Add return tag to doits, thus fixing
 	Behavior>>#evaluate: when using the STInST compiler.
+	* GSTParser.st: Look beyond return tag.
+	* SIFParser.st: Look beyond return tag.
+	* SqueakParser.st: Look beyond return tag.
 
 2010-12-04  Paolo Bonzini  <bonzini@gnu.org>
 

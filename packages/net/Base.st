@@ -1126,7 +1126,7 @@ Copyright (c) Kazuki Yasumatsu, 1995. All rights reserved.
 	speed == nil
 	    ifFalse: 
 		[stream nextPutAll: ' ('.
-		stream display: (transferSpeed / 1024 asScaledDecimal: 2).
+		stream display: (self transferSpeed / 1024 asScaledDecimal: 2).
 		stream nextPutAll: ' Kbytes/sec)'].
 	^stream contents
     ]

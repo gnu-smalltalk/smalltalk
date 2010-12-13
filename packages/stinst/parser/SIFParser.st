@@ -56,6 +56,7 @@ evaluate: node
     node statements size == 1 ifFalse: [ ^self error: 'invalid SIF' ].
 
     stmt := node statements first.
+    stmt isReturn ifTrue: [ stmt := stmt value ].
     stmt isMessage ifFalse: [ ^super evaluate: node ].
     stmt selector == #interchangeVersion: ifTrue: [ ^false ].
 

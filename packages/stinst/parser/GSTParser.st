@@ -86,20 +86,23 @@ STInST.STFileInParser subclass: GSTFileInParser [
     ]
 
     parseDeclaration: node [
+        | decl |
 	currentDeclaration := node parent.
-        node isMessage ifTrue: [
-            (node selectorParts first value = 'subclass:')
-                ifTrue: [self parseClass: node. ^self].
+        decl := node.
+        decl isReturn ifTrue: [ decl := decl value ].
+        decl isMessage ifTrue: [
+            (decl selectorParts first value = 'subclass:')
+                ifTrue: [self parseClass: decl. ^self].
             
-            (node selectorParts first value = 'extend')
-                ifTrue: [self parseClassExtension: node. ^self].
+            (decl selectorParts first value = 'extend')
+                ifTrue: [self parseClassExtension: decl. ^self].
                 
-            ((node receiver name = 'Namespace') 
-                and: [node selectorParts first value = 'current:' ])
-                    ifTrue: [self parseNamespace: node. ^self]].
+            ((decl receiver name = 'Namespace') 
+                and: [decl selectorParts first value = 'current:' ])
+                    ifTrue: [self parseNamespace: decl. ^self]].
         
-        node isVariable 
-            ifTrue: [(node name = 'Eval') 
+        decl isVariable 
+            ifTrue: [(decl name = 'Eval') 
                         ifTrue: [self parseEval. ^self]].
         
         self parserError: 'expected Eval, Namespace or class definition'

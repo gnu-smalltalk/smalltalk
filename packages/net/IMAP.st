@@ -459,20 +459,10 @@ Object subclass: IMAPFetchedItem [
 Namespace current: NetClients.IMAP [
 
 NetProtocolInterpreter subclass: IMAPProtocolInterpreter [
-    | client responseStream commandSequencer mutex readResponseSemaphore continuationPromise commandsInProgress queuedCommands |
+    | responseStream commandSequencer mutex readResponseSemaphore continuationPromise commandsInProgress queuedCommands |
     
     <comment: nil>
     <category: 'NetClients-IMAP'>
-
-    client [
-	<category: 'accessing'>
-	^client
-    ]
-
-    client: imapClient [
-	<category: 'accessing'>
-	client := imapClient
-    ]
 
     commandPrefix: aString [
 	<category: 'accessing'>

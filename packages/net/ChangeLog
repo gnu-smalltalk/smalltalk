@@ -1,5 +1,10 @@
 2010-12-13  Paolo Bonzini  <bonzini@gnu.org>
 
+	* Base.st: Fix erroneously pushed commit.
+	* IMAP.st: Likewise.
+
+2010-12-13  Paolo Bonzini  <bonzini@gnu.org>
+
 	* Base.st: Remove duplicate instance variables, move things from
 	PluggableReporter to Reporter.  Reported by Gwenael Casaccio.
 	* IMAP.st: Remove duplicate instance variable.  Reported by Gwenael

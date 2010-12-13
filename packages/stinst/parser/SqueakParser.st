@@ -43,6 +43,7 @@ STFileInParser subclass: SqueakFileInParser [
 	| stmt |
 	node statements size == 1 ifFalse: [^super evaluate: node].
 	stmt := node statements first.
+        stmt isReturn ifTrue: [ stmt := stmt value ].
 	stmt isMessage ifFalse: [^super evaluate: node].
 	stmt selector == #addCategory: ifTrue: [^false].
 	stmt selector == #commentStamp:prior: 
