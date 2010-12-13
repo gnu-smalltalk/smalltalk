@@ -34,7 +34,7 @@
 Namespace current: NetClients.IMAP [
 
 Object subclass: IMAPCommand [
-    | client sequenceID name arguments status responses completionResponse promise |
+    | sequenceID name arguments status responses completionResponse promise |
     
     <category: 'NetClients-IMAP'>
     <comment: nil>

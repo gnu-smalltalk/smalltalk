@@ -32,8 +32,6 @@
 
 
 Object subclass: FilePath [
-    | path |
-    
     <category: 'Streams-Files'>
     <comment: 'I expose the syntax of file names, including paths.  I know how to
 manipulate such a path by splitting it into its components.  In addition,

@@ -1,3 +1,8 @@
+2010-12-13  Paolo Bonzini <bonzini@gnu.org>
+
+	* kernel/FilePath.st: Remove unused instance variable.  Reported
+	by Gwenael Casaccio.
+
 2010-12-09  Paolo Bonzini <bonzini@gnu.org>
 
 	* kernel/PkgLoader.st: Do not modify "self files".

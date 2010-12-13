@@ -1023,7 +1023,7 @@ Copyright (c) Kazuki Yasumatsu, 1995. All rights reserved.
 
 
 Object subclass: Reporter [
-    | totalByte readByte |
+    | totalByte readByte startTime currentTime |
     
     <category: 'NetClients-URIResolver'>
     <comment: nil>
@@ -1033,9 +1033,10 @@ Object subclass: Reporter [
 	^readByte
     ]
 
-    readByte: aValue [
+    readByte: anInteger [
 	<category: 'accessing'>
-	readByte := aValue
+	readByte := readByte + anInteger.
+	currentTime := Time millisecondClockValue.
     ]
 
     endTransfer [
@@ -1045,6 +1046,8 @@ Object subclass: Reporter [
 
     startTransfer [
 	<category: 'api'>
+	readByte := 0.
+	startTime := currentTime := Time millisecondClockValue.
 	^self
     ]
 
@@ -1062,12 +1065,18 @@ Object subclass: Reporter [
 	<category: 'api'>
 	totalByte := aNumber
     ]
+
+    transferSpeed [
+	<category: 'api'>
+	currentTime = startTime ifTrue: [^nil].
+        ^readByte / ((currentTime - startTime) / 1000)
+    ]
 ]
 
 
 
 Reporter subclass: PluggableReporter [
-    | startTime currentTime totalByte readByte statusBlock |
+    | statusBlock |
     
     <category: 'NetClients-Framework'>
     <comment: '
@@ -1086,15 +1095,13 @@ Copyright (c) Kazuki Yasumatsu, 1995. All rights reserved.
 
     readByte: anInteger [
 	<category: 'accessing'>
-	readByte := readByte + anInteger.
-	currentTime := Time millisecondClockValue.
+        super readByte: anInteger.
 	self statusString: self progressStatusString
     ]
 
     startTransfer [
 	<category: 'accessing'>
-	readByte := 0.
-	startTime := currentTime := Time millisecondClockValue.
+        super startTransfer.
 	self statusString: 'Transferring: Start.'
     ]
 
@@ -1104,14 +1111,9 @@ Copyright (c) Kazuki Yasumatsu, 1995. All rights reserved.
 	statusBlock value: statusString
     ]
 
-    totalByte: anInteger [
-	<category: 'accessing'>
-	totalByte := anInteger
-    ]
-
     progressStatusString [
 	<category: 'private'>
-	| stream |
+	| stream speed |
 	stream := WriteStream on: (String new: 128).
 	stream print: readByte.
 	totalByte == nil 
@@ -1120,10 +1122,11 @@ Copyright (c) Kazuki Yasumatsu, 1995. All rights reserved.
 		    nextPut: $/;
 		    print: totalByte].
 	stream nextPutAll: ' bytes'.
-	currentTime = startTime 
+        speed := self transferSpeed.
+	speed == nil
 	    ifFalse: 
 		[stream nextPutAll: ' ('.
-		(readByte / (currentTime - startTime)) asFloat printOn: stream digits: 2.
+		stream display: (transferSpeed / 1024 asScaledDecimal: 2).
 		stream nextPutAll: ' Kbytes/sec)'].
 	^stream contents
     ]
