@@ -56,6 +56,18 @@ on content (such as add:after:)'>
 	^self new: 16
     ]
 
+    do: aBlock [
+        "Evaluate aBlock for all the elements in the collection"
+
+        <category: 'enumerating'>
+        | index |
+        self beConsistent.
+        index := firstIndex.
+        [ index <= lastIndex ] whileTrue: [
+            aBlock value: (self basicAt: index).
+            index := index + 1 ]
+    ]
+
     first [
 	"Answer the first item of the receiver"
 

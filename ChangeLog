@@ -1,5 +1,9 @@
 2010-12-13  Paolo Bonzini <bonzini@gnu.org>
 
+	* kernel/OrderColl.st: Speed up iteration 2x.
+
+2010-12-13  Paolo Bonzini <bonzini@gnu.org>
+
 	* kernel/FilePath.st: Remove unused instance variable.  Reported
 	by Gwenael Casaccio.
 
