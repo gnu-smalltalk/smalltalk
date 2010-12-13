@@ -127,6 +127,7 @@ RBParser subclass: STFileParser [
 		    ifFalse: [comments first first - 1].
 	tags := nil.
 	node := self parseStatements.
+        node addReturn.
 	node comments isNil 
 	    ifTrue: [node comments: comments]
 	    ifFalse: [comments isNil ifFalse: [node comments: node comments , comments]].
