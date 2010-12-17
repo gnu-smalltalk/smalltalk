@@ -70,5 +70,25 @@ TestCase subclass: GtkCategorizedClassWidgetTest [
             selectAClass: Kernel.CollectingStream class.
         self assert: changed
     ]
+
+    testNotification [
+	<category: 'testing'>
+
+        | widget notifier |
+        widget := GtkCategorizedClassWidget new.
+	widget
+            mainWidget: widget buildTreeView;
+            namespace: Smalltalk category: ''.
+
+	notifier := SystemChangeNotifier new.
+	notifier
+            notify: widget ofSystemChangesOfItem: #class change: #Added using: #'addEvent:';
+            notify: widget ofSystemChangesOfItem: #class change: #Removed using: #'removeEvent:';
+            notify: widget ofSystemChangesOfItem: #class change: #Recategorized using: #'recategorizedEvent:';
+            notify: widget ofSystemChangesOfItem: #class change: #Modified using: #'modificationEvent:'.
+
+	"Object subclass: #TestA.
+	widget selectAClass: TestA"
+    ]
 ]
 

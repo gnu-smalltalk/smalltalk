@@ -1,13 +1,18 @@
 GtkBrowsingTool subclass: GtkSUnit [
     | namespaceWidget classWidget methodWidget sourceCodeWidget successfullWidget failedWidget errorWidget namespace class state |
 
+    accelPath [
+        <category: 'accelerator path'>
+
+        ^ '<SUnit>'
+    ]
+
     createRunMenus [
         <category: 'user interface'>
 
-        ^{
-		GTK.GtkMenuItem menuItem: 'Load tests' connectTo: self selector: #loadTests.
-		GTK.GtkMenuItem menuItem: 'Run test' connectTo: self selector: #runTest.
-		GTK.GtkMenuItem menuItem: 'Debug test' connectTo: self selector: #debugTest}
+        ^{GTK.GtkMenuItem menuItem: 'Load tests' connectTo: self selector: #loadTests.
+	  GTK.GtkMenuItem menuItem: 'Run test' connectTo: self selector: #runTest.
+	  GTK.GtkMenuItem menuItem: 'Debug test' connectTo: self selector: #debugTest}
     ]
 
     createMenus [
@@ -220,7 +225,7 @@ GtkBrowsingTool subclass: GtkSUnit [
 
 	(methodWidget hasSelectedMethod and: [aSymbol = methodWidget selectedMethodSymbol]) ifFalse: [
             methodWidget selectAMethod: aSymbol asString ].
-	sourceCodeWidget sourceCode: methodWidget sourceCode.
+	sourceCodeWidget source: (BrowserMethodSource on: methodWidget selectedMethod).
 	state := MethodState on: self with: methodWidget selectedMethod
     ]
 
@@ -297,12 +302,6 @@ GtkBrowsingTool subclass: GtkSUnit [
         sourceCodeWidget compileError: aString line: line
     ]
 
-    newMethod [
-        <category: 'method events'>
-
-        AddMethodCommand on: self.
-    ]
-
     focusedWidget [
 	<category: 'events'>
 
@@ -312,7 +311,7 @@ GtkBrowsingTool subclass: GtkSUnit [
     acceptIt [
         <category: 'smalltalk events'>
 
-        AcceptItCommand on: self
+        AcceptItCommand executeOn: self
     ]
     
     cancel [
@@ -420,25 +419,25 @@ GtkBrowsingTool subclass: GtkSUnit [
     doIt [
         <category: 'smalltalk event'>
 
-        DoItCommand on: self
+        DoItCommand executeOn: self
     ]
 
     debugIt [
         <category: 'smalltalk event'>
 
-        DebugItCommand on: self
+        DebugItCommand executeOn: self
     ]
 
     inspectIt [
         <category: 'smalltalk event'>
 
-        InspectItCommand on: self
+        InspectItCommand executeOn: self
     ]
 
     printIt [
         <category: 'smalltalk event'>
 
-        PrintItCommand on: self
+        PrintItCommand executeOn: self
     ]
 
     hasChanged [

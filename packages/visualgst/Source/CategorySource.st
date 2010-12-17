@@ -1,20 +1,13 @@
-Object subclass: CategorySource [
-    | printCategory class stream |
-
-    CategorySource class >> display: aSymbol of: aClass [
-	<category: 'instance creation'>
-
-	^ (self write: aSymbol of: aClass on: (WriteStream on: String new))
-	    source 
-    ]
+SourceFormatter subclass: CategorySource [
+    | printCategory class |
 
     CategorySource class >> write: aSymbol of: aClass on: aStream [
 	<category: 'instance creation'>
 
-	^ self new
+	^(self for: aStream)
 	    printCategory: aSymbol of: aClass;
-	    stream: aStream;
-	    yourself
+	    output;
+            yourself
     ]
 
     printCategory: aSymbol of: aClass [
@@ -30,7 +23,7 @@ Object subclass: CategorySource [
 	stream := aStream
     ]
 
-    source [
+    output [
 	<category: 'accessing'>
 
         stream
@@ -41,14 +34,15 @@ Object subclass: CategorySource [
 	class methodDictionary do: [ :each |
 	    each methodCategory = printCategory ifTrue: [
 		(MethodSource write: each on: stream)
-		    sourceWithoutClassHeader ] ].
+		    outputWithoutClassHeader ] ].
 
 	stream
             nextPutAll: ']';
             nl.
-
-        ^ stream contents
     ]
 
+    parser [
+        ^ STInST.GSTParser
+    ]
 ]
 

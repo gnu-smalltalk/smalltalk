@@ -84,7 +84,7 @@ GtkConcreteWidget subclass: GtkHistoryWidget [
 	<category: 'event'>
 
 	widget hasSelectedItem ifFalse: [ ^ self ].
-	InspectItCommand on: self
+	InspectItCommand executeOn: self
     ]
 
     onSelectionChanged [

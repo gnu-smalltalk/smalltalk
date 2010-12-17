@@ -71,69 +71,52 @@ GtkConcreteWidget subclass: GtkCategoryWidget [
     buildTreeView [
         <category: 'user interface'>
     
-	categoryTree := (GTK.GtkTreeView createListWithModel: {{GtkColumnTextType title: 'Method categories'}})
-			    connectSignal: 'button-press-event' to: self selector: #'onPress:event:';
-			    yourself.
-	categoryTree getSelection setMode: GTK.Gtk gtkSelectionBrowse.
-        (model := GtkListModel on: categoryTree getModel)
+	categoryTree := GtkScrollTreeWidget createListWithModel: {{GtkColumnTextType title: 'Method categories'}}.
+	categoryTree treeView getSelection setMode: GTK.Gtk gtkSelectionBrowse.
+	categoryTree connectToWhenPopupMenu: (CategoryMenus on: self).
+        (model := GtkListModel on: categoryTree treeView getModel)
                                         contentsBlock: [ :each | {each displayString} ].
-	^ GTK.GtkScrolledWindow withChild: categoryTree
+	^ categoryTree mainWidget
     ]
 
     unselectAll [
 	<category: 'selection'>
 
-	categoryTree getSelection unselectAll
-    ]
-
-    onPress: aGtkWidget event: aGdkEvent [
-        <category: 'button event'>
-
-        | menu aGdkButtonEvent |
-        aGdkButtonEvent := aGdkEvent castTo: GTK.GdkEventButton type.
-        aGdkButtonEvent button value = 3 ifFalse: [ ^ false ].
-        menu := GTK.GtkMenu new.
-        menu appendMenuItems: {{'Add a category'. self. #newCategory}.
-            {'Rename a category'. self. #renameCategory}.
-            {}.
-            {'File out a category'. self. #fileoutCategory}}.
-        menu attachToWidget: categoryTree detacher: nil.
-        menu popup: nil parentMenuItem: nil func: nil data: nil button: 3 activateTime: aGdkButtonEvent time value.
-        menu showAll.
-        ^ true
+	categoryTree treeView getSelection unselectAll
     ]
 
     whenSelectionChangedSend: aSelector to: anObject [
 	<category: 'events'>
 
-	categoryTree getSelection
+	categoryTree treeView getSelection
 	    connectSignal: 'changed' to: anObject selector: aSelector
     ]
 
     state [
         <category: 'testing'>
 
-        self hasSelectedCategory ifFalse: [ ^ ClassState with: self classOrMeta ].
-        ^ CategoryState with: self classOrMeta->self selectedCategory
+        ^ self hasSelectedCategory 
+			ifFalse: [ ClassState with: self classOrMeta ]
+			ifTrue: [ CategoryState with: self classOrMeta->self selectedCategory ]
     ]
 
     hasSelectedCategory [
 	<category: 'testing'>
 
-	^ categoryTree hasSelectedItem
+	^ categoryTree treeView hasSelectedItem
     ]
 
     selectedCategory [
 	<category: 'accessing'>
 
 	self hasSelectedCategory ifFalse: [ self error: 'nothing is selected' ].
-	^ categoryTree selection
+	^ categoryTree treeView selection
     ]
 
     selectACategory: aString [
         <category: 'item selection'>
 
-	categoryTree select: aString
+	categoryTree treeView select: aString
     ]
 
     findIterInACategory: aString [
@@ -141,7 +124,7 @@ GtkConcreteWidget subclass: GtkCategoryWidget [
 
         | result |
         result := model findIterInACategory: aString.
-        categoryTree scrollToCell: (model gtkModel getPath: result) column: nil useAlign: false rowAlign: 0.5 colAlign: 0.5.
+        categoryTree treeView scrollToCell: (model gtkModel getPath: result) column: nil useAlign: false rowAlign: 0.5 colAlign: 0.5.
         ^ result
     ]
 
@@ -155,24 +138,6 @@ GtkConcreteWidget subclass: GtkCategoryWidget [
 	<category: 'accessing'>
 
 	^ model
-    ]
-
-    newCategory [
-        <category: 'category events'>
-
-        AddCategoryCommand on: self
-    ]
-
-    renameCategory [
-        <category: 'category events'>
-
-        RenameCategoryCommand on: self
-    ]
-
-    fileoutCategory [
-        <category: 'category events'>
-
-        FileoutCategoryCommand on: self
     ]
 
     removeEmptyCategory [

@@ -15,34 +15,12 @@ GtkTextWidget subclass: GtkInspectorSourceWidget [
 	object := anObject
     ]
 
-    popupMenuOn: aGtkWidget menu: aGtkMenu [
-	<category: 'events'>
+    connectSignals [
+        <category: 'initialization'>
 
-	| menuitem |
-    
-	menuitem := GTK.GtkMenuItem new.
-	menuitem show.
-	aGtkMenu append: menuitem.
-	menuitem := GTK.GtkMenuItem newWithLabel: 'Do It'.
-	menuitem
-	    show;
-	    connectSignal: 'activate' to: self selector: #doIt userData: nil.
-	aGtkMenu append: menuitem.
-	menuitem := GTK.GtkMenuItem newWithLabel: 'Print It'.
-	menuitem
-	    show;
-	    connectSignal: 'activate' to: self selector: #printIt userData: nil.
-	aGtkMenu append: menuitem.
-	menuitem := GTK.GtkMenuItem newWithLabel: 'Inspect It'.
-	menuitem
-	    show;
-	    connectSignal: 'activate' to: self selector: #inspectIt userData: nil.
-	aGtkMenu append: menuitem.
-	menuitem := GTK.GtkMenuItem newWithLabel: 'Debug It'.
-	menuitem
-	    show;
-	    connectSignal: 'activate' to: self selector: #debugIt userData: nil.
-	aGtkMenu append: menuitem
+	super connectSignals.
+        self
+            connectToWhenPopupMenu: (WorkspaceMenus on: self).
     ]
 
     targetObject [
@@ -54,24 +32,24 @@ GtkTextWidget subclass: GtkInspectorSourceWidget [
     doIt [
 	<category: 'smalltalk event'>
 
-	DoItCommand on: self
+	DoItCommand executeOn: self
     ]
 
     debugIt [
 	<category: 'smalltalk event'>
 
-	DebugItCommand on: self
+	DebugItCommand executeOn: self
     ]
 
     inspectIt [
 	<category: 'smalltalk event'>
 
-	InspectItCommand on: self
+	InspectItCommand executeOn: self
     ]
 
     printIt [
 	<category: 'smalltalk event'>
 
-	PrintItCommand on: self
+	PrintItCommand executeOn: self
     ]
 ]

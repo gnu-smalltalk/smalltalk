@@ -31,7 +31,7 @@ GtkCategorizedClassWidget subclass: GtkClassSUnitWidget [
     hasSelectedClass [
         <category: 'testing'>
 
-        ^ (classesTree getSelection getSelectedRows: nil) ~= nil
+        ^ (classesTree treeView getSelection getSelectedRows: nil) ~= nil
     ]
 
     selectedClass [
@@ -44,7 +44,7 @@ GtkCategorizedClassWidget subclass: GtkClassSUnitWidget [
         <category: 'accessing'>
 
 	self hasSelectedClass ifFalse: [ self error: 'Nothing is selected' ].
-	^ classesTree selections collect: [:each| each asClass]
+	^ classesTree treeView selections collect: [:each| each asClass]
     ]
 
     recategorizedEvent: anEvent [

@@ -3,19 +3,7 @@ ModifiedEvent subclass: ModifiedClassDefinitionEvent [
     anyChanges [
 	<category: 'testing'>
 
-	^ self isSuperclassModified or: [self areInstVarsModified or: [self areClassVarsModified or: [self areSharedPoolsModified or: [self isTraitCompositionModified]]]]
-    ]
-
-    isTraitCompositionModified [
-	<category: 'testing'>
-
-	^self traitComposition printString ~= self oldTraitComposition printString
-    ]
-
-    oldTraitComposition [
-	<category: 'accessing'>
-
-	^ oldItem traitComposition
+	^ self isSuperclassModified or: [ self areInstVarsModified or: [ self areClassVarsModified or: [ self areSharedPoolsModified ] ] ]
     ]
 
     printOn: aStream [
@@ -25,20 +13,12 @@ ModifiedEvent subclass: ModifiedClassDefinitionEvent [
         aStream
 	   nextPutAll: ' Super: ';
 	    print: self isSuperclassModified;
-	    nextPutAll: ' TraitComposition: ';
-	    print: self isTraitCompositionModified;
 	    nextPutAll: ' InstVars: ';
 	    print: self areInstVarsModified;
 	    nextPutAll: ' ClassVars: ';
 	    print: self areClassVarsModified;
 	    nextPutAll: ' SharedPools: ';
 	    print: self areSharedPoolsModified
-    ]
-
-    traitComposition [
-	<category: 'accessing'>
-
-	^ item traitComposition
     ]
 
     classVarNames [
@@ -120,7 +100,7 @@ ModifiedEvent subclass: ModifiedClassDefinitionEvent [
 	^ Array with: self classKind
     ]
 
-    classDefinitionChangedFrom: oldClass to: newClass [
+    ModifiedClassDefinitionEvent class >> classDefinitionChangedFrom: oldClass to: newClass [
 	<category: 'instance creation'>
 
 	| instance |

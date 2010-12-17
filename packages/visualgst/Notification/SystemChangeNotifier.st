@@ -153,7 +153,7 @@ EventMultiplexer subclass: SystemChangeNotifier [
     classDefinitionChangedFrom: oldClass to: newClass [
 	<category: 'system triggers'>
 
-	self trigger: (ModifiedClassDefinitionEvent classDefinitionChangedFrom: oldClass to: newClass)
+	self trigger: (ModifiedEvent classDefinitionChangedFrom: oldClass to: newClass)
     ]
 
     classRemoved: aClass fromCategory: aCategoryName [

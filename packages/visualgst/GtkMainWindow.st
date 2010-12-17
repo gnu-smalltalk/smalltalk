@@ -261,7 +261,16 @@ that are specific to this version of GNU Smalltalk.';
 
         | widget |
         widget := self focusedWidget.
-        widget isNil ifTrue: [^self].
-        ^widget perform: aSymbol
+        widget isNil ifTrue: [ ^ self ].
+        ^ widget perform: aSymbol
+    ]
+
+    onFocusPerform: aSymbol with: anObject [
+        <category: 'widget'>
+
+        | widget |
+        widget := self focusedWidget.
+        widget isNil ifTrue: [ ^ self ].
+        ^ widget perform: aSymbol with: anObject
     ]
 ]

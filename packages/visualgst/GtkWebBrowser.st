@@ -14,6 +14,12 @@ GtkBrowsingTool subclass: GtkWebBrowser [
 	^ self openSized: 450@375
     ]
 
+    accelPath [
+        <category: 'accelerator path'>
+
+        ^ '<Smallzilla>'
+    ]
+
     windowTitle [
         ^ 'Smallzilla'
     ]

@@ -10,11 +10,23 @@ GtkConcreteWidget subclass: GtkTextWidget [
 	    yourself
     ]
 
+    connectToWhenPopupMenu: aMenu [
+        <category: 'button event'>
+        popupMenu := aMenu.
+	textWidget
+	    connectSignal: 'populate-popup' to: self selector: #'popupMenuOn:menu:'
+    ]
+
+    popupMenuOn: aWidget menu: aGtkMenu [
+        <category: 'button event'>
+        aGtkMenu append: (GTK.GtkMenuItem new show; yourself).
+        popupMenu appendTo: aGtkMenu
+    ]
+
     connectSignals [
 	<category: 'initialization'>
 
 	textWidget
-	    connectSignal: 'populate-popup' to: self selector: #'popupMenuOn:menu:';
 	    connectSignal: 'paste-clipboard' to: self selector: #pasteFromClipboard;
             connectSignal: 'cut-clipboard' to: self selector: #cutFromClipboard.
 
@@ -63,11 +75,6 @@ GtkConcreteWidget subclass: GtkTextWidget [
             packEnd: ((findWidget := GtkFindWidget on: self) mainWidget) expand: false fill: false padding: 0;
             packEnd: ((replaceWidget := GtkReplaceWidget on: self)  mainWidget) expand: false fill: false padding: 0;
             yourself
-    ]
-
-    popupMenuOn: aGtkWidget menu: aGtkMenu [
-        <category: 'events'>
-
     ]
 
     beginUserAction [

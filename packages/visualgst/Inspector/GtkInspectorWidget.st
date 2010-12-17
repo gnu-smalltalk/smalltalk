@@ -51,12 +51,11 @@ GtkConcreteWidget subclass: GtkInspectorWidget [
     buildTreeWidget [
 	<category: 'user interface'>
 
-        inspectorTree := (GTK.GtkTreeView createListWithModel: {{GtkColumnTextType title: 'Variables'}})
-                            connectSignal: 'button-press-event' to: self selector: #'onPress:event:' userData: nil;
-                            yourself.
-        (model := GtkListModel on: inspectorTree getModel)
+        inspectorTree := GtkScrollTreeWidget createListWithModel: {{GtkColumnTextType title: 'Variables'}}.
+        inspectorTree connectToWhenPopupMenu: (InspectorMenus on: self).
+        (model := GtkListModel on: inspectorTree treeView getModel)
                                         contentsBlock: [ :each | {each displayString} ].
-        ^ GTK.GtkScrolledWindow withChild: inspectorTree
+        ^ inspectorTree mainWidget
     ]
 
     buildWorkspaceWidget [
@@ -80,14 +79,14 @@ GtkConcreteWidget subclass: GtkInspectorWidget [
     whenSelectionChangedSend: aSelector to: anObject [
         <category: 'events'>
 
-        inspectorTree getSelection
+        inspectorTree treeView getSelection
             connectSignal: 'changed' to: anObject selector: aSelector userData: nil
     ]
 
     hasSelectedValue [
         <category: 'testing'>
 
-        ^ inspectorTree hasSelectedItem 
+        ^ inspectorTree treeView hasSelectedItem 
     ]
 
     onVariableChanged [
@@ -101,7 +100,12 @@ GtkConcreteWidget subclass: GtkInspectorWidget [
 	<category: 'item selection'>
 
         self hasSelectedValue ifFalse: [self error: 'Nothing is selected'].
-        ^ inspectorTree selection
+        ^ inspectorTree treeView selection
+    ]
+
+    targetObject [
+
+	^ self selectedItem
     ]
 
     selectedValue [
@@ -110,43 +114,24 @@ GtkConcreteWidget subclass: GtkInspectorWidget [
 	^ objectView selectedValue: self selectedItem
     ]
 
-    onPress: aGtkWidget event: aGdkEvent [
-        <category: 'button event'>
-
-        | menu aGdkButtonEvent |
-        aGdkButtonEvent := aGdkEvent castTo: GTK.GdkEventButton type.
-        aGdkButtonEvent button value = 3 ifFalse: [ ^ false ].
-        menu := GTK.GtkMenu new.
-        menu appendMenuItems: {{'Open a new Inspector'. self. #newInspector}.
-            {}.
-            {'Dive'. self. #dive}.
-	    {'Back'. self. #back}.
-            {}.
-            {'File out object'. self. #fileoutObject}}.
-        menu attachToWidget: inspectorTree detacher: nil.
-        menu popup: nil parentMenuItem: nil func: nil data: nil button: 3 activateTime: aGdkButtonEvent time value.
-        menu showAll.
-        ^ true
+    canDive [
+	<category: 'events'>
+	^self hasSelectedValue and: [self selectedItem ~= 'self' and: [ objectView canDive ]]
     ]
 
-    newInspector [
+    isStackEmpty [
 	<category: 'events'>
-
-	GtkInspector openOn: self selectedValue
+        ^stack isEmpty
     ]
 
     dive [
 	<category: 'events'>
-
-	(self selectedItem = 'self' or: [ objectView canDive not ]) ifTrue: [ ^ self ].
 	stack addFirst: self object.
         self object: self selectedValue
     ]
 
     back [
 	<category: 'events'>
-
-	stack isEmpty ifTrue: [ ^ self ].
 	self object: stack removeFirst
     ]
 

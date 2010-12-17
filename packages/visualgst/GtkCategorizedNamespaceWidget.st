@@ -1,5 +1,5 @@
 GtkConcreteWidget subclass: GtkCategorizedNamespaceWidget [
-    | namespacesTree model |
+    | namespaceTree model |
 
     initialize [
         <category: 'initialization'>
@@ -20,61 +20,52 @@ GtkConcreteWidget subclass: GtkCategorizedNamespaceWidget [
     buildTreeView [
         <category: 'user interface'>
 
-	namespacesTree := GtkScrollTreeWidget createTreeWithModel: {{GtkColumnPixbufType visible. GtkColumnTextType title: 'Namespaces'}}.
-	namespacesTree connectToWhenPopupMenu: [ :menu | self buildPopupMenu: menu ].
-	namespacesTree treeView getSelection setMode: GTK.Gtk gtkSelectionBrowse.
-	(model := GtkTreeModel on: namespacesTree treeView getModel)
+	namespaceTree := GtkScrollTreeWidget createTreeWithModel: {{GtkColumnPixbufType visible. GtkColumnTextType title: 'Namespaces'}}.
+	namespaceTree connectToWhenPopupMenu: (NamespaceMenus on: self).
+	namespaceTree treeView getSelection setMode: GTK.Gtk gtkSelectionBrowse.
+	(model := GtkTreeModel on: namespaceTree treeView getModel)
                                         item: FakeNamespace;
                                         childrenBlock: [ :each | (each subspaces asArray sort: [ :a :b | a name <= b name ]), (each categories values sort: [ :a :b | a name <= b name ]) ];
                                         contentsBlock: [ :each | {each icon. each name asString} ];
                                         connectSignal: 'row-has-child-toggled' to: self selector: #'childToggled:path:iter:';
                                         refresh.
-	^ namespacesTree mainWidget
-    ]
-
-    buildPopupMenu: aGtkMenu [
-        <category: 'button event'>
-
-        aGtkMenu appendMenuItems: {{'Add a namespace'. self. #newNamespace}.
-            {'Rename a namespace'. self. #renameNamespace}.
-            {'Delete a namespace'. self. #deleteNamespace}.
-            {}.
-            {'Inspect a namespace'. self. #inspectNamespace}.
-            {}.
-            {'File out a namespace'. self. #fileoutNamespace}}
+	^ namespaceTree mainWidget
     ]
 
     whenSelectionChangedSend: aSelector to: anObject [
         <category: 'events'>
 
-        namespacesTree treeView getSelection
+        namespaceTree treeView getSelection
             connectSignal: 'changed' to: anObject selector: aSelector
     ]
 
     selectANamespace: aNamespace [
         <category: 'item selection'>
 
-	namespacesTree treeView select: aNamespace
+	(self hasSelectedNamespace and: [ self selectedNamespace == aNamespace ]) ifTrue: [ ^ self ].
+	(namespaceTree treeView)
+			    expandAll;
+			    select: aNamespace
     ]
 
     hasSelectedNamespace [
         <category: 'testing'>
 
-        ^ namespacesTree treeView hasSelectedItem
+        ^ namespaceTree treeView hasSelectedItem
     ]
 
     selectedNamespace [
         <category: 'accessing'>
 
 	self hasSelectedNamespace ifFalse: [ self error: 'nothing is selected' ].
-	^ namespacesTree treeView selection namespace
+	^ namespaceTree treeView selection namespace
     ]
 
     selectedCategory [
         <category: 'accessing'>
 
         self hasSelectedNamespace ifFalse: [ self error: 'nothing is selected' ].
-        ^ namespacesTree treeView selection category
+        ^ namespaceTree treeView selection category
     ]
 
     state [
@@ -89,40 +80,10 @@ GtkConcreteWidget subclass: GtkCategorizedNamespaceWidget [
     childToggled: model path: path iter: iter [
 	<category: 'signals'>
 
-	namespacesTree treeView collapseRow: path.
+	namespaceTree treeView collapseRow: path.
 	((model at: iter) at: 3) isNamespace ifTrue: [
 	    ((model at: iter) at: 3) subspaces isEmpty ifFalse: [
-		namespacesTree treeView expandRow: path openAll: false ] ]
-    ]
-
-    newNamespace [
-        <category: 'popup events'>
-
-        AddNamespaceCommand on: self
-    ]
-
-    renameNamespace [
-        <category: 'namespace events'>
-
-        RenameNamespaceCommand on: self
-    ]
-
-    deleteNamespace [
-        <category: 'namespace events'>
-
-        DeleteNamespaceCommand on: self
-    ]
-
-    inspectNamespace [
-        <category: 'namespace events'>
-
-        InspectNamespaceCommand on: self
-    ]
-
-    fileoutNamespace [
-        <category: 'namespace events'>
-
-        FileoutNamespaceCommand on: self
+		namespaceTree treeView expandRow: path openAll: false ] ]
     ]
 
     addEvent: anEvent [

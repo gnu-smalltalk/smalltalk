@@ -40,35 +40,18 @@ GtkConcreteWidget subclass: GtkContextWidget [
     buildTreeView [
         <category: 'user interface'>
     
-        contextTree := (GTK.GtkTreeView createListWithModel: {{GtkColumnTextType title: 'Contexts'}})
-                            connectSignal: 'button-press-event' to: self selector: #'onPress:event:';
-                            yourself.
-        contextTree getSelection setMode: GTK.Gtk gtkSelectionBrowse.
-        (model := GtkListModel on: contextTree getModel)
+        contextTree := GtkScrollTreeWidget createListWithModel: {{GtkColumnTextType title: 'Contexts'}}.
+        contextTree connectToWhenPopupMenu: (ContextMenus on: self).
+        contextTree treeView getSelection setMode: GTK.Gtk gtkSelectionBrowse.
+        (model := GtkListModel on: contextTree treeView getModel)
                                         contentsBlock: [ :each | {each printString} ].
-        ^ GTK.GtkScrolledWindow withChild: contextTree
-    ]
-
-    onPress: aGtkWidget event: aGdkEvent [
-        <category: 'button event'>
-
-        | menu aGdkButtonEvent |
-        aGdkButtonEvent := aGdkEvent castTo: GTK.GdkEventButton type.
-        aGdkButtonEvent button value = 3 ifFalse: [ ^ false ].
-        menu := GTK.GtkMenu new.
-        menu appendMenuItems: {{'Inspect a method'. self. #inspectMethod}.
-            {}.
-            {'File out a method'. self. #fileoutMethod}}.
-        menu attachToWidget: contextTree detacher: nil.
-        menu popup: nil parentMenuItem: nil func: nil data: nil button: 3 activateTime: aGdkButtonEvent time value.
-        menu showAll.
-        ^ true
+        ^ contextTree mainWidget
     ]
 
     whenSelectionChangedSend: aSelector to: anObject [
 	<category: 'events'>
 
-	contextTree getSelection
+	contextTree treeView getSelection
 	    connectSignal: 'changed' to: anObject selector: aSelector userData: nil
     ]
 
@@ -81,19 +64,19 @@ GtkConcreteWidget subclass: GtkContextWidget [
     selectLastContext [
         <category: 'item selection'>
 
-	contextTree selectLastItem
+	contextTree treeView selectLastItem
     ]
 
     selectFirstContext [
         <category: 'item selection'>
 
-	contextTree selectFirstItem
+	contextTree treeView selectFirstItem
     ]
 
     hasSelectedContext [
 	<category: 'testing'>
 
-	^ contextTree hasSelectedItem
+	^ contextTree treeView hasSelectedItem
     ]
 
     selectedContext [
@@ -101,22 +84,16 @@ GtkConcreteWidget subclass: GtkContextWidget [
 
 
 	self hasSelectedContext ifFalse: [ self error: 'Nothing is selected' ].
-        ^ contextTree selection
+        ^ contextTree treeView selection
     ]
 
     state [
         <category: 'actions'>
 
         "TODO: add ContextState."
-        contextTree hasSelectedItem ifTrue: [
-            ^MethodState with: contextTree selection method method ].
+        contextTree treeView hasSelectedItem ifTrue: [
+            ^MethodState with: contextTree treeView selection method method ].
         ^BrowserState new
-    ]
-
-    inspectMethod [
-	<category: 'method events'>
-
-	InspectMethodCommand on: self
     ]
 
     positionOfSelectedContext [

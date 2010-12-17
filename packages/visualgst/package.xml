@@ -6,60 +6,66 @@
   <prereq>Cairo</prereq>
   <prereq>SUnit</prereq>
   <prereq>DebugTools</prereq>
+  <prereq>Announcements</prereq>
   <provides>Browser</provides>
   <test>
-    <filein>Tests/FinderTest.st</filein>
-    <filein>Tests/GtkCategorizedClassWidgetTest.st</filein>
+    <filein>Tests/AddNamespaceUndoCommandTest.st</filein>
+    <filein>Tests/GtkMethodWidgetTest.st</filein>
     <filein>Tests/CompiledMethodTest.st</filein>
     <filein>Tests/ExtractLiteralsTest.st</filein>
-    <filein>Tests/StateTest.st</filein>
-    <filein>Tests/AddClassUndoCommandTest.st</filein>
+    <filein>Tests/CategoryTest.st</filein>
+    <filein>Tests/GtkScrollTreeWidgetTest.st</filein>
+    <filein>Tests/MenuBuilderTest.st</filein>
     <filein>Tests/GtkAssistantTest.st</filein>
     <filein>Tests/GtkSimpleListWidgetTest.st</filein>
-    <filein>Tests/GtkScrollTreeWidgetTest.st</filein>
-    <filein>Tests/PragmaTest.st</filein>
-    <filein>Tests/GtkCategoryWidgetTest.st</filein>
-    <filein>Tests/GtkConcreteWidgetTest.st</filein>
-    <filein>Tests/GtkCategorizedNamespaceWidgetTest.st</filein>
-    <filein>Tests/GtkMethodWidgetTest.st</filein>
-    <filein>Tests/CategoryTest.st</filein>
-    <filein>Tests/AddNamespaceUndoCommandTest.st</filein>
     <filein>Tests/EmptyTest.st</filein>
-    <file>Tests/FinderTest.st</file>
-    <file>Tests/GtkCategorizedClassWidgetTest.st</file>
+    <filein>Tests/AddClassUndoCommandTest.st</filein>
+    <filein>Tests/GtkCategoryWidgetTest.st</filein>
+    <filein>Tests/StateTest.st</filein>
+    <filein>Tests/FinderTest.st</filein>
+    <filein>Tests/PragmaTest.st</filein>
+    <filein>Tests/GtkCategorizedNamespaceWidgetTest.st</filein>
+    <filein>Tests/GtkCategorizedClassWidgetTest.st</filein>
+    <filein>Tests/GtkConcreteWidgetTest.st</filein>
+    <file>Tests/AddNamespaceUndoCommandTest.st</file>
+    <file>Tests/GtkMethodWidgetTest.st</file>
     <file>Tests/CompiledMethodTest.st</file>
     <file>Tests/ExtractLiteralsTest.st</file>
-    <file>Tests/StateTest.st</file>
-    <file>Tests/AddClassUndoCommandTest.st</file>
+    <file>Tests/CategoryTest.st</file>
+    <file>Tests/GtkScrollTreeWidgetTest.st</file>
+    <file>Tests/MenuBuilderTest.st</file>
     <file>Tests/GtkAssistantTest.st</file>
     <file>Tests/GtkSimpleListWidgetTest.st</file>
-    <file>Tests/GtkScrollTreeWidgetTest.st</file>
-    <file>Tests/PragmaTest.st</file>
-    <file>Tests/GtkCategoryWidgetTest.st</file>
-    <file>Tests/GtkConcreteWidgetTest.st</file>
-    <file>Tests/GtkCategorizedNamespaceWidgetTest.st</file>
-    <file>Tests/GtkMethodWidgetTest.st</file>
-    <file>Tests/CategoryTest.st</file>
-    <file>Tests/AddNamespaceUndoCommandTest.st</file>
     <file>Tests/EmptyTest.st</file>
+    <file>Tests/AddClassUndoCommandTest.st</file>
+    <file>Tests/GtkCategoryWidgetTest.st</file>
+    <file>Tests/StateTest.st</file>
+    <file>Tests/FinderTest.st</file>
+    <file>Tests/PragmaTest.st</file>
+    <file>Tests/GtkCategorizedNamespaceWidgetTest.st</file>
+    <file>Tests/GtkCategorizedClassWidgetTest.st</file>
+    <file>Tests/GtkConcreteWidgetTest.st</file>
     <sunit>
-      VisualGST.FinderTest
-      VisualGST.GtkCategorizedClassWidgetTest
+      VisualGST.AddNamespaceUndoCommandTest
+      VisualGST.GtkMethodWidgetTest
       VisualGST.CompiledMethodTest
       VisualGST.ExtractLiteralsTest
-      VisualGST.StateTest
-      VisualGST.AddClassUndoCommandTest
+      VisualGST.CategoryTest
+      VisualGST.GtkScrollTreeWidgetTest
+      VisualGST.Test
+      VisualGST.MenuBuilderTest
       VisualGST.GtkAssistantTest
       VisualGST.GtkSimpleListWidgetTest
-      VisualGST.GtkScrollTreeWidgetTest
-      VisualGST.PragmasTest
-      VisualGST.GtkCategoryWidgetTest
-      VisualGST.GtkConcreteWidgetTest
-      VisualGST.GtkCategorizedNamespaceWidgetTest
-      VisualGST.GtkMethodWidgetTest
-      VisualGST.CategoryTest
-      VisualGST.AddNamespaceUndoCommandTest
       VisualGST.EmptyTest
+      VisualGST.AddClassUndoCommandTest
+      VisualGST.GtkCategoryWidgetTest
+      VisualGST.StateTest
+      VisualGST.FinderTest
+      VisualGST.PragmasTest
+      VisualGST.GtkCategorizedNamespaceWidgetTest
+      VisualGST.GtkCategorizedClassWidgetTest
+      VisualGST.#Test
+      VisualGST.GtkConcreteWidgetTest
     </sunit>
   </test>
   <filein>Notification/AbstractEvent.st</filein>
@@ -76,36 +82,70 @@
   <filein>Notification/RenamedEvent.st</filein>
   <filein>Notification/ReorganizedEvent.st</filein>
   <filein>Notification/SystemChangeNotifier.st</filein>
+  <filein>GtkAnnouncer.st</filein>
+  <filein>GtkNamespaceSelectionChanged.st</filein>
+  <filein>GtkClassSelectionChanged.st</filein>
   <filein>Commands/Command.st</filein>
-  <filein>Commands/DoItCommand.st</filein>
-  <filein>Commands/DebugItCommand.st</filein>
-  <filein>Commands/PrintItCommand.st</filein>
-  <filein>Commands/InspectItCommand.st</filein>
-  <filein>Commands/ClassCommand.st</filein>
-  <filein>Commands/CategoryCommand.st</filein>
-  <filein>Commands/MethodCommand.st</filein>
-  <filein>Commands/NamespaceCommand.st</filein>
-  <filein>Commands/InspectNamespaceCommand.st</filein>
-  <filein>Commands/FileoutNamespaceCommand.st</filein>
-  <filein>Commands/AddNamespaceCommand.st</filein>
-  <filein>Commands/DeleteNamespaceCommand.st</filein>
-  <filein>Commands/RenameNamespaceCommand.st</filein>
-  <filein>Commands/InspectClassCommand.st</filein>
-  <filein>Commands/FileoutClassCommand.st</filein>
-  <filein>Commands/AddClassCommand.st</filein>
-  <filein>Commands/DeleteClassCommand.st</filein>
-  <filein>Commands/RenameClassCommand.st</filein>
-  <filein>Commands/FileoutCategoryCommand.st</filein>
-  <filein>Commands/AddCategoryCommand.st</filein>
-  <filein>Commands/RenameCategoryCommand.st</filein>
-  <filein>Commands/FileoutMethodCommand.st</filein>
-  <filein>Commands/InspectMethodCommand.st</filein>
-  <filein>Commands/AcceptItCommand.st</filein>
-  <filein>Commands/DeleteMethodCommand.st</filein>
-  <filein>Commands/RunTestCommand.st</filein>
-  <filein>Commands/OpenAssistantCommand.st</filein>
-  <filein>Commands/OpenWebBrowserCommand.st</filein>
-  <filein>Pragmas/Pragmas.st</filein>
+  <filein>Commands/SmalltalkMenus/DoItCommand.st</filein>
+  <filein>Commands/SmalltalkMenus/DebugItCommand.st</filein>
+  <filein>Commands/SmalltalkMenus/PrintItCommand.st</filein>
+  <filein>Commands/SmalltalkMenus/InspectItCommand.st</filein>
+  <filein>Commands/SmalltalkMenus/AcceptItCommand.st</filein>
+  <filein>Commands/SmalltalkMenus/CancelCommand.st</filein>
+  <filein>Commands/HistoryCommands/HistoryBackCommand.st</filein>
+  <filein>Commands/HistoryCommands/HistoryDisplayCommand.st</filein>
+  <filein>Commands/HistoryCommands/HistoryForwardCommand.st</filein>
+  <filein>Commands/TabsMenus/CloseTabCommand.st</filein>
+  <filein>Commands/TabsMenus/NextTabCommand.st</filein>
+  <filein>Commands/TabsMenus/PreviousTabCommand.st</filein>
+  <filein>Commands/NamespaceMenus/NamespaceCommand.st</filein>
+  <filein>Commands/NamespaceMenus/InspectNamespaceCommand.st</filein>
+  <filein>Commands/NamespaceMenus/FileoutNamespaceCommand.st</filein>
+  <filein>Commands/NamespaceMenus/AddNamespaceCommand.st</filein>
+  <filein>Commands/NamespaceMenus/DeleteNamespaceCommand.st</filein>
+  <filein>Commands/NamespaceMenus/RenameNamespaceCommand.st</filein>
+  <filein>Commands/ClassMenus/ClassCommand.st</filein>
+  <filein>Commands/ClassMenus/InspectClassCommand.st</filein>
+  <filein>Commands/ClassMenus/FileoutClassCommand.st</filein>
+  <filein>Commands/ClassMenus/AddClassCommand.st</filein>
+  <filein>Commands/ClassMenus/DeleteClassCommand.st</filein>
+  <filein>Commands/ClassMenus/RenameClassCommand.st</filein>
+  <filein>Commands/CategoryMenus/CategoryCommand.st</filein>
+  <filein>Commands/CategoryMenus/FileoutCategoryCommand.st</filein>
+  <filein>Commands/CategoryMenus/AddCategoryCommand.st</filein>
+  <filein>Commands/CategoryMenus/RenameCategoryCommand.st</filein>
+  <filein>Commands/MethodMenus/MethodCommand.st</filein>
+  <filein>Commands/MethodMenus/FileoutMethodCommand.st</filein>
+  <filein>Commands/MethodMenus/InspectMethodCommand.st</filein>
+  <filein>Commands/MethodMenus/DeleteMethodCommand.st</filein>
+  <filein>Commands/MethodMenus/DebugTestCommand.st</filein>
+  <filein>Commands/ToolsMenus/OpenAssistantCommand.st</filein>
+  <filein>Commands/ToolsMenus/OpenWebBrowserCommand.st</filein>
+  <filein>Commands/EditMenus/CancelEditCommand.st</filein>
+  <filein>Commands/EditMenus/UndoEditCommand.st</filein>
+  <filein>Commands/EditMenus/RedoEditCommand.st</filein>
+  <filein>Commands/EditMenus/CutEditCommand.st</filein>
+  <filein>Commands/EditMenus/CopyEditCommand.st</filein>
+  <filein>Commands/EditMenus/PasteEditCommand.st</filein>
+  <filein>Commands/EditMenus/SelectAllEditCommand.st</filein>
+  <filein>Commands/EditMenus/FindEditCommand.st</filein>
+  <filein>Commands/EditMenus/ReplaceEditCommand.st</filein>
+  <filein>Menus/MenuBuilder.st</filein>
+  <filein>Menus/MenuSeparator.st</filein>
+  <filein>Menus/NamespaceMenus.st</filein>
+  <filein>Menus/ClassMenus.st</filein>
+  <filein>Menus/CategoryMenus.st</filein>
+  <filein>Menus/ContextMenus.st</filein>
+  <filein>Menus/MethodMenus.st</filein>
+  <filein>Menus/EditMenus.st</filein>
+  <filein>Menus/SmalltalkMenus.st</filein>
+  <filein>Menus/ToolsMenus.st</filein>
+  <filein>Menus/HistoryMenus.st</filein>
+  <filein>Menus/TabsMenus.st</filein>
+  <filein>Menus/InspectorMenus.st</filein>
+  <filein>Menus/TextMenus.st</filein>
+  <filein>Menus/WorkspaceVariableMenus.st</filein>
+  <filein>Menus/WorkspaceMenus.st</filein>
   <filein>FakeNamespace.st</filein>
   <filein>Category/ClassCategory.st</filein>
   <filein>Category/AbstractNamespace.st</filein>
@@ -162,10 +202,15 @@
   <filein>Undo/AddNamespaceUndoCommand.st</filein>
   <filein>Undo/RenameNamespaceUndoCommand.st</filein>
   <filein>Undo/DeleteNamespaceUndoCommand.st</filein>
+  <filein>Source/SourceFormatter.st</filein>
+  <filein>Source/NamespaceHeaderSource.st</filein>
   <filein>Source/NamespaceSource.st</filein>
+  <filein>Source/ClassHeaderSource.st</filein>
   <filein>Source/ClassSource.st</filein>
   <filein>Source/CategorySource.st</filein>
   <filein>Source/MethodSource.st</filein>
+  <filein>Source/PackageSource.st</filein>
+  <filein>Source/BrowserMethodSource.st</filein>
   <filein>Undo/AddClassUndoCommand.st</filein>
   <filein>Undo/RenameClassUndoCommand.st</filein>
   <filein>Undo/DeleteClassUndoCommand.st</filein>
@@ -229,13 +274,18 @@
   <filein>SUnit/GtkSUnit.st</filein>
   <filein>Commands/OpenBrowserCommand.st</filein>
   <filein>Commands/OpenTabbedBrowserCommand.st</filein>
-  <filein>Commands/OpenSUnitCommand.st</filein>
+  <filein>Commands/ToolsMenus/OpenSUnitCommand.st</filein>
+  <filein>Commands/ToolsMenus/OpenBottomPaneCommand.st</filein>
   <filein>Commands/OpenWorkspaceCommand.st</filein>
-  <filein>Commands/OpenImplementorCommand.st</filein>
-  <filein>Commands/OpenSenderCommand.st</filein>
-  <filein>Commands/OpenPackageBuilderCommand.st</filein>
+  <filein>Commands/ToolsMenus/OpenImplementorCommand.st</filein>
+  <filein>Commands/ToolsMenus/OpenSenderCommand.st</filein>
+  <filein>Commands/ToolsMenus/OpenPackageBuilderCommand.st</filein>
   <filein>Commands/SaveImageCommand.st</filein>
   <filein>Commands/SaveImageAsCommand.st</filein>
+  <filein>Commands/InspectorMenus/InspectorBackCommand.st</filein>
+  <filein>Commands/InspectorMenus/InspectorDiveCommand.st</filein>
+  <filein>Commands/WorkspaceMenus/DeleteItemCommand.st</filein>
+  <filein>Commands/WorkspaceMenus/InspectItemCommand.st</filein>
   <file>Notification/AbstractEvent.st</file>
   <file>Notification/AddedEvent.st</file>
   <file>Notification/CommentedEvent.st</file>
@@ -250,36 +300,70 @@
   <file>Notification/RenamedEvent.st</file>
   <file>Notification/ReorganizedEvent.st</file>
   <file>Notification/SystemChangeNotifier.st</file>
+  <file>GtkAnnouncer.st</file>
+  <file>GtkNamespaceSelectionChanged.st</file>
+  <file>GtkClassSelectionChanged.st</file>
   <file>Commands/Command.st</file>
-  <file>Commands/DoItCommand.st</file>
-  <file>Commands/DebugItCommand.st</file>
-  <file>Commands/PrintItCommand.st</file>
-  <file>Commands/InspectItCommand.st</file>
-  <file>Commands/ClassCommand.st</file>
-  <file>Commands/CategoryCommand.st</file>
-  <file>Commands/MethodCommand.st</file>
-  <file>Commands/NamespaceCommand.st</file>
-  <file>Commands/InspectNamespaceCommand.st</file>
-  <file>Commands/FileoutNamespaceCommand.st</file>
-  <file>Commands/AddNamespaceCommand.st</file>
-  <file>Commands/DeleteNamespaceCommand.st</file>
-  <file>Commands/RenameNamespaceCommand.st</file>
-  <file>Commands/InspectClassCommand.st</file>
-  <file>Commands/FileoutClassCommand.st</file>
-  <file>Commands/AddClassCommand.st</file>
-  <file>Commands/DeleteClassCommand.st</file>
-  <file>Commands/RenameClassCommand.st</file>
-  <file>Commands/FileoutCategoryCommand.st</file>
-  <file>Commands/AddCategoryCommand.st</file>
-  <file>Commands/RenameCategoryCommand.st</file>
-  <file>Commands/FileoutMethodCommand.st</file>
-  <file>Commands/InspectMethodCommand.st</file>
-  <file>Commands/AcceptItCommand.st</file>
-  <file>Commands/DeleteMethodCommand.st</file>
-  <file>Commands/RunTestCommand.st</file>
-  <file>Commands/OpenAssistantCommand.st</file>
-  <file>Commands/OpenWebBrowserCommand.st</file>
-  <file>Pragmas/Pragmas.st</file>
+  <file>Commands/SmalltalkMenus/DoItCommand.st</file>
+  <file>Commands/SmalltalkMenus/DebugItCommand.st</file>
+  <file>Commands/SmalltalkMenus/PrintItCommand.st</file>
+  <file>Commands/SmalltalkMenus/InspectItCommand.st</file>
+  <file>Commands/SmalltalkMenus/AcceptItCommand.st</file>
+  <file>Commands/SmalltalkMenus/CancelCommand.st</file>
+  <file>Commands/HistoryCommands/HistoryBackCommand.st</file>
+  <file>Commands/HistoryCommands/HistoryDisplayCommand.st</file>
+  <file>Commands/HistoryCommands/HistoryForwardCommand.st</file>
+  <file>Commands/TabsMenus/CloseTabCommand.st</file>
+  <file>Commands/TabsMenus/NextTabCommand.st</file>
+  <file>Commands/TabsMenus/PreviousTabCommand.st</file>
+  <file>Commands/NamespaceMenus/NamespaceCommand.st</file>
+  <file>Commands/NamespaceMenus/InspectNamespaceCommand.st</file>
+  <file>Commands/NamespaceMenus/FileoutNamespaceCommand.st</file>
+  <file>Commands/NamespaceMenus/AddNamespaceCommand.st</file>
+  <file>Commands/NamespaceMenus/DeleteNamespaceCommand.st</file>
+  <file>Commands/NamespaceMenus/RenameNamespaceCommand.st</file>
+  <file>Commands/ClassMenus/ClassCommand.st</file>
+  <file>Commands/ClassMenus/InspectClassCommand.st</file>
+  <file>Commands/ClassMenus/FileoutClassCommand.st</file>
+  <file>Commands/ClassMenus/AddClassCommand.st</file>
+  <file>Commands/ClassMenus/DeleteClassCommand.st</file>
+  <file>Commands/ClassMenus/RenameClassCommand.st</file>
+  <file>Commands/CategoryMenus/CategoryCommand.st</file>
+  <file>Commands/CategoryMenus/FileoutCategoryCommand.st</file>
+  <file>Commands/CategoryMenus/AddCategoryCommand.st</file>
+  <file>Commands/CategoryMenus/RenameCategoryCommand.st</file>
+  <file>Commands/MethodMenus/MethodCommand.st</file>
+  <file>Commands/MethodMenus/FileoutMethodCommand.st</file>
+  <file>Commands/MethodMenus/InspectMethodCommand.st</file>
+  <file>Commands/MethodMenus/DeleteMethodCommand.st</file>
+  <file>Commands/MethodMenus/DebugTestCommand.st</file>
+  <file>Commands/ToolsMenus/OpenAssistantCommand.st</file>
+  <file>Commands/ToolsMenus/OpenWebBrowserCommand.st</file>
+  <file>Commands/EditMenus/CancelEditCommand.st</file>
+  <file>Commands/EditMenus/UndoEditCommand.st</file>
+  <file>Commands/EditMenus/RedoEditCommand.st</file>
+  <file>Commands/EditMenus/CutEditCommand.st</file>
+  <file>Commands/EditMenus/CopyEditCommand.st</file>
+  <file>Commands/EditMenus/PasteEditCommand.st</file>
+  <file>Commands/EditMenus/SelectAllEditCommand.st</file>
+  <file>Commands/EditMenus/FindEditCommand.st</file>
+  <file>Commands/EditMenus/ReplaceEditCommand.st</file>
+  <file>Menus/MenuBuilder.st</file>
+  <file>Menus/MenuSeparator.st</file>
+  <file>Menus/NamespaceMenus.st</file>
+  <file>Menus/ClassMenus.st</file>
+  <file>Menus/CategoryMenus.st</file>
+  <file>Menus/ContextMenus.st</file>
+  <file>Menus/MethodMenus.st</file>
+  <file>Menus/EditMenus.st</file>
+  <file>Menus/SmalltalkMenus.st</file>
+  <file>Menus/ToolsMenus.st</file>
+  <file>Menus/HistoryMenus.st</file>
+  <file>Menus/TabsMenus.st</file>
+  <file>Menus/InspectorMenus.st</file>
+  <file>Menus/TextMenus.st</file>
+  <file>Menus/WorkspaceVariableMenus.st</file>
+  <file>Menus/WorkspaceMenus.st</file>
   <file>FakeNamespace.st</file>
   <file>Category/ClassCategory.st</file>
   <file>Category/AbstractNamespace.st</file>
@@ -336,10 +420,15 @@
   <file>Undo/AddNamespaceUndoCommand.st</file>
   <file>Undo/RenameNamespaceUndoCommand.st</file>
   <file>Undo/DeleteNamespaceUndoCommand.st</file>
+  <file>Source/SourceFormatter.st</file>
+  <file>Source/NamespaceHeaderSource.st</file>
   <file>Source/NamespaceSource.st</file>
+  <file>Source/ClassHeaderSource.st</file>
   <file>Source/ClassSource.st</file>
   <file>Source/CategorySource.st</file>
   <file>Source/MethodSource.st</file>
+  <file>Source/PackageSource.st</file>
+  <file>Source/BrowserMethodSource.st</file>
   <file>Undo/AddClassUndoCommand.st</file>
   <file>Undo/RenameClassUndoCommand.st</file>
   <file>Undo/DeleteClassUndoCommand.st</file>
@@ -403,13 +492,18 @@
   <file>SUnit/GtkSUnit.st</file>
   <file>Commands/OpenBrowserCommand.st</file>
   <file>Commands/OpenTabbedBrowserCommand.st</file>
-  <file>Commands/OpenSUnitCommand.st</file>
+  <file>Commands/ToolsMenus/OpenSUnitCommand.st</file>
+  <file>Commands/ToolsMenus/OpenBottomPaneCommand.st</file>
   <file>Commands/OpenWorkspaceCommand.st</file>
-  <file>Commands/OpenImplementorCommand.st</file>
-  <file>Commands/OpenSenderCommand.st</file>
-  <file>Commands/OpenPackageBuilderCommand.st</file>
+  <file>Commands/ToolsMenus/OpenImplementorCommand.st</file>
+  <file>Commands/ToolsMenus/OpenSenderCommand.st</file>
+  <file>Commands/ToolsMenus/OpenPackageBuilderCommand.st</file>
   <file>Commands/SaveImageCommand.st</file>
   <file>Commands/SaveImageAsCommand.st</file>
+  <file>Commands/InspectorMenus/InspectorBackCommand.st</file>
+  <file>Commands/InspectorMenus/InspectorDiveCommand.st</file>
+  <file>Commands/WorkspaceMenus/DeleteItemCommand.st</file>
+  <file>Commands/WorkspaceMenus/InspectItemCommand.st</file>
   <file>Icons/category.gif</file>
   <file>Icons/namespace.gif</file>
   <file>Icons/go-bottom.png</file>

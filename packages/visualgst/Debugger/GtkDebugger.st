@@ -29,6 +29,12 @@ GtkBrowsingTool subclass: GtkDebugger [
 	^ 1
     ]
 
+    accelPath [
+        <category: 'accelerator path'>
+
+        ^ '<VisualGST>'
+    ]
+
     windowTitle [
 	^ 'Debugger'
     ]
@@ -275,19 +281,13 @@ GtkBrowsingTool subclass: GtkDebugger [
         ^codeWidget hasSelection
     ]
 
-    inspectMethod [
-	<category: 'method events'>
-
-	InspectMethodCommand on: self
-    ]
-
     contextChanged [
 	<category: 'context events'>
 
 	| iter |
 	self checkCodeWidgetAndUpdate: [
 	    contextWidget hasSelectedContext ifFalse: [ ^ self ].
-	    codeWidget sourceCode: contextWidget selectedContext method methodSourceString.
+	    codeWidget source: (BrowserMethodSource on: contextWidget selectedContext method).
 	    codeWidget applyTag: #debug forLine: contextWidget selectedContext currentLine.
 	    self updateInspectorWidget: contextWidget selectedContext ]
     ]
@@ -357,7 +357,7 @@ GtkBrowsingTool subclass: GtkDebugger [
     acceptIt [
 	<category: 'method events'>
 
-	AcceptItCommand on: self.
+	AcceptItCommand executeOn: self.
     ]
 
     targetObject [
@@ -423,25 +423,25 @@ GtkBrowsingTool subclass: GtkDebugger [
     doIt [
         <category: 'smalltalk event'>
 
-        DoItCommand on: self
+        DoItCommand executeOn: self
     ]
 
     debugIt [
         <category: 'smalltalk event'>
 
-        DebugItCommand on: self
+        DebugItCommand executeOn: self
     ]
 
     inspectIt [
         <category: 'smalltalk event'>
 
-        InspectItCommand on: self
+        InspectItCommand executeOn: self
     ]
 
     printIt [
         <category: 'smalltalk event'>
 
-        PrintItCommand on: self
+        PrintItCommand executeOn: self
     ]
 
     hasChanged [

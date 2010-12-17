@@ -211,24 +211,30 @@ GtkConcreteWidget subclass: GtkClassBrowserWidget [
 	    aSmallInteger = 0 
 		ifTrue: [
 		    iMethodWidget hasSelectedMethod 
-			ifTrue: [ codeWidget sourceCode: iMethodWidget sourceCode ]
+			ifTrue: [ codeWidget source: (BrowserMethodSource on: iMethodWidget selectedMethod) ]
 			ifFalse: [ codeWidget clear ] ]
 		ifFalse: [
 		    cMethodWidget hasSelectedMethod
-			ifTrue: [ codeWidget sourceCode: cMethodWidget sourceCode ]
+			ifTrue: [ codeWidget source: (BrowserMethodSource on: cMethodWidget selectedMethod) ]
 			ifFalse: [ codeWidget clear ] ] ]
     ]
 
     onNamespaceChanged [
 	<category: 'events'>
 
-	self updateState: namespaceWidget state
+	self updateState: namespaceWidget state.
+	GtkAnnouncer current announce: (GtkNamespaceSelectionChanged new
+		selectedNamespace: self selectedNamespace;
+		yourself)
     ]
 
     onClassChanged [
 	<category: 'events'>
 
-	self updateState: classWidget state
+	self updateState: classWidget state.
+	GtkAnnouncer current announce: (GtkClassSelectionChanged new
+		selectedClass: self selectedClass;
+		yourself)
     ]
 
     onClassHierarchyChanged [
@@ -294,79 +300,7 @@ GtkConcreteWidget subclass: GtkClassBrowserWidget [
     acceptIt [
 	<category: 'smalltalk events'>
 
-        AcceptItCommand on: self
-    ]
-
-    fileoutNamespace [
-	<category: 'namespace events'>
-
-	FileoutNamespaceCommand on: self
-    ]
-
-    newNamespace [
-	<category: 'namespace events'>
-
-	AddNamespaceCommand on: self
-    ]
-
-    renameNamespace [
-	<category: 'namespace events'>
-
-	RenameNamespaceCommand on: self
-    ]
-
-    deleteNamespace [
-	<category: 'namespace events'>
-
-	DeleteNamespaceCommand on: self
-    ]
-
-    inspectNamespace [
-	<category: 'namespace events'>
-
-	InspectNamespaceCommand on: self
-    ]
-
-    fileoutClass [
-	<category: 'class events'>
-    
-	FileoutClassCommand on: classWidget
-    ]
-
-    extractNamespaceFrom: aNamespace [
-	<category: 'namespace as directory'>
-
-	| list namespace |
-	namespace := aNamespace.
-	list := OrderedCollection new.
-	[ namespace isNil ] whileFalse: [
-            list addFirst: namespace displayString.
-            namespace := namespace superspace ].
-	^ list
-    ]
-
-    newClass [
-	<category: 'class events'>
-	
-	AddClassCommand on: self
-    ]
-
-    renameClass [
-	<category: 'class events'>
-
-	RenameClassCommand on: self
-    ]
-
-    deleteClass [
-	<category: 'class events'>
-
-	DeleteClassCommand on: self
-    ]
-
-    inspectClass [
-	<category: 'class events'>
-
-	InspectClassCommand on: self
+        AcceptItCommand executeOn: self
     ]
 
     viewedCategoryWidget [
@@ -381,24 +315,6 @@ GtkConcreteWidget subclass: GtkClassBrowserWidget [
 	<category: 'category events'>
 
 	^ self viewedCategoryWidget model 
-    ]
-
-    fileoutCategory [
-        <category: 'category events'>
-
-	self viewedCategoryWidget fileoutCategory
-    ]
-
-    newCategory [
-        <category: 'category events'>
-
-	AddCategoryCommand on: self
-    ]
-
-    renameCategory [
-        <category: 'category events'>
-
-	RenameCategoryCommand on: self
     ]
 
     viewedMethodWidget [
@@ -421,34 +337,16 @@ GtkConcreteWidget subclass: GtkClassBrowserWidget [
         codeWidget compileError: aString line: line
     ]
 
-    newMethod [
-	<category: 'method events'>
-
-	AcceptItCommand on: self.
-    ]
-
-    deleteMethod [
-	<category: 'method events'>
-
-	DeleteMethodCommand on: self
-    ]
-
-    inspectMethod [
-	<category: 'method events'>
-
-	InspectMethodCommand on: self
-    ]
-
-    fileoutMethod [
-	<category: 'method events'>
-
-	FileoutMethodCommand on: self
-    ]
-
     selectedNamespace [
 	<category: 'selection'>
 
 	^ namespaceWidget selectedNamespace
+    ]
+
+    selectedClass [
+	<category: 'selection'>
+
+	^ classWidget selectedClass
     ]
 
     selectedClassCategory [
@@ -475,24 +373,6 @@ GtkConcreteWidget subclass: GtkClassBrowserWidget [
 
         iMethodWidget clear.
         cMethodWidget clear
-    ]
-
-    displayNamespaceSource: aNamespace [
-	<category: 'private-selection'>
-
-        codeWidget namespaceDefinition: (NamespaceSource on: aNamespace)
-    ]
-
-    displayClassSource: aClass [
-	<category: 'private-selection'>
-
-	codeWidget classDefinition: (ClassSource displayHeaderOf: aClass).
-    ]
-
-    displayMethodSource: aString [
-	<category: 'private-selection'>
-
-	codeWidget sourceCode: aString
     ]
 
     clearSource [
@@ -573,7 +453,7 @@ GtkConcreteWidget subclass: GtkClassBrowserWidget [
 	    updateNamespaceWidget: aNamespace;
 	    clearCategories;
 	    clearMethods;
-	    displayNamespaceSource: aNamespace
+	    source: (NamespaceHeaderSource on: aNamespace)
     ]
 
     selectAClass: aClass [
@@ -649,25 +529,25 @@ GtkConcreteWidget subclass: GtkClassBrowserWidget [
     doIt [
 	<category: 'smalltalk event'>
 
-	DoItCommand on: self
+	DoItCommand executeOn: self
     ]
 
     debugIt [
 	<category: 'smalltalk event'>
 
-	DebugItCommand on: self
+	DebugItCommand executeOn: self
     ]
 
     inspectIt [
 	<category: 'smalltalk event'>
 
-	InspectItCommand on: self
+	InspectItCommand executeOn: self
     ]
 
     printIt [
 	<category: 'smalltalk event'>
 
-	PrintItCommand on: self
+	PrintItCommand executeOn: self
     ]
 
     forward [
@@ -791,6 +671,12 @@ GtkConcreteWidget subclass: GtkClassBrowserWidget [
 	<category: 'code saved'>
 
 	codeWidget clearUndo
+    ]
+
+    source: aSourceFormatter [
+	<category: 'code saved'>
+
+	codeWidget source: aSourceFormatter
     ]
 
     codeSaved [

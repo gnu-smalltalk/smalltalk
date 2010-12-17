@@ -45,7 +45,7 @@ GtkConcreteWidget subclass: GtkSUnitResult [
         menuitem := GTK.GtkMenuItem newWithLabel: 'Run test'.
         menuitem
             show;
-            connectSignal: 'activate' to: self selector: #runTest userData: nil.
+            connectSignal: 'activate' to: self selector: #debugTest userData: nil.
         aGtkMenu append: menuitem.
 	"TODO: show test"
         menuitem := GTK.GtkMenuItem new.
@@ -72,10 +72,10 @@ GtkConcreteWidget subclass: GtkSUnitResult [
         ^ true
     ]
 
-    runTest [
+    debugTest [
 	<category: 'event'>
 	
-        RunTestCommand on: self
+        DebugTestCommand executeOn: self
     ]
 
     hasSelectedMethod [
@@ -113,7 +113,7 @@ GtkConcreteWidget subclass: GtkSUnitResult [
     ]
 
     browseImplementors [
-        OpenImplementorCommand on: self
+        OpenImplementorCommand executeOn: self
     ]
 ]
 

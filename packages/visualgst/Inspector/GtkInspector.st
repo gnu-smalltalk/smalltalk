@@ -12,6 +12,12 @@ GtkBrowsingTool subclass: GtkInspector [
 	    yourself
     ]
 
+    accelPath [
+        <category: 'accelerator path'>
+
+        ^ '<Inspector>'
+    ]
+
     postInitialize [
         <category: 'initialization'>
 
@@ -99,10 +105,11 @@ GtkBrowsingTool subclass: GtkInspector [
     createMenus [
 	<category: 'user interface'>
 
-	self addMenuItem: 'File' withSubmenu: self createFileMenus.
-	self addMenuItem: 'Edit' withSubmenu: self createEditMenus.
-	self addMenuItem: 'Smalltalk' withSubmenu: self createSmalltalkMenus.
-	self addMenuItem: 'Tools' withSubmenu: self createToolsMenus.
+        self createMainMenu: {#('File' #createFileMenus).
+            #('Edit' #createEditMenus).
+            #('Smalltalk' #createSmalltalkMenus).
+            #('Tools' #createToolsMenus).
+            #('Help' #createHelpMenus)}
     ]
 
     focusedWidget [
@@ -162,28 +169,64 @@ GtkBrowsingTool subclass: GtkInspector [
         self saveCodeOr: [ super close ]
     ]
 
+    targetObject [
+        <category: 'smalltalk events'>
+
+        ^ self onFocusPerform: #targetObject
+    ]
+
+    targetObject [
+        <category: 'smalltalk events'>
+
+        ^ self onFocusPerform: #targetObject
+    ]
+
+    doIt: anObject [
+        <category: 'smalltalk events'>
+
+        self onFocusPerform: #doIt: with: anObject
+    ]
+
+    printIt: anObject [
+        <category: 'smalltalk events'>
+
+        self onFocusPerform: #printIt: with: anObject
+    ]
+
+    inspectIt: anObject [
+        <category: 'smalltalk events'>
+
+        self onFocusPerform: #inspectIt: with: anObject
+    ]
+
+    debugIt: anObject [
+        <category: 'smalltalk events'>
+
+        self onFocusPerform: #debugIt: with: anObject
+    ]
+
     doIt [
-        <category: 'smalltalk events'>
+	<category: 'smalltalk event'>
 
-        self onFocusPerform: #doIt
-    ]
-
-    printIt [
-        <category: 'smalltalk events'>
-
-        self onFocusPerform: #printIt
-    ]
-
-    inspectIt [
-        <category: 'smalltalk events'>
-
-        self onFocusPerform: #inspectIt
+	DoItCommand executeOn: self
     ]
 
     debugIt [
-        <category: 'smalltalk events'>
+	<category: 'smalltalk event'>
 
-        self onFocusPerform: #debugIt
+	DebugItCommand executeOn: self
+    ]
+
+    inspectIt [
+	<category: 'smalltalk event'>
+
+	InspectItCommand executeOn: self
+    ]
+
+    printIt [
+	<category: 'smalltalk event'>
+
+	PrintItCommand executeOn: self
     ]
 
     acceptIt [

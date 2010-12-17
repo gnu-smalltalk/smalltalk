@@ -32,106 +32,22 @@ GtkTextWidget subclass: GtkSourceCodeWidget [
 	    createTag: #comment varargs: #('foreground' 'SpringGreen4' nil)
     ]
 
-    popupMenuOn: aGtkWidget menu: aGtkMenu [
-        <category: 'events'>
-
-        | menuitem symbol |
-
-	symbol := self selectedMethodSymbol.
-        menuitem := GTK.GtkMenuItem new.
-        menuitem show.
-        aGtkMenu append: menuitem.
-        menuitem := GTK.GtkMenuItem newWithLabel: 'Browse senders'.
-        menuitem
-	    setSensitive: symbol notNil;
-            show;
-            connectSignal: 'activate' to: self selector: #browseSenders.
-        aGtkMenu append: menuitem.
-        menuitem := GTK.GtkMenuItem newWithLabel: 'Browse implementors'.
-        menuitem
-	    setSensitive: symbol notNil;
-            show;
-            connectSignal: 'activate' to: self selector: #browseImplementors userData: nil.
-        aGtkMenu append: menuitem.
-        menuitem := GTK.GtkMenuItem new.
-        menuitem show.
-        menuitem := GTK.GtkMenuItem new.
-        menuitem show.
-        aGtkMenu append: menuitem.
-        menuitem := GTK.GtkMenuItem newWithLabel: 'Accept'.
-        menuitem
-            show;
-            connectSignal: 'activate' to: self selector: #acceptIt userData: nil.
-        aGtkMenu append: menuitem.
-        menuitem := GTK.GtkMenuItem newWithLabel: 'Cancel'.
-        menuitem
-            show;
-            connectSignal: 'activate' to: self selector: #cancel userData: nil.
-        aGtkMenu append: menuitem.
-        menuitem := GTK.GtkMenuItem new.
-        menuitem show.
-        aGtkMenu append: menuitem.
-        menuitem := GTK.GtkMenuItem newWithLabel: 'Undo'.
-        menuitem
-            show;
-            connectSignal: 'activate' to: self selector: #undo userData: nil.
-        aGtkMenu append: menuitem.
-        menuitem := GTK.GtkMenuItem newWithLabel: 'Redo'.
-        menuitem
-            show;
-            connectSignal: 'activate' to: self selector: #redo userData: nil.
-        aGtkMenu append: menuitem.
-        menuitem := GTK.GtkMenuItem newWithLabel: 'Do It'.
-        menuitem
-            show;
-            connectSignal: 'activate' to: self selector: #doIt userData: nil.
-        aGtkMenu append: menuitem.
-        menuitem := GTK.GtkMenuItem newWithLabel: 'Print It'.
-        menuitem
-            show;
-            connectSignal: 'activate' to: self selector: #printIt userData: nil.
-        aGtkMenu append: menuitem.
-        menuitem := GTK.GtkMenuItem newWithLabel: 'Inspect It'.
-        menuitem
-            show;
-            connectSignal: 'activate' to: self selector: #inspectIt userData: nil.
-        aGtkMenu append: menuitem.
-        menuitem := GTK.GtkMenuItem newWithLabel: 'Debug It'.
-        menuitem
-            show;
-            connectSignal: 'activate' to: self selector: #debugIt userData: nil.
-        aGtkMenu append: menuitem
-    ]
-
     sourceCode [
 	<category: 'accessing'>
 
 	^ self buffer text
     ]
 
-    namespaceDefinition: aString [
+    source: aSource [
 	<category: 'accessing'>
 
+        | string |
+        string := aSource source.
 	self emptyStack.
-	self codeText: aString. 
-	self buffer setText: (self codeText)
-    ]
-
-    classDefinition: aString [
-	<category: 'accessing'>
-
-	self emptyStack.
-	self codeText: aString. 
-	self buffer setText: (self codeText)
-    ]
-
-    sourceCode: aString [
-	<category: 'accessing'>
-
-	self emptyStack.
-	self codeText: aString. 
-	self buffer setText: (self codeText).
-	self parseSource: aString ifParsed: [ :node | SyntaxHighlighter highlight: node in: self buffer ]
+	self codeText: string. 
+	self buffer setText: self codeText.
+	aSource parser == STInST.RBBracketedMethodParser ifTrue: [
+            self parseSource: string ifParsed: [ :node | SyntaxHighlighter highlight: node in: self buffer ] ]
     ]
 
     parseSource: aString ifParsed: aOneArgBlock [
@@ -150,6 +66,8 @@ GtkTextWidget subclass: GtkSourceCodeWidget [
         <category: 'initialization'>
 
 	super connectSignals.
+        self
+            connectToWhenPopupMenu: (TextMenus on: self).
         (self buffer)
 	    connectSignal: 'changed' to: self selector: #'changed' userData: nil
     ]
@@ -312,7 +230,7 @@ GtkTextWidget subclass: GtkSourceCodeWidget [
     browseImplementors [
 	<category: 'browse'>
 
-	OpenImplementorCommand on: self
+	^ browser ifNotNil: [ browser launcher ]
     ]
 
     appendTag: aSymbol description: anArray [

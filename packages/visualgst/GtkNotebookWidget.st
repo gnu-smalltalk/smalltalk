@@ -31,6 +31,13 @@ GtkConcreteWidget subclass: GtkNotebookWidget [
 	self addWidget: aWidget labelWidget: (self buildLabelWidget: aString withIcon: GTK.Gtk gtkStockClose at: aWidget)
     ]
 
+
+    updateWidget: aWidget withLabel: aString [
+	<category: 'user interface'>
+
+	notebook setTabLabel: aWidget mainWidget tabLabel: (self buildLabelWidget: aString withIcon: GTK.Gtk gtkStockClose at: aWidget)
+    ]
+
     addPermanentWidget: aWidget labeled: aString [
         <category: 'user interface'>
 
@@ -133,6 +140,13 @@ GtkConcreteWidget subclass: GtkNotebookWidget [
 	labels removeAtIndex: self currentPage + 1.
 	notebook removePage: self currentPage.
 	pages size = 1 ifTrue: [ notebook setShowTabs: false ]
+    ]
+
+    showPane [
+	<category: 'widget'>
+
+	notebook showAll.
+	pages do: [ :each | each postInitialize ]
     ]
 ]
 

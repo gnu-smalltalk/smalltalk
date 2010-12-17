@@ -96,12 +96,12 @@ GtkConcreteWidget subclass: GtkInspectorBrowserWidget [
 	    aSmallInteger = 0 
 		ifTrue: [
 		    iMethodWidget hasSelectedMethod 
-			ifTrue: [ codeWidget sourceCode: iMethodWidget sourceCode ]
-			ifFalse: [ codeWidget sourceCode: '' ] ]
+			ifTrue: [ codeWidget source: (BrowserMethodSource on: iMethodWidget selectedMethod) ]
+			ifFalse: [ codeWidget clear ] ]
 		ifFalse: [
                     cMethodWidget hasSelectedMethod
-                        ifTrue: [ codeWidget sourceCode: cMethodWidget sourceCode ]
-                        ifFalse: [ codeWidget sourceCode: '' ] ] ]
+                        ifTrue: [ codeWidget source: (BrowserMethodSource on: cMethodWidget selectedMethod) ]
+                        ifFalse: [ codeWidget clear ] ] ]
     ]
 
     onClassHierarchyChanged [
@@ -116,7 +116,7 @@ GtkConcreteWidget subclass: GtkInspectorBrowserWidget [
             iMethodWidget class: aClass withCategory: '*'.
             cMethodWidget class: aClass class withCategory: '*'.
 
-            codeWidget sourceCode: ''.
+            codeWidget clear.
 	    state := CategoryState on: self with: classHierarchyWidget selectedClass -> '*' ]
     ]
 
@@ -127,7 +127,7 @@ GtkConcreteWidget subclass: GtkInspectorBrowserWidget [
 	self checkCodeWidgetAndUpdate: [
 	    iMethodWidget hasSelectedMethod ifFalse: [ ^ self ].
 	    method := iMethodWidget selectedMethod.
-	    codeWidget sourceCode: iMethodWidget sourceCode.
+	    codeWidget source: (BrowserMethodSource on: method).
 	    state := MethodState on: self with: method ]
     ]
 
@@ -138,7 +138,7 @@ GtkConcreteWidget subclass: GtkInspectorBrowserWidget [
 	self checkCodeWidgetAndUpdate: [
 	    cMethodWidget hasSelectedMethod ifFalse: [ ^ self ].
 	    method := cMethodWidget selectedMethod.
-	    codeWidget sourceCode: cMethodWidget sourceCode.
+	    codeWidget source: (BrowserMethodSource on: method).
 	    state := MethodState on: self with: method ]
     ]
 
@@ -209,25 +209,25 @@ GtkConcreteWidget subclass: GtkInspectorBrowserWidget [
     doIt [
 	<category: 'smalltalk event'>
 
-	DoItCommand on: self
+	DoItCommand executeOn: self
     ]
 
     debugIt [
 	<category: 'smalltalk event'>
 
-	DebugItCommand on: self
+	DebugItCommand executeOn: self
     ]
 
     inspectIt [
 	<category: 'smalltalk event'>
 
-	InspectItCommand on: self
+	InspectItCommand executeOn: self
     ]
 
     printIt [
 	<category: 'smalltalk event'>
 
-	PrintItCommand on: self
+	PrintItCommand executeOn: self
     ]
 
     cancel [
@@ -311,7 +311,7 @@ GtkConcreteWidget subclass: GtkInspectorBrowserWidget [
     acceptIt [
 	<category: 'smalltalk events'>
 
-        AcceptItCommand on: self
+        AcceptItCommand executeOn: self
     ]
 
     hasChanged [

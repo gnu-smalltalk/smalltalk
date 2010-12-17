@@ -6,6 +6,12 @@ GtkBrowsingTool subclass: GtkAssistant [
 	^ self openSized: 450@375
     ]
 
+    accelPath [
+        <category: 'accelerator path'>
+
+        ^ '<Assistant>'
+    ]
+
     windowTitle [
 	^ 'Assistant'
     ]

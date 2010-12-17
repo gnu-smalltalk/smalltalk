@@ -1,28 +1,21 @@
-Object subclass: MethodSource [
-    | printMethod stream |
-
-    MethodSource class >> display: aCompiledMethod [
-	<category: 'instance creation'>
-
-	^ (self write: {aCompiledMethod} on: (WriteStream on: String new))
-	    method 
-    ]
+SourceFormatter subclass: MethodSource [
+    | printMethod |
 
     MethodSource class >> write: aCompiledMethod on: aStream [
 	<category: 'instance creation'>
 
-	^ self new
-	    stream: aStream;
+	^(self for: aStream)
 	    printMethod: {aCompiledMethod};
-	    yourself
+	    output;
+            yourself
     ]
 
     MethodSource class >> writeMethods: aCollection on: aStream [
         <category: 'instance creation'>
 
-        ^ self new
-            stream: aStream;
+	(self for: aStream)
             printMethod: aCollection;
+	    output;
             yourself
     ]
 
@@ -67,7 +60,7 @@ Object subclass: MethodSource [
             nl  
     ]
 
-    source [
+    output [
 	<category: 'accessing'>
 
         stream
@@ -81,18 +74,19 @@ Object subclass: MethodSource [
 	stream
             nextPutAll: ']';
             nl.
-
-        ^ stream contents
     ]
 
-    sourceWithoutClassHeader [
+    outputWithoutClassHeader [
         <category: 'accessing'>
 
 	printMethod do: [ :each |
 	    self outputMethod: (self methodSourceFor: each) ].
 
         stream nl. 
-        ^ stream contents
+    ]
+
+    parser [
+        ^ STInST.RBBracketedMethodParser
     ]
 ]
 

@@ -26,13 +26,12 @@ GtkConcreteWidget subclass: GtkVariableTrackerWidget [
     buildListView [
 	<category: 'user interface'>
 
-        widget := (GTK.GtkTreeView createListWithModel: {{GtkColumnTextType title: 'Variable'}. {GtkColumnTextType title: 'Value'}})
-                            connectSignal: 'button-press-event' to: self selector: #'onPress:event:';
-                            yourself.
-        widget getSelection setMode: GTK.Gtk gtkSelectionBrowse.
-        (model := GtkListModel on: widget getModel)
+        widget := GtkScrollTreeWidget createListWithModel: {{GtkColumnTextType title: 'Variable'}. {GtkColumnTextType title: 'Value'}}.
+        widget connectToWhenPopupMenu: (WorkspaceVariableMenus on: self).
+        widget treeView getSelection setMode: GTK.Gtk gtkSelectionBrowse.
+        (model := GtkListModel on: widget treeView getModel)
                                         contentsBlock: [ :each | {each asString. (object instVarNamed: each) displayString} ].
-        ^ GTK.GtkScrolledWindow withChild: widget
+        ^ widget mainWidget
     ]
 
     refresh [
@@ -43,26 +42,22 @@ GtkConcreteWidget subclass: GtkVariableTrackerWidget [
 	    refresh
     ]
 
-    onPress: aGtkWidget event: aGdkEvent [
-        <category: 'button event'>
-
-        | menu aGdkButtonEvent |
-        aGdkButtonEvent := aGdkEvent castTo: GTK.GdkEventButton type.
-        aGdkButtonEvent button value = 3 ifFalse: [ ^ false ].
-        menu := GTK.GtkMenu new.
-        menu appendMenuItems: {{'Inspect a variable'. self. #inspectVariable}.
-            {'Delete a variable'. self. #deleteVariable}.
-            {'Set a variable to nil'. self. #nilVariable}}.
-        menu attachToWidget: widget detacher: nil.
-        menu popup: nil parentMenuItem: nil func: nil data: nil button: 3 activateTime: aGdkButtonEvent time value.
-        menu showAll.
-        ^ true
-    ]
-
     targetObject [
         <category: 'evaluation'>
 
-        ^ object instVarNamed: widget selection
+        ^ object instVarNamed: self selectedValue
+    ]
+
+    hasSelectedValue [
+        <category: 'smalltalk event'>
+
+        ^widget treeView hasSelectedValue
+    ]
+
+    selectedValue [
+        <category: 'smalltalk event'>
+
+        ^widget treeView selection
     ]
 
     inspectIt: anObject [
@@ -71,28 +66,14 @@ GtkConcreteWidget subclass: GtkVariableTrackerWidget [
         GtkInspector openOn: anObject
     ]
 
-    inspectVariable [
-	<category: 'event'>
-
-	widget hasSelectedItem ifFalse: [ ^ self ].
-	InspectItCommand on: self
-    ]
-
     deleteVariable [
 	<category: 'event'>
 
 	| ivar |
-	widget hasSelectedItem ifFalse: [ ^ self ].
-	ivar := widget selection.
+	widget treeView hasSelectedValue ifFalse: [ ^ self ].
+	ivar := self selectedValue.
 	model remove: ivar.
 	object class removeInstVarName: ivar.
-    ]
-
-    nilVariable [
-	<category: 'event'>
-
-	widget hasSelectedItem ifFalse: [ ^ self ].
-	object instVarNamed: widget selection put: nil
     ]
 ]
 

@@ -69,8 +69,7 @@ THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.'
             GTK.GtkMenuItem menuItem: 'Save image' connectTo: self selector: #saveImage.
             GTK.GtkMenuItem menuItem: 'Save image as...' connectTo: self selector: #saveImageAs.
             GTK.GtkMenuItem new}.
-        self exitOnClose ifFalse: [
-            menu add: (GTK.GtkMenuItem menuItem: 'Close' accelPath: '<GtkVisualGSTTool>/File/Close' connectTo: self selector: #close) ].
+            menu add: (GTK.GtkMenuItem menuItem: 'Close' accelPath: '<GtkVisualGSTTool>/File/Close' connectTo: self selector: #closeTab).
         menu add: (GTK.GtkMenuItem menuItem: 'Quit' accelPath: '<GtkVisualGSTTool>/File/Quit' connectTo: self selector: #quit).
         ^menu
     ]
@@ -78,7 +77,7 @@ THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.'
     exitOnClose [
         <category: 'file events'>
 
-        ^self == GtkLauncher uniqueInstance
+        ^ self == GtkLauncher uniqueInstance
     ]
 
     quit [
@@ -90,65 +89,19 @@ THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.'
     createEditMenus [
         <category: 'user interface'>
 
-        self accelGroup append: {{'<Control><shift>Z'. '<GtkVisualGSTTool>/Edit/Cancel'}.
-            {'<Control>Z'. '<GtkVisualGSTTool>/Edit/Undo'}.
-            {'<Control>Y'. '<GtkVisualGSTTool>/Edit/Redo'}.
-            {'<Control>X'. '<GtkVisualGSTTool>/Edit/Cut'}.
-            {'<Control>C'. '<GtkVisualGSTTool>/Edit/Copy'}.
-            {'<Control>V'. '<GtkVisualGSTTool>/Edit/Paste'}.
-            {'<Control>F'. '<GtkVisualGSTTool>/Edit/Find'}.
-            {'<Control>R'. '<GtkVisualGSTTool>/Edit/Replace'}}.
-
-        ^{GTK.GtkMenuItem menuItem: 'Cancel edits' accelPath: '<GtkVisualGSTTool>/Edit/Cancel' connectTo: self selector: #cancel.
-            GTK.GtkMenuItem menuItem: 'Undo' accelPath: '<GtkVisualGSTTool>/Edit/Undo' connectTo: self selector: #undo.
-            GTK.GtkMenuItem menuItem: 'Redo' accelPath: '<GtkVisualGSTTool>/Edit/Redo' connectTo: self selector: #redo.
-            GTK.GtkMenuItem new.
-            GTK.GtkMenuItem menuItem: 'Cut' accelPath: '<GtkVisualGSTTool>/Edit/Cut' connectTo: self selector: #cut.
-            GTK.GtkMenuItem menuItem: 'Copy' accelPath: '<GtkVisualGSTTool>/Edit/Copy' connectTo: self selector: #copy.
-            GTK.GtkMenuItem menuItem: 'Paste' accelPath: '<GtkVisualGSTTool>/Edit/Paste' connectTo: self selector: #paste.
-            GTK.GtkMenuItem new.
-            GTK.GtkMenuItem menuItem: 'Select all' accelPath: '<GtkVisualGSTTool>/Edit/SelectAll' connectTo: self selector: #selectAll.
-            GTK.GtkMenuItem new.
-            GTK.GtkMenuItem menuItem: 'Find' accelPath: '<GtkVisualGSTTool>/Edit/Find' connectTo: self selector: #find.
-            GTK.GtkMenuItem menuItem: 'Replace' accelPath: '<GtkVisualGSTTool>/Edit/Replace' connectTo: self selector: #replace}
+	^ EditMenus browserBuildOn: self
     ]
 
     createSmalltalkMenus [
         <category: 'user interface'>
 
-        self accelGroup append: {{'<Control>D'. '<GtkVisualGSTTool>/Smalltalk/DoIt'. self. #doIt}.
-            {'<Alt>D'. '<GtkVisualGSTTool>/Smalltalk/DebugIt'. self. #printIt}.
-            {'<Control>P'. '<GtkVisualGSTTool>/Smalltalk/PrintIt'. self. #printIt}.
-            {'<Control>I'. '<GtkVisualGSTTool>/Smalltalk/InspectIt'. self. #inspectIt}.
-            {'<Control>S'. '<GtkVisualGSTTool>/Smalltalk/AcceptIt'. self. #acceptIt}}.
-
-        ^{GTK.GtkMenuItem menuItem: 'Do It' accelPath: '<GtkVisualGSTTool>/Smalltalk/DoIt' connectTo: self selector: #doIt.
-            GTK.GtkMenuItem menuItem: 'Print It' accelPath: '<GtkVisualGSTTool>/Smalltalk/PrintIt' connectTo: self selector: #printIt.
-            GTK.GtkMenuItem menuItem: 'Inspect It' accelPath: '<GtkVisualGSTTool>/Smalltalk/InspectIt' connectTo: self selector: #inspectIt.
-            GTK.GtkMenuItem menuItem: 'Debug It' accelPath: '<GtkVisualGSTTool>/Smalltalk/DebugIt' connectTo: self selector: #debugIt.
-            GTK.GtkMenuItem new.
-            GTK.GtkMenuItem menuItem: 'Accept' accelPath: '<GtkVisualGSTTool>/Smalltalk/AcceptIt' connectTo: self selector: #acceptIt}
+	^ SmalltalkMenus browserBuildOn: self
     ]
 
     createToolsMenus [
         <category: 'user interface'>
 
-        | menu |
-        self accelGroup append: {{'<Control>M'. '<GtkVisualGSTTool>/Tools/Implementors'}.
-            {'<Control>N'. '<GtkVisualGSTTool>/Tools/Senders'}.
-            {'<Alt>P'. '<GtkVisualGSTTool>/Tools/PackageBuilder'}}.
-
-        menu := {GTK.GtkMenuItem menuItem: 'Implementors' accelPath: '<GtkVisualGSTTool>/Tools/Implementors' connectTo: self selector: #newImplementorBrowser.
-            GTK.GtkMenuItem menuItem: 'Senders' accelPath: '<GtkVisualGSTTool>/Tools/Senders' connectTo: self selector: #newSenderBrowser.
-            GTK.GtkMenuItem menuItem: 'SUnit' connectTo: self selector: #newSUnitBrowser.
-            GTK.GtkMenuItem menuItem: 'PackageBuilder' accelPath: '<GtkVisualGSTTool>/Tools/PackageBuilder' connectTo: self selector: #packageBuilder} asOrderedCollection.
-
-        GtkWebView hasWebkit ifTrue: [ menu := menu, {GTK.GtkMenuItem new.
-            GTK.GtkMenuItem menuItem: 'Assistant' connectTo: OpenAssistantCommand selector: #execute.
-            GTK.GtkMenuItem new.
-            GTK.GtkMenuItem menuItem: 'Smallzilla' connectTo: OpenWebBrowserCommand selector: #execute} ].
-
-        ^menu
+	^ ToolsMenus browserBuildOn: self
     ]
 
     state [
@@ -197,25 +150,25 @@ THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.'
     newSUnitBrowser [
 	<category: 'tools events'>
 
-	OpenSUnitCommand on: self
+	OpenSUnitCommand executeOn: self
     ]
 
     newSenderBrowser [
 	<category: 'tools events'>
 
-	OpenSenderCommand on: self
+	OpenSenderCommand executeOn: self
     ]
 
     newImplementorBrowser [
 	<category: 'tools events'>
 
-	OpenImplementorCommand on: self
+	OpenImplementorCommand executeOn: self
     ]
 
     packageBuilder [
         <category: 'tools events'>
 
-        OpenPackageBuilderCommand on: self
+        OpenPackageBuilderCommand executeOn: self
     ]
 
     helpContents [

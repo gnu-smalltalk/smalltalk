@@ -25,7 +25,8 @@ GtkConcreteWidget subclass: GtkCategorizedClassWidget [
         (GtkLauncher uniqueInstance systemChangeNotifier)
             notify: self ofSystemChangesOfItem: #class change: #Added using: #'addEvent:';
             notify: self ofSystemChangesOfItem: #class change: #Removed using: #'removeEvent:';
-            notify: self ofSystemChangesOfItem: #class change: #Recategorized using: #'recategorizedEvent:'
+            notify: self ofSystemChangesOfItem: #class change: #Recategorized using: #'recategorizedEvent:';
+            notify: self ofSystemChangesOfItem: #class change: #Modified using: #'modificationEvent:'
     ]
 
     category: aString [
@@ -60,7 +61,7 @@ GtkConcreteWidget subclass: GtkCategorizedClassWidget [
             category: aString;
             namespace: aNamespace.
 	model refresh.
-	classesTree expandAll
+	classesTree treeView expandAll
     ]
 
     appendClass: aClass to: anArray [
@@ -92,51 +93,30 @@ GtkConcreteWidget subclass: GtkCategorizedClassWidget [
     buildTreeView [
 	<category: 'user interface'>
    
-        classesTree := (GTK.GtkTreeView createTreeWithModel: {{GtkColumnTextType title: 'Classes'}})
-                            connectSignal: 'button-press-event' to: self selector: #'onPress:event:';
-                            yourself.
-        classesTree getSelection setMode: self selectionMode.
-        (model := GtkTreeModel on: classesTree getModel)
+        classesTree := GtkScrollTreeWidget createTreeWithModel: {{GtkColumnTextType title: 'Classes'}}.
+        classesTree connectToWhenPopupMenu: (ClassMenus on: self).
+        classesTree treeView getSelection setMode: self selectionMode.
+        (model := GtkTreeModel on: classesTree treeView getModel)
 					item: self root;
 					childrenBlock: [ :each | | col | 
 							    col := SortedCollection sortBlock: [ :a :b | a asClass name <= b asClass name ]. 
 							    each subclassesDo: [ :subclasses | self appendClass: subclasses to: col ]. 
 							    col ];
                                         contentsBlock: [ :each | {each asClass name asString, ' '} ].
-        ^ GTK.GtkScrolledWindow withChild: classesTree 
-    ]
-
-    onPress: aGtkWidget event: aGdkEvent [
-        <category: 'button event'>
-
-        | menu aGdkButtonEvent |
-        aGdkButtonEvent := aGdkEvent castTo: GTK.GdkEventButton type.
-        aGdkButtonEvent button value = 3 ifFalse: [ ^ false ].
-        menu := GTK.GtkMenu new.
-        menu appendMenuItems: {{'Add a class'. self. #newClass}.
-            {'Rename a class'. self. #renameClass}.
-            {'Delete a class'. self. #deleteClass}.
-            {}.
-            {'Inspect a class'. self. #inspectClass}.
-            {}.
-            {'File out a class'. self. #fileoutClass}}.
-        menu attachToWidget: classesTree detacher: nil.
-        menu popup: nil parentMenuItem: nil func: nil data: nil button: 3 activateTime: aGdkButtonEvent time value.
-        menu showAll.
-        ^ true
+        ^ classesTree mainWidget
     ]
 
     whenSelectionChangedSend: aSelector to: anObject [
 	<category: 'events'>
 
-	classesTree getSelection
+	classesTree treeView getSelection
 	    connectSignal: 'changed' to: anObject selector: aSelector
     ]
 
     selectionMode: aSelectionMode [
 	<category: 'user interface'>
 
-	classesTree getSelection setMode: aSelectionMode.
+	classesTree treeView getSelection setMode: aSelectionMode.
     ]
 
     selectedNamespace [
@@ -154,7 +134,7 @@ GtkConcreteWidget subclass: GtkCategorizedClassWidget [
     hasSelectedClass [
 	<category: 'testing'>
 
-	^ classesTree hasSelectedItem
+	^ classesTree treeView hasSelectedItem
     ]
 
     state [
@@ -171,43 +151,13 @@ GtkConcreteWidget subclass: GtkCategorizedClassWidget [
 	<category: 'accessing'>
 
 	self hasSelectedClass ifFalse: [ self error: 'nothing is selected' ].
-	^ classesTree selection asClass
+	^ classesTree treeView selection asClass
     ]
 
     selectAClass: aClass [
 	<category: 'item selection'>
 
-	classesTree select: aClass
-    ]
-
-    newClass [
-        <category: 'class events'>
-
-        AddClassCommand on: self
-    ]
-
-    renameClass [
-        <category: 'class events'>
-
-        RenameClassCommand on: self
-    ]
-
-    deleteClass [
-        <category: 'class events'>
-
-        DeleteClassCommand on: self
-    ]
-
-    inspectClass [
-        <category: 'class events'>
-
-	InspectClassCommand on: self
-    ]
-
-    fileoutClass [
-        <category: 'class events'>
-
-	FileoutClassCommand on: self
+	classesTree treeView select: aClass
     ]
 
     addToModel: aClass [
@@ -232,6 +182,16 @@ GtkConcreteWidget subclass: GtkCategorizedClassWidget [
         anEvent item environment == self namespace ifFalse: [ ^ self ].
         (anEvent item category = self category or: [ self category isEmpty ]) ifFalse: [ ^ self ].
         model remove: anEvent item class
+    ]
+
+    modificationEvent: anEvent [
+        <category: 'model event'>
+
+        (anEvent item environment == self namespace or: [ anEvent isSuperclassModified not ]) ifFalse: [ ^ self ].
+        (anEvent oldItem category = self category or: [ anEvent oldItem category isNil and: [ self category isEmpty ] ])
+		    ifTrue: [ model remove: anEvent item class ].
+        (anEvent item category = self category or: [ anEvent item category isNil and: [ self category isEmpty ] ]) 
+		    ifTrue: [ self addToModel: anEvent item ]
     ]
 
     recategorizedEvent: anEvent [

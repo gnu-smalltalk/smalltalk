@@ -18,7 +18,7 @@ Object subclass: GtkImage [
 	    registerNotifier;
             buildNamespaceModel;
             buildClassModel;
-            buildMethodModel.
+            buildMethodModel
     ]
 
     registerNotifier [
@@ -108,7 +108,7 @@ Object subclass: GtkImage [
     do: aBlock [
 	<category: 'model'>
 
-	(finderDic keys asArray sort: [ :a :b | a <= b ]) do: aBlock
+	(finderDic keys asArray "sort: [ :a :b | a <= b ]") do: aBlock
     ]
 
     addNamespaceEvent: anEvent [
