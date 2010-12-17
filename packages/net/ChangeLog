@@ -1,3 +1,7 @@
+2010-12-17  Paolo Bonzini  <bonzini@gnu.org>
+
+	* IMAP.st: _Really_ fix it.
+
 2010-12-13  Paolo Bonzini  <bonzini@gnu.org>
 
 	* Base.st: Fix erroneously pushed commit.
