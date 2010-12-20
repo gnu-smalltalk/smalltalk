@@ -1,3 +1,9 @@
+2010-12-18  Paolo Bonzini <bonzini@gnu.org>
+
+	* kernel/OrderColl.st: Add #identityRemove:ifAbsent: and
+	 #identityRemove:.
+	* kernel/Delay.st: Use it.  Reset the delay after removal.
+
 2010-12-13  Paolo Bonzini <bonzini@gnu.org>
 
 	* kernel/OrderColl.st: Speed up iteration 2x.

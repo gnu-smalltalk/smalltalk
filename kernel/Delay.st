@@ -112,7 +112,7 @@ created.'>
 	TimeoutSem initialize.
 
 	"And signal when the next request is due."
-	activeDelay isNil ifFalse: [
+	self activeDelay isNil ifFalse: [
 	    nextTick := activeDelay resumptionTime - Time millisecondClockValue.
 	    Processor signal: TimeoutSem atMilliseconds: nextTick].
     ]
@@ -141,11 +141,11 @@ created.'>
 
 	<category: 'timer process'>
         | activeDelay |
-	aDelay reset.
 	activeDelay := self activeDelay.
 	activeDelay isNil ifTrue: [^self].
 	activeDelay == aDelay ifTrue: [^Queue removeLast].
-	^Queue remove: aDelay ifAbsent: [].
+	Queue identityRemove: aDelay ifAbsent: [].
+	aDelay reset
     ]
 
     Delay class >> startDelayLoop [

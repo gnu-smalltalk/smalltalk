@@ -322,6 +322,26 @@ on content (such as add:after:)'>
 	^answer
     ]
 
+    identityRemove: oldObject [
+	"Remove oldObject from the receiver. If absent, fail, else
+	 answer oldObject."
+
+	<category: 'removing'>
+	^self identityRemove: oldObject
+	    ifAbsent: [SystemExceptions.NotFound signalOn: oldObject what: 'object']
+    ]
+
+    identityRemove: anObject ifAbsent: aBlock [
+	"Remove anObject from the receiver. If it can't be found, answer the
+	 result of evaluating aBlock"
+
+	<category: 'removing'>
+	^self removeAtIndex: (self 
+		    identityIndexOf: anObject
+		    startingAt: 1
+		    ifAbsent: [^aBlock value])
+    ]
+
     remove: anObject ifAbsent: aBlock [
 	"Remove anObject from the receiver. If it can't be found, answer the
 	 result of evaluating aBlock"
