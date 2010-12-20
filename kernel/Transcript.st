@@ -107,6 +107,13 @@ implements the global Transcript object.'>
 	self nextPutAll: (String new: anInteger withAll: anObject)
     ]
 
+    critical: aBlock [
+	"Evaluate aBlock while holding the Transcript lock"
+
+	<category: 'accessing'>
+	semaphore critical: aBlock
+    ]
+
     next: n putAll: aString startingAt: pos [
 	"Write aString to the Transcript"
 

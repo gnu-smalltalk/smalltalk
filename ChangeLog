@@ -1,3 +1,7 @@
+2010-12-20  Paolo Bonzini <bonzini@gnu.org>
+
+	* kernel/Transcript.st: Add #critical:.
+
 2010-12-18  Paolo Bonzini <bonzini@gnu.org>
 
 	* kernel/OrderColl.st: Add #identityRemove:ifAbsent: and
