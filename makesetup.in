@@ -253,7 +253,11 @@ add_section basic \
   ./libgst*.dll \
   image/gst.im
 
-add_mingw_rpms $basic mingw32-runtime
+add_mingw_rpms $basic \
+  mingw32-runtime \
+  mingw32-libffi \
+  mingw32-libltdl \
+  mingw32-libsigsegv
 
 add_section ide \
   "IDE" \
