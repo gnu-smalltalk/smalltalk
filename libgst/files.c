@@ -282,14 +282,14 @@ static const char standard_files[] = {
 
   /* Goodies */
   "DynVariable.st\0"
-  "Autoload.st\0"
   "DLD.st\0"
   "Getopt.st\0"
   "Generator.st\0"
   "StreamOps.st\0"
   "ObjDumper.st\0"
-  "PkgLoader.st\0"
   "Regex.st\0"
+  "PkgLoader.st\0"
+  "Autoload.st\0"
 };
 
 /* The argc and argv that are passed to libgst via gst_smalltalk_args. 

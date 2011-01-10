@@ -1,3 +1,8 @@
+2011-01-10  Paolo Bonzini <bonzini@gnu.org>
+
+	* kernel/Autoload.st: Add the ability to plug arbitrary loaders.
+	Suggested by Denis Washington.
+
 2011-01-10  Mathieu Suen  <mathieusuen@yahoo.fr>
 
 	* tests/shape.ok: New.
