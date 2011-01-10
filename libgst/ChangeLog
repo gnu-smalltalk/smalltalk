@@ -1,3 +1,8 @@
+2011-01-10  Paolo Bonzini  <bonzini@gnu.org>
+	    Mathiue Suen  <mathieusuen@yahoo.fr>
+
+	* libgst/dict.inl: Fix 32-bit #int and 64-bit #uint limits.
+
 2010-12-05  Paolo Bonzini  <bonzini@gnu.org>
 
 	* lib-src/sockets.c: Use O_NONBLOCK from socketx.h.

@@ -1,3 +1,9 @@
+2011-01-10  Mathieu Suen  <mathieusuen@yahoo.fr>
+
+	* tests/shape.ok: New.
+	* tests/shape.st: New.
+	* tests/testsuite.at: Add it.
+
 2010-12-20  Paolo Bonzini <bonzini@gnu.org>
 
 	* kernel/Transcript.st: Add #critical:.

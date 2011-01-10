@@ -1321,19 +1321,9 @@ is_c_int_32 (OOP oop)
 #endif
 
   ba = (gst_byte_array) OOP_TO_OBJ (oop);
-  if (ba->objClass == _gst_large_negative_integer_class)
+  if (COMMON (ba->objClass == _gst_large_positive_integer_class)
+      || ba->objClass == _gst_large_negative_integer_class)
     return (NUM_INDEXABLE_FIELDS (oop) == 4);
-
-  else if COMMON (ba->objClass == _gst_large_positive_integer_class)
-    {
-      switch (NUM_INDEXABLE_FIELDS (oop))
-	{
-	case 4:
-	  return (true);
-	case 5:
-	  return (ba->bytes[4] == 0);
-	}
-    }
 
   return (false);
 }
@@ -1347,7 +1337,7 @@ is_c_uint_32 (OOP oop)
 #if SIZEOF_OOP == 4
     return (TO_INT (oop) >= 0);
 #else
-    return (TO_INT (oop) >= 0 && TO_INT (oop) < INT_MAX);
+    return (TO_INT (oop) >= 0 && TO_INT (oop) < UINT_MAX);
 #endif
 
   ba = (gst_byte_array) OOP_TO_OBJ (oop);
