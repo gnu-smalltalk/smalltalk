@@ -97,7 +97,7 @@ Object subclass: OpenGLTest [
 	    callback: Glut displayFuncEvent
 	    to: [ self display ].
 	aWindow 
-	    addCallback: Glut reshapeFuncEvent
+	    callback: Glut reshapeFuncEvent
 	    to: [ :w :h | self reshape: w height: h ]
     ]
 
