@@ -96,7 +96,7 @@ CairoContext.'>
     ]
 
     Cairo class >> imageSurfaceGetData: surface [
-        <cCall: 'cairo_image_surface_get_data' returning: #cObject args: #(#cObject)>
+        <cCall: 'cairo_image_surface_get_data' returning: #{CByte} args: #(#cObject)>
     ]
 
     Cairo class >> imageSurfaceGetHeight: filename [

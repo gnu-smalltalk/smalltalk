@@ -1,3 +1,8 @@
+2011-01-09  Paolo Bonzini  <bonzini@gnu.org>
+
+	* CairoFuncs.st: Return #{CByte} from cairo_image_surface_get_data.
+	* CairoSurfaces.st: Add CairoPngSurface>>#data.
+
 2010-12-04  Paolo Bonzini  <bonzini@gnu.org>
 
 	* package.xml: Remove now superfluous <file> tags.

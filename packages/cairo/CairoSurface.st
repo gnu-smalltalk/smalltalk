@@ -296,6 +296,11 @@ CairoLoadableFileSurface subclass: CairoPngSurface [
 	^Cairo imageSurfaceCreateFromPng: filename
     ]
 
+    data [
+	<category: 'C interface'>
+	^Cairo imageSurfaceGetData: self cairoSurface
+    ]
+
     save [
 	"Save the contents of the surface to the PNG file specified by
 	 #filename."
