@@ -1148,7 +1148,7 @@ Whitespace is defined as spaces, tabs, and comments."
 (defun smalltalk-goto-next-keyword ()
   (goto-char (smalltalk-next-keyword)))
 
-(defun* smalltalk-previous-keyword (&key (original-point (point)))
+(defun smalltalk-previous-keyword (&key (original-point (point)))
   (smalltalk-backward-whitespace)
   (if (looking-back "[>[({.^]")
       (progn (goto-char original-point) (point))
@@ -1158,7 +1158,7 @@ Whitespace is defined as spaces, tabs, and comments."
 	  (prog1 (point) (goto-char original-point))
 	(smalltalk-previous-keyword :original-point original-point)))))
 
-(defun* smalltalk-next-keyword (&key (original-point (point)))
+(defun smalltalk-next-keyword (&key (original-point (point)))
   (smalltalk-forward-whitespace)
   (if (looking-at "[])}.]")
       (progn (goto-char original-point) (point))
