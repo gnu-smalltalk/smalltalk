@@ -208,6 +208,9 @@
 	  smalltalk-font-lock-keywords-2)
 	 nil nil nil nil))
 
+  ;; tags
+  (set (make-local-variable 'find-tag-default-function) 
+	   'smalltalk-find-message)
   ;; Run hooks, must be last
   (run-hooks 'smalltalk-mode-hook))
 
@@ -791,7 +794,8 @@ following on the same line."
     (save-excursion
       (save-restriction
 	(widen)
-	(end-of-line)
+	(beginning-of-line)
+	(smalltalk-end-of-paren)
 	(smalltalk-narrow-to-method)
 	(setq state (smalltalk-parse-sexp-and-narrow-to-paren))
 	(narrow-to-region (point-min) (point))
@@ -832,6 +836,13 @@ following on the same line."
 	    (and (null indent-amount)
 		 (setq indent-amount default-amount))))))
     (or indent-amount (smalltalk-current-indent))))
+
+(defun smalltalk-end-of-paren ()
+  (let ((prev-point (point)))
+	(smalltalk-safe-forward-sexp)
+	(while (not (= (point) prev-point))
+	  (setq prev-point (point))
+	  (smalltalk-safe-forward-sexp))))
 
 (defun smalltalk-indent-to-column (col)
   (if (/= col (smalltalk-current-indent))
@@ -979,7 +990,7 @@ Whitespace is defined as spaces, tabs, and comments."
     (save-excursion
       (if (setq new-hit-point
 		(search-backward-regexp
-		 "^[ \t]*\\(\\w+\\.\\)*\\(\\w+\\)[ \t]+extend[ \t]+\\[" nil t))
+		 "^[ \t]*\\(\\(\\w+\\.\\)*\\w+\\)[ \t]+extend[ \t]+\\[" nil t))
 	  (setq new-hit (buffer-substring
 			 (match-beginning 1)
 			 (match-end 1)))))
@@ -1059,5 +1070,103 @@ Whitespace is defined as spaces, tabs, and comments."
       (progn (smalltalk-begin-of-scope)
 	     (skip-chars-forward "^[")
 	     (smalltalk-end-of-defun))))
+
+(defun smalltalk-find-message ()
+  (save-excursion
+    (smalltalk-goto-begenning-of-statement)
+    (cond
+     ((smalltalk-looking-at-unary-send)
+      (if (not (smalltalk-has-sender))
+	       (progn 
+		 (smalltalk-safe-forward-sexp) 
+		 (smalltalk-safe-forward-sexp)
+		 (smalltalk-find-message))
+	       (buffer-substring-no-properties (point) (progn (smalltalk-safe-forward-sexp)(point)))))
+      ((smalltalk-looking-at-keyword-send)
+       (concat (smalltalk-find-beginning-of-keyword-send) (smalltalk-find-end-of-keyword-send))))))
+	 
+(defun smalltalk-safe-backward-sexp ()
+  (let (prev-point)
+    (condition-case nil
+	(progn
+	  (setq prev-point (point))
+	  (smalltalk-backward-sexp 1))
+      (error (goto-char prev-point)))))
+
+(defun smalltalk-safe-forward-sexp ()
+  (let (prev-point)
+    (condition-case nil
+	(progn
+	  (setq prev-point (point))
+	  (smalltalk-forward-sexp 1))
+      (error (goto-char prev-point)))))
+
+(defun smalltalk-goto-begenning-of-statement()
+  (if (not (looking-back "[ \t\n]"))
+      (smalltalk-safe-backward-sexp)))
+
+(defun smalltalk-has-sender ()
+  (save-excursion
+    (smalltalk-backward-whitespace)
+    (looking-back "[]})A-Za-z0-9']")))
+
+(defun smalltalk-looking-at-binary-send ()
+  (looking-at "[^]A-Za-z0-9:_(){}[;.\'\"]+[ \t\n]"))
+
+(defun smalltalk-looking-at-unary-send ()
+  (looking-at "[A-Za-z][A-Za-z0-9]*[ \t\n]"))
+
+(defun smalltalk-looking-at-keyword-send ()
+  (looking-at "[A-Za-z][A-Za-z0-9_]*:"))
+
+(defun smalltalk-looking-back-keyword-send ()
+  (looking-back "[A-z][A-z0-9_]*:"))
+
+(defun smalltalk-find-end-of-keyword-send ()
+  (save-excursion
+    (smalltalk-forward-whitespace)
+    (if (or (looking-at "[.;]")(= (smalltalk-next-keyword) (point)))
+	""
+      (progn
+	(smalltalk-goto-next-keyword)
+	(concat (buffer-substring-no-properties (save-excursion (progn (smalltalk-safe-backward-sexp) (point))) (point))
+		(smalltalk-find-end-of-keyword-send))))))
+
+(defun smalltalk-find-beginning-of-keyword-send ()
+  (save-excursion
+    (smalltalk-backward-whitespace)
+    (if (or (looking-back "[.;]")(= (smalltalk-previous-keyword) (point)))
+	""
+      (progn
+	(smalltalk-goto-previous-keyword)
+	(concat (smalltalk-find-beginning-of-keyword-send) 
+		(buffer-substring-no-properties (point) (progn (smalltalk-safe-forward-sexp)(+ (point) 1))))))))
+
+(defun smalltalk-goto-previous-keyword ()
+  (goto-char (smalltalk-previous-keyword)))
+
+(defun smalltalk-goto-next-keyword ()
+  (goto-char (smalltalk-next-keyword)))
+
+(defun* smalltalk-previous-keyword (&key (original-point (point)))
+  (smalltalk-backward-whitespace)
+  (if (looking-back "[>[({.^]")
+      (progn (goto-char original-point) (point))
+    (progn 
+      (smalltalk-safe-backward-sexp)
+      (if (smalltalk-looking-at-keyword-send)
+	  (prog1 (point) (goto-char original-point))
+	(smalltalk-previous-keyword :original-point original-point)))))
+
+(defun* smalltalk-next-keyword (&key (original-point (point)))
+  (smalltalk-forward-whitespace)
+  (if (looking-at "[])}.]")
+      (progn (goto-char original-point) (point))
+    (progn 
+      (smalltalk-safe-forward-sexp)
+      (skip-chars-forward ":")
+      (if (smalltalk-looking-back-keyword-send)
+	  (prog1 (point) (goto-char original-point))
+	(smalltalk-next-keyword :original-point original-point)))))
 
 (provide 'smalltalk-mode)
