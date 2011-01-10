@@ -1,5 +1,10 @@
 2011-01-09  Paolo Bonzini  <bonzini@gnu.org>
 
+	* CairoSurfaces.st: Make #buildBlankSurface abstract, override it
+	for image surfaces.
+
+2011-01-09  Paolo Bonzini  <bonzini@gnu.org>
+
 	* CairoFuncs.st: Return #{CByte} from cairo_image_surface_get_data.
 	* CairoSurfaces.st: Add CairoPngSurface>>#data.
 

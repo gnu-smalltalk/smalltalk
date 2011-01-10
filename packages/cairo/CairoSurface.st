@@ -125,7 +125,7 @@ CairoSurface subclass: CairoOffscreenSurface [
 
     buildBlankSurface [
 	<category: 'C interface'>
-	^Cairo imageSurfaceCreate: Cairo formatArgb32 width: extent x height: extent y
+        self subclassResponsibility
     ]
 
     buildSurface [
@@ -135,6 +135,11 @@ CairoSurface subclass: CairoOffscreenSurface [
 ]
 
 CairoOffscreenSurface subclass: CairoImageSurface [
+    buildBlankSurface [
+	<category: 'C interface'>
+	^Cairo imageSurfaceCreate: Cairo formatArgb32 width: extent x height: extent y
+    ]
+
     data [
 	<category: 'C interface'>
 	^Cairo imageSurfaceGetData: self cairoSurface
@@ -287,6 +292,11 @@ CairoFileSurface subclass: CairoLoadableFileSurface [
 ]
 
 CairoLoadableFileSurface subclass: CairoPngSurface [
+    buildBlankSurface [
+	<category: 'C interface'>
+	^Cairo imageSurfaceCreate: Cairo formatArgb32 width: extent x height: extent y
+    ]
+
     buildSurfaceFromFile [
 	"Try to read the surface from the file if it exists.  Otherwise,
 	 create a blank surface whose size must have been given with
