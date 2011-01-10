@@ -1,5 +1,9 @@
 2011-01-10  Paolo Bonzini  <bonzini@gnu.org>
 
+	* gstGl.c: Fix CairoBlit.st example on Linux.
+
+2011-01-10  Paolo Bonzini  <bonzini@gnu.org>
+
 	* tess.st: Fix.
 
 2010-12-04  Paolo Bonzini  <bonzini@gnu.org>

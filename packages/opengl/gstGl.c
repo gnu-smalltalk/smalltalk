@@ -1216,6 +1216,7 @@ void gst_initModule_gl()
   vm_proxy->defineCFunc ("glGetPixelMapusv", glGetPixelMapusv);
   vm_proxy->defineCFunc ("glGetPointerv", glGetPointerv);
   vm_proxy->defineCFunc ("glGetPolygonStipple", glGetPolygonStipple);
+  vm_proxy->defineCFunc ("glGetString", glGetString);
   vm_proxy->defineCFunc ("glGetTexEnvfv", glGetTexEnvfv);
   vm_proxy->defineCFunc ("glGetTexEnviv", glGetTexEnviv);
   vm_proxy->defineCFunc ("glGetTexGendv", glGetTexGendv);
