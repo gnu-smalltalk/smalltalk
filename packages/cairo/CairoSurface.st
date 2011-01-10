@@ -122,20 +122,10 @@ CairoSurface subclass: CairoOffscreenSurface [
     ]
 
     extent: aPoint [ extent := aPoint ]
-
-    buildBlankSurface [
-	<category: 'C interface'>
-        self subclassResponsibility
-    ]
-
-    buildSurface [
-	<category: 'C interface'>
-	^self buildBlankSurface
-    ]
 ]
 
 CairoOffscreenSurface subclass: CairoImageSurface [
-    buildBlankSurface [
+    buildSurface [
 	<category: 'C interface'>
 	^Cairo imageSurfaceCreate: Cairo formatArgb32 width: extent x height: extent y
     ]
@@ -152,12 +142,14 @@ CairoOffscreenSurface subclass: CairoFileSurface [
     CairoFileSurface class >> on: aFile with: aSurface [
 	"Create a new surface that will save to aFile and whose
 	 size and initial content is the same as aSurface's.
-	 The content is reset to the content of aFile when
-	 the Smalltalk image is restarted."
+         For a subclass of CairoLoadableFileSurface, the
+	 content is reset to the content of aFile when
+	 the Smalltalk image is restarted.  Otherwise, it
+         will be reset to transparent on image restart."
 
 	<category: 'instance creation'>
 	^(self extent: aSurface extent)
-	    buildBlankSurface;
+	    buildSurface;
 	    paint: aSurface;
 	    filename: aFile asString;
 	    yourself
@@ -165,14 +157,17 @@ CairoOffscreenSurface subclass: CairoFileSurface [
 
     CairoFileSurface class >> on: aFile extent: aPoint [
 	"Create a new surface that will save to aFile, whose
-	 size is aPoint and whose initial content is transparent.
-	 The content is reset to the content of aFile when
-	 the Smalltalk image is restarted."
+	 size is aPoint.  The initial content is transparent
+         except for subclasses of CairoLoadableFileSurface,
+         where it is loaded from aFile.  For loadable surfaces
+	 the content is also reset to the content of aFile when
+	 the Smalltalk image is restarted, otherwise it will be
+         transparent too."
 
 	<category: 'instance creation'>
 	^(self extent: aPoint)
-	    buildBlankSurface;
 	    filename: aFile asString;
+	    buildSurface;
 	    yourself
     ]
 
@@ -228,7 +223,7 @@ CairoFileSurface subclass: CairoMultiPageSurface [
 ]
 
 CairoFileSurface subclass: CairoPdfSurface [
-    buildBlankSurface [
+    buildSurface [
 	<category: 'C interface'>
 	^Cairo pdfSurfaceCreate: self filename width: extent x height: extent y
     ]
@@ -245,7 +240,7 @@ CairoFileSurface subclass: CairoPdfSurface [
 ].
 
 CairoFileSurface subclass: CairoSvgSurface [
-    buildBlankSurface [
+    buildSurface [
 	<category: 'C interface'>
 	^Cairo svgSurfaceCreate: self filename width: extent x height: extent y
     ]
@@ -259,6 +254,11 @@ CairoFileSurface subclass: CairoLoadableFileSurface [
 	 image load."
 
 	^self new filename: aFile asString
+    ]
+
+    buildBlankSurface [
+	<category: 'C interface'>
+	self subclassResponsibility
     ]
 
     buildSurface [

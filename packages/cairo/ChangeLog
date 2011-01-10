@@ -1,5 +1,10 @@
 2011-01-09  Paolo Bonzini  <bonzini@gnu.org>
 
+	* CairoSurfaces.st: Further cleanup of #buildSurface vs.
+	#buildBlankSurface.
+
+2011-01-09  Paolo Bonzini  <bonzini@gnu.org>
+
 	* CairoSurfaces.st: Make #buildBlankSurface abstract, override it
 	for image surfaces.
 
