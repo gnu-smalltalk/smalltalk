@@ -147,8 +147,6 @@ main (int argc, char **argv)
 
   sockets_init ();
   gnutls_init (&session, GNUTLS_CLIENT);
-  gnutls_priority_set_direct (session, "PERFORMANCE:+ANON-DH:!ARCFOUR-128",
-			      NULL);
 
   gnutls_anon_allocate_client_credentials (&anon_cred);
   gnutls_credentials_set (session, GNUTLS_CRD_ANON, anon_cred);

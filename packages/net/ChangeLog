@@ -1,3 +1,7 @@
+2011-01-11  Paolo Bonzini  <bonzini@gnu.org>
+
+	* gnutls-wrapper.c: Support older GnuTLS.
+
 2010-12-17  Paolo Bonzini  <bonzini@gnu.org>
 
 	* IMAP.st: _Really_ fix it.
