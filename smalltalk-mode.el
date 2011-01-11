@@ -1073,7 +1073,7 @@ Whitespace is defined as spaces, tabs, and comments."
 
 (defun smalltalk-find-message ()
   (save-excursion
-    (smalltalk-goto-begenning-of-statement)
+    (smalltalk-goto-beginning-of-statement)
     (cond
      ((smalltalk-looking-at-unary-send)
       (if (not (smalltalk-has-sender))
@@ -1101,7 +1101,7 @@ Whitespace is defined as spaces, tabs, and comments."
 	  (smalltalk-forward-sexp 1))
       (error (goto-char prev-point)))))
 
-(defun smalltalk-goto-begenning-of-statement()
+(defun smalltalk-goto-beginning-of-statement ()
   (if (not (looking-back "[ \t\n]"))
       (smalltalk-safe-backward-sexp)))
 
