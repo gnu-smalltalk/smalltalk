@@ -1125,7 +1125,7 @@ Whitespace is defined as spaces, tabs, and comments."
 (defun smalltalk-find-end-of-keyword-send ()
   (save-excursion
     (smalltalk-forward-whitespace)
-    (if (or (looking-at "[.;]")(= (smalltalk-next-keyword) (point)))
+    (if (or (looking-at "[.;]") (= (smalltalk-next-keyword) (point)))
 	""
       (progn
 	(smalltalk-goto-next-keyword)
@@ -1135,7 +1135,7 @@ Whitespace is defined as spaces, tabs, and comments."
 (defun smalltalk-find-beginning-of-keyword-send ()
   (save-excursion
     (smalltalk-backward-whitespace)
-    (if (or (looking-back "[.;]")(= (smalltalk-previous-keyword) (point)))
+    (if (or (looking-back "[.;]") (= (smalltalk-previous-keyword) (point)))
 	""
       (progn
 	(smalltalk-goto-previous-keyword)
@@ -1148,25 +1148,31 @@ Whitespace is defined as spaces, tabs, and comments."
 (defun smalltalk-goto-next-keyword ()
   (goto-char (smalltalk-next-keyword)))
 
-(defun smalltalk-previous-keyword (&key (original-point (point)))
+(defun smalltalk-previous-keyword-1 ()
   (smalltalk-backward-whitespace)
-  (if (looking-back "[>[({.^]")
-      (progn (goto-char original-point) (point))
+  (if (looking-back "[>[({.^]") ;; not really ok when > is sent in a keyword arg
+      nil
     (progn 
       (smalltalk-safe-backward-sexp)
       (if (smalltalk-looking-at-keyword-send)
-	  (prog1 (point) (goto-char original-point))
-	(smalltalk-previous-keyword :original-point original-point)))))
+	  (point)
+	(smalltalk-previous-keyword-1)))))
 
-(defun smalltalk-next-keyword (&key (original-point (point)))
+(defun smalltalk-next-keyword-1 ()
   (smalltalk-forward-whitespace)
   (if (looking-at "[])}.]")
-      (progn (goto-char original-point) (point))
+      nil
     (progn 
       (smalltalk-safe-forward-sexp)
       (skip-chars-forward ":")
       (if (smalltalk-looking-back-keyword-send)
-	  (prog1 (point) (goto-char original-point))
-	(smalltalk-next-keyword :original-point original-point)))))
+	  (point)
+	(smalltalk-next-keyword-1)))))
+
+(defun smalltalk-previous-keyword ()
+  (or (save-excursion (smalltalk-previous-keyword-1)) (point)))
+
+(defun smalltalk-next-keyword ()
+  (or (save-excursion (smalltalk-next-keyword-1)) (point)))
 
 (provide 'smalltalk-mode)
