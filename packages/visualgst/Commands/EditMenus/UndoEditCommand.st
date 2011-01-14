@@ -12,6 +12,11 @@ Command subclass: UndoEditCommand [
         ^ '<Control>Z'
     ]
 
+    stockIcon [
+
+	^ 'gtk-undo'
+    ]
+
     execute [
         <category: 'command'>
 

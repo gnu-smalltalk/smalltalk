@@ -12,6 +12,11 @@ Command subclass: RedoEditCommand [
         ^ '<Control>Y'
     ]
 
+    stockIcon [
+
+	^ 'gtk-redo'
+    ]
+
     execute [
         <category: 'command'>
 

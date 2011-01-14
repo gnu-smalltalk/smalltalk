@@ -12,6 +12,11 @@ DoItCommand subclass: PrintItCommand [
 	^ '<Control>P'
     ]
 
+    stockIcon [
+
+        ^ 'gtk-print'
+    ]
+
     execute [
         <category: 'command'>
 

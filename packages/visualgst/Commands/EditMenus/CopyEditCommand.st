@@ -12,6 +12,11 @@ Command subclass: CopyEditCommand [
         ^ '<Control>C'
     ]
 
+    stockIcon [
+
+	^ 'gtk-copy'
+    ]
+
     execute [
         <category: 'command'>
 

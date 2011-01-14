@@ -12,6 +12,11 @@ DoItCommand subclass: DebugItCommand [
 	^ '<Alt>D'
     ]
 
+    stockIcon [
+
+        ^ 'gtk-sort-descending'
+    ]
+
     execute [
         <category: 'command'>
 

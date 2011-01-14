@@ -103,6 +103,12 @@ CompiledBlock extend [
 
         ^ VisualGST.GtkCompiledBlockInspectorView
     ]
+
+    methodRecompilationSourceString [
+	<category: '*VisualGST'>
+
+	^ self method methodRecompilationSourceString
+    ]
 ]
 
 SequenceableCollection extend [
@@ -372,8 +378,8 @@ Behavior extend [
     debuggerClass [
 	<category: '*VisualGST'>
 
-	^ nil
-	"^ VisualGST.GtkDebugger"
+	"^ nil"
+	^ VisualGST.GtkDebugger
     ]
 ]
 

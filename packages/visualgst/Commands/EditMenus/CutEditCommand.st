@@ -12,6 +12,11 @@ Command subclass: CutEditCommand [
         ^ '<Control>X'
     ]
 
+    stockIcon [
+
+	^ 'gtk-cut'
+    ]
+
     execute [
         <category: 'command'>
 

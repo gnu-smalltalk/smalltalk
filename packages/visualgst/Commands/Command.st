@@ -62,13 +62,25 @@ Object subclass: Command [
     item [
         <category: 'accessing'>
 
-	self subclassResponisibility 
+	self subclassResponsibility 
     ]
 
     accel [
         <category: 'accessing'>
 
 	^ nil
+    ]
+
+    tooltip [
+	<category: 'accessing'>
+
+	^ ''
+    ]
+
+    stockIcon [
+	<category: 'accessing'>
+
+	^ ''
     ]
 
     buildMenuItem [
@@ -78,6 +90,15 @@ Object subclass: Command [
                 show;
                 connectSignal: 'activate' to: self selector: #executeIfValid;
                 yourself
+    ]
+
+    buildToolItem [
+        <category: 'build'>
+
+	^ (GTK.GtkToolButton newFromStock: self stockIcon label: self item)
+                                connectSignal: 'clicked' to: self selector: #executeIfValid;
+                                setTooltipText: self tooltip;
+                                yourself
     ]
 
     setState: aGtkMenuItem [

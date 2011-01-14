@@ -12,6 +12,11 @@ Command subclass: DoItCommand [
 	^ '<Control>D'
     ]
 
+    stockIcon [
+
+	^ 'gtk-execute'
+    ]
+
     execute [
         <category: 'command'>
 

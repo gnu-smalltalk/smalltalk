@@ -98,7 +98,7 @@ UndoCommand subclass: AddMethodUndoCommand [
 
 	browserWidget ifNotNil: [ classOrMeta isClass 
 						    ifTrue: [ browserWidget selectAnInstanceMethod: compiledMethod selector ]
-						    ifFalse: [ browserWidget selectAClassMethod: compiledMethod selector ] ].
+						    ifFalse: [ browserWidget selectAClassMethod: compiledMethod selector ] ]
     ]
 
     displayError [

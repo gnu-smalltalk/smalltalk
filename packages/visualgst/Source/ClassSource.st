@@ -13,15 +13,28 @@ ClassHeaderSource subclass: ClassSource [
 
 	| lines |
 	lines := (self sourceOf: aMethod) lines.
-	1 to: lines size - 1 do: [ :i |
+	1 to: lines size do: [ :i |
 	    stream
 		space: 4;
 		nextPutAll: (lines at: i);
 		nl ].
-	stream
-	    nextPutAll: lines last; 
-	    nl; 
-	    nl
+	stream nl
+    ]
+
+    outputMethodWithoutFirstTab: aMethod [
+        <category: 'printing'>
+
+        | lines |
+        lines := (self sourceOf: aMethod) lines.
+        stream 
+	    nextPutAll: (lines at: 1);
+	    nl.
+        2 to: lines size do: [ :i |
+            stream
+                space: 4;
+                nextPutAll: (lines at: i);
+                nl ].
+        stream nl
     ]
 
     outputClassMethod: aMethod [
@@ -30,25 +43,36 @@ ClassHeaderSource subclass: ClassSource [
         stream
             space: 4;
             nextPutAll: printClass name, ' class >> '.
-	self outputMethod: aMethod
+	self outputMethodWithoutFirstTab: aMethod
+    ]
+
+    outputMethodsWith: aOneArgBlock in: aClass [
+
+        aClass methodDictionary ifNotNil: [
+            (aClass methodDictionary asSortedCollection: [ :a :b |
+                    a methodCategory < b methodCategory ]) do: [ :each |
+                        each methodCategory
+                            ifNil: [ aOneArgBlock value: each ]
+                            ifNotNil: [ :aCategoryString |  aCategoryString first ~= $* ifTrue: [ aOneArgBlock value: each ] ] ] ]
     ]
 
     outputMethodsFor: aClass [
 	<category: 'printing'>
 
-	aClass methodDictionary ifNotNil: [ 
-	    (aClass methodDictionary asSortedCollection: [ :a :b | 
-		    a methodCategory < b methodCategory ]) do: [ :each |
-			each methodCategory 
-			    ifNil: [ self outputMethod: each ]
-			    ifNotNil: [ :aCategoryString |  aCategoryString first ~= $* ifTrue: [ self outputMethod: each ] ] ] ]
+	self outputMethodsWith: [ :each | each printNl. self outputMethod: each ] in: aClass
+    ]
+
+    outputClassMethodsFor: aClass [
+        <category: 'printing'>
+
+	self outputMethodsWith: [ :each | self outputClassMethod: each ] in: aClass
     ]
 
     outputMethods [
 	<category: 'printing'>
 
 	self 
-	    outputMethodsFor: printClass class;
+	    outputClassMethodsFor: printClass class;
 	    outputMethodsFor: printClass
     ]
 ]

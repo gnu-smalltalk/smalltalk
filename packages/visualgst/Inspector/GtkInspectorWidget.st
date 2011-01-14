@@ -99,13 +99,13 @@ GtkConcreteWidget subclass: GtkInspectorWidget [
     selectedItem [
 	<category: 'item selection'>
 
-        self hasSelectedValue ifFalse: [self error: 'Nothing is selected'].
+        self hasSelectedValue ifFalse: [ self error: 'Nothing is selected' ].
         ^ inspectorTree treeView selection
     ]
 
     targetObject [
 
-	^ self selectedItem
+	^ self selectedValue
     ]
 
     selectedValue [
@@ -116,22 +116,26 @@ GtkConcreteWidget subclass: GtkInspectorWidget [
 
     canDive [
 	<category: 'events'>
-	^self hasSelectedValue and: [self selectedItem ~= 'self' and: [ objectView canDive ]]
+
+	^ self hasSelectedValue and: [ self selectedItem ~= 'self' and: [ objectView canDive ] ]
     ]
 
     isStackEmpty [
 	<category: 'events'>
-        ^stack isEmpty
+
+        ^ stack isEmpty
     ]
 
     dive [
 	<category: 'events'>
+
 	stack addFirst: self object.
         self object: self selectedValue
     ]
 
     back [
 	<category: 'events'>
+
 	self object: stack removeFirst
     ]
 
@@ -150,7 +154,7 @@ GtkConcreteWidget subclass: GtkInspectorWidget [
     inspectIt: object [
         <category: 'smalltalk event'>
 
-        workspaceWidget inspectIt: object
+        GtkInspector openOn: object
     ]
 
     printIt: object [

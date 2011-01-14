@@ -1,12 +1,9 @@
-MenuBuilder subclass: MethodMenus [
+MenuBuilder subclass: ContextMenus [
 
-    MethodMenus class >> menus [
+    ContextMenus class >> menus [
 
-	^ {OpenSenderCommand.
-        OpenImplementorCommand.
+	^ {InspectMethodCommand.
 	MenuSeparator.
-        FileoutMethodCommand.
-	MenuSeparator.
-        InspectMethodCommand}
+        FileoutMethodCommand}
     ]
 ]

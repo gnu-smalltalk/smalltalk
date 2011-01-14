@@ -12,6 +12,11 @@ DoItCommand subclass: InspectItCommand [
 	^ '<Control>I'
     ]
 
+    stockIcon [
+
+        ^ 'gtk-convert'
+    ]
+
     execute [
         <category: 'command'>
 

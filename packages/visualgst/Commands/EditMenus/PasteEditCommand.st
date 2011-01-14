@@ -12,6 +12,11 @@ Command subclass: PasteEditCommand [
         ^ '<Control>V'
     ]
 
+    stockIcon [
+
+	^ 'gtk-paste'
+    ]
+
     execute [
         <category: 'command'>
 

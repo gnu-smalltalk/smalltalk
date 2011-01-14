@@ -12,6 +12,11 @@ Command subclass: AcceptItCommand [
 	^ '<Control>S'
     ]
 
+    stockIcon [
+
+        ^ 'gtk-apply'
+    ]
+
     acceptClassDefinitionOn: aNamespace [
         <category: 'class event'>
 

@@ -84,12 +84,18 @@ Object subclass: GtkTreeModel [
         (self childrenBlock value: anItem) do: [ :each | self append: each with: iter ]
     ]
 
+    remove: anObject ifAbsent: aBlock [
+	<category: 'model'>
+
+        | iter |
+        iter := self findIter: anObject ifAbsent: [ ^ aBlock value ].
+        model remove: iter
+    ]
+
     remove: anObject [
 	<category: 'model'>
 
-	| iter |
-	(iter := self findIter: anObject) ifNil: [ self error: 'item not found' ].
-	model remove: iter
+	self remove: anObject ifAbsent: [ self error: 'item not found' ]
     ]
 
     clear [

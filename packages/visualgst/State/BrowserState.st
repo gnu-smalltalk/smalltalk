@@ -27,6 +27,12 @@ Object subclass: BrowserState [
         ^ state displayString
     ]
 
+    hasSelection [
+	<category: 'testing'>
+
+	^ ((self hasSelectedNamespace bitOr: self hasSelectedClass) bitOr: self hasSelectedCategory) bitOr: self hasSelectedMethod
+    ]
+
     hasSelectedMethod [
         <category: 'testing'>
 
