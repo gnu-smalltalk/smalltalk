@@ -1158,6 +1158,7 @@ smalltalk_to_c (OOP oop,
     {				/* how to encode nil */
       switch (cType)
 	{
+	case CDATA_COBJECT_PTR:
 	case CDATA_COBJECT:
 	case CDATA_BYTEARRAY:
 	case CDATA_BYTEARRAY_OUT:
