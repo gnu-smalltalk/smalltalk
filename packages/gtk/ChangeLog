@@ -1,3 +1,8 @@
+2011-01-14  Paolo Bonzini  <bonzini@gnu.org>
+
+	* gst-gtk.h: Remove.
+	* gst-gtk.c: Remove inclusion.
+
 2010-12-04  Paolo Bonzini  <bonzini@gnu.org>
 
 	* package.xml: Remove now superfluous <file> tags.

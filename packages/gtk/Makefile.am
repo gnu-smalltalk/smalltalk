@@ -23,7 +23,7 @@ gst_gtk_la_LIBADD = $(ALL_LIBS)
 dist_gst_gtk_la_SOURCES = gst-gtk.c placer.c
 nodist_gst_gtk_la_SOURCES = libs.def
 BUILT_SOURCES = libs.def
-dist_noinst_HEADERS = gst-gtk.h placer.h
+dist_noinst_HEADERS = placer.h
 
 EXTRA_PROGRAMS = testplacer sizeof enums
 testplacer_SOURCES = testplacer.c

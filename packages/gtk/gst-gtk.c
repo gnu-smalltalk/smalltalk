@@ -59,6 +59,8 @@
 #include <gtk/gtk.h>
 #include <glib-object.h>
 #include <glib.h>
+#include <atk/atk.h>
+#include <pango/pango.h>
 
 #include <gobject/gvaluecollector.h>
 
@@ -73,7 +75,6 @@
 #include <string.h>
 #endif
 
-#include "gst-gtk.h"
 #include "placer.h"
 
 typedef struct SmalltalkClosure
