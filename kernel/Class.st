@@ -706,6 +706,7 @@ the class category.'>
 	| className class |
 	className := classNameString asGlobalKey.
 	class := Namespace current hereAt: className ifAbsent: [nil].
+        class isNamespace ifTrue: [ self error: 'Class name %1 conflicts with the name of its namespace' % {classNameString asString} ].
 	^(class isNil or: [class isClass not]) 
 	    ifTrue: [Metaclass subclassOf: self class]
 	    ifFalse: [class class]
