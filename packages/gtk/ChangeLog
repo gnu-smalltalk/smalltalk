@@ -1,5 +1,16 @@
 2011-01-14  Paolo Bonzini  <bonzini@gnu.org>
 
+	* example_arrow.st: Explicitly load package.
+	* example_aspectframe.st: Explicitly load package.
+	* example_buttonbox.st: Explicitly load package.
+	* example_entry.st: Explicitly load package.
+	* example_eventbox.st: Explicitly load package.
+	* example_hello.st: Explicitly load package.
+	* example_tictactoe.st: Explicitly load package.
+	* example_tree.st: Explicitly load package.
+
+2011-01-14  Paolo Bonzini  <bonzini@gnu.org>
+
 	* gst-gtk.h: Remove.
 	* gst-gtk.c: Remove inclusion.
 

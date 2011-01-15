@@ -29,6 +29,8 @@
  ======================================================================"
 
 
+PackageLoader fileInPackage: 'GTK'.
+
 
 Namespace current: GTK [
 
