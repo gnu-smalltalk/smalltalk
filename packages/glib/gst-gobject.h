@@ -134,6 +134,6 @@ extern int connect_signal (OOP widget,
 			    OOP selector,
 			    OOP user_data);
 
-extern void set_vm_proxy (VMProxy *vm_proxy);
+extern void gst_gobject_init (void);
 
 #endif

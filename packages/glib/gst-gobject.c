@@ -56,8 +56,6 @@
 GType G_TYPE_OOP;
 GQuark q_gst_object;
 
-static VMProxy *_glib_vm_proxy;
-
 static GTypeInfo gtype_oop_info = {
   0,                           /* class_size */
   NULL,                        /* base_init */
@@ -81,14 +79,14 @@ static void
 g_type_oop_value_free (GValue *value)
 {
   if (value->data[0].v_pointer)
-      _glib_vm_proxy->unregisterOOP ((OOP) value->data[0].v_pointer);
+      gst_unregister_oop ((OOP) value->data[0].v_pointer);
 }
 
 static void
 g_type_oop_value_copy (const GValue *src_value,
                         GValue       *dest_value)
 {
-  _glib_vm_proxy->registerOOP ((OOP) src_value->data[0].v_pointer);
+  gst_register_oop ((OOP) src_value->data[0].v_pointer);
   dest_value->data[0].v_pointer = src_value->data[0].v_pointer;
 }
 
@@ -104,9 +102,8 @@ static const GTypeValueTable gtype_oop_value_table = {
 };
 
 void
-set_vm_proxy (VMProxy *vm_proxy)
+gst_gobject_init (void)
 {
-  _glib_vm_proxy =  vm_proxy;
   g_type_init ();
   q_gst_object = g_quark_from_string ("gst_object");
   gtype_oop_info.value_table = &gtype_oop_value_table;
@@ -132,7 +129,7 @@ associate_oop_to_g_object (GObject *obj, OOP oop)
 
   g_object_set_qdata (obj, q_gst_object, oop);
   g_object_ref (obj);
-  _glib_vm_proxy->strMsgSend (oop, "addToBeFinalized", NULL);
+  gst_str_msg_send (oop, "addToBeFinalized", NULL);
 }
 
 OOP
@@ -151,7 +148,7 @@ narrow_oop_for_g_object (GObject *obj, OOP oop)
 OOP
 get_oop_for_g_boxed (gpointer obj, GType type)
 {
-  OOP oop = _glib_vm_proxy->cObjectToOOP(obj);
+  OOP oop = gst_c_object_to_oop(obj);
   OOP class = g_type_get_qdata (type, q_gst_object);
 
   if (class)
@@ -168,7 +165,7 @@ get_oop_for_g_object (GObject *obj)
     {
       /* We don't have a wrapper for it, so create it.  Get the class
 	 from the object's type.  */
-      oop = _glib_vm_proxy->cObjectToOOP(obj);
+      oop = gst_c_object_to_oop(obj);
       associate_oop_to_g_object (obj, oop);
     }
 
@@ -202,55 +199,55 @@ convert_g_value_to_oop (const GValue *val)
     {
     case G_TYPE_CHAR:
       v_char = g_value_get_char (val);
-      return _glib_vm_proxy->charToOOP(v_char);
+      return gst_char_to_oop(v_char);
 
     case G_TYPE_BOOLEAN:
       v_boolean = g_value_get_boolean (val);
-      return _glib_vm_proxy->boolToOOP(v_boolean);
+      return gst_bool_to_oop(v_boolean);
 
     case G_TYPE_UCHAR:
       v_int = g_value_get_uchar (val);
-      return _glib_vm_proxy->intToOOP(v_int);
+      return gst_int_to_oop(v_int);
 
     case G_TYPE_INT:
       v_int = g_value_get_int (val);
-      return _glib_vm_proxy->intToOOP(v_int);
+      return gst_int_to_oop(v_int);
 
     case G_TYPE_UINT:
       v_int = g_value_get_uint (val);
-      return _glib_vm_proxy->intToOOP(v_int);
+      return gst_int_to_oop(v_int);
 
     case G_TYPE_LONG:
       v_int = g_value_get_long (val);
-      return _glib_vm_proxy->intToOOP(v_int);
+      return gst_int_to_oop(v_int);
 
     case G_TYPE_ULONG:
       v_int = g_value_get_ulong (val);
-      return _glib_vm_proxy->intToOOP(v_int);
+      return gst_int_to_oop(v_int);
 
     case G_TYPE_ENUM:
       v_int = g_value_get_enum (val);
-      return _glib_vm_proxy->intToOOP(v_int);
+      return gst_int_to_oop(v_int);
 
     case G_TYPE_FLAGS:
       v_int = g_value_get_flags (val);
-      return _glib_vm_proxy->intToOOP(v_int);
+      return gst_int_to_oop(v_int);
 
     case G_TYPE_FLOAT:
       v_float = g_value_get_float (val);
-      return _glib_vm_proxy->floatToOOP(v_float);
+      return gst_float_to_oop(v_float);
 
     case G_TYPE_DOUBLE:
       v_float = g_value_get_double (val);
-      return _glib_vm_proxy->floatToOOP(v_float);
+      return gst_float_to_oop(v_float);
 
     case G_TYPE_STRING:
       v_ptr = (gpointer) g_value_get_string (val);
-      return _glib_vm_proxy->stringToOOP(v_ptr);
+      return gst_string_to_oop(v_ptr);
 
     case G_TYPE_POINTER:
       v_ptr = g_value_get_pointer (val);
-      return _glib_vm_proxy->cObjectToOOP(v_ptr);
+      return gst_c_object_to_oop(v_ptr);
 
     case G_TYPE_BOXED:
       v_ptr = g_value_get_boxed (val);
@@ -287,7 +284,7 @@ fill_g_value_from_oop (GValue *return_value, OOP oop)
 
 
   if (type == G_TYPE_OOP) {
-    _glib_vm_proxy->registerOOP (oop);
+    gst_register_oop (oop);
     g_value_set_boxed (return_value, (gpointer)oop);
     return ;
   }
@@ -299,78 +296,78 @@ fill_g_value_from_oop (GValue *return_value, OOP oop)
       break;
 
     case G_TYPE_CHAR:
-      v_char = _glib_vm_proxy->OOPToChar (oop);
+      v_char = gst_oop_to_char (oop);
       g_value_set_char (return_value, v_char);
       break;
 
     case G_TYPE_BOOLEAN:
-      v_boolean = _glib_vm_proxy->OOPToBool (oop);
+      v_boolean = gst_oop_to_bool (oop);
       g_value_set_boolean (return_value, v_boolean);
       break;
 
     case G_TYPE_UCHAR:
-      v_int = _glib_vm_proxy->OOPToInt (oop);
+      v_int = gst_oop_to_int (oop);
       g_value_set_uchar (return_value, v_int);
       break;
 
     case G_TYPE_INT:
-      v_int = _glib_vm_proxy->OOPToInt (oop);
+      v_int = gst_oop_to_int (oop);
       g_value_set_int (return_value, v_int);
       break;
 
     case G_TYPE_UINT:
-      v_int = _glib_vm_proxy->OOPToInt (oop);
+      v_int = gst_oop_to_int (oop);
       g_value_set_uint (return_value, v_int);
       break;
 
     case G_TYPE_LONG:
-      v_int = _glib_vm_proxy->OOPToInt (oop);
+      v_int = gst_oop_to_int (oop);
       g_value_set_long (return_value, v_int);
       break;
 
     case G_TYPE_ULONG:
-      v_int = _glib_vm_proxy->OOPToInt (oop);
+      v_int = gst_oop_to_int (oop);
       g_value_set_ulong (return_value, v_int);
       break;
 
     case G_TYPE_ENUM:
-      v_int = _glib_vm_proxy->OOPToInt (oop);
+      v_int = gst_oop_to_int (oop);
       g_value_set_enum (return_value, v_int);
       break;
 
     case G_TYPE_FLAGS:
-      v_int = _glib_vm_proxy->OOPToInt (oop);
+      v_int = gst_oop_to_int (oop);
       g_value_set_flags (return_value, v_int);
       break;
 
     case G_TYPE_FLOAT:
-      v_float = _glib_vm_proxy->OOPToFloat (oop);
+      v_float = gst_oop_to_float (oop);
       g_value_set_float (return_value, v_float);
       break;
 
     case G_TYPE_DOUBLE:
-      v_float = _glib_vm_proxy->OOPToFloat (oop);
+      v_float = gst_oop_to_float (oop);
       g_value_set_double (return_value, v_float);
       break;
 
     case G_TYPE_STRING:
-      v_ptr = _glib_vm_proxy->OOPToString (oop);
+      v_ptr = gst_oop_to_string (oop);
       g_value_set_string_take_ownership (return_value, v_ptr);
       break;
 
     case G_TYPE_POINTER:
-      v_ptr = _glib_vm_proxy->OOPToCObject (oop);
+      v_ptr = gst_oop_to_c_object (oop);
       g_value_set_pointer (return_value, v_ptr);
       break;
 
     case G_TYPE_BOXED:
-      v_ptr = _glib_vm_proxy->OOPToCObject (oop);
+      v_ptr = gst_oop_to_c_object (oop);
       g_value_set_boxed (return_value, v_ptr);
       break;
 
     case G_TYPE_OBJECT:
     case G_TYPE_INTERFACE:
-      v_ptr = _glib_vm_proxy->OOPToCObject (oop);
+      v_ptr = gst_oop_to_c_object (oop);
       g_value_set_object (return_value, v_ptr);
       break;
 
@@ -386,10 +383,10 @@ finalize_smalltalk_closure (gpointer      data,
 {
   SmalltalkClosure *stc = (SmalltalkClosure *) closure;
 
-  _glib_vm_proxy->unregisterOOP (stc->receiver);
-  _glib_vm_proxy->unregisterOOP (stc->widget);
+  gst_unregister_oop (stc->receiver);
+  gst_unregister_oop (stc->widget);
   if (stc->data)
-    _glib_vm_proxy->unregisterOOP (stc->data);
+    gst_unregister_oop (stc->data);
 }
 
 static void
@@ -440,7 +437,7 @@ invoke_smalltalk_closure (GClosure     *closure,
         args[i++] = stc->widget;
     }
 
-  resultOOP = _glib_vm_proxy->nvmsgSend (stc->receiver, stc->selector, args, i);
+  resultOOP = gst_nvmsg_send (stc->receiver, stc->selector, args, i);
 
   /* FIXME Need to init return_value's type? */
   if (return_value)
@@ -457,10 +454,10 @@ create_smalltalk_closure (OOP receiver,
   GClosure *closure = g_closure_new_simple (sizeof (SmalltalkClosure), NULL);
   SmalltalkClosure *stc = (SmalltalkClosure *) closure;
 
-  _glib_vm_proxy->registerOOP (receiver);
-  _glib_vm_proxy->registerOOP (widget);
+  gst_register_oop (receiver);
+  gst_register_oop (widget);
   if (data)
-    _glib_vm_proxy->registerOOP (data);
+    gst_register_oop (data);
 
   stc->receiver = receiver;
   stc->selector = selector;
@@ -481,7 +478,7 @@ connect_signal (OOP widget,
 		OOP selector,
 		OOP user_data)
 {
-  GObject      *gObject = _glib_vm_proxy->OOPToCObject (widget);
+  GObject      *gObject = gst_oop_to_c_object (widget);
   GClosure     *closure;
   GSignalQuery  qry;
   guint         sig_id;
@@ -497,8 +494,8 @@ connect_signal (OOP widget,
     return (-2); /* Invalid event name */
 
   g_signal_query (sig_id, &qry);
-  oop_sel_args = _glib_vm_proxy->strMsgSend (selector, "numArgs", NULL);
-  if (oop_sel_args == _glib_vm_proxy->nilOOP)
+  oop_sel_args = gst_str_msg_send (selector, "numArgs", NULL);
+  if (oop_sel_args == gst_interpreter_proxy.nilOOP)
     return (-3); /* Invalid selector */ 
 
   /* Check the number of arguments in the selector against the number of 
@@ -506,7 +503,7 @@ connect_signal (OOP widget,
   /* We can return fewer arguments than are in the event, if the others aren't 
      wanted, but we can't return more, and returning nilOOPs instead is not 
      100% satisfactory, so fail. */
-  n_params = _glib_vm_proxy->OOPToInt (oop_sel_args);
+  n_params = gst_oop_to_int (oop_sel_args);
   if (n_params - qry.n_params > 2)
     return (-4);
 

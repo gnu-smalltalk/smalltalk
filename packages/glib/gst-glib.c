@@ -473,7 +473,7 @@ gst_initModule (proxy)
   if (initialized && !g_thread_supported ())
     g_thread_init (NULL);
 
-  set_vm_proxy (proxy);
+  gst_gobject_init ();
   gst_log_set_handler (NULL);
   gst_log_set_handler ("Gtk");
   gst_log_set_handler ("GLib");

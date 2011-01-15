@@ -1,5 +1,11 @@
 2011-01-15  Paolo Bonzini  <bonzini@gnu.org>
 
+	* gst-gobject.c: Remove VMProxy dependency.
+	* gst-gobject.h: Adjust.
+	* gst-glib.c: Adjust.
+
+2011-01-15  Paolo Bonzini  <bonzini@gnu.org>
+
 	* GLib.st: New, split from the Gtk package.
 	* gst-glib.c: New, split from gst-gtk.c.
 	* gst-gobject.c: New, split from gst-gtk.c.
