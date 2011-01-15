@@ -68,6 +68,7 @@
       VisualGST.GtkConcreteWidgetTest
     </sunit>
   </test>
+  <filein>Extensions.st</filein>
   <filein>Notification/AbstractEvent.st</filein>
   <filein>Notification/AddedEvent.st</filein>
   <filein>Notification/CommentedEvent.st</filein>
@@ -228,7 +229,6 @@
   <filein>MethodFinder.st</filein>
   <filein>GtkWebBrowser.st</filein>
   <filein>GtkWebView.st</filein>
-  <filein>Extensions.st</filein>
   <filein>GtkAssistant.st</filein>
   <filein>Undo/RenameCategoryUndoCommand.st</filein>
   <filein>Undo/AddMethodUndoCommand.st</filein>

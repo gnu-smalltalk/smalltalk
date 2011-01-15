@@ -1,3 +1,10 @@
+2011-01-15  Paolo Bonzini  <bonzini@gnu.org>
+
+	* Extensions.st: Add compatibility hack.
+	* Model/GtkColumnOOPType.st: Prepare for GLib package.
+	* SUnit/GtkSUnitResultWidget.st: Prepare for GLib package.
+	* package.xml: Load Extensions.st first.
+
 2011-01-14  Gwenael Casaccio  <mrgwen@gmail.com>
 
 	* many many files: Sync with upstream.

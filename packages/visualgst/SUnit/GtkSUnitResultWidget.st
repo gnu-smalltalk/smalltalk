@@ -19,7 +19,7 @@ GtkConcreteWidget subclass: GtkSUnitResult [
         <category: 'model'>
 
         ^ model ifNil: [
-            model := GTK.GtkTreeStore new: 2 varargs: {GTK.GValue gTypeString. GTK.GLib oopType} ]
+            model := GTK.GtkTreeStore new: 2 varargs: {GTK.GValue gTypeString. GLib.GType oopType} ]
     ]
 
     clearModel [

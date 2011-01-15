@@ -3,7 +3,7 @@ GtkColumnType subclass: GtkColumnOOPType [
     GtkColumnOOPType class >> kind [
 	<category: 'accessing'>
 
-	^ GTK.GLib oopType
+	^ GLib.GType oopType
     ]
 
     GtkColumnOOPType class >> kindName [

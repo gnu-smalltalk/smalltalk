@@ -1,3 +1,13 @@
+Eval [
+    "Huge hack for compatibility with the separate GLib package
+     in newer gst."
+    (GTK definesKey: #GLib) ifTrue: [
+        GTK GLib addClassVarName: #GType.
+        GTK GLib classPool at: #GType put: GTK GLib.
+        Smalltalk at: #GLib put: GTK GLib.
+    ]
+]
+
 Object extend [
 
     gtkInspect [
