@@ -119,6 +119,13 @@
 (defvar smalltalk-mode-map
   (let ((keymap (make-sparse-keymap)))
     (define-key keymap "\n" 	   'smalltalk-newline-and-indent)
+    (define-key keymap "\C-c\C-a"   'smalltalk-begin-of-defun)
+    (define-key keymap "\C-c\C-e"   'smalltalk-end-of-defun)
+    (define-key keymap "\C-c\C-f"   'smalltalk-forward-sexp)
+    (define-key keymap "\C-c\C-b"   'smalltalk-backward-sexp)
+    (define-key keymap "\C-c\C-p"   'smalltalk-goto-previous-keyword)
+    (define-key keymap "\C-c\C-n"   'smalltalk-goto-next-keyword)
+    ;; the following three are deprecated
     (define-key keymap "\C-\M-a"   'smalltalk-begin-of-defun)
     (define-key keymap "\C-\M-f"   'smalltalk-forward-sexp)
     (define-key keymap "\C-\M-b"   'smalltalk-backward-sexp)
