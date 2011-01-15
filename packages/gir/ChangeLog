@@ -1,0 +1,4 @@
+2010-01-15  Paolo Bonzini  <bonzini@gnu.org>
+
+	* package.xml: New.
+	* GIR.st: New.

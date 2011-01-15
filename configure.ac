@@ -474,6 +474,10 @@ GST_PACKAGE_ENABLE([GLib], [glib], [
   [gst_cv_glib],
   [Makefile], [gst-glib.la libgst-gobject.la])
 
+GST_PACKAGE_ENABLE([GObject-Introspection], [gir], [
+  PKG_CHECK_MODULES(GIR, gobject-introspection-1.0 >= 0.9.3, [gst_cv_gir=yes])],
+  [gst_cv_gir])
+
 GST_PACKAGE_ENABLE([GTK], [gtk], [
   AC_ARG_ENABLE(gtk,
   [  --enable-gtk={yes,no,blox}

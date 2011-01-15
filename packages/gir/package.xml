@@ -1,0 +1,10 @@
+<package>
+  <name>GObject-Introspection</name>
+  <namespace>GIR</namespace>
+
+  <prereq>GLib</prereq>
+  <filein>GIR.st</filein>
+
+  <library>libgirepository-1.0</library>
+</package>
+
