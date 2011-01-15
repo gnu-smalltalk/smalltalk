@@ -455,36 +455,39 @@ GST_PACKAGE_ENABLE([Cairo], [cairo],
   [PKG_CHECK_MODULES([CAIRO], cairo, [gst_cv_cairo=yes], [gst_cv_cairo=no])],
   [gst_cv_cairo])
 
+GST_PACKAGE_ENABLE([GLib], [glib], [
+  AM_PATH_GLIB_2_0(2.0.0, [
+    PKG_CHECK_MODULES(GTHREAD, gthread-2.0 >= 2.0.0, [gst_cv_glib=yes])
+  ], [], gobject)
+  if test $gst_cv_glib = yes; then
+    ac_save_LIBS=$LIBS
+    ac_save_CFLAGS=$CFLAGS
+    LIBS="$LIBS $GLIB_LIBS"
+    CFLAGS="$CFLAGS $GLIB_CFLAGS"
+    AC_CHECK_FUNCS([g_poll])
+    if test $ac_cv_func_g_poll = no; then
+      AC_DEFINE([g_poll], [poll], [Define to poll if your glib does not provide g_poll.])
+    fi
+    LIBS=$ac_save_LIBS
+    CFLAGS=$ac_save_CFLAGS
+  fi],
+  [gst_cv_glib],
+  [Makefile], [gst-glib.la libgst-gobject.la])
+
 GST_PACKAGE_ENABLE([GTK], [gtk], [
   AC_ARG_ENABLE(gtk,
   [  --enable-gtk={yes,no,blox}
                           enable GTK+ bindings.  Blox/GTK is experimental.], ,
   enable_gtk=yes)
 
-  if test "$enable_gtk" != no; then
+  if test "$enable_gtk" != no && test "$gst_cv_glib" != no; then
     maybe_enable_gtk=$enable_gtk
     enable_gtk=no
-    AM_PATH_GLIB_2_0(2.0.0, [
-      AM_PATH_GTK_2_0(2.0.0, [
-        PKG_CHECK_MODULES(ATK, atk >= 1.0.0, [
-          PKG_CHECK_MODULES(PANGO, pango >= 1.0.0, [
-            PKG_CHECK_MODULES(GTHREAD, gthread-2.0 >= 2.0.0, [enable_gtk=$maybe_enable_gtk])
-          ])
-        ])
+    AM_PATH_GTK_2_0(2.0.0, [
+      PKG_CHECK_MODULES(ATK, atk >= 1.0.0, [
+        PKG_CHECK_MODULES(PANGO, pango >= 1.0.0, [enable_gtk=$maybe_enable_gtk])
       ])
-    ], [], gobject)
-    if test $enable_gtk = yes; then
-      ac_save_LIBS=$LIBS
-      ac_save_CFLAGS=$CFLAGS
-      LIBS="$LIBS $GLIB_LIBS"
-      CFLAGS="$CFLAGS $GLIB_CFLAGS"
-      AC_CHECK_FUNCS([g_poll])
-      if test $ac_cv_func_g_poll = no; then
-        AC_DEFINE([g_poll], [poll], [Define to poll if your glib does not provide g_poll.])
-      fi
-      LIBS=$ac_save_LIBS
-      CFLAGS=$ac_save_CFLAGS
-    fi
+    ])
   fi],
   [enable_gtk gst_cv_cairo],
   [Makefile], [gst-gtk.la])

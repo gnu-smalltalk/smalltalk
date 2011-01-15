@@ -19,7 +19,7 @@ ALL_LIBS = $(GLIB_LIBS) $(GTK_LIBS) $(PANGO_LIBS) $(ATK_LIBS) $(GTHREAD_LIBS) \
 
 moduleexec_LTLIBRARIES = gst-gtk.la
 gst_gtk_la_LDFLAGS = $(gst_module_ldflags)
-gst_gtk_la_LIBADD = $(ALL_LIBS)
+gst_gtk_la_LIBADD = $(ALL_LIBS) ../glib/libgst-gobject.la
 dist_gst_gtk_la_SOURCES = gst-gtk.c placer.c
 nodist_gst_gtk_la_SOURCES = libs.def
 BUILT_SOURCES = libs.def
@@ -30,17 +30,13 @@ testplacer_SOURCES = testplacer.c
 testplacer_LDADD = $(GLIB_LIBS) $(GTK_LIBS)
 
 
-INCLUDES = -I$(top_srcdir)/libgst -I$(top_srcdir)/lib-src -I$(top_srcdir)/libltdl
+INCLUDES = -I$(top_srcdir)/libgst -I$(top_srcdir)/lib-src -I$(top_srcdir)/libltdl -I$(top_srcdir)/packages/glib
 
 AM_CFLAGS = $(GLIB_CFLAGS) $(GTK_CFLAGS) $(PANGO_CFLAGS) $(ATK_CFLAGS)
 
 GTK_FILES = \
 	  glib-object.h gdk/gdk.h \
 	  gdk-pixbuf/gdk-pixbuf.h gtk/gtk.h atk/atk.h pango/pango.h
-
-# We don't want to include all of GLib for obvious reasons...
-GLIB_FILES = \
-	  glib/goption.h glib/gdate.h glib/gmain.h
 
 LOCAL_FILES = $(srcdir)/placer.h
 
@@ -80,10 +76,10 @@ libs.def: Makefile
 	  case $$i in \
 	    -L*) \
 	      j=`echo $$i | sed 's,^-L,,'` ; \
-	      echo "_gst_vm_proxy->dlAddSearchDir(\"$$j\");" ;; \
+	      echo "_gtk_vm_proxy->dlAddSearchDir(\"$$j\");" ;; \
 	    -lG*|-lg*|-lATK*|-latk*|-lPango*|-lpango*) \
 	      j=`echo $$i | sed 's,^-l,lib,'` ; \
-	      echo "_gst_vm_proxy->dlOpen(\"$$j\", false);" ;; \
+	      echo "_gtk_vm_proxy->dlOpen(\"$$j\", false);" ;; \
 	    *) ;; \
 	  esac; \
 	done | sort -u > libs.def
@@ -117,10 +113,7 @@ order: mkorder.awk Makefile $(LOCAL_FILES)
 	      */gobject/*) \
 	        echo "$$i" ;; \
 	      */glib/*) \
-	        case " $(GLIB_FILES) " in \
-		  *" glib/`basename $$i` "*) echo "$$i" ;; \
-		  *) ;; \
-		esac ;; \
+		;; \
 	      *) \
 		echo "$$i" ;; \
 	    esac; \

@@ -1,0 +1,9 @@
+<package>
+  <name>GLib</name>
+  <namespace>GLib</namespace>
+
+  <filein>GLib.st</filein>
+
+  <module>gst-glib</module>
+</package>
+

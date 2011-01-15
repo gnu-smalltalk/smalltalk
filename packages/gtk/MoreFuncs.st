@@ -1,19 +1,4 @@
-GMainContext extend [
-    iterate [
-        <category: 'C call-outs'>
-        <asyncCCall: 'gstGtkMainContextIterate' args: #(#self )>
-
-    ]
-]
-
-
 Gtk class extend [
-
-    main: aSemaphore [
-	<category: 'C call-outs'>
-	<cCall: 'gstGtkMain' returning: #{GMainLoop} args: #(#smalltalk )>
-	
-    ]
 
     gstGtkInit [
 	"For backwards compatibility."
@@ -22,76 +7,6 @@ Gtk class extend [
     gtkInitialized [
 	<category: 'C call-outs'>
 	<cCall: 'gtkInitialized' returning: #boolean args: #()>
-    ]
-
-]
-
-
-
-GLib class extend [
-
-    register: anObject forType: gType [
-	<category: 'C call-outs'>
-	<cCall: 'gstGtkRegisterForType' returning: #void
-	args: #(#smalltalk #unknown )>
-	
-    ]
-
-    oopType [
-	<category: 'C call-outs'>
-	<cCall: 'gstTypeOOP' returning: #long
-	args: #()>
-    ]
-]
-
-
-
-GObject extend [
-
-    connectSignal: name to: handler selector: sel userData: userData [
-       <category: 'C call-outs'>
-       <cCall: 'gstGtkConnectSignal' returning: #int
-       args: #(#selfSmalltalk #string #smalltalk #smalltalk #smalltalk )>
-       
-    ]
-
-    connectSignal: name to: handler selector: sel [
-       <category: 'C call-outs'>
-       <cCall: 'gstGtkConnectSignalNoUserData' returning: #int
-       args: #(#selfSmalltalk #string #smalltalk #smalltalk )>
-       
-    ]
-
-    disconnectSignal: anInteger [
-       <category: 'C call-outs'>
-       <cCall: 'g_signal_handler_disconnect' returning: #void
-       args: #(#self #int )>
-    ]
-
-    narrow [
-       <category: 'C call-outs'>
-       <cCall: 'gstGtkNarrowGObjectOOP' returning: #smalltalk
-	args: #(#self #selfSmalltalk )>
-	
-    ]
-
-    free [
-	<category: 'C call-outs'>
-	<cCall: 'gstGtkFreeGObjectOOP' returning: #void args: #(#self )>
-	
-    ]
-
-    propertiesAt: name [
-	<category: 'C call-outs'>
-	<cCall: 'gstGtkGetProperty' returning: #smalltalk args: #(#self #string )>
-	
-    ]
-
-    propertiesAt: name put: anObject [
-	<category: 'C call-outs'>
-	<cCall: 'gstGtkSetProperty' returning: #void
-	args: #(#self #string #smalltalk )>
-	
     ]
 
 ]
@@ -225,18 +140,6 @@ GtkContainer extend [
 	<category: 'C call-outs'>
 	<cCall: 'gstGtkSetChildProperty' returning: #void
 	args: #(#self #cObject #string #smalltalk )>
-	
-    ]
-
-]
-
-
-
-GValue class extend [
-
-    typeFromName: aName [
-	<category: 'C call-outs'>
-	<cCall: 'g_type_from_name' returning: #int args: #(#string )>
 	
     ]
 

@@ -16,26 +16,6 @@ GtkAlignment class extend [
 ]
 
 
-GObject class extend [
-    new [
-	<category: 'instance creation'>
-        ^self new: self getType varargs: #(nil)
-    ]
-]
-
-
-GList extend [
-    do: aOneArgBlock [
-	<category: 'iterating'>
-	| iter |
-	iter := self.
-	[ iter isNull not ] whileTrue: [
-	    aOneArgBlock value: iter data value.
-	    iter := iter next value ]
-    ]
-]
-
-
 GdkDrawable extend [
 
     withContextDo: aBlock [
@@ -514,7 +494,8 @@ Gtk class extend [
     | loop |
 
     mainQuit [
-        loop quit
+	<category: 'event loop'>
+        GLib.GMainLoop mainQuit
     ]
 
     main [
@@ -523,18 +504,7 @@ Gtk class extend [
          run.  Like gtk_main, it is ended with Gtk>>#mainQuit."
 
 	<category: 'event loop'>
-	| sem newLoop context |
-	sem := Semaphore new.
-	newLoop := GTK.Gtk main: sem.
-        newLoop isNil ifTrue: [ ^self ].
-        loop := newLoop.
-        context := loop getContext.
-
-	[
-            [sem wait.
-	    context iterate.
-            loop isRunning] whileTrue]
-                 ensure: [loop unref]
+	GLib.GMainLoop main
     ]
 
 ]
@@ -1069,12 +1039,3 @@ GTK.GtkToolButton class extend [
 	    yourself
     ]
 ]
-
-
-"Finish initialization.  This will be done upon #returnFromSnapshot on
- subsequent image loads."
-
-Eval [
-    GLib registerAllTypes
-]
-

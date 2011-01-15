@@ -1,3 +1,14 @@
+2011-01-15  Paolo Bonzini  <bonzini@gnu.org>
+
+	* GtkDecl.st: Remove GLib stuff.  Import GLib namespace into GTK.
+	* GtkImpl.st: Same.  Point main loop to GLib methods.
+	* MoreFuncs.st: Remove GLib stuff.
+	* MoreStruct.st: Same.
+	* funcs.awk: Change #registerType: class.
+	* gst-gtk.c: Remove code moved to GLib package or libgst-gobject.
+	* package.xml: Add GLib prerequisite.
+	* structs.awk: GObject is now in the GLib namespace.
+
 2011-01-14  Paolo Bonzini  <bonzini@gnu.org>
 
 	* example_arrow.st: Explicitly load package.

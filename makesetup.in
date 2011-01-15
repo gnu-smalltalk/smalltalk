@@ -250,7 +250,7 @@ add_section basic \
   "Basic installation" \
   "Basic installation of GNU Smalltalk, including network access" \
   gst.exe \
-  ./libgst*.dll \
+  ./libgst-[0-9].dll \
   image/gst.im
 
 add_mingw_rpms $basic \
@@ -264,14 +264,18 @@ add_section ide \
   "IDE for GNU Smalltalk" \
   ./gst-browser.exe \
   ./gst-blox.exe \
+  ./libgst-gobject-[0-9].dll \
   smalltalk/BLOXBrowser.star \
   smalltalk/Blox.star \
   smalltalk/BloxGTK.star \
   smalltalk/Cairo.star \
+  smalltalk/GLib.star \
   smalltalk/GTK.star \
   smalltalk/VisualGST.star \
   smalltalk/examples/Man.st \
   smalltalk/examples/Tetris.st \
+  modules/gst-glib*.dll \
+  modules/gst-glib.la
   modules/gst-gtk*.dll \
   modules/gst-gtk.la
 

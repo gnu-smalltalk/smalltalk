@@ -29,6 +29,10 @@
  ======================================================================"
 
 
+Eval [
+    GTK import: GLib
+]
+
 
 Object subclass: Pango [
     
@@ -62,72 +66,9 @@ Object subclass: Atk [
 
 
 
-Object subclass: GLib [
-    
-    <category: 'Gtk'>
-    <comment: nil>
-
-    GLib class [
-	| gtkTypes |
-	
-    ]
-
-    GLib class >> registerAllTypes [
-	<category: 'registering GObject types'>
-	gtkTypes isNil ifTrue: [gtkTypes := OrderedCollection new].
-	gtkTypes do: [:each | self register: each forType: each getType]
-    ]
-
-    GLib class >> registerType: aClass [
-	<category: 'registering GObject types'>
-	gtkTypes isNil ifTrue: [gtkTypes := OrderedCollection new].
-	gtkTypes addLast: aClass
-    ]
-
-    GLib class >> update: anObject [
-	<category: 'registering GObject types'>
-	anObject == #returnFromSnapshot ifTrue: [self registerAllTypes]
-    ]
-]
-
-
-
-Object subclass: GQuark [
-    
-    <category: 'Gtk'>
-    <comment: nil>
-]
-
-
-
-CObject subclass: GList [
-    
-    <shape: #word>
-    <category: 'Gtk'>
-    <comment: nil>
-]
-
-
-
-CObject subclass: GSList [
-    
-    <shape: #word>
-    <category: 'Gtk'>
-    <comment: nil>
-]
-
-
-
 CObject subclass: GdkEvent [
     
     <shape: #word>
     <category: 'Gtk'>
     <comment: nil>
 ]
-
-
-
-Eval [
-    ObjectMemory addDependent: GLib
-]
-

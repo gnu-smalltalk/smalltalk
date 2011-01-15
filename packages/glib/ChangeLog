@@ -1,0 +1,7 @@
+2011-01-15  Paolo Bonzini  <bonzini@gnu.org>
+
+	* GLib.st: New, split from the Gtk package.
+	* gst-glib.c: New, split from gst-gtk.c.
+	* gst-gobject.c: New, split from gst-gtk.c.
+	* gst-gobject.h: New, split from gst-gtk.c.
+	* package.xml: New.

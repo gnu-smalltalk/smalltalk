@@ -330,7 +330,7 @@ match_function_first_line($0) {
   print "\targs: #(" argdecl " )>! !\n"
 
   if (decl == "getType" && !self)
-    print "GLib registerType: " prefixClassName "!\n"
+    print "GLib.GType registerType: " prefixClassName "!\n"
 }
 
 

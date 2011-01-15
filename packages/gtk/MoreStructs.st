@@ -32,15 +32,6 @@
 
 
 
-CStruct subclass: GTypeClass [
-    
-    <category: 'GTK'>
-    <comment: nil>
-    <declaration: #(#(#'g_type' #uLong ) )>
-]
-
-
-
 "FIXME: passing #cObjectPtr should be smarter or something"
 
 
@@ -59,35 +50,6 @@ CStruct subclass: GtkRequisition [
     <category: 'GTK'>
     <comment: nil>
     <declaration: #(#(#width #int ) #(#height #int ) )>
-]
-
-
-
-CStruct subclass: GList [
-    
-    <category: 'GTK'>
-    <comment: nil>
-    <declaration: #(#(#data #(#ptr #CObject ) ) #(#next #(#ptr #{GList} ) )
-		    #(#prev #(#ptr #{GList} ) ) )>
-
-    free [
-        <category: 'C call-outs'>
-        <cCall: 'g_list_free' returning: #void args: #(#self )>
-    ]
-]
-
-
-
-CStruct subclass: GSList [
-    
-    <category: 'GTK'>
-    <comment: nil>
-    <declaration: #(#(#data #(#ptr #CObject ) ) #(#next #(#ptr #{GSList} ) ) )>
-
-    free [
-        <category: 'C call-outs'>
-        <cCall: 'g_slist_free' returning: #void args: #(#self )>
-    ]
 ]
 
 

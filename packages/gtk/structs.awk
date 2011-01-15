@@ -43,8 +43,7 @@ BEGIN {
   # GtkEditable is a dummy class, so we must set inheritance manually
   known_parent["GtkEntry"] = "GtkEditable"
   known_parent["GtkEditable"] = "GtkWidget"
-  known_parent["GObject"] = "GTypeInstance"
-  known_parent["GtkObject"] = "GObject"
+  known_parent["GtkObject"] = "GLib.GObject"
   known_parent["GdkWindowObject"] = "GdkDrawable"
 
   # A couple of things that we need from GLib
@@ -53,6 +52,7 @@ BEGIN {
 
   # Here starts the class hierarchy
   emitted["CObject"] = ""
+  emitted["GLib.GObject"] = ""
 }
 
 {
@@ -69,7 +69,7 @@ BEGIN {
       is_g_name = src ~ /^(G|Pango|Atk)/
       is_pointer = dest ~ /\*/
       if (src ~ /Iface$/ && is_g_name && !is_pointer)
-        known_parent[substr (dest, 1, length (dest) - 5)] = "GObject"
+        known_parent[substr (dest, 1, length (dest) - 5)] = "GLib.GObject"
     }
   else if (is_struct)
     name = $2
@@ -97,9 +97,11 @@ is_struct && (name in classNames) {
 
   if (name in known_parent)
     parent = known_parent[name]
-  else
+  else {
     parent = ($1 ~ /^(G|Pango|Atk)/) && ($2 !~ /^\*/) && ($1 in emitted) ? $1 : "CObject" 
-
+    if (parent == "GObject")
+      parent = "GLib.GObject"
+  }
   parse_struct(parent, name)
 }
 

@@ -3,6 +3,7 @@
   <namespace>GTK</namespace>
 
   <prereq>Cairo</prereq>
+  <prereq>GLib</prereq>
 
   <filein>GtkDecl.st</filein>
   <filein>Structs.st</filein>
