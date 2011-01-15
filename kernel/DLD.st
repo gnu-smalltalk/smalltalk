@@ -116,7 +116,7 @@ so this avoids looking for symbols in the wrong library.'>
 		"If there is no established first, we started iterating from the
 		 first element in the stream."
 		first isNil ifTrue: [^true]].
-	^(last := stream peek) = first
+	^(last := stream peek) == first
     ]
 
     next [

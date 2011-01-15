@@ -1,3 +1,8 @@
+2011-01-15  Paolo Bonzini <bonzini@gnu.org>
+
+	* kernel/DLD.st: Fix case when the same library is loaded multiple
+	times.
+
 2011-01-14  Gwenael Casaccio  <mrgwen@gmail.com>
 
 	* kernel/Class.st: Detect class name conflicting with its namespace.
