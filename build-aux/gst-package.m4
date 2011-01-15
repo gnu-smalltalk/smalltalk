@@ -44,8 +44,8 @@ uninstall-local::
 all-local: $1.star
 EOF
   m4_if([$3], [], [], 
-    [PACKAGE_DLOPEN_FLAGS="$PACKAGE_DLOPEN_FLAGS m4_foreach_w(GST_Lib,
-	[$3], [-dlopen \"\${abs_top_builddir}/_GST_PKG_DIR/GST_Lib\"])"])
+    [PACKAGE_DLOPEN_FLAGS="$PACKAGE_DLOPEN_FLAGS[]m4_foreach_w(GST_Lib,
+	[$3], [ -dlopen \"\${abs_top_builddir}/_GST_PKG_DIR/GST_Lib\"])"])
   m4_foreach_w(GST_File, [$2],
 	       [m4_if(GST_File, Makefile,
 		      [BUILT_PACKAGES="$BUILT_PACKAGES _GST_PKG_DIR"])])])
