@@ -25,6 +25,7 @@
 ;;; Incorporates Frank Caggiano's changes for Emacs 19.
 ;;; Updates and changes for Emacs 20 and 21 by David Forster
 
+
 ;; ===[ Variables and constants ]=====================================
 
 (defvar smalltalk-name-regexp "[A-z][A-z0-9_]*"
@@ -171,7 +172,11 @@
 ;; ---[ Interactive functions ]---------------------------------------
 
 (defun smalltalk-mode ()
-  "Major mode for editing Smalltalk code."
+  "Major mode for editing Smalltalk code.
+
+Commands:
+\\{smalltalk-mode-map}
+"
   (interactive)
   (kill-all-local-variables)
   (setq major-mode 'smalltalk-mode)
@@ -299,6 +304,7 @@ one."
 
 
 (defun smalltalk-forward-sexp (n)
+  "Move point left to the next smalltalk expression."
   (interactive "p")
   (let (i)
     (cond ((< n 0)
@@ -312,6 +318,7 @@ one."
 	     (setq n (1- n)))))))
 
 (defun smalltalk-backward-sexp (n)
+  "Move point right to the next smalltalk expression."
   (interactive "p")
   (let (i)
     (cond ((< n 0)
@@ -367,6 +374,7 @@ expressions."
     (self-insert-command 1)))
 
 (defun smalltalk-bang ()
+  "Go to the end of the method definition"
   (interactive)
   (cond ((or (smalltalk-in-string) (smalltalk-in-comment)) (insert "!"))
         ((smalltalk-in-bang-syntax)
@@ -1011,9 +1019,7 @@ Whitespace is defined as spaces, tabs, and comments."
 	(progn (setq curr-hit-point new-hit-point)
 	       (setq curr-hit new-hit)))
     (cons curr-hit curr-hit-point)))
-
-
-
+  
 (defun smalltalk-current-scope-point ()
   (defun smalltalk-update-hit-point (current search)
     (save-excursion
@@ -1134,40 +1140,50 @@ Whitespace is defined as spaces, tabs, and comments."
 
 (defun smalltalk-find-beginning-of-keyword-send ()
   (save-excursion
-    (smalltalk-backward-whitespace)
-    (if (or (looking-back "[.;]") (= (smalltalk-previous-keyword) (point)))
-	""
-      (progn
-	(smalltalk-goto-previous-keyword)
-	(concat (smalltalk-find-beginning-of-keyword-send) 
-		(buffer-substring-no-properties (point) (progn (smalltalk-safe-forward-sexp)(+ (point) 1))))))))
+    (let ((begin-of-defun (smalltalk-at-begin-of-defun)))
+      (smalltalk-backward-whitespace)
+      (if (or (if begin-of-defun
+		  (looking-back "[].;]")
+		(looking-back "[.;]"))
+	      (= (smalltalk-previous-keyword) (point)))
+	  ""
+	(progn
+	  (smalltalk-goto-previous-keyword)
+	  (concat (smalltalk-find-beginning-of-keyword-send) 
+		  (buffer-substring-no-properties (point) (progn (smalltalk-safe-forward-sexp)(+ (point) 1)))))))))
 
 (defun smalltalk-goto-previous-keyword ()
+  "Go to the previous keyword of the current message send"
   (goto-char (smalltalk-previous-keyword)))
 
 (defun smalltalk-goto-next-keyword ()
+  "Go to the next keyword of the current message send"
   (goto-char (smalltalk-next-keyword)))
 
 (defun smalltalk-previous-keyword-1 ()
   (smalltalk-backward-whitespace)
   (if (looking-back "[>[({.^]") ;; not really ok when > is sent in a keyword arg
       nil
-    (progn 
-      (smalltalk-safe-backward-sexp)
-      (if (smalltalk-looking-at-keyword-send)
-	  (point)
-	(smalltalk-previous-keyword-1)))))
+    (if (= (point) (save-excursion (smalltalk-safe-backward-sexp) (point)))
+	nil
+      (progn 
+	(smalltalk-safe-backward-sexp)
+	(if (smalltalk-looking-at-keyword-send)
+	    (point)
+	  (smalltalk-previous-keyword-1))))))
 
 (defun smalltalk-next-keyword-1 ()
   (smalltalk-forward-whitespace)
-  (if (looking-at "[])}.]")
-      nil
-    (progn 
-      (smalltalk-safe-forward-sexp)
-      (skip-chars-forward ":")
-      (if (smalltalk-looking-back-keyword-send)
-	  (point)
-	(smalltalk-next-keyword-1)))))
+  (if (looking-at "[])};.]")
+      nil 
+    (if (= (point) (save-excursion (smalltalk-safe-forward-sexp) (point)))
+	nil
+      (progn
+	(smalltalk-safe-forward-sexp)
+	  (skip-chars-forward ":")
+	  (if (smalltalk-looking-back-keyword-send)
+	      (point)
+	    (smalltalk-next-keyword-1))))))
 
 (defun smalltalk-previous-keyword ()
   (or (save-excursion (smalltalk-previous-keyword-1)) (point)))
@@ -1176,3 +1192,4 @@ Whitespace is defined as spaces, tabs, and comments."
   (or (save-excursion (smalltalk-next-keyword-1)) (point)))
 
 (provide 'smalltalk-mode)
+
