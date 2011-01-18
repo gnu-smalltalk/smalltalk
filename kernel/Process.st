@@ -402,13 +402,13 @@ can suspend themselves and resume themselves however they wish.'>
 
 	"Start the Process immediately so that we get into the
 	 #on:do: handler.  Otherwise, we will not be able to
-	 terminate the process with #terminate."
+	 terminate the process with #terminate.  The #resume will
+         preempt the forking process."
 	suspendedContext := closure asContext: nil.
 	priority := Processor unpreemptedPriority.
 	self
 	    addToBeFinalized;
-	    resume.
-	aPriority > Processor activePriority ifTrue: [ Processor yield ].
+	    resume
     ]
 
     isActive [

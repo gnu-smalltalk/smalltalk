@@ -1,3 +1,7 @@
+2011-01-18  Paolo Bonzini <bonzini@gnu.org>
+
+	* kernel/Process.st: Remove useless #yield.
+
 2011-01-15  Paolo Bonzini <bonzini@gnu.org>
 
 	* kernel/DLD.st: Fix case when the same library is loaded multiple
