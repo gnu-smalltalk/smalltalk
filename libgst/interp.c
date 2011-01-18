@@ -1995,8 +1995,12 @@ _gst_check_process_state (void)
 	  if (process->myList != processListOOP)
 	    abort ();
 
+#if 0
+	  /* This is false when a process has just finished initializing
+	     itself.  */
 	  if (process->priority != FROM_INT (priority))
 	    abort ();
+#endif
 
           /* Sanity check the last link in the process list.  */
 	  if (IS_NIL (process->nextLink) && processOOP != processList->lastLink)

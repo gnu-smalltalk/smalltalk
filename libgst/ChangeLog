@@ -1,3 +1,7 @@
+2011-01-18  Paolo Bonzini <bonzini@gnu.org>
+
+	* libgst/interp.c: Do not verify an invalid invariant.
+
 2011-01-14  Paolo Bonzini <bonzini@gnu.org>
 
 	* libgst/cint.c: Accept UndefinedObject for #cObjectPtr.

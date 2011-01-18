@@ -387,7 +387,6 @@ can suspend themselves and resume themselves however they wish.'>
 		aBoolean
 		    ifTrue: [self suspend]
 		    ifFalse: [
-			self resume.
 			aPriority < activePriority ifTrue: [ Processor yield ] ].
 		aBlockClosure value]
 			on: SystemExceptions.ProcessBeingTerminated
