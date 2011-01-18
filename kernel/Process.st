@@ -265,14 +265,12 @@ can suspend themselves and resume themselves however they wish.'>
 			and: Processor highestPriority].
 
 	[
-	    | activePriority waiting |
+	    | activePriority |
             activePriority := Processor activePriority.
-	    waiting := self isActive not and: [ self isReady not ].
 	    priority := anInteger.
-	    waiting ifFalse: [
-		"Atomically move the process to the right list."
-                self resume.
-                anInteger > activePriority ifTrue: [ Processor yield ] ].
+	    "Atomically move the process to the right list, preempting
+             the current process if necessary."
+            self isReady ifTrue: [self resume].
 	] valueWithoutPreemption
     ]
 
