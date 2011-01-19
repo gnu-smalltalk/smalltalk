@@ -112,7 +112,7 @@ this can be changed by class methods on SocketAddress sublcasses.'>
 	[(self 
 	    bind: fd
 	    to: addr
-	    addrLen: addr size) < 0 ifTrue: [File checkError: self soError] ]
+	    addrLen: addr size) < 0 ifTrue: [File checkError] ]
 		ifCurtailed: [self close].
 	self isOpen ifTrue: [self hasBeenBound]
     ]
