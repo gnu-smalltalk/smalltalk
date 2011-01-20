@@ -82,12 +82,13 @@ register_for_type (OOP oop, GType type)
 }
 
 static int
-connect_signal_no_user_data (OOP widget, 
-			     char *event_name, 
-			     OOP receiver, 
-			     OOP selector)
+g_signal_connect_smalltalk_closure_no_user_data (OOP widget, 
+		    				 char *event_name, 
+						 OOP receiver, 
+						 OOP selector)
 {
-  return connect_signal (widget, event_name, receiver, selector, NULL);
+  return g_signal_connect_smalltalk_closure (widget, event_name,
+					     receiver, selector, NULL);
 }
 
 /* Event loop.  The Glib event loop in GNU Smalltalk is split between two
@@ -395,7 +396,7 @@ object_get_property (GObject *anObject,
   spec = g_object_class_find_property (G_OBJECT_GET_CLASS(obj), aProperty);
   g_value_init (&result, spec->value_type);
   g_object_get_property (obj, aProperty, &result);
-  return (convert_g_value_to_oop (&result));
+  return (g_value_convert_to_oop (&result));
 }
 
 void
@@ -410,7 +411,7 @@ object_set_property (GObject *anObject,
   obj = G_OBJECT (anObject);
   spec = g_object_class_find_property (G_OBJECT_GET_CLASS(obj), aProperty);
   g_value_init (&value, spec->value_type);
-  fill_g_value_from_oop (&value, aValue);
+  g_value_fill_from_oop (&value, aValue);
   g_object_set_property (obj, aProperty, &value);
 }
 
@@ -482,10 +483,10 @@ gst_initModule (proxy)
   _glib_vm_proxy->defineCFunc ("gtkInitialized", gst_gtk_initialized);
   _glib_vm_proxy->defineCFunc ("gstTypeOOP", gst_type_oop);
   _glib_vm_proxy->defineCFunc ("gstGtkRegisterForType", register_for_type);
-  _glib_vm_proxy->defineCFunc ("gstGtkFreeGObjectOOP", free_oop_for_g_object);
-  _glib_vm_proxy->defineCFunc ("gstGtkNarrowGObjectOOP", narrow_oop_for_g_object);
-  _glib_vm_proxy->defineCFunc ("gstGtkConnectSignal", connect_signal);
-  _glib_vm_proxy->defineCFunc ("gstGtkConnectSignalNoUserData", connect_signal_no_user_data);
+  _glib_vm_proxy->defineCFunc ("gstGtkFreeGObjectOOP", g_object_detach_oop);
+  _glib_vm_proxy->defineCFunc ("gstGtkNarrowGObjectOOP", g_object_narrow_oop);
+  _glib_vm_proxy->defineCFunc ("gstGtkConnectSignal", g_signal_connect_smalltalk_closure);
+  _glib_vm_proxy->defineCFunc ("gstGtkConnectSignalNoUserData", g_signal_connect_smalltalk_closure_no_user_data);
   _glib_vm_proxy->defineCFunc ("gstGtkMain", create_main_loop_thread);
   _glib_vm_proxy->defineCFunc ("gstGtkMainContextIterate", main_context_iterate);
   _glib_vm_proxy->defineCFunc ("gstGtkGetProperty", object_get_property);

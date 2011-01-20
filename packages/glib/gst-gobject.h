@@ -85,54 +85,58 @@ extern GQuark q_gst_object;
 
 extern GType G_TYPE_OOP;
 
+/* Add a reference to OBJ and attach the Smalltalk objcet OOP to it, so
+   that g_object_get_oop will return it.  */
+extern void g_object_attach_oop (GObject *obj, OOP oop);
+
 /* Unref OBJ and detach it from the Smalltalk object that has represented
    it so far.  */
-extern void free_oop_for_g_object (GObject *obj);
+extern void g_object_detach_oop (GObject *obj);
 
 /* If no Smalltalk object has represented OBJ so far, change OOP's class
    to be the correct one, ref the object, mark it as finalizable, and
    answer OOP; otherwise answer the pre-existing object.  */
-extern OOP narrow_oop_for_g_object (GObject *obj,
-				    OOP oop);
+extern OOP g_object_narrow_oop (GObject *obj,
+				OOP oop);
 
 /* Answer a Smalltalk object that can represent OBJ.  This is the same
    as narrow_oop_for_g_object, but creates a new OOP if no Smalltalk
    object has represented OBJ so far.  */
-extern OOP get_oop_for_g_object (GObject *obj);
+extern OOP g_object_get_oop (GObject *obj);
 
 /* Answer a Smalltalk object that can represent the boxed value OBJ.
    This needs to know the TYPE of the value because GBoxed values don't
    know their type.  */
-extern OOP get_oop_for_g_boxed (gpointer obj,
-				GType type);
+extern OOP g_boxed_get_oop (gpointer obj,
+			    GType type);
 
 /* Store in a quark that OBJ is represented by the Smalltalk object OOP.  */
-extern void associate_oop_to_g_object (GObject *obj,
-				       OOP oop);
+extern void g_object_attach_oop (GObject *obj,
+				    OOP oop);
 
 /* Convert the GValue, VAL, to a Smalltalk object.  */
-extern OOP convert_g_value_to_oop (const GValue *val);
+extern OOP g_value_convert_to_oop (const GValue *val);
 
 /* Store the value represented by OOP into the GValue, VAL.  */
-extern void fill_g_value_from_oop (GValue *val,
+extern void g_value_fill_from_oop (GValue *val,
 				   OOP oop);
 
 /* Create a GClosure that invokes the selector, SELECTOR, on the given
    object.  DATA is inserted as the second parameter (or is passed as the
    only one is the closure's arity is 0).  */
-extern GClosure *create_smalltalk_closure (OOP receiver,	
-					   OOP selector,
-					   OOP data,
-					   OOP widget,
-					   int n_params);
+extern GClosure *smalltalk_closure_new (OOP receiver,	
+					OOP selector,
+					OOP data,
+					OOP widget,
+					int n_params);
 
 /* A wrapper around g_signal_connect_closure that looks up the
    selector and creates a Smalltalk GClosure.  */
-extern int connect_signal (OOP widget, 
-			    char *event_name, 
-			    OOP receiver, 
-			    OOP selector,
-			    OOP user_data);
+extern int g_signal_connect_smalltalk_closure (OOP widget, 
+			   char *event_name, 
+			   OOP receiver, 
+			   OOP selector,
+			   OOP user_data);
 
 extern void gst_gobject_init (void);
 

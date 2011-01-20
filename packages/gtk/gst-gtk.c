@@ -105,8 +105,8 @@ connect_accel_group (OOP accel_group,
   /* Receiver is assumed to be OK, no matter what it is */
   /* Parameters OK, so carry on and connect the signal */
 
-  closure = create_smalltalk_closure (receiver, selector, NULL,
-                                      accel_group, n_params);
+  closure = smalltalk_closure_new (receiver, selector, NULL,
+				   accel_group, n_params);
   gtk_accel_group_connect (cObject, accel_key, accel_mods, accel_flags, closure);
   return 0;
 }
@@ -140,7 +140,7 @@ container_get_child_property (GtkContainer *aParent,
 
   g_value_init (&result, spec->value_type);
   gtk_container_child_get_property (aParent, aChild, aProperty, &result);
-  return (convert_g_value_to_oop (&result));
+  return (g_value_convert_to_oop (&result));
 }
 
 void
@@ -159,7 +159,7 @@ container_set_child_property (GtkContainer *aParent,
 						  aProperty);
 
   g_value_init (&value, spec->value_type);
-  fill_g_value_from_oop (&value, aValue);
+  g_value_fill_from_oop (&value, aValue);
   gtk_container_child_set_property (aParent, aChild, aProperty, &value);
 }
 
@@ -172,7 +172,7 @@ tree_model_get_oop (GtkTreeModel *model,
   OOP result; 
 
   gtk_tree_model_get_value (model, iter, col, &gval); 
-  result = convert_g_value_to_oop (&gval);
+  result = g_value_convert_to_oop (&gval);
   g_value_unset (&gval);
   return (result); 
 } 
@@ -186,7 +186,7 @@ list_store_set_oop (GtkListStore *store,
     GValue gval = { 0 };
     g_value_init (&gval,
 		  gtk_tree_model_get_column_type (GTK_TREE_MODEL(store), col));
-    fill_g_value_from_oop (&gval, value);
+    g_value_fill_from_oop (&gval, value);
     gtk_list_store_set_value (store, iter, col, &gval); 
     g_value_unset (&gval);
 } 
@@ -199,7 +199,7 @@ tree_store_set_oop (GtkTreeStore *store,
 { 
     GValue gval = { 0 }; 
     g_value_init (&gval, gtk_tree_model_get_column_type (GTK_TREE_MODEL(store), col));
-    fill_g_value_from_oop (&gval, value);
+    g_value_fill_from_oop (&gval, value);
     gtk_tree_store_set_value (store, iter, col, &gval); 
     g_value_unset (&gval);
 }

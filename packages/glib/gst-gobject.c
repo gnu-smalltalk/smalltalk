@@ -84,7 +84,7 @@ g_type_oop_value_free (GValue *value)
 
 static void
 g_type_oop_value_copy (const GValue *src_value,
-                        GValue       *dest_value)
+		       GValue       *dest_value)
 {
   gst_register_oop ((OOP) src_value->data[0].v_pointer);
   dest_value->data[0].v_pointer = src_value->data[0].v_pointer;
@@ -113,14 +113,14 @@ gst_gobject_init (void)
 
 /* GObject wrapper.  */
 void
-free_oop_for_g_object (GObject *obj)
+g_object_detach_oop (GObject *obj)
 {
   g_object_set_qdata (obj, q_gst_object, NULL);
   g_object_unref (obj);
 }
 
 void
-associate_oop_to_g_object (GObject *obj, OOP oop)
+g_object_attach_oop (GObject *obj, OOP oop)
 {
   OOP class = g_type_get_qdata (G_OBJECT_TYPE (obj), q_gst_object);
 
@@ -133,12 +133,12 @@ associate_oop_to_g_object (GObject *obj, OOP oop)
 }
 
 OOP
-narrow_oop_for_g_object (GObject *obj, OOP oop)
+g_object_narrow_oop (GObject *obj, OOP oop)
 {
   OOP preexistingOOP;
   if (!(preexistingOOP = g_object_get_qdata (obj, q_gst_object)))
     {
-      associate_oop_to_g_object (obj, oop);
+      g_object_attach_oop (obj, oop);
       return oop;
     }
   else
@@ -146,7 +146,7 @@ narrow_oop_for_g_object (GObject *obj, OOP oop)
 }
 
 OOP
-get_oop_for_g_boxed (gpointer obj, GType type)
+g_boxed_get_oop (gpointer obj, GType type)
 {
   OOP oop = gst_c_object_to_oop(obj);
   OOP class = g_type_get_qdata (type, q_gst_object);
@@ -158,7 +158,7 @@ get_oop_for_g_boxed (gpointer obj, GType type)
 }
 
 OOP
-get_oop_for_g_object (GObject *obj)
+g_object_get_oop (GObject *obj)
 {
   OOP oop;
   if (!(oop = g_object_get_qdata (obj, q_gst_object)))
@@ -166,7 +166,7 @@ get_oop_for_g_object (GObject *obj)
       /* We don't have a wrapper for it, so create it.  Get the class
 	 from the object's type.  */
       oop = gst_c_object_to_oop(obj);
-      associate_oop_to_g_object (obj, oop);
+      g_object_attach_oop (obj, oop);
     }
 
   return oop;
@@ -174,7 +174,7 @@ get_oop_for_g_object (GObject *obj)
 
 /* SmalltalkClosure implementation.  */
 OOP
-convert_g_value_to_oop (const GValue *val)
+g_value_convert_to_oop (const GValue *val)
 {
   GType type = G_VALUE_TYPE (val);
   GType fundamental;
@@ -251,14 +251,14 @@ convert_g_value_to_oop (const GValue *val)
 
     case G_TYPE_BOXED:
       v_ptr = g_value_get_boxed (val);
-      return get_oop_for_g_boxed (v_ptr, type);
+      return g_boxed_get_oop (v_ptr, type);
 
     case G_TYPE_OBJECT:
     case G_TYPE_INTERFACE:
       v_ptr = g_value_get_object (val);
       if (fundamental == type
 	  || G_TYPE_CHECK_INSTANCE_TYPE (v_ptr, type))
-	return get_oop_for_g_object (v_ptr);
+	return g_object_get_oop (v_ptr);
 
     default:
       return NULL;
@@ -266,7 +266,7 @@ convert_g_value_to_oop (const GValue *val)
 }
 
 void
-fill_g_value_from_oop (GValue *return_value, OOP oop)
+g_value_fill_from_oop (GValue *return_value, OOP oop)
 {
   GType type = G_VALUE_TYPE (return_value);
   GType fundamental;
@@ -411,7 +411,7 @@ invoke_smalltalk_closure (GClosure     *closure,
      the sender (first parameter, usually) most of the time */
   for (i = 0; i < n_param_values; i++)
     {
-      OOP oop = convert_g_value_to_oop (&param_values[i]);
+      OOP oop = g_value_convert_to_oop (&param_values[i]);
       if (!oop)
 	{
 	  fprintf (stderr, "Invalid type, signal discarded.\n");
@@ -441,15 +441,15 @@ invoke_smalltalk_closure (GClosure     *closure,
 
   /* FIXME Need to init return_value's type? */
   if (return_value)
-    fill_g_value_from_oop (return_value, resultOOP);
+    g_value_fill_from_oop (return_value, resultOOP);
 }
 
 GClosure *
-create_smalltalk_closure (OOP receiver,	
-			  OOP selector,
-			  OOP data,
-			  OOP widget,
-			  int n_params)
+smalltalk_closure_new (OOP receiver,	
+		       OOP selector,
+		       OOP data,
+		       OOP widget,
+		       int n_params)
 {
   GClosure *closure = g_closure_new_simple (sizeof (SmalltalkClosure), NULL);
   SmalltalkClosure *stc = (SmalltalkClosure *) closure;
@@ -472,7 +472,7 @@ create_smalltalk_closure (OOP receiver,
 
 /* Signal implementation.  */
 int
-connect_signal (OOP widget, 
+g_signal_connect_smalltalk_closure (OOP widget, 
 		char *event_name, 
 		OOP receiver, 
 		OOP selector,
@@ -510,9 +510,9 @@ connect_signal (OOP widget,
   /* Receiver is assumed to be OK, no matter what it is */
   /* Parameters OK, so carry on and connect the signal */
   
-  widget = narrow_oop_for_g_object (gObject, widget);
-  closure = create_smalltalk_closure (receiver, selector, user_data,
-                                     widget, n_params);
+  widget = g_object_narrow_oop (gObject, widget);
+  closure = smalltalk_closure_new (receiver, selector, user_data,
+				   widget, n_params);
 
   return g_signal_connect_closure (gObject, event_name, closure, FALSE);
 }

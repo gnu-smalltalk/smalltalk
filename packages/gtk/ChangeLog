@@ -1,3 +1,7 @@
+2011-01-20  Denis Washington <denisw@online.de>
+
+	* gst-gtk.c: Adopt new names for the libgst-gobject API.
+
 2011-01-15  Paolo Bonzini  <bonzini@gnu.org>
 
 	* GtkDecl.st: Remove GLib stuff.  Import GLib namespace into GTK.

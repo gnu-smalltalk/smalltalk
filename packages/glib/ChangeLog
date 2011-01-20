@@ -1,3 +1,9 @@
+2011-01-20  Denis Washington <denisw@online.de>
+
+	* gst-gobject.c: Adopt new names for the API.
+	* gst-gobject.h: Adjust.
+	* gst-glib.c: Adjust.
+
 2011-01-15  Paolo Bonzini  <bonzini@gnu.org>
 
 	* gst-gobject.c: Remove VMProxy dependency.
