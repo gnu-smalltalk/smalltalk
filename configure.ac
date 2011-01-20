@@ -457,7 +457,8 @@ GST_PACKAGE_ENABLE([Cairo], [cairo],
 
 GST_PACKAGE_ENABLE([GLib], [glib], [
   AM_PATH_GLIB_2_0(2.0.0, [
-    PKG_CHECK_MODULES(GTHREAD, gthread-2.0 >= 2.0.0, [gst_cv_glib=yes])
+    PKG_CHECK_MODULES(GTHREAD, gthread-2.0 >= 2.0.0,
+                      [gst_cv_glib=yes], [gst_cv_glib=no])
   ], [], gobject)
   if test $gst_cv_glib = yes; then
     ac_save_LIBS=$LIBS
@@ -475,7 +476,8 @@ GST_PACKAGE_ENABLE([GLib], [glib], [
   [Makefile], [gst-glib.la libgst-gobject.la])
 
 GST_PACKAGE_ENABLE([GObject-Introspection], [gir], [
-  PKG_CHECK_MODULES(GIR, gobject-introspection-1.0 >= 0.9.3, [gst_cv_gir=yes])],
+  PKG_CHECK_MODULES(GIR, gobject-introspection-1.0 >= 0.9.3,
+                    [gst_cv_gir=yes], [gst_cv_gir=no])],
   [gst_cv_gir])
 
 GST_PACKAGE_ENABLE([GTK], [gtk], [
@@ -487,11 +489,10 @@ GST_PACKAGE_ENABLE([GTK], [gtk], [
   if test "$enable_gtk" != no && test "$gst_cv_glib" != no; then
     maybe_enable_gtk=$enable_gtk
     enable_gtk=no
-    AM_PATH_GTK_2_0(2.0.0, [
-      PKG_CHECK_MODULES(ATK, atk >= 1.0.0, [
-        PKG_CHECK_MODULES(PANGO, pango >= 1.0.0, [enable_gtk=$maybe_enable_gtk])
-      ])
-    ])
+    AM_PATH_GTK_2_0(2.0.0,
+      [PKG_CHECK_MODULES(ATK, atk >= 1.0.0,
+        [PKG_CHECK_MODULES(PANGO, pango >= 1.0.0,
+                           [enable_gtk=$maybe_enable_gtk], :)], [:])])
   fi],
   [enable_gtk gst_cv_cairo],
   [Makefile], [gst-gtk.la])
