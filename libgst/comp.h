@@ -225,10 +225,8 @@ typedef struct gst_block_closure
  *gst_block_closure;
 
 
-/* These hold the compiler's notions of the current class for compilations,
-   and the current category that compiled methods are to be placed into */
-extern OOP _gst_this_class ATTRIBUTE_HIDDEN;
-extern OOP _gst_this_category ATTRIBUTE_HIDDEN;
+/* This holds the parse tree for the method being compiled.  */
+extern tree_node _gst_curr_method ATTRIBUTE_HIDDEN;
 
 /* This is the value most recently returned by
    _gst_execute_statements.  It is used to communicate the returned
@@ -250,11 +248,6 @@ extern int _gst_declare_tracing
    completely; only syntax will be checked.  Set by primitive, cleared
    by grammar.  */
 extern mst_Boolean _gst_skip_compilation 
-  ATTRIBUTE_HIDDEN;
-
-/* This holds whether the compiler should make the compiled methods
-   untrusted.  */
-extern mst_Boolean _gst_untrusted_methods 
   ATTRIBUTE_HIDDEN;
 
 /* Given a tree_node of type TREE_KEYWORD_LIST, pick out and concatenate
@@ -302,17 +295,9 @@ extern void _gst_display_compilation_trace (const char *string,
 extern void _gst_install_initial_methods (void) 
   ATTRIBUTE_HIDDEN;
 
-/* Sets the compiler's notion of the class to compile methods into.  */
-extern void _gst_set_compilation_class (OOP class_oop) 
-  ATTRIBUTE_HIDDEN;
-
-/* Sets the compiler's notion of the category to compile methods into.  */
-extern void _gst_set_compilation_category (OOP categoryOOP) 
-  ATTRIBUTE_HIDDEN;
-
 /* Clears the compiler's notion of the class and category to compile
    methods into.  */
-extern void _gst_reset_compilation_category () 
+extern void reset_compilation_category () 
   ATTRIBUTE_HIDDEN;
 
 /* This function will send a message to ObjectMemory (a system

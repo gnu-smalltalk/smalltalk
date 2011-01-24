@@ -117,7 +117,10 @@ typedef struct gst_parser {
   int la_size;
   int la_first;
   enum parser_state state;
+  mst_Boolean untrustedContext;
   OOP current_namespace;
+  OOP currentClass;
+  OOP currentCategory;
   OOP lastMethodOOP;
   jmp_buf recover;
 } gst_parser;
@@ -125,6 +128,25 @@ typedef struct gst_parser {
 /* This is necessary so that the grammar knows when it must switch to
    compile mode */
 extern gst_parser *_gst_current_parser 
+  ATTRIBUTE_HIDDEN;
+
+extern OOP _gst_get_current_namespace (void)
+  ATTRIBUTE_HIDDEN;
+
+/* Sets the parser's notion of the class to compile methods into.  */
+extern void _gst_set_compilation_class (OOP class_oop) 
+  ATTRIBUTE_HIDDEN;
+
+/* Sets the parser's notion of the category to compile methods into.  */
+extern void _gst_set_compilation_category (OOP categoryOOP) 
+  ATTRIBUTE_HIDDEN;
+
+/* Resets the parser's compilation information.  */
+extern void _gst_reset_compilation_category (void) 
+  ATTRIBUTE_HIDDEN;
+
+/* Returns whether methods should be created untrusted in the current parse.  */
+extern mst_Boolean _gst_untrusted_parse (void) 
   ATTRIBUTE_HIDDEN;
 
 /* Invoke the recursive descent parser.  */

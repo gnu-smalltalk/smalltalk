@@ -308,6 +308,56 @@ _gst_print_tokens (gst_parser *p)
   printf ("\n");
 }
 
+OOP
+_gst_get_current_namespace (void)
+{
+  if (_gst_current_parser)
+    return _gst_current_parser->current_namespace;
+
+  return _gst_current_namespace;
+}
+
+mst_Boolean
+_gst_untrusted_parse (void)
+{
+  if (!_gst_current_parser)
+    return false;
+
+  return (_gst_current_parser->untrustedContext
+          || IS_OOP_UNTRUSTED (_gst_current_parser->currentClass));
+}
+
+void
+_gst_set_compilation_class (OOP class_oop)
+{
+  assert (IS_NIL (_gst_current_parser->currentClass));
+  _gst_current_parser->currentClass = class_oop;
+  _gst_register_oop (class_oop);
+}
+
+void
+_gst_set_compilation_category (OOP categoryOOP)
+{
+  assert (IS_NIL (_gst_current_parser->currentClass));
+  _gst_current_parser->currentCategory = categoryOOP;
+  _gst_register_oop (categoryOOP);
+}
+
+void
+_gst_reset_compilation_category (void)
+{
+  if (!IS_NIL (_gst_current_parser->currentClass))
+    {
+      _gst_unregister_oop (_gst_current_parser->currentClass);
+      _gst_current_parser->currentClass = _gst_nil_oop;
+    }
+  if (!IS_NIL (_gst_current_parser->currentCategory))
+    {
+      _gst_unregister_oop (_gst_current_parser->currentCategory);
+      _gst_current_parser->currentCategory = _gst_nil_oop;
+    }
+}
+
 /* Top of the descent.  */
 
 OOP
@@ -318,6 +368,7 @@ _gst_parse_method (OOP currentClass, OOP currentCategory)
 
   _gst_current_parser = &p;
   p.state = PARSE_METHOD;
+  p.untrustedContext = IS_OOP_UNTRUSTED (_gst_this_context_oop);
   p.current_namespace = CLASS_ENVIRONMENT (currentClass);
   _gst_set_compilation_class (currentClass);
   _gst_set_compilation_category (currentCategory);
@@ -328,7 +379,6 @@ _gst_parse_method (OOP currentClass, OOP currentCategory)
     _gst_had_error = false;
 
   methodOOP = p.lastMethodOOP;
-  _gst_reset_compilation_category ();
   _gst_current_parser = prev_parser;
   return methodOOP;
 }
@@ -338,14 +388,17 @@ _gst_parse_chunks (OOP currentNamespace)
 {
   gst_parser p, *prev_parser = _gst_current_parser;
 
-  _gst_current_parser = &p;
+  /* This should ultimately become _gst_get_current_namespace ().  */
+  if (!currentNamespace)
+    currentNamespace = _gst_current_namespace;
 
+  _gst_current_parser = &p;
   lex_init (&p);
   if (token (&p, 0) == SHEBANG)
     lex (&p);
 
-  p.current_namespace = (currentNamespace ? currentNamespace
-                         : _gst_current_namespace);
+  p.untrustedContext = IS_OOP_UNTRUSTED (_gst_this_context_oop);
+  p.current_namespace = currentNamespace;
   p.state = PARSE_DOIT;
   setjmp (p.recover);
   _gst_had_error = false;
@@ -1165,6 +1218,9 @@ parse_method (gst_parser *p, int at_end)
 
   method = _gst_make_method (&pat->location, &current_pos,
 			     pat, temps, attrs, stmts, NULL,
+			     _gst_current_parser->currentClass,
+			     _gst_current_parser->currentCategory,
+			     _gst_untrusted_parse (),
 			     at_end != ']');
 
   if (!_gst_had_error && !_gst_skip_compilation)

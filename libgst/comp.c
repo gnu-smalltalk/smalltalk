@@ -80,16 +80,10 @@ typedef struct method_attributes
 } method_attributes;
 
 
-/* This holds whether the compiler should make the compiled methods
-   untrusted.  */
-mst_Boolean _gst_untrusted_methods = false;
-
 /* These hold the compiler's notions of the current class for
    compilations, and the current category that compiled methods are to
    be placed into.  */
-OOP _gst_this_class = NULL;
-OOP _gst_this_category = NULL;
-static OOP this_method_category;
+tree_node _gst_curr_method;
 
 /* This flag controls whether byte codes are printed after
    compilation.  */
@@ -202,7 +196,8 @@ static OOP compute_selector (tree_node selectorExpr);
 static OOP get_literals_array (void);
 
 /* Process the attributes in ATTRIBUTELIST, return the primitive number.
-   Also record a <category: ...> attribute in this_method_category.  */
+   Also record a <category: ...> attribute in curr_method's
+   currentCategory.  */
 static int process_attributes_tree (tree_node attributeList);
 
 /* Process the attribute in MESSAGEOOP, return the primitive number
@@ -440,8 +435,6 @@ _gst_install_initial_methods (void)
   /* Define the termination method first of all, because
      compiling #methodsFor: will invoke an evaluation
      (to get the argument of the <primitive: ...> attribute.  */
-  _gst_set_compilation_class (_gst_undefined_object_class);
-  _gst_set_compilation_category (_gst_string_new ("private"));
   _gst_alloc_bytecodes ();
   _gst_compile_byte (EXIT_INTERPRETER, 0);
   _gst_compile_byte (JUMP_BACK, 4);
@@ -449,9 +442,10 @@ _gst_install_initial_methods (void)
   /* The zeros are primitive, # of args, # of temps, stack depth */
   termination_method = _gst_make_new_method (0, 0, 0, 0, _gst_nil_oop,
 					     _gst_get_bytecodes (),
-					     _gst_this_class,
+					     _gst_undefined_object_class,
 					     _gst_terminate_symbol,
-					     _gst_this_category, -1, -1);
+					     _gst_string_new ("private"),
+					     -1, -1);
 
   ((gst_compiled_method) OOP_TO_OBJ (termination_method))->header.headerFlag
     = MTH_ANNOTATED;
@@ -535,37 +529,6 @@ _gst_init_compiler (void)
   literal_vec_max = literal_vec + LITERAL_VEC_CHUNK_SIZE;
 
   _gst_register_oop_array (&literal_vec, &literal_vec_curr);
-  _gst_reset_compilation_category ();
-}
-
-void
-_gst_set_compilation_class (OOP class_oop)
-{
-  _gst_unregister_oop (_gst_this_class);
-  _gst_this_class = class_oop;
-  _gst_register_oop (_gst_this_class);
-
-  _gst_untrusted_methods = (IS_OOP_UNTRUSTED (_gst_this_context_oop)
-			    || IS_OOP_UNTRUSTED (_gst_this_class));
-}
-
-void
-_gst_set_compilation_category (OOP categoryOOP)
-{
-  _gst_unregister_oop (_gst_this_category);
-  _gst_this_category = categoryOOP;
-  _gst_register_oop (_gst_this_category);
-
-  _gst_untrusted_methods = (IS_OOP_UNTRUSTED (_gst_this_context_oop)
-			    || IS_OOP_UNTRUSTED (_gst_this_class));
-}
-
-void
-_gst_reset_compilation_category ()
-{
-  _gst_set_compilation_class (_gst_undefined_object_class);
-  _gst_set_compilation_category (_gst_nil_oop);
-  _gst_untrusted_methods = false;
 }
 
 
@@ -579,9 +542,10 @@ _gst_display_compilation_trace (const char *string,
 
   if (category)
     printf ("%s category %O for %O\n", string,
-	    _gst_this_category, _gst_this_class);
+	    _gst_curr_method->v_method.currentCategory,
+            _gst_curr_method->v_method.currentClass);
   else
-    printf ("%s for %O\n", string, _gst_this_class);
+    printf ("%s for %O\n", string, _gst_curr_method->v_method.currentClass);
 }
 
 
@@ -598,7 +562,6 @@ _gst_execute_statements (tree_node temps,
   struct rusage startRusage, endRusage;
 #endif
   OOP methodOOP, resultOOP;
-  OOP oldClass, oldCategory;
   enum undeclared_strategy oldUndeclared;
   inc_ptr incPtr;
   YYLTYPE loc;
@@ -608,15 +571,7 @@ _gst_execute_statements (tree_node temps,
       || !_gst_get_cur_stream_prompt ())
     quiet = true;
 
-  oldClass = _gst_this_class;
-  oldCategory = _gst_this_category;
-  _gst_register_oop (oldClass);
-  _gst_register_oop (oldCategory);
-
-  _gst_set_compilation_class (_gst_undefined_object_class);
-  _gst_set_compilation_category (_gst_nil_oop);
   loc = _gst_get_location ();
-
   messagePattern = _gst_make_unary_expr (&statements->location,
 					 NULL, "executeStatements");
 
@@ -631,16 +586,15 @@ _gst_execute_statements (tree_node temps,
   methodOOP =
     _gst_compile_method (_gst_make_method (&statements->location, &loc,
 					   messagePattern, temps, NULL,
-					   statements, _gst_current_namespace,
+					   statements,
+					   _gst_get_current_namespace (),
+					   _gst_undefined_object_class,
+					   _gst_nil_oop,
+					   _gst_untrusted_parse (),
 					   false),
 			 true, false);
 
   _gst_set_undeclared (oldUndeclared);
-  _gst_set_compilation_class (oldClass);
-  _gst_set_compilation_category (oldCategory);
-  _gst_unregister_oop (oldClass);
-  _gst_unregister_oop (oldCategory);
-
   if (_gst_had_error)		/* don't execute on error */
     return (NULL);
 
@@ -759,6 +713,7 @@ _gst_compile_method (tree_node method,
 		     mst_Boolean returnLast,
 		     mst_Boolean install)
 {
+  tree_node outer_method;
   tree_node statement;
   OOP selector;
   OOP methodOOP;
@@ -770,7 +725,8 @@ _gst_compile_method (tree_node method,
 
   dup_message_receiver = false;
   literal_vec_curr = literal_vec;
-  this_method_category = _gst_this_category;
+  outer_method = _gst_curr_method;
+  _gst_curr_method = method;
 
   incPtr = INC_SAVE_POINTER ();
 
@@ -778,8 +734,7 @@ _gst_compile_method (tree_node method,
   _gst_push_new_scope ();
   inside_block = 0;
   selector = compute_selector (method->v_method.selectorExpr);
-  _gst_compute_linearized_pools (_gst_this_class,
-				 method->v_method.currentEnvironment);
+  _gst_compute_linearized_pools ();
 
   /* When we are reading from stdin, it's better to write line numbers where
      1 is the first line *in the current doit*, because for now the prompt
@@ -795,7 +750,7 @@ _gst_compile_method (tree_node method,
   INC_ADD_OOP (selector);
 
   if (_gst_declare_tracing)
-    printf ("  class %O, selector %O\n", _gst_this_class, selector);
+    printf ("  class %O, selector %O\n", method->v_method.currentClass, selector);
 
   if (setjmp (bad_method) == 0)
     {
@@ -880,8 +835,8 @@ _gst_compile_method (tree_node method,
 					_gst_get_arg_count (),
 					_gst_get_temp_count (),
 					stack_depth, _gst_nil_oop, bytecodes,
-					_gst_this_class, selector,
-					_gst_this_category,
+					method->v_method.currentClass, selector,
+					method->v_method.currentCategory,
 					method->location.file_offset,
 					method->v_method.endPos);
 
@@ -902,6 +857,7 @@ _gst_compile_method (tree_node method,
     }
 
   _gst_pop_all_scopes ();
+  _gst_curr_method = outer_method;
 
   INC_RESTORE_POINTER (incPtr);
   return (methodOOP);
@@ -1398,16 +1354,16 @@ compile_send (tree_node expr,
 
   int super = expr->v_expr.receiver
               && is_super (expr->v_expr.receiver);
+  OOP superclassOOP = SUPERCLASS (_gst_curr_method->v_method.currentClass);
 
-  if (super && IS_NIL (SUPERCLASS (_gst_this_class)))
+  if (super && IS_NIL (superclassOOP))
     {
       _gst_errorf ("cannot send to super from within a root class\n");
       EXIT_COMPILATION ();
     }
 
   if (super)
-    compile_constant (_gst_make_oop_constant (&expr->location,
-					      SUPERCLASS (_gst_this_class)));
+    compile_constant (_gst_make_oop_constant (&expr->location, superclassOOP));
 
   if (!bs)
     {
@@ -2189,7 +2145,7 @@ _gst_make_constant_oop (tree_node constExpr)
         INC_ADD_OOP (resultOOP);
 
 	dvb->key = _gst_intern_string (varNode->v_list.name);
-	dvb->class = _gst_this_class;
+	dvb->class = _gst_curr_method->v_method.currentClass;
 	dvb->defaultDictionary = _gst_get_undeclared_dictionary ();
 	dvb->association = _gst_nil_oop;
 
@@ -2289,7 +2245,7 @@ make_clean_block_closure (OOP blockOOP)
      receiver was nil, for example, untrusted clean blocks evaluated
      from a trusted environment would be treated as trusted (because
      nil is trusted).  */
-  closure->receiver = _gst_this_class;
+  closure->receiver = _gst_curr_method->v_method.currentClass;
   closure->outerContext = _gst_nil_oop;
   closure->block = blockOOP;
 
@@ -2400,7 +2356,7 @@ process_attributes_tree (tree_node attribute_list)
 
       if (result > 0)
 	{
-          if (IS_OOP_UNTRUSTED (_gst_this_class))
+          if (IS_OOP_UNTRUSTED (_gst_curr_method->v_method.currentClass))
 	    {
 	      _gst_errorf ("an untrusted class cannot declare primitives");
 	      EXIT_COMPILATION ();
@@ -2477,7 +2433,8 @@ process_attribute (OOP messageOOP)
     }
   else if (selectorOOP == _gst_category_symbol)
     {
-      this_method_category = arguments->data[0];
+      _gst_curr_method->v_method.currentCategory = arguments->data[0];
+      INC_ADD_OOP (_gst_curr_method->v_method.currentCategory);
       return (0);
     }
   else
@@ -2597,8 +2554,9 @@ install_method (OOP methodOOP)
       char *result;
       OOP attributeOOP = descriptor->attributes[i];
       gst_message attribute = (gst_message) OOP_TO_OBJ (attributeOOP);
-      OOP handlerBlockOOP = _gst_find_pragma_handler (_gst_this_class,
-						      attribute->selector);
+      OOP handlerBlockOOP = _gst_find_pragma_handler
+        (_gst_curr_method->v_method.currentClass,
+         attribute->selector);
 
       if (!IS_NIL (handlerBlockOOP))
 	{
@@ -2626,9 +2584,9 @@ install_method (OOP methodOOP)
      reachable by the root set so we don't need to hold onto it
      here.  */
   methodDictionaryOOP =
-    _gst_valid_class_method_dictionary (_gst_this_class);
+    _gst_valid_class_method_dictionary (_gst_curr_method->v_method.currentClass);
 
-  if (_gst_untrusted_methods)
+  if (_gst_curr_method->v_method.untrusted)
     {
       oldMethod = _gst_identity_dictionary_at (methodDictionaryOOP,
 					       selector);
@@ -2663,13 +2621,13 @@ _gst_make_new_method (int primitiveIndex,
 		      bc_vector bytecodes,
 		      OOP class,
 		      OOP selector,
-		      OOP defaultCategoryOOP,
+		      OOP categoryOOP,
 		      int64_t startPos,
 		      int64_t endPos)
 {
   method_header header;
   int newFlags;
-  OOP method, methodDesc, sourceCode, category;
+  OOP method, methodDesc, sourceCode;
   inc_ptr incPtr;
 
   maximumStackDepth += numArgs + numTemps;
@@ -2747,14 +2705,6 @@ _gst_make_new_method (int primitiveIndex,
   header.numTemps = numTemps;
   header.intMark = 1;
 
-  if (this_method_category)
-    {
-      category = this_method_category;
-      this_method_category = NULL;
-    }
-  else
-    category = defaultCategoryOOP;
-
   if (IS_NIL (class))
     sourceCode = _gst_nil_oop;
   else
@@ -2764,7 +2714,7 @@ _gst_make_new_method (int primitiveIndex,
     }
 
   methodDesc = method_info_new (class, selector, method_attrs,
-				sourceCode, category);
+				sourceCode, categoryOOP);
   INC_ADD_OOP (methodDesc);
 
   method = method_new (header, literals, bytecodes, class, methodDesc);
@@ -2795,10 +2745,12 @@ method_new (method_header header,
   method = (gst_compiled_method) instantiate_with (_gst_compiled_method_class,
 						   numByteCodes, &methodOOP);
 
-  MAKE_OOP_UNTRUSTED (methodOOP,
-		      _gst_untrusted_methods
-		      || IS_OOP_UNTRUSTED (_gst_this_context_oop)
-		      || IS_OOP_UNTRUSTED (class));
+  if (_gst_curr_method)
+    MAKE_OOP_UNTRUSTED (methodOOP, _gst_curr_method->v_method.untrusted);
+  else
+    MAKE_OOP_UNTRUSTED (methodOOP,
+                        IS_OOP_UNTRUSTED (_gst_this_context_oop)
+                        || IS_OOP_UNTRUSTED (class));
 
   method->header = header;
   method->descriptor = methodDesc;

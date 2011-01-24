@@ -831,23 +831,27 @@ add_shared_pool_resolution (OOP class_oop, OOP environmentOOP, pool_list *p_end)
 }
 
 void
-_gst_compute_linearized_pools (OOP classOOP, OOP environmentOOP)
+_gst_compute_linearized_pools (void)
 {
   pool_list *p_end = &linearized_pools;
-  OOP myClass;
+  OOP myClass, classOOP;
+  OOP environmentOOP = _gst_curr_method->v_method.currentEnvironment;
   mst_Boolean override = (environmentOOP != NULL);
 
   assert (linearized_pools == NULL);
+  myClass = _gst_get_class_object (_gst_curr_method->v_method.currentClass);
 
   /* Add pools separately for each class.  */
-  for (myClass = _gst_get_class_object (_gst_this_class); !IS_NIL (myClass);
-       myClass = SUPERCLASS (myClass))
+  for (classOOP = myClass; !IS_NIL (classOOP); classOOP = SUPERCLASS (classOOP))
     {
       /* First search in the class pool.  */
-      p_end = add_pool (_gst_class_variable_dictionary (myClass), p_end);
+      p_end = add_pool (_gst_class_variable_dictionary (classOOP), p_end);
+
+      /* Override CLASSOOP's environment with ENVIRONMENTOOP if it is not
+         NULL.  */
       p_end = add_shared_pool_resolution
-	      (myClass, 
-	       override ? environmentOOP : CLASS_ENVIRONMENT (myClass),
+	      (classOOP, 
+	       override ? environmentOOP : CLASS_ENVIRONMENT (classOOP),
 	       p_end);
     }
 }
@@ -1017,7 +1021,8 @@ _gst_find_variable (symbol_entry * se,
   index = _gst_add_forced_object (varAssoc);
 
   fill_symbol_entry (se, SCOPE_GLOBAL, 
-		     _gst_untrusted_methods && !IS_OOP_UNTRUSTED (varAssoc),
+		     (_gst_curr_method->v_method.untrusted
+		      && !IS_OOP_UNTRUSTED (varAssoc)),
 		     varAssoc, index, 0);
   return (true);
 }
@@ -1028,10 +1033,11 @@ is_instance_variable_read_only (int index)
   int numVars;
   OOP class_oop;
 
-  if (!_gst_untrusted_methods)
+  if (!_gst_curr_method->v_method.untrusted)
     return (false);
 
-  for (class_oop = _gst_this_class; IS_OOP_UNTRUSTED (class_oop);
+  for (class_oop = _gst_curr_method->v_method.currentClass;
+       IS_OOP_UNTRUSTED (class_oop);
        class_oop = SUPERCLASS (class_oop))
     ;
 
@@ -1045,7 +1051,8 @@ instance_variable_index (OOP symbol)
   OOP arrayOOP;
   int index, numVars;
 
-  arrayOOP = _gst_instance_variable_array (_gst_this_class);
+  arrayOOP = _gst_instance_variable_array
+    (_gst_curr_method->v_method.currentClass);
   numVars = NUM_OOPS (OOP_TO_OBJ (arrayOOP));
 
   for (index = numVars; index >= 1; index--)
@@ -1119,7 +1126,7 @@ _gst_find_pragma_handler (OOP classOOP,
 {
   OOP class_oop, myClass;
 
-  myClass = _gst_get_class_object (_gst_this_class);
+  myClass = _gst_get_class_object (_gst_curr_method->v_method.currentClass);
 
   /* Now search in the class pools */
   for (class_oop = myClass; !IS_NIL (class_oop);
