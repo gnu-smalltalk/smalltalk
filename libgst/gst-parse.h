@@ -118,6 +118,7 @@ typedef struct gst_parser {
   int la_first;
   enum parser_state state;
   OOP current_namespace;
+  OOP lastMethodOOP;
   jmp_buf recover;
 } gst_parser;
 
@@ -127,8 +128,8 @@ extern gst_parser *_gst_current_parser
   ATTRIBUTE_HIDDEN;
 
 /* Invoke the recursive descent parser.  */
-extern void _gst_parse_method (OOP currentClass,
-                               OOP currentCategory) 
+extern OOP _gst_parse_method (OOP currentClass,
+                              OOP currentCategory) 
   ATTRIBUTE_HIDDEN;
 extern void _gst_parse_chunks (OOP currentNamespace) 
   ATTRIBUTE_HIDDEN;

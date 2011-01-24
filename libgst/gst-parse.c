@@ -310,10 +310,12 @@ _gst_print_tokens (gst_parser *p)
 
 /* Top of the descent.  */
 
-void
+OOP
 _gst_parse_method (OOP currentClass, OOP currentCategory)
 {
   gst_parser p, *prev_parser = _gst_current_parser;
+  OOP methodOOP;
+
   _gst_current_parser = &p;
   p.state = PARSE_METHOD;
   p.current_namespace = CLASS_ENVIRONMENT (currentClass);
@@ -325,8 +327,10 @@ _gst_parse_method (OOP currentClass, OOP currentCategory)
   else
     _gst_had_error = false;
 
+  methodOOP = p.lastMethodOOP;
   _gst_reset_compilation_category ();
   _gst_current_parser = prev_parser;
+  return methodOOP;
 }
 
 void
@@ -1167,7 +1171,8 @@ parse_method (gst_parser *p, int at_end)
     {
       enum undeclared_strategy oldUndeclared;
       oldUndeclared = _gst_set_undeclared (UNDECLARED_GLOBALS);
-      _gst_compile_method (method, false, true);
+      _gst_current_parser->lastMethodOOP =
+        _gst_compile_method (method, false, true);
       _gst_set_undeclared (oldUndeclared);
     }
 

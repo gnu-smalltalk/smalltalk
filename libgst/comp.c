@@ -91,11 +91,6 @@ OOP _gst_this_class = NULL;
 OOP _gst_this_category = NULL;
 static OOP this_method_category;
 
-/* This holds the gst_compiled_method oop for the most recently
-   compiled method.  It is only really valid after a compile: has been
-   done, but this is the only place that its used.  */
-OOP _gst_latest_compiled_method = NULL;
-
 /* This flag controls whether byte codes are printed after
    compilation.  */
 int _gst_declare_tracing = 0;
@@ -781,8 +776,6 @@ _gst_compile_method (tree_node method,
   dup_message_receiver = false;
   literal_vec_curr = literal_vec;
   this_method_category = _gst_this_category;
-  _gst_unregister_oop (_gst_latest_compiled_method);
-  _gst_latest_compiled_method = _gst_nil_oop;
 
   incPtr = INC_SAVE_POINTER ();
 
@@ -901,13 +894,10 @@ _gst_compile_method (tree_node method,
 
       if (install)
 	install_method (methodOOP);
-
-      _gst_latest_compiled_method = methodOOP;	/* reachable by the
-						   root set */
-      _gst_register_oop (_gst_latest_compiled_method);
     }
   else
     {
+      methodOOP = _gst_nil_oop;
       _gst_had_error = true;
       bytecodes = _gst_get_bytecodes ();
       literal_vec_curr = literal_vec;
@@ -917,7 +907,7 @@ _gst_compile_method (tree_node method,
   _gst_pop_all_scopes ();
 
   INC_RESTORE_POINTER (incPtr);
-  return (_gst_latest_compiled_method);
+  return (methodOOP);
 }
 
 void

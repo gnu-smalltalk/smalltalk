@@ -336,7 +336,8 @@ static void set_preemption_timer (void);
 static mst_Boolean parse_stream_with_protection (OOP currentNamespace);
 
 /* Same as _gst_parse_method_from_stream, but creating a reentrancy_jmpbuf.
-   Returns true if interrupted. */
+   Returns true if interrupted, pushes the last compiled method on the
+   stack. */
 static mst_Boolean parse_method_from_stream_with_protection (OOP currentClass,
 							     OOP currentCategory);
 
@@ -2802,12 +2803,16 @@ parse_method_from_stream_with_protection (OOP currentClass,
 					  OOP currentCategory)
 {
   interp_jmp_buf jb;
+  OOP methodOOP;
 
   push_jmp_buf (&jb, false, get_active_process ());
   if (setjmp (jb.jmpBuf) == 0)
-    _gst_parse_method_from_stream (currentClass,
-				   currentCategory);
+    methodOOP = _gst_parse_method_from_stream (currentClass,
+                                               currentCategory);
+  else
+    methodOOP = _gst_nil_oop;
 
+  PUSH_OOP (methodOOP);
   return pop_jmp_buf ();
 }
 

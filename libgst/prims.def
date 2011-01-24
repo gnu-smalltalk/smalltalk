@@ -5148,11 +5148,11 @@ primitive VMpr_Behavior_primCompile [succeed]
   else
     _gst_push_stream_oop (oop2);
 
+  /* Pushes last compiled method onto stack.  */
   interrupted = parse_method_from_stream_with_protection (
     oop1,
     _gst_string_new ("still unclassified"));
   _gst_pop_stream (true);
-  PUSH_OOP (_gst_latest_compiled_method);
 
   if (interrupted)
     stop_execution ();
@@ -5187,13 +5187,13 @@ primitive VMpr_Behavior_primCompileIfError [fail,succeed,reload_ip]
       else
 	_gst_push_stream_oop (oop2);
 
+      /* Pushes last compiled method onto stack.  */
       interrupted = parse_method_from_stream_with_protection (
         oop1,
         _gst_string_new ("still unclassified"));
 
       _gst_pop_stream (true);
       _gst_report_errors = oldReportErrors;
-      PUSH_OOP (_gst_latest_compiled_method);
 
       if (interrupted)
         stop_execution ();

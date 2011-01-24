@@ -229,7 +229,6 @@ typedef struct gst_block_closure
    and the current category that compiled methods are to be placed into */
 extern OOP _gst_this_class ATTRIBUTE_HIDDEN;
 extern OOP _gst_this_category ATTRIBUTE_HIDDEN;
-extern OOP _gst_latest_compiled_method ATTRIBUTE_HIDDEN;
 
 /* This is the value most recently returned by
    _gst_execute_statements.  It is used to communicate the returned

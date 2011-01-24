@@ -86,8 +86,8 @@ extern struct obstack *_gst_compilation_obstack
   ATTRIBUTE_HIDDEN;
 
 /* Parse a method from the topmost stream in the stack.  */
-extern void _gst_parse_method_from_stream (OOP currentClass,
-			                   OOP currentCategory)
+extern OOP _gst_parse_method_from_stream (OOP currentClass,
+					  OOP currentCategory)
   ATTRIBUTE_HIDDEN;
 
 /* Parse the topmost stream in the stack.  */
