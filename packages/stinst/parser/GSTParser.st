@@ -150,8 +150,9 @@ STInST.STFileInParser subclass: GSTFileInParser [
     
     parseClass: node [ 
         self evaluateMessageOn: (node receiver)
-             selector: #subclass:
-             argument: (node arguments first name asSymbol).
+             selector: #subclass:environment:
+             arguments: {node arguments first name asSymbol.
+                         self driver currentNamespace}.
              
         class := node arguments first.
         self parseClassBody: false.
@@ -342,15 +343,19 @@ STInST.STFileInParser subclass: GSTFileInParser [
              argument: vars.
     ]
     
-    evaluateMessageOn: rec selector: sel argument: arg [
+    evaluateMessageOn: rec selector: sel arguments: argSymbols [
         | stmt |
           
         stmt := RBMessageNode
-	            receiver: rec
-	            selector: sel
-	            arguments: { RBLiteralNode value: arg }.
+            receiver: rec
+            selector: sel
+            arguments: {argSymbols collect: [:each | RBLiteralNode value: each]}.
 	    	    
         self evaluateStatement: stmt.
+    ]
+    
+    evaluateMessageOn: rec selector: sel argument: argSymbol [
+        self evaluateMessageOn: rec selector: sel arguments: { argSymbol }
     ]
     
     evaluateStatement: node [

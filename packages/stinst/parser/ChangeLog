@@ -1,5 +1,9 @@
 2011-01-24  Paolo Bonzini  <bonzini@gnu.org>
 
+	* GSTParser.st: Use #subclass:environment:.
+
+2011-01-24  Paolo Bonzini  <bonzini@gnu.org>
+
 	* STLoader.st: Intercept #subclass:environment:.
 	* STLoaderObjs.st: Add #subclass:environment:.
 

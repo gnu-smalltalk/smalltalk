@@ -117,6 +117,7 @@ typedef struct gst_parser {
   int la_size;
   int la_first;
   enum parser_state state;
+  OOP current_namespace;
   jmp_buf recover;
 } gst_parser;
 

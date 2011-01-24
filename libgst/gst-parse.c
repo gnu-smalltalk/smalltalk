@@ -112,8 +112,10 @@ static mst_Boolean parse_namespace_definition (gst_parser *p,
 static mst_Boolean parse_class_definition (gst_parser *p,
 					   OOP classOOP,	
 					   mst_Boolean extend);
-static OOP parse_namespace (tree_node name);
-static OOP parse_class (tree_node list);
+static OOP parse_namespace (gst_parser *p,
+			    tree_node name);
+static OOP parse_class (gst_parser *p,
+			tree_node list);
 static void parse_scoped_method (gst_parser *p,
 				 OOP classOOP);
 static void parse_instance_variables (gst_parser *p,
@@ -314,6 +316,7 @@ _gst_parse_method ()
   gst_parser p, *prev_parser = _gst_current_parser;
   _gst_current_parser = &p;
   p.state = PARSE_METHOD;
+  p.current_namespace = _gst_current_namespace;
   lex_init (&p);
   if (setjmp (p.recover) == 0)
     parse_method (&p, ']');
@@ -334,6 +337,7 @@ _gst_parse_chunks ()
   if (token (&p, 0) == SHEBANG)
     lex (&p);
 
+  p.current_namespace = _gst_current_namespace;
   p.state = PARSE_DOIT;
   setjmp (p.recover);
   _gst_had_error = false;
@@ -512,10 +516,11 @@ parse_scoped_definition (gst_parser *p, tree_node first_stmt)
 	return parse_namespace_definition (p, first_stmt);
       
       if (strcmp (expression->v_list.name, "subclass:") == 0
-	  && (classOOP = parse_class (receiver)) != NULL)
+	  && (classOOP = parse_class (p, receiver)) != NULL)
 	{
 	  const char * name = expression->v_list.value->v_list.name;
-	  _gst_msg_sendf (&classOOP, "%o %o subclass: %S", classOOP, name);
+	  _gst_msg_sendf (&classOOP, "%o %o subclass: %S environment: %o",
+                          classOOP, name, p->current_namespace);
 	      
 	  if (IS_NIL (classOOP))
 	    _gst_had_error = true;
@@ -527,20 +532,20 @@ parse_scoped_definition (gst_parser *p, tree_node first_stmt)
   else if (first_stmt->nodeType == TREE_UNARY_EXPR
 	   && first_stmt->v_expr.selector == _gst_intern_string ("extend"))
     {
-      OOP namespace_old = _gst_current_namespace;
+      OOP namespace_old = p->current_namespace;
       OOP classOrMetaclassOOP = NULL;
       mst_Boolean ret_value;
 
       _gst_register_oop (namespace_old);
       if (receiver->nodeType == TREE_VARIABLE_NODE)
  	{
- 	  classOOP = parse_class (receiver);
+ 	  classOOP = parse_class (p, receiver);
 	  classOrMetaclassOOP = classOOP;
  	}
       else if (receiver->nodeType == TREE_UNARY_EXPR
 	       && receiver->v_expr.selector == _gst_intern_string ("class"))
  	{
- 	  classOOP = parse_class (receiver->v_expr.receiver);
+ 	  classOOP = parse_class (p, receiver->v_expr.receiver);
 	  classOrMetaclassOOP = classOOP ? OOP_CLASS (classOOP) : NULL;
  	}	   
       if (classOrMetaclassOOP != NULL) 
@@ -552,7 +557,9 @@ parse_scoped_definition (gst_parser *p, tree_node first_stmt)
 	    _gst_msg_sendf (NULL, "%v %o current: %o",
 			    _gst_namespace_class, namespace_new);
 	  
+	  p->current_namespace = namespace_new;
  	  ret_value = parse_class_definition (p, classOrMetaclassOOP, true);
+	  p->current_namespace = namespace_old;
 
 	  if (namespace_new != namespace_old)
 	    _gst_msg_sendf (NULL, "%v %o current: %o",
@@ -654,16 +661,17 @@ static mst_Boolean
 parse_namespace_definition (gst_parser *p, tree_node first_stmt)
 {      
   tree_node expr = first_stmt->v_expr.expression;
-  OOP new_namespace = parse_namespace (expr->v_list.value);
+  OOP new_namespace = parse_namespace (p, expr->v_list.value);
   
   if (new_namespace)
     {
-      OOP old_namespace = _gst_current_namespace;
+      OOP old_namespace = p->current_namespace;
       _gst_register_oop (old_namespace);		
   
       _gst_msg_sendf (NULL, "%v %o current: %o", 
 		      _gst_namespace_class, new_namespace);
       
+      p->current_namespace = new_namespace;
       while (token (p, 0) != ']' && token (p, 0) != EOF && token (p, 0) != '!')
 	{
 	  if (token (p, 0) == '<')
@@ -672,6 +680,7 @@ parse_namespace_definition (gst_parser *p, tree_node first_stmt)
 	    parse_doit (p, true);
 	}
 
+      p->current_namespace = old_namespace;
       _gst_msg_sendf (NULL, "%v %o current: %o",
 		      _gst_namespace_class, old_namespace);
       
@@ -904,7 +913,7 @@ parse_scoped_method (gst_parser *p, OOP classOOP)
   mst_Boolean class_method = false;
 
   class_node = parse_variable_primary (p);
-  class = parse_class (class_node);
+  class = parse_class (p, class_node);
 
   if (OOP_CLASS (classOOP) == _gst_metaclass_class)
     classInstanceOOP = METACLASS_INSTANCE (classOOP);
@@ -961,10 +970,11 @@ parse_scoped_method (gst_parser *p, OOP classOOP)
 }
 
 static OOP
-parse_class (tree_node list) 
+parse_class (gst_parser *p,
+	     tree_node list) 
 {
   const char* name;
-  OOP currentOOP = _gst_current_namespace;
+  OOP currentOOP = p->current_namespace;
   tree_node next; 
 
   if (strcmp (list->v_list.name, "nil") == 0)
@@ -1010,12 +1020,12 @@ parse_class (tree_node list)
 }
 
 static OOP
-parse_namespace (tree_node list) 
+parse_namespace (gst_parser *p, tree_node list) 
 {
   OOP name, new_namespace, current_namespace;
   const char *namespc;
 	
-  current_namespace = _gst_current_namespace;
+  current_namespace = p->current_namespace;
   while (list->v_list.next != NULL)
     {
       name = _gst_intern_string (list->v_list.name);	
