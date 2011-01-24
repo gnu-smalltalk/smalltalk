@@ -39,6 +39,15 @@ Object subclass: UndefinedObject [
 instance, which is the object "nil".'>
     <import: Smalltalk>
 
+    UndefinedObject class >> allSharedPoolDictionariesDo: aBlock [
+        "Answer the shared pools visible from methods in the metaclass,
+         in the correct search order."
+
+        self
+            allSharedPoolDictionariesDo: aBlock
+            overrideEnvironment: Namespace current
+    ]
+
     copy [
 	<category: 'basic'>
 	^self

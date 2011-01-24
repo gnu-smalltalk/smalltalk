@@ -655,7 +655,16 @@ the class category.'>
         "Answer the shared pools visible from methods in the metaclass,
          in the correct search order."
 
-        | superclassSpaces |
+        self allSharedPoolDictionariesDo: aBlock overrideEnvironment: nil
+    ]
+
+    allSharedPoolDictionariesDo: aBlock overrideEnvironment: aNamespace [
+        "Answer the shared pools visible from methods in the class,
+         in the correct search order.  The receiver's environment is
+         temporarily replaced with aNamespace"
+
+        | superclassSpaces env |
+        env := aNamespace.
         self withAllSuperclassesDo: [:behavior || classSpaces |
 	    aBlock value: behavior classPool.
 
@@ -663,8 +672,8 @@ the class category.'>
 	     classSpaces..."
             superclassSpaces isNil
 		ifTrue: [classSpaces := IdentitySet new.
-			 behavior environment withAllSuperspacesDo: [ :each |
-			     classSpaces add: each]]
+                         (env ifNil: [behavior environment])
+                             withAllSuperspacesDo: [:each | classSpaces add: each]]
 		ifFalse: [classSpaces := superclassSpaces].
 
 	    "... and visit them."
@@ -685,7 +694,9 @@ the class category.'>
 		     "also visit the namespace shared pools"
 		     Class allPoolDictionaries: each sharedPoolDictionaries
 			   except: classSpaces
-			   do: aBlock]]]
+			   do: aBlock]].
+
+            env := nil]
     ]
 
     allLocalSharedPoolDictionariesExcept: inWhite do: aBlock [
