@@ -805,14 +805,12 @@ combine_local_pools (OOP sharedPoolsOOP, struct pointer_set_t *white, pool_list 
    the superclass.  */
 
 static pool_list *
-add_shared_pool_resolution (OOP class_oop, pool_list *p_end)
+add_shared_pool_resolution (OOP class_oop, OOP environmentOOP, pool_list *p_end)
 {
-  OOP environmentOOP;
   gst_class class;
   struct pointer_set_t *pset;
 
   /* Then in all the imports not reachable from the environment.  */
-  environmentOOP = CLASS_ENVIRONMENT (class_oop);
   pset = make_with_all_superspaces_set (environmentOOP);
   class = (gst_class) OOP_TO_OBJ (class_oop);
   p_end = combine_local_pools (class->sharedPools, pset, p_end);
@@ -833,10 +831,11 @@ add_shared_pool_resolution (OOP class_oop, pool_list *p_end)
 }
 
 void
-_gst_compute_linearized_pools (OOP classOOP)
+_gst_compute_linearized_pools (OOP classOOP, OOP environmentOOP)
 {
   pool_list *p_end = &linearized_pools;
   OOP myClass;
+  mst_Boolean override = (environmentOOP != NULL);
 
   assert (linearized_pools == NULL);
 
@@ -846,7 +845,10 @@ _gst_compute_linearized_pools (OOP classOOP)
     {
       /* First search in the class pool.  */
       p_end = add_pool (_gst_class_variable_dictionary (myClass), p_end);
-      p_end = add_shared_pool_resolution (myClass, p_end);
+      p_end = add_shared_pool_resolution
+	      (myClass, 
+	       override ? environmentOOP : CLASS_ENVIRONMENT (myClass),
+	       p_end);
     }
 }
 

@@ -426,11 +426,6 @@ static inline int64_t to_c_int_64 (OOP oop);
 #define CLASS_ENVIRONMENT(class_oop) \
   (((gst_class)OOP_TO_OBJ(class_oop))->environment)
 
-/* Set NAMESPACEOOP to be the namespace in which references to globals
-   from methods of CLASS_OOP are resolved.  */
-#define SET_CLASS_ENVIRONMENT(class_oop, namespaceOOP) \
-  (((gst_class)OOP_TO_OBJ(class_oop))->environment = namespaceOOP)
-
 /* Answer the instance specification for instances of CLASS_OOP.  */
 #define CLASS_INSTANCE_SPEC(class_oop) \
   (((gst_class)OOP_TO_OBJ(class_oop))->instanceSpec)

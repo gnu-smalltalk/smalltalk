@@ -193,8 +193,10 @@ extern mst_Boolean _gst_find_variable (symbol_entry * se,
 				       tree_node list)
   ATTRIBUTE_HIDDEN;
 
-/* Compute linearized pool order for CLASSOOP.  */
-extern void _gst_compute_linearized_pools (OOP classOOP)
+/* Compute linearized pool order for CLASSOOP.  Override CLASSOOP's environment
+   with ENVIRONMENTOOP if it is not NULL.  */
+extern void _gst_compute_linearized_pools (OOP classOOP,
+                                           OOP environmentOOP)
   ATTRIBUTE_HIDDEN;
 
 /* This converts a C string to a symbol and stores it in the symbol

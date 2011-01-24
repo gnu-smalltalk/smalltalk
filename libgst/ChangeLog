@@ -1,5 +1,17 @@
 2011-01-24  Paolo Bonzini <bonzini@gnu.org>
 
+	* libgst/comp.c: Use new attribute of method trees instead of
+	temporarily changing the namespace of UndefinedObject.
+	* libgst/gst-parse.c: Adjust call.
+	* libgst/sym.c: Add namespace override to
+	_gst_compute_linearized_pools.
+	* libgst/sym.h: Adjust prototype.
+	* libgst/tree.c: Add namespace override to method trees.
+	* libgst/tree.h: Adjust declarations and prototype.
+	* libgst/dict.inl: Remove SET_CLASS_ENVIRONMENT.
+
+2011-01-24  Paolo Bonzini <bonzini@gnu.org>
+
 	* libgst/sym.c: Add _gst_compute_linearized_pool_order.
 	* libgst/sym.h: Declare it.
 	* libgst/comp.c: Use it.

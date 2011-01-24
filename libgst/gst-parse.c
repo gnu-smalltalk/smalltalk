@@ -1164,7 +1164,7 @@ parse_method (gst_parser *p, int at_end)
     current_pos.file_offset++;
 
   method = _gst_make_method (&pat->location, &current_pos,
-			     pat, temps, attrs, stmts,
+			     pat, temps, attrs, stmts, NULL,
 			     at_end != ']');
 
   if (!_gst_had_error && !_gst_skip_compilation)

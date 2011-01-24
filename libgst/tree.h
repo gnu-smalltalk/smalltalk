@@ -180,6 +180,7 @@ typedef struct method_node
   tree_node temporaries;
   tree_node attributes;
   tree_node statements;
+  OOP currentEnvironment;
   int64_t endPos;
   mst_Boolean isOldSyntax;
 }
@@ -232,6 +233,7 @@ extern tree_node _gst_make_method (YYLTYPE *startLocation,
 				   tree_node temporaries,
 				   tree_node attributes,
 				   tree_node statements,
+                                   OOP currentEnvironment,
 				   int isOldSyntax)
   ATTRIBUTE_HIDDEN;
 

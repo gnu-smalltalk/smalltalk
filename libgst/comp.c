@@ -625,22 +625,17 @@ _gst_execute_statements (tree_node temps,
   /* This is a big hack to let doits access the variables and classes
      in the current namespace.  */
   oldUndeclared = _gst_set_undeclared (undeclared);
-  SET_CLASS_ENVIRONMENT (_gst_undefined_object_class,
-			 _gst_current_namespace);
-
   if (statements->nodeType != TREE_STATEMENT_LIST)
     statements = _gst_make_statement_list (&statements->location, statements);
 
   methodOOP =
     _gst_compile_method (_gst_make_method (&statements->location, &loc,
 					   messagePattern, temps, NULL,
-					   statements, false),
+					   statements, _gst_current_namespace,
+					   false),
 			 true, false);
 
-  SET_CLASS_ENVIRONMENT (_gst_undefined_object_class,
-			 _gst_smalltalk_dictionary);
   _gst_set_undeclared (oldUndeclared);
-
   _gst_set_compilation_class (oldClass);
   _gst_set_compilation_category (oldCategory);
   _gst_unregister_oop (oldClass);
@@ -783,7 +778,8 @@ _gst_compile_method (tree_node method,
   _gst_push_new_scope ();
   inside_block = 0;
   selector = compute_selector (method->v_method.selectorExpr);
-  _gst_compute_linearized_pools (_gst_this_class);
+  _gst_compute_linearized_pools (_gst_this_class,
+				 method->v_method.currentEnvironment);
 
   /* When we are reading from stdin, it's better to write line numbers where
      1 is the first line *in the current doit*, because for now the prompt

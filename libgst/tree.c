@@ -125,6 +125,7 @@ _gst_make_method (YYLTYPE *location,
 		  tree_node temporaries,
 		  tree_node attributes,
 		  tree_node statements,
+		  OOP currentEnvironment,
 		  int isOldSyntax)
 {
   tree_node result;
@@ -135,6 +136,7 @@ _gst_make_method (YYLTYPE *location,
   result->v_method.temporaries = temporaries;
   result->v_method.attributes = attributes;
   result->v_method.statements = statements;
+  result->v_method.currentEnvironment = currentEnvironment;
   result->v_method.isOldSyntax = isOldSyntax;
   return (result);
 }
