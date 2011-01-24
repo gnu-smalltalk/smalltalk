@@ -399,7 +399,7 @@ _gst_eval_code (const char *str)
     _gst_initialize (NULL, NULL, GST_NO_TTY);
 
   _gst_push_cstring (str);
-  _gst_parse_stream (false);
+  _gst_parse_stream (NULL);
   _gst_pop_stream (true);
 }
 
@@ -413,7 +413,7 @@ _gst_eval_expr (const char *str)
     _gst_initialize (NULL, NULL, GST_NO_TTY);
 
   _gst_push_cstring (str);
-  _gst_parse_stream (false);
+  _gst_parse_stream (NULL);
   _gst_pop_stream (true);
   result = _gst_last_returned_value;
   INC_ADD_OOP (result);

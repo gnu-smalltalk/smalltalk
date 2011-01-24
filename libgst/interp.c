@@ -333,7 +333,12 @@ static void set_preemption_timer (void);
 
 /* Same as _gst_parse_stream, but creating a reentrancy_jmpbuf.  Returns
    true if interrupted. */
-static mst_Boolean parse_stream_with_protection (mst_Boolean method);
+static mst_Boolean parse_stream_with_protection (OOP currentNamespace);
+
+/* Same as _gst_parse_method_from_stream, but creating a reentrancy_jmpbuf.
+   Returns true if interrupted. */
+static mst_Boolean parse_method_from_stream_with_protection (OOP currentClass,
+							     OOP currentCategory);
 
 /* Put the given process to sleep by rotating the list of processes for
    PROCESSOOP's priority (i.e. it was the head of the list and becomes
@@ -2793,13 +2798,27 @@ stop_execution (void)
 }
 
 mst_Boolean
-parse_stream_with_protection (mst_Boolean method)
+parse_method_from_stream_with_protection (OOP currentClass,
+					  OOP currentCategory)
 {
   interp_jmp_buf jb;
 
   push_jmp_buf (&jb, false, get_active_process ());
   if (setjmp (jb.jmpBuf) == 0)
-    _gst_parse_stream (method);
+    _gst_parse_method_from_stream (currentClass,
+				   currentCategory);
+
+  return pop_jmp_buf ();
+}
+
+mst_Boolean
+parse_stream_with_protection (OOP currentNamespace)
+{
+  interp_jmp_buf jb;
+
+  push_jmp_buf (&jb, false, get_active_process ());
+  if (setjmp (jb.jmpBuf) == 0)
+    _gst_parse_stream (currentNamespace);
 
   return pop_jmp_buf ();
 }

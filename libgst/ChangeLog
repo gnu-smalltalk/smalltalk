@@ -1,5 +1,22 @@
 2011-01-24  Paolo Bonzini <bonzini@gnu.org>
 
+	* libgst/dict.inl: Add CLASS_ENVIRONMENT.
+	* libgst/sym.c: Use it.
+
+	* libgst/gst-parse.c: Receive current namespace from outside.
+	* libgst/gst-parse.h: Adjust prototypes.
+	* libgst/lex.c: Adjust _gst_parse_stream, add
+	_gst_parse_method_from_stream.
+	* libgst/lex.h: Adjust prototypes.
+	* libgst/callin.c: Adjust callers.
+	* libgst/comp.c: Likewise.
+	* libgst/input.c: Likewise.
+	* libgst/interp.c: Adjust parse_stream_with_protection, add
+	parse_method_from_stream_with_protection.
+	* libgst/prims.def: Adjust callers.
+
+2011-01-24  Paolo Bonzini <bonzini@gnu.org>
+
 	* libgst/gst-parse.c: Add current namespace to gst_parser.
 	* libgst/gst-parse.h: Likewise.
 

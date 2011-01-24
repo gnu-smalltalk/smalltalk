@@ -815,7 +815,7 @@ _gst_process_stdin (const char *prompt)
   _gst_push_stdin_string ();
   if (isatty (0))
     in_stream->prompt = prompt;
-  _gst_parse_stream (false);
+  _gst_parse_stream (NULL);
   _gst_pop_stream (true);
   _gst_non_interactive = true;
 }
@@ -843,7 +843,7 @@ _gst_process_file (const char *fileName, enum gst_file_dir dir)
 
       old = _gst_set_undeclared (UNDECLARED_GLOBALS);
       _gst_push_unix_file (fd, f);
-      _gst_parse_stream (false);
+      _gst_parse_stream (NULL);
       _gst_pop_stream (true);
       _gst_set_undeclared (old);
       errno = 0;

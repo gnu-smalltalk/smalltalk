@@ -311,23 +311,26 @@ _gst_print_tokens (gst_parser *p)
 /* Top of the descent.  */
 
 void
-_gst_parse_method ()
+_gst_parse_method (OOP currentClass, OOP currentCategory)
 {
   gst_parser p, *prev_parser = _gst_current_parser;
   _gst_current_parser = &p;
   p.state = PARSE_METHOD;
-  p.current_namespace = _gst_current_namespace;
+  p.current_namespace = CLASS_ENVIRONMENT (currentClass);
+  _gst_set_compilation_class (currentClass);
+  _gst_set_compilation_category (currentCategory);
   lex_init (&p);
   if (setjmp (p.recover) == 0)
     parse_method (&p, ']');
   else
     _gst_had_error = false;
 
+  _gst_reset_compilation_category ();
   _gst_current_parser = prev_parser;
 }
 
 void
-_gst_parse_chunks ()
+_gst_parse_chunks (OOP currentNamespace)
 {
   gst_parser p, *prev_parser = _gst_current_parser;
 
@@ -337,7 +340,8 @@ _gst_parse_chunks ()
   if (token (&p, 0) == SHEBANG)
     lex (&p);
 
-  p.current_namespace = _gst_current_namespace;
+  p.current_namespace = (currentNamespace ? currentNamespace
+                         : _gst_current_namespace);
   p.state = PARSE_DOIT;
   setjmp (p.recover);
   _gst_had_error = false;

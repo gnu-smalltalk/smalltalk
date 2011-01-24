@@ -815,18 +815,17 @@ add_local_pool_resolution (OOP class_oop, pool_list *p_end)
   p_end = add_pool (_gst_class_variable_dictionary (class_oop), p_end);
 
   /* Then in all the imports not reachable from the environment.  */
-  class = (gst_class) OOP_TO_OBJ (class_oop);
-  environmentOOP = class->environment;
+  environmentOOP = CLASS_ENVIRONMENT (class_oop);
   pset = make_with_all_superspaces_set (environmentOOP);
+  class = (gst_class) OOP_TO_OBJ (class_oop);
   p_end = combine_local_pools (class->sharedPools, pset, p_end);
   pointer_set_destroy (pset);
 
   /* Then search in the `environments', except those that are already
      reachable from the superclass. */
   class_oop = SUPERCLASS (class_oop);
-  class = (gst_class) OOP_TO_OBJ (class_oop);
   if (!IS_NIL (class_oop))
-    pset = make_with_all_superspaces_set (class->environment);
+    pset = make_with_all_superspaces_set (CLASS_ENVIRONMENT (class_oop));
   else
     pset = NULL;
   

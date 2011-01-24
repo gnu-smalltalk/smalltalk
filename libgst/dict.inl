@@ -421,6 +421,11 @@ static inline int64_t to_c_int_64 (OOP oop);
 #define SET_ASSOCIATION_VALUE(associationOOP, valueOOP) \
   (((gst_association)OOP_TO_OBJ(associationOOP))->value = valueOOP)
 
+/* Return  the namespace in which references to globals
+   from methods of CLASS_OOP are resolved.  */
+#define CLASS_ENVIRONMENT(class_oop) \
+  (((gst_class)OOP_TO_OBJ(class_oop))->environment)
+
 /* Set NAMESPACEOOP to be the namespace in which references to globals
    from methods of CLASS_OOP are resolved.  */
 #define SET_CLASS_ENVIRONMENT(class_oop, namespaceOOP) \

@@ -85,8 +85,13 @@ extern int _gst_first_error_line
 extern struct obstack *_gst_compilation_obstack 
   ATTRIBUTE_HIDDEN;
 
+/* Parse a method from the topmost stream in the stack.  */
+extern void _gst_parse_method_from_stream (OOP currentClass,
+			                   OOP currentCategory)
+  ATTRIBUTE_HIDDEN;
+
 /* Parse the topmost stream in the stack.  */
-extern void _gst_parse_stream (mst_Boolean method)
+extern void _gst_parse_stream (OOP currentNamespace)
   ATTRIBUTE_HIDDEN;
 
 /* Lexer interface to the lexer.  */

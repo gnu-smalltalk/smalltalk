@@ -127,9 +127,10 @@ extern gst_parser *_gst_current_parser
   ATTRIBUTE_HIDDEN;
 
 /* Invoke the recursive descent parser.  */
-extern void _gst_parse_method (void) 
+extern void _gst_parse_method (OOP currentClass,
+                               OOP currentCategory) 
   ATTRIBUTE_HIDDEN;
-extern void _gst_parse_chunks (void) 
+extern void _gst_parse_chunks (OOP currentNamespace) 
   ATTRIBUTE_HIDDEN;
 
 extern void _gst_print_tokens (gst_parser *p)

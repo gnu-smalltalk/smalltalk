@@ -472,10 +472,9 @@ methodsFor: aCategoryString [\n\
       The methods are put in the category identified by the parameter.\" \n\
     <primitive: VMpr_Behavior_methodsFor> \n\
 ]";
-  _gst_set_compilation_class (_gst_behavior_class);
-  _gst_set_compilation_category (_gst_string_new ("compiling methods"));
   _gst_push_smalltalk_string (_gst_string_new (methodsForString));
-  _gst_parse_stream (true);
+  _gst_parse_method_from_stream (_gst_behavior_class,
+				 _gst_string_new ("compiling methods"));
   _gst_pop_stream (true);
 
   _gst_reset_compilation_category ();

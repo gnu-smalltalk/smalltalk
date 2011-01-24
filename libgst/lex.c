@@ -1161,7 +1161,7 @@ scan_large_integer (mst_Boolean negative,
 
 
 void
-_gst_parse_stream (mst_Boolean method)
+_gst_parse_method_from_stream (OOP currentClass, OOP currentCategory)
 {
   struct obstack thisObstack, *oldObstack;
 
@@ -1177,13 +1177,32 @@ _gst_parse_stream (mst_Boolean method)
     while (_gst_yylex (&yylval));
 #else /* !NO_PARSE */
     _gst_had_error = false;
-    if (method)
-      {
-	_gst_parse_method ();
-	_gst_reset_compilation_category ();
-      }
-    else
-      _gst_parse_chunks ();
+    _gst_parse_method (currentClass, currentCategory);
+#endif /* !NO_PARSE */
+  }
+
+  obstack_free (&thisObstack, NULL);
+  _gst_compilation_obstack = oldObstack;
+}
+
+void
+_gst_parse_stream (OOP currentNamespace)
+{
+  struct obstack thisObstack, *oldObstack;
+
+  /* Allow re-entrancy by allocating a different obstack every time
+     _gst_parse_stream is called */
+  oldObstack = _gst_compilation_obstack;
+  _gst_compilation_obstack = &thisObstack;
+  obstack_init (&thisObstack);
+
+  {
+#ifdef NO_PARSE
+    YYSTYPE yylval;
+    while (_gst_yylex (&yylval));
+#else /* !NO_PARSE */
+    _gst_had_error = false;
+    _gst_parse_chunks (currentNamespace);
 #endif /* !NO_PARSE */
   }
 
