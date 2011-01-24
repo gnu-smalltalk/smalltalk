@@ -1,3 +1,7 @@
+2011-01-24  Paolo Bonzini <bonzini@gnu.org>
+
+	* libgst/dict.c: Add Smalltalk as a shared pool.
+
 2011-01-18  Paolo Bonzini <bonzini@gnu.org>
 
 	* libgst/interp.c: Do not verify an invalid invariant.

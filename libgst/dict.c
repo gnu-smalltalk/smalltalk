@@ -621,7 +621,7 @@ static const class_definition class_info[] = {
 
   {&_gst_undefined_object_class, &_gst_object_class,
    GST_ISP_FIXED, true, 0,
-   "UndefinedObject", NULL, NULL, NULL },
+   "UndefinedObject", NULL, NULL, "Smalltalk" },
 
   {&_gst_boolean_class, &_gst_object_class,
    GST_ISP_FIXED, true, 0,

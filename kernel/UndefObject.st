@@ -37,6 +37,7 @@ Object subclass: UndefinedObject [
     <category: 'Language-Implementation'>
     <comment: 'I have the questionable distinction of being a class with only one
 instance, which is the object "nil".'>
+    <import: Smalltalk>
 
     copy [
 	<category: 'basic'>
