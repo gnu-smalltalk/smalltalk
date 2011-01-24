@@ -783,6 +783,7 @@ _gst_compile_method (tree_node method,
   _gst_push_new_scope ();
   inside_block = 0;
   selector = compute_selector (method->v_method.selectorExpr);
+  _gst_compute_linearized_pools (_gst_this_class);
 
   /* When we are reading from stdin, it's better to write line numbers where
      1 is the first line *in the current doit*, because for now the prompt

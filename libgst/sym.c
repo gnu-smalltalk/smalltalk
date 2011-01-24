@@ -805,14 +805,11 @@ combine_local_pools (OOP sharedPoolsOOP, struct pointer_set_t *white, pool_list 
    the superclass.  */
 
 static pool_list *
-add_local_pool_resolution (OOP class_oop, pool_list *p_end)
+add_shared_pool_resolution (OOP class_oop, pool_list *p_end)
 {
   OOP environmentOOP;
   gst_class class;
   struct pointer_set_t *pset;
-
-  /* First search in the class pool.  */
-  p_end = add_pool (_gst_class_variable_dictionary (class_oop), p_end);
 
   /* Then in all the imports not reachable from the environment.  */
   environmentOOP = CLASS_ENVIRONMENT (class_oop);
@@ -835,22 +832,29 @@ add_local_pool_resolution (OOP class_oop, pool_list *p_end)
   return p_end;
 }
 
+void
+_gst_compute_linearized_pools (OOP classOOP)
+{
+  pool_list *p_end = &linearized_pools;
+  OOP myClass;
+
+  assert (linearized_pools == NULL);
+
+  /* Add pools separately for each class.  */
+  for (myClass = _gst_get_class_object (_gst_this_class); !IS_NIL (myClass);
+       myClass = SUPERCLASS (myClass))
+    {
+      /* First search in the class pool.  */
+      p_end = add_pool (_gst_class_variable_dictionary (myClass), p_end);
+      p_end = add_shared_pool_resolution (myClass, p_end);
+    }
+}
+
 OOP
 find_class_variable (OOP varName)
 {
   pool_list pool;
   OOP assocOOP;
-
-  if (!linearized_pools)
-    {
-      pool_list *p_end = &linearized_pools;
-      OOP myClass;
-
-      /* Add pools separately for each class.  */
-      for (myClass = _gst_get_class_object (_gst_this_class); !IS_NIL (myClass);
-           myClass = SUPERCLASS (myClass))
-        p_end = add_local_pool_resolution (myClass, p_end);
-    }
 
   for (pool = linearized_pools; pool; pool = pool->next)
     {
