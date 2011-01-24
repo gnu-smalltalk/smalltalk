@@ -442,8 +442,6 @@ static mst_Boolean dup_message_receiver = false;
 void
 _gst_install_initial_methods (void)
 {
-  const char *methodsForString;
-
   /* Define the termination method first of all, because
      compiling #methodsFor: will invoke an evaluation
      (to get the argument of the <primitive: ...> attribute.  */
@@ -464,20 +462,6 @@ _gst_install_initial_methods (void)
     = MTH_ANNOTATED;
 
   install_method (termination_method);
-
-  methodsForString = "\n\
-methodsFor: aCategoryString [\n\
-    \"Calling this method prepares the parser to receive methods \n\
-      to be compiled and installed in the receiver's method dictionary. \n\
-      The methods are put in the category identified by the parameter.\" \n\
-    <primitive: VMpr_Behavior_methodsFor> \n\
-]";
-  _gst_push_smalltalk_string (_gst_string_new (methodsForString));
-  _gst_parse_method_from_stream (_gst_behavior_class,
-				 _gst_string_new ("compiling methods"));
-  _gst_pop_stream (true);
-
-  _gst_reset_compilation_category ();
 }
 
 OOP

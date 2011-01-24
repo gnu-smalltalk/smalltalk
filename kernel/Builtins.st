@@ -32,6 +32,16 @@
  ======================================================================"
 
 
+Behavior extend [
+    methodsFor: aCategoryString [
+        "Calling this method prepares the parser to receive methods
+         to be compiled and installed in the receiver's method dictionary.
+         The methods are put in the category identified by the parameter."
+        <category: 'parsing'>
+        <primitive: VMpr_Behavior_methodsFor>
+    ]
+]
+
 Object extend [
     class [
         "Answer the class to which the receiver belongs"

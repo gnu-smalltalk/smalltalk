@@ -1,5 +1,9 @@
 2011-01-24  Paolo Bonzini <bonzini@gnu.org>
 
+	* kernel/Builtins.st: Add #methodsFor:.
+
+2011-01-24  Paolo Bonzini <bonzini@gnu.org>
+
 	* kernel/Builtins.st: Remove obsolete stubs.
 
 2011-01-24  Paolo Bonzini <bonzini@gnu.org>

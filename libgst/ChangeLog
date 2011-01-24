@@ -1,5 +1,9 @@
 2011-01-24  Paolo Bonzini <bonzini@gnu.org>
 
+	* libgst/comp.c: #methodsFor: is no longer needed for bootstrap.
+
+2011-01-24  Paolo Bonzini <bonzini@gnu.org>
+
 	* libgst/dict.inl: Add CLASS_ENVIRONMENT.
 	* libgst/sym.c: Use it.
 
