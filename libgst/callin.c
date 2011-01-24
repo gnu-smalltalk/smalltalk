@@ -416,6 +416,7 @@ _gst_eval_expr (const char *str)
   _gst_parse_stream (false);
   _gst_pop_stream (true);
   result = _gst_last_returned_value;
+  INC_ADD_OOP (result);
 
   return (result);
 }
