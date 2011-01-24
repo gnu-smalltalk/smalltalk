@@ -1,3 +1,8 @@
+2011-01-24  Paolo Bonzini  <bonzini@gnu.org>
+
+	* STLoader.st: Intercept #subclass:environment:.
+	* STLoaderObjs.st: Add #subclass:environment:.
+
 2010-12-13  Paolo Bonzini  <bonzini@gnu.org>
 
 	* STFileParser.st: Add return tag to doits, thus fixing

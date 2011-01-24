@@ -111,10 +111,31 @@ Dictionary extend [
     
     
 
+Namespace class extend [
+    current [
+        "Answer the current namespace"
+
+        <category: 'accessing'>
+        Current isNil ifTrue: [Current := Smalltalk].
+        ^Current
+    ]
+]
+
+
 Class extend [
     
+    subclass: classNameString environment: aNamespace [
+	<category: 'instance creation'>
+        ^(aNamespace at: classNameString)
+    ]
+    
     subclass: classNameString [
-        ^(Smalltalk at: classNameString)
+	"Define a subclass of the receiver with the given name.  If the class
+	 is already defined, don't modify its instance or class variables
+	 but still, if necessary, recompile everything needed."
+
+	<category: 'instance creation'>
+        ^self subclass: classNameString environment: Namespace current
     ]
     
     subclass: classNameString
@@ -184,8 +205,18 @@ Behavior extend [
 ]
 
 UndefinedObject extend [
+    subclass: classNameString environment: aNamespace [
+	<category: 'class polymorphism'>
+        ^(aNamespace at: classNameString)
+    ]
+    
     subclass: classNameString [
-        ^(Smalltalk at: classNameString)
+       "Define a subclass of the receiver with the given name.  If the class
+        is already defined, don't modify its instance or class variables
+        but still, if necessary, recompile everything needed."
+
+       <category: 'class polymorphism'>
+        ^self subclass: classNameString environment: Namespace current
     ]
     
     subclass: classNameString

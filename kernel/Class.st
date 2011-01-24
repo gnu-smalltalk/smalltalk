@@ -429,21 +429,31 @@ the class category.'>
 	^false
     ]
 
+    subclass: classNameString environment: aNamespace[
+	"Define a subclass of the receiver with the given name within
+	 aNamespace.  If the class is already defined, don't modify its
+	 instance or class variables but still, if necessary, recompile
+	 everything needed."
+
+	<category: 'instance creation'>
+	| meta |
+	KernelInitialized ifFalse: [^aNamespace at: classNameString].
+	meta := self metaclassFor: classNameString.
+	^meta 
+	    name: classNameString
+	    environment: aNamespace
+	    subclassOf: self
+    ]
+
     subclass: classNameString [
 	"Define a subclass of the receiver with the given name.  If the class
 	 is already defined, don't modify its instance or class variables
 	 but still, if necessary, recompile everything needed."
 
 	<category: 'instance creation'>
-	| meta |
-	KernelInitialized ifFalse: [^Smalltalk at: classNameString].
-	meta := self metaclassFor: classNameString.
-	^meta 
-	    name: classNameString
-	    environment: Namespace current
-	    subclassOf: self
+        ^self subclass: classNameString environment: Namespace current
     ]
-
+    
     subclass: classNameString instanceVariableNames: stringInstVarNames classVariableNames: stringOfClassVarNames poolDictionaries: stringOfPoolNames category: categoryNameString [
 	"Define a fixed subclass of the receiver with the given name, instance
 	 variables, class variables, pool dictionaries and category. If the

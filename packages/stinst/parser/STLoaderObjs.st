@@ -282,6 +282,7 @@ variableByteSubclass: s instanceVariableNames: ivn classVariableNames: cvn
 	poolDictionaries: pd
 	category: c
 	shape: #byte
+        environment: loader currentNamespace
 	loader: loader!
  
 variableWordSubclass: s instanceVariableNames: ivn classVariableNames: cvn
@@ -295,6 +296,7 @@ variableWordSubclass: s instanceVariableNames: ivn classVariableNames: cvn
 	poolDictionaries: pd
 	category: c
 	shape: #word
+        environment: loader currentNamespace
 	loader: loader!
  
 variable: shape subclass: s instanceVariableNames: ivn classVariableNames: cvn
@@ -308,6 +310,7 @@ variable: shape subclass: s instanceVariableNames: ivn classVariableNames: cvn
 	poolDictionaries: pd
 	category: c
 	shape: shape
+        environment: loader currentNamespace
 	loader: loader!
  
 variableSubclass: s instanceVariableNames: ivn classVariableNames: cvn
@@ -321,6 +324,7 @@ variableSubclass: s instanceVariableNames: ivn classVariableNames: cvn
 	poolDictionaries: pd
 	category: c
 	shape: #pointer
+        environment: loader currentNamespace
 	loader: loader!
  
 subclass: s instanceVariableNames: ivn classVariableNames: cvn
@@ -334,6 +338,7 @@ subclass: s instanceVariableNames: ivn classVariableNames: cvn
 	poolDictionaries: pd
 	category: c
 	shape: nil
+        environment: loader currentNamespace
 	loader: loader!
 
 subclass: s declaration: cstructDecl classVariableNames: cvn
@@ -357,6 +362,7 @@ variableByteSubclass: s instanceVariableNames: ivn classVariableNames: cvn
 	poolDictionaries: pd
 	category: ''
 	shape: #byte
+        environment: loader currentNamespace
 	loader: loader!
  
 variableWordSubclass: s instanceVariableNames: ivn classVariableNames: cvn
@@ -370,6 +376,7 @@ variableWordSubclass: s instanceVariableNames: ivn classVariableNames: cvn
 	poolDictionaries: pd
 	category: ''
 	shape: #word
+        environment: loader currentNamespace
 	loader: loader!
  
 variable: shape subclass: s instanceVariableNames: ivn classVariableNames: cvn
@@ -383,6 +390,7 @@ variable: shape subclass: s instanceVariableNames: ivn classVariableNames: cvn
 	poolDictionaries: pd
 	category: ''
 	shape: shape
+        environment: loader currentNamespace
 	loader: loader!
  
 variableSubclass: s instanceVariableNames: ivn classVariableNames: cvn
@@ -396,6 +404,7 @@ variableSubclass: s instanceVariableNames: ivn classVariableNames: cvn
 	poolDictionaries: pd
 	category: ''
 	shape: #pointer
+        environment: loader currentNamespace
 	loader: loader!
  
 subclass: s instanceVariableNames: ivn classVariableNames: cvn
@@ -409,6 +418,7 @@ subclass: s instanceVariableNames: ivn classVariableNames: cvn
 	poolDictionaries: pd
 	category: ''
 	shape: nil
+        environment: loader currentNamespace
 	loader: loader!
 
 subclass: s
@@ -421,6 +431,20 @@ subclass: s
 	poolDictionaries: ''
 	category: ''
 	shape: nil
+        environment: loader currentNamespace
+	loader: loader!
+
+subclass: s environment: env
+
+    ^LoadedClass
+	superclass: self
+	name: s
+	instanceVariableNames: ''
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: ''
+	shape: nil
+        environment: env
 	loader: loader!
 
 !PseudoBehavior methodsFor: 'method dictionary services'!
@@ -1064,10 +1088,10 @@ initializeFor: aClass
 !LoadedClass class methodsFor: 'creating classes'!
 
 superclass: sup name: s instanceVariableNames: ivn classVariableNames: cvn
-	poolDictionaries: pd category: c shape: sh loader: loader
+	poolDictionaries: pd category: c shape: sh environment: env loader: loader
     ^(self for: loader)
 	superclass: sup name: s instanceVariableNames: ivn classVariableNames: cvn
-	poolDictionaries: pd category: c shape: sh
+	poolDictionaries: pd category: c shape: sh environment: env
 ! !
 
 !LoadedClass methodsFor: 'accessing'!
@@ -1176,12 +1200,12 @@ import: aNamespace
 !LoadedClass methodsFor: 'initializing'!
 
 superclass: sup name: s instanceVariableNames: ivn classVariableNames: cvn
-	poolDictionaries: pd category: c shape: sh
+	poolDictionaries: pd category: c shape: sh environment: env
     superclass := sup.
     name := s.
     category := c.
     shape := sh.
-    environment := loader currentNamespace.
+    environment := env.
     class := LoadedMetaclass for: self.
     instVars := ivn subStrings.
     classVars := cvn subStrings.

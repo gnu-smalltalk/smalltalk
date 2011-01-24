@@ -116,6 +116,9 @@ initialize
 	toEvaluate: #subclass:
 	perform: #doSubclass:selector:arguments:;
 
+	toEvaluate: #subclass:environment:
+	perform: #doSubclass:selector:arguments:;
+
 	toEvaluate: #subclass:instanceVariableNames:classVariableNames:poolDictionaries:category:
 	perform: #doSubclass:selector:arguments:;
 

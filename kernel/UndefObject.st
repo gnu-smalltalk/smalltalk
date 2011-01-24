@@ -363,19 +363,29 @@ instance, which is the object "nil".'>
 	    category: categoryNameString
     ]
 
+    subclass: classNameString environment: aNamespace [
+	"Define a subclass of the receiver with the given name within
+	 aNamespace.  If the class is already defined, don't modify its
+	 instance or class variables but still, if necessary, recompile
+	 everything needed."
+
+	<category: 'class polymorphism'>
+	| meta |
+	KernelInitialized ifFalse: [^aNamespace at: classNameString].
+	meta := self metaclassFor: classNameString.
+	^meta 
+	    name: classNameString
+	    environment: Namespace current
+	    subclassOf: self
+    ]
+
     subclass: classNameString [
 	"Define a subclass of the receiver with the given name.  If the class
 	 is already defined, don't modify its instance or class variables
 	 but still, if necessary, recompile everything needed."
 
 	<category: 'class polymorphism'>
-	| meta |
-	KernelInitialized ifFalse: [^Smalltalk at: classNameString].
-	meta := self metaclassFor: classNameString.
-	^meta 
-	    name: classNameString
-	    environment: Namespace current
-	    subclassOf: self
+        ^self subclass: classNameString environment: Namespace current
     ]
 
     variableSubclass: classNameString instanceVariableNames: stringInstVarNames classVariableNames: stringOfClassVarNames poolDictionaries: stringOfPoolNames category: categoryNameString [
