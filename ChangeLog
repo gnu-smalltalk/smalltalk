@@ -1,3 +1,7 @@
+2011-01-25  Paolo Bonzini <bonzini@gnu.org>
+
+	* scripts/Package.st: Fix String<->File confusion with --prepare.
+
 2011-01-15  Paolo Bonzini <bonzini@gnu.org>
 
 	* kernel/DLD.st: Fix case when the same library is loaded multiple

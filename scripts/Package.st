@@ -884,11 +884,11 @@ PackageCommand subclass: PkgPrepare [
 	| f |
 	srcFile isNil ifTrue: [
 	    f := self srcdir / aString.
-            (File exists: f)
+            f exists
 	        ifTrue: [ srcFile := (File name: self srcdir) pathTo: f ].
 
 	    f := f, '.in'.
-            (File exists: f)
+            f exists
 	        ifTrue: [ srcFile := (File name: self srcdir) pathTo: f ].
 
             (File exists: aString)
