@@ -1,3 +1,7 @@
+2011-01-26  Stefan Schmiedl  <s@xss.de>
+
+	* Table.st: Take current domain into account.
+
 2010-12-04  Paolo Bonzini  <bonzini@gnu.org>
 
 	* package.xml: Remove now superfluous <file> tags.
