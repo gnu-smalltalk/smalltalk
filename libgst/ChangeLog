@@ -1,5 +1,9 @@
 2011-01-24  Paolo Bonzini <bonzini@gnu.org>
 
+	* libgst/gst-parse.c: Incubate lastMethodOOP.
+
+2011-01-24  Paolo Bonzini <bonzini@gnu.org>
+
 	* libgst/comp.c: Fixes to previous commit.
 	* libgst/gst-parse.c: Likewise.
 

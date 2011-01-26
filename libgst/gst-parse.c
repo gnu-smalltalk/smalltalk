@@ -372,8 +372,10 @@ _gst_parse_method (OOP currentClass, OOP currentCategory)
 {
   gst_parser p, *prev_parser = _gst_current_parser;
   OOP methodOOP;
+  inc_ptr incPtr;
 
   _gst_current_parser = &p;
+  incPtr = INC_SAVE_POINTER ();
   parser_init (&p);
   p.state = PARSE_METHOD;
   p.untrustedContext = IS_OOP_UNTRUSTED (_gst_this_context_oop);
@@ -388,6 +390,7 @@ _gst_parse_method (OOP currentClass, OOP currentCategory)
     _gst_had_error = false;
 
   methodOOP = p.lastMethodOOP;
+  INC_RESTORE_POINTER (incPtr);
   _gst_current_parser = prev_parser;
   return methodOOP;
 }
@@ -396,12 +399,14 @@ void
 _gst_parse_chunks (OOP currentNamespace)
 {
   gst_parser p, *prev_parser = _gst_current_parser;
+  inc_ptr incPtr;
 
   /* This should ultimately become _gst_get_current_namespace ().  */
   if (!currentNamespace)
     currentNamespace = _gst_current_namespace;
 
   _gst_current_parser = &p;
+  incPtr = INC_SAVE_POINTER ();
   parser_init (&p);
   p.untrustedContext = IS_OOP_UNTRUSTED (_gst_this_context_oop);
   p.current_namespace = currentNamespace;
@@ -416,6 +421,7 @@ _gst_parse_chunks (OOP currentNamespace)
   while (token (&p, 0) != EOF)
     parse_chunks (&p);
 
+  INC_RESTORE_POINTER (incPtr);
   _gst_current_parser = prev_parser;
 }
 
@@ -1240,6 +1246,7 @@ parse_method (gst_parser *p, int at_end)
       oldUndeclared = _gst_set_undeclared (UNDECLARED_GLOBALS);
       _gst_current_parser->lastMethodOOP =
         _gst_compile_method (method, false, true);
+      INC_ADD_OOP (_gst_current_parser->lastMethodOOP);
       _gst_set_undeclared (oldUndeclared);
     }
 
