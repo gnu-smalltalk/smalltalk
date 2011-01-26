@@ -60,6 +60,10 @@ static inline OOP sub_with_check (OOP op1, OOP op2,
 static inline OOP mul_with_check (OOP op1, OOP op2,
                                   mst_Boolean *overflow);
 
+/* Generate random number using the Mersenne Twister technique */
+static inline uint32_t random_next ();
+static inline void random_generate ();
+
 /* These do not need overflow checking.  */
 static inline OOP tagged_and (OOP op1, OOP op2);
 static inline OOP tagged_or (OOP op1, OOP op2);
@@ -210,4 +214,43 @@ mul_with_check (OOP op1, OOP op2, mst_Boolean *overflow)
     }
 
   return FROM_INT (0);
+}
+
+/* State of the random generator.
+   We use the Mersenne Twister MT19937 */
+#define RANDOM_SIZE (624 + 1)
+
+uint32_t
+random_next (uint32_t *mt)
+{
+  const int N = RANDOM_SIZE - 1; 
+  int mt_index = mt[N];
+  uint32_t y;
+  if (mt_index == 0)
+    random_generate(mt);
+
+  y = mt[mt_index];
+  y ^= (y >> 11);
+  y ^= (y << 7) & 0x9d2c5680;
+  y ^= (y << 15) & 0xefc60000;
+  y ^= (y >> 18);
+
+  mt_index = (mt_index + 1) % N;
+  mt[N] = mt_index;
+  return y;
+}
+
+void
+random_generate (uint32_t *mt)
+{
+  const int N = RANDOM_SIZE - 1; 
+  const int M = 397;
+  int i;
+  for (i = 0; i < N; i++)
+    {
+      uint32_t y = (mt[i] & 0x80000000U) | (mt[(i + 1) % N] & 0x7fffffffU); 
+      mt[i] = mt[(i + M) % N] ^ (y >> 1);
+      if (y & 1)
+	mt[i] = mt[i] ^ 0x9908b0dfU;
+    }
 }

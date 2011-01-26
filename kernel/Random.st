@@ -1,15 +1,16 @@
 "======================================================================
 |
 |   Random number Method Definitions
+|   This is the Mersenne Twister generator implementation
 |
 |
  ======================================================================"
 
 "======================================================================
 |
-| Copyright 1988,92,94,95,99,2000,2001,2002
+| Copyright 1988,92,94,95,99,2000,2001,2002,2011
 | Free Software Foundation, Inc.
-| Written by Steve Byrne.
+| Written by Steve Byrne and Mathieu Suen.
 |
 | This file is part of the GNU Smalltalk class library.
 |
@@ -33,24 +34,26 @@
 
 
 Stream subclass: Random [
-    | seed |
-    
     <category: 'Streams'>
     <comment: 'My instances are generator streams that produce random numbers, which are 
 floating point values between 0 and 1.'>
+    <shape: #uint>
 
     Random class [
 	| source |
 	
     ]
 
-    Random class >> seed: aFloat [
-	"Create a new random number generator whose seed is aFloat"
+    Random class >> mtSize [
+	"MT19937 have a size of 624"
+	^624
+    ]
+
+    Random class >> seed: anInteger [
+	"Create a new random number generator whose seed is anInteger."
 
 	<category: 'instance creation'>
-	^(self basicNew)
-	    seed: aFloat;
-	    yourself
+	^(self basicNew: self mtSize + 1) setSeed: anInteger
     ]
 
     Random class >> new [
@@ -58,7 +61,7 @@ floating point values between 0 and 1.'>
 	 current time on the millisecond clock"
 
 	<category: 'instance creation'>
-	^self basicNew setSeed
+	^(self basicNew: self mtSize + 1) setSeed
     ]
 
     Random class >> source [
@@ -85,8 +88,6 @@ floating point values between 0 and 1.'>
     chiSquare [
 	"Compute the chi-square of the random that this class generates."
 
-	"the previous algorithm's chi-square was 93.4"
-
 	<category: 'testing'>
 	^self chiSquare: 1000 range: 100
     ]
@@ -96,14 +97,11 @@ floating point values between 0 and 1.'>
 	 numbers in the 0..r range."
 
 	<category: 'testing'>
-	| f t seed |
-	seed := 0.1234567.
-	f := Array new: r + 1.
-	1 to: r + 1 do: [:i | f at: i put: 0].
+	| f t |
+	f := Array new: r withAll: 0.
 	n timesRepeat: 
-		[seed := (seed + Float pi) squared squared fractionPart.
-		t := (seed * r) truncated.
-		f at: t + 1 put: (f at: t + 1) + 1].
+		[t := self between: 1 and: r.
+		f at: t put: (f at: t) + 1].
 	t := 0.
 	1 to: r do: [:i | t := t + (f at: i) squared].
 	^r asFloat * t / n - n
@@ -122,17 +120,25 @@ floating point values between 0 and 1.'>
 	<category: 'basic'>
 	| i range |
 	range := high - low + 1.
-	i := (self next * range) truncated.
+	i := self nextLimit: range.
 	^i + low
     ]
 
     next [
-	"Return the next random number in the sequence."
-
-	"Found on an obscure Japanese manual. Turns out to be good!"
+	"Return a random SmallInteger of maximum 32-bits precision."
 
 	<category: 'basic'>
-	^seed := (seed + Float pi) squared squared fractionPart
+	<primitive: VMpr_Random_next>
+        self primitiveFailed
+    ]
+
+    nextLimit: anInteger [
+	"Return a random SmallInteger, uniformly distributed between 0 and
+         anInteger."
+
+	<category: 'basic'>
+	<primitive: VMpr_Random_next>
+        self primitiveFailed
     ]
 
     nextPut: value [
@@ -140,24 +146,24 @@ floating point values between 0 and 1.'>
 	self shouldNotImplement
     ]
 
-    seed: aFloat [
-	"Private - Set the random number seed to aFloat.
-	 Ensure decent results even when integers are passed"
+    setSeed: anInteger [
+	"Private - Set the random number seed to anInteger."
 
-	<category: 'private'>
-	seed := (aFloat / 100000.0 + aFloat) fractionPart.
-	self next.
-	self next
+        | previous value |
+        "Avoid getting all zeros!"
+	previous := anInteger bitOr: 1.
+	1 to: self class mtSize do:[ :mtIndex |
+	    value := 1812433253 * (previous bitXor: (previous bitShift: -30)).
+	    self at: mtIndex put: (previous := value bitAnd: 16rFFFFFFFF)
+	].
+        self at: self size put: 0
     ]
 
     setSeed [
 	"Private - Set a random number seed."
 
 	<category: 'private'>
-	seed := Time primSecondClock - Time primMillisecondClock.
-	seed := (seed / 4194303.0) fractionPart.
-	self next.
-	self next
+	self setSeed: (Time primSecondClock - Time primMillisecondClock) abs.
     ]
 ]
 

@@ -1,3 +1,8 @@
+2011-01-27  Mathieu Suen  <mathieusuen@yahoo.fr>
+            Paolo Bonzini <bonzini@gnu.org>
+
+	* kernel/Random.st: Implement Mersenne Twister.
+
 2011-01-24  Paolo Bonzini <bonzini@gnu.org>
 
 	* kernel/Builtins.st: Add #methodsFor:.

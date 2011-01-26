@@ -6066,6 +6066,49 @@ primitive VMpr_SystemDictionary_rawProfile [succeed]
   PRIM_SUCCEEDED;
 }
 
+primitive VMpr_Random_next [succeed]
+{
+  OOP oop1, oop2;
+  mst_Object obj;
+  intptr_t spec;
+  uint64_t limit, top;
+
+  if (numArgs == 0)
+    oop1 = _gst_nil_oop;
+  else
+    {
+      oop1 = POP_OOP ();
+      if (!IS_INT (oop1))
+        goto bad;
+    }
+
+  /* Boring validity checks.  */
+  oop2 = STACKTOP ();
+  spec = OOP_INSTANCE_SPEC (oop2);
+  if (spec & (~0 << ISP_NUMFIXEDFIELDS))
+    goto bad;
+  if (OOP_SIZE_BYTES (oop2) < RANDOM_SIZE * sizeof (uint32_t))
+    goto bad;
+
+  obj = OOP_TO_OBJ (oop2);
+  top = random_next ((uint32_t *) obj->data);
+  if (numArgs == 0)
+    SET_STACKTOP (floatd_new (top / (double)0xFFFFFFFF));
+  else
+    {
+      limit = TO_INT (oop1);
+      if (limit < 0 || limit > 0xFFFFFFFF)
+        goto bad;
+
+      top = (uint32_t) ((limit * top) >> 32);
+      SET_STACKTOP_INT (top);
+    }
+  PRIM_SUCCEEDED;
+
+ bad:
+  UNPOP (1);
+  PRIM_FAILED;
+}
 
 #undef INT_BIN_OP
 #undef BOOL_BIN_OP
