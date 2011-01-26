@@ -374,7 +374,9 @@ static void realloc_literal_vec (void);
 /* Takes a new CompiledMethod METHODOOP and installs it in the method
    dictionary for the current class.  If the current class does not
    contain a valid method dictionary, one is allocated for it.  */
-static void install_method (OOP methodOOP);
+static void install_method (OOP methodOOP,
+			    OOP classOOP,
+			    mst_Boolean untrusted);
 
 /* This caches the OOP of the special UndefinedObject>>#__terminate
    method, which is executed by contexts created with
@@ -450,7 +452,7 @@ _gst_install_initial_methods (void)
   ((gst_compiled_method) OOP_TO_OBJ (termination_method))->header.headerFlag
     = MTH_ANNOTATED;
 
-  install_method (termination_method);
+  install_method (termination_method, _gst_undefined_object_class, false);
 }
 
 OOP
@@ -845,7 +847,9 @@ _gst_compile_method (tree_node method,
       INC_ADD_OOP (methodOOP);
 
       if (install)
-	install_method (methodOOP);
+	install_method (methodOOP,
+			_gst_curr_method->v_method.currentClass,
+			_gst_curr_method->v_method.untrusted);
     }
   else
     {
@@ -2538,7 +2542,7 @@ get_literals_array (void)
 
 
 void
-install_method (OOP methodOOP)
+install_method (OOP methodOOP, OOP classOOP, mst_Boolean untrusted)
 {
   OOP oldMethod, selector, methodDictionaryOOP;
   gst_compiled_method method;
@@ -2554,9 +2558,8 @@ install_method (OOP methodOOP)
       char *result;
       OOP attributeOOP = descriptor->attributes[i];
       gst_message attribute = (gst_message) OOP_TO_OBJ (attributeOOP);
-      OOP handlerBlockOOP = _gst_find_pragma_handler
-        (_gst_curr_method->v_method.currentClass,
-         attribute->selector);
+      OOP handlerBlockOOP = _gst_find_pragma_handler (classOOP,
+						      attribute->selector);
 
       if (!IS_NIL (handlerBlockOOP))
 	{
@@ -2584,9 +2587,8 @@ install_method (OOP methodOOP)
      reachable by the root set so we don't need to hold onto it
      here.  */
   methodDictionaryOOP =
-    _gst_valid_class_method_dictionary (_gst_curr_method->v_method.currentClass);
-
-  if (_gst_curr_method->v_method.untrusted)
+    _gst_valid_class_method_dictionary (classOOP);
+  if (untrusted)
     {
       oldMethod = _gst_identity_dictionary_at (methodDictionaryOOP,
 					       selector);

@@ -338,7 +338,7 @@ _gst_set_compilation_class (OOP class_oop)
 void
 _gst_set_compilation_category (OOP categoryOOP)
 {
-  assert (IS_NIL (_gst_current_parser->currentClass));
+  assert (IS_NIL (_gst_current_parser->currentCategory));
   _gst_current_parser->currentCategory = categoryOOP;
   _gst_register_oop (categoryOOP);
 }
@@ -358,6 +358,13 @@ _gst_reset_compilation_category (void)
     }
 }
 
+static void
+parser_init (gst_parser *p)
+{
+  memset (p, 0, sizeof(p));
+  p->currentClass = p->currentCategory = _gst_nil_oop;
+}
+
 /* Top of the descent.  */
 
 OOP
@@ -367,11 +374,13 @@ _gst_parse_method (OOP currentClass, OOP currentCategory)
   OOP methodOOP;
 
   _gst_current_parser = &p;
+  parser_init (&p);
   p.state = PARSE_METHOD;
   p.untrustedContext = IS_OOP_UNTRUSTED (_gst_this_context_oop);
   p.current_namespace = CLASS_ENVIRONMENT (currentClass);
   _gst_set_compilation_class (currentClass);
   _gst_set_compilation_category (currentCategory);
+
   lex_init (&p);
   if (setjmp (p.recover) == 0)
     parse_method (&p, ']');
@@ -393,13 +402,15 @@ _gst_parse_chunks (OOP currentNamespace)
     currentNamespace = _gst_current_namespace;
 
   _gst_current_parser = &p;
+  parser_init (&p);
+  p.untrustedContext = IS_OOP_UNTRUSTED (_gst_this_context_oop);
+  p.current_namespace = currentNamespace;
+  p.state = PARSE_DOIT;
+
   lex_init (&p);
   if (token (&p, 0) == SHEBANG)
     lex (&p);
 
-  p.untrustedContext = IS_OOP_UNTRUSTED (_gst_this_context_oop);
-  p.current_namespace = currentNamespace;
-  p.state = PARSE_DOIT;
   setjmp (p.recover);
   _gst_had_error = false;
   while (token (&p, 0) != EOF)

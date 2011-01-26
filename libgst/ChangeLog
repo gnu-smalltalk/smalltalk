@@ -1,5 +1,29 @@
 2011-01-24  Paolo Bonzini <bonzini@gnu.org>
 
+	* libgst/comp.c: Fixes to previous commit.
+	* libgst/gst-parse.c: Likewise.
+
+2011-01-24  Paolo Bonzini <bonzini@gnu.org>
+
+	* libgst/comp.c: Store current tree object for the method.
+	Replace calls to _gst_set_compilation_class and
+	_gst_set_compilation_category with new arguments to
+	_gst_make_new_method.  Replace accesses to _gst_this_class
+	and _gst_this_category with accesses to _gst_curr_method.
+	Replace accesses to _gst_untrusted_methods with accesses
+	to new fields in the method tree or _gst_untrusted_parse().
+	* libgst/comp.h: Remove declarations for deleted variables.
+	* libgst/gst-parse.c: Add _gst_get_current_namespace,
+	_gst_untrusted_class.  Move _gst_set_compilation_class,
+	_gst_set_compilation_category, _gst_reset_compilation_catgory here.
+	* libgst/sym.c: Remove arguments to _gst_compute_linearized_pools,
+	use _gst_curr_method instead.
+	* libgst/sym.h: Adjust.
+	* libgst/tree.c: Add new arguments to _gst_make_method.
+	* libgst/tree.h: Likewise, and adjust struct method_node.
+
+2011-01-24  Paolo Bonzini <bonzini@gnu.org>
+
 	* libgst/comp.c: Use new attribute of method trees instead of
 	temporarily changing the namespace of UndefinedObject.
 	* libgst/gst-parse.c: Adjust call.
@@ -15,6 +39,20 @@
 	* libgst/sym.c: Add _gst_compute_linearized_pool_order.
 	* libgst/sym.h: Declare it.
 	* libgst/comp.c: Use it.
+
+2011-01-24  Paolo Bonzini <bonzini@gnu.org>
+
+	* libgst/comp.c: Remove _gst_latest_compiled_method.  Return
+	it from _gst_compile_method.
+	* libgst/comp.h: Remove _gst_latest_compiled_method.
+	* libgst/gst-parse.c: Store latest compiled method in the
+	parser.  Return it from _gst_parse_method.
+	* libgst/lex.c: Return latest compiled method in
+	_gst_parse_method_from_stream.
+	* libgst/lex.h: Adjust prototype.
+	* libgst/interp.c: Push latest compiled method in
+	parse_method_from_stream_with_protection.
+	* libgst/prims.def: Adjust primitives that call it.
 
 2011-01-24  Paolo Bonzini <bonzini@gnu.org>
 
@@ -36,6 +74,13 @@
 	* libgst/interp.c: Adjust parse_stream_with_protection, add
 	parse_method_from_stream_with_protection.
 	* libgst/prims.def: Adjust callers.
+
+2011-01-24  Paolo Bonzini <bonzini@gnu.org>
+
+	* libgst/callin.c: Incubate return value.
+	* libgst/comp.c: Do not rely on _gst_last_returned_value when it
+	could be overridden by hooks or other Smalltalk code.
+	* libgst/gst-parse.c: Do not use _gst_last_returned_value.
 
 2011-01-24  Paolo Bonzini <bonzini@gnu.org>
 
