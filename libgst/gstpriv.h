@@ -361,15 +361,15 @@ enum {
 
 /* Answer whether a method, OOP, has already been verified. */
 #define IS_OOP_VERIFIED(oop) \
-  ((oop)->flags & F_VERIFIED)
+  (((oop)->flags & F_VERIFIED) != 0)
 
 /* Answer whether an object, OOP, is weak.  */
 #define IS_OOP_WEAK(oop) \
-  ((oop)->flags & F_WEAK)
+  (((oop)->flags & F_WEAK) != 0)
 
 /* Answer whether an object, OOP, is readonly.  */
 #define IS_OOP_READONLY(oop) \
-  (IS_INT ((oop)) ? F_READONLY : (oop)->flags & F_READONLY)
+  (IS_INT ((oop)) || ((oop)->flags & F_READONLY))
 
 /* Set whether an object, OOP, is readonly or readwrite.  */
 #define MAKE_OOP_READONLY(oop, ro) \
@@ -380,7 +380,7 @@ enum {
 
 /* Answer whether an object, OOP, is untrusted.  */
 #define IS_OOP_UNTRUSTED(oop) \
-  (IS_INT ((oop)) ? 0 : ((oop)->flags & F_UNTRUSTED))
+  (!IS_INT ((oop)) && ((oop)->flags & F_UNTRUSTED))
 
 /* Set whether an object, OOP, is trusted or untrusted.  */
 #define MAKE_OOP_UNTRUSTED(oop, untr) \

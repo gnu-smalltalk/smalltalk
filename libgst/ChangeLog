@@ -1,5 +1,10 @@
 2011-01-27  Paolo Bonzini <bonzini@gnu.org>
 
+	* libgst/gstpriv.h: Return boolean values from IS_OOP_*.
+	* libgst/oop.inl: Likewise.
+
+2011-01-27  Paolo Bonzini <bonzini@gnu.org>
+
 	* libgst/gst-parse.c: Track current namespace across doits.
 
 2011-01-27  Mathieu Suen  <mathieusuen@yahoo.fr>
