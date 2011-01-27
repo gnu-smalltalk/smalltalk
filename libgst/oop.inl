@@ -72,12 +72,12 @@ static inline OOP alloc_oop (PTR obj, intptr_t flags);
   (IS_INT(oop) || IS_OOP_VALID_GC (oop))
 
 #define IS_OOP_NEW(oop) \
-  ((oop)->flags & F_SPACES)
+  (((oop)->flags & F_SPACES) != 0)
 
 /* This can only be used at the start or the end of an incremental
    GC cycle.  */
 #define IS_OOP_VALID_GC(oop) \
-  ((oop)->flags & _gst_mem.live_flags)
+  (((oop)->flags & _gst_mem.live_flags) != 0)
 
 /* After a global GC, the live_flags say that an object is live
    if it is marked reachable.  Old objects that have already survived
@@ -89,7 +89,7 @@ static inline OOP alloc_oop (PTR obj, intptr_t flags);
 	   || (oop) > _gst_mem.next_oop_to_sweep)))
 
 #define IS_OOP_MARKED(oop) \
-  ((oop)->flags & F_REACHABLE)
+  (((oop)->flags & F_REACHABLE) != 0)
 
 #define IS_OOP_FREE(oop) \
   ((oop)->flags == 0)

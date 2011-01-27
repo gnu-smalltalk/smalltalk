@@ -1,3 +1,8 @@
+2011-01-27  Paolo Bonzini <bonzini@gnu.org>
+
+	* libgst/gstpriv.h: Return boolean values from IS_OOP_*.
+	* libgst/oop.inl: Likewise.
+
 2011-01-14  Paolo Bonzini <bonzini@gnu.org>
 
 	* libgst/cint.c: Accept UndefinedObject for #cObjectPtr.
