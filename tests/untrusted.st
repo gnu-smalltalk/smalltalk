@@ -94,22 +94,23 @@ Eval [
 
 Eval [
     Processor activeProcess makeUntrusted: true.
-    Set methodsFor: 'security checking'
+    '!Set methodsFor: ''security checking''!
+
+lovelyMethod
+    ^tally!
+
+dangerousMethod
+    tally := 0!
+
+lovelyMethod
+    ^Array!
+
+dangerousMethod
+    Array := 0! !' readStream fileIn
 ]
 
-lovelyMethod
-    ^tally!
-
-dangerousMethod
-    tally := 0!
-
-lovelyMethod
-    ^Array!
-
-dangerousMethod
-    Array := 0! !
-
-Eval [ Set methodsFor: 'security checking' ]
+Eval [
+    '!Set methodsFor: ''security checking''!
 
 lovelyTrustedMethod
     ^tally!
@@ -121,7 +122,8 @@ lovelyTrustedMethod
     ^Array!
 
 dangerousTrustedMethod
-    Array := 0! !
+    Array := 0! !' readStream fileIn
+]
 
 Set subclass: UntrustedSet [
     | a |
