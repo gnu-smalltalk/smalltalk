@@ -1,5 +1,9 @@
+2011-01-27  Paolo Bonzini <bonzini@gnu.org>
+
+	* libgst/gst-parse.c: Track current namespace across doits.
+
 2011-01-27  Mathieu Suen  <mathieusuen@yahoo.fr>
-            Paolo Bonzini <bonzini@gnu.org>
+	    Paolo Bonzini <bonzini@gnu.org>
 
 	* libgst/interp.inl: Add Mersenne Twister.
 	* libgst/prims.def: Implement VMpr_Random_next.

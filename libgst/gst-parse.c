@@ -343,6 +343,30 @@ _gst_set_compilation_category (OOP categoryOOP)
   _gst_register_oop (categoryOOP);
 }
 
+static OOP
+set_compilation_namespace (OOP namespaceOOP)
+{
+  OOP oldNamespaceOOP = _gst_current_parser->current_namespace;
+
+  _gst_current_parser->current_namespace = namespaceOOP;
+  if (!IS_NIL (namespaceOOP))
+    {
+      if (oldNamespaceOOP != namespaceOOP)
+        _gst_register_oop (namespaceOOP);
+      if (namespaceOOP != _gst_current_namespace)
+        _gst_msg_sendf (NULL, "%v %o current: %o",
+                        _gst_namespace_class, namespaceOOP);
+    }
+
+  if (!IS_NIL (oldNamespaceOOP))
+    {
+      if (oldNamespaceOOP != namespaceOOP)
+        _gst_unregister_oop (_gst_current_parser->current_namespace);
+    }
+
+  return oldNamespaceOOP;
+}
+
 void
 _gst_reset_compilation_category (void)
 {
@@ -363,6 +387,8 @@ parser_init (gst_parser *p)
 {
   memset (p, 0, sizeof(p));
   p->currentClass = p->currentCategory = _gst_nil_oop;
+  /* This should ultimately become _gst_get_current_namespace ().  */
+  p->current_namespace = _gst_current_namespace;
 }
 
 /* Top of the descent.  */
@@ -390,8 +416,10 @@ _gst_parse_method (OOP currentClass, OOP currentCategory)
     _gst_had_error = false;
 
   methodOOP = p.lastMethodOOP;
-  INC_RESTORE_POINTER (incPtr);
+  _gst_reset_compilation_category ();
+  set_compilation_namespace (_gst_nil_oop);
   _gst_current_parser = prev_parser;
+  INC_RESTORE_POINTER (incPtr);
   return methodOOP;
 }
 
@@ -401,15 +429,12 @@ _gst_parse_chunks (OOP currentNamespace)
   gst_parser p, *prev_parser = _gst_current_parser;
   inc_ptr incPtr;
 
-  /* This should ultimately become _gst_get_current_namespace ().  */
-  if (!currentNamespace)
-    currentNamespace = _gst_current_namespace;
-
   _gst_current_parser = &p;
   incPtr = INC_SAVE_POINTER ();
   parser_init (&p);
   p.untrustedContext = IS_OOP_UNTRUSTED (_gst_this_context_oop);
-  p.current_namespace = currentNamespace;
+  if (currentNamespace)
+    p.current_namespace = currentNamespace;
   p.state = PARSE_DOIT;
 
   lex_init (&p);
@@ -421,6 +446,8 @@ _gst_parse_chunks (OOP currentNamespace)
   while (token (&p, 0) != EOF)
     parse_chunks (&p);
 
+  _gst_reset_compilation_category ();
+  set_compilation_namespace (_gst_nil_oop);
   INC_RESTORE_POINTER (incPtr);
   _gst_current_parser = prev_parser;
 }
@@ -522,6 +549,19 @@ recover_error (gst_parser *p)
   longjmp (p->recover, 1);
 }
 
+static OOP
+execute_doit (gst_parser *p, tree_node temps, tree_node stmts,
+              enum undeclared_strategy undeclared, mst_Boolean quiet)
+{
+  OOP resultOOP;
+  set_compilation_namespace (p->current_namespace);
+  resultOOP = _gst_execute_statements (temps, stmts, undeclared, quiet);
+
+  /* Store Smalltalk's notion of current namespace back to the parser.  */
+  set_compilation_namespace (_gst_current_namespace);
+  return resultOOP;
+}
+
 /* doit: temporaries statements '!' [ method_list '!' ]
    | empty */
 
@@ -551,7 +591,7 @@ parse_doit (gst_parser *p, mst_Boolean fail_at_eof)
     }
   else if (statement)
     {
-      _gst_execute_statements (NULL, statement, UNDECLARED_TEMPORARIES, false);
+      execute_doit (p, NULL, statement, UNDECLARED_TEMPORARIES, false);
       _gst_free_tree ();
     }
 
@@ -610,11 +650,9 @@ parse_scoped_definition (gst_parser *p, tree_node first_stmt)
   else if (first_stmt->nodeType == TREE_UNARY_EXPR
 	   && first_stmt->v_expr.selector == _gst_intern_string ("extend"))
     {
-      OOP namespace_old = p->current_namespace;
       OOP classOrMetaclassOOP = NULL;
       mst_Boolean ret_value;
 
-      _gst_register_oop (namespace_old);
       if (receiver->nodeType == TREE_VARIABLE_NODE)
  	{
  	  classOOP = parse_class (p, receiver);
@@ -628,22 +666,13 @@ parse_scoped_definition (gst_parser *p, tree_node first_stmt)
  	}	   
       if (classOrMetaclassOOP != NULL) 
  	{
- 	  OOP namespace_new = ((gst_class) OOP_TO_OBJ (classOOP))->environment; 
-	  
-	  /* When creating the image, current namespace is not available. */
-	  if (namespace_new != namespace_old)
-	    _gst_msg_sendf (NULL, "%v %o current: %o",
-			    _gst_namespace_class, namespace_new);
-	  
-	  p->current_namespace = namespace_new;
+          inc_ptr incPtr = INC_SAVE_POINTER ();
+ 	  OOP namespace_new = ((gst_class) OOP_TO_OBJ (classOOP))->environment;
+          OOP namespace_old = set_compilation_namespace (namespace_new);
+          INC_ADD_OOP (namespace_old);
  	  ret_value = parse_class_definition (p, classOrMetaclassOOP, true);
-	  p->current_namespace = namespace_old;
-
-	  if (namespace_new != namespace_old)
-	    _gst_msg_sendf (NULL, "%v %o current: %o",
-			    _gst_namespace_class, namespace_old);
-	  
- 	  _gst_unregister_oop (namespace_old);
+          set_compilation_namespace (namespace_old);
+ 	  INC_RESTORE_POINTER (incPtr);
  	  return ret_value;
  	}
     }
@@ -677,8 +706,8 @@ parse_eval_definition (gst_parser *p)
 	  fflush (stderr);
         }
 
-      resultOOP = _gst_execute_statements (tmps, stmts, UNDECLARED_TEMPORARIES,
-                                           _gst_regression_testing);
+      resultOOP = execute_doit (p, tmps, stmts, UNDECLARED_TEMPORARIES,
+                                _gst_regression_testing);
 
       if (_gst_regression_testing)
         {
@@ -719,7 +748,7 @@ parse_and_send_attribute (gst_parser *p, OOP receiverOOP)
     {
       value = stmt->v_list.value;
       value = _gst_make_statement_list (&value->location, value);
-      args[i] = _gst_execute_statements (NULL, value, UNDECLARED_NONE, true);
+      args[i] = execute_doit (p, NULL, value, UNDECLARED_NONE, true);
       if (!args[i])
         {
           _gst_had_error = true;
@@ -744,13 +773,9 @@ parse_namespace_definition (gst_parser *p, tree_node first_stmt)
   
   if (new_namespace)
     {
-      OOP old_namespace = p->current_namespace;
-      _gst_register_oop (old_namespace);		
-  
-      _gst_msg_sendf (NULL, "%v %o current: %o", 
-		      _gst_namespace_class, new_namespace);
-      
-      p->current_namespace = new_namespace;
+      inc_ptr incPtr = INC_SAVE_POINTER ();
+      OOP old_namespace = set_compilation_namespace (new_namespace);
+      INC_ADD_OOP (old_namespace);
       while (token (p, 0) != ']' && token (p, 0) != EOF && token (p, 0) != '!')
 	{
 	  if (token (p, 0) == '<')
@@ -759,11 +784,8 @@ parse_namespace_definition (gst_parser *p, tree_node first_stmt)
 	    parse_doit (p, true);
 	}
 
-      p->current_namespace = old_namespace;
-      _gst_msg_sendf (NULL, "%v %o current: %o",
-		      _gst_namespace_class, old_namespace);
-      
-      _gst_unregister_oop (old_namespace);
+      set_compilation_namespace (old_namespace);
+      INC_RESTORE_POINTER (incPtr);
       return true;
     } 
 
@@ -859,8 +881,7 @@ parse_class_definition (gst_parser *p, OOP classOOP, mst_Boolean extend)
 	      if (!_gst_had_error)
 		{
 	          stmt = _gst_make_statement_list (&stmt->location, stmt);
-	          result = _gst_execute_statements (NULL, stmt, UNDECLARED_NONE,
-						    true);
+	          result = execute_doit (p, NULL, stmt, UNDECLARED_NONE, true);
 
 	          if (result)
 		    DICTIONARY_AT_PUT (class_var_dict, name, result);
@@ -1824,7 +1845,7 @@ parse_compile_time_constant (gst_parser *p)
   lex_skip_mandatory (p, ')');
 
   if (statements && !_gst_had_error)
-    result = _gst_execute_statements (temps, statements, UNDECLARED_NONE, true);
+    result = execute_doit (p, temps, statements, UNDECLARED_NONE, true);
 
   return _gst_make_oop_constant (&location, result ? result : _gst_nil_oop); 
 }
