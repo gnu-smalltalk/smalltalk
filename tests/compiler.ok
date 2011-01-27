@@ -9,7 +9,8 @@ returned value is 'bar'
 Execution begins...
 returned value is 100
 compiler.st:118: parse error, expected '!'
-compiler.st:121: parse error, expected keyword
+ error: did not understand #<
+compiler.st:122: expected object
 
 Execution begins...
 returned value is 2
@@ -55,19 +56,19 @@ returned value is '-123.000s3'
 
 Execution begins...
 a Smalltalk string:1: parse error, expected positive numeric literal
-returned value is CompiledMethod new: 6 "<0>"
+returned value is nil
 
 Execution begins...
 a Smalltalk string:1: parse error, expected positive numeric literal
-returned value is CompiledMethod new: 6 "<0>"
+returned value is nil
 
 Execution begins...
 a Smalltalk string:1: parse error, expected positive numeric literal
-returned value is CompiledMethod new: 6 "<0>"
+returned value is nil
 
 Execution begins...
 a Smalltalk string:1: parse error, expected positive numeric literal
-returned value is CompiledMethod new: 6 "<0>"
+returned value is nil
 
 Execution begins...
 returned value is FileSegment

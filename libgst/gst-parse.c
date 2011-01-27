@@ -411,11 +411,16 @@ _gst_parse_method (OOP currentClass, OOP currentCategory)
 
   lex_init (&p);
   if (setjmp (p.recover) == 0)
-    parse_method (&p, ']');
+    {
+      parse_method (&p, ']');
+      methodOOP = p.lastMethodOOP;
+    }
   else
-    _gst_had_error = false;
+    {
+      _gst_had_error = false;
+      methodOOP = _gst_nil_oop;
+    }
 
-  methodOOP = p.lastMethodOOP;
   _gst_reset_compilation_category ();
   set_compilation_namespace (_gst_nil_oop);
   _gst_current_parser = prev_parser;
@@ -461,7 +466,6 @@ parse_chunks (gst_parser *p)
     {
       OOP oldTemporaries = _gst_push_temporaries_dictionary ();
       jmp_buf old_recover;
-      memcpy (old_recover, p->recover, sizeof (p->recover));
       setjmp (p->recover);
       while (token (p, 0) != EOF && token (p, 0) != '!')
         {
@@ -689,6 +693,7 @@ parse_eval_definition (gst_parser *p)
   OOP oldDictionary = _gst_push_temporaries_dictionary ();
   jmp_buf old_recover;
 
+  assert (IS_NIL (_gst_current_parser->currentClass));
   memcpy (old_recover, p->recover, sizeof (p->recover));
   if (setjmp (p->recover) == 0)
     {
@@ -1213,9 +1218,15 @@ parse_instance_variables (gst_parser *p, OOP classOOP, mst_Boolean extend)
 static void
 parse_method_list (gst_parser *p)
 {
-  while (token (p, 0) != '!')
-    parse_method (p, '!');
+  jmp_buf old_recover;
+  memcpy (old_recover, p->recover, sizeof (p->recover));
+  if (setjmp (p->recover) == 0)
+    {
+      while (token (p, 0) != '!')
+        parse_method (p, '!');
+    }
 
+  memcpy (p->recover, old_recover, sizeof (p->recover));
   _gst_skip_compilation = false;
   _gst_reset_compilation_category ();
   p->state = PARSE_DOIT;

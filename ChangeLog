@@ -1,5 +1,10 @@
 2011-01-27  Paolo Bonzini <bonzini@gnu.org>
 
+	* testsuite/compiler.ok: Regenerate, nil is returned consistently
+	from #compile: if the method has errors.
+
+2011-01-27  Paolo Bonzini <bonzini@gnu.org>
+
 	* testsuite/untrusted.st: Use a filein from an untrusted process
 	instead of passing information across #methodsFor: (which worked
 	more or less by chance).
