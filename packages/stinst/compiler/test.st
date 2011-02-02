@@ -31,8 +31,8 @@
 
 Eval [
     PackageLoader fileInPackage: #Compiler.
-    STInST.STFileInParser 
-	parseSmalltalk: '
+
+    STInST.STEvaluationDriver new parseSmalltalk: '
    | i |
    i := ##(| a | a := -2. ''before everything'' printNl. a).
    [ i < 5 ] whileTrue:  [ i printNl. i := i + 1 ].
@@ -68,6 +68,6 @@ Arrays... and multi-line strings'') printNl.
        value: ''finally, many parameters, ''
        value: ''cascading ''
        value: ''and block temporaries too! ''.
-!'
+!' with: STInST.STFileInParser.
 ]
 
