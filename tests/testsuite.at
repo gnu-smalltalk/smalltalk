@@ -72,6 +72,7 @@ AT_DIFF_TEST([prodcons.st])
 AT_DIFF_TEST([random-bench.st])
 AT_DIFF_TEST([sieve.st])
 AT_DIFF_TEST([strcat.st])
+AT_DIFF_TEST([stcompiler.st])
 
 AT_BANNER([Basic packages.])
 AT_PACKAGE_TEST([SUnit])

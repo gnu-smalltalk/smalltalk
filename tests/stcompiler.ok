@@ -1,0 +1,43 @@
+
+Execution begins...
+Loading package Parser
+
+Execution begins...
+returned value is RBScanner
+
+Execution begins...
+returned value is IdentityDictionary new: 128 "<0>"
+
+Execution begins...
+returned value is DefaultPoolResolution
+
+Execution begins...
+returned value is STCompiler
+Loading package Compiler
+returned value is 3
+
+Execution begins...
+'before everything'
+-2
+-1
+0
+1
+2
+3
+4
+5
+6
+7
+8
+'okay'
+'okay'
+now I'm testing 'Cascading'
+(true false nil 53 $a ByteArray (1 2 3 ) (1 2 3 ) {Smalltalk.Association} #perform: #perform:with: '
+Arrays... and multi-line strings' )
+and now blocks with parameters...
+'okay'
+[] in UndefinedObject>>executeStatements (a String:1)
+finally, many parameters, 
+cascading 
+and block temporaries too! 
+returned value is TextCollector new "<0>"

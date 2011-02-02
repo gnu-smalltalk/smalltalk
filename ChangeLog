@@ -1,3 +1,10 @@
+2011-02-02  Holger Hans Peter Freyther  <holger@freyther.de>
+
+	* tests/stcompiler.ok: New.
+	* tests/stcompiler.st: New.
+	* tests/testsuite.at: Add STInST compiler tests.
+	* tests/Makefile.am: Add STInST compiler tests.
+
 2011-02-03  Paolo Bonzini <bonzini@gnu.org>
 
 	* tests/shape.st: Fix for 32-bit compilation.
