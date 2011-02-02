@@ -1,5 +1,9 @@
 2011-02-02  Holger Hans Peter Freyther  <holger@freyther.de>
 
+	* tests/Makefile.am: Add shape.ok and shape.st to the noinst data
+
+2011-02-02  Holger Hans Peter Freyther  <holger@freyther.de>
+
 	* tests/stcompiler.ok: New.
 	* tests/stcompiler.st: New.
 	* tests/testsuite.at: Add STInST compiler tests.
