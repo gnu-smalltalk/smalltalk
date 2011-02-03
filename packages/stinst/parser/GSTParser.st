@@ -349,7 +349,7 @@ STInST.STFileInParser subclass: GSTFileInParser [
         stmt := RBMessageNode
             receiver: rec
             selector: sel
-            arguments: {argSymbols collect: [:each | RBLiteralNode value: each]}.
+            arguments: (argSymbols collect: [:each | RBLiteralNode value: each]).
 	    	    
         self evaluateStatement: stmt.
     ]
