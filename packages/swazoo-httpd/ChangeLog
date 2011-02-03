@@ -1,3 +1,7 @@
+2011-02-03  Dmitry Matveev  <dmm1989@gmail.com>
+
+	* Extensions.st: Add missing methods for SpFileStream.
+
 2010-12-12  Paolo Bonzini  <bonzini@gnu.org>
 
 	* HTTP.st: Add back private #siteMatch: method.
