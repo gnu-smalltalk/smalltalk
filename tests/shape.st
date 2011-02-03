@@ -46,9 +46,9 @@ Object subclass: IntShape
 ]
 
 Eval [
-    UintShape new.
+    UintShape new printString.
 ]
 
 Eval [
-    IntShape new
+    IntShape new printString
 ]

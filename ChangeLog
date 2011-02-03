@@ -1,3 +1,8 @@
+2011-02-03  Paolo Bonzini <bonzini@gnu.org>
+
+	* tests/shape.st: Fix for 32-bit compilation.
+	* tests/shape.ok: Regenerate.
+
 2011-01-25  Paolo Bonzini <bonzini@gnu.org>
 
 	* scripts/Package.st: Fix String<->File confusion with --prepare.
