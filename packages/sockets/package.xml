@@ -15,5 +15,11 @@
   <filein>Tests.st</filein>
   <filein>cfuncs.st</filein>
   <filein>init.st</filein>
+
+  <test>
+	<sunit>Sockets.SocketTest</sunit>
+	<filein>UnitTest.st</filein>
+  </test>
+
   <file>ChangeLog</file>
 </package>
