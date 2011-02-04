@@ -1,3 +1,7 @@
+2011-02-04  Holger Hans Peter Freyther  <holger@freyther.de>
+
+	* libgst/sockets.c: Add size check for the socket addr.
+
 2011-02-02  Holger Hans Peter Freyther  <holger@freyther.de>
 
 	* tests/Makefile.am: Add shape.ok and shape.st to the noinst data
