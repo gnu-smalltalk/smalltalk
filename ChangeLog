@@ -1,5 +1,9 @@
 2011-02-04  Holger Hans Peter Freyther  <holger@freyther.de>
 
+	* libgst/cint.c: Propagate type conversion failures.
+
+2011-02-04  Holger Hans Peter Freyther  <holger@freyther.de>
+
 	* tests/testsuite.at: Add the Sockets test.
 
 2011-02-04  Holger Hans Peter Freyther  <holger@freyther.de>

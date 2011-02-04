@@ -50,4 +50,19 @@ TestCase subclass: SocketTest [
 	datagram := Datagram new.
 	socket nextPut: datagram.
     ]
+
+    testDoNotCrashWithWrongTypes [
+        "The objective is to see if wrong types for a cCallout will
+         make the VM crash or not. It should also check if these calls
+         raise the appropriate exception."
+        | socket impl |
+
+        socket := DatagramSocket new.
+        impl := socket implementation.
+
+        self should: [impl accept: -1 peer: nil addrLen: 0] raise: SystemExceptions.PrimitiveFailed.
+        self should: [impl getPeerName: -1 addr: nil addrLen: 0] raise: SystemExceptions.PrimitiveFailed.
+        self should: [impl getSockName: -1 addr: nil addrLen: 0] raise: SystemExceptions.PrimitiveFailed.
+        self should: [impl receive: -1 buffer: nil size: 0 flags: 0 from: nil size: 0] raise: SystemExceptions.PrimitiveFailed.
+    ]
 ]
