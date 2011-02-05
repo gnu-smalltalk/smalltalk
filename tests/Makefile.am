@@ -17,7 +17,8 @@ nestedloop.st objdump.ok objdump.st objects.ok objects.st objinst.ok \
 objinst.st processes.ok processes.st prodcons.ok prodcons.st quit.ok \
 quit.st random-bench.ok random-bench.st untrusted.ok untrusted.st sets.ok \
 sets.st sieve.ok sieve.st strcat.ok strcat.st strings.ok strings.st \
-pools.ok pools.st Ansi.st AnsiDB.st AnsiInit.st AnsiLoad.st AnsiRun.st
+pools.ok pools.st Ansi.st AnsiDB.st AnsiInit.st AnsiLoad.st AnsiRun.st \
+stcompiler.st stcompiler.ok shape.st shape.ok
 
 CLEANFILES = gst.im
 DISTCLEANFILES = atconfig

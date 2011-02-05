@@ -59,3 +59,18 @@ SpFilename extend [
     ]
 
 ]
+
+
+
+SpFileStream extend [
+    lineEndTransparent [
+       "Do nothing.  GNU Smalltalk streams do not muck with line endings."
+       <category: 'useless portability hacks'>
+    ]
+
+    nextAvailable: anInteger [
+        ^self underlyingStream nextAvailable: anInteger
+    ]
+]
+
+

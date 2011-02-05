@@ -293,13 +293,14 @@ mySocket (int domain, int type, int protocol)
    we read the second byte (sa_family on BSD systems) and write it in the
    entire sa_family field. */
 static inline void
-fix_sockaddr (struct sockaddr *sockaddr)
+fix_sockaddr (struct sockaddr *sockaddr, socklen_t len)
 {
 #ifndef HAVE_STRUCT_SOCKADDR_SA_LEN
   /* Make sure sa_family is a short.  */
   char verify[sizeof (sockaddr->sa_family) == 2 ? 1 : -1];
 
-  sockaddr->sa_family = ((unsigned char *) sockaddr)[1];
+  if (len >= 2)
+    sockaddr->sa_family = ((unsigned char *) sockaddr)[1];
 #endif
 }
 
@@ -324,7 +325,7 @@ myConnect (int fd, struct sockaddr *sockaddr, int len)
 #endif
 #endif
   
-  fix_sockaddr (sockaddr);
+  fix_sockaddr (sockaddr, len);
   rc = connect (sock, sockaddr, len);
   if (rc == 0 || is_socket_error (EINPROGRESS) || is_socket_error (EWOULDBLOCK))
     return 0;
@@ -365,7 +366,7 @@ myAccept (int fd, struct sockaddr *addr, socklen_t *addrlen)
 static int
 myBind (int fd, struct sockaddr *addr, socklen_t addrlen)
 {
-  fix_sockaddr (addr);
+  fix_sockaddr (addr, addrlen);
   return bind (FD_TO_SOCKET (fd), addr, addrlen);
 }
 
@@ -434,7 +435,7 @@ static int
 mySendto (int fd, const char *buf, int len, int flags,
 	  struct sockaddr *to, int tolen)
 {
-  fix_sockaddr (to);
+  fix_sockaddr (to, tolen);
   return sendto (FD_TO_SOCKET (fd), buf, len, flags, to, tolen);
 }
 

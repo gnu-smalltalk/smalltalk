@@ -1,14 +1,15 @@
 "======================================================================
 |
-|   Test the Smalltalk-in-Smalltalk parser.
+|   Regression tests for the STInST compiler
 |
 |
  ======================================================================"
 
+
 "======================================================================
 |
-| Copyright 1999, 2000, 2001, 2002 Free Software Foundation, Inc.
-| Written by Paolo Bonzini.
+| Copyright (C) 1999, 200, 2001, 2002, 2011 Free Software Foundation.
+| Written by Paolo Bonzini and Holger Hans Peter Freyther.
 |
 | This file is part of GNU Smalltalk.
 |
@@ -28,8 +29,14 @@
  ======================================================================"
 
 
-
 Eval [
+    "This is testing bug: http://smalltalk.gnu.org/project/issue/527"
+    PackageLoader fileInPackage: 'Compiler'.
+    Behavior evaluate: '3'.
+]
+
+Eval [
+    "Random code to test features of the parser"
     PackageLoader fileInPackage: #Compiler.
 
     STInST.STEvaluationDriver new parseSmalltalk: '
@@ -70,4 +77,3 @@ Arrays... and multi-line strings'') printNl.
        value: ''and block temporaries too! ''.
 !' with: STInST.STFileInParser.
 ]
-

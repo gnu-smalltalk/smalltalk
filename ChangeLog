@@ -1,3 +1,23 @@
+2011-02-04  Holger Hans Peter Freyther  <holger@freyther.de>
+
+	* libgst/sockets.c: Add size check for the socket addr.
+
+2011-02-02  Holger Hans Peter Freyther  <holger@freyther.de>
+
+	* tests/Makefile.am: Add shape.ok and shape.st to the noinst data
+
+2011-02-02  Holger Hans Peter Freyther  <holger@freyther.de>
+
+	* tests/stcompiler.ok: New.
+	* tests/stcompiler.st: New.
+	* tests/testsuite.at: Add STInST compiler tests.
+	* tests/Makefile.am: Add STInST compiler tests.
+
+2011-02-03  Paolo Bonzini <bonzini@gnu.org>
+
+	* tests/shape.st: Fix for 32-bit compilation.
+	* tests/shape.ok: Regenerate.
+
 2011-01-27  Paolo Bonzini <bonzini@gnu.org>
 
 	* testsuite/compiler.ok: Regenerate, nil is returned consistently
