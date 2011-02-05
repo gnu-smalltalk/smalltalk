@@ -62,14 +62,6 @@ SpFilename extend [
 
 
 
-diff --git a/packages/swazoo-httpd/Extensions.st b/packages/swazoo-httpd/Extensions.st
-index 6835c61..eedf892 100644
---- a/packages/swazoo-httpd/Extensions.st
-+++ b/packages/swazoo-httpd/Extensions.st
-@@ -36,6 +36,22 @@ Stream extend [
-     ]
- ]
- 
 SpFileStream extend [
     lineEndTransparent [
        "Do nothing.  GNU Smalltalk streams do not muck with line endings."

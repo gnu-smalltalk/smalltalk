@@ -1,3 +1,7 @@
+2011-02-03  Paolo Bonzini  <bonzini@gnu.org>
+
+	* Extensions.st: Remove diff header. :/
+
 2011-02-03  Dmitry Matveev  <dmm1989@gmail.com>
 
 	* Extensions.st: Add missing methods for SpFileStream.
