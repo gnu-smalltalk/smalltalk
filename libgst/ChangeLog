@@ -2,6 +2,10 @@
 
 	* libgst/cint.c: Propagate type conversion failures.
 
+2011-02-04  Holger Hans Peter Freyther  <holger@freyther.de>
+
+	* libgst/sockets.c: Add size check for the socket addr.
+
 2011-01-27  Paolo Bonzini <bonzini@gnu.org>
 
 	* libgst/gstpriv.h: Return boolean values from IS_OOP_*.

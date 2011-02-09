@@ -77,3 +77,16 @@ Arrays... and multi-line strings'') printNl.
        value: ''and block temporaries too! ''.
 !' with: STInST.STFileInParser.
 ]
+
+Eval [
+    | squeak |
+    "Test the import of squeak code"
+
+    squeak := '!String methodsFor: ''*petitparser-core-converting'' stamp: ''lr 11/7/2009 13:32''!
+asParser
+    ^ PPLiteralSequenceParser on: self! !'.
+
+    STInST.STClassLoader new parseSmalltalkStream: squeak readStream
+		    with: STInST.SqueakFileInParser.
+]
+

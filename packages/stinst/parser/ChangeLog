@@ -1,3 +1,7 @@
+2011-02-06  Holger Hans Peter Freyther  <holger@freyther.de>
+
+	* STLoader.st: Look through the return statement.
+
 2010-12-13  Paolo Bonzini  <bonzini@gnu.org>
 
 	* STFileParser.st: Add return tag to doits, thus fixing
