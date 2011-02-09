@@ -7,7 +7,7 @@
 
 /***********************************************************************
  *
- * Copyright 1988,89,90,91,92,94,95,99,2000,2001,2002,2003,2005,2006,2007,2008,2009
+ * Copyright 1988,89,90,91,92,94,95,99,2000,2001,2002,2003,2005,2006,2007,2008,2009,2011
  * Free Software Foundation, Inc.
  * Written by Steve Byrne.
  *
@@ -150,9 +150,10 @@ static void marli (int n);
 static void bad_type (OOP class_oop,
 		      cdata_type cType);
 
-/* Determines the appropriate C mapping for OOP and stores it.  */
-static void push_smalltalk_obj (OOP oop,
-				cdata_type cType);
+/* Determines the appropriate C mapping for OOP and stores it. This
+   returns 1 in case the type could not be converted. */
+static mst_Boolean push_smalltalk_obj (OOP oop,
+				       cdata_type cType);
 
 /* Converts the return type as stored in RESULT to an OOP, based
    on the RETURNTYPEOOP that is stored in the descriptor.  #void is
@@ -852,13 +853,24 @@ _gst_invoke_croutine (OOP cFuncOOP,
   /* Push the arguments */
   for (si = i = 0; i < fixedArgs; i++)
     {
+      mst_Boolean res;
+
       cType = IS_OOP (argTypes[i]) ? CDATA_COBJECT : TO_INT (argTypes[i]);
-      if (cType == CDATA_SELF || cType == CDATA_SELF_OOP)
-	push_smalltalk_obj (receiver,
-			    cType == CDATA_SELF ? CDATA_UNKNOWN : CDATA_OOP);
-      else if (cType != CDATA_VOID)
+      if (cType == CDATA_VOID)
+        continue;
+
+      else if (cType == CDATA_SELF || cType == CDATA_SELF_OOP)
+	res = push_smalltalk_obj (receiver,
+				  cType == CDATA_SELF ? CDATA_UNKNOWN : CDATA_OOP);
+      else
 	/* Do nothing if it is a void */
-	push_smalltalk_obj (args[si++], cType);
+	res = push_smalltalk_obj (args[si++], cType);
+
+      if (!res)
+        {
+          oop = NULL;
+          goto out;
+        }
     }
 
   /* If the previous call was done through the same function descriptor,
@@ -883,6 +895,7 @@ _gst_invoke_croutine (OOP cFuncOOP,
   oop = c_to_smalltalk (&result, receiver, desc->returnTypeOOP);
   INC_ADD_OOP (oop);
 
+ out:
   /* Fixup all returned string variables */
   if (needPostprocessing)
     for (i = 0, arg = local_arg_vec; i < totalArgs; i++, arg++)
@@ -890,26 +903,29 @@ _gst_invoke_croutine (OOP cFuncOOP,
         if (!arg->oop)
 	  continue;
 
-        switch (arg->cType)
+        if (oop)
           {
-          case CDATA_COBJECT_PTR:
-	    set_cobject_value (arg->oop, arg->u.cObjectPtrVal.ptrVal);
-	    continue;
+            switch (arg->cType)
+              {
+              case CDATA_COBJECT_PTR:
+                set_cobject_value (arg->oop, arg->u.cObjectPtrVal.ptrVal);
+                continue;
 
-          case CDATA_WSTRING_OUT:
-	    _gst_set_oop_unicode_string (arg->oop, arg->u.ptrVal);
-	    break;
+              case CDATA_WSTRING_OUT:
+                _gst_set_oop_unicode_string (arg->oop, arg->u.ptrVal);
+                break;
 
-          case CDATA_STRING_OUT:
-	    _gst_set_oopstring (arg->oop, arg->u.ptrVal);
-	    break;
+              case CDATA_STRING_OUT:
+                _gst_set_oopstring (arg->oop, arg->u.ptrVal);
+                break;
 
-          case CDATA_BYTEARRAY_OUT:
-	    _gst_set_oop_bytes (arg->oop, arg->u.ptrVal);
-	    break;
+              case CDATA_BYTEARRAY_OUT:
+                _gst_set_oop_bytes (arg->oop, arg->u.ptrVal);
+                break;
 
-          default:
-	    break;
+              default:
+                break;
+              }
           }
 
         xfree (arg->u.ptrVal);
@@ -1191,7 +1207,7 @@ smalltalk_to_c (OOP oop,
   return NULL;
 }
 
-void
+mst_Boolean
 push_smalltalk_obj (OOP oop,
 		    cdata_type cType)
 {
@@ -1201,12 +1217,13 @@ push_smalltalk_obj (OOP oop,
       if (OOP_INT_CLASS (oop) != _gst_array_class)
 	{
           bad_type (OOP_INT_CLASS (oop), cType);
-          return;
+          return false;
 	}
 
       cType = (cType == CDATA_VARIADIC) ? CDATA_UNKNOWN : CDATA_OOP;
       for (i = 1; i <= NUM_WORDS (OOP_TO_OBJ (oop)); i++)
-	push_smalltalk_obj (ARRAY_AT (oop, i), cType);
+	if (push_smalltalk_obj (ARRAY_AT (oop, i), cType) != 0)
+	  return false;
     }
   else
     {
@@ -1216,7 +1233,11 @@ push_smalltalk_obj (OOP oop,
 	INC_ADD_OOP (cp->oop);
       if (type)
 	c_func_cur->types[c_func_cur->arg_idx++] = type;
+      else
+	return false;
     }
+
+  return true;
 }
 
 OOP
@@ -1345,8 +1366,6 @@ bad_type (OOP class_oop,
   else
     _gst_errorf ("Attempt to pass an instance of %O as a %s", class_oop,
 	         c_type_name[cType]);
-
-  _gst_show_backtrace (stderr);
 }
 
 
@@ -1381,11 +1400,10 @@ closure_msg_send (ffi_cif* cif, void* result, void** args, void* userdata)
 
   desc = (gst_c_callable) OOP_TO_OBJ (callbackOOP);
   cType = IS_OOP (desc->returnTypeOOP) ? CDATA_COBJECT : TO_INT (desc->returnTypeOOP);
-  if (cType != CDATA_VOID)
-    {
-      smalltalk_to_c (resultOOP, &cp, cType);
-      memcpy (result, &cp.u, sizeof (ffi_arg));
-    }
+  if (cType != CDATA_VOID && smalltalk_to_c (resultOOP, &cp, cType))
+    memcpy (result, &cp.u, sizeof (ffi_arg));
+  else
+    memset (result, 0, sizeof (ffi_arg));
 }
 
 void

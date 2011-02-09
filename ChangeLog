@@ -1,6 +1,11 @@
+2011-02-06  Holger Hans Peter Freyther  <holger@freyther.de>
+
+	* tests/stcompiler.ok: Regenerate.
+	* tests/stcompiler.st: Add test case.
+
 2011-02-04  Holger Hans Peter Freyther  <holger@freyther.de>
 
-	* libgst/sockets.c: Add size check for the socket addr.
+	* tests/testsuite.at: Add the Sockets test.
 
 2011-02-02  Holger Hans Peter Freyther  <holger@freyther.de>
 

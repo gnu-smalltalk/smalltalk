@@ -1,3 +1,12 @@
+2011-02-04  Holger Hans Peter Freyther  <zecke@selfish.org>
+
+	* UnitTest.st: Verify that the primitive are failing.
+
+2011-02-04  Holger Hans Peter Freyther  <zecke@selfish.org>
+
+	* package.xml: Add test section.
+	* UnitTest.st: Add SUnit based testcase.
+
 2011-01-19  Holger Hans Peter Freyther  <zecke@selfish.org>
 
 	* Sockets.st: Use errno to test outcome of bind.

@@ -99,9 +99,14 @@ evaluate: node
 	inject: false
 	into: [ :old :each |
 	    "We *do not* want short-circuit evaluation here!!"
-            each isMessage
-	        ifTrue: [ old | (self evaluateStatement: each) ]
-	        ifFalse: [ self unknown: each ]
+	    | node |
+	    node := each.
+	    each isReturn
+		ifTrue: [ node := each value ].
+
+	    node isMessage
+		ifTrue: [ old | (self evaluateStatement: node) ]
+		ifFalse: [ self unknown: node ].
         ]
 !
 
