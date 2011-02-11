@@ -87,6 +87,14 @@ Eval [ (CP value + 1) - CA ]
 Eval [ (CPtrCType elementType: #int) new value ]
 
 
+"test variadic arguments to callouts.  note SmallInteger->long."
+String extend [
+    printf: args [ <cCall: 'printf' returning: #int args: #(#self #variadic)> ]
+]
+
+Eval [ 'abc%ld%s%g%c' printf: #(3 'def' 4.0e0 10) ]
+Eval [ '%s' printf: 'def' ] "error"
+
 SmallInteger extend [
     testAsync [
         "Asynchronous vs. synchronous actually matters only when the function

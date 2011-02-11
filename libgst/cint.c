@@ -594,6 +594,7 @@ _gst_init_cfuncs (void)
   _gst_define_cfunc ("system", system);
   _gst_define_cfunc ("getenv", getenv);
   _gst_define_cfunc ("putenv", my_putenv);
+  _gst_define_cfunc ("printf", printf);
 
   _gst_define_cfunc ("errno", get_errno);
   _gst_define_cfunc ("strerror", strerror);
@@ -774,7 +775,7 @@ _gst_invoke_croutine (OOP cFuncOOP,
   cparam result, *local_arg_vec, *arg;
   void *funcAddr, **p_slot, **ffi_arg_vec;
   OOP *argTypes, oop;
-  int i, si, fixedArgs, totalArgs;
+  int i, si, fixedArgs, totalArgs, filledArgs;
   mst_Boolean haveVariadic, needPostprocessing;
   inc_ptr incPtr;
 
@@ -869,6 +870,7 @@ _gst_invoke_croutine (OOP cFuncOOP,
       if (!res)
         {
           oop = NULL;
+	  filledArgs = c_func_cur->arg_idx;
           goto out;
         }
     }
@@ -888,6 +890,8 @@ _gst_invoke_croutine (OOP cFuncOOP,
     }
 
   errno = 0;
+  filledArgs = c_func_cur->arg_idx;
+  assert (filledArgs == totalArgs);
   ffi_call (&c_func_cur->cacheCif, FFI_FN (funcAddr), &result.u, ffi_arg_vec);
 
   _gst_set_errno (errno);
@@ -898,34 +902,35 @@ _gst_invoke_croutine (OOP cFuncOOP,
  out:
   /* Fixup all returned string variables */
   if (needPostprocessing)
-    for (i = 0, arg = local_arg_vec; i < totalArgs; i++, arg++)
+    for (i = 0, arg = local_arg_vec; i < filledArgs; i++, arg++)
       {
         if (!arg->oop)
 	  continue;
 
-        if (oop)
+	switch (arg->cType)
           {
-            switch (arg->cType)
-              {
-              case CDATA_COBJECT_PTR:
-                set_cobject_value (arg->oop, arg->u.cObjectPtrVal.ptrVal);
-                continue;
+          case CDATA_COBJECT_PTR:
+            if (oop)
+              set_cobject_value (arg->oop, arg->u.cObjectPtrVal.ptrVal);
+            continue;
 
-              case CDATA_WSTRING_OUT:
-                _gst_set_oop_unicode_string (arg->oop, arg->u.ptrVal);
-                break;
+          case CDATA_WSTRING_OUT:
+            if (oop)
+              _gst_set_oop_unicode_string (arg->oop, arg->u.ptrVal);
+            break;
 
-              case CDATA_STRING_OUT:
-                _gst_set_oopstring (arg->oop, arg->u.ptrVal);
-                break;
+          case CDATA_STRING_OUT:
+            if (oop)
+              _gst_set_oopstring (arg->oop, arg->u.ptrVal);
+            break;
 
-              case CDATA_BYTEARRAY_OUT:
-                _gst_set_oop_bytes (arg->oop, arg->u.ptrVal);
-                break;
+          case CDATA_BYTEARRAY_OUT:
+            if (oop)
+              _gst_set_oop_bytes (arg->oop, arg->u.ptrVal);
+            break;
 
-              default:
-                break;
-              }
+          default:
+            break;
           }
 
         xfree (arg->u.ptrVal);
@@ -1222,7 +1227,7 @@ push_smalltalk_obj (OOP oop,
 
       cType = (cType == CDATA_VARIADIC) ? CDATA_UNKNOWN : CDATA_OOP;
       for (i = 1; i <= NUM_WORDS (OOP_TO_OBJ (oop)); i++)
-	if (push_smalltalk_obj (ARRAY_AT (oop, i), cType) != 0)
+	if (!push_smalltalk_obj (ARRAY_AT (oop, i), cType))
 	  return false;
     }
   else
