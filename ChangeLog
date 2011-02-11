@@ -1,3 +1,8 @@
+2011-02-11  Paolo Bonzini <bonzini@gnu.org>
+
+	* tests/cobjects.ok: Regenerate.
+	* tests/cobjects.st: Add test case for variadic.
+
 2011-02-06  Holger Hans Peter Freyther  <holger@freyther.de>
 
 	* tests/stcompiler.ok: Regenerate.
