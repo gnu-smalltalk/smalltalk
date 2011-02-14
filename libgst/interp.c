@@ -472,7 +472,7 @@ static inline void prepare_context (gst_context_part context,
 
 /* Return from the current context and restore the virtual machine's
    status (ip, sp, _gst_this_method, _gst_self, ...).  */
-static void unwind_context (void);
+static void __attribute__ ((__always_inline__)) unwind_context (void);
 
 /* Check whether it is true that sending SENDSELECTOR to RECEIVER
    accepts NUMARGS arguments.  Note that the RECEIVER is only used to
