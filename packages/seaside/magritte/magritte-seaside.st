@@ -353,6 +353,7 @@ MAComponentDecoration subclass: MAValidationDecoration [
 	<category: 'rendering'>
 	(html unorderedList)
 	    class: 'errors';
+	    labels: [:item | item printString];
 	    list: self errors;
 	    with: nil
     ]
