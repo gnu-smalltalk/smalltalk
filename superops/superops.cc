@@ -38,6 +38,8 @@
 #error Sorry, you need a recent C++ compiler to compile this program.
 #endif
 
+#include <cstdlib>
+#include <cstring>
 #include <iostream>
 #include <sstream>
 #include <fstream>

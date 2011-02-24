@@ -41,6 +41,8 @@
 #include "keyword-list.h"
 #include "positions.h"
 
+#include <cstdlib>
+
 class Output
 {
 public:

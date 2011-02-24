@@ -26,6 +26,9 @@
 #ifndef positions_h
 #define positions_h 1
 
+class PositionIterator;
+class PositionReverseIterator;
+
 /* This class denotes a set of byte positions, used to access a keyword.  */
 
 class Positions
