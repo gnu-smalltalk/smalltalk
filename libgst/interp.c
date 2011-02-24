@@ -2104,22 +2104,24 @@ create_callin_process (OOP contextOOP)
   OOP processListsOOP;
   gst_processor_scheduler processor;
   gst_process initialProcess;
-  OOP initialProcessOOP, initialProcessListOOP;
+  OOP initialProcessOOP, initialProcessListOOP, nameOOP;
   inc_ptr inc = INC_SAVE_POINTER ();
 
   processor = (gst_processor_scheduler) OOP_TO_OBJ (_gst_processor_oop);
   processListsOOP = processor->processLists;
   initialProcessListOOP = ARRAY_AT (processListsOOP, 4);
 
+  nameOOP = _gst_string_new ("call-in process");
+  INC_ADD_OOP (nameOOP);
+
   initialProcess = (gst_process)
     instantiate (_gst_callin_process_class, &initialProcessOOP);
 
   INC_ADD_OOP (initialProcessOOP);
-
   initialProcess->priority = FROM_INT (USER_SCHEDULING_PRIORITY);
   initialProcess->interruptLock = _gst_nil_oop;
   initialProcess->suspendedContext = contextOOP;
-  initialProcess->name = _gst_string_new ("call-in process");
+  initialProcess->name = nameOOP;
   INC_RESTORE_POINTER (inc);
 
   /* Put initialProcessOOP in the root set */

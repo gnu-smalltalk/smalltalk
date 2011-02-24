@@ -1,3 +1,7 @@
+2011-02-24  Paolo Bonzini  <bonzini@gnu.org>
+
+	* libgst/interp.c: Fix GC bug reported by Gwenael Casaccio.
+
 2011-02-14  Holger Hans Peter Freyther  <holger@freyther.de>
 
 	* libgst/interp.c: Always inline unwind_context.
