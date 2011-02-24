@@ -481,15 +481,15 @@ main (int argc, char **argv)
   // A simple script to collect the superoperator candidates
   // from the current image.
   const char gst_script[] =
-    " !CompiledCode methodsFor: 'jumps'!"
+    " CompiledCode extend ["
 
-    " allSuperoperatorBreaks"
+    " allSuperoperatorBreaks ["
     "     | breaks |"
     "     breaks := SortedCollection new."
     "     self allByteCodeIndicesDo: [ :i :b :op |"
     ///////// "Split where jumps land"
     "         (b >= 40 and: [ b <= 43 ])"
-    "            ifTrue: [ breaks add: (self jumpDestinationAt: i) ]."
+    "            ifTrue: [ breaks add: (self jumpDestinationAt: i forward: b > 40) ]."
 
     ///////// "Split after returns"
     "         (b >= 50 and: [ b <= 51 ])"
@@ -507,9 +507,9 @@ main (int argc, char **argv)
     "         (b < 32 and: [ (b + 12 bitAnd: 250) ~= 32 ])"
     "            ifTrue: [ breaks add: (self nextBytecodeIndex: i) ]"
     "     ]."
-    "     ^breaks!"
+    "     ^breaks ]"
 
-    " allOptimizableSequencesDo: aBlock"
+    " allOptimizableSequencesDo: aBlock ["
     "     | breaks ws |"
     "     breaks := self allSuperoperatorBreaks."
     "     ({1}, breaks)"
@@ -517,26 +517,27 @@ main (int argc, char **argv)
     "         do: [ :begin :end |"
     "             end - begin > 2 ifTrue: ["
     "                 aBlock value: (self copyFrom: begin to: end - 1) ]"
-    "         ]!"
+    "         ] ]"
 
-    " printAllOptimizableSequences"
+    " printAllOptimizableSequences ["
     "     self allOptimizableSequencesDo: [ :seq |"
     "         seq size printOn: stdout."
     "         seq do: [ :each | stdout space. each printOn: stdout ]."
     "         stdout nl"
-    "     ]! !"
+    "     ] ] ]."
 
-    " stdout nextPutAll: 'BEGIN'; nl!"
+    " Eval [ "
+    " stdout nextPutAll: 'BEGIN'; nl."
     " CompiledMethod allInstancesDo: [ :each |"
     "     each descriptor notNil"
-    "         ifTrue: [ each printAllOptimizableSequences ] ]!"
+    "         ifTrue: [ each printAllOptimizableSequences ] ]."
 
     " CompiledBlock allInstancesDo: [ :each |"
     "     each method notNil"
-    "         ifTrue: [ each printAllOptimizableSequences ] ]!"
+    "         ifTrue: [ each printAllOptimizableSequences ] ]."
 
-    " stdout nl!"
-    " ObjectMemory quit!";
+    " stdout nl."
+    " ObjectMemory quit ]";
 
   write (wfd[0], gst_script, sizeof (gst_script) - 1);
 

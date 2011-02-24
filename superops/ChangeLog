@@ -1,3 +1,7 @@
+2011-02-24  Paolo Bonzini  <bonzini@gnu.org>
+
+	* superops/superops.cc: Fix for 9bc2bf59.
+
 2011-02-24  Gwenael Casaccio  <mrgwen@gmail.com>
 
 	* superops/byte_def.cc: Add missing includes.
