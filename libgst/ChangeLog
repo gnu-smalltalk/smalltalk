@@ -1,3 +1,7 @@
+2011-02-28  Paolo Bonzini  <bonzini@gnu.org>
+
+	* libgst/dict.inl: Fix creation of FloatQ's on non-x86 platforms.
+
 2011-02-24  Paolo Bonzini  <bonzini@gnu.org>
 
 	* libgst/interp.c: Fix GC bug reported by Gwenael Casaccio.

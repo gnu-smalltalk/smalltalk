@@ -1,3 +1,16 @@
+2011-02-24  Paolo Bonzini  <bonzini@gnu.org>
+
+	* superops/superops.cc: Fix for 9bc2bf59.
+
+2011-02-24  Gwenael Casaccio  <mrgwen@gmail.com>
+
+	* superops/byte_def.cc: Add missing includes.
+	* superops/hash.cc: Add missing includes.
+	* superops/positions.h: Add missing forward references.
+	* superops/superops.cc: Add missing includes.
+	* superops/table.cc: Add missing includes.
+	* superops/vm_def.cc: Add missing includes.
+
 2008-07-14  Paolo Bonzini  <bonzini@gnu.org>
 
 	* superops/vm_def.cc: Use a proper subclass to emit ADVANCE instead

@@ -34,6 +34,7 @@
 
 #include "byte_def.h"
 #include "vm_def.h"
+#include <cstdlib>
 #include <iostream>
 #include <fstream>
 

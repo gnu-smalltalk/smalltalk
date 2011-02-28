@@ -1,3 +1,8 @@
+2011-02-24  Dmitry Matveev  <dmm1989@gmail.com>
+
+	* magritte-seaside.st: Fix printing of validation errors in
+	Magritte-generated Seaside input forms.
+
 2010-12-04  Paolo Bonzini  <bonzini@gnu.org>
 
 	* package.xml: Remove now superfluous <file> tags.
