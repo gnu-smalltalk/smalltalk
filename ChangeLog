@@ -1,3 +1,8 @@
+2011-02-28  Paolo Bonzini <bonzini@gnu.org>
+
+	* kernel/FloatQ.st: Improve precision of FloatQ constants for
+	113-bit floats.
+
 2011-02-11  Paolo Bonzini <bonzini@gnu.org>
 
 	* tests/cobjects.ok: Regenerate.
