@@ -571,12 +571,12 @@ floatq_new (long double f)
   OOP floatOOP;
   gst_object obj = new_instance_with (_gst_floatq_class, 16, &floatOOP);
 
-  memcpy (&obj->data, &f, 10);
-
 #if defined __i386__ || defined __x86_64__
   /* Two bytes (six on x86-64) of 80-bit long doubles are unused.  */
+  memcpy (&obj->data, &f, 10);
   memset (((char *)obj->data) + 10, 0, 6);
 #else
+  memcpy (&obj->data, &f, sizeof (long double));
   memset (((char *)obj->data) + sizeof (long double), 0,
 	  16 - sizeof (long double));
 #endif
