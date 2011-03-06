@@ -1,5 +1,9 @@
 2011-03-06  Holger Hans Peter Freyther  <holger@moiji-mobile.com>
 
+	* URIResolver.st: Always set the 'Host' header for HTTP.
+
+2011-03-06  Holger Hans Peter Freyther  <holger@moiji-mobile.com>
+
 	* URIResolver.st: Add #defaultHeaders for HTTP.
 
 2011-03-07  Paolo Bonzini  <bonzini@gnu.org>
