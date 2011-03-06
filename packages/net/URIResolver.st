@@ -650,11 +650,12 @@ Copyright (c) Kazuki Yasumatsu, 1995. All rights reserved.
 	<category: 'http accessing'>
 	| requestHeaders tmpFile stream protocolError response string |
 	requestHeaders := self defaultHeaders.
+	client reporter statusString: 'Connecting'.
+	protocolError := false.
 	client reporter 
 	    statusString: 'Connect: Host contacted. Waiting for reply...'.
 	stream := self tmpFile.
 	tmpFile := stream file.
-	protocolError := false.
 	
 	[
 	[
@@ -698,14 +699,14 @@ Copyright (c) Kazuki Yasumatsu, 1995. All rights reserved.
 		    body: string;
 		    url: url;
 		    canCache: false;
-		    guessMimeTypeFromResponse: response;
+		    guessMimeType;
 		    yourself]
 	    ifFalse: 
 		[(WebEntity new)
 		    url: url;
 		    canCache: false;
 		    localFileName: tmpFile name;
-		    guessMimeTypeFromResponse: response;
+		    guessMimeType;
 		    yourself]
     ]
 
