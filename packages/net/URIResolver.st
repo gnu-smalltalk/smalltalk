@@ -75,6 +75,17 @@ Copyright (c) Kazuki Yasumatsu, 1995. All rights reserved.
 	^entity stream
     ]
 
+    defaultHeaders [
+	"The default headers for HTTP like requests"
+	| requestHeaders |
+	requestHeaders := OrderedCollection new.
+	requestHeaders add: 'User-Agent: GNU-Smalltalk/' , Smalltalk version.
+	requestHeaders add: 'Accept: text/html, image/gif, */*; q=0.2'.
+	noCache ifTrue: [requestHeaders add: 'Pragma: no-cache'].
+
+	^ requestHeaders
+    ]
+
     connectClient [
 	<category: 'private'>
 	| host |
@@ -494,11 +505,8 @@ Copyright (c) Kazuki Yasumatsu, 1995. All rights reserved.
     requestHttpContents: urlString [
 	<category: 'http accessing'>
 	| requestHeaders tmpFile stream protocolError response string |
-	requestHeaders := OrderedCollection new.
-	requestHeaders add: 'User-Agent: GNU-Smalltalk/' , Smalltalk version.
-	requestHeaders add: 'Accept: text/html, image/gif, */*; q=0.2'.
+	requestHeaders := self defaultHeaders.
 	requestHeaders add: 'Host: ' , url host.
-	noCache ifTrue: [requestHeaders add: 'Pragma: no-cache'].
 	client reporter statusString: 'Connecting'.
 	protocolError := false.
 	client reporter 
@@ -568,11 +576,8 @@ Copyright (c) Kazuki Yasumatsu, 1995. All rights reserved.
     requestHttpHead: urlString [
 	<category: 'http accessing'>
 	| requestHeaders tmpFile stream protocolError response string |
-	requestHeaders := OrderedCollection new.
-	requestHeaders add: 'User-Agent: GNU-Smalltalk/' , Smalltalk version.
-	requestHeaders add: 'Accept: text/html, image/gif, */*; q=0.2'.
+	requestHeaders := self defaultHeaders.
 	requestHeaders add: 'Host: ' , url host.
-	noCache ifTrue: [requestHeaders add: 'Pragma: no-cache'].
 	client reporter statusString: 'Connecting'.
 	client reporter 
 	    statusString: 'Connect: Host contacted. Waiting for reply...'.
@@ -645,10 +650,7 @@ Copyright (c) Kazuki Yasumatsu, 1995. All rights reserved.
     postHttpContents: contents urlString: urlString [
 	<category: 'http accessing'>
 	| requestHeaders tmpFile stream protocolError response string |
-	requestHeaders := OrderedCollection new.
-	requestHeaders add: 'User-Agent: GNU-Smalltalk/' , Smalltalk version.
-	requestHeaders add: 'Accept: text/html, image/gif, */*; q=0.2'.
-	noCache ifTrue: [requestHeaders add: 'Pragma: no-cache'].
+	requestHeaders := self defaultHeaders.
 	client reporter 
 	    statusString: 'Connect: Host contacted. Waiting for reply...'.
 	stream := self tmpFile.
