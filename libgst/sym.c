@@ -384,10 +384,14 @@ _gst_pop_old_scope (void)
 void
 _gst_pop_all_scopes (void)
 {
-  pool_list next;
-
   while (_gst_compiler_state->cur_scope)
     _gst_pop_old_scope ();
+}
+
+void
+_gst_free_linearized_pools ()
+{
+  pool_list next;
 
   while (_gst_current_parser->linearized_pools)
     {
@@ -832,15 +836,18 @@ add_shared_pool_resolution (OOP class_oop, OOP environmentOOP, pool_list *p_end)
 }
 
 void
-_gst_compute_linearized_pools (void)
+_gst_compute_linearized_pools (gst_parser *parser, mst_Boolean forDoit)
 {
   pool_list *p_end = &_gst_current_parser->linearized_pools;
   OOP myClass, classOOP;
-  OOP environmentOOP = _gst_curr_method->v_method.currentEnvironment;
-  mst_Boolean override = (environmentOOP != NULL);
+  OOP environmentOOP = parser->current_namespace;
+
+  if (IS_NIL (parser->currentClass))
+    myClass = _gst_undefined_object_class;
+  else
+    myClass = _gst_get_class_object (parser->currentClass);
 
   assert (_gst_current_parser->linearized_pools == NULL);
-  myClass = _gst_get_class_object (_gst_curr_method->v_method.currentClass);
 
   /* Add pools separately for each class.  */
   for (classOOP = myClass; !IS_NIL (classOOP); classOOP = SUPERCLASS (classOOP))
@@ -852,7 +859,7 @@ _gst_compute_linearized_pools (void)
          NULL.  */
       p_end = add_shared_pool_resolution
 	      (classOOP, 
-	       override ? environmentOOP : CLASS_ENVIRONMENT (classOOP),
+	       forDoit ? environmentOOP : CLASS_ENVIRONMENT (classOOP),
 	       p_end);
     }
 }

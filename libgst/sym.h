@@ -195,8 +195,16 @@ extern mst_Boolean _gst_find_variable (symbol_entry * se,
 				       tree_node list)
   ATTRIBUTE_HIDDEN;
 
-/* Compute linearized pool order for _gst_curr_method.  */
-extern void _gst_compute_linearized_pools (void)
+/* Compute linearized pool order for PARSER.  If FORDOIT is true,
+   temporarily use the parser's current namespace instead of the environment
+   of the compilation class.  */
+struct gst_parser;
+extern void _gst_compute_linearized_pools (struct gst_parser *parser,
+                                           mst_Boolean forDoit)
+  ATTRIBUTE_HIDDEN;
+
+/* Free linearized pool order that was computed last.  */
+extern void _gst_free_linearized_pools (void)
   ATTRIBUTE_HIDDEN;
 
 /* This converts a C string to a symbol and stores it in the symbol

@@ -95,8 +95,10 @@ static int filprintf (Filament *fil,
 		      const char *format, ...);
 
 /* Transform the ATTRIBUTE_KEYWORDS node (a TREE_ATTRIBUTE_LIST)
-   into a Message object, and return it.  */
+   into a Message object, and return it.  Compile the arguments
+   in the context of CLASSOOP if not NULL.  */
 static OOP make_attribute (gst_parser *p,
+                           OOP classOOP,
 			   tree_node attribute_keywords);
 
 /* Grammar productions.  */
@@ -110,8 +112,9 @@ static mst_Boolean parse_scoped_definition (gst_parser *p,
 
 static void parse_eval_definition (gst_parser *p);
 
-static mst_Boolean parse_and_send_attribute (gst_parser *p,
-					     OOP receiverOOP);
+static void parse_and_send_attribute (gst_parser *p,
+                                      OOP receiverOOP,
+                                      mst_Boolean forClass);
 static mst_Boolean parse_namespace_definition (gst_parser *p,
 					       tree_node first_stmt);
 static mst_Boolean parse_class_definition (gst_parser *p,
@@ -338,6 +341,7 @@ _gst_set_compilation_class (OOP class_oop)
   assert (IS_NIL (_gst_current_parser->currentClass));
   _gst_current_parser->currentClass = class_oop;
   _gst_register_oop (class_oop);
+  _gst_compute_linearized_pools (_gst_current_parser, false);
 }
 
 void
@@ -379,6 +383,7 @@ _gst_reset_compilation_category (void)
     {
       _gst_unregister_oop (_gst_current_parser->currentClass);
       _gst_current_parser->currentClass = _gst_nil_oop;
+      _gst_free_linearized_pools ();
     }
   if (!IS_NIL (_gst_current_parser->currentCategory))
     {
@@ -410,7 +415,7 @@ _gst_parse_method (OOP currentClass, OOP currentCategory)
   parser_init (&p);
   p.state = PARSE_METHOD;
   p.untrustedContext = IS_OOP_UNTRUSTED (_gst_this_context_oop);
-  p.current_namespace = CLASS_ENVIRONMENT (currentClass);
+  p.current_namespace = _gst_nil_oop;
   _gst_set_compilation_class (currentClass);
   _gst_set_compilation_category (currentCategory);
 
@@ -560,14 +565,39 @@ recover_error (gst_parser *p)
 
 static OOP
 execute_doit (gst_parser *p, tree_node temps, tree_node stmts,
-              enum undeclared_strategy undeclared, mst_Boolean quiet)
+              OOP currentClassOOP, enum undeclared_strategy undeclared,
+              mst_Boolean quiet)
 {
+  mst_Boolean in_class;
   OOP resultOOP;
-  set_compilation_namespace (p->current_namespace);
+  inc_ptr incPtr;
+
+  in_class = !IS_NIL (p->currentClass);
+  if (!in_class)
+    {
+      assert (p == _gst_current_parser);
+      if (currentClassOOP)
+        _gst_set_compilation_class (currentClassOOP);
+      else
+        {
+          /* Let doits access the variables and classes in the current namespace.  */
+          set_compilation_namespace (p->current_namespace);
+          p->currentClass = _gst_undefined_object_class;
+          _gst_register_oop (p->currentClass);
+          _gst_compute_linearized_pools (p, true);
+        }
+    }
+
   resultOOP = _gst_execute_statements (temps, stmts, undeclared, quiet);
+  incPtr = INC_SAVE_POINTER ();
+  INC_ADD_OOP (resultOOP);
+
+  if (!in_class && p->state != PARSE_METHOD_LIST)
+    _gst_reset_compilation_category ();
 
   /* Store Smalltalk's notion of current namespace back to the parser.  */
   set_compilation_namespace (_gst_current_namespace);
+  INC_RESTORE_POINTER (incPtr);
   return resultOOP;
 }
 
@@ -600,7 +630,7 @@ parse_doit (gst_parser *p, mst_Boolean fail_at_eof)
     }
   else if (statement)
     {
-      execute_doit (p, NULL, statement, UNDECLARED_TEMPORARIES, false);
+      execute_doit (p, NULL, statement, NULL, UNDECLARED_TEMPORARIES, false);
       _gst_free_tree ();
     }
 
@@ -716,7 +746,7 @@ parse_eval_definition (gst_parser *p)
 	  fflush (stderr);
         }
 
-      resultOOP = execute_doit (p, tmps, stmts, UNDECLARED_TEMPORARIES,
+      resultOOP = execute_doit (p, tmps, stmts, NULL, UNDECLARED_TEMPORARIES,
                                 _gst_regression_testing);
 
       if (_gst_regression_testing)
@@ -738,7 +768,7 @@ parse_eval_definition (gst_parser *p)
 }
 
 static OOP
-make_attribute (gst_parser *p, tree_node attribute_keywords)
+make_attribute (gst_parser *p, OOP classOOP, tree_node attribute_keywords)
 {
   tree_node keyword;
   OOP selectorOOP, argsArrayOOP, messageOOP;
@@ -763,7 +793,7 @@ make_attribute (gst_parser *p, tree_node attribute_keywords)
       OOP result;
       if (value->nodeType != TREE_CONST_EXPR)
 	{
-          result = execute_doit (p, NULL, value, UNDECLARED_GLOBALS, true);
+          result = execute_doit (p, NULL, value, classOOP, UNDECLARED_GLOBALS, true);
           if (!result)
 	    {
 	      _gst_had_error = true;
@@ -787,8 +817,8 @@ make_attribute (gst_parser *p, tree_node attribute_keywords)
 }
 
 
-static mst_Boolean
-parse_and_send_attribute (gst_parser *p, OOP receiverOOP)
+static void
+parse_and_send_attribute (gst_parser *p, OOP receiverOOP, mst_Boolean forClass)
 {
   tree_node keywords;
 
@@ -796,7 +826,8 @@ parse_and_send_attribute (gst_parser *p, OOP receiverOOP)
   keywords = parse_keyword_list (p, EXPR_BINOP);
   if (!_gst_had_error)
     {
-      OOP messageOOP = make_attribute (p, keywords);
+      OOP messageOOP;
+      messageOOP = make_attribute (p, forClass ? receiverOOP : NULL, keywords);
       if (!IS_NIL (messageOOP))
         {
           OOP selectorOOP = MESSAGE_SELECTOR (messageOOP);
@@ -809,7 +840,6 @@ parse_and_send_attribute (gst_parser *p, OOP receiverOOP)
     }
 
   lex_skip_mandatory (p, '>');
-  return !_gst_had_error;
 }
 
 
@@ -827,7 +857,7 @@ parse_namespace_definition (gst_parser *p, tree_node first_stmt)
       while (token (p, 0) != ']' && token (p, 0) != EOF && token (p, 0) != '!')
 	{
 	  if (token (p, 0) == '<')
-	    parse_and_send_attribute (p, new_namespace);
+	    parse_and_send_attribute (p, new_namespace, false);
 	  else
 	    parse_doit (p, true);
 	}
@@ -893,7 +923,7 @@ parse_class_definition (gst_parser *p, OOP classOOP, mst_Boolean extend)
 	    }
 	  else if (t2 == KEYWORD) 
 	    {
-	      parse_and_send_attribute (p, classOOP);
+	      parse_and_send_attribute (p, classOOP, true);
 	      continue;
 	    }
 	  break;
@@ -924,12 +954,12 @@ parse_class_definition (gst_parser *p, OOP classOOP, mst_Boolean extend)
 		  class = (gst_class) OOP_TO_OBJ (the_class);
 		  class->classVariables = class_var_dict;
 		}
-	      
+
 	      stmt = parse_required_expression (p);
 	      if (!_gst_had_error)
 		{
 	          stmt = _gst_make_statement_list (&stmt->location, stmt);
-	          result = execute_doit (p, NULL, stmt, UNDECLARED_GLOBALS, true);
+	          result = execute_doit (p, NULL, stmt, NULL, UNDECLARED_GLOBALS, true);
 
 	          if (result)
 		    DICTIONARY_AT_PUT (class_var_dict, name, result);
@@ -1443,7 +1473,7 @@ parse_attribute (gst_parser *p)
   /* First convert the TREE_KEYWORD_EXPR into a Message object, then
      into a TREE_CONST_EXPR, and finally embed this one into a
      TREE_ATTRIBUTE_LIST.  */
-  attributeOOP = make_attribute (p, keywords);
+  attributeOOP = make_attribute (p, NULL, keywords);
   constant = _gst_make_oop_constant (&keywords->location, attributeOOP);
   attr = _gst_make_attribute_list (&constant->location, constant);
   lex_skip_mandatory (p, '>');
@@ -1907,7 +1937,7 @@ parse_compile_time_constant (gst_parser *p)
   lex_skip_mandatory (p, ')');
 
   if (statements && !_gst_had_error)
-    result = execute_doit (p, temps, statements, UNDECLARED_GLOBALS, true);
+    result = execute_doit (p, temps, statements, NULL, UNDECLARED_GLOBALS, true);
 
   return _gst_make_oop_constant (&location, result ? result : _gst_nil_oop); 
 }

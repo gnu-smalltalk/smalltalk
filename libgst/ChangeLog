@@ -1,5 +1,16 @@
 2011-03-07  Paolo Bonzini  <bonzini@gnu.org>
 
+	* libgst/comp.c: Do not call _gst_compute_linearized_pools here.
+	* libgst/gst-parse.c: Call it here, before a doit or when setting
+	the compilation class.	Add currentClassOOP argument to
+	execute_doit so that the compilation class for the doit can be
+	set when parsing a class pragma.
+	* libgst/sym.c: Accept a parser in _gst_compute_linearized_pools.
+	Add _gst_free_linearized_pools.
+	* libgst/sym.h: Add _gst_free_linearized_pools.
+
+2011-03-07  Paolo Bonzini  <bonzini@gnu.org>
+
 	* libgst/gst-parse.c: Never use UNDECLARED_NONE.
 	* libgst/sym.c: Remove it.
 	* libgst/sym.h: Remove it.
