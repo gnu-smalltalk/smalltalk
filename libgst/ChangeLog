@@ -1,5 +1,10 @@
 2011-03-07  Paolo Bonzini  <bonzini@gnu.org>
 
+	* libgst/gst-parse.c: Move optimization of const_exprs from
+	make_attribute to execute_doit.
+
+2011-03-07  Paolo Bonzini  <bonzini@gnu.org>
+
 	* libgst/gst-parse.c: Pass current class when evaluating class
 	variable declarations.
 

@@ -88,3 +88,10 @@ returned value is true
 
 Execution begins...
 returned value is 5
+({Subspace.B} )
+
+Execution begins...
+returned value is VariableBinding new "<0>"
+
+Execution begins...
+returned value is Array new: 1 "<0>"

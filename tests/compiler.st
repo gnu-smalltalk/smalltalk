@@ -277,3 +277,17 @@ Object subclass: A [
 ]
 Eval [ A.C ]
 
+"Test referring to the current class from a pragma."
+Behavior extend [
+    debug: anObject [ anObject printNl ]
+]
+
+Namespace current: Subspace [
+    Object subclass: B [
+        <debug: #(#{B})>
+    ]
+]
+
+"Test referring to an invalid binding"
+Eval [ ##(#{ABC}) ]
+Eval [ #((#{ABC})) ]

@@ -790,19 +790,13 @@ make_attribute (gst_parser *p, OOP classOOP, tree_node attribute_keywords)
        i++, keyword = keyword->v_list.next)
     {
       tree_node value = keyword->v_list.value;
-      OOP result;
-      if (value->nodeType != TREE_CONST_EXPR)
-	{
-          result = execute_doit (p, NULL, value, classOOP, UNDECLARED_GLOBALS, true);
-          if (!result)
-	    {
-	      _gst_had_error = true;
-	      INC_RESTORE_POINTER (incPtr);
-	      return _gst_nil_oop;
-	    }
-	}
-      else
-	result = _gst_make_constant_oop (value);
+      OOP result = execute_doit (p, NULL, value, classOOP, UNDECLARED_GLOBALS, true);
+      if (!result)
+        {
+          _gst_had_error = true;
+          INC_RESTORE_POINTER (incPtr);
+          return _gst_nil_oop;
+        }
 
       argsArray = OOP_TO_OBJ (argsArrayOOP);
       argsArray->data[i] = result;

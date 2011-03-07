@@ -567,26 +567,46 @@ _gst_execute_statements (tree_node temps,
 
   oldUndeclared = _gst_set_undeclared (undeclared);
 
-  method =
-    _gst_make_method (&statements->location, &loc,
-		      messagePattern, temps, NULL,
-		      statements,
-		      _gst_get_current_namespace (),
-		      _gst_current_parser->currentClass,
-		      _gst_nil_oop,
-		      _gst_untrusted_parse (),
-		      false);
+  incPtr = INC_SAVE_POINTER ();
+  if (statements->v_list.value
+      && statements->v_list.value->nodeType == TREE_CONST_EXPR
+      && !statements->v_list.next)
+    {
+      if (setjmp (bad_method) == 0)
+        resultOOP = _gst_make_constant_oop (statements->v_list.value);
+      else
+        {
+          _gst_had_error = true;
+          INC_RESTORE_POINTER (incPtr);
+          return NULL;
+        }
 
-  if (_gst_declare_tracing)
-    printf ("Compiling doit code for %O\n", method->v_method.currentClass);
+      methodOOP = _gst_nil_oop;
+      INC_ADD_OOP (resultOOP);
+    }
+  else
+    {
+      method =
+        _gst_make_method (&statements->location, &loc,
+                          messagePattern, temps, NULL,
+                          statements,
+                          _gst_get_current_namespace (),
+                          _gst_current_parser->currentClass,
+                          _gst_nil_oop,
+                          _gst_untrusted_parse (),
+                          false);
 
-  methodOOP = _gst_compile_method (method, true, false);
+      if (_gst_declare_tracing)
+        printf ("Compiling doit code for %O\n", method->v_method.currentClass);
+
+      methodOOP = _gst_compile_method (method, true, false);
+      resultOOP = _gst_nil_oop;
+    }
 
   _gst_set_undeclared (oldUndeclared);
   if (_gst_had_error)		/* don't execute on error */
     return (NULL);
 
-  incPtr = INC_SAVE_POINTER ();
   INC_ADD_OOP (methodOOP);
 
   if (!_gst_raw_profile)
@@ -594,85 +614,91 @@ _gst_execute_statements (tree_node temps,
       _gst_self_returns = _gst_inst_var_returns = _gst_literal_returns =
       _gst_sample_counter = 0;
 
-  startTime = _gst_get_milli_time ();
-#ifdef HAVE_GETRUSAGE
-  getrusage (RUSAGE_SELF, &startRusage);
-#endif
-
-  _gst_invoke_hook (GST_BEFORE_EVAL);
-
-  /* send a message to NIL, which will find this synthetic method
-     definition in Object and execute it */
-  resultOOP = _gst_nvmsg_send (_gst_nil_oop, methodOOP, NULL, 0);
-  INC_ADD_OOP (resultOOP);
-
-  endTime = _gst_get_milli_time ();
-#ifdef HAVE_GETRUSAGE
-  getrusage (RUSAGE_SELF, &endRusage);
-#endif
-
-  if (!quiet && _gst_verbosity >= 3)
+  if (!IS_NIL (methodOOP))
     {
-      deltaTime = endTime - startTime;
+      startTime = _gst_get_milli_time ();
+#ifdef HAVE_GETRUSAGE
+      getrusage (RUSAGE_SELF, &startRusage);
+#endif
+
+      _gst_invoke_hook (GST_BEFORE_EVAL);
+
+      /* send a message to NIL, which will find this synthetic method
+         definition in Object and execute it */
+      resultOOP = _gst_nvmsg_send (_gst_nil_oop, methodOOP, NULL, 0);
+      INC_ADD_OOP (resultOOP);
+
+      endTime = _gst_get_milli_time ();
+#ifdef HAVE_GETRUSAGE
+      getrusage (RUSAGE_SELF, &endRusage);
+#endif
+
+      if (!quiet && _gst_verbosity >= 3)
+        {
+          deltaTime = endTime - startTime;
 #ifdef ENABLE_JIT_TRANSLATION
-      printf ("Execution took %.3f seconds", deltaTime / 1000.0);
+          printf ("Execution took %.3f seconds", deltaTime / 1000.0);
 #else
-      printf ("%lu byte codes executed\nwhich took %.3f seconds",
-              _gst_bytecode_counter, deltaTime / 1000.0);
+          printf ("%lu byte codes executed\nwhich took %.3f seconds",
+                  _gst_bytecode_counter, deltaTime / 1000.0);
 #endif
 
 #ifdef HAVE_GETRUSAGE
-      deltaTime = ((endRusage.ru_utime.tv_sec * 1000) +
-                   (endRusage.ru_utime.tv_usec / 1000)) -
-        ((startRusage.ru_utime.tv_sec * 1000) +
-         (startRusage.ru_utime.tv_usec / 1000));
-      printf (" (%.3fs user", deltaTime / 1000.0);
+          deltaTime = ((endRusage.ru_utime.tv_sec * 1000) +
+                       (endRusage.ru_utime.tv_usec / 1000)) -
+            ((startRusage.ru_utime.tv_sec * 1000) +
+             (startRusage.ru_utime.tv_usec / 1000));
+          printf (" (%.3fs user", deltaTime / 1000.0);
 
-      deltaTime = ((endRusage.ru_stime.tv_sec * 1000) +
-                   (endRusage.ru_stime.tv_usec / 1000)) -
-        ((startRusage.ru_stime.tv_sec * 1000) +
-         (startRusage.ru_stime.tv_usec / 1000));
-      printf ("+%.3fs sys)", deltaTime / 1000.0);
+          deltaTime = ((endRusage.ru_stime.tv_sec * 1000) +
+                       (endRusage.ru_stime.tv_usec / 1000)) -
+            ((startRusage.ru_stime.tv_sec * 1000) +
+             (startRusage.ru_stime.tv_usec / 1000));
+          printf ("+%.3fs sys)", deltaTime / 1000.0);
 #endif
-      printf ("\n");
+          printf ("\n");
 
 #ifndef ENABLE_JIT_TRANSLATION
-      if (_gst_bytecode_counter)
-        {
-          printf ("%lu primitives, percent %.2f\n", _gst_primitives_executed,
-                  100.0 * _gst_primitives_executed / _gst_bytecode_counter);
-          printf ("self returns %lu, inst var returns %lu, literal returns %lu\n",
-                  _gst_self_returns, _gst_inst_var_returns, _gst_literal_returns);
-          printf ("%lu method cache lookups since last cleanup, percent %.2f\n",
-                  _gst_sample_counter,
-                  100.0 * _gst_sample_counter / _gst_bytecode_counter);
-        }
+          if (_gst_bytecode_counter)
+            {
+              printf ("%lu primitives, percent %.2f\n", _gst_primitives_executed,
+                      100.0 * _gst_primitives_executed / _gst_bytecode_counter);
+              printf ("self returns %lu, inst var returns %lu, literal returns %lu\n",
+                      _gst_self_returns, _gst_inst_var_returns, _gst_literal_returns);
+              printf ("%lu method cache lookups since last cleanup, percent %.2f\n",
+                      _gst_sample_counter,
+                      100.0 * _gst_sample_counter / _gst_bytecode_counter);
+            }
 #endif
 
-      if (_gst_sample_counter)
-        {
+          if (_gst_sample_counter)
+            {
 #ifdef ENABLE_JIT_TRANSLATION
-          printf
-            ("%lu primitives, %lu inline cache misses since last cache cleanup\n",
-             _gst_primitives_executed, _gst_sample_counter);
+              printf
+                ("%lu primitives, %lu inline cache misses since last cache cleanup\n",
+                 _gst_primitives_executed, _gst_sample_counter);
 #endif
-          cacheHits = _gst_sample_counter - _gst_cache_misses;
-          printf ("%lu method cache hits, %lu misses", cacheHits,
-                  _gst_cache_misses);
-          if (cacheHits || _gst_cache_misses)
-            printf (", %.2f percent hits\n", (100.0 * cacheHits) / _gst_sample_counter);
-          else
-            printf ("\n");
+              cacheHits = _gst_sample_counter - _gst_cache_misses;
+              printf ("%lu method cache hits, %lu misses", cacheHits,
+                      _gst_cache_misses);
+              if (cacheHits || _gst_cache_misses)
+                printf (", %.2f percent hits\n", (100.0 * cacheHits) / _gst_sample_counter);
+              else
+                printf ("\n");
+            }
         }
-
-      /* Do more frequent flushing to ensure the result are well placed */
-      printf ("returned value is ");
-      fflush(stdout);
     }
 
   if (!quiet)
     {
       int save_execution;
+
+      if (_gst_verbosity >= 3)
+        {
+          /* Do more frequent flushing to ensure the result are well placed */
+          printf ("returned value is ");
+          fflush(stdout);
+        }
 
       save_execution = _gst_execution_tracing;
       if (_gst_execution_tracing == 1)
@@ -688,7 +714,9 @@ _gst_execute_statements (tree_node temps,
       _gst_execution_tracing = save_execution;
     }
 
-  _gst_invoke_hook (GST_AFTER_EVAL);
+  if (!IS_NIL (methodOOP))
+    _gst_invoke_hook (GST_AFTER_EVAL);
+
   INC_RESTORE_POINTER (incPtr);
   _gst_last_returned_value = resultOOP;
   return (_gst_last_returned_value);
@@ -2139,7 +2167,7 @@ _gst_make_constant_oop (tree_node constExpr)
         INC_ADD_OOP (resultOOP);
 
 	dvb->key = _gst_intern_string (varNode->v_list.name);
-	dvb->class = _gst_curr_method->v_method.currentClass;
+	dvb->class = _gst_current_parser->currentClass;
 	dvb->defaultDictionary = _gst_get_undeclared_dictionary ();
 	dvb->association = _gst_nil_oop;
 
