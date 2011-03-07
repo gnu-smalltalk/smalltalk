@@ -285,11 +285,9 @@ extern tree_node _gst_make_keyword_list (YYLTYPE *location,
 					 tree_node expression)
   ATTRIBUTE_HIDDEN;
 
-/* Given a keyword list node, modify it in place to make an attribute list
-   tree node; evaluate all non-constant arguments and return NULL if
-   any evaluation fails.  */
+/* Given a constant node, create an ATTRIBUTE_LIST node.  */
 extern tree_node _gst_make_attribute_list (YYLTYPE *location,
-					   tree_node keywords)
+					   tree_node constant)
   ATTRIBUTE_HIDDEN;
 
 /* Given a variable tree node, convert it to a variable list tree node

@@ -214,14 +214,8 @@ _gst_make_statement_list (YYLTYPE *location,
 
 tree_node
 _gst_make_attribute_list (YYLTYPE *location,
-		          tree_node attribute)
+		          tree_node constant)
 {
-  /* First convert the TREE_KEYWORD_EXPR into a Message object, then
-     into a TREE_CONST_EXPR, and finally embed this one into a
-     TREE_ATTRIBUTE_LIST.  */
-  OOP attributeOOP = _gst_make_attribute (attribute);
-  tree_node constant = _gst_make_oop_constant (location, attributeOOP);
-
   return (make_list_node (location, TREE_ATTRIBUTE_LIST, NULL, constant));
 }
 
