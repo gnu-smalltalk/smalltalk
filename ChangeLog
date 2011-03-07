@@ -1,5 +1,9 @@
 2011-03-07  Paolo Bonzini <bonzini@gnu.org>
 
+	* tests/pools.st: Add broken testcases.
+
+2011-03-07  Paolo Bonzini <bonzini@gnu.org>
+
 	* kernel/CType.st: Fix #storeOn: for array types.
 
 2011-03-07  Paolo Bonzini <bonzini@gnu.org>
