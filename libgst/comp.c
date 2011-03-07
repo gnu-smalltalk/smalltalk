@@ -535,29 +535,13 @@ _gst_init_compiler (void)
 
 
 
-void
-_gst_display_compilation_trace (const char *string,
-				mst_Boolean category)
-{
-  if (!_gst_declare_tracing)
-    return;
-
-  if (category)
-    printf ("%s category %O for %O\n", string,
-	    _gst_curr_method->v_method.currentCategory,
-            _gst_curr_method->v_method.currentClass);
-  else
-    printf ("%s for %O\n", string, _gst_curr_method->v_method.currentClass);
-}
-
-
 OOP
 _gst_execute_statements (tree_node temps,
 			 tree_node statements,
 			 enum undeclared_strategy undeclared,
 			 mst_Boolean quiet)
 {
-  tree_node messagePattern;
+  tree_node messagePattern, method;
   int startTime, endTime, deltaTime;
   unsigned long cacheHits;
 #ifdef HAVE_GETRUSAGE
@@ -577,24 +561,27 @@ _gst_execute_statements (tree_node temps,
   messagePattern = _gst_make_unary_expr (&statements->location,
 					 NULL, "executeStatements");
 
-  _gst_display_compilation_trace ("Compiling doit code", false);
+  if (statements->nodeType != TREE_STATEMENT_LIST)
+    statements = _gst_make_statement_list (&statements->location, statements);
 
   /* This is a big hack to let doits access the variables and classes
      in the current namespace.  */
   oldUndeclared = _gst_set_undeclared (undeclared);
-  if (statements->nodeType != TREE_STATEMENT_LIST)
-    statements = _gst_make_statement_list (&statements->location, statements);
 
-  methodOOP =
-    _gst_compile_method (_gst_make_method (&statements->location, &loc,
-					   messagePattern, temps, NULL,
-					   statements,
-					   _gst_get_current_namespace (),
-					   _gst_undefined_object_class,
-					   _gst_nil_oop,
-					   _gst_untrusted_parse (),
-					   false),
-			 true, false);
+  method =
+    _gst_make_method (&statements->location, &loc,
+		      messagePattern, temps, NULL,
+		      statements,
+		      _gst_get_current_namespace (),
+		      _gst_undefined_object_class,
+		      _gst_nil_oop,
+		      _gst_untrusted_parse (),
+		      false);
+
+  if (_gst_declare_tracing)
+    printf ("Compiling doit code for %O\n", method->v_method.currentClass);
+
+  methodOOP = _gst_compile_method (method, true, false);
 
   _gst_set_undeclared (oldUndeclared);
   if (_gst_had_error)		/* don't execute on error */

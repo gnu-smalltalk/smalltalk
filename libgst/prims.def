@@ -3799,7 +3799,6 @@ primitive VMpr_Behavior_methodsFor [succeed,fail]
 
   _gst_set_compilation_class (oop1);
   _gst_set_compilation_category (oop2);
-  _gst_display_compilation_trace ("Compiling", true);
   _gst_current_parser->state = PARSE_METHOD_LIST;
   PRIM_SUCCEEDED;
 }
@@ -3817,13 +3816,8 @@ primitive VMpr_Behavior_methodsForIfTrue [succeed,fail]
 
   _gst_set_compilation_class (oop1);
   _gst_set_compilation_category (oop2);
-  if (oop3 == _gst_true_oop)
-    _gst_display_compilation_trace ("Conditionally compiling", true);
-  else
-    {
-      _gst_skip_compilation = true;
-      _gst_display_compilation_trace ("Conditionally skipping", true);
-    }
+  if (oop3 != _gst_true_oop)
+    _gst_skip_compilation = true;
   _gst_current_parser->state = PARSE_METHOD_LIST;
   PRIM_SUCCEEDED;
 }

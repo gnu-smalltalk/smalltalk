@@ -271,14 +271,6 @@ extern OOP _gst_execute_statements (tree_node temps,
 				    mst_Boolean quiet)
   ATTRIBUTE_HIDDEN;
 
-/* This function will print a message describing the method category
-   and class being compiled.  The message can have the form "STRING
-   _GST_THIS_CATEGORY for _GST_THIS_CLASS" or "STRING for
-   _GST_THIS_CLASS", depending on the value of CATEGORY.  */
-extern void _gst_display_compilation_trace (const char *string,
-				            mst_Boolean category) 
-  ATTRIBUTE_HIDDEN;
-
 /* This routine does a very interesting thing.  It installs the inital
    method, which is the primitive for "methodsFor:".  It does this by
    creating a string that contains the method definition and then
