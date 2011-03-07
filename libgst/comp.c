@@ -262,9 +262,6 @@ static void compile_send (tree_node receiver,
 	                  OOP selector,
 	                  int numArgs);
 
-/* Computes and returns the length of a parse tree list, LISTEXPR.  */
-static int list_length (tree_node listExpr);
-
 /* Adds OOP to the literals associated with the method being compiled
    and returns the index of the literal slot that was used (0-based).
    Does not check for duplicates.  Automatically puts OOP in the
@@ -1336,7 +1333,7 @@ compile_keyword_expr (tree_node expr)
 	return;
     }
 
-  numArgs = list_length (expr->v_expr.expression);
+  numArgs = _gst_list_length (expr->v_expr.expression);
 
   compile_keyword_list (expr->v_expr.expression);
   compile_send (expr, selector, numArgs);
@@ -2152,7 +2149,7 @@ _gst_make_constant_oop (tree_node constExpr)
 	varNode = varNode->v_list.next;
 	if (varNode)
 	  {
-	    int i, size = list_length (varNode);
+	    int i, size = _gst_list_length (varNode);
 	    OOP arrayOOP;
 	    gst_object array =
 	      instantiate_with (_gst_array_class, size, &arrayOOP);
@@ -2289,55 +2286,6 @@ _gst_compute_keyword_selector (tree_node keywordList)
 }
 
 
-OOP
-_gst_make_attribute (tree_node attribute_keywords)
-{
-  tree_node keyword;
-  OOP selectorOOP, argsArrayOOP, messageOOP;
-  gst_object argsArray;
-  int i, numArgs;
-  inc_ptr incPtr;
-
-  incPtr = INC_SAVE_POINTER ();
-  
-  if (_gst_had_error)
-    return _gst_nil_oop;
-
-  selectorOOP = _gst_compute_keyword_selector (attribute_keywords);
-  numArgs = list_length (attribute_keywords);
-  argsArray = instantiate_with (_gst_array_class, numArgs, &argsArrayOOP);
-  INC_ADD_OOP (argsArrayOOP);
-
-  for (i = 0, keyword = attribute_keywords; keyword != NULL;
-       i++, keyword = keyword->v_list.next)
-    {
-      tree_node value = keyword->v_list.value;
-      OOP result;
-      if (value->nodeType != TREE_CONST_EXPR)
-	{
-          result = _gst_execute_statements (NULL, value, UNDECLARED_NONE, true);
-          if (!result)
-	    {
-	      _gst_had_error = true;
-	      return _gst_nil_oop;
-	    }
-	}
-      else
-	result = _gst_make_constant_oop (value);
-
-      argsArray = OOP_TO_OBJ (argsArrayOOP);
-      argsArray->data[i] = result;
-    }
-
-  messageOOP = _gst_message_new_args (selectorOOP, argsArrayOOP);
-  INC_RESTORE_POINTER (incPtr);
-
-  MAKE_OOP_READONLY (argsArrayOOP, true);
-  MAKE_OOP_READONLY (messageOOP, true);
-  return (messageOOP);
-}
-
-
 int
 process_attributes_tree (tree_node attribute_list)
 {
@@ -2466,23 +2414,6 @@ realloc_literal_vec (void)
   literal_vec_max = literal_vec + size;
 }
 
-
-int
-list_length (tree_node listExpr)
-{
-  tree_node l;
-  long len;
-
-  for (len = 0, l = listExpr; l; l = l->v_list.next, len++);
-
-  if (sizeof (int) < sizeof (long) && len > INT_MAX)
-    {
-      _gst_errorf ("list too long, %ld", len);
-      len = INT_MAX;
-    }
-
-  return ((int) len);
-}
 
 
 

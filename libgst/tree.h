@@ -214,6 +214,11 @@ struct tree_node
 #define v_method	nodeVal.nvMethod
 
 
+/* Computes and returns the length of a parse tree list, LISTEXPR.  */
+extern int _gst_list_length (tree_node listExpr)
+  ATTRIBUTE_HIDDEN;
+
+
 /* Create a method_node with the given fields (see description under
    struct method_node).  TEMPORARIES can possibly be NULL.  If the
    method has any attributes associated with it, then they are in

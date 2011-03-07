@@ -366,11 +366,6 @@ extern OOP _gst_block_new (int numArgs,
 extern int _gst_add_forced_object (OOP oop) 
   ATTRIBUTE_HIDDEN;
 
-/* Transform the ATTRIBUTE_KEYWORDS node (a TREE_ATTRIBUTE_LIST)
-   into a Message object, and return it.  */
-extern OOP _gst_make_attribute (tree_node attribute_keywords) 
-  ATTRIBUTE_HIDDEN;
-
 /* Process the attributes in ARRAYOOP, return the primitive number
    (so far, this is the only attribute we honor), or -1 for a bad
    primitive number.  */

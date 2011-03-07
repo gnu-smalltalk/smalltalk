@@ -109,6 +109,22 @@ static void indent (int level);
 
 
 
+int
+_gst_list_length (tree_node listExpr)
+{
+  tree_node l;
+  long len;
+
+  for (len = 0, l = listExpr; l; l = l->v_list.next, len++);
+
+  if (sizeof (int) < sizeof (long) && len > INT_MAX)
+    {
+      _gst_errorf ("list too long, %ld", len);
+      len = INT_MAX;
+    }
+
+  return ((int) len);
+}
 
 tree_node
 _gst_make_array_elt (YYLTYPE *location,

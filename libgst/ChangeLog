@@ -1,5 +1,14 @@
 2011-03-07  Paolo Bonzini  <bonzini@gnu.org>
 
+	* libgst/comp.c: Move _gst_make_attribute and list_length
+	respectively...
+	* libgst/gst-parse.c: here (as make_attribute)...
+	* libgst/tree.c: ... and here (as _gst_list_length).
+	* libgst/comp.h: Adjust.
+	* libgst/tree.h: Adjust.
+
+2011-03-07  Paolo Bonzini  <bonzini@gnu.org>
+
 	* libgst/comp.c: Add compiler_state.
 	* libgst/comp.h: Add compiler_state.
 	* libgst/sym.c: Move cur_scope into it.

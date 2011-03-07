@@ -94,6 +94,11 @@ static void recover_error (gst_parser *p)
 static int filprintf (Filament *fil,
 		      const char *format, ...);
 
+/* Transform the ATTRIBUTE_KEYWORDS node (a TREE_ATTRIBUTE_LIST)
+   into a Message object, and return it.  */
+static OOP make_attribute (gst_parser *p,
+			   tree_node attribute_keywords);
+
 /* Grammar productions.  */
 
 static void parse_chunks (gst_parser *p);
@@ -732,38 +737,76 @@ parse_eval_definition (gst_parser *p)
     longjmp (p->recover, 1);
 }
 
+static OOP
+make_attribute (gst_parser *p, tree_node attribute_keywords)
+{
+  tree_node keyword;
+  OOP selectorOOP, argsArrayOOP, messageOOP;
+  gst_object argsArray;
+  int i, numArgs;
+  inc_ptr incPtr;
+
+  incPtr = INC_SAVE_POINTER ();
+  
+  if (_gst_had_error)
+    return _gst_nil_oop;
+
+  selectorOOP = _gst_compute_keyword_selector (attribute_keywords);
+  numArgs = _gst_list_length (attribute_keywords);
+  argsArray = instantiate_with (_gst_array_class, numArgs, &argsArrayOOP);
+  INC_ADD_OOP (argsArrayOOP);
+
+  for (i = 0, keyword = attribute_keywords; keyword != NULL;
+       i++, keyword = keyword->v_list.next)
+    {
+      tree_node value = keyword->v_list.value;
+      OOP result;
+      if (value->nodeType != TREE_CONST_EXPR)
+	{
+          result = execute_doit (p, NULL, value, UNDECLARED_NONE, true);
+          if (!result)
+	    {
+	      _gst_had_error = true;
+	      INC_RESTORE_POINTER (incPtr);
+	      return _gst_nil_oop;
+	    }
+	}
+      else
+	result = _gst_make_constant_oop (value);
+
+      argsArray = OOP_TO_OBJ (argsArrayOOP);
+      argsArray->data[i] = result;
+    }
+
+  messageOOP = _gst_message_new_args (selectorOOP, argsArrayOOP);
+  INC_RESTORE_POINTER (incPtr);
+
+  MAKE_OOP_READONLY (argsArrayOOP, true);
+  MAKE_OOP_READONLY (messageOOP, true);
+  return (messageOOP);
+}
+
+
 static mst_Boolean
 parse_and_send_attribute (gst_parser *p, OOP receiverOOP)
 {
-  OOP selectorOOP, *args;
-  tree_node keyword, value, stmt;
-  int i, nb = 0;
+  tree_node keywords;
 
-#if 0
-  printf ("parse attribute\n");
-#endif
   lex_skip_mandatory (p, '<');
-  keyword = parse_keyword_expression (p, NULL, EXPR_KEYWORD);
-
-  selectorOOP = _gst_compute_keyword_selector (keyword->v_expr.expression);
-  nb = _gst_selector_num_args (selectorOOP);
-  args = alloca (sizeof (*args) * nb);
-  i = 0;
-  for (stmt = keyword->v_expr.expression; stmt; stmt = stmt->v_list.next)
-    {
-      value = stmt->v_list.value;
-      value = _gst_make_statement_list (&value->location, value);
-      args[i] = execute_doit (p, NULL, value, UNDECLARED_NONE, true);
-      if (!args[i])
-        {
-          _gst_had_error = true;
-          break;
-        }
-      i = i + 1;
-    }
-
+  keywords = parse_keyword_list (p, EXPR_BINOP);
   if (!_gst_had_error)
-    _gst_nvmsg_send (receiverOOP, selectorOOP, args, i);
+    {
+      OOP messageOOP = make_attribute (p, keywords);
+      if (!IS_NIL (messageOOP))
+        {
+          OOP selectorOOP = MESSAGE_SELECTOR (messageOOP);
+          OOP argsOOP = MESSAGE_ARGS (messageOOP);
+	  int numArgs = NUM_OOPS (OOP_TO_OBJ (argsOOP));
+          OOP *args = alloca(numArgs * sizeof (OOP));
+          memcpy (args, OOP_TO_OBJ (argsOOP)->data, numArgs * sizeof (OOP));
+          _gst_nvmsg_send (receiverOOP, selectorOOP, args, numArgs);
+        }
+    }
 
   lex_skip_mandatory (p, '>');
   return !_gst_had_error;
@@ -1400,7 +1443,7 @@ parse_attribute (gst_parser *p)
   /* First convert the TREE_KEYWORD_EXPR into a Message object, then
      into a TREE_CONST_EXPR, and finally embed this one into a
      TREE_ATTRIBUTE_LIST.  */
-  attributeOOP = _gst_make_attribute (keywords);
+  attributeOOP = make_attribute (p, keywords);
   constant = _gst_make_oop_constant (&keywords->location, attributeOOP);
   attr = _gst_make_attribute_list (&constant->location, constant);
   lex_skip_mandatory (p, '>');
