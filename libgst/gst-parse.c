@@ -763,7 +763,7 @@ make_attribute (gst_parser *p, tree_node attribute_keywords)
       OOP result;
       if (value->nodeType != TREE_CONST_EXPR)
 	{
-          result = execute_doit (p, NULL, value, UNDECLARED_NONE, true);
+          result = execute_doit (p, NULL, value, UNDECLARED_GLOBALS, true);
           if (!result)
 	    {
 	      _gst_had_error = true;
@@ -929,7 +929,7 @@ parse_class_definition (gst_parser *p, OOP classOOP, mst_Boolean extend)
 	      if (!_gst_had_error)
 		{
 	          stmt = _gst_make_statement_list (&stmt->location, stmt);
-	          result = execute_doit (p, NULL, stmt, UNDECLARED_NONE, true);
+	          result = execute_doit (p, NULL, stmt, UNDECLARED_GLOBALS, true);
 
 	          if (result)
 		    DICTIONARY_AT_PUT (class_var_dict, name, result);
@@ -1907,7 +1907,7 @@ parse_compile_time_constant (gst_parser *p)
   lex_skip_mandatory (p, ')');
 
   if (statements && !_gst_had_error)
-    result = execute_doit (p, temps, statements, UNDECLARED_NONE, true);
+    result = execute_doit (p, temps, statements, UNDECLARED_GLOBALS, true);
 
   return _gst_make_oop_constant (&location, result ? result : _gst_nil_oop); 
 }

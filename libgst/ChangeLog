@@ -1,5 +1,11 @@
 2011-03-07  Paolo Bonzini  <bonzini@gnu.org>
 
+	* libgst/gst-parse.c: Never use UNDECLARED_NONE.
+	* libgst/sym.c: Remove it.
+	* libgst/sym.h: Remove it.
+
+2011-03-07  Paolo Bonzini  <bonzini@gnu.org>
+
 	* libgst/comp.c: Move _gst_make_attribute and list_length
 	respectively...
 	* libgst/gst-parse.c: here (as make_attribute)...

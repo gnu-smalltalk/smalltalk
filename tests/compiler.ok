@@ -17,7 +17,6 @@ returned value is 2
 
 Execution begins...
 returned value is 'No crashes'
-compiler.st:131: undefined variable C referenced
 
 Execution begins...
 a Smalltalk string:1: undefined variable a referenced
@@ -83,3 +82,6 @@ returned value is CompiledMethod new: 0 "<0>"
 Execution begins...
  error: Invalid argument #a: key not found
 returned value is nil
+
+Execution begins...
+returned value is true

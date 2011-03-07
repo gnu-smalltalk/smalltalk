@@ -261,3 +261,11 @@ Object subclass: A [
 Eval [A class >> #a]
 Eval [A >> #a]
 
+"Test referring to an undeclared global in a method attribute.
+ This is unpleasant when outside a binding constant, but
+ more or less necessary."
+A extend [
+    test1 [ <cCall: 'getArgv' returning: #{UndeclaredGlobal} arguments: #(#int)> ]
+]
+
+Eval [ Undeclared includesKey: #UndeclaredGlobal ]

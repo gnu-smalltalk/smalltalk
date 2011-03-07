@@ -88,7 +88,6 @@ typedef struct scope *scope;
 typedef struct pool_list *pool_list;
 
 enum undeclared_strategy {
-  UNDECLARED_NONE,
   UNDECLARED_GLOBALS,
   UNDECLARED_TEMPORARIES,
   UNDECLARED_CURRENT
