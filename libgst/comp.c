@@ -712,6 +712,7 @@ _gst_compile_method (tree_node method,
   compiler_state s, *outer_state;
   tree_node statement;
   OOP selector;
+  OOP literalsOOP;
   OOP methodOOP;
   bc_vector bytecodes;
   int primitiveIndex;
@@ -828,10 +829,13 @@ _gst_compile_method (tree_node method,
       stack_depth = GET_STACK_DEPTH ();
       bytecodes = _gst_get_bytecodes ();
 
+      literalsOOP = get_literals_array ();
+      INC_ADD_OOP (literalsOOP);
+
       methodOOP = _gst_make_new_method (primitiveIndex,
 					_gst_get_arg_count (),
 					_gst_get_temp_count (),
-					stack_depth, _gst_nil_oop, bytecodes,
+					stack_depth, literalsOOP, bytecodes,
 					method->v_method.currentClass, selector,
 					method->v_method.currentCategory,
 					method->location.file_offset,
@@ -2454,11 +2458,13 @@ get_literals_array (void)
 {
   OOP methodLiteralsOOP;
   gst_object methodLiterals;
+  int n;
 
-  assert (literal_vec_curr > literal_vec);
+  n = literal_vec_curr - literal_vec;
+  if (!n)
+    return _gst_nil_oop;
 
-  methodLiterals = new_instance_with (_gst_array_class, 
-				      literal_vec_curr - literal_vec,
+  methodLiterals = new_instance_with (_gst_array_class, n,
 		                      &methodLiteralsOOP);
 
   memcpy (methodLiterals->data, literal_vec, 
@@ -2467,6 +2473,7 @@ get_literals_array (void)
   literal_vec_curr = literal_vec;
 
   MAKE_OOP_READONLY (methodLiteralsOOP, true);
+  literal_vec_curr = literal_vec;
   return (methodLiteralsOOP);
 }
 
@@ -2577,17 +2584,9 @@ _gst_make_new_method (int primitiveIndex,
   else if (method_attrs)
     header.headerFlag = MTH_ANNOTATED;
 
-  /* if returning a literal, we must either use comp.c's literal pool
-     (IS_NIL (LITERALS)), get it from a preexisting literal pool
-     (LITERAL_VEC_CURR == LITERAL_VEC), or put it into an empty
-     pool (NUM_WORDS (...) == 0).  */
   else if (numArgs == 0
 	   && numTemps == 0
-	   && (newFlags = _gst_is_simple_return (bytecodes)) != 0
-	   && (newFlags != MTH_RETURN_LITERAL
-	       || IS_NIL (literals)
-      	       || NUM_WORDS (OOP_TO_OBJ (literals)) == 0
-               || literal_vec_curr == literal_vec))
+	   && (newFlags = _gst_is_simple_return (bytecodes)) != 0)
     {
       header.headerFlag = newFlags & 0xFF;
       /* if returning an instance variable, its index is indicated in
@@ -2600,17 +2599,17 @@ _gst_make_new_method (int primitiveIndex,
 
       /* If returning a literal but we have none, it was added with
          _gst_add_forced_object.  */
+      if (newFlags == MTH_RETURN_LITERAL
+	  && (IS_NIL (literals)
+	      || NUM_WORDS (OOP_TO_OBJ (literals)) == 0))
+        {
+          literals = get_literals_array ();
+          INC_ADD_OOP (literals);
+        }
     }
 
   else
     header.headerFlag = MTH_NORMAL;
-
-  if (literal_vec_curr > literal_vec)
-    {
-      literals = get_literals_array ();
-      literal_vec_curr = literal_vec;
-      INC_ADD_OOP (literals);
-    }
 
   if (bytecodes)
     {
