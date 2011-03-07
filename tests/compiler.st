@@ -269,3 +269,11 @@ A extend [
 ]
 
 Eval [ Undeclared includesKey: #UndeclaredGlobal ]
+
+"Fix referring to previous class variables in class variable declarations"
+Object subclass: A [
+    B := 5.
+    C := B
+]
+Eval [ A.C ]
+

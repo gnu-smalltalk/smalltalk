@@ -1,5 +1,10 @@
 2011-03-07  Paolo Bonzini  <bonzini@gnu.org>
 
+	* libgst/gst-parse.c: Pass current class when evaluating class
+	variable declarations.
+
+2011-03-07  Paolo Bonzini  <bonzini@gnu.org>
+
 	* libgst/comp.c: Do not call _gst_compute_linearized_pools here.
 	* libgst/gst-parse.c: Call it here, before a doit or when setting
 	the compilation class.	Add currentClassOOP argument to

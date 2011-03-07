@@ -959,7 +959,7 @@ parse_class_definition (gst_parser *p, OOP classOOP, mst_Boolean extend)
 	      if (!_gst_had_error)
 		{
 	          stmt = _gst_make_statement_list (&stmt->location, stmt);
-	          result = execute_doit (p, NULL, stmt, NULL, UNDECLARED_GLOBALS, true);
+	          result = execute_doit (p, NULL, stmt, the_class, UNDECLARED_GLOBALS, true);
 
 	          if (result)
 		    DICTIONARY_AT_PUT (class_var_dict, name, result);
