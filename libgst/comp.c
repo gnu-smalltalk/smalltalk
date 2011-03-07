@@ -277,6 +277,10 @@ static void compile_expression (tree_node expr);
    specialize in compilations for that expression.  */
 static void compile_simple_expression (tree_node expr);
 
+/* Recursively compile a complex expression, evaluate it and use
+   the result as a compile-time constant.  */
+static void compile_compile_time_constant (tree_node expr);
+
 /* Compile code to push the value of a variable onto the stack.  The
    special variables, self, true, false, super, and thisContext, are
    handled specially.  For other variables, different code is emitted
@@ -918,9 +922,32 @@ compile_simple_expression (tree_node expr)
     case TREE_ARRAY_CONSTRUCTOR:
       compile_array_constructor (expr);
       break;
-    default:
+    case TREE_METHOD_NODE:
+      compile_compile_time_constant (expr);
+      break;
+    case TREE_ASSIGN_EXPR:
       compile_expression (expr);
+      break;
+    default:
+      abort();
     }
+}
+
+void
+compile_compile_time_constant (tree_node expr)
+{
+  OOP resultOOP;
+  tree_node constant;
+  bc_vector current_bytecodes;
+
+  current_bytecodes = _gst_save_bytecode_array ();
+  resultOOP = _gst_execute_statements (expr, UNDECLARED_GLOBALS, true);
+  _gst_restore_bytecode_array (current_bytecodes);
+
+  constant = _gst_make_oop_constant (&expr->location,
+                                     resultOOP ? resultOOP : _gst_nil_oop);
+
+  compile_simple_expression (constant);
 }
 
 void

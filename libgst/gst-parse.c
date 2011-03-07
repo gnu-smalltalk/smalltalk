@@ -1934,7 +1934,6 @@ parse_compile_time_constant (gst_parser *p)
 {
   tree_node temps, statements;
   YYLTYPE location = *loc(p,0);
-  OOP result = NULL;
 
   assert (token (p, 0) == '#');
   lex (p);
@@ -1943,10 +1942,15 @@ parse_compile_time_constant (gst_parser *p)
   statements = parse_statements (p, NULL, true);
   lex_skip_mandatory (p, ')');
 
-  if (statements && !_gst_had_error)
-    result = execute_doit (p, temps, statements, NULL, UNDECLARED_GLOBALS, true);
+  if (!statements || _gst_had_error)
+    return _gst_make_oop_constant (&location, _gst_nil_oop);
 
-  return _gst_make_oop_constant (&location, result ? result : _gst_nil_oop); 
+  return _gst_make_method (&location, loc(p, 0),
+                           NULL, temps, NULL, statements, NULL,
+                           _gst_current_parser->currentClass,
+                           _gst_nil_oop,
+                           _gst_untrusted_parse (),
+                           false);
 }
 
 

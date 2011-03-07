@@ -151,14 +151,14 @@ MyProject.MyLibWrapper.Baz class extend [ test [ ^##(Exception printNl) ] ]
 MyProject.MyLibWrapper.Baz class extend [ test [ ^##(ValueAdaptor printNl) ] ]
 MyLibrary.BackForMore class extend [ test [ ^##(PkgVersion printNl) ] ]
 
-"Both of the above -- this does not work yet""
+"Both of the above"
 MyLibrary.Foo class extend [ TryThis := ##(Exception printNl) ]
 MyLibrary.Bar class extend [ TryThis := ##(Scape printNl) ]
 MyLibrary.Blah class extend [ TryThis := ##(Scape printNl) ]
 MyProject.MyLibWrapper.Baz class extend [ TryThis := ##(Scape printNl) ]
 MyProject.MyLibWrapper.Baz class extend [ TryThis := ##(Exception printNl) ]
 MyProject.MyLibWrapper.Baz class extend [ TryThis := ##(ValueAdaptor printNl) ]
-MyLibrary.BackForMore class extend [ TryThis := ##(PkgVersion printNl) ]"
+MyLibrary.BackForMore class extend [ TryThis := ##(PkgVersion printNl) ]
 
 "test namespace-sharedpools"
 Eval [ MyProject.MyLibWrapper.Baz new blah ] "6667"

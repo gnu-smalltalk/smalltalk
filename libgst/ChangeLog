@@ -1,5 +1,12 @@
 2011-03-07  Paolo Bonzini  <bonzini@gnu.org>
 
+	* libgst/comp.c: Accept recursive TREE_METHOD_NODEs, transform
+	them to compile-time constants.
+	* libgst/gst-parse.c: Parse compile-time constants as recursive
+	TREE_METHOD_NODEs.
+
+2011-03-07  Paolo Bonzini  <bonzini@gnu.org>
+
 	* libgst/comp.c: Wrap attributes into an OOP and pass them to
 	_gst_make_new_method, instead of using process_attributes_tree.
 	Limit lifetime of method_attrs to _gst_make_new_method.
