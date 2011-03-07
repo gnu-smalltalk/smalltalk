@@ -437,7 +437,7 @@ Copyright (c) Kazuki Yasumatsu, 1995. All rights reserved.
 			ex.
 			messageText := ex messageText.
 			ex return: nil].
-	connection isNil ifTrue: [^self connectionFailedError: messageText].
+	connection isNil ifTrue: [^self clientPI connectionFailedError: messageText].
 	self connectionStream: connection.
 	self clientPI connected.
     ]
