@@ -1,5 +1,12 @@
 2011-03-07  Paolo Bonzini  <bonzini@gnu.org>
 
+	* libgst/comp.c: Rewrite compilation of cascades to remove
+	dup_message_receiver.  Instead, compile the receiver
+	separately.  Avoid optimizations when the compilation is
+	part of a cascade.
+
+2011-03-07  Paolo Bonzini  <bonzini@gnu.org>
+
 	* libgst/comp.c: Use compiler state for the bad_method jmpbuf.
 	* libgst/comp.h: Add field here.
 

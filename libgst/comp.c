@@ -310,7 +310,8 @@ static void compile_array_constructor (tree_node arrayConstructor);
    cascaded message send and if so emits code to duplicate the stack
    top after the evaluation of the receiver for use by the subsequent
    cascaded expressions.  */
-static void compile_unary_expr (tree_node expr);
+static void compile_unary_expr (tree_node expr,
+				mst_Boolean omit_receiver);
 
 /* Compile code to evaluate a binary expression EXPR.  Special cases
    sends to "super" and open codes whileTrue/whileFalse/repeat when
@@ -318,7 +319,8 @@ static void compile_unary_expr (tree_node expr);
    part of a cascaded message send and if so emits code to duplicate
    the stack top after the evaluation of the receiver for use by the
    subsequent cascaded expressions.  */
-static void compile_binary_expr (tree_node expr);
+static void compile_binary_expr (tree_node expr,
+				 mst_Boolean omit_receiver);
 
 /* Compile code to evaluate a keyword expression EXPR.  Special cases
    sends to "super" and open codes while loops, the 4 kinds of if
@@ -327,7 +329,8 @@ static void compile_binary_expr (tree_node expr);
    if it's the first part of a cascaded message send and if so emits
    code to duplicate the stack top after the evaluation of the
    receiver for use by the subsequent cascaded expressions.  */
-static void compile_keyword_expr (tree_node expr);
+static void compile_keyword_expr (tree_node expr,
+				  mst_Boolean omit_receiver);
 
 /* Compiles the code for a cascaded message send.  Due to the fact
    that cascaded sends go to the receiver of the last message before
@@ -386,18 +389,6 @@ static OOP termination_method;
 
 /* The linked list of attributes that are specified by the method.  */
 static method_attributes *method_attrs = NULL;
-
-/* HACK ALERT!! HACK ALERT!!  This variable is used for cascading.
-   The tree structure is all wrong for the code in cascade processing
-   to find the receiver of the initial message.  What this does is
-   when it's true, compile_unary_expr, compile_binary_expr, and
-   compile_keyword_expr record its value, and clear the global (to
-   prevent propagation to compilation of subnodes).  After compiling
-   their receiver, if the saved value of the flag is true, they emit a
-   DUP_STACK_TOP, and continue compilation.  Since cascaded sends are
-   relatively rare, I figured that this was a better alternative than
-   passing useless parameters around all the time.  */
-static mst_Boolean dup_message_receiver = false;
 
 
 /* Exit a really losing compilation */
@@ -706,7 +697,6 @@ _gst_compile_method (tree_node method,
   inc_ptr incPtr;
   gst_compiled_method compiledMethod;
 
-  dup_message_receiver = false;
   outer_method = _gst_curr_method;
   outer_state = _gst_compiler_state;
   _gst_curr_method = method;
@@ -915,13 +905,13 @@ compile_simple_expression (tree_node expr)
       compile_block (expr);
       break;
     case TREE_UNARY_EXPR:
-      compile_unary_expr (expr);
+      compile_unary_expr (expr, false);
       break;
     case TREE_BINARY_EXPR:
-      compile_binary_expr (expr);
+      compile_binary_expr (expr, false);
       break;
     case TREE_KEYWORD_EXPR:
-      compile_keyword_expr (expr);
+      compile_keyword_expr (expr, false);
       break;
     case TREE_CASCADE_EXPR:
       compile_cascaded_message (expr);
@@ -1203,63 +1193,45 @@ compile_array_constructor (tree_node arrayConstructor)
 
 
 void
-compile_unary_expr (tree_node expr)
+compile_unary_expr (tree_node expr,
+		    mst_Boolean omit_receiver)
 {
   OOP selector;
-  mst_Boolean savedDupFlag;
-
-  savedDupFlag = dup_message_receiver;
-  dup_message_receiver = false;
 
   selector = expr->v_expr.selector;
 
-  /* check for optimized cases of messages to blocks and handle them
-     specially */
-  if (selector == _gst_while_true_symbol
-      || selector == _gst_while_false_symbol)
+  if (!omit_receiver)
     {
-      if (compile_while_loop (selector, expr))
-	return;
-    }
-  else if (selector == _gst_repeat_symbol)
-    {
-      if (compile_repeat (expr->v_expr.receiver))
-	return;
-    }
+      /* check for optimized cases of messages to blocks and handle them
+         specially */
+      if (selector == _gst_while_true_symbol
+          || selector == _gst_while_false_symbol)
+        {
+          if (compile_while_loop (selector, expr))
+            return;
+        }
+      else if (selector == _gst_repeat_symbol)
+        {
+          if (compile_repeat (expr->v_expr.receiver))
+            return;
+        }
 
-  if (expr->v_expr.receiver != NULL)
-    {
       compile_expression (expr->v_expr.receiver);
-      if (savedDupFlag)
-	{
-	  _gst_compile_byte (DUP_STACK_TOP, 0);
-          INCR_STACK_DEPTH ();
-	}
     }
 
   compile_send (expr, selector, 0);
 }
 
 void
-compile_binary_expr (tree_node expr)
+compile_binary_expr (tree_node expr,
+                     mst_Boolean omit_receiver)
 {
   OOP selector;
-  mst_Boolean savedDupFlag;
-
-  savedDupFlag = dup_message_receiver;
-  dup_message_receiver = false;
 
   selector = expr->v_expr.selector;
 
-  if (expr->v_expr.receiver != NULL)
-    {
-      compile_expression (expr->v_expr.receiver);
-      if (savedDupFlag)
-	{
-	  _gst_compile_byte (DUP_STACK_TOP, 0);
-          INCR_STACK_DEPTH ();
-	}
-    }
+  if (!omit_receiver)
+    compile_expression (expr->v_expr.receiver);
 
   if (expr->v_expr.expression)
     compile_expression (expr->v_expr.expression);
@@ -1268,72 +1240,63 @@ compile_binary_expr (tree_node expr)
 }
 
 void
-compile_keyword_expr (tree_node expr)
+compile_keyword_expr (tree_node expr,
+                      mst_Boolean omit_receiver)
 {
   OOP selector;
   int numArgs;
-  mst_Boolean savedDupFlag;
-
-  savedDupFlag = dup_message_receiver;
-  dup_message_receiver = false;
 
   selector = compute_selector (expr);
-
-  /* check for optimized cases of messages to booleans and handle them
-     specially */
-  if (selector == _gst_while_true_colon_symbol
-      || selector == _gst_while_false_colon_symbol)
+  if (!omit_receiver)
     {
-      if (compile_while_loop (selector, expr))
-	return;
-    }
+      /* check for optimized cases of messages to booleans and handle them
+         specially */
+      if (selector == _gst_while_true_colon_symbol
+          || selector == _gst_while_false_colon_symbol)
+        {
+          if (compile_while_loop (selector, expr))
+            return;
+        }
 
-  if (expr->v_expr.receiver)
-    {
       compile_expression (expr->v_expr.receiver);
-      if (savedDupFlag)
-	{
-	  _gst_compile_byte (DUP_STACK_TOP, 0);
-          INCR_STACK_DEPTH ();
-	}
-    }
 
-  if (selector == _gst_if_true_symbol
-      || selector == _gst_if_false_symbol)
-    {
-      if (compile_if_statement (selector, expr->v_expr.expression))
-	return;
-    }
-  else if (selector == _gst_if_true_if_false_symbol
-	   || selector == _gst_if_false_if_true_symbol)
-    {
-      if (compile_if_true_false_statement
-	  (selector, expr->v_expr.expression))
-	return;
-    }
-  else if (selector == _gst_and_symbol
-	   || selector == _gst_or_symbol)
-    {
-      if (compile_and_or_statement (selector, expr->v_expr.expression))
-	return;
-    }
-  else if (selector == _gst_times_repeat_symbol)
-    {
-      if (compile_times_repeat (expr->v_expr.expression))
-	return;
-    }
-  else if (selector == _gst_to_do_symbol)
-    {
-      if (compile_to_by_do (expr->v_expr.expression->v_list.value, NULL,
-			    expr->v_expr.expression->v_list.next->v_list.value))
-	return;
-    }
-  else if (selector == _gst_to_by_do_symbol)
-    {
-      if (compile_to_by_do (expr->v_expr.expression->v_list.value,
-			    expr->v_expr.expression->v_list.next->v_list.value,
-			    expr->v_expr.expression->v_list.next->v_list.next->v_list.value))
-	return;
+      if (selector == _gst_if_true_symbol
+          || selector == _gst_if_false_symbol)
+        {
+          if (compile_if_statement (selector, expr->v_expr.expression))
+            return;
+        }
+      else if (selector == _gst_if_true_if_false_symbol
+               || selector == _gst_if_false_if_true_symbol)
+        {
+          if (compile_if_true_false_statement
+              (selector, expr->v_expr.expression))
+            return;
+        }
+      else if (selector == _gst_and_symbol
+               || selector == _gst_or_symbol)
+        {
+          if (compile_and_or_statement (selector, expr->v_expr.expression))
+            return;
+        }
+      else if (selector == _gst_times_repeat_symbol)
+        {
+          if (compile_times_repeat (expr->v_expr.expression))
+            return;
+        }
+      else if (selector == _gst_to_do_symbol)
+        {
+          if (compile_to_by_do (expr->v_expr.expression->v_list.value, NULL,
+                                expr->v_expr.expression->v_list.next->v_list.value))
+            return;
+        }
+      else if (selector == _gst_to_by_do_symbol)
+        {
+          if (compile_to_by_do (expr->v_expr.expression->v_list.value,
+                                expr->v_expr.expression->v_list.next->v_list.value,
+                                expr->v_expr.expression->v_list.next->v_list.next->v_list.value))
+            return;
+        }
     }
 
   numArgs = _gst_list_length (expr->v_expr.expression);
@@ -1811,13 +1774,36 @@ compile_jump (int len,
 
 
 void
+compile_cascaded_expression (tree_node expr)
+{
+  _gst_line_number (expr->location.first_line, 0);
+  switch (expr->nodeType)
+    {
+    case TREE_UNARY_EXPR:
+      compile_unary_expr (expr, true);
+      break;
+    case TREE_BINARY_EXPR:
+      compile_binary_expr (expr, true);
+      break;
+    case TREE_KEYWORD_EXPR:
+      compile_keyword_expr (expr, true);
+      break;
+    default:
+      abort ();
+    }
+}
+
+void
 compile_cascaded_message (tree_node cascadedExpr)
 {
   tree_node message;
 
-  dup_message_receiver = true;
-  compile_expression (cascadedExpr->v_expr.receiver);
+  message = cascadedExpr->v_expr.receiver;
+  compile_expression (message->v_expr.receiver);
+  _gst_compile_byte (DUP_STACK_TOP, 0);
+  INCR_STACK_DEPTH ();
 
+  compile_cascaded_expression (message);
   for (message = cascadedExpr->v_expr.expression; message;
        message = message->v_list.next)
     {
@@ -1827,10 +1813,7 @@ compile_cascaded_message (tree_node cascadedExpr)
       else
 	SUB_STACK_DEPTH (1);
 
-      compile_expression (message->v_list.value);
-      /* !!! remember that unary, binary and keywordexpr should ignore
-         the receiver field if it is nil; that is the case for these
-         functions and things work out fine if that's the case.  */
+      compile_cascaded_expression (message->v_list.value);
     }
 }
 
