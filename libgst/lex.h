@@ -55,6 +55,33 @@
 #ifndef GST_LEX_H
 #define GST_LEX_H
 
+/* A structure holding a constant for objects having byte-sized
+ *    indexed instance variables (ByteArrays and LargeIntegers).  */
+typedef struct byte_object
+{
+  OOP class;
+  int size;
+  gst_uchar body[1];
+}
+ *byte_object;
+
+typedef union YYSTYPE {
+  long double          fval;
+  intptr_t             ival;
+  char                *sval;
+  byte_object          boval;
+  OOP                  oval;
+  struct tree_node    *node;
+} YYSTYPE;
+
+typedef struct YYLTYPE
+{
+  int first_line;
+  int first_column;
+  int64_t file_offset;
+} YYLTYPE;
+
+
 /* True if errors must be reported to the standard error, false if
    errors should instead stored so that they are passed to Smalltalk
    code.  */

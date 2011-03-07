@@ -84,6 +84,9 @@ typedef struct symbol_entry
 }
 symbol_entry;
 
+typedef struct scope *scope;
+typedef struct pool_list *pool_list;
+
 enum undeclared_strategy {
   UNDECLARED_NONE,
   UNDECLARED_GLOBALS,

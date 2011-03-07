@@ -84,20 +84,8 @@ typedef enum
 }
 node_type;
 
-/* A structure holding a constant for objects having byte-sized
-   indexed instance variables (ByteArrays and LargeIntegers).  */
-typedef struct byte_object
-{
-  OOP class;
-  int size;
-  gst_uchar body[1];
-}
- *byte_object;
-
 /* A forward declaration.  */
 typedef struct tree_node *tree_node;
-
-#include "gst-parse.h"
 
 /* A generic kind of parse-tree node that stores a list of nodes.  In
    particular, NEXTADDR points to the last NEXT pointer in the list so

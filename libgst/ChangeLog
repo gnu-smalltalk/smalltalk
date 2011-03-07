@@ -1,5 +1,14 @@
 2011-03-07  Paolo Bonzini  <bonzini@gnu.org>
 
+	* libgst/gst-parse.h: Move YYLTYPE/YYSTYPE to lex.h.
+	* libgst/gstprib.h: Move compiler headers together.
+	* libgst/lex.h: Add more lexer data types.
+	* libgst/sym.c: Remove scope/pool_list typedefs.
+	* libgst/sym.h: Add them here.  Use gst_parser forward reference.
+	* libgst/tree.h: Remove struct byte_object.
+
+2011-03-07  Paolo Bonzini  <bonzini@gnu.org>
+
 	* libgst/gst-parse.c: Move creation of ATTRIBUTE_LIST contents here...
 	* libgst/tree.c: ... from here.
 	* libgst/tree.h: Adjust documentation.

@@ -84,22 +84,6 @@ enum yytokentype {
 
 #undef TOKEN_DEF
 
-typedef union YYSTYPE {
-  long double	       fval;
-  intptr_t	       ival;
-  char		      *sval;
-  byte_object	       boval;
-  OOP		       oval;
-  tree_node	       node;
-} YYSTYPE;
-
-typedef struct YYLTYPE
-{
-  int first_line;
-  int first_column;
-  int64_t file_offset;
-} YYLTYPE;
-
 enum parser_state {
   PARSE_METHOD,
   PARSE_METHOD_LIST,

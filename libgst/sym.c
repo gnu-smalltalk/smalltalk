@@ -77,7 +77,6 @@ struct symbol_list
    which are declared in a given scope.  Nested scopes result in
    nested instances of the scope struct, with the current scope always
    being the innermost at any point during the compilation.  */
-typedef struct scope *scope;
 struct scope
 {
   scope prevScope;
@@ -89,7 +88,6 @@ struct scope
 /* Represents all the pools (namespaces) which are declared in the
    current scope.  This information is relatively complex to compute,
    so it's kept cached.  */
-typedef struct pool_list *pool_list;
 struct pool_list
 {
   OOP poolOOP;
