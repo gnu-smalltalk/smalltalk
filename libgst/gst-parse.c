@@ -1264,11 +1264,19 @@ parse_attributes (gst_parser *p, tree_node prev_attrs)
 static tree_node
 parse_attribute (gst_parser *p)
 {
-  tree_node attr;
+  tree_node keywords, attr, constant;
+  OOP attributeOOP;
+
   lex_skip_mandatory (p, '<');
   lex_must_be (p, KEYWORD);
-  attr = parse_keyword_list (p, EXPR_BINOP);
-  attr = _gst_make_attribute_list (&attr->location, attr);
+  keywords = parse_keyword_list (p, EXPR_BINOP);
+
+  /* First convert the TREE_KEYWORD_EXPR into a Message object, then
+     into a TREE_CONST_EXPR, and finally embed this one into a
+     TREE_ATTRIBUTE_LIST.  */
+  attributeOOP = _gst_make_attribute (keywords);
+  constant = _gst_make_oop_constant (&keywords->location, attributeOOP);
+  attr = _gst_make_attribute_list (&constant->location, constant);
   lex_skip_mandatory (p, '>');
   return attr;
 }

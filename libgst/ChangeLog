@@ -1,3 +1,9 @@
+2011-05-18  Paolo Bonzini  <bonzini@gnu.org>
+
+	* libgst/gst-parse.c: Move creation of ATTRIBUTE_LIST contents here...
+	* libgst/tree.c: ... from here.
+	* libgst/tree.h: Adjust documentation.
+
 2011-04-29  Paolo Bonzini  <bonzini@gnu.org>
 
 	* libgst/callin.c: Use FROM_C_INT and FROM_C_LONG properly.
