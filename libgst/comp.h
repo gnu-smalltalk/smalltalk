@@ -241,8 +241,7 @@ typedef struct compiler_state
 extern tree_node _gst_curr_method ATTRIBUTE_HIDDEN;
 
 /* This holds other bits of compiler state that needs to be saved
-   when the compiler is reentered.  (Transition in progress, there
-   are other global data).  */
+   when the compiler is reentered.  */
 compiler_state *_gst_compiler_state;
 
 /* This is the value most recently returned by
@@ -329,10 +328,10 @@ extern OOP _gst_compile_method (tree_node method,
    the method's byte codes (setting up the flags to optimize returns).
    LITERALS is a Smalltalk Array containing the literals, or nil if we
    retrieve it from the array internal to comp.c */
-extern OOP _gst_make_new_method (int primitiveIndex,
-				 int numArgs,
+extern OOP _gst_make_new_method (int numArgs,
 				 int numTemps,
 				 int maximumStackDepth,
+				 OOP attributes,
 				 OOP literals,
 				 bc_vector bytecodes,
 				 OOP class,
@@ -366,12 +365,6 @@ extern OOP _gst_block_new (int numArgs,
    is present in the literal vector.  The answer is the index into the
    literal vector where the object was stored.  */
 extern int _gst_add_forced_object (OOP oop) 
-  ATTRIBUTE_HIDDEN;
-
-/* Process the attributes in ARRAYOOP, return the primitive number
-   (so far, this is the only attribute we honor), or -1 for a bad
-   primitive number.  */
-extern int _gst_process_attributes_array (OOP arrayOOP) 
   ATTRIBUTE_HIDDEN;
 
 #endif /* GST_COMP_H */

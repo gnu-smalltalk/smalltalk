@@ -85,8 +85,7 @@ typedef struct method_attributes
 tree_node _gst_curr_method;
 
 /* This holds other bits of compiler state that needs to be saved
-   when the compiler is reentered.  (Transition in progress, there
-   are other global data).  */
+   when the compiler is reentered.  */
 compiler_state *_gst_compiler_state;
 
 /* This flag controls whether byte codes are printed after
@@ -199,15 +198,12 @@ static OOP compute_selector (tree_node selectorExpr);
    no literals for the current method, _gst_nil_oop is returned.  */
 static OOP get_literals_array (void);
 
-/* Process the attributes in ATTRIBUTELIST, return the primitive number.
-   Also record a <category: ...> attribute in curr_method's
-   currentCategory.  */
-static int process_attributes_tree (tree_node attributeList);
+/* Process the attributes in ATTRIBUTELIST, return them as an Array
+   of Messages.  */
+static OOP get_attributes_array (tree_node attributeList);
 
-/* Process the attribute in MESSAGEOOP, return the primitive number
-   (so far, this is the only attribute we honor), -1 for a bad
-   primitive number, or 0 for other attributes.  */
-static int process_attribute (OOP messageOOP);
+/* Track the attribute represeneted by MESSAGEOOP in METHOD_ATTRS.  */
+static void record_attribute (OOP messageOOP);
 
 /* Creates and returns a CompiledMethod.  The method is completely
    filled in, including the descriptor, the method literals, and the
@@ -419,7 +415,8 @@ _gst_install_initial_methods (void)
   _gst_compile_byte (JUMP_BACK, 4);
 
   /* The zeros are primitive, # of args, # of temps, stack depth */
-  termination_method = _gst_make_new_method (0, 0, 0, 0, _gst_nil_oop,
+  termination_method = _gst_make_new_method (0, 0, 0, _gst_nil_oop,
+					     _gst_nil_oop,
 					     _gst_get_bytecodes (),
 					     _gst_undefined_object_class,
 					     _gst_terminate_symbol,
@@ -689,10 +686,9 @@ _gst_compile_method (tree_node method,
   compiler_state s, *outer_state;
   tree_node statement;
   OOP selector;
-  OOP literalsOOP;
+  OOP literalsOOP, attributesOOP;
   OOP methodOOP;
   bc_vector bytecodes;
-  int primitiveIndex;
   int stack_depth;
   inc_ptr incPtr;
   gst_compiled_method compiledMethod;
@@ -735,6 +731,7 @@ _gst_compile_method (tree_node method,
   if (_gst_declare_tracing)
     printf ("  class %O, selector %O\n", method->v_method.currentClass, selector);
 
+  methodOOP = _gst_nil_oop;
   if (setjmp (_gst_compiler_state->bad_method) == 0)
     {
       if (_gst_declare_arguments (method->v_method.selectorExpr) == -1)
@@ -750,8 +747,6 @@ _gst_compile_method (tree_node method,
 			  "duplicate temporary variable name");
           EXIT_COMPILATION ();
 	}
-
-      primitiveIndex = process_attributes_tree (method->v_method.attributes);
 
       for (statement = method->v_method.statements; statement; )
 	{
@@ -817,18 +812,23 @@ _gst_compile_method (tree_node method,
       literalsOOP = get_literals_array ();
       INC_ADD_OOP (literalsOOP);
 
-      methodOOP = _gst_make_new_method (primitiveIndex,
-					_gst_get_arg_count (),
+      attributesOOP = get_attributes_array (method->v_method.attributes);
+      INC_ADD_OOP (attributesOOP);
+
+      methodOOP = _gst_make_new_method (_gst_get_arg_count (),
 					_gst_get_temp_count (),
-					stack_depth, literalsOOP, bytecodes,
-					method->v_method.currentClass, selector,
-					method->v_method.currentCategory,
+					stack_depth, attributesOOP, literalsOOP,
+					bytecodes, method->v_method.currentClass,
+					selector, method->v_method.currentCategory,
 					method->location.file_offset,
 					method->v_method.endPos);
+    }
 
+  if (methodOOP != _gst_nil_oop)
+    {
+      INC_ADD_OOP (methodOOP);
       compiledMethod = (gst_compiled_method) OOP_TO_OBJ (methodOOP);
       compiledMethod->header.isOldSyntax = method->v_method.isOldSyntax;
-      INC_ADD_OOP (methodOOP);
 
       if (install)
 	install_method (methodOOP,
@@ -837,7 +837,6 @@ _gst_compile_method (tree_node method,
     }
   else
     {
-      methodOOP = _gst_nil_oop;
       _gst_had_error = true;
       bytecodes = _gst_get_bytecodes ();
       _gst_free_bytecodes (bytecodes);
@@ -2273,118 +2272,48 @@ _gst_compute_keyword_selector (tree_node keywordList)
 }
 
 
-int
-process_attributes_tree (tree_node attribute_list)
+OOP
+get_attributes_array (tree_node attribute_list)
 {
-  int primitiveIndex = 0;
+  OOP attributesOOP;
+  gst_object attributes;
+  int n, i;
 
-  for (; attribute_list; attribute_list = attribute_list->v_list.next)
+  n = _gst_list_length (attribute_list);
+  attributes = new_instance_with (_gst_array_class, n,
+                                  &attributesOOP);
+
+  for (i = 0; attribute_list; attribute_list = attribute_list->v_list.next, i++)
     {
       tree_node value = attribute_list->v_list.value;
       OOP messageOOP = value->v_const.val.oopVal;
-      int result = process_attribute (messageOOP);
+      gst_message message = (gst_message) OOP_TO_OBJ (messageOOP);
+      OOP selectorOOP = message->selector;
 
-      if (result < 0)
-	{
-	  EXIT_COMPILATION ();
-	}
-
-      if (result > 0)
-	{
-          if (IS_OOP_UNTRUSTED (_gst_curr_method->v_method.currentClass))
-	    {
-	      _gst_errorf ("an untrusted class cannot declare primitives");
-	      EXIT_COMPILATION ();
-	    }
-
-	  if (primitiveIndex > 0)
-	    {
-	      _gst_errorf ("duplicate primitive declaration");
-	      EXIT_COMPILATION ();
-	    }
-	  primitiveIndex = result;
-	}
+      attributes->data[i] = messageOOP;
+      if (selectorOOP == _gst_primitive_symbol
+          && _gst_untrusted_parse ())
+        {
+          _gst_errorf ("an untrusted method cannot declare primitives");
+          EXIT_COMPILATION ();
+        }
     }
 
-  return primitiveIndex;
+  return attributesOOP;
 }
 
-int
-_gst_process_attributes_array (OOP arrayOOP)
+void
+record_attribute (OOP messageOOP)
 {
-  int primitiveIndex = 0;
-  int n = NUM_WORDS (OOP_TO_OBJ (arrayOOP));
-  int i;
+  method_attributes *new_attr = (method_attributes *)
+    xmalloc (sizeof (method_attributes));
 
-  if (IS_NIL (arrayOOP))
-    return 0;
+  new_attr->count = method_attrs ? method_attrs->count + 1 : 0;
+  new_attr->oop = messageOOP;
+  new_attr->next = method_attrs;
+  method_attrs = new_attr;
 
-  for (i = 0; i < n; i++)
-    {
-      OOP messageOOP = OOP_TO_OBJ (arrayOOP)->data[i];
-      int result = process_attribute (messageOOP);
-
-      if (result < 0)
-	return (-1);
-
-      if (result > 0)
-	{
-	  if (primitiveIndex > 0)
-	    return (-1);
-
-	  primitiveIndex = result;
-	}
-    }
-
-  return primitiveIndex;
-}
-
-int
-process_attribute (OOP messageOOP)
-{
-  gst_message message = (gst_message) OOP_TO_OBJ (messageOOP);
-  OOP selectorOOP = message->selector;
-  OOP argumentsOOP = message->args;
-  gst_object arguments = OOP_TO_OBJ (argumentsOOP);
-
-  if (selectorOOP == _gst_primitive_symbol)
-    {
-      if (IS_INT (arguments->data[0]))
-	{
-	  int primitiveIndex = TO_INT (arguments->data[0]);
-	  if (primitiveIndex <= 0 || primitiveIndex >= NUM_PRIMITIVES)
-	    {
-	      _gst_errorf ("primitive number out of range");
-	      return (-1);
-	    }
-
-          return (primitiveIndex);
-	}
-      else
-	{
-	  _gst_errorf ("bad primitive number, expected SmallInteger");
-	  return (-1);
-	}
-    }
-  else if (selectorOOP == _gst_category_symbol)
-    {
-      _gst_curr_method->v_method.currentCategory = arguments->data[0];
-      INC_ADD_OOP (_gst_curr_method->v_method.currentCategory);
-      return (0);
-    }
-  else
-    {
-      method_attributes *new_attr = (method_attributes *)
-        xmalloc (sizeof (method_attributes));
-
-      new_attr->count = method_attrs ? method_attrs->count + 1 : 0;
-      new_attr->oop = messageOOP;
-      new_attr->next = method_attrs;
-      method_attrs = new_attr;
-
-      _gst_register_oop (messageOOP);
-      return (0);
-    }
+  INC_ADD_OOP (messageOOP);
 }
 
 void
@@ -2539,10 +2468,10 @@ install_method (OOP methodOOP, OOP classOOP, mst_Boolean untrusted)
 }
 
 OOP
-_gst_make_new_method (int primitiveIndex,
-		      int numArgs,
+_gst_make_new_method (int numArgs,
 		      int numTemps,
 		      int maximumStackDepth,
+		      OOP attributesOOP,
 		      OOP literalsOOP,
 		      bc_vector bytecodes,
 		      OOP class,
@@ -2556,19 +2485,60 @@ _gst_make_new_method (int primitiveIndex,
   OOP method, methodDesc, sourceCode;
   OOP literalOOP;
   inc_ptr incPtr;
+  int primitiveIndex;
+  int n = NUM_WORDS (OOP_TO_OBJ (attributesOOP));
+  int i;
+ 
+  incPtr = INC_SAVE_POINTER ();
+
+  primitiveIndex = 0;
+  for (i = 0; i < n; i++)
+    {
+      OOP messageOOP = OOP_TO_OBJ (attributesOOP)->data[i];
+      gst_message message = (gst_message) OOP_TO_OBJ (messageOOP);
+      OOP selectorOOP = message->selector;
+      OOP argumentsOOP = message->args;
+      gst_object arguments = OOP_TO_OBJ (argumentsOOP);
+
+      if (selectorOOP == _gst_primitive_symbol)
+        {
+          if (!IS_INT (arguments->data[0]))
+            {
+              _gst_errorf ("bad primitive number, expected SmallInteger");
+              INC_RESTORE_POINTER (incPtr);
+              return _gst_nil_oop;
+            }
+          if (primitiveIndex > 0)
+            {
+              _gst_errorf ("duplicate primitive number");
+              INC_RESTORE_POINTER (incPtr);
+              return _gst_nil_oop;
+            }
+          primitiveIndex = TO_INT (arguments->data[0]);
+          if (_gst_declare_tracing)
+            printf ("  Primitive Index %d\n", primitiveIndex);
+
+          if (primitiveIndex <= 0 || primitiveIndex >= NUM_PRIMITIVES)
+            {
+              _gst_errorf ("primitive number out of range");
+              INC_RESTORE_POINTER (incPtr);
+              return _gst_nil_oop;
+            }
+	}
+      else if (selectorOOP == _gst_category_symbol)
+        {
+          categoryOOP = arguments->data[0];
+          INC_ADD_OOP (categoryOOP);
+        }
+      else
+        record_attribute (messageOOP);
+    }
 
   maximumStackDepth += numArgs + numTemps;
   memset (&header, 0, sizeof (method_header));
 
-  incPtr = INC_SAVE_POINTER ();
   if (primitiveIndex)
-    {
-      if (_gst_declare_tracing)
-	printf ("  Primitive Index %d\n", primitiveIndex);
-
-      header.headerFlag = MTH_PRIMITIVE;
-    }
-
+    header.headerFlag = MTH_PRIMITIVE;
   else if (method_attrs)
     header.headerFlag = MTH_ANNOTATED;
 
@@ -2637,6 +2607,8 @@ _gst_make_new_method (int primitiveIndex,
 				sourceCode, categoryOOP);
   INC_ADD_OOP (methodDesc);
 
+  method_attrs = NULL;
+
   method = method_new (header, literalsOOP, bytecodes, class, methodDesc);
   INC_RESTORE_POINTER (incPtr);
   return (method);
@@ -2659,8 +2631,6 @@ method_new (method_header header,
     numByteCodes = _gst_bytecode_length (bytecodes);
   else
     numByteCodes = 0;
-
-  method_attrs = NULL;
 
   method = (gst_compiled_method) instantiate_with (_gst_compiled_method_class,
 						   numByteCodes, &methodOOP);
@@ -2772,7 +2742,6 @@ method_info_new (OOP class,
     {
       methodInfo->attributes[attrs->count] = attrs->oop;
       next = attrs->next;
-      _gst_unregister_oop (attrs->oop);
       free (attrs);
       attrs = next;
     }

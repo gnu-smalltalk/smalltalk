@@ -2233,14 +2233,13 @@ primitive VMpr_CompiledMethod_create [succeed,fail]
   int methodArgs = TO_INT (STACK_AT (4));
   OOP literals = STACK_AT (5);
   bc_vector bytecodes = _gst_extract_bytecodes (bytecodesOOP);
-  int primitive = _gst_process_attributes_array (attributesOOP);
   OOP method;
-  if (primitive == -1)
-    PRIM_FAILED;
 
-  method = _gst_make_new_method (primitive, methodArgs, methodTemps, depth,
+  method = _gst_make_new_method (methodArgs, methodTemps, depth, attributesOOP,
 			         literals, bytecodes, _gst_nil_oop,
 				 _gst_nil_oop, _gst_nil_oop, -1, -1);
+  if (IS_NIL (method))
+    PRIM_FAILED;
 
   POP_N_OOPS(6);
   OOP_CLASS(method) = STACKTOP ();

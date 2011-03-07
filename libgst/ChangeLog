@@ -1,5 +1,14 @@
 2011-03-07  Paolo Bonzini  <bonzini@gnu.org>
 
+	* libgst/comp.c: Wrap attributes into an OOP and pass them to
+	_gst_make_new_method, instead of using process_attributes_tree.
+	Limit lifetime of method_attrs to _gst_make_new_method.
+	* libgst/comp.h: Adjust _gst_make_new_method arguments, remove
+	_gst_process_attributes_array.
+	* libgst/prims.def: Adjust call.
+
+2011-03-07  Paolo Bonzini  <bonzini@gnu.org>
+
 	* libgst/comp.c: Rewrite compilation of cascades to remove
 	dup_message_receiver.  Instead, compile the receiver
 	separately.  Avoid optimizations when the compilation is
