@@ -266,7 +266,6 @@ static symbol_list find_local_var (scope scope,
 static OOP find_class_variable (OOP varName);
 
 static scope cur_scope = NULL;
-static pool_list linearized_pools = NULL;
 
 /* This is an array of symbols which the virtual machine knows about,
    and is used to restore the global variables upon image load.  */
@@ -392,11 +391,11 @@ _gst_pop_all_scopes (void)
   while (cur_scope)
     _gst_pop_old_scope ();
 
-  while (linearized_pools)
+  while (_gst_current_parser->linearized_pools)
     {
-      next = linearized_pools->next;
-      xfree (linearized_pools);
-      linearized_pools = next;
+      next = _gst_current_parser->linearized_pools->next;
+      xfree (_gst_current_parser->linearized_pools);
+      _gst_current_parser->linearized_pools = next;
     }
 }
 
@@ -831,12 +830,12 @@ add_shared_pool_resolution (OOP class_oop, OOP environmentOOP, pool_list *p_end)
 void
 _gst_compute_linearized_pools (void)
 {
-  pool_list *p_end = &linearized_pools;
+  pool_list *p_end = &_gst_current_parser->linearized_pools;
   OOP myClass, classOOP;
   OOP environmentOOP = _gst_curr_method->v_method.currentEnvironment;
   mst_Boolean override = (environmentOOP != NULL);
 
-  assert (linearized_pools == NULL);
+  assert (_gst_current_parser->linearized_pools == NULL);
   myClass = _gst_get_class_object (_gst_curr_method->v_method.currentClass);
 
   /* Add pools separately for each class.  */
@@ -860,7 +859,7 @@ find_class_variable (OOP varName)
   pool_list pool;
   OOP assocOOP;
 
-  for (pool = linearized_pools; pool; pool = pool->next)
+  for (pool = _gst_current_parser->linearized_pools; pool; pool = pool->next)
     {
       assocOOP =
 	dictionary_association_at (pool->poolOOP, varName);

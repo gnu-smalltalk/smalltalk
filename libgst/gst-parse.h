@@ -102,6 +102,7 @@ typedef struct gst_parser {
   int la_first;
   enum parser_state state;
   mst_Boolean untrustedContext;
+  pool_list linearized_pools;
   OOP current_namespace;
   OOP currentClass;
   OOP currentCategory;

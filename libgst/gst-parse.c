@@ -385,7 +385,7 @@ _gst_reset_compilation_category (void)
 static void
 parser_init (gst_parser *p)
 {
-  memset (p, 0, sizeof(p));
+  memset (p, 0, sizeof(*p));
   p->currentClass = p->currentCategory = _gst_nil_oop;
   /* This should ultimately become _gst_get_current_namespace ().  */
   p->current_namespace = _gst_current_namespace;
