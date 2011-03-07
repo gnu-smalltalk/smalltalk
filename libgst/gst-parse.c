@@ -568,6 +568,7 @@ execute_doit (gst_parser *p, tree_node temps, tree_node stmts,
               OOP currentClassOOP, enum undeclared_strategy undeclared,
               mst_Boolean quiet)
 {
+  tree_node method;
   mst_Boolean in_class;
   OOP resultOOP;
   inc_ptr incPtr;
@@ -588,7 +589,19 @@ execute_doit (gst_parser *p, tree_node temps, tree_node stmts,
         }
     }
 
-  resultOOP = _gst_execute_statements (temps, stmts, undeclared, quiet);
+  if (stmts->nodeType != TREE_STATEMENT_LIST)
+    stmts = _gst_make_statement_list (&stmts->location, stmts);
+
+  method =
+    _gst_make_method (&stmts->location, loc(p, 0),
+                      NULL, temps, NULL, stmts,
+                      _gst_get_current_namespace (),
+                      _gst_current_parser->currentClass,
+                      _gst_nil_oop,
+                      _gst_untrusted_parse (),
+                      false);
+
+  resultOOP = _gst_execute_statements (method, undeclared, quiet);
   incPtr = INC_SAVE_POINTER ();
   INC_ADD_OOP (resultOOP);
 

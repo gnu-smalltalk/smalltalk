@@ -273,10 +273,9 @@ extern OOP _gst_make_constant_oop (tree_node constExpr);
 
 /* Called to compile and execute an "immediate expression"; i.e. a Smalltalk
    statement that is not part of a method definition and where temporaries are
-   declared automatically.  The parse trees are in TEMPS and STATEMENTS.
+   declared automatically.  The parse trees are in METHOD.
    Return the object that was returned by the expression.  */
-extern OOP _gst_execute_statements (tree_node temps,
-				    tree_node statement,
+extern OOP _gst_execute_statements (tree_node method,
 				    enum undeclared_strategy undeclared,
 				    mst_Boolean quiet)
   ATTRIBUTE_HIDDEN;

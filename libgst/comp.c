@@ -537,12 +537,11 @@ _gst_init_compiler (void)
 
 
 OOP
-_gst_execute_statements (tree_node temps,
-			 tree_node statements,
+_gst_execute_statements (tree_node method,
 			 enum undeclared_strategy undeclared,
 			 mst_Boolean quiet)
 {
-  tree_node messagePattern, method;
+  tree_node statements;
   int startTime, endTime, deltaTime;
   unsigned long cacheHits;
 #ifdef HAVE_GETRUSAGE
@@ -551,23 +550,16 @@ _gst_execute_statements (tree_node temps,
   OOP methodOOP, resultOOP;
   enum undeclared_strategy oldUndeclared;
   inc_ptr incPtr;
-  YYLTYPE loc;
 
   if (_gst_regression_testing
       || _gst_verbosity < 2
       || !_gst_get_cur_stream_prompt ())
     quiet = true;
 
-  loc = _gst_get_location ();
-  messagePattern = _gst_make_unary_expr (&statements->location,
-					 NULL, "executeStatements");
-
-  if (statements->nodeType != TREE_STATEMENT_LIST)
-    statements = _gst_make_statement_list (&statements->location, statements);
-
   oldUndeclared = _gst_set_undeclared (undeclared);
 
   incPtr = INC_SAVE_POINTER ();
+  statements = method->v_method.statements;
   if (statements->v_list.value
       && statements->v_list.value->nodeType == TREE_CONST_EXPR
       && !statements->v_list.next)
@@ -586,16 +578,6 @@ _gst_execute_statements (tree_node temps,
     }
   else
     {
-      method =
-        _gst_make_method (&statements->location, &loc,
-                          messagePattern, temps, NULL,
-                          statements,
-                          _gst_get_current_namespace (),
-                          _gst_current_parser->currentClass,
-                          _gst_nil_oop,
-                          _gst_untrusted_parse (),
-                          false);
-
       if (_gst_declare_tracing)
         printf ("Compiling doit code for %O\n", method->v_method.currentClass);
 

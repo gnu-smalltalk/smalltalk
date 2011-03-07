@@ -150,6 +150,10 @@ _gst_make_method (YYLTYPE *location,
   tree_node result;
 
   result = make_tree_node (location, TREE_METHOD_NODE);
+  if (!selectorExpr)
+    selectorExpr = _gst_make_unary_expr (location,
+					 NULL, "executeStatements");
+
   result->v_method.endPos = endLocation->file_offset;
   result->v_method.selectorExpr = selectorExpr;
   result->v_method.temporaries = temporaries;
