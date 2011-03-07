@@ -1,3 +1,7 @@
+2011-03-07  Holger Hans Peter Freyther  <holger@moiji-mobile.com>
+
+	* URIResolver.st: Add #doHTTPRequest and use it.
+
 2011-03-06  Holger Hans Peter Freyther  <holger@moiji-mobile.com>
 
 	* URIResolver.st: Align GET and POST for HTTP.
