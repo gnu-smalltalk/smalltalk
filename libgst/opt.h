@@ -107,7 +107,8 @@ extern const char *_gst_verify_method (OOP methodOOP,
 /* This looks at BYTECODES and checks if they could be replaced
    with an optimized return of self, of an instance variable or of
    a literal.  */
-extern int _gst_is_simple_return (bc_vector bytecodes)
+extern int _gst_is_simple_return (bc_vector bytecodes,
+				  OOP *literalOOP)
   ATTRIBUTE_HIDDEN;
 
 /* This decides whether the block compiled to the BC bytecodes can be

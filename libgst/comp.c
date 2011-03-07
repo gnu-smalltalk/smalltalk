@@ -391,14 +391,6 @@ static jmp_buf bad_method;
 /* The linked list of attributes that are specified by the method.  */
 static method_attributes *method_attrs = NULL;
 
-/* The vector of literals that the compiler uses to accumulate literal
-   constants into */
-static OOP *literal_vec = NULL;
-
-/* These indicate the first free slot in the vector of literals in the
-   method being compiled, and the first slot past the literal vector */
-static OOP *literal_vec_curr, *literal_vec_max;
-
 /* HACK ALERT!! HACK ALERT!!  This variable is used for cascading.
    The tree structure is all wrong for the code in cascade processing
    to find the receiver of the initial message.  What this does is
@@ -517,19 +509,6 @@ _gst_invoke_hook (enum gst_vm_hook hook)
   _gst_execution_tracing = save_execution;
 }
 
-void
-_gst_init_compiler (void)
-{
-  /* Prepare the literal vector for use.  The literal vector is where the
-     compiler will store any literals that are used by the method being
-     compiled.  */
-  literal_vec = (OOP *) xmalloc (LITERAL_VEC_CHUNK_SIZE * sizeof (OOP));
-
-  literal_vec_curr = literal_vec;
-  literal_vec_max = literal_vec + LITERAL_VEC_CHUNK_SIZE;
-
-  _gst_register_oop_array (&literal_vec, &literal_vec_curr);
-}
 
 
 
@@ -721,12 +700,22 @@ _gst_compile_method (tree_node method,
   gst_compiled_method compiledMethod;
 
   dup_message_receiver = false;
-  literal_vec_curr = literal_vec;
+
   outer_method = _gst_curr_method;
   outer_state = _gst_compiler_state;
   _gst_curr_method = method;
   _gst_compiler_state = &s;
   memset (&s, 0, sizeof (s));
+
+  /* Prepare the literal vector for use.  The literal vector is where the
+     compiler will store any literals that are used by the method being
+     compiled.  */
+  _gst_compiler_state->literal_vec =
+    (OOP *) xmalloc (LITERAL_VEC_CHUNK_SIZE * sizeof (OOP));
+  _gst_compiler_state->literal_vec_curr =
+    _gst_compiler_state->literal_vec;
+  _gst_compiler_state->literal_vec_max =
+    _gst_compiler_state->literal_vec + LITERAL_VEC_CHUNK_SIZE;
 
   incPtr = INC_SAVE_POINTER ();
 
@@ -855,10 +844,10 @@ _gst_compile_method (tree_node method,
       methodOOP = _gst_nil_oop;
       _gst_had_error = true;
       bytecodes = _gst_get_bytecodes ();
-      literal_vec_curr = literal_vec;
       _gst_free_bytecodes (bytecodes);
     }
 
+  xfree (_gst_compiler_state->literal_vec);
   _gst_pop_all_scopes ();
   _gst_curr_method = outer_method;
   _gst_compiler_state = outer_state;
@@ -1017,10 +1006,11 @@ compile_constant (tree_node constExpr)
 
   /* Scan the current literal frame, looking for a constant equal
      to the one that is being compiled.  */
-  for (lit = literal_vec; lit < literal_vec_curr; lit++)
+  for (lit = _gst_compiler_state->literal_vec;
+       lit < _gst_compiler_state->literal_vec_curr; lit++)
     if (equal_constant (*lit, constExpr))
       {
-	index = lit - literal_vec;
+	index = lit - _gst_compiler_state->literal_vec;
 	break;
       }
 
@@ -2220,16 +2210,17 @@ make_block (int args,
     {
       printf ("  Code for enclosed block:\n");
 #ifdef PRINT_BEFORE_OPTIMIZATION
-      _gst_print_bytecodes (bytecodes, literal_vec);
+      _gst_print_bytecodes (bytecodes, _gst_compiler_state->literal_vec);
 #endif
     }
   bytecodes = _gst_optimize_bytecodes (bytecodes);
 
   if (_gst_declare_tracing)
-    _gst_print_bytecodes (bytecodes, literal_vec);
+    _gst_print_bytecodes (bytecodes, _gst_compiler_state->literal_vec);
 
   blockOOP =
-    _gst_block_new (args, temps, bytecodes, stack_depth, literal_vec);
+    _gst_block_new (args, temps, bytecodes, stack_depth,
+                    _gst_compiler_state->literal_vec);
 
   _gst_free_bytecodes (bytecodes);
   return (blockOOP);
@@ -2410,15 +2401,19 @@ process_attribute (OOP messageOOP)
 void
 realloc_literal_vec (void)
 {
-  int size;
-  ptrdiff_t delta;
+  int size, current;
 
-  size = literal_vec_max - literal_vec + LITERAL_VEC_CHUNK_SIZE;
-  delta = ((OOP *) xrealloc (literal_vec, size * sizeof (OOP))) - literal_vec;
+  current = _gst_compiler_state->literal_vec_curr
+    - _gst_compiler_state->literal_vec;
+  size = _gst_compiler_state->literal_vec_max
+    - _gst_compiler_state->literal_vec + LITERAL_VEC_CHUNK_SIZE;
 
-  literal_vec += delta;
-  literal_vec_curr += delta;
-  literal_vec_max = literal_vec + size;
+  _gst_compiler_state->literal_vec = 
+    (OOP *) xrealloc (_gst_compiler_state->literal_vec, size * sizeof (OOP));
+  _gst_compiler_state->literal_vec_curr =
+    _gst_compiler_state->literal_vec + current;
+  _gst_compiler_state->literal_vec_max =
+    _gst_compiler_state->literal_vec + size;
 }
 
 
@@ -2434,11 +2429,14 @@ realloc_literal_vec (void)
 int
 add_literal (OOP oop)
 {
-  if (literal_vec_curr >= literal_vec_max)
+  int i;
+  if (_gst_compiler_state->literal_vec_curr >= _gst_compiler_state->literal_vec_max)
     realloc_literal_vec ();
 
-  *literal_vec_curr++ = oop;
-  return (literal_vec_curr - literal_vec - 1);
+  i =_gst_compiler_state->literal_vec_curr - _gst_compiler_state->literal_vec;
+  *_gst_compiler_state->literal_vec_curr++ = oop;
+  INC_ADD_OOP (oop);
+  return i;
 }
 
 int
@@ -2446,9 +2444,11 @@ _gst_add_forced_object (OOP oop)
 {
   OOP *lit;
 
-  for (lit = literal_vec; lit < literal_vec_curr; lit++)
+  for (lit = _gst_compiler_state->literal_vec;
+       lit < _gst_compiler_state->literal_vec_curr;
+       lit++)
     if (*lit == oop)
-      return (lit - literal_vec);
+      return (lit - _gst_compiler_state->literal_vec);
 
   return (add_literal (oop));
 }
@@ -2460,20 +2460,18 @@ get_literals_array (void)
   gst_object methodLiterals;
   int n;
 
-  n = literal_vec_curr - literal_vec;
+  n = _gst_compiler_state->literal_vec_curr - _gst_compiler_state->literal_vec;
   if (!n)
     return _gst_nil_oop;
 
   methodLiterals = new_instance_with (_gst_array_class, n,
 		                      &methodLiteralsOOP);
 
-  memcpy (methodLiterals->data, literal_vec, 
-	  (literal_vec_curr - literal_vec) * sizeof(OOP));
-
-  literal_vec_curr = literal_vec;
+  memcpy (methodLiterals->data, _gst_compiler_state->literal_vec, 
+	  n * sizeof(OOP));
 
   MAKE_OOP_READONLY (methodLiteralsOOP, true);
-  literal_vec_curr = literal_vec;
+  _gst_compiler_state->literal_vec_curr = _gst_compiler_state->literal_vec;
   return (methodLiteralsOOP);
 }
 
@@ -2556,7 +2554,7 @@ _gst_make_new_method (int primitiveIndex,
 		      int numArgs,
 		      int numTemps,
 		      int maximumStackDepth,
-		      OOP literals,
+		      OOP literalsOOP,
 		      bc_vector bytecodes,
 		      OOP class,
 		      OOP selector,
@@ -2567,6 +2565,7 @@ _gst_make_new_method (int primitiveIndex,
   method_header header;
   int newFlags;
   OOP method, methodDesc, sourceCode;
+  OOP literalOOP;
   inc_ptr incPtr;
 
   maximumStackDepth += numArgs + numTemps;
@@ -2586,7 +2585,7 @@ _gst_make_new_method (int primitiveIndex,
 
   else if (numArgs == 0
 	   && numTemps == 0
-	   && (newFlags = _gst_is_simple_return (bytecodes)) != 0)
+	   && (newFlags = _gst_is_simple_return (bytecodes, &literalOOP)) != 0)
     {
       header.headerFlag = newFlags & 0xFF;
       /* if returning an instance variable, its index is indicated in
@@ -2597,14 +2596,15 @@ _gst_make_new_method (int primitiveIndex,
       _gst_free_bytecodes (bytecodes);
       bytecodes = NULL;
 
-      /* If returning a literal but we have none, it was added with
-         _gst_add_forced_object.  */
-      if (newFlags == MTH_RETURN_LITERAL
-	  && (IS_NIL (literals)
-	      || NUM_WORDS (OOP_TO_OBJ (literals)) == 0))
+      /* Check if returning a literal from a push special or push integer
+         bytecode.  */
+      if (newFlags == MTH_RETURN_LITERAL && literalOOP != NULL)
         {
-          literals = get_literals_array ();
-          INC_ADD_OOP (literals);
+          gst_object literals;
+          INC_ADD_OOP (literalOOP);
+          literals = new_instance_with (_gst_array_class, 1, &literalsOOP);
+          literals->data[0] = literalOOP;
+          INC_ADD_OOP (literalsOOP);
         }
     }
 
@@ -2615,7 +2615,7 @@ _gst_make_new_method (int primitiveIndex,
     {
 #ifdef PRINT_BEFORE_OPTIMIZATION
       if (_gst_declare_tracing)
-	_gst_print_bytecodes (bytecodes, OOP_TO_OBJ (literals)->data);
+	_gst_print_bytecodes (bytecodes, OOP_TO_OBJ (literalsOOP)->data);
 #endif
       bytecodes = _gst_optimize_bytecodes (bytecodes);
     }
@@ -2624,7 +2624,7 @@ _gst_make_new_method (int primitiveIndex,
     printf ("  Allocated stack slots %d\n", maximumStackDepth);
 
   if (_gst_declare_tracing)
-    _gst_print_bytecodes (bytecodes, OOP_TO_OBJ (literals)->data);
+    _gst_print_bytecodes (bytecodes, OOP_TO_OBJ (literalsOOP)->data);
 
   maximumStackDepth += (1 << DEPTH_SCALE) - 1;	/* round */
   maximumStackDepth >>= DEPTH_SCALE;
@@ -2648,7 +2648,7 @@ _gst_make_new_method (int primitiveIndex,
 				sourceCode, categoryOOP);
   INC_ADD_OOP (methodDesc);
 
-  method = method_new (header, literals, bytecodes, class, methodDesc);
+  method = method_new (header, literalsOOP, bytecodes, class, methodDesc);
   INC_RESTORE_POINTER (incPtr);
   return (method);
 }

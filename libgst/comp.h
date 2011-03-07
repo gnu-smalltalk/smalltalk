@@ -230,6 +230,9 @@ typedef struct compiler_state
   int prev_line;
   scope cur_scope;
   mst_Boolean inside_block;
+  OOP *literal_vec;
+  OOP *literal_vec_curr;
+  OOP *literal_vec_max;
 } compiler_state;
 
 
@@ -307,10 +310,6 @@ extern void reset_compilation_category ()
 /* This function will send a message to ObjectMemory (a system
    class) asking it to broadcast the event named HOOK.  */
 extern void _gst_invoke_hook (enum gst_vm_hook hook) 
-  ATTRIBUTE_HIDDEN;
-
-/* Prepares the compiler for execution, initializing some variables.  */
-extern void _gst_init_compiler (void) 
   ATTRIBUTE_HIDDEN;
 
 /* Compile the code for a complete method definition.  This basically

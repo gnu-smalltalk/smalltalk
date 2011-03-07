@@ -1,5 +1,14 @@
 2011-03-07  Paolo Bonzini  <bonzini@gnu.org>
 
+	* libgst/comp.c: Use compiler state for the literal vector.
+	* libgst/comp.h: Add literal vector fields here.  Remove
+	_gst_init_compiler.
+	* libgst/files.c: Remove calls.
+	* libgst/opt.c: Adjust _gst_is_simple_return to return literal by ref.
+	* libgst/opt.h: Adjust prototype.
+
+2011-03-07  Paolo Bonzini  <bonzini@gnu.org>
+
 	* libgst/comp.c: Always pass literals to _gst_make_new_method.
 
 2011-03-07  Paolo Bonzini  <bonzini@gnu.org>

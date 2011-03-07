@@ -226,7 +226,8 @@ static mst_Boolean merge_stacks (OOP *dest,
 
 
 int
-_gst_is_simple_return (bc_vector bytecodes)
+_gst_is_simple_return (bc_vector bytecodes,
+		       OOP *literalOOP)
 {
   gst_uchar *bytes;
   size_t byteCodeLen;
@@ -234,6 +235,7 @@ _gst_is_simple_return (bc_vector bytecodes)
   OOP maybe_object = NULL;
   int i;
 
+  *literalOOP = NULL;
   if (bytecodes == NULL)
     return (MTH_NORMAL);
 
@@ -265,7 +267,7 @@ _gst_is_simple_return (bc_vector bytecodes)
         LINE_NUMBER_BYTECODE { }
         RETURN_CONTEXT_STACK_TOP {
 	  if (maybe_object)
-	    _gst_add_forced_object (maybe_object);
+	    *literalOOP = maybe_object;
 	  return maybe;
 	}
 

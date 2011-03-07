@@ -496,7 +496,6 @@ _gst_initialize (const char *kernel_dir,
   if (loadBinary && _gst_load_from_file (_gst_binary_image_name))
     {
       _gst_init_interpreter ();
-      _gst_init_compiler ();
       _gst_init_vmproxy ();
     }
   else if (abortOnFailure)
@@ -514,7 +513,6 @@ _gst_initialize (const char *kernel_dir,
       _gst_init_mem_default ();
       _gst_init_dictionary ();
       _gst_init_interpreter ();
-      _gst_init_compiler ();
       _gst_init_vmproxy ();
 
       _gst_install_initial_methods ();
