@@ -265,8 +265,6 @@ static symbol_list find_local_var (scope scope,
    the symbol list for the variable if it is found.  */
 static OOP find_class_variable (OOP varName);
 
-static scope cur_scope = NULL;
-
 /* This is an array of symbols which the virtual machine knows about,
    and is used to restore the global variables upon image load.  */
 static const symbol_info sym_info[] = {
@@ -350,13 +348,13 @@ _gst_get_scope_kind (scope_type scope)
 int
 _gst_get_arg_count (void)
 {
-  return (cur_scope->numArguments);
+  return (_gst_compiler_state->cur_scope->numArguments);
 }
 
 int
 _gst_get_temp_count (void)
 {
-  return (cur_scope->numTemporaries);
+  return (_gst_compiler_state->cur_scope->numTemporaries);
 }
 
 void
@@ -364,11 +362,11 @@ _gst_push_new_scope (void)
 {
   scope newScope;
   newScope = (scope) xmalloc (sizeof (*newScope));
-  newScope->prevScope = cur_scope;
+  newScope->prevScope = _gst_compiler_state->cur_scope;
   newScope->symbols = NULL;
   newScope->numArguments = 0;
   newScope->numTemporaries = 0;
-  cur_scope = newScope;
+  _gst_compiler_state->cur_scope = newScope;
 }
 
 void
@@ -376,8 +374,8 @@ _gst_pop_old_scope (void)
 {
   scope oldScope;
 
-  oldScope = cur_scope;
-  cur_scope = cur_scope->prevScope;
+  oldScope = _gst_compiler_state->cur_scope;
+  _gst_compiler_state->cur_scope = oldScope->prevScope;
 
   free_scope_symbols (oldScope);
   xfree (oldScope);
@@ -388,7 +386,7 @@ _gst_pop_all_scopes (void)
 {
   pool_list next;
 
-  while (cur_scope)
+  while (_gst_compiler_state->cur_scope)
     _gst_pop_old_scope ();
 
   while (_gst_current_parser->linearized_pools)
@@ -403,6 +401,8 @@ _gst_pop_all_scopes (void)
 int
 _gst_declare_arguments (tree_node args)
 {
+  scope cur_scope = _gst_compiler_state->cur_scope;
+
   if (args->nodeType == TREE_UNARY_EXPR)
     return (0);
 
@@ -437,6 +437,8 @@ _gst_declare_temporaries (tree_node temps)
 int
 _gst_declare_block_arguments (tree_node args)
 {
+  scope cur_scope = _gst_compiler_state->cur_scope;
+
   for (; args != NULL; args = args->v_list.next)
     if (_gst_declare_name (args->v_list.name, false, false) == -1)
       return -1;
@@ -451,6 +453,7 @@ void
 _gst_undeclare_name (void)
 {
   symbol_list oldList;
+  scope cur_scope = _gst_compiler_state->cur_scope;
 
   oldList = cur_scope->symbols;
   cur_scope->symbols = cur_scope->symbols->prevSymbol;
@@ -465,6 +468,7 @@ _gst_declare_name (const char *name,
 {
   symbol_list newList;
   OOP symbol = _gst_intern_string (name);
+  scope cur_scope = _gst_compiler_state->cur_scope;
 
   if (!allowDup && find_local_var (cur_scope, symbol) != NULL)
     return -1;
@@ -988,7 +992,7 @@ _gst_find_variable (symbol_entry * se,
       return (true);
     }
 
-  for (scope = cur_scope, scopeDistance = 0; scope != NULL;
+  for (scope = _gst_compiler_state->cur_scope, scopeDistance = 0; scope != NULL;
        scope = scope->prevScope, scopeDistance++)
     {
       s = find_local_var (scope, symbol);

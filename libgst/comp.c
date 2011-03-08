@@ -79,11 +79,15 @@ typedef struct method_attributes
   OOP oop;
 } method_attributes;
 
-
 /* These hold the compiler's notions of the current class for
    compilations, and the current category that compiled methods are to
    be placed into.  */
 tree_node _gst_curr_method;
+
+/* This holds other bits of compiler state that needs to be saved
+   when the compiler is reentered.  (Transition in progress, there
+   are other global data).  */
+compiler_state *_gst_compiler_state;
 
 /* This flag controls whether byte codes are printed after
    compilation.  */
@@ -703,6 +707,7 @@ _gst_compile_method (tree_node method,
 		     mst_Boolean install)
 {
   tree_node outer_method;
+  compiler_state s, *outer_state;
   tree_node statement;
   OOP selector;
   OOP methodOOP;
@@ -715,7 +720,10 @@ _gst_compile_method (tree_node method,
   dup_message_receiver = false;
   literal_vec_curr = literal_vec;
   outer_method = _gst_curr_method;
+  outer_state = _gst_compiler_state;
   _gst_curr_method = method;
+  _gst_compiler_state = &s;
+  memset (&s, 0, sizeof (s));
 
   incPtr = INC_SAVE_POINTER ();
 
@@ -849,6 +857,7 @@ _gst_compile_method (tree_node method,
 
   _gst_pop_all_scopes ();
   _gst_curr_method = outer_method;
+  _gst_compiler_state = outer_state;
 
   INC_RESTORE_POINTER (incPtr);
   return (methodOOP);

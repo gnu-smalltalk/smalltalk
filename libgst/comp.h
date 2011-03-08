@@ -224,9 +224,19 @@ typedef struct gst_block_closure
 }
  *gst_block_closure;
 
+typedef struct compiler_state
+{
+  scope cur_scope;
+} compiler_state;
+
 
 /* This holds the parse tree for the method being compiled.  */
 extern tree_node _gst_curr_method ATTRIBUTE_HIDDEN;
+
+/* This holds other bits of compiler state that needs to be saved
+   when the compiler is reentered.  (Transition in progress, there
+   are other global data).  */
+compiler_state *_gst_compiler_state;
 
 /* This is the value most recently returned by
    _gst_execute_statements.  It is used to communicate the returned

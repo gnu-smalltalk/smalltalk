@@ -1,5 +1,11 @@
 2011-03-07  Paolo Bonzini  <bonzini@gnu.org>
 
+	* libgst/comp.c: Add compiler_state.
+	* libgst/comp.h: Add compiler_state.
+	* libgst/sym.c: Move cur_scope into it.
+
+2011-03-07  Paolo Bonzini  <bonzini@gnu.org>
+
 	* libgst/gst-parse.h: Add linearized_pools.
 	* libgst/sym.c: Make linearized_pools per-parser.
 
