@@ -226,6 +226,8 @@ typedef struct gst_block_closure
 
 typedef struct compiler_state
 {
+  int line_offset;
+  int prev_line;
   scope cur_scope;
 } compiler_state;
 

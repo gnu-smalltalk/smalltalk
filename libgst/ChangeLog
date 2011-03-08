@@ -1,5 +1,10 @@
 2011-03-07  Paolo Bonzini  <bonzini@gnu.org>
 
+	* libgst/byte.c: Use compiler state for _gst_line_number.
+	* libgst/comp.h: Add fields here.
+
+2011-03-07  Paolo Bonzini  <bonzini@gnu.org>
+
 	* libgst/comp.c: Pass a whole method node to #executeStatements.
 	* libgst/comp.h: Adjust prototype.
 	* libgst/gst-parse.c: Add back removed code here.

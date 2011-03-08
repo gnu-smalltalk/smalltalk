@@ -118,9 +118,6 @@ compile_byte (gst_uchar byte, int arg)
 void
 _gst_line_number (int n, int flags)
 {
-  static int prev_line;
-  static int line_offset;
-
   if (n > 65535)
     n = 65535;
 
@@ -131,9 +128,9 @@ _gst_line_number (int n, int flags)
       if (flags & LN_ABSOLUTE)
 	{
 	  compile_byte (LINE_NUMBER_BYTECODE, n);
-	  prev_line = n;
+	  _gst_compiler_state->prev_line = n;
 	}
-      line_offset = n - 1;
+      _gst_compiler_state->line_offset = n - 1;
       next_line_number = -1;
     }
   else
@@ -141,16 +138,16 @@ _gst_line_number (int n, int flags)
       assert (!(flags & LN_ABSOLUTE));
       if (n == -1)
 	{
-	  prev_line = -1;
+	  _gst_compiler_state->prev_line = -1;
 	  next_line_number = -1;
 	}
       else
 	{
-	  assert (n > line_offset);
-	  if ((flags & LN_FORCE) || n != prev_line)
+	  assert (n > _gst_compiler_state->line_offset);
+	  if ((flags & LN_FORCE) || n != _gst_compiler_state->prev_line)
 	    {
-	      prev_line = n;
-	      next_line_number = n - line_offset;
+	      _gst_compiler_state->prev_line = n;
+	      next_line_number = n - _gst_compiler_state->line_offset;
 	    }
 	}
     }
