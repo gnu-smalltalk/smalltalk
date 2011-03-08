@@ -565,7 +565,7 @@ recover_error (gst_parser *p)
 
 static OOP
 execute_doit (gst_parser *p, tree_node temps, tree_node stmts,
-              OOP currentClassOOP, enum undeclared_strategy undeclared,
+              OOP currentClassOOP, mst_Boolean undeclared,
               mst_Boolean quiet)
 {
   tree_node method;
@@ -643,7 +643,7 @@ parse_doit (gst_parser *p, mst_Boolean fail_at_eof)
     }
   else if (statement)
     {
-      execute_doit (p, NULL, statement, NULL, UNDECLARED_TEMPORARIES, false);
+      execute_doit (p, NULL, statement, NULL, true, false);
       _gst_free_tree ();
     }
 
@@ -759,7 +759,7 @@ parse_eval_definition (gst_parser *p)
 	  fflush (stderr);
         }
 
-      resultOOP = execute_doit (p, tmps, stmts, NULL, UNDECLARED_TEMPORARIES,
+      resultOOP = execute_doit (p, tmps, stmts, NULL, true,
                                 _gst_regression_testing);
 
       if (_gst_regression_testing)
@@ -803,7 +803,7 @@ make_attribute (gst_parser *p, OOP classOOP, tree_node attribute_keywords)
        i++, keyword = keyword->v_list.next)
     {
       tree_node value = keyword->v_list.value;
-      OOP result = execute_doit (p, NULL, value, classOOP, UNDECLARED_GLOBALS, true);
+      OOP result = execute_doit (p, NULL, value, classOOP, false, true);
       if (!result)
         {
           _gst_had_error = true;
@@ -966,7 +966,7 @@ parse_class_definition (gst_parser *p, OOP classOOP, mst_Boolean extend)
 	      if (!_gst_had_error)
 		{
 	          stmt = _gst_make_statement_list (&stmt->location, stmt);
-	          result = execute_doit (p, NULL, stmt, the_class, UNDECLARED_GLOBALS, true);
+	          result = execute_doit (p, NULL, stmt, the_class, false, true);
 
 	          if (result)
 		    DICTIONARY_AT_PUT (class_var_dict, name, result);
@@ -1354,12 +1354,9 @@ parse_method (gst_parser *p, int at_end)
 
   if (!_gst_had_error && !_gst_skip_compilation)
     {
-      enum undeclared_strategy oldUndeclared;
-      oldUndeclared = _gst_set_undeclared (UNDECLARED_GLOBALS);
       _gst_current_parser->lastMethodOOP =
-        _gst_compile_method (method, false, true);
+        _gst_compile_method (method, false, true, false);
       INC_ADD_OOP (_gst_current_parser->lastMethodOOP);
-      _gst_set_undeclared (oldUndeclared);
     }
 
   _gst_free_tree ();

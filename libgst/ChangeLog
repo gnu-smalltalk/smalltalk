@@ -1,5 +1,19 @@
 2011-03-07  Paolo Bonzini  <bonzini@gnu.org>
 
+	* libgst/comp.c: Change undeclared_strategy to boolean,
+	accept it as an additional argument in _gst_compile_method,
+	move it into compiler state.
+	* libgst/comp.h: Add field, adjust prototype.
+	* libgst/gst-parse.c: Change undeclared_strategy to boolean,
+	pass it to _gst_compile_method.
+	* libgst/input.c: Remove calls to _gst_set_undeclared, it is
+	always overridden anyway.
+	* libgst/sym.c: Access undeclared strategy in compiler state,
+	remove _gst_set_undeclared.
+	* libgst/sym.h: Remove undeclared_strategy and _gst_set_undeclared.
+
+2011-03-07  Paolo Bonzini  <bonzini@gnu.org>
+
 	* libgst/comp.c: Accept recursive TREE_METHOD_NODEs, transform
 	them to compile-time constants.
 	* libgst/gst-parse.c: Parse compile-time constants as recursive

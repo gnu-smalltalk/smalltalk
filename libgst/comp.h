@@ -230,6 +230,7 @@ typedef struct compiler_state
   int prev_line;
   scope cur_scope;
   mst_Boolean inside_block;
+  mst_Boolean undeclared_temporaries;
   OOP *literal_vec;
   OOP *literal_vec_curr;
   OOP *literal_vec_max;
@@ -278,11 +279,10 @@ extern OOP _gst_compute_keyword_selector (tree_node selectorExpr)
 extern OOP _gst_make_constant_oop (tree_node constExpr);
 
 /* Called to compile and execute an "immediate expression"; i.e. a Smalltalk
-   statement that is not part of a method definition and where temporaries are
-   declared automatically.  The parse trees are in METHOD.
-   Return the object that was returned by the expression.  */
+   statement that is not part of a method definition.  The parse trees are in
+   METHOD.  Return the object that was returned by the expression.  */
 extern OOP _gst_execute_statements (tree_node method,
-				    enum undeclared_strategy undeclared,
+				    mst_Boolean undeclaredTemps,
 				    mst_Boolean quiet)
   ATTRIBUTE_HIDDEN;
 
@@ -320,7 +320,8 @@ extern void _gst_invoke_hook (enum gst_vm_hook hook)
    derived from the method expression.  */
 extern OOP _gst_compile_method (tree_node method,
 				mst_Boolean returnLast,
-				mst_Boolean install) 
+				mst_Boolean install,
+                                mst_Boolean undeclaredTemps) 
   ATTRIBUTE_HIDDEN;
 
 /* Constructs and returns a new CompiledMethod instance.  It computes

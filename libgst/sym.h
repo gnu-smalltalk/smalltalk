@@ -87,17 +87,6 @@ symbol_entry;
 typedef struct scope *scope;
 typedef struct pool_list *pool_list;
 
-enum undeclared_strategy {
-  UNDECLARED_GLOBALS,
-  UNDECLARED_TEMPORARIES,
-  UNDECLARED_CURRENT
-};
-
-/* Set whether undeclared globals can be considered forward references,
-   or whether they should be considered like temporary variables.  */
-extern int _gst_set_undeclared (enum undeclared_strategy value)
-  ATTRIBUTE_HIDDEN;
-
 /* Establish a new dictionary that will host local variables of the
    evaluations; return the old one.  */
 extern OOP _gst_push_temporaries_dictionary (void)

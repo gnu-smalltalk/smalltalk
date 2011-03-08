@@ -823,7 +823,6 @@ _gst_process_stdin (const char *prompt)
 mst_Boolean
 _gst_process_file (const char *fileName, enum gst_file_dir dir)
 {
-  enum undeclared_strategy old;
   int fd;
   char *f;
 
@@ -841,11 +840,9 @@ _gst_process_file (const char *fileName, enum gst_file_dir dir)
       if (_gst_verbosity == 3)
 	printf ("Processing %s\n", f);
 
-      old = _gst_set_undeclared (UNDECLARED_GLOBALS);
       _gst_push_unix_file (fd, f);
       _gst_parse_stream (NULL);
       _gst_pop_stream (true);
-      _gst_set_undeclared (old);
       errno = 0;
     }
 

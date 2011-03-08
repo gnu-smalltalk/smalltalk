@@ -5325,7 +5325,6 @@ primitive VMpr_Stream_fileInLine [succeed,fail]
   OOP oop2 = (numArgs == 4 ? POP_OOP () : oop3);
   OOP oop1 = POP_OOP ();
   OOP streamOOP = STACKTOP ();
-  enum undeclared_strategy old;
   
   if (!RECEIVER_IS_OOP (streamOOP))
     PRIM_FAILED;
@@ -5340,9 +5339,7 @@ primitive VMpr_Stream_fileInLine [succeed,fail]
 
       _gst_push_stream_oop (streamOOP);
       _gst_set_stream_info (arg1, oop2, oop3, arg4);
-      old = _gst_set_undeclared (UNDECLARED_GLOBALS);
       interrupted = parse_stream_with_protection (NULL);
-      _gst_set_undeclared (old);
       _gst_pop_stream (false);
       if (interrupted)
 	stop_execution ();

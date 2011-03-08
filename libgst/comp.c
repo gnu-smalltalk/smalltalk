@@ -502,7 +502,7 @@ _gst_invoke_hook (enum gst_vm_hook hook)
 
 OOP
 _gst_execute_statements (tree_node method,
-			 enum undeclared_strategy undeclared,
+			 mst_Boolean undeclared,
 			 mst_Boolean quiet)
 {
   tree_node statements;
@@ -512,15 +512,12 @@ _gst_execute_statements (tree_node method,
   struct rusage startRusage, endRusage;
 #endif
   OOP methodOOP, resultOOP;
-  enum undeclared_strategy oldUndeclared;
   inc_ptr incPtr;
 
   if (_gst_regression_testing
       || _gst_verbosity < 2
       || !_gst_get_cur_stream_prompt ())
     quiet = true;
-
-  oldUndeclared = _gst_set_undeclared (undeclared);
 
   incPtr = INC_SAVE_POINTER ();
   statements = method->v_method.statements;
@@ -535,6 +532,7 @@ _gst_execute_statements (tree_node method,
       _gst_curr_method = method;
       _gst_compiler_state = &s;
       memset (&s, 0, sizeof (s));
+      _gst_compiler_state->undeclared_temporaries = undeclared;
 
       if (setjmp (_gst_compiler_state->bad_method) == 0)
         {
@@ -553,11 +551,10 @@ _gst_execute_statements (tree_node method,
       if (_gst_declare_tracing)
         printf ("Compiling doit code for %O\n", method->v_method.currentClass);
 
-      methodOOP = _gst_compile_method (method, true, false);
+      methodOOP = _gst_compile_method (method, true, false, undeclared);
       resultOOP = _gst_nil_oop;
     }
 
-  _gst_set_undeclared (oldUndeclared);
   if (_gst_had_error)		/* don't execute on error */
     {
       INC_RESTORE_POINTER (incPtr);
@@ -684,7 +681,8 @@ _gst_execute_statements (tree_node method,
 OOP
 _gst_compile_method (tree_node method,
 		     mst_Boolean returnLast,
-		     mst_Boolean install)
+		     mst_Boolean install,
+		     mst_Boolean undeclaredTemps)
 {
   tree_node outer_method;
   compiler_state s, *outer_state;
@@ -702,6 +700,8 @@ _gst_compile_method (tree_node method,
   _gst_curr_method = method;
   _gst_compiler_state = &s;
   memset (&s, 0, sizeof (s));
+
+  _gst_compiler_state->undeclared_temporaries = undeclaredTemps;
 
   /* Prepare the literal vector for use.  The literal vector is where the
      compiler will store any literals that are used by the method being
@@ -941,7 +941,7 @@ compile_compile_time_constant (tree_node expr)
   bc_vector current_bytecodes;
 
   current_bytecodes = _gst_save_bytecode_array ();
-  resultOOP = _gst_execute_statements (expr, UNDECLARED_GLOBALS, true);
+  resultOOP = _gst_execute_statements (expr, false, true);
   _gst_restore_bytecode_array (current_bytecodes);
 
   constant = _gst_make_oop_constant (&expr->location,

@@ -177,9 +177,6 @@ OOP temporaries_dictionary = NULL;
 /* The list of selectors for the send immediate bytecode.  */
 struct builtin_selector _gst_builtin_selectors[256] = {};
 
-/* True if undeclared globals can be considered forward references.  */
-enum undeclared_strategy _gst_use_undeclared = UNDECLARED_TEMPORARIES;
-
 /* Answer whether OOP is a Smalltalk String LEN characters long and
    these characters match the first LEN characters of STR (which must
    not have embedded NULs).  */
@@ -883,15 +880,6 @@ find_class_variable (OOP varName)
 }
 
 
-int
-_gst_set_undeclared (enum undeclared_strategy new)
-{
-  enum undeclared_strategy old = _gst_use_undeclared;
-  if (new != UNDECLARED_CURRENT)
-    _gst_use_undeclared = new;
-  return old;
-}
-
 OOP
 _gst_push_temporaries_dictionary (void)
 {
@@ -928,9 +916,14 @@ _gst_find_variable_binding (tree_node list)
   if (!IS_NIL (assocOOP))
     return _gst_make_oop_constant (&list->location, assocOOP);
 
-  else if (_gst_use_undeclared == UNDECLARED_GLOBALS
-	   && !elt->v_list.next 
-	   && isupper (*STRING_OOP_CHARS (symbol)))
+  /* For temporaries, make a deferred binding so that we can try using
+     a global variable.  Unlike namespaces, the temporaries dictionary
+     does not know anything about Undeclared.  */
+  if (_gst_compiler_state->undeclared_temporaries)
+    return _gst_make_deferred_binding_constant (&list->location, list);
+
+  if (!elt->v_list.next 
+      && isupper (*STRING_OOP_CHARS (symbol)))
     {
       OOP dictOOP = dictionary_at (_gst_smalltalk_dictionary,
 				   _gst_undeclared_symbol);
@@ -940,20 +933,13 @@ _gst_find_variable_binding (tree_node list)
       return _gst_make_oop_constant (&list->location, assocOOP);
     }
 
-  /* For temporaries, make a deferred binding so that we can try using
-     a global variable.  Unlike namespaces, the temporaries dictionary
-     does not know anything about Undeclared.  */
-  else if (_gst_use_undeclared == UNDECLARED_TEMPORARIES)
-    return _gst_make_deferred_binding_constant (&list->location, list);
-
-  else
-    return NULL;
+  return NULL;
 }
 
 OOP
 _gst_get_undeclared_dictionary ()
 {
-  assert (_gst_use_undeclared == UNDECLARED_TEMPORARIES);
+  assert (_gst_compiler_state->undeclared_temporaries);
   return temporaries_dictionary;
 }
 
