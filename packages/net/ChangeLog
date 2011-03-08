@@ -1,3 +1,7 @@
+2011-03-07  Paolo Bonzini  <bonzini@gnu.org>
+
+	* gnutls-wrapper.c: Fix previous patch.
+
 2011-01-11  Paolo Bonzini  <bonzini@gnu.org>
 
 	* gnutls-wrapper.c: Support older GnuTLS.

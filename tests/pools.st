@@ -135,6 +135,25 @@ Eval [ MyLibrary.BackForMore test ] "'MyLibrary 1.0'"
 
 "These do not work yet:
 
+""Test resolution within class variables""
+MyLibrary.Foo class extend [ TryThis := Exception printNl ]
+MyLibrary.Bar class extend [ TryThis := Scape printNl ]
+MyLibrary.Blah class extend [ TryThis := Scape printNl ]
+MyProject.MyLibWrapper.Baz class extend [ TryThis := Scape printNl ]
+MyProject.MyLibWrapper.Baz class extend [ TryThis := Exception printNl ]
+MyProject.MyLibWrapper.Baz class extend [ TryThis := ValueAdaptor printNl ]
+MyLibrary.BackForMore class extend [ TryThis := PkgVersion printNl ]
+
+""Test resolution within compile-time constants""
+MyLibrary.Foo class extend [ test [ ^##(Exception printNl) ] ]
+MyLibrary.Bar class extend [ test [ ^##(Scape printNl) ] ]
+MyLibrary.Blah class extend [ test [ ^##(Scape printNl) ] ]
+MyProject.MyLibWrapper.Baz class extend [ test [ ^##(Scape printNl) ] ]
+MyProject.MyLibWrapper.Baz class extend [ test [ ^##(Exception printNl) ] ]
+MyProject.MyLibWrapper.Baz class extend [ test [ ^##(ValueAdaptor printNl) ] ]
+MyLibrary.BackForMore class extend [ test [ ^##(PkgVersion printNl) ] ]
+
+""Both of the above -- this does not work yet""
 MyLibrary.Foo class extend [ TryThis := ##(Exception printNl) ]
 MyLibrary.Bar class extend [ TryThis := ##(Scape printNl) ]
 MyLibrary.Blah class extend [ TryThis := ##(Scape printNl) ]

@@ -22,7 +22,7 @@ This class is part of the GLORP system (see http://www.glorp.org), licensed unde
 	"Access beyond fixed variables."
 
 	<category: 'fundamental primitives'>
-	<primitive: VMpr_Object_instVarAt>
+	<primitive: VMPrimitives.VMpr_Object_instVarAt>
 	^self basicAt: index - self class instSize
     ]
 
@@ -37,7 +37,7 @@ This class is part of the GLORP system (see http://www.glorp.org), licensed unde
 	"Access beyond fixed fields"
 
 	<category: 'fundamental primitives'>
-	<primitive: VMpr_Object_instVarAtPut>
+	<primitive: VMPrimitives.VMpr_Object_instVarAtPut>
 	^self basicAt: anInteger - self class instSize put: anObject
     ]
 
@@ -48,7 +48,7 @@ This class is part of the GLORP system (see http://www.glorp.org), licensed unde
 	 Array."
 
 	<category: 'fundamental primitives'>
-	<primitive: VMpr_Object_performWithArguments>
+	<primitive: VMPrimitives.VMpr_Object_performWithArguments>
 	
     ]
 
@@ -58,7 +58,7 @@ This class is part of the GLORP system (see http://www.glorp.org), licensed unde
 	 must be expecting one argument."
 
 	<category: 'fundamental primitives'>
-	<primitive: VMpr_Object_perform>
+	<primitive: VMPrimitives.VMpr_Object_perform>
 	
     ]
 ]

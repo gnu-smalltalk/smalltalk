@@ -1,3 +1,7 @@
+2011-03-08  Paolo Bonzini  <bonzini@gnu.org>
+
+	* libgst/opt.c: Add missing verification rule.
+
 2011-03-07  Paolo Bonzini  <bonzini@gnu.org>
 
 	* libgst/comp.c: Remove _gst_display_compilation_trace, put

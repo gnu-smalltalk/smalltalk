@@ -204,7 +204,7 @@ as #methodsFor: to extend it with class-side methods).'>
 	 will load the file."
 
 	<category: 'accessing'>
-	<primitive: VMpr_Object_class>
+	<primitive: VMPrimitives.VMpr_Object_class>
     ]
 
     doesNotUnderstand: aMessage [

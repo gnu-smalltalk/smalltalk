@@ -1,3 +1,15 @@
+2011-03-07  Paolo Bonzini <bonzini@gnu.org>
+
+	* tests/pools.st: Add broken testcases.
+
+2011-03-07  Paolo Bonzini <bonzini@gnu.org>
+
+	* kernel/CType.st: Fix #storeOn: for array types.
+
+2011-03-07  Paolo Bonzini <bonzini@gnu.org>
+
+	* kernel/Autoload.st: Fix declaration of #class for Autoload.
+
 2011-02-28  Paolo Bonzini <bonzini@gnu.org>
 
 	* kernel/FloatQ.st: Improve precision of FloatQ constants for

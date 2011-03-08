@@ -376,7 +376,7 @@ CPtrCType subclass: CArrayCType [
 	    nextPutAll: '(CArrayCType elementType: ';
 	    store: self elementType;
 	    nextPutAll: ' numberOfElements: ';
-	    store: numElements printString;
+	    store: numElements asInteger;
 	    nextPut: $)
     ]
 

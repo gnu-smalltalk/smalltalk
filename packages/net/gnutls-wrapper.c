@@ -147,6 +147,7 @@ main (int argc, char **argv)
 
   sockets_init ();
   gnutls_init (&session, GNUTLS_CLIENT);
+  gnutls_set_default_priority (session);
 
   gnutls_anon_allocate_client_credentials (&anon_cred);
   gnutls_credentials_set (session, GNUTLS_CRD_ANON, anon_cred);
