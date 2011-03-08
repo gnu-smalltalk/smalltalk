@@ -1719,7 +1719,17 @@ _gst_verify_method (OOP methodOOP, int *num_outer_temps, int depth)
 	      *sp++ = _gst_small_integer_class;
 	    }
 
-	    RETURN_METHOD_STACK_TOP,
+	    RETURN_METHOD_STACK_TOP {
+              block_header header;
+	      if (OOP_CLASS (methodOOP) != _gst_compiled_block_class)
+		return "invalid return from method";
+
+              header = GET_BLOCK_HEADER (methodOOP);
+              if (header.clean != (1 << BLK_CLEAN_BITS) - 1)
+		return "invalid return from clean block";
+
+	      break;
+	    }
 	    RETURN_CONTEXT_STACK_TOP { break; }
 
 	    LINE_NUMBER_BYTECODE { }
