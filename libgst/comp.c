@@ -399,9 +399,6 @@ static OOP *literal_vec = NULL;
    method being compiled, and the first slot past the literal vector */
 static OOP *literal_vec_curr, *literal_vec_max;
 
-/* This indicates whether we are compiling a block */
-static int inside_block;
-
 /* HACK ALERT!! HACK ALERT!!  This variable is used for cascading.
    The tree structure is all wrong for the code in cascade processing
    to find the receiver of the initial message.  What this does is
@@ -734,7 +731,6 @@ _gst_compile_method (tree_node method,
 
   _gst_alloc_bytecodes ();
   _gst_push_new_scope ();
-  inside_block = 0;
   selector = compute_selector (method->v_method.selectorExpr);
 
   /* When we are reading from stdin, it's better to write line numbers where
@@ -879,7 +875,7 @@ compile_statement (tree_node stmt)
     }
 
   receiver = stmt->v_expr.receiver;
-  if (inside_block)
+  if (_gst_compiler_state->inside_block)
     {
       compile_expression (receiver);
       _gst_compile_byte (RETURN_METHOD_STACK_TOP, 0);
@@ -1137,7 +1133,7 @@ compile_statements (tree_node statementList,
   if (isBlock)
     {
       _gst_line_number (statementList->location.first_line, LN_FORCE);
-      inside_block++;
+      _gst_compiler_state->inside_block++;
     }
 
   for (stmt = statementList;; stmt = stmt->v_list.next)
@@ -1162,7 +1158,7 @@ compile_statements (tree_node statementList,
   if (isBlock)
     {
       _gst_line_number (-1, 0);
-      inside_block--;
+      _gst_compiler_state->inside_block--;
     }
 
   return (stmt->v_list.value->nodeType == TREE_RETURN_EXPR);

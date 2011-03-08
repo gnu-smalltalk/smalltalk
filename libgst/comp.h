@@ -229,6 +229,7 @@ typedef struct compiler_state
   int line_offset;
   int prev_line;
   scope cur_scope;
+  mst_Boolean inside_block;
 } compiler_state;
 
 
