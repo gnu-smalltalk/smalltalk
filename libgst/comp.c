@@ -384,10 +384,6 @@ static void install_method (OOP methodOOP,
    _gst_prepare_execution_environment.  */
 static OOP termination_method;
 
-/* Used to abort really losing compiles, jumps back to the top level
-   of the compiler */
-static jmp_buf bad_method;
-
 /* The linked list of attributes that are specified by the method.  */
 static method_attributes *method_attrs = NULL;
 
@@ -406,7 +402,7 @@ static mst_Boolean dup_message_receiver = false;
 
 /* Exit a really losing compilation */
 #define EXIT_COMPILATION()						\
-	longjmp(bad_method, 1)
+	longjmp(_gst_compiler_state->bad_method, 1)
 
 /* Answer whether the BLOCKNODE parse node has temporaries or
    arguments.  */
@@ -540,17 +536,25 @@ _gst_execute_statements (tree_node method,
       && statements->v_list.value->nodeType == TREE_CONST_EXPR
       && !statements->v_list.next)
     {
-      if (setjmp (bad_method) == 0)
-        resultOOP = _gst_make_constant_oop (statements->v_list.value);
-      else
-        {
-          _gst_had_error = true;
-          INC_RESTORE_POINTER (incPtr);
-          return NULL;
-        }
+      tree_node outer_method;
+      compiler_state s, *outer_state;
+      outer_method = _gst_curr_method;
+      outer_state = _gst_compiler_state;
+      _gst_curr_method = method;
+      _gst_compiler_state = &s;
+      memset (&s, 0, sizeof (s));
 
+      if (setjmp (_gst_compiler_state->bad_method) == 0)
+        {
+          resultOOP = _gst_make_constant_oop (statements->v_list.value);
+          INC_ADD_OOP (resultOOP);
+        }
+      else
+        _gst_had_error = true;
+
+      _gst_curr_method = outer_method;
+      _gst_compiler_state = outer_state;
       methodOOP = _gst_nil_oop;
-      INC_ADD_OOP (resultOOP);
     }
   else
     {
@@ -563,7 +567,10 @@ _gst_execute_statements (tree_node method,
 
   _gst_set_undeclared (oldUndeclared);
   if (_gst_had_error)		/* don't execute on error */
-    return (NULL);
+    {
+      INC_RESTORE_POINTER (incPtr);
+      return NULL;
+    }
 
   INC_ADD_OOP (methodOOP);
 
@@ -700,7 +707,6 @@ _gst_compile_method (tree_node method,
   gst_compiled_method compiledMethod;
 
   dup_message_receiver = false;
-
   outer_method = _gst_curr_method;
   outer_state = _gst_compiler_state;
   _gst_curr_method = method;
@@ -739,7 +745,7 @@ _gst_compile_method (tree_node method,
   if (_gst_declare_tracing)
     printf ("  class %O, selector %O\n", method->v_method.currentClass, selector);
 
-  if (setjmp (bad_method) == 0)
+  if (setjmp (_gst_compiler_state->bad_method) == 0)
     {
       if (_gst_declare_arguments (method->v_method.selectorExpr) == -1)
 	{

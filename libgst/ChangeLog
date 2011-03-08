@@ -1,5 +1,10 @@
 2011-03-07  Paolo Bonzini  <bonzini@gnu.org>
 
+	* libgst/comp.c: Use compiler state for the bad_method jmpbuf.
+	* libgst/comp.h: Add field here.
+
+2011-03-07  Paolo Bonzini  <bonzini@gnu.org>
+
 	* libgst/comp.c: Use compiler state for the literal vector.
 	* libgst/comp.h: Add literal vector fields here.  Remove
 	_gst_init_compiler.
