@@ -252,16 +252,16 @@ and vice versa.'>
 		(c isDigitAddress: host) 
 		    ifTrue: [^self at: host cache: [Array with: (c fromString: host)]]].
 	addresses := self at: host
-	    cache: [ | hints result |
+	    cache: [ | hints result array |
 		hints := CAddrInfoStruct gcNew.
 		hints aiFamily value: self protocolFamily.
 		hints aiFlags value: (self aiFlags bitOr: self aiCanonname).
-		result := hints getaddrinfo: host.
-		result isNil
-		    ifTrue: [ nil ]
-		    ifFalse: [
-			[self extractAddressesAfterLookup: result] 
-				ensure: [result free]]].
+		[(result := hints getaddrinfo: host) isNil
+                    ifTrue: [nil]
+                    ifFalse: [
+		        array := self extractAddressesAfterLookup: result.
+                        array isEmpty ifTrue: [nil] ifFalse: [array]]]
+                    ensure: [result free]].
 
 	^addresses
     ]
@@ -277,7 +277,9 @@ and vice versa.'>
 	aString isEmpty ifTrue: [^self loopbackHost].
 	all := self allByName: aString.
 	all isNil ifTrue: [^nil].
-	^all anyOne
+        self == SocketAddress ifFalse: [^all anyOne].
+	^all detect: [:each | each isKindOf: Socket defaultAddressClass]
+            ifNone: [all anyOne]
     ]
 
     SocketAddress class >> extractAddressesAfterLookup: aiHead [
