@@ -501,7 +501,8 @@ _gst_invoke_hook (enum gst_vm_hook hook)
 
 
 OOP
-_gst_execute_statements (tree_node method,
+_gst_execute_statements (OOP receiverOOP,
+			 tree_node method,
 			 mst_Boolean undeclared,
 			 mst_Boolean quiet)
 {
@@ -579,7 +580,7 @@ _gst_execute_statements (tree_node method,
 
       /* send a message to NIL, which will find this synthetic method
          definition in Object and execute it */
-      resultOOP = _gst_nvmsg_send (_gst_nil_oop, methodOOP, NULL, 0);
+      resultOOP = _gst_nvmsg_send (receiverOOP, methodOOP, NULL, 0);
       INC_ADD_OOP (resultOOP);
 
       endTime = _gst_get_milli_time ();
@@ -941,7 +942,7 @@ compile_compile_time_constant (tree_node expr)
   bc_vector current_bytecodes;
 
   current_bytecodes = _gst_save_bytecode_array ();
-  resultOOP = _gst_execute_statements (expr, false, true);
+  resultOOP = _gst_execute_statements (_gst_nil_oop, expr, false, true);
   _gst_restore_bytecode_array (current_bytecodes);
 
   constant = _gst_make_oop_constant (&expr->location,

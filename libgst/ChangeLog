@@ -1,3 +1,9 @@
+2011-03-09  Paolo Bonzini  <bonzini@gnu.org>
+
+	* libgst/comp.c: Add receiver to _gst_execute_statements.
+	* libgst/gst-parse.c: Replace current class with receiver
+	in execute_doit.
+
 2011-03-07  Paolo Bonzini  <bonzini@gnu.org>
 
 	* libgst/comp.c: Change undeclared_strategy to boolean,

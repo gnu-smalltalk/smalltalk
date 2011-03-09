@@ -270,12 +270,16 @@ A extend [
 
 Eval [ Undeclared includesKey: #UndeclaredGlobal ]
 
-"Fix referring to previous class variables in class variable declarations"
+"Fix referring to self, as well as previous class variables,
+ in class variable declarations"
 Object subclass: A [
-    B := 5.
-    C := B
+    B := name.
+    C := self.
+    D := C name
 ]
+Eval [ A.B ]
 Eval [ A.C ]
+Eval [ A.D ]
 
 "Test referring to the current class from a pragma."
 Behavior extend [

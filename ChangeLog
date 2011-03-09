@@ -1,3 +1,8 @@
+2011-03-09  Paolo Bonzini <bonzini@gnu.org>
+
+	* tests/compiler.st: Add test case.
+	* tests/compiler.ok: Regenerate.
+
 2011-03-07  Paolo Bonzini <bonzini@gnu.org>
 
 	* tests/pools.st: Enable fixed testcases.

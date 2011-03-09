@@ -565,8 +565,8 @@ recover_error (gst_parser *p)
 
 static OOP
 execute_doit (gst_parser *p, tree_node temps, tree_node stmts,
-              OOP currentClassOOP, mst_Boolean undeclared,
-              mst_Boolean quiet)
+              OOP receiverOOP,
+	      mst_Boolean undeclared, mst_Boolean quiet)
 {
   tree_node method;
   mst_Boolean in_class;
@@ -577,12 +577,13 @@ execute_doit (gst_parser *p, tree_node temps, tree_node stmts,
   if (!in_class)
     {
       assert (p == _gst_current_parser);
-      if (currentClassOOP)
-        _gst_set_compilation_class (currentClassOOP);
+      if (receiverOOP)
+        _gst_set_compilation_class (OOP_CLASS (receiverOOP));
       else
         {
           /* Let doits access the variables and classes in the current namespace.  */
           set_compilation_namespace (p->current_namespace);
+	  receiverOOP = _gst_nil_oop;
           p->currentClass = _gst_undefined_object_class;
           _gst_register_oop (p->currentClass);
           _gst_compute_linearized_pools (p, true);
@@ -601,7 +602,7 @@ execute_doit (gst_parser *p, tree_node temps, tree_node stmts,
                       _gst_untrusted_parse (),
                       false);
 
-  resultOOP = _gst_execute_statements (method, undeclared, quiet);
+  resultOOP = _gst_execute_statements (receiverOOP, method, undeclared, quiet);
   incPtr = INC_SAVE_POINTER ();
   INC_ADD_OOP (resultOOP);
 
