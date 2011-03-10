@@ -293,7 +293,7 @@ Copyright (c) Kazuki Yasumatsu, 1995. All rights reserved.
 	    cr.
 	self putRequestHeaders: requestHeaders.
 	binary 
-	    ifTrue: [self connectionStream stream nextPutAll: data]
+	    ifTrue: [(self connectionStream stream) nextPutAll: data; flush]
 	    ifFalse: [self nextPutAll: data].
 	^self readResponseInto: aStream
     ]
