@@ -1,3 +1,27 @@
+2011-03-10  Holger Hans Peter Freyther  <holger@moiji-mobile.com>
+
+	* HTTP.st: Flush the binary stream.
+
+2011-03-07  Holger Hans Peter Freyther  <holger@moiji-mobile.com>
+
+	* Base.st: Call connectionFailedError of NetProtocolInterpreter.
+
+2011-03-07  Holger Hans Peter Freyther  <holger@moiji-mobile.com>
+
+	* URIResolver.st: Add #doHTTPRequest and use it.
+
+2011-03-06  Holger Hans Peter Freyther  <holger@moiji-mobile.com>
+
+	* URIResolver.st: Align GET and POST for HTTP.
+
+2011-03-06  Holger Hans Peter Freyther  <holger@moiji-mobile.com>
+
+	* URIResolver.st: Always set the 'Host' header for HTTP.
+
+2011-03-06  Holger Hans Peter Freyther  <holger@moiji-mobile.com>
+
+	* URIResolver.st: Add #defaultHeaders for HTTP.
+
 2011-03-07  Paolo Bonzini  <bonzini@gnu.org>
 
 	* gnutls-wrapper.c: Fix previous patch.

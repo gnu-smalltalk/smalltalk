@@ -75,6 +75,18 @@ Copyright (c) Kazuki Yasumatsu, 1995. All rights reserved.
 	^entity stream
     ]
 
+    defaultHeaders [
+	"The default headers for HTTP like requests"
+	| requestHeaders |
+	requestHeaders := OrderedCollection new.
+	requestHeaders add: 'User-Agent: GNU-Smalltalk/' , Smalltalk version.
+	requestHeaders add: 'Accept: text/html, image/gif, */*; q=0.2'.
+	requestHeaders add: 'Host: ' , url host.
+	noCache ifTrue: [requestHeaders add: 'Pragma: no-cache'].
+
+	^ requestHeaders
+    ]
+
     connectClient [
 	<category: 'private'>
 	| host |
@@ -491,14 +503,10 @@ Copyright (c) Kazuki Yasumatsu, 1995. All rights reserved.
 	^self requestHttpContents: url requestString
     ]
 
-    requestHttpContents: urlString [
-	<category: 'http accessing'>
+    doHTTPRequest: requestBlock onSuccess: successBlock [
+	<category: 'private'>
 	| requestHeaders tmpFile stream protocolError response string |
-	requestHeaders := OrderedCollection new.
-	requestHeaders add: 'User-Agent: GNU-Smalltalk/' , Smalltalk version.
-	requestHeaders add: 'Accept: text/html, image/gif, */*; q=0.2'.
-	requestHeaders add: 'Host: ' , url host.
-	noCache ifTrue: [requestHeaders add: 'Pragma: no-cache'].
+	requestHeaders := self defaultHeaders.
 	client reporter statusString: 'Connecting'.
 	protocolError := false.
 	client reporter 
@@ -508,10 +516,7 @@ Copyright (c) Kazuki Yasumatsu, 1995. All rights reserved.
 	
 	[
 	[
-	[response := client 
-		    get: urlString
-		    requestHeaders: requestHeaders
-		    into: stream] 
+	[response := requestBlock value: requestHeaders value: stream]
 		ensure: [client close]] 
 		on: NetClientError
 		do: [:ex | ^self errorContents: ex messageText]
@@ -548,12 +553,22 @@ Copyright (c) Kazuki Yasumatsu, 1995. All rights reserved.
 		    guessMimeType;
 		    yourself]
 	    ifFalse: 
-		[(WebEntity new)
-		    url: url;
-		    canCache: noCache not;
-		    localFileName: tmpFile name;
-		    guessMimeType;
-		    yourself]
+		[|ent |
+		    ent := (WebEntity new)
+			    url: url;
+			    localFileName: tmpFile name;
+			    canCache: noCache not;
+			    guessMimeType;
+			    yourself.
+		    successBlock value: ent.
+		    ent]
+    ]
+
+    requestHttpContents: urlString [
+	<category: 'http accessing'>
+	^ self doHTTPRequest: [:requestHeaders :stream |
+		    client  get: urlString requestHeaders: requestHeaders into: stream]
+	       onSuccess: [:ent | ]
     ]
 
     getHttpHead [
@@ -568,11 +583,7 @@ Copyright (c) Kazuki Yasumatsu, 1995. All rights reserved.
     requestHttpHead: urlString [
 	<category: 'http accessing'>
 	| requestHeaders tmpFile stream protocolError response string |
-	requestHeaders := OrderedCollection new.
-	requestHeaders add: 'User-Agent: GNU-Smalltalk/' , Smalltalk version.
-	requestHeaders add: 'Accept: text/html, image/gif, */*; q=0.2'.
-	requestHeaders add: 'Host: ' , url host.
-	noCache ifTrue: [requestHeaders add: 'Pragma: no-cache'].
+	requestHeaders := self defaultHeaders.
 	client reporter statusString: 'Connecting'.
 	client reporter 
 	    statusString: 'Connect: Host contacted. Waiting for reply...'.
@@ -644,68 +655,14 @@ Copyright (c) Kazuki Yasumatsu, 1995. All rights reserved.
 
     postHttpContents: contents urlString: urlString [
 	<category: 'http accessing'>
-	| requestHeaders tmpFile stream protocolError response string |
-	requestHeaders := OrderedCollection new.
-	requestHeaders add: 'User-Agent: GNU-Smalltalk/' , Smalltalk version.
-	requestHeaders add: 'Accept: text/html, image/gif, */*; q=0.2'.
-	noCache ifTrue: [requestHeaders add: 'Pragma: no-cache'].
-	client reporter 
-	    statusString: 'Connect: Host contacted. Waiting for reply...'.
-	stream := self tmpFile.
-	tmpFile := stream file.
-	protocolError := false.
-	
-	[
-	[
-	[response := client 
-		    post: urlString
+	^ self doHTTPRequest: [:requestHeaders :stream |
+		    client post: urlString
 		    type: contents type
 		    data: contents asStringOrByteArray
 		    binary: contents isBinary
 		    requestHeaders: requestHeaders
 		    into: stream] 
-		ensure: [client close]] 
-		on: NetClientError
-		do: [:ex | ^self errorContents: ex messageText]
-		on: ProtocolError
-		do: 
-		    [:ex | 
-		    protocolError := true.
-		    ex pass]
-		on: HTTP.HTTPRedirection
-		do: 
-		    [:ex | 
-		    | location |
-		    location := ex tag.
-		    location isNil 
-			ifTrue: [^self errorContents: 'Moved elsewhere']
-			ifFalse: 
-			    [client reporter statusString: 'Redirecting'.
-			    stream close.
-			    stream := nil.
-			    tmpFile exists ifTrue: [tmpFile remove].
-			    ^(self class on: (url construct: (URL fromString: location)))
-				noCache: self noCache;
-				reporter: self reporter;
-				contents]]] 
-		ensure: [stream isNil ifFalse: [stream close]].
-	^protocolError 
-	    ifTrue: 
-		[string := tmpFile contents.
-		tmpFile remove.
-		(WebEntity new)
-		    body: string;
-		    url: url;
-		    canCache: false;
-		    guessMimeTypeFromResponse: response;
-		    yourself]
-	    ifFalse: 
-		[(WebEntity new)
-		    url: url;
-		    canCache: false;
-		    localFileName: tmpFile name;
-		    guessMimeTypeFromResponse: response;
-		    yourself]
+		onSuccess: [:ent | ent canCache: false ]
     ]
 
     emptyMessage [
