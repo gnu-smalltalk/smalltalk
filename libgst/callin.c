@@ -105,7 +105,8 @@ _gst_va_msg_send (OOP receiver,
   save = ap;
 #endif
 
-  for (numArgs = 0; (anArg = va_arg (ap, OOP)) != NULL; numArgs++);
+  for (numArgs = 0; va_arg (ap, OOP) != NULL; numArgs++)
+    ;
 
   if (numArgs != _gst_selector_num_args (selector))
     return (_gst_nil_oop);
@@ -207,7 +208,7 @@ _gst_va_msg_sendf (PTR resultPtr,
     return;
 
   args = (OOP *) alloca (sizeof (OOP) * numArgs);
-  for (i = -1, s = selectorBuf, fp = &fmt[2]; *fp; fp++)
+  for (i = -1, fp = &fmt[2]; *fp; fp++)
     {
       if (*fp != '%')
 	continue;

@@ -1,3 +1,8 @@
+2011-03-12  Paolo Bonzini  <bonzini@gnu.org>
+
+	* lib-src/ltdl.c: clang analyzer fixes.
+	* lib-src/regex.c: clang analyzer simplifications.
+
 2010-12-05  Paolo Bonzini  <bonzini@gnu.org>
 
 	* lib-src/socketx.h: Provide O_NONBLOCK.

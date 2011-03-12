@@ -2093,7 +2093,6 @@ equal_constant (OOP oop,
 		return (false);
 
 	      varNode = varNode->v_list.next;
-	      pKey = &path->data[i];
 	    }
 	}
       break;
@@ -2237,6 +2236,7 @@ _gst_make_constant_oop (tree_node constExpr)
 	      array->data[i] = _gst_intern_string (varNode->v_list.name);
 	  }
 
+        INC_RESTORE_POINTER (incPtr);
         return (resultOOP);
       }
 

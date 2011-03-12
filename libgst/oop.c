@@ -352,14 +352,12 @@ _gst_init_mem (size_t eden, size_t survivor, size_t old,
 
 void _gst_update_object_memory_oop (OOP oop)
 {
-  int numScavenges;
   gst_object_memory data;
 
   /* Ensure the statistics are coherent.  */
   for (;;) {
     OOP floatOOP;
 
-    numScavenges = _gst_mem.numScavenges;
     data = (gst_object_memory) OOP_TO_OBJ (oop);
     data->bytesPerOOP = FROM_INT (sizeof (PTR));
     data->bytesPerOTE = FROM_INT (sizeof (struct oop_s) +
@@ -785,11 +783,9 @@ gst_object
 _gst_alloc_old_obj (size_t size,
 		    OOP *p_oop)
 {
-  OOP *newAllocPtr;
   gst_object p_instance;
 
   size = ROUNDED_BYTES (size);
-  newAllocPtr = _gst_mem.eden.allocPtr + BYTES_TO_SIZE (size);
 
   /* If the object is big enough, we put it directly in oldspace.  */
   p_instance = (gst_object) _gst_mem_alloc (_gst_mem.old, size);
@@ -1558,8 +1554,7 @@ queue_put (surv_space *q, OOP *src, int n)
           printf ("Wrap: survivor space ends at %p, needed %p\n", q->maxPtr, newAlloc);
 #endif
           q->topPtr = q->allocPtr;
-          result = q->allocPtr = q->minPtr;
-          newAlloc = q->allocPtr + n;
+          q->allocPtr = q->minPtr;
 	  continue;
         }
 
@@ -2319,14 +2314,11 @@ _gst_inc_init_registry (void)
 void
 _gst_inc_grow_registry (void)
 {
-  OOP *oldBase;
   unsigned oldPtrOffset;
   unsigned oldRegistrySize, newRegistrySize;
 
-  oldBase = _gst_mem.inc_base;
   oldPtrOffset = _gst_mem.inc_ptr - _gst_mem.inc_base;
   oldRegistrySize = _gst_mem.inc_end - _gst_mem.inc_base;
-
   newRegistrySize = oldRegistrySize + INCUBATOR_CHUNK_SIZE;
 
   _gst_mem.inc_base =

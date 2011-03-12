@@ -1,3 +1,7 @@
+2011-03-12  Paolo Bonzini  <bonzini@gnu.org>
+
+	* gnutls-wrapper.c: Remove dead code signaled by clang analyzer.
+
 2011-03-10  Holger Hans Peter Freyther  <holger@moiji-mobile.com>
 
 	* HTTP.st: Flush the binary stream.

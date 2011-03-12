@@ -75,7 +75,7 @@ socket_open (const char *hostname, const char *service)
   /* get server name */
   memset (&hints, 0, sizeof (hints));
   hints.ai_socktype = SOCK_STREAM;
-  if ((err = getaddrinfo (hostname, service, &hints, &res)))
+  if (getaddrinfo (hostname, service, &hints, &res) != 0)
     exit (1);
 
   fd = -1;
@@ -125,7 +125,7 @@ main (int argc, char **argv)
   gnutls_anon_client_credentials_t anon_cred;
   gnutls_certificate_credentials_t xcred;
 
-  if ((ret = gnutls_global_init ()) < 0)
+  if (gnutls_global_init () < 0)
     exit (1);
 
   if (argc < 3)

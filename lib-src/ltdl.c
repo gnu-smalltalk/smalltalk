@@ -3231,6 +3231,13 @@ try_dlopen (phandle, filename)
 	  while ((line[LT_STRLEN(line) -1] != '\n') && (!feof (file)))
 	    {
 	      line = LT_DLREALLOC (char, line, line_len *2);
+	      if (!line)
+                {
+                  fclose (file);
+                  ++errors;
+                  goto cleanup;
+                }
+
 	      if (!fgets (&line[line_len -1], (int) line_len +1, file))
 		{
 		  break;
@@ -3579,6 +3586,7 @@ lt_argz_insertdir (pargz, pargz_len, dirnam, dp)
   assert (pargz);
   assert (pargz_len);
   assert (dp);
+  assert (dirnam);
 
   dir_len = LT_STRLEN (dirnam);
   end     = dp->d_name + LT_D_NAMLEN(dp);

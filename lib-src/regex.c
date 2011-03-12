@@ -1355,7 +1355,6 @@ pre_compile_pattern (pattern, size, bufp)
 			  if (SYNTAX (c) == Sword)
 			    SET_LIST_BIT (c);
 			}
-		      last = -1;
 		      continue;
 
 		    case 'W':
@@ -1364,34 +1363,29 @@ pre_compile_pattern (pattern, size, bufp)
 			  if (SYNTAX (c) != Sword)
 			    SET_LIST_BIT (c);
 			}
-		      last = -1;
 		      continue;
 
 		    case 's':
 		      for (c = 0; c < 256; c++)
 			if (ISSPACE (c))
 			  SET_LIST_BIT (c);
-		      last = -1;
 		      continue;
 
 		    case 'S':
 		      for (c = 0; c < 256; c++)
 			if (!ISSPACE (c))
 			  SET_LIST_BIT (c);
-		      last = -1;
 		      continue;
 
 		    case 'd':
 		      for (c = '0'; c <= '9'; c++)
 			SET_LIST_BIT (c);
-		      last = -1;
 		      continue;
 
 		    case 'D':
 		      for (c = 0; c < 256; c++)
 			if (!ISDIGIT (c))
 			  SET_LIST_BIT (c);
-		      last = -1;
 		      continue;
 
 		    case 'x':
@@ -1533,7 +1527,6 @@ pre_compile_pattern (pattern, size, bufp)
 		      SET_LIST_BIT (TRANSLATE_P ()? translate['['] : '[');
 		      SET_LIST_BIT (TRANSLATE_P ()? translate[':'] : ':');
 		      had_char_class = 0;
-		      last = ':';
 		    }
 		}
 	      else
@@ -2194,8 +2187,8 @@ pre_compile_pattern (pattern, size, bufp)
 		  {
 		    /* need to get octal */
 		    p = p_save;
-		    c = scan_oct (p_save, 3, &numlen) & 0xff;
-		    p = p_save + numlen;
+		    c = scan_oct (p, 3, &numlen) & 0xff;
+		    p += numlen;
 		    c1 = 0;
 		    had_num_literal = 1;
 		    goto numeric_char;
@@ -2913,19 +2906,14 @@ pre_search (bufp, string, size, startpos, range, regs)
   if (bufp->must)
     {
       int len = ((unsigned char *) bufp->must)[0];
-      int pos, pbeg, pend;
+      int pos, pbeg;
 
-      pbeg = startpos;
-      pend = startpos + range;
-      if (pbeg > pend)
-	{			/* swap pbeg,pend */
-	  pos = pend;
-	  pend = pbeg;
-	  pbeg = pos;
-	}
-      pend = size;
+      if (range < 0)
+        pbeg = startpos + range;
+      else
+        pbeg = startpos;
       pos = bm_search (bufp->must + 1, len,
-		       string + pbeg, pend - pbeg,
+		       string + pbeg, (range < 0 ? -range : range),
 		       bufp->must_skip, MAY_TRANSLATE ()? translate : 0);
 
       if (pos == -1)
