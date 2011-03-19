@@ -1016,7 +1016,7 @@ gst_opengl_glGenTextures ( GLsizei size )
 {
   GLint *textures;
   int i;
-  OOP anArray = nil;
+  OOP anArray;
 
   /* Allocating an Array object */
   anArray = vm_proxy->objectAlloc (vm_proxy->arrayClass, size);

@@ -676,7 +676,6 @@ _gst_mpz_mul (gst_mpz *w, const gst_mpz *u, const gst_mpz *v)
   mp_ptr up, vp;
   mp_ptr wp;
   mp_ptr free_me = NULL;
-  size_t free_me_size;
 
   sign_product = usize ^ vsize;
   usize = ABS (usize);
@@ -698,10 +697,7 @@ _gst_mpz_mul (gst_mpz *w, const gst_mpz *u, const gst_mpz *v)
   if (w->alloc < wsize)
     {
       if (wp == up || wp == vp)
-	{
-	  free_me = wp;
-	  free_me_size = w->alloc;
-	}
+	free_me = wp;
       else
 	xfree (wp);
 
@@ -885,13 +881,11 @@ _gst_mpz_get_d(const gst_mpz *mpz, double *p_d)
   double d, old;
   int n;
 
-  d = 0.0;
-  old = 0.0;
-
   n = mpz->size;
   while (mpz->d[--n] == 0)
     ;
 
+  d = 0.0;
   for (; n >= 0; n--)
     {
       old = ldexp (d, 8 * SIZEOF_MP_LIMB_T);
@@ -912,13 +906,11 @@ _gst_mpz_get_ld(const gst_mpz *mpz, long double *p_ld)
   long double d, old;
   int n;
 
-  d = 0.0;
-  old = 0.0;
-
   n = mpz->size;
   while (mpz->d[--n] == 0)
     ;
 
+  d = 0.0;
   for (; n >= 0; n--)
     {
       old = ldexpl (d, 8 * SIZEOF_MP_LIMB_T);

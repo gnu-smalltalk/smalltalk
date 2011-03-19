@@ -198,7 +198,7 @@ make_event (OOP parserOOP, OOP classOOP, ...)
 {
   va_list va;
   OOP eventOOP, ptr;
-  OOP sentinelOOP, headOOP;
+  OOP sentinelOOP;
   XMLExpatPullParser parserObj;
   SAXEventSequence pendingObj, sentinelObj;
   mst_Object obj;
@@ -229,7 +229,6 @@ make_event (OOP parserOOP, OOP classOOP, ...)
      (which becomes the tail of the list!) and allocate a new sentinel.  */
   pendingObj = (SAXEventSequence) OOP_TO_OBJ (parserObj->pendingEventOOP);
   pendingObj->eventOOP = eventOOP;
-  headOOP = pendingObj->nextOOP;
 
   /* Allocate a new sentinel node and store it.  */
   sentinelOOP = vmProxy->objectAlloc (saxEventSequenceClass, 0);

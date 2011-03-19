@@ -1,3 +1,15 @@
+2011-03-12  Paolo Bonzini  <bonzini@gnu.org>
+
+	* libgst/callin.c: Remove dead code signaled by clang analyzer.
+	* libgst/cint.c: Likewise.
+	* libgst/comp.c: Likewise, and add missing INC_RESTORE_POINTER.
+	* libgst/dict.c: Likewise.
+	* libgst/interp.c: Likewise.
+	* libgst/mpz.c: Likewise.
+	* libgst/oop.c: Likewise.
+	* libgst/opt.c: Likewise.
+	* libgst/re.c: Likewise.
+
 2011-03-19  Paolo Bonzini  <bonzini@gnu.org>
 
 	* libgst/gst-parse.c: Fix attribute breakage.

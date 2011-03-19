@@ -317,7 +317,6 @@ make_re_results (OOP srcOOP, struct pre_registers *regs)
 OOP
 _gst_re_search (OOP srcOOP, OOP patternOOP, int from, int to)
 {
-  int res = 0;
   const char *src;
   struct pre_pattern_buffer *regex;
   struct pre_registers *regs;
@@ -334,7 +333,7 @@ _gst_re_search (OOP srcOOP, OOP patternOOP, int from, int to)
   /* now search */
   src = &STRING_OOP_AT (OOP_TO_OBJ (srcOOP), 1);
   regs = (struct pre_registers *) calloc (1, sizeof (struct pre_registers));
-  res = pre_search (regex, src, to, from - 1, to - from + 1, regs);
+  pre_search (regex, src, to, from - 1, to - from + 1, regs);
 
   if (caching == REGEX_NOT_CACHED)
     pre_free_pattern (regex);

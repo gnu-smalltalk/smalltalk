@@ -435,13 +435,12 @@ my_opendir (const char *dir)
 void
 test_callin (OOP oop, int(*callback)(const char *))
 {
-  OOP o, sel;
+  OOP o;
   double f;
   int i;
   _gst_str_msg_send (oop, "printNl", NULL);
 
   o = _gst_string_to_oop ("abc");
-  sel = _gst_symbol_to_oop ("printNl");
   _gst_str_msg_send (_gst_str_msg_send (o, ",", o, NULL), "printNl",
 		     NULL);
   i = callback ("this is a test");

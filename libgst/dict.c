@@ -891,11 +891,8 @@ create_metaclass (OOP class_oop,
   gst_class class;
   gst_metaclass metaclass;
   gst_object subClasses;
-  OOP superClassOOP;
 
-  superClassOOP = SUPERCLASS (class_oop);
   class = (gst_class) OOP_TO_OBJ (class_oop);
-
   metaclass = (gst_metaclass) new_instance (_gst_metaclass_class,
 					    &class->objClass);
 
@@ -1327,13 +1324,9 @@ prepare_primitive_numbers_table ()
 {
   int i;
   OOP primitivesDictionaryOOP;
-  gst_dictionary primitivesDictionary;
 
   primitivesDictionaryOOP = dictionary_at (_gst_smalltalk_dictionary, 
 					   _gst_vm_primitives_symbol);
-
-  primitivesDictionary =
-    (gst_dictionary) OOP_TO_OBJ (primitivesDictionaryOOP);
 
   for (i = 0; i < NUM_PRIMITIVES; i++)
     _gst_set_primitive_attributes (i, NULL);
@@ -1392,9 +1385,7 @@ _gst_valid_class_method_dictionary (OOP class_oop)
   if (IS_NIL (class->methodDictionary))
     {
       OOP identDict;
-      gst_object obj;
       identDict = identity_dictionary_new (_gst_method_dictionary_class, 32);
-      obj = OOP_TO_OBJ (identDict);
       class = (gst_class) OOP_TO_OBJ (class_oop);
       class->methodDictionary = identDict;
     }

@@ -230,7 +230,6 @@ _gst_is_simple_return (bc_vector bytecodes,
 		       OOP *literalOOP)
 {
   gst_uchar *bytes;
-  size_t byteCodeLen;
   int maybe = MTH_NORMAL;
   OOP maybe_object = NULL;
   int i;
@@ -239,7 +238,6 @@ _gst_is_simple_return (bc_vector bytecodes,
   if (bytecodes == NULL)
     return (MTH_NORMAL);
 
-  byteCodeLen = _gst_bytecode_length (bytecodes);
   bytes = bytecodes->base;
 
   for (i = 1; i <= 3; i++)
@@ -434,7 +432,7 @@ _gst_optimize_bytecodes (bc_vector bytecodes)
 #else
   bc_vector old_bytecodes;
   block_boundary *blocks, *block, *last;
-  gst_uchar *bp, *opt, *end, *first;
+  gst_uchar *bp, *end, *first;
   int i;
   mst_Boolean changed;
 
@@ -608,7 +606,7 @@ _gst_optimize_bytecodes (bc_vector bytecodes)
 
   /* Optimize the single basic blocks.  */
   i = 0;
-  for (bp = opt = bytecodes->base, block = blocks; block != last; block++)
+  for (block = blocks; block != last; block++)
     {
       first = bytecodes->base + block->start;
       bp = bytecodes->base + block->end;
@@ -641,7 +639,7 @@ _gst_optimize_bytecodes (bc_vector bytecodes)
     {
       changed = false;
       i = 0;
-      for (bp = bytecodes->base, block = blocks; block != last; block++)
+      for (block = blocks; block != last; block++)
         {
           int jump_length;
           if (block->final_byte != i)

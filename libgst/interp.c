@@ -786,8 +786,6 @@ empty_context_stack (void)
 void
 alloc_new_chunk (void)
 {
-  gst_method_context newContext;
-
   if UNCOMMON (++chunk >= &chunks[MAX_CHUNKS_IN_MEMORY])
     {
       /* No more chunks available - GC */
@@ -797,20 +795,13 @@ alloc_new_chunk (void)
 
   empty_context_stack ();
 
-  newContext = (gst_method_context) * chunk;
-  if UNCOMMON (!newContext)
-    {
-      /* Allocate memory only the first time we're using the chunk.
-         _gst_empty_context_pool resets the status but doesn't free
-         the memory.  */
-      cur_chunk_begin = *chunk = (gst_context_part)
-        xcalloc (1, SIZE_TO_BYTES (CHUNK_SIZE));
+  /* Allocate memory only the first time we're using the chunk.
+     _gst_empty_context_pool resets the status but doesn't free
+     the memory.  */
+  if UNCOMMON (!*chunk)
+    *chunk = (gst_context_part) xcalloc (1, SIZE_TO_BYTES (CHUNK_SIZE));
 
-      newContext = (gst_method_context) cur_chunk_begin;
-    }
-  else
-    cur_chunk_begin = *chunk;
-
+  cur_chunk_begin = *chunk;
   cur_chunk_end = (gst_context_part) (
     ((char *) cur_chunk_begin) + SIZE_TO_BYTES(CHUNK_SIZE));
 }
@@ -1039,14 +1030,13 @@ void
 unwind_context (void)
 {
   gst_method_context oldContext, newContext;
-  OOP oldContextOOP, newContextOOP;
+  OOP newContextOOP;
 
   newContextOOP = _gst_this_context_oop;
   newContext = (gst_method_context) OOP_TO_OBJ (newContextOOP);
 
   do
     {
-      oldContextOOP = newContextOOP;
       oldContext = newContext;
 
       /* Descend in the chain...  */
@@ -1209,7 +1199,7 @@ unwind_to (OOP returnContextOOP)
 mst_Boolean
 disable_non_unwind_contexts (OOP returnContextOOP)
 {
-  OOP oldContextOOP, newContextOOP, *chain;
+  OOP newContextOOP, *chain;
   gst_method_context oldContext, newContext;
 
   newContextOOP = _gst_this_context_oop;
@@ -1218,7 +1208,6 @@ disable_non_unwind_contexts (OOP returnContextOOP)
 
   for (;;)
     {
-      oldContextOOP = newContextOOP;
       oldContext = newContext;
 
       /* Descend in the chain...  */
@@ -1256,7 +1245,6 @@ disable_non_unwind_contexts (OOP returnContextOOP)
   while UNCOMMON (CONTEXT_FLAGS (newContext)
                   == (MCF_IS_METHOD_CONTEXT | MCF_IS_DISABLED_CONTEXT))
     {
-      oldContextOOP = newContextOOP;
       oldContext = newContext;
 
       /* Descend in the chain...  */
