@@ -835,7 +835,7 @@ parse_and_send_attribute (gst_parser *p, OOP receiverOOP, mst_Boolean forClass)
   if (!_gst_had_error)
     {
       OOP messageOOP;
-      messageOOP = make_attribute (p, forClass ? receiverOOP : NULL, keywords);
+      messageOOP = make_attribute (p, forClass ? receiverOOP : _gst_nil_oop, keywords);
       if (!IS_NIL (messageOOP))
         {
           OOP selectorOOP = MESSAGE_SELECTOR (messageOOP);
@@ -1478,7 +1478,7 @@ parse_attribute (gst_parser *p)
   /* First convert the TREE_KEYWORD_EXPR into a Message object, then
      into a TREE_CONST_EXPR, and finally embed this one into a
      TREE_ATTRIBUTE_LIST.  */
-  attributeOOP = make_attribute (p, NULL, keywords);
+  attributeOOP = make_attribute (p, _gst_nil_oop, keywords);
   constant = _gst_make_oop_constant (&keywords->location, attributeOOP);
   attr = _gst_make_attribute_list (&constant->location, constant);
   lex_skip_mandatory (p, '>');

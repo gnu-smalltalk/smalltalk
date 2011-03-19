@@ -1,3 +1,7 @@
+2011-03-19  Paolo Bonzini  <bonzini@gnu.org>
+
+	* libgst/gst-parse.c: Fix attribute breakage.
+
 2011-03-09  Paolo Bonzini  <bonzini@gnu.org>
 
 	* libgst/comp.c: Add receiver to _gst_execute_statements.
