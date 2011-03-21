@@ -1436,6 +1436,37 @@ NetClientError subclass: ConnectionClosedError [
 
 
 
+Notification subclass: ProtocolNotification [
+    
+    | response |
+
+    <category: 'NetClients-Framework'>
+    <comment: nil>
+
+    description [
+	<category: 'exception handling'>
+	^'Protocol Notification'
+    ]
+
+    response [
+	<category: 'exception handling'>
+	^response
+    ]
+
+    response: aResponse [
+	<category: 'exception handling'>
+	response := aResponse.
+        self messageText: '%1: %2' % {self description. response statusMessage}
+    ]
+
+    isResumable [
+	<category: 'exception handling'>
+	^true
+    ]
+]
+
+
+
 NetClientError subclass: ProtocolError [
     
     | response |
