@@ -1,3 +1,10 @@
+
+	* Base.st: Add response variable to ProtocolError.  Add
+	UnexpectedResponseError.
+	* FTP.st: Use #unexpectedResponse:.
+	* NNTP.st: Use #errorResponse: and #unexpectedResponse:.
+	* SMTP.st: Use #errorResponse:
+
 2011-03-21  Paolo Bonzini  <bonzini@gnu.org>
 
 	* FTP.st: Remove useless override.

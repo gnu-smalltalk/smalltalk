@@ -425,7 +425,7 @@ Copyright (c) Kazuki Yasumatsu, 1995. All rights reserved.
 			["User not local; please try"
 
 			self noSuchRecipientNotify: forwardPath]
-		    ifFalse: [self protocolError: response statusMessage]]
+		    ifFalse: [self errorResponse: response]]
     ]
 
     smtpReset [
