@@ -1,5 +1,11 @@
 2011-03-21  Paolo Bonzini  <bonzini@gnu.org>
 
+	* FTP.st: Remove useless override.
+	* HTTP.st: Remove useless override.
+	* POP.st: Remove useless override.
+
+2011-03-21  Paolo Bonzini  <bonzini@gnu.org>
+
 	* Base.st: Add exception descriptions.  Add WrongStateError.
 	* IMAP.st: Use WrongStateError.
 

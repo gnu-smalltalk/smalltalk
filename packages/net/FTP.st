@@ -537,12 +537,6 @@ NetProtocolInterpreter subclass: FTPProtocolInterpreter [
 	self checkResponse
     ]
 
-    checkResponse: response [
-	<category: 'private'>
-	^self checkResponse: response
-	    ifError: [self protocolError: response statusMessage]
-    ]
-
     checkResponse: response ifError: errorBlock [
 	<category: 'private'>
 	| status |
