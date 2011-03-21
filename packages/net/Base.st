@@ -1405,6 +1405,12 @@ NetClientError subclass: ConnectionFailedError [
     
     <category: 'NetClients-Framework'>
     <comment: nil>
+
+    description [
+        <category: 'exception handling'>
+
+        ^'The connection attempt failed.'
+    ]
 ]
 
 
@@ -1413,6 +1419,12 @@ NetClientError subclass: ConnectionClosedError [
     
     <category: 'NetClients-Framework'>
     <comment: nil>
+
+    description [
+        <category: 'exception handling'>
+
+        ^'The server closed the connection.'
+    ]
 ]
 
 
@@ -1434,5 +1446,23 @@ NetClientError subclass: LoginIncorrectError [
     
     <category: 'NetClients-Framework'>
     <comment: nil>
+
+    description [
+        <category: 'exception handling'>
+
+        ^'The server rejected your login attempt.'
+    ]
+]
+
+
+NetClientError subclass: WrongStateError [
+    <category: 'NetClients-Framework'>
+    <comment: nil>
+
+    description [
+        <category: 'exception handling'>
+
+        ^'This command cannot be executed in the client''s current state.'
+    ]
 ]
 

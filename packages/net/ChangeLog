@@ -1,3 +1,8 @@
+2011-03-21  Paolo Bonzini  <bonzini@gnu.org>
+
+	* Base.st: Add exception descriptions.  Add WrongStateError.
+	* IMAP.st: Use WrongStateError.
+
 2011-03-12  Paolo Bonzini  <bonzini@gnu.org>
 
 	* gnutls-wrapper.c: Remove dead code signaled by clang analyzer.
