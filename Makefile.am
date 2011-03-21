@@ -18,6 +18,7 @@
 # Automake requirements
 AUTOMAKE_OPTIONS = gnu 1.11 dist-xz
 ACLOCAL_AMFLAGS = -I build-aux
+DISTCHECK_CONFIGURE_FLAGS=--without-system-libltdl --without-system-libsigsegv --without-system-libffi
 
 PACKAGE=smalltalk
 gstdatadir=$(pkgdatadir)
