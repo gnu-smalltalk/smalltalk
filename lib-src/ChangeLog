@@ -1,3 +1,8 @@
+2011-03-21  Paolo Bonzini  <bonzini@gnu.org>
+
+	* lib-src/ltdl.c: Delete.
+	* lib-src/ltdl_.h: Delete.
+
 2011-03-12  Paolo Bonzini  <bonzini@gnu.org>
 
 	* lib-src/ltdl.c: clang analyzer fixes.

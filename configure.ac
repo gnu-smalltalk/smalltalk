@@ -114,10 +114,6 @@ if test "$ac_cv_lib_gnutls_gnutls_global_init" = yes; then
   AC_DEFINE(HAVE_GNUTLS, 1, [Define to 1 if gnutls is being used])
 fi
 
-dnl Throw all these away in 3.3, and just require the system
-dnl lib{ltdl,ffi,sigsegv}.  Before that, however, we need to
-dnl ensure Fedora has a cross-compiled libffi and libsigsegv.
-
 AC_ARG_WITH(system-libltdl,
 [  --with-system-libltdl[=PATH]  use system libltdl.la (search in PATH if given)],
 [], [with_system_libltdl=detect])
@@ -128,13 +124,9 @@ if test $with_system_libltdl = detect; then
 fi
 
 if test $with_system_libltdl = no; then
-  AC_MSG_WARN([using included copy of libltdl])
-  AC_MSG_WARN([this is deprecated and will go away])
-  AC_MSG_WARN([it is suggested to install libltdl])
-  AC_LIBOBJ(ltdl)
-  AC_CONFIG_LINKS([lib-src/ltdl.h:lib-src/ltdl_.h])
-  INCLTDL= LIBLTDL=
-elif test $with_system_libltdl = yes; then
+  AC_MSG_ERROR([libltdl is required to compile GNU Smalltalk])
+fi
+if test $with_system_libltdl = yes; then
   INCLTDL= LIBLTDL=-lltdl
 else
   INCLTDL="-I$with_system_libltdl/../include"
@@ -154,13 +146,9 @@ if test $with_system_libffi = detect; then
   with_system_libffi=$ac_cv_lib_libffi_ffi_prep_cif
 fi
 if test $with_system_libffi = no; then
-  AC_MSG_WARN([using included copy of libffi])
-  AC_MSG_WARN([this is deprecated and will go away])
-  AC_MSG_WARN([it is suggested to install libffi])
-  AC_CONFIG_SUBDIRS(libffi)
-  INCFFI='-I$(top_srcdir)/libffi/include -I$(top_builddir)/libffi/include'
-  LIBFFI='$(top_builddir)/libffi/libffi.la'
-elif test $with_system_libffi = yes; then
+  AC_MSG_ERROR([libffi is required to compile GNU Smalltalk])
+fi
+if test $with_system_libffi = yes; then
   INCFFI=$LIBFFI_CFLAGS
   LIBFFI=${LIBFFI_LIBS:-'-lffi'}
 else
@@ -207,22 +195,10 @@ if test $enable_generational_gc = no; then
 else
   AC_DEFINE(HAVE_SIGSEGV_H, 1, [Define to 1 if libsigsegv is being used])
   if test $with_system_libsigsegv = no; then
-    case $host in
-      x86_64-apple-darwin*)
-        AC_MSG_ERROR(dnl
-[a pre-installed libsigsegv is required on 64-bit Darwin.  To
-configure: error: proceed without it, use the --disable-generational-gc
-configure: error: option for configure.])
-        ;;
-      *)
-       AC_MSG_WARN([using included copy of libsigsegv])
-       AC_MSG_WARN([this is deprecated and will go away])
-       AC_MSG_WARN([it is suggested to install libsigsegv])
-    esac
-    AC_CONFIG_SUBDIRS(sigsegv)
-    INCSIGSEGV='-I$(top_srcdir)/sigsegv/src -I$(top_builddir)/sigsegv/src'
-    LIBSIGSEGV='$(top_builddir)/sigsegv/src/libsigsegv_convenience.la'
-  elif test $with_system_libsigsegv = yes; then
+    AC_MSG_ERROR([libsigsegv is required by default to compile GNU Smalltalk
+To proceed, configure with --disable-generational-gc.])
+  fi
+  if test $with_system_libsigsegv = yes; then
     INCSIGSEGV= LIBSIGSEGV=-lsigsegv
   else
     INCSIGSEGV="-I$with_system_libsigsegv/../include"

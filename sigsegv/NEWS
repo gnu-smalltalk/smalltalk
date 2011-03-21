@@ -1,51 +1,0 @@
-New in 2.5:
-
-* Support for MacOS X 10.5.
-
-New in 2.4:
-
-* Support for GCC 4 on more platforms.
-* Added support for catching stack overflow on NetBSD.
-* Improved support for catching stack overflow on Linux, Solaris:
-  Works also when /proc is not mounted or lacks read permissions.
-
-New in 2.3:
-
-* Support for GCC 4 on some platforms contributed by Paolo Bonzini.
-* Support for MacOS X i386 contributed by Bruno Haible.
-* Improved support for Woe32 contributed by Doug Currie.
-
-New in 2.2:
-
-* Support for new versions of MacOS X contributed by Paolo Bonzini.
-* Improved support for AIX 5, contributed by Bruno Haible.
-
-New in 2.1:
-
-* Support for MacOS X contributed by Paolo Bonzini.
-* Support for Cygwin contributed by Paolo Bonzini.
-* Support for Linux/ia64 and Linux/hppa contributed by Bruno Haible.
-* Support for OpenBSD/i386 contributed by Bruno Haible.
-* Support for NetBSD/alpha contributed by Paolo Bonzini.
-
-New in 2.0:
-
-* Modernized infrastructure.
-* Added support for catching stack overflow on AIX 4, HP-UX, and BeOS.
-* Dropped support for NeXTstep.
-* The function sigsegv_leave_handler() no longer restores the signal mask.
-  This must now be done by the calling handler (either through sigprocmask
-  or through siglongjmp).
-
-New in 1.2:
-
-* Support for HP-UX contributed by Paolo Bonzini.
-
-New in 1.1:
-
-* Catching stack overflow now works on some Unix systems:
-  - Linux 2.2.x with glibc-2.1,
-  - Sun Solaris,
-  - DEC OSF/1 4.0,
-  - SGI Irix.
-

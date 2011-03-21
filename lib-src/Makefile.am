@@ -11,7 +11,7 @@ library_la_SOURCES = \
 noinst_HEADERS = \
        obstack.h poll_.h getopt.h md5.h ansidecl.h strspell.h lock.h \
        mathl.h trigl.h avltrees.h rbtrees.h trigl.c sincosl.c getaddrinfo.h \
-       socketx.h ltdl_.h regex.h pointer-set.h
+       socketx.h regex.h pointer-set.h
 
-DISTCLEANFILES = poll.h ltdl.h
+DISTCLEANFILES = poll.h
 
