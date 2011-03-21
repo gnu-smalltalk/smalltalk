@@ -19,6 +19,10 @@ dist_gst_glib_la_SOURCES = gst-glib.c
 nodist_gst_glib_la_SOURCES = libs.def
 BUILT_SOURCES = libs.def
 
+# Work around bug in Automake (or is it Libtool?)  The gst-glib library is
+# installed before libgst-gobject has been relinked.
+.NOTPARALLEL:
+
 INCLUDES = -I$(top_srcdir)/libgst -I$(top_srcdir)/lib-src -I$(top_srcdir)/libltdl
 
 AM_CFLAGS = $(GLIB_CFLAGS) $(GTHREAD_CFLAGS)

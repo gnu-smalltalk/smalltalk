@@ -240,3 +240,4 @@ uninstall-local:: gst-tool$(EXEEXT)
 	-rm -f $(DESTDIR)$(imagedir)/gst.im
 
 @PACKAGE_RULES@
+GTK.star: GLib.star
