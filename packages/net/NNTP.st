@@ -523,12 +523,10 @@ Copyright (c) Kazuki Yasumatsu, 1995. All rights reserved.
 	<category: 'private'>
 	| textFollows |
 	textFollows := self checkResponse: response
-		    ifError: 
-			[self protocolError: response statusMessage.
-			false].
+		    ifError: [self errorResponse: response. ^self].
 	textFollows ifFalse: [^self].
 	self skipMessageUntilPeriod.
-	^self protocolError: 'Unexpected reply: ' , response statusMessage
+	self unexpectedResponse: response
     ]
 
     checkResponse: response ifError: errorBlock [
@@ -745,11 +743,8 @@ Copyright (c) Kazuki Yasumatsu, 1995. All rights reserved.
 	<category: 'private'>
 	| textFollows |
 	textFollows := self checkResponse: response
-		    ifError: 
-			[self protocolError: response statusMessage.
-			false].
-	textFollows 
-	    ifFalse: [^self protocolError: 'Unexpected reply: ' , response statusMessage]
+		    ifError: [self errorResponse: response. ^self].
+	textFollows ifFalse: [self unexpectedResponse: response. ^self]
     ]
 
     defaultPortNumber [

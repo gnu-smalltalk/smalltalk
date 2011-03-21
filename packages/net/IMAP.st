@@ -1494,7 +1494,7 @@ Object subclass: IMAPState [
 
     signalError [
 	<category: 'errors'>
-	^self protocolError: 'wrong state'
+	^WrongStateError signal
     ]
 
     client: aValue [

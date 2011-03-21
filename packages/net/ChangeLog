@@ -1,3 +1,32 @@
+2011-03-21  Paolo Bonzini  <bonzini@gnu.org>
+
+	* URIResolver.st: Reorder exceptions.
+
+2011-03-21  Paolo Bonzini  <bonzini@gnu.org>
+
+	* Base.st: Add ProtocolNotification.
+	* HTTP.st: Use it for redirects.
+	* URIResolver.st: Simplify.
+
+2011-03-21  Paolo Bonzini  <bonzini@gnu.org>
+
+	* Base.st: Add response variable to ProtocolError.  Add
+	UnexpectedResponseError.
+	* FTP.st: Use #unexpectedResponse:.
+	* NNTP.st: Use #errorResponse: and #unexpectedResponse:.
+	* SMTP.st: Use #errorResponse:
+
+2011-03-21  Paolo Bonzini  <bonzini@gnu.org>
+
+	* FTP.st: Remove useless override.
+	* HTTP.st: Remove useless override.
+	* POP.st: Remove useless override.
+
+2011-03-21  Paolo Bonzini  <bonzini@gnu.org>
+
+	* Base.st: Add exception descriptions.  Add WrongStateError.
+	* IMAP.st: Use WrongStateError.
+
 2011-03-12  Paolo Bonzini  <bonzini@gnu.org>
 
 	* gnutls-wrapper.c: Remove dead code signaled by clang analyzer.

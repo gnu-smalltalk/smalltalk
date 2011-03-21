@@ -298,12 +298,6 @@ Copyright (c) Kazuki Yasumatsu, 1995. All rights reserved.
 	^self readResponseInto: aStream
     ]
 
-    checkResponse: response [
-	<category: 'private'>
-	^self checkResponse: response
-	    ifError: [self protocolError: response statusMessage]
-    ]
-
     checkResponse: response ifError: errorBlock [
 	<category: 'private'>
 	| status |
@@ -352,9 +346,7 @@ Copyright (c) Kazuki Yasumatsu, 1995. All rights reserved.
 
 		status = 302	"Moved Temporarily"]) 
 	    ifTrue: 
-		[| location |
-		location := response fieldAt: 'Location' ifAbsent: [nil].
-		^self redirectionNotify: location value].
+		[^self redirectionNotify: response ifInvalid: errorBlock].
 	status = 303 
 	    ifTrue: 
 		["Method"
@@ -444,11 +436,16 @@ Copyright (c) Kazuki Yasumatsu, 1995. All rights reserved.
 	^errorBlock value
     ]
 
-    redirectionNotify: redirectLocation [
+    redirectionNotify: aResponse ifInvalid: errorBlock [
 	<category: 'private'>
-	^(HTTPRedirection new)
-	    tag: redirectLocation;
-	    signal
+        | ex |
+	ex := HTTPRedirection new.
+	ex response: aResponse.
+        ex location isNil
+            ifTrue: [ ^errorBlock value ]
+            ifFalse: [
+                ex tag: ex location. "backwards compatibility"
+	        ex signal ].
     ]
 ]
 
@@ -553,10 +550,20 @@ Copyright (c) Kazuki Yasumatsu, 1995. All rights reserved.
 
 Namespace current: NetClients.HTTP [
 
-Notification subclass: HTTPRedirection [
+ProtocolNotification subclass: HTTPRedirection [
     
     <category: 'NetClients-HTTP'>
     <comment: nil>
+
+    | location |
+
+    location [
+        location isNil ifFalse: [^location].
+        response isNil ifTrue: [^nil].
+	location := response fieldAt: 'Location' ifAbsent: [nil].
+        location isNil ifFalse: [location := location value].
+	^location
+    ]
 ]
 
 ]

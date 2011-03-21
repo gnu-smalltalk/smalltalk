@@ -429,7 +429,7 @@ NetProtocolInterpreter subclass: FTPProtocolInterpreter [
 	response := self getResponse.
 	self checkResponse: response.
 	response status = 227 
-	    ifFalse: [^self protocolError: response statusMessage].
+	    ifFalse: [^self unexpectedResponse: response].
 
 	"227 Entering Passive Mode (h1,h2,h3,h4,p1,p2)"
 	stream := response statusMessage readStream.
@@ -535,12 +535,6 @@ NetProtocolInterpreter subclass: FTPProtocolInterpreter [
 	    nextPutAll: 'USER ' , user;
 	    cr.
 	self checkResponse
-    ]
-
-    checkResponse: response [
-	<category: 'private'>
-	^self checkResponse: response
-	    ifError: [self protocolError: response statusMessage]
     ]
 
     checkResponse: response ifError: errorBlock [

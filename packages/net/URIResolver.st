@@ -518,29 +518,26 @@ Copyright (c) Kazuki Yasumatsu, 1995. All rights reserved.
 	[
 	[response := requestBlock value: requestHeaders value: stream]
 		ensure: [client close]] 
-		on: NetClientError
-		do: [:ex | ^self errorContents: ex messageText]
 		on: ProtocolError
 		do: 
 		    [:ex | 
 		    protocolError := true.
 		    ex pass]
+		on: NetClientError
+		do: [:ex | ^self errorContents: ex messageText]
 		on: HTTP.HTTPRedirection
 		do: 
 		    [:ex | 
 		    | location |
-		    location := ex tag.
-		    location isNil 
-			ifTrue: [^self errorContents: 'Moved elsewhere']
-			ifFalse: 
-			    [client reporter statusString: 'Redirecting'.
-			    stream close.
-			    stream := nil.
-			    tmpFile exists ifTrue: [tmpFile remove].
-			    ^(self class on: (url construct: (URL fromString: location)))
-				noCache: self noCache;
-				reporter: self reporter;
-				contents]]] 
+		    location := ex location.
+		    client reporter statusString: 'Redirecting'.
+		    stream close.
+		    stream := nil.
+		    tmpFile exists ifTrue: [tmpFile remove].
+		    ^(self class on: (url construct: (URL fromString: location)))
+			noCache: self noCache;
+			reporter: self reporter;
+			contents]] 
 		ensure: [stream isNil ifFalse: [stream close]].
 	^protocolError 
 	    ifTrue: 
@@ -598,29 +595,26 @@ Copyright (c) Kazuki Yasumatsu, 1995. All rights reserved.
 		    requestHeaders: requestHeaders
 		    into: stream] 
 		ensure: [client close]] 
-		on: NetClientError
-		do: [:ex | ^self errorContents: ex messageText]
 		on: ProtocolError
 		do: 
 		    [:ex | 
 		    protocolError := true.
 		    ex pass]
+		on: NetClientError
+		do: [:ex | ^self errorContents: ex messageText]
 		on: HTTP.HTTPRedirection
 		do: 
 		    [:ex | 
 		    | location |
-		    location := ex tag.
-		    location isNil 
-			ifTrue: [^self errorContents: 'Moved elsewhere']
-			ifFalse: 
-			    [client reporter statusString: 'Redirecting'.
-			    stream close.
-			    stream := nil.
-			    tmpFile exists ifTrue: [tmpFile remove].
-			    ^(self class on: (url construct: (URL fromString: location)))
-				noCache: self noCache;
-				reporter: self reporter;
-				getHead]]] 
+		    location := ex location.
+		    client reporter statusString: 'Redirecting'.
+		    stream close.
+		    stream := nil.
+		    tmpFile exists ifTrue: [tmpFile remove].
+		    ^(self class on: (url construct: (URL fromString: location)))
+			noCache: self noCache;
+			reporter: self reporter;
+			getHead]] 
 		ensure: [stream isNil ifFalse: [stream close]].
 	^protocolError 
 	    ifTrue: 

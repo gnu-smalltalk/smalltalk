@@ -765,7 +765,7 @@ Object subclass: NetProtocolInterpreter [
     checkResponse: response [
 	<category: 'private'>
 	self checkResponse: response
-	    ifError: [self protocolError: response statusMessage]
+	    ifError: [self errorResponse: response]
     ]
 
     checkResponse: reponse ifError: errorBlock [
@@ -799,11 +799,18 @@ Object subclass: NetProtocolInterpreter [
 	    signal: 'Login incorrect: ' , messageText
     ]
 
-    protocolError: messageText [
+    errorResponse: aResponse [
 	<category: 'private'>
 	^(ProtocolError new)
-	    tag: messageText;
-	    signal: 'Protocol error: ' , messageText
+	    response: aResponse;
+	    signal
+    ]
+
+    unexpectedResponse: aResponse [
+	<category: 'private'>
+	^(UnexpectedResponseError new)
+	    response: aResponse;
+	    signal
     ]
 
     lineEndConvention [
@@ -1405,6 +1412,12 @@ NetClientError subclass: ConnectionFailedError [
     
     <category: 'NetClients-Framework'>
     <comment: nil>
+
+    description [
+        <category: 'exception handling'>
+
+        ^'The connection attempt failed.'
+    ]
 ]
 
 
@@ -1413,14 +1426,38 @@ NetClientError subclass: ConnectionClosedError [
     
     <category: 'NetClients-Framework'>
     <comment: nil>
+
+    description [
+        <category: 'exception handling'>
+
+        ^'The server closed the connection.'
+    ]
 ]
 
 
 
-NetClientError subclass: ProtocolError [
+Notification subclass: ProtocolNotification [
     
+    | response |
+
     <category: 'NetClients-Framework'>
     <comment: nil>
+
+    description [
+	<category: 'exception handling'>
+	^'Protocol Notification'
+    ]
+
+    response [
+	<category: 'exception handling'>
+	^response
+    ]
+
+    response: aResponse [
+	<category: 'exception handling'>
+	response := aResponse.
+        self messageText: '%1: %2' % {self description. response statusMessage}
+    ]
 
     isResumable [
 	<category: 'exception handling'>
@@ -1430,9 +1467,78 @@ NetClientError subclass: ProtocolError [
 
 
 
+NetClientError subclass: ProtocolError [
+    
+    | response |
+
+    <category: 'NetClients-Framework'>
+    <comment: nil>
+
+    description [
+	<category: 'exception handling'>
+	^'Protocol Error'
+    ]
+
+    response [
+	<category: 'exception handling'>
+	^response
+    ]
+
+    response: aResponse [
+	<category: 'exception handling'>
+	response := aResponse.
+        self messageText: '%1: %2' % {self description. response statusMessage}
+    ]
+
+    isResumable [
+	<category: 'exception handling'>
+	^true
+    ]
+]
+
+
+
+NetClientError subclass: UnexpectedResponseError [
+    
+    | response |
+
+    <category: 'NetClients-Framework'>
+    <comment: nil>
+
+    description [
+	<category: 'exception handling'>
+	^'Unexpected Response'
+    ]
+
+    isResumable [
+	<category: 'exception handling'>
+	^false
+    ]
+]
+
+
+
 NetClientError subclass: LoginIncorrectError [
     
     <category: 'NetClients-Framework'>
     <comment: nil>
+
+    description [
+        <category: 'exception handling'>
+
+        ^'The server rejected your login attempt.'
+    ]
+]
+
+
+NetClientError subclass: WrongStateError [
+    <category: 'NetClients-Framework'>
+    <comment: nil>
+
+    description [
+        <category: 'exception handling'>
+
+        ^'This command cannot be executed in the client''s current state.'
+    ]
 ]
 
