@@ -518,13 +518,13 @@ Copyright (c) Kazuki Yasumatsu, 1995. All rights reserved.
 	[
 	[response := requestBlock value: requestHeaders value: stream]
 		ensure: [client close]] 
-		on: NetClientError
-		do: [:ex | ^self errorContents: ex messageText]
 		on: ProtocolError
 		do: 
 		    [:ex | 
 		    protocolError := true.
 		    ex pass]
+		on: NetClientError
+		do: [:ex | ^self errorContents: ex messageText]
 		on: HTTP.HTTPRedirection
 		do: 
 		    [:ex | 
@@ -595,13 +595,13 @@ Copyright (c) Kazuki Yasumatsu, 1995. All rights reserved.
 		    requestHeaders: requestHeaders
 		    into: stream] 
 		ensure: [client close]] 
-		on: NetClientError
-		do: [:ex | ^self errorContents: ex messageText]
 		on: ProtocolError
 		do: 
 		    [:ex | 
 		    protocolError := true.
 		    ex pass]
+		on: NetClientError
+		do: [:ex | ^self errorContents: ex messageText]
 		on: HTTP.HTTPRedirection
 		do: 
 		    [:ex | 

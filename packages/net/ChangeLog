@@ -1,5 +1,9 @@
 2011-03-21  Paolo Bonzini  <bonzini@gnu.org>
 
+	* URIResolver.st: Reorder exceptions.
+
+2011-03-21  Paolo Bonzini  <bonzini@gnu.org>
+
 	* Base.st: Add ProtocolNotification.
 	* HTTP.st: Use it for redirects.
 	* URIResolver.st: Simplify.
