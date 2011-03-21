@@ -7,14 +7,14 @@ dnl Process this file with autoconf to produce a configure script.
 
 dnl 2.63 needed by testsuite, actually
 AC_PREREQ(2.63)
-AC_INIT([GNU Smalltalk], 3.2.3, help-smalltalk@gnu.org, smalltalk,
+AC_INIT([GNU Smalltalk], 3.2.4, help-smalltalk@gnu.org, smalltalk,
         [http://smalltalk.gnu.org/])
 MAINTAINER="bonzini@gnu.org"
 
 dnl CURRENT:REVISION:AGE means this is the REVISION-th version of
 dnl the CURRENT-th interface; all the interface from CURRENT-AGE
 dnl to CURRENT are supported.
-GST_REVISION(8:2:1)
+GST_REVISION(8:3:1)
 AC_CONFIG_AUX_DIR([build-aux])
 AC_CONFIG_MACRO_DIR([build-aux])
 AC_CONFIG_SRCDIR([main.c])
