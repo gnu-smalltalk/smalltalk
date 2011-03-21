@@ -1,5 +1,57 @@
 List of user-visible changes in GNU Smalltalk
 
+NEWS FROM 3.2.3 TO 3.2.4
+
+o   Autoload is extended to allow plugging in arbitrary loaders.
+
+o   Array items in a CStruct didn't work, this is fixed now.
+
+o   DLD could have problems when the same library was requested multiple
+    times.
+
+o   Errors in the bind() system call were not detected correctly; this
+    has been fixed.
+
+o   Fixes for platforms with 113-bit long doubles.
+
+o   Fixes to Delay in the presence of delays with the exact same expiration.
+
+o   Fixes to the HTTP package, including correct flushing of POST requests
+    and doesNotUnderstand exceptions when the host did not exist.
+
+o   GLUT bindings now build correctly under Windows.
+
+o   Many smalltalk-mode improvements.
+
+o   New methods: TextCollector>>#critical:, 
+
+o   nil can be passed to a C function accepting a #cObjectPtr (i.e.
+    void **) argument.
+
+o   SocketAddress>>#allByName: returns nil now, instead of an empty array,
+    when getaddrinfo succeeds but returns no address for the requested
+    address class.
+
+o   SocketAddress>>#byName: returns addresses for the default address class
+    when the receiver is SocketAddress (and not a subclass).
+
+o   Support for older versions of GnuTLS.
+
+o   Swazoo's static content serving was broken and has been fixed.
+
+o   The GST_PACKAGE macro supports having multiple .la files in its last
+    argument.  gst-package's --prepare option was broken and has been fixed.
+
+o   The NetClients exception ProtocolError now includes the erroneous
+    response.  Similarly, the package includes ProtocolNotification which
+    is used, for example, for HTTP redirects.
+
+o   Updated the Squeak/Pharo fileout parser.
+
+o   Updated VisualGST.
+
+-----------------------------------------------------------------------------
+
 NEWS FROM 3.2.2 TO 3.2.3
 
 o   Class attributes can have more than 1 keyword.
