@@ -1,3 +1,7 @@
+2011-03-22  Paolo Bonzini  <bonzini@gnu.org>
+
+	* lib-src/socketx.h: Define shutdown arguments for the sake of Windows.
+
 2011-03-12  Paolo Bonzini  <bonzini@gnu.org>
 
 	* lib-src/ltdl.c: clang analyzer fixes.
