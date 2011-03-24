@@ -1,3 +1,8 @@
+2011-03-24  Paolo Bonzini <bonzini@gnu.org>
+
+	* tests/intmath.st: Add testcases.
+	* tests/intmath.ok: Regenerate.
+
 2011-03-07  Paolo Bonzini <bonzini@gnu.org>
 
 	* tests/pools.st: Add broken testcases.

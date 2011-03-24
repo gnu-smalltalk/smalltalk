@@ -111,71 +111,45 @@ tagged_xor (OOP op1, OOP op2)
 OOP
 add_with_check (OOP op1, OOP op2, mst_Boolean *overflow)
 {
-#if (defined __i386__ || defined __x86_64__)
   intptr_t iop1 = (intptr_t) op1;
-  intptr_t iop2 = ((intptr_t) op2) - 1;
+  intptr_t iop2 = (intptr_t) op2;
   intptr_t iresult;
+#if (defined __i386__ || defined __x86_64__) && !defined NO_OPTIMIZED_SMALLINTEGERS
   int of = 0;
+  iop2--;
   asm ("add" OP_SUFFIX " %3, %2\n"
        "seto %b1" : "=r" (iresult), "+&q" (of) : "0" (iop1), OP_CONSTRAINT (iop2));
 
   *overflow = of;
-  return (OOP) iresult;
 #else
-  intptr_t iop1 = TO_INT (op1);
-  intptr_t iop2 = TO_INT (op2);
-  intptr_t iresult = no_opt (iop1 + iop2);
+  iresult = no_opt (iop1 + (iop2 - 1));
   *overflow = false;
-  if (iresult < iop1)
-    {
-      if (iop2 < 0)
-        return FROM_INT (iresult);
-    }
-  else
-    {
-      if (iop2 >= 0)
-        return FROM_INT (iresult);
-    }
-
-  if UNCOMMON (INT_OVERFLOW (iresult))
+  if (COMMON ((iop1 ^ iop2) >= 0) && UNCOMMON ((iop1 ^ iresult) < 0))
     *overflow = true;
-  return FROM_INT (iresult);
 #endif
+  return (OOP) iresult;
 }
 
 OOP
 sub_with_check (OOP op1, OOP op2, mst_Boolean *overflow)
 {
-#if (defined __i386__ || defined __x86_64__)
   intptr_t iop1 = (intptr_t) op1;
-  intptr_t iop2 = ((intptr_t) op2) - 1;
+  intptr_t iop2 = (intptr_t) op2;
   intptr_t iresult;
+#if (defined __i386__ || defined __x86_64__) && !defined NO_OPTIMIZED_SMALLINTEGERS
   int of = 0;
+  iop2--;
   asm ("sub" OP_SUFFIX " %3, %2\n"
        "seto %b1" : "=r" (iresult), "+&q" (of) : "0" (iop1), OP_CONSTRAINT (iop2));
 
   *overflow = of;
-  return (OOP) iresult;
 #else
-  intptr_t iop1 = TO_INT (op1);
-  intptr_t iop2 = TO_INT (op2);
-  intptr_t iresult = no_opt (iop1 - iop2);
+  iresult = no_opt (iop1 - (iop2 - 1));
   *overflow = false;
-  if (iresult < iop1)
-    {
-      if (iop2 >= 0)
-        return FROM_INT (iresult);
-    }
-  else
-    {
-      if (iop2 < 0)
-        return FROM_INT (iresult);
-    }
-
-  if UNCOMMON (INT_OVERFLOW (iresult))
+  if (UNCOMMON ((iop1 ^ iop2) < 0) && UNCOMMON ((iop1 ^ iresult) < 0))
     *overflow = true;
-  return FROM_INT (iresult);
 #endif
+  return (OOP) iresult;
 }
 
 OOP
