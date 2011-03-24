@@ -1,3 +1,7 @@
+2011-03-22  Paolo Bonzini  <bonzini@gnu.org>
+
+	* gnutls-wrapper.c: Fixes for Win32 compilation.
+
 2011-03-21  Paolo Bonzini  <bonzini@gnu.org>
 
 	* URIResolver.st: Reorder exceptions.
