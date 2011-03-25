@@ -46,6 +46,12 @@ collection.'>
 	ptr := 1
     ]
 
+    close [
+	<category: 'buffer handling'>
+        super close.
+        flushBlock := nil
+    ]
+
     flushBlock: block [
 	"Set which block will be used to flush the buffer.
 	 The block will be evaluated with a collection and
@@ -117,6 +123,12 @@ evaluates an user defined block to try to get some more data.'>
 	^(super on: aCollection)
 	    setToEnd;
 	    yourself	"Force a buffer load soon"
+    ]
+
+    close [
+	<category: 'buffer handling'>
+        super close.
+        fillBlock := nil
     ]
 
     atEnd [
