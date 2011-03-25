@@ -1,3 +1,7 @@
+2011-03-24  Paolo Bonzini  <bonzini@gnu.org>
+
+	* Buffers.st: Remove fill/flush blocks when closing the stream.
+
 2011-03-09  Paolo Bonzini  <bonzini@gnu.org>
 
 	* SocketAddress.st: Prefer returning addresses for the default
