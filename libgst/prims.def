@@ -3086,12 +3086,14 @@ primitive VMpr_String_similarityTo [succeed,fail]
   oop2 = POP_OOP ();
   oop1 = STACKTOP ();
 
-  if (OOP_FIXED_FIELDS (oop1)
-      || (OOP_INSTANCE_SPEC (oop1) & ISP_INDEXEDVARS) != GST_ISP_CHARACTER)
+  if (IS_INT(oop2)
+      || OOP_FIXED_FIELDS (oop2)
+      || (OOP_INSTANCE_SPEC (oop2) & ISP_INDEXEDVARS) != GST_ISP_CHARACTER)
     PRIM_FAILED;
 
 #ifndef OPTIMIZE
-  if (OOP_FIXED_FIELDS (oop1)
+  if (IS_INT(oop1)
+      || OOP_FIXED_FIELDS (oop1)
       || (OOP_INSTANCE_SPEC (oop1) & ISP_INDEXEDVARS) != GST_ISP_CHARACTER)
     PRIM_FAILED;
 #endif
@@ -5522,7 +5524,8 @@ primitive VMpr_FileDescriptor_fileOp [succeed,fail]
       }
 
     case PRIM_PUT_CHARS:
-      if ((OOP_INSTANCE_SPEC (oopVec[1]) & ISP_INDEXEDVARS) != GST_ISP_FIXED
+      if (!IS_INT(oopVec[1])
+          && (OOP_INSTANCE_SPEC (oopVec[1]) & ISP_INDEXEDVARS) != GST_ISP_FIXED
           && _gst_log2_sizes[OOP_INSTANCE_SPEC (oopVec[1]) & ISP_SHAPE] == 0)
 	{
 	  char *data = STRING_OOP_CHARS (oopVec[1]);
@@ -5543,7 +5546,8 @@ primitive VMpr_FileDescriptor_fileOp [succeed,fail]
       break;
 
     case PRIM_GET_CHARS:		/* only works for strings */
-      if ((OOP_INSTANCE_SPEC (oopVec[1]) & ISP_INDEXEDVARS) != GST_ISP_FIXED
+      if (!IS_INT(oopVec[1])
+          && (OOP_INSTANCE_SPEC (oopVec[1]) & ISP_INDEXEDVARS) != GST_ISP_FIXED
           && _gst_log2_sizes[OOP_INSTANCE_SPEC (oopVec[1]) & ISP_SHAPE] == 0)
 	{
 	  char *data = STRING_OOP_CHARS (oopVec[1]);
@@ -5569,7 +5573,8 @@ primitive VMpr_FileDescriptor_fileOp [succeed,fail]
       break;
 
     case PRIM_GET_CHARS_AT:
-      if ((OOP_INSTANCE_SPEC (oopVec[1]) & ISP_INDEXEDVARS) != GST_ISP_FIXED
+      if (!IS_INT(oopVec[1])
+          && (OOP_INSTANCE_SPEC (oopVec[1]) & ISP_INDEXEDVARS) != GST_ISP_FIXED
           && _gst_log2_sizes[OOP_INSTANCE_SPEC (oopVec[1]) & ISP_SHAPE] == 0
 	  && IS_OFF_T (oopVec[4]))
 	{
@@ -5611,7 +5616,8 @@ primitive VMpr_FileDescriptor_fileOp [succeed,fail]
       break;
 
     case PRIM_PUT_CHARS_AT:
-      if ((OOP_INSTANCE_SPEC (oopVec[1]) & ISP_INDEXEDVARS) != GST_ISP_FIXED
+      if (!IS_INT(oopVec[1])
+          && (OOP_INSTANCE_SPEC (oopVec[1]) & ISP_INDEXEDVARS) != GST_ISP_FIXED
           && _gst_log2_sizes[OOP_INSTANCE_SPEC (oopVec[1]) & ISP_SHAPE] == 0
 	  && IS_OFF_T (oopVec[4]))
 	{
@@ -5781,7 +5787,8 @@ primitive VMpr_FileDescriptor_socketOp [succeed,fail]
       }
 
     case PRIM_PUT_CHARS:
-      if ((OOP_INSTANCE_SPEC (oopVec[1]) & ISP_INDEXEDVARS) != GST_ISP_FIXED
+      if (!IS_INT(oopVec[1])
+          && (OOP_INSTANCE_SPEC (oopVec[1]) & ISP_INDEXEDVARS) != GST_ISP_FIXED
           && _gst_log2_sizes[OOP_INSTANCE_SPEC (oopVec[1]) & ISP_SHAPE] == 0)
 	{
 	  char *data = STRING_OOP_CHARS (oopVec[1]);
@@ -5803,7 +5810,8 @@ primitive VMpr_FileDescriptor_socketOp [succeed,fail]
       break;
 
     case PRIM_GET_CHARS:		/* only works for strings */
-      if ((OOP_INSTANCE_SPEC (oopVec[1]) & ISP_INDEXEDVARS) != GST_ISP_FIXED
+      if (!IS_INT(oopVec[1])
+          && (OOP_INSTANCE_SPEC (oopVec[1]) & ISP_INDEXEDVARS) != GST_ISP_FIXED
           && _gst_log2_sizes[OOP_INSTANCE_SPEC (oopVec[1]) & ISP_SHAPE] == 0)
 	{
 	  char *data = STRING_OOP_CHARS (oopVec[1]);

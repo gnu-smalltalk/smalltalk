@@ -1,3 +1,7 @@
+2011-03-25  Paolo Bonzini  <bonzini@gnu.org>
+
+	* libgst/prims.def: Fix crashes with unexpected integer arguments.
+
 2011-03-24  Paolo Bonzini  <bonzini@gnu.org>
 
 	* libgst/interp.inl: Fix brokenness on non-x86 platforms.
