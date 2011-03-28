@@ -286,6 +286,7 @@ do arbitrary processing on the files.'>
 	<category: 'basic'>
 	self isOpen ifFalse: [SystemExceptions.FileError signal: 'file closed'].
 	File checkError.
+        self pastEnd.
 	^0
     ]
 
@@ -797,7 +798,8 @@ do arbitrary processing on the files.'>
 		    fileOp: 3
 		    with: aCollection
 		    with: position + available
-		    with: (position + n - 1 min: aCollection size).
+		    with: (position + n - 1 min: aCollection size)
+                    ifFail: [self checkError].
 	count := count + available.
 	count = 0 ifTrue: [atEnd := true].
 	^count
@@ -817,7 +819,8 @@ do arbitrary processing on the files.'>
 			    fileOp: 2
 			    with: aCollection
 			    with: cur
-			    with: last.
+			    with: last
+                            ifFail: [self checkError].
 		result = 0 ifTrue: [^cur - position].
 		cur := cur + result].
 	^cur - position
