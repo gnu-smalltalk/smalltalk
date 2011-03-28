@@ -5869,6 +5869,8 @@ primitive VMpr_FileDescriptor_socketOp [succeed,fail]
 #endif
 
  fail:
+  if (errno)
+    _gst_set_errno (errno);
   PRIM_FAILED;
 
  succeed:
