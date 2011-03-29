@@ -1,5 +1,9 @@
 2011-03-29  Paolo Bonzini  <bonzini@gnu.org>
 
+	* MIME.st: Do not fail on empty fields like "Expires: \r\n".
+
+2011-03-29  Paolo Bonzini  <bonzini@gnu.org>
+
 	* HTTP.st: Accept end-of-file where a chunked encoding header
 	should have been.
 
