@@ -42,14 +42,6 @@ GtkWidget extend [
 	^requisition asPoint
     ]
 
-    "TODO: more flags..."
-
-    setSensitive: aBoolean [
-	aBoolean
-	     ifTrue: [ self setFlags: Gtk gtkSensitive ]
-	     ifFalse: [ self unsetFlags: Gtk gtkSensitive ]
-    ]
-
 ]
 
 

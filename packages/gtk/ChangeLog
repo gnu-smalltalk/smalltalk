@@ -1,3 +1,7 @@
+2011-03-31  Paolo Bonzini  <bonzini@gnu.org>
+
+	* GtkImpl.st: Remove #setSensitive:.
+
 2011-01-20  Denis Washington <denisw@online.de>
 
 	* gst-gtk.c: Adopt new names for the libgst-gobject API.

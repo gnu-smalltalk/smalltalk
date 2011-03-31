@@ -170,7 +170,8 @@ Copyright (c) Kazuki Yasumatsu, 1995. All rights reserved.
 	cr := Character cr.
 	lf := Character lf.
 	
-	[(aResponseStream peek asUppercase isDigit: 16) 
+	[aResponseStream atEnd ifTrue: [^self].
+        (aResponseStream peek asUppercase isDigit: 16) 
 	    ifFalse: 
 		[self 
 		    error: 'Expecting chunk-size, but found ' 
