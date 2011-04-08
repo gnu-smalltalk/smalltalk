@@ -113,24 +113,20 @@ Connection subclass: PGConnection [
     ]
 
     do: aSQLQuery [
-	<category: 'implementations'>
-	^(PGResultSet new: (handle exec: aSQLQuery))
-	    checkStatusForDo;
-	    yourself
-    ]
-
-    prepare: aSQLQuery [
-	"FIXME"
-
-	<category: 'implementations'>
-	self notYetImplemented
+	<category: 'querying'>
+        ^(self prepare: aSQLQuery) execute
     ]
 
     select: aSQLQuery [
-	<category: 'implementations'>
-	^(PGResultSet new: (handle exec: aSQLQuery))
-	    checkStatusForSelect;
-	    yourself
+	<category: 'querying'>
+        ^(self prepare: aSQLQuery) execute
+    ]
+
+    prepare: aSQLQuery [
+	<category: 'querying'>
+        ^(PGStatement on: self)
+            dbHandle: handle;
+            queryString: aSQLQuery.
     ]
 
     close [

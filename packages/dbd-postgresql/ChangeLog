@@ -1,3 +1,7 @@
+2011-04-08  Holger Hans Peter Freyther  <holger@freyther.de>
+
+	* Statement.st: New.
+
 2011-04-07  Holger Hans Peter Freyther  <holger@freyther.de>
 
 	* ColumnInfo.st: Do not attempt to convert a NULL value.
