@@ -1,3 +1,7 @@
+2011-04-08  Holger Hans Peter Freyther  <zecke@selfish.org>
+
+	* Statement.st: Add Statement class>>#getCommand:.
+
 2010-12-04  Paolo Bonzini  <bonzini@gnu.org>
 
 	* package.xml: Remove now superfluous <file> tags.

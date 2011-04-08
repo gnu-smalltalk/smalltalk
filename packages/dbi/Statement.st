@@ -8,7 +8,7 @@
 "======================================================================
 |
 | Copyright 2006 Mike Anderson
-| Copyright 2007, 2008 Free Software Foundation, Inc.
+| Copyright 2007, 2008, 2011 Free Software Foundation, Inc.
 |
 | Written by Mike Anderson
 |
@@ -47,6 +47,17 @@ Object subclass: Statement [
         ^self new
             connection: aConnection;
             yourself
+    ]
+
+    Statement class >> getCommand: queryString [
+        | readStream writeStream aCharacter |
+        writeStream := WriteStream on: String new.
+        readStream := ReadStream on: queryString.
+        readStream skipSeparators.
+        [readStream atEnd
+	    or: [aCharacter := readStream next. aCharacter isSeparator]]
+                whileFalse: [writeStream nextPut: aCharacter asUppercase].
+        ^writeStream contents
     ]
 
     connection [

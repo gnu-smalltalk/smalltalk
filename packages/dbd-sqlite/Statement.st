@@ -94,13 +94,6 @@ Statement subclass: SQLiteStatement [
     
     getCommand [
         <category: 'private'>
-        | readStream writeStream aCharacter |
-        writeStream := WriteStream on: String new.
-        readStream := ReadStream on: queryString.
-        readStream skipSeparators.
-        [readStream atEnd
-	    or: [aCharacter := readStream next. aCharacter isSeparator]]
-                whileFalse: [writeStream nextPut: aCharacter asUppercase].
-        ^writeStream contents
+        ^ self class getCommand: queryString.
     ]
 ]
