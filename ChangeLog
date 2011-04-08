@@ -1,3 +1,7 @@
+2011-04-06  Paolo Bonzini <bonzini@gnu.org>
+
+	* kernel/SeqCollect.st: Add #size.
+
 2011-03-28  Paolo Bonzini <bonzini@gnu.org>
 
 	* kernel/FileDescr.st: Report end-of-stream when read/write return 0.

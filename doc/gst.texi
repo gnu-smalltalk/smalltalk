@@ -2260,7 +2260,7 @@ my password is @code{mypass}.
 | connection statement result |
 
 connection := DBI.Connection
-    connect: 'dbi:MySQL:dbname=test:host=localhost'
+    connect: 'dbi:MySQL:dbname=test;hostname=localhost'
     user: 'doe'
     password: 'mypass').
 @end example
