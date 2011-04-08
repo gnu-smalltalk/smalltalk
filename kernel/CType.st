@@ -145,12 +145,31 @@ elements.'>
 	^CObject gcAlloc: self sizeof type: self
     ]
 
+    gcNew: anInteger [
+	"Allocate a new CObject with room for anInteger C object of the type
+	 (class) identified by the receiver.  The object is movable
+	 in memory, but on the other hand it is garbage-collected
+	 automatically."
+
+	<category: 'C instance creation'>
+	^CObject gcAlloc: self sizeof * anInteger type: self
+    ]
+
     new [
 	"Allocate a new CObject with the type (class) identified by the receiver.
 	 It is the caller's responsibility to free the memory allocated for it."
 
 	<category: 'C instance creation'>
 	^CObject alloc: self sizeof type: self
+    ]
+
+    new: anInteger [
+	"Allocate a new CObject with room for anInteger C objects of the type
+	 (class) identified by the receiver.  It is the caller's
+	 responsibility to free the memory allocated for it."
+
+	<category: 'accessing'>
+	^CObject alloc: self sizeof * anInteger type: self
     ]
 
     address: cObjOrInt [
@@ -305,15 +324,6 @@ CType subclass: CPtrCType [
 
 	<category: 'accessing'>
 	^elementType
-    ]
-
-    new: size [
-	"Allocate space for `size' objects like those that the receiver points
-	 to, and with the type (class) identified by the receiver.
-	 It is the caller's responsibility to free the memory allocated for it."
-
-	<category: 'accessing'>
-	^CObject alloc: elementType sizeof * size type: self
     ]
 
     storeOn: aStream [

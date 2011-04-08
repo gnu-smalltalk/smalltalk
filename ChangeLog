@@ -1,5 +1,9 @@
 2011-04-06  Paolo Bonzini <bonzini@gnu.org>
 
+	* kernel/CType.st: Add #new: and #gcNew:.
+
+2011-04-06  Paolo Bonzini <bonzini@gnu.org>
+
 	* kernel/SeqCollect.st: Add #size.
 
 2011-03-28  Paolo Bonzini <bonzini@gnu.org>
