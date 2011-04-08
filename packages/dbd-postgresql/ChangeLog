@@ -1,3 +1,7 @@
+2011-04-07  Holger Hans Peter Freyther  <holger@freyther.de>
+
+	* ColumnInfo.st: Do not attempt to convert a NULL value.
+
 2011-01-26  Stefan Schmiedl  <s@xss.de>
 
 	* Table.st: Take current domain into account.
