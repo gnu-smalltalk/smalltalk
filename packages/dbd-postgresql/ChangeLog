@@ -1,5 +1,10 @@
 2011-04-08  Holger Hans Peter Freyther  <holger@freyther.de>
 
+	* Statements.st: Implement executeWithAll:
+	* Connection.st: Invoke PQexecParams.
+
+2011-04-08  Holger Hans Peter Freyther  <holger@freyther.de>
+
 	* Statement.st: New.
 
 2011-04-07  Holger Hans Peter Freyther  <holger@freyther.de>

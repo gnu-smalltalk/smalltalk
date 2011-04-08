@@ -188,6 +188,43 @@ CObject subclass: PQConnection [
     exec: aSqlStatement [
         <cCall: 'PQexec' returning: #{PQResultSet} args: #(#self #string)>
     ]
+
+    "Executing SQL with params"
+    exec: aSqlStatement with: params [
+        | par strings |
+
+        "Sanity check before we do memory allocations in C"
+        strings := params collect: [ :each |
+            each isString ifTrue: [each]
+                ifFalse: [self fieldConverter printString: each]].
+
+        "Convert the params into an array of C-Strings."
+        ^[par := CStringType gcNew: strings size.
+        strings keysAndValuesDo: [:i :each |
+            par at: i - 1 put: each].
+
+        self
+            exec_params:aSqlStatement
+            n_par: params size
+            types: nil
+            values: par
+            lengths: nil
+            formats: nil
+            res: 0
+        ] ensure: [
+            "Free the memory we allocated"
+
+            par isNil ifFalse: [
+                0 to: params size - 1 do: [:i |
+                    ((par + i) derefAt: 0 type: CObjectType) free ] ].
+        ]
+    ]
+
+    exec_params: cmd n_par: parAms types: types values: vals lengths: l formats: f res: r [
+        <category: 'private'>
+        <cCall: 'PQexecParams' returning: #{PQResultSet}
+            args: #(#self #string #int #cObject #cObject #cObject #cObject #int)>
+    ]
 ]
 
 

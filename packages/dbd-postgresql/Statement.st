@@ -53,6 +53,8 @@ now the ability to execute commands with binding.'>
 
     queryString: aSQLQuery [
         <category: 'accessing'>
+        "In PostgreSQL one can use $1 for binding parameters with the
+         executeWithAll:. The parameters must be all strings."
         queryString := aSQLQuery.
     ]
 
@@ -63,17 +65,26 @@ now the ability to execute commands with binding.'>
         ^isSelect
     ]
 
+    checkResult: aRes [
+        <category: 'private'>
+        self isSelect
+            ifTrue:  [aRes checkStatusForSelect]
+            ifFalse: [aRes checkStatusForDo].
+        ^ aRes
+    ]
+
     execute [
         <category: 'querying'>
         | res |
         res := PGResultSet new: (dbHandle exec: queryString).
-        self isSelect
-            ifTrue:  [res checkStatusForSelect]
-            ifFalse: [res checkStatusForDo].
-        ^ res
+        ^ self checkResult: res.
     ]
 
     executeWithAll: aParams [
-        self notYetImplemented
+        | res |
+        "In PostgreSQL one can use $1 for binding parameters with the
+         executeWithAll:. The parameters must be all strings."
+        res := PGResultSet new: (dbHandle exec: queryString with: aParams).
+        ^ self checkResult: res.
     ]
 ]
