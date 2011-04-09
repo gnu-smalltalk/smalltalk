@@ -191,16 +191,11 @@ CObject subclass: PQConnection [
 
     "Executing SQL with params"
     exec: aSqlStatement with: params [
-        | par strings |
-
-        "Sanity check before we do memory allocations in C"
-        strings := params collect: [ :each |
-            each isString ifTrue: [each]
-                ifFalse: [self fieldConverter printString: each]].
+        | par |
 
         "Convert the params into an array of C-Strings."
-        ^[par := CStringType gcNew: strings size.
-        strings keysAndValuesDo: [:i :each |
+        ^[par := CStringType gcNew: params size.
+        params keysAndValuesDo: [:i :each |
             par at: i - 1 put: each].
 
         self

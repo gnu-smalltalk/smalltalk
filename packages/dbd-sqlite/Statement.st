@@ -76,14 +76,12 @@ Statement subclass: SQLiteStatement [
     
     executeWithAll: aParams [
         <category: 'querying'>
-        | resCode resultSet |
-        aParams keysAndValuesDo: [:i :param | 
+        | resCode |
+        ^[aParams keysAndValuesDo: [:i :param | 
                 resCode := self handle bindingAt: i put: param.
                 self handle checkError: resCode = 0].
                                           
-        resultSet := SQLiteResultSet on: self.
-        self resetAndClear.
-        ^resultSet
+        SQLiteResultSet on: self] ensure: [self resetAndClear]
     ]
     
     resetAndClear [

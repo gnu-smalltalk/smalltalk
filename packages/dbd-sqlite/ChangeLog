@@ -1,3 +1,7 @@
+2011-04-09  Paolo Bonzini  <bonzini@gnu.org>
+
+	* Statement.st: Move #resetAndClear inside an #ensure: block.
+
 2011-04-08  Holger Peter Freyther  <zecke@selfish.org>
 
 	* Statement.st: Refactor code and use DBI.Statement class>>#getCommand:.

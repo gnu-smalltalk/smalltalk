@@ -80,11 +80,15 @@ now the ability to execute commands with binding.'>
         ^ self checkResult: res.
     ]
 
-    executeWithAll: aParams [
-        | res |
+    executeWithAll: params [
+        | res strings |
         "In PostgreSQL one can use $1 for binding parameters with the
          executeWithAll:. The parameters must be all strings."
-        res := PGResultSet new: (dbHandle exec: queryString with: aParams).
+        strings := params collect: [ :each |
+            each isString ifTrue: [each]
+                ifFalse: [self connection fieldConverter printString: each]].
+
+        res := PGResultSet new: (dbHandle exec: queryString with: strings).
         ^ self checkResult: res.
     ]
 ]

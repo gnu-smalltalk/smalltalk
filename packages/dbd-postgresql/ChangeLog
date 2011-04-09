@@ -1,6 +1,15 @@
+2011-04-09  Paolo Bonzini  <bonzini@gnu.org>
+
+	* Statement.st: Move field conversion here...
+	* Connection.st: ... from here.
+
+2011-04-09  Holger Hans Peter Freyther  <holger@freyther.de>
+
+	* ResultSet.st: Fix return value for PQcmdTuples.
+
 2011-04-08  Holger Hans Peter Freyther  <holger@freyther.de>
 
-	* Statements.st: Implement executeWithAll:
+	* Statement.st: Implement executeWithAll:
 	* Connection.st: Invoke PQexecParams.
 
 2011-04-08  Holger Hans Peter Freyther  <holger@freyther.de>
