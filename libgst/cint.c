@@ -823,6 +823,11 @@ _gst_invoke_croutine (OOP cFuncOOP,
         case CDATA_WSTRING_OUT:
         case CDATA_STRING_OUT:
         case CDATA_BYTEARRAY_OUT:
+        case CDATA_SYMBOL_OUT:
+        case CDATA_STRING:
+        case CDATA_BYTEARRAY:
+        case CDATA_SYMBOL:
+        case CDATA_WSTRING:
 	  needPostprocessing = true;
 	  /* fall through */
 

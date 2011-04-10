@@ -8,6 +8,7 @@
   <filein>ResultSet.st</filein>
   <filein>Row.st</filein>
   <filein>ColumnInfo.st</filein>
+  <filein>Statement.st</filein>
   <filein>Table.st</filein>
   <filein>TableColumnInfo.st</filein>
   <filein>FieldConverter.st</filein>

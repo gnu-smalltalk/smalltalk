@@ -166,7 +166,7 @@ ResultSet subclass: PGResultSet [
     rowsAffected [
 	<category: 'accessing'>
 	self isDML ifFalse: [super rowsAffected].
-	^handle numTuples
+	^handle rowsAffected asInteger
     ]
 
     columnsArray [
@@ -293,7 +293,7 @@ CObject subclass: PQResultSet [
 
     "DML results"
     rowsAffected [
-        <cCall: 'PQcmdTuples' returning: #int args: #( #self)>
+        <cCall: 'PQcmdTuples' returning: #string args: #( #self)>
     ]
 	
     lastOid [

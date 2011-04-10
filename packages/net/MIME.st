@@ -223,8 +223,8 @@ Object subclass: SimpleScanner [
 		#(32 9) includes: c asInteger].
 	self initClassificationTableWith: CRLFMask
 	    when: [:c | c == Character cr or: [c == Character nl]].
-	self initClassificationTableWith: EndOfLineMask
-	    when: [:c | c == Character cr]
+	"self initClassificationTableWith: EndOfLineMask
+	    when: [:c | c == Character cr]"
     ]
 
     SimpleScanner class >> initClassificationTableWith: mask when: aBlock [
@@ -588,6 +588,7 @@ Object subclass: SimpleScanner [
 	<category: 'stream interface -- reading'>
 	lookahead notNil ifTrue: [^lookahead].
 	self atEnd ifTrue: [^nil].
+	hereChar := nil.
 	lookahead := source next.
 	^lookahead
     ]
@@ -1142,11 +1143,9 @@ MessageElement subclass: MimeEntity [
 
     parseFieldsFrom: rfc822Stream [
 	<category: 'parsing'>
-	| cr nl |
-	
-	[(cr := rfc822Stream peekFor: Character cr) 
-	    | (nl := rfc822Stream peekFor: Character nl)] 
-		whileFalse: [self parseFieldFrom: rfc822Stream]
+	[rfc822Stream atEndOfLine] 
+		whileFalse: [self parseFieldFrom: rfc822Stream].
+        rfc822Stream next; skipEndOfLine
     ]
 
     parseMultipartBodyFrom: rfc822Stream [
@@ -2695,16 +2694,29 @@ MailScanner subclass: RFC822Scanner [
 	^token
     ]
 
+    atEndOfLine [
+	<category: 'multi-character scans'>
+        self peek.
+	^(self classificationMaskFor: lookahead) anyMask: CRLFMask
+    ]
+
+    skipEndOfLine [
+	<category: 'multi-character scans'>
+	hereChar == Character nl 
+	    ifFalse: 
+		[(source peekFor: Character nl) 
+		    ifFalse: [^false]
+		    ifTrue: [self sourceTrailNextPut: Character nl]].
+        ^true
+    ]
+
     scanEndOfLine [
 	"Note: this will work only for RFC822 but not for HTTP. Needs more design work"
 
 	<category: 'multi-character scans'>
-	(self matchCharacterType: CRLFMask) ifFalse: [^self].
-	hereChar == Character nl 
-	    ifFalse: 
-		[(source peekFor: Character nl) 
-		    ifFalse: [^self]
-		    ifTrue: [self sourceTrailNextPut: Character nl]].
+        "Called after #step, so no need to peek to set the CRLFMask."
+	(self matchCharacterType: CRLFMask) ifFalse: [^false].
+	self skipEndOfLine ifFalse: [^self].
 	self shouldFoldLine 
 	    ifTrue: 
 		[self hereChar: Character space.
@@ -2770,6 +2782,7 @@ MailScanner subclass: RFC822Scanner [
 	"RFC822: text = <Any CHAR, including bare CR & bare LF, but not including CRLF. This is a 'catchall' category and cannot be tokenized. Text is used only to read values of unstructured fields"
 
 	<category: 'multi-character scans'>
+	(self matchCharacterType: EndOfLineMask) ifTrue: [^String new].
 	^self scanUntil: [self matchCharacterType: CRLFMask]
     ]
 
@@ -2863,14 +2876,13 @@ MailScanner subclass: RFC822Scanner [
 	<category: 'private'>
 	| char |
 	self atEnd ifTrue: [^false].
-	char := source next.
+	char := source peek.
 	^((self classificationMaskFor: char) anyMask: WhiteSpaceMask) 
 	    ifFalse: 
-		[lookahead := char.
-		self resetToken.
+		[self resetToken; peek.
 		false]
 	    ifTrue: 
-		[self sourceTrailNextPut: char.
+		[self sourceTrailNextPut: source next.
 		true]
     ]
 

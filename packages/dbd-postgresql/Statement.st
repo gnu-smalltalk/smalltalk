@@ -1,6 +1,6 @@
 "======================================================================
 |
-|   SQLite bindings, Statement class
+|   PostgreSQL bindings, Statement class
 |
 |
  ======================================================================"
@@ -8,8 +8,8 @@
 
 "======================================================================
 |
-| Copyright 2007, 2008 Free Software Foundation, Inc.
-| Written by Daniele Sciascia
+| Copyright 2011 Free Software Foundation, Inc.
+| Written by Holger Hans Peter Freyther
 |
 | This file is part of the GNU Smalltalk class library.
 |
@@ -32,66 +32,63 @@
 "
 
 
+Statement subclass: PGStatement [
+    | dbHandle queryString isSelect |
 
-Statement subclass: SQLiteStatement [
-    | handle queryString isSelect |
-    
     <category: 'DBI-Drivers'>
-    <comment: 'I represent a SQLite prepared statement'>
-    
+    <comment: 'I represent a Postgres prepared statement. Or actually right
+now the ability to execute commands with binding.'>
+
     SelectQueries := #('EXPLAIN' 'SELECT') asSet.
 
-    handle [
+    dbHandle: aHandle [
         <category: 'private'>
-        ^handle
+        dbHandle := aHandle.
     ]
-    
-    handle: aSqlite3StmtHandle [
-        <category: 'private'>
-        handle := aSqlite3StmtHandle
-    ]
-    
+
     queryString [
         <category: 'accessing'>
         ^queryString
     ]
-    
+
     queryString: aSQLQuery [
         <category: 'accessing'>
+        "In PostgreSQL one can use $1 for binding parameters with the
+         executeWithAll:. The parameters must be all strings."
         queryString := aSQLQuery.
-        
     ]
-    
+
     isSelect [
         <category: 'accessing'>
         isSelect isNil
-            ifTrue: [isSelect := SelectQueries includes: self getCommand].
+            ifTrue: [isSelect := SelectQueries includes: (self class getCommand: queryString)].
         ^isSelect
     ]
-    
+
+    checkResult: aRes [
+        <category: 'private'>
+        self isSelect
+            ifTrue:  [aRes checkStatusForSelect]
+            ifFalse: [aRes checkStatusForDo].
+        ^ aRes
+    ]
+
     execute [
         <category: 'querying'>
-        ^SQLiteResultSet on: self
+        | res |
+        res := PGResultSet new: (dbHandle exec: queryString).
+        ^ self checkResult: res.
     ]
-    
-    executeWithAll: aParams [
-        <category: 'querying'>
-        | resCode |
-        ^[aParams keysAndValuesDo: [:i :param | 
-                resCode := self handle bindingAt: i put: param.
-                self handle checkError: resCode = 0].
-                                          
-        SQLiteResultSet on: self] ensure: [self resetAndClear]
-    ]
-    
-    resetAndClear [
-        <category: 'private'>
-        self handle reset.
-        self handle clearBindings.
-    ]
-    
-    getCommand [
-        <category: 'private'>
-        ^ self class getCommand: queryString.
+
+    executeWithAll: params [
+        | res strings |
+        "In PostgreSQL one can use $1 for binding parameters with the
+         executeWithAll:. The parameters must be all strings."
+        strings := params collect: [ :each |
+            each isString ifTrue: [each]
+                ifFalse: [self connection fieldConverter printString: each]].
+
+        res := PGResultSet new: (dbHandle exec: queryString with: strings).
+        ^ self checkResult: res.
     ]
 ]

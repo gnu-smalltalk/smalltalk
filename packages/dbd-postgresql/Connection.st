@@ -113,24 +113,20 @@ Connection subclass: PGConnection [
     ]
 
     do: aSQLQuery [
-	<category: 'implementations'>
-	^(PGResultSet new: (handle exec: aSQLQuery))
-	    checkStatusForDo;
-	    yourself
-    ]
-
-    prepare: aSQLQuery [
-	"FIXME"
-
-	<category: 'implementations'>
-	self notYetImplemented
+	<category: 'querying'>
+        ^(self prepare: aSQLQuery) execute
     ]
 
     select: aSQLQuery [
-	<category: 'implementations'>
-	^(PGResultSet new: (handle exec: aSQLQuery))
-	    checkStatusForSelect;
-	    yourself
+	<category: 'querying'>
+        ^(self prepare: aSQLQuery) execute
+    ]
+
+    prepare: aSQLQuery [
+	<category: 'querying'>
+        ^(PGStatement on: self)
+            dbHandle: handle;
+            queryString: aSQLQuery.
     ]
 
     close [
@@ -191,6 +187,38 @@ CObject subclass: PQConnection [
     "Executing SQL"
     exec: aSqlStatement [
         <cCall: 'PQexec' returning: #{PQResultSet} args: #(#self #string)>
+    ]
+
+    "Executing SQL with params"
+    exec: aSqlStatement with: params [
+        | par |
+
+        "Convert the params into an array of C-Strings."
+        ^[par := CStringType gcNew: params size.
+        params keysAndValuesDo: [:i :each |
+            par at: i - 1 put: each].
+
+        self
+            exec_params:aSqlStatement
+            n_par: params size
+            types: nil
+            values: par
+            lengths: nil
+            formats: nil
+            res: 0
+        ] ensure: [
+            "Free the memory we allocated"
+
+            par isNil ifFalse: [
+                0 to: params size - 1 do: [:i |
+                    ((par + i) derefAt: 0 type: CObjectType) free ] ].
+        ]
+    ]
+
+    exec_params: cmd n_par: parAms types: types values: vals lengths: l formats: f res: r [
+        <category: 'private'>
+        <cCall: 'PQexecParams' returning: #{PQResultSet}
+            args: #(#self #string #int #cObject #cObject #cObject #cObject #int)>
     ]
 ]
 

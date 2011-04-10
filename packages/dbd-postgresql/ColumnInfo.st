@@ -213,7 +213,8 @@ ColumnInfo subclass: PGColumnInfo [
 
     PGColumnInfo class >> convert: aRaw type: aType [
 	<category: 'type conversions'>
-	TypeConversions at: aType ifPresent: [:sel | ^self perform: sel with: aRaw].
+	aRaw isNil ifFalse: [
+		TypeConversions at: aType ifPresent: [:sel | ^self perform: sel with: aRaw]].
 	^aRaw
     ]
 

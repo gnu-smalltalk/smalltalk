@@ -1,3 +1,25 @@
+2011-04-09  Paolo Bonzini  <bonzini@gnu.org>
+
+	* Statement.st: Move field conversion here...
+	* Connection.st: ... from here.
+
+2011-04-09  Holger Hans Peter Freyther  <holger@freyther.de>
+
+	* ResultSet.st: Fix return value for PQcmdTuples.
+
+2011-04-08  Holger Hans Peter Freyther  <holger@freyther.de>
+
+	* Statement.st: Implement executeWithAll:
+	* Connection.st: Invoke PQexecParams.
+
+2011-04-08  Holger Hans Peter Freyther  <holger@freyther.de>
+
+	* Statement.st: New.
+
+2011-04-07  Holger Hans Peter Freyther  <holger@freyther.de>
+
+	* ColumnInfo.st: Do not attempt to convert a NULL value.
+
 2011-01-26  Stefan Schmiedl  <s@xss.de>
 
 	* Table.st: Take current domain into account.
