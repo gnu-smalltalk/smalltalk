@@ -1368,6 +1368,39 @@ current process.'>
 
 
 
+Namespace current: Kernel [
+
+Notification subclass: TimeoutNotification [
+    | delay |
+    <category: 'Language-Implementation'>
+    <comment: 'I get send by the timeout handling of a Delay
+and I am the indication that the time is up and that one should come
+to an end.'>
+
+    TimeoutNotification class >> on: aDelay [
+        <category: 'creation'>
+        ^ self new
+            delay: aDelay; yourself
+    ]
+
+    delay: aDelay [
+        <category: 'private'>
+        delay := aDelay
+    ]
+
+    delay [
+        <category: 'private'>
+        ^ delay
+    ]
+
+    isResumable [
+        <category: 'private'>
+        ^ false
+    ]
+]
+
+]
+
 Number extend [
 
     arithmeticError: msg [

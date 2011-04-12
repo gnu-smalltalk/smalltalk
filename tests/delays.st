@@ -57,3 +57,33 @@ Eval [
     ^expired not and: [ msec between: 2500 and: 4500 ]
 ]
 
+"Test timeouts"
+Eval [
+     (Delay forSeconds: 1)
+         value:
+             [[(Delay forSeconds: 1000000) wait.]
+                 ensure: ['ensure' printNl]]
+         onTimeoutDo: ['timeout' printNl].
+]
+
+Eval [
+     (Delay forSeconds: 1)
+         value:
+             [[(Delay forSeconds: 1000000) wait.]
+                 ifCurtailed: ['ifCurtailed' printNl]]
+         onTimeoutDo: ['timeout' printNl].
+]
+
+Eval [
+     [
+         (Delay forSeconds: 1)
+             value: [
+                 [
+                     (Delay forSeconds: 100000)
+                         value: [[(Delay forSeconds: 10000) wait] ensure:
+                             ['ensure-in' printNl]]
+                         onTimeoutDo: ['timeout-inner' printNl].
+                 ] ensure: ['ensure-mid' printNl]]
+             onTimeoutDo: ['timeout' printNl].
+     ] ensure: ['ensure-out' printNl].
+]

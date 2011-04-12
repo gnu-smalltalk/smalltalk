@@ -10,3 +10,20 @@ returned value is true
 
 Execution begins...
 returned value is true
+
+Execution begins...
+'ensure'
+'timeout'
+returned value is 'timeout'
+
+Execution begins...
+'ifCurtailed'
+'timeout'
+returned value is 'timeout'
+
+Execution begins...
+'ensure-in'
+'ensure-mid'
+'timeout'
+'ensure-out'
+returned value is 'timeout'
