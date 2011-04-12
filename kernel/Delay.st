@@ -267,6 +267,40 @@ created.'>
          the second call to #notifyChange, or because the timeout fired."
     ]
 
+    value: aBlock onTimeoutDo: aTimeoutBlock [
+        "Execute aBlock for up to the time of my own delay; in case the code
+         did not finish abort the execution, unwind the block and then
+         evaluate aTimeoutBlock."
+        <category: 'timeout'>
+        | value timeout |
+        timeout := false.
+        value := [ | sem proc |
+            "Use the semaphore to signal that we executed everything"
+            sem := Semaphore new.
+            "Remember the current process"
+            proc := Processor activeProcess.
+
+            "Start a process to wait in and then signal"
+            [
+                "Wait and see if it is timed out. If so send a signal."
+                (self timedWaitOn: sem) ifTrue: [
+                   proc signalInterrupt: (Kernel.TimeoutNotification on: self).
+                ].
+            ] fork.
+
+            aBlock ensure: [sem signal].
+        ] on: Kernel.TimeoutNotification do: [:e |
+            e delay = self
+                ifTrue:  [timeout := true]
+                ifFalse: [e pass].
+        ].
+
+        "Make sure we call the #ensure:/#ifCurtailed: blocks first."
+        ^ timeout
+            ifTrue:  [aTimeoutBlock value]
+            ifFalse: [value].
+    ]
+
     start [
         "Prepare to wait on the delay."
 	<category: 'private'>

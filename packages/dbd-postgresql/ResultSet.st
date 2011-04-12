@@ -236,7 +236,9 @@ ResultSet subclass: PGResultSet [
 
     primClear [
 	<category: 'PG specific'>
-	handle clear
+	handle ifNotNil: [
+		handle clear.
+		handle := nil]
     ]
 
     release [

@@ -1,3 +1,11 @@
+2011-04-12  Holger Hans Peter Freyther  <holger@freyther.de>
+
+	* kernel/Delay.st: Add #value:onTimeoutDo:.
+	* kernel/Process.st: Add #signalInterrupt:.
+	* kernel/SysExcept.st: Add TimeoutNotification.
+	* tests/delays.st: Add testcases.
+	* tests/delays.ok: Regenerate.
+
 2011-04-06  Paolo Bonzini <bonzini@gnu.org>
 
 	* kernel/CType.st: Add #new: and #gcNew:.

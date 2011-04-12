@@ -1,3 +1,7 @@
+2011-04-11  Holger Hans Peter Freyther  <holger@freyther.de>
+
+	* ResultSet.st: Handle multiple calls to primClear.
+
 2011-04-09  Paolo Bonzini  <bonzini@gnu.org>
 
 	* Statement.st: Move field conversion here...

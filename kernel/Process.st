@@ -282,6 +282,28 @@ can suspend themselves and resume themselves however they wish.'>
 	^self interruptLock critical: aBlock
     ]
 
+    signalInterrupt: anException [
+	"Force the receiver to be interrupted and anException to be raised as
+	 soon as it becomes the active process (this could mean NOW if the
+         receiver is active).  If the process is suspended or waiting on a
+         semaphore, it is woken up so that the interrupt is processed
+         as soon as the process priority allows to do.  The exception should
+         not be resumable to avoid that execution is continued without
+         the process actually having gotten a signal on the semaphore (this
+         restriction may be lifted in the future)."
+        <category: '*timeout-private'>
+        self interruptLock critical:
+            [| block |
+                self isActive
+                    ifTrue:
+                        [anException signal.
+                         ^self].
+                 block := [self evaluate: [anException signal]
+                     ifNotTerminated: [self resume]].
+                 suspendedContext := block asContext: suspendedContext.
+                 self resume]
+    ]
+
     queueInterrupt: aBlock [
 	"Force the receiver to be interrupted and to evaluate aBlock as soon as it
 	 becomes the active process (this could mean NOW if the receiver is active).
