@@ -243,7 +243,7 @@ extern tree_node _gst_curr_method ATTRIBUTE_HIDDEN;
 
 /* This holds other bits of compiler state that needs to be saved
    when the compiler is reentered.  */
-compiler_state *_gst_compiler_state;
+extern compiler_state *_gst_compiler_state ATTRIBUTE_HIDDEN;
 
 /* This is the value most recently returned by
    _gst_execute_statements.  It is used to communicate the returned

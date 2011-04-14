@@ -1,3 +1,7 @@
+2011-04-14  Paolo Bonzini  <bonzini@gnu.org>
+
+	* libgst/comp.h: Fix extern declaration of _gst_compiler_state.
+
 2011-04-10  Holger Hans Peter Freyther  <holger@freyther.de>
 
 	* libgst/cint.c: Free #string, #byteArray, #symbol, #wstring
