@@ -224,7 +224,7 @@ dist-hook::
 # To install the kernel files, we use gst-package in --dist mode.
 install-data-hook::
 	$(GST_PACKAGE) --dist --copy --all-files \
-	  --destdir "$(DESTDIR)" --target-dir="$(pkgdatadir)" \
+	  --destdir="$(DESTDIR)" --target-dir="$(pkgdatadir)" \
 	  --srcdir "$(srcdir)" $(srcdir)/packages.xml
 	$(mkdir_p) $(DESTDIR)$(imagedir)
 	cd $(DESTDIR)$(imagedir) && \
@@ -236,7 +236,7 @@ install-data-hook::
 
 uninstall-local:: gst-tool$(EXEEXT)
 	$(WINEWRAPPER) $(GST_PACKAGE) \
-	  --uninstall --destdir "$(DESTDIR)" --target-dir "$(pkgdatadir)" \
+	  --uninstall --destdir="$(DESTDIR)" --target-dir "$(pkgdatadir)" \
 	  --srcdir $(srcdir) $(DESTDIR)$(pkgdatadir)/packages.xml
 	-rm -f $(DESTDIR)$(imagedir)/gst.im
 
