@@ -1,5 +1,10 @@
 2011-04-21  Paolo Bonzini  <bonzini@gnu.org>
 
+	* STCompiler.st: Fix and extract inlining of #repeat.
+	* STCompLit.st: Enable it.
+
+2011-04-21  Paolo Bonzini  <bonzini@gnu.org>
+
 	* STSymTable.st: Add and use LiteralDictionary.
 
 2011-02-06  Holger Hans Peter Freyther  <holger@freyther.de>
