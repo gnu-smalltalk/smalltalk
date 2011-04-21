@@ -29,6 +29,119 @@
 
 
 
+Collection extend [
+    literalHash [
+        <category: 'compiler'>
+        ^self identityHash
+    ]
+
+    literalEquals: anObject [
+        <category: 'compiler'>
+        ^self == anObject
+    ]
+]
+
+VariableBinding extend [
+    literalHash [
+        <category: 'compiler'>
+        ^self identityHash
+    ]
+
+    literalEquals: anObject [
+        <category: 'compiler'>
+        ^self == anObject
+    ]
+]
+
+ArrayedCollection extend [
+    literalHash [
+        <category: 'compiler'>
+        ^self size bitXor: self class hash
+    ]
+
+    literalEquals: anObject [
+        <category: 'compiler'>
+        self == anObject ifTrue: [^true].
+        self size = anObject size ifFalse: [^false].
+        self class = anObject class ifFalse: [^false].
+        1 to: self size do: [ :i |
+            ((self at: i) literalEquals: (anObject at: i))
+                ifFalse: [^false] ].
+        ^true
+    ]
+]
+
+Float extend [
+    literalHash [
+        <category: 'compiler'>
+        ^self primHash
+    ]
+
+    literalEquals: anObject [
+        <category: 'compiler'>
+        self size = anObject size ifFalse: [^false].
+        self class = anObject class ifFalse: [^false].
+        1 to: self size do: [ :i |
+            ((self at: i) literalEquals: (anObject at: i))
+                ifFalse: [^false] ].
+        ^true
+    ]
+]
+
+Object extend [
+    literalHash [
+        <category: 'compiler'>
+        ^self hash
+    ]
+
+    literalEquals: anObject [
+        <category: 'compiler'>
+        ^self = anObject
+    ]
+]
+
+
+LookupTable subclass: LiteralDictionary [
+    
+    <shape: #pointer>
+    <category: 'Collections-Keyed'>
+    <comment: 'I am similar to LookupTable, except that I use the 
+comparison message #literalEquals: to determine equivalence of objects.'>
+
+    keysClass [
+	"Answer the class answered by #keys"
+
+	<category: 'private methods'>
+	^IdentitySet
+    ]
+
+    hashFor: anObject [
+	"Return an hash value for the item, anObject"
+
+	<category: 'private methods'>
+	^anObject literalHash
+    ]
+
+    findIndex: anObject [
+	"Tries to see if anObject exists as an indexed variable. As soon as nil
+	 or anObject is found, the index of that slot is answered"
+
+	<category: 'private methods'>
+	| index size element |
+	self beConsistent.
+
+	"Sorry for the lack of readability, but I want speed... :-)"
+	index := (anObject literalHash scramble 
+		    bitAnd: (size := self primSize) - 1) + 1.
+	
+	[((element := self primAt: index) isNil or: [element literalEquals: anObject])
+	    ifTrue: [^index].
+	index == size ifTrue: [index := 1] ifFalse: [index := index + 1]] 
+		repeat
+    ]
+]
+
+
 Object subclass: STLiteralsTable [
     | map array |
     
@@ -74,7 +187,7 @@ Object subclass: STLiteralsTable [
 
     initialize: aSize [
 	<category: 'private'>
-	map := Dictionary new: aSize.
+	map := LiteralDictionary new: aSize.
 	array := Array new: aSize
     ]
 ]
