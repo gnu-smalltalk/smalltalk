@@ -137,8 +137,8 @@ evaluates an user defined block to try to get some more data.'>
 	<category: 'buffer handling'>
 	self basicAtEnd ifFalse: [^false].
 	fillBlock isNil ifTrue: [^true].
-	ptr := 1.
 	endPtr := fillBlock value: collection value: collection size.
+	ptr := 1.
 	^self basicAtEnd
     ]
 
