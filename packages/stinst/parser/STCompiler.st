@@ -788,7 +788,7 @@ indexed'' bytecode. The resulting stream is
 		bc1 isNil 
 		    ifTrue: 
 			[bc1 := self bytecodesFor: each.
-			ret1 := each isReturn]
+			ret1 := each body lastIsReturn]
 		    ifFalse: [bc2 := self bytecodesFor: each]].
 	aNode receiver acceptVisitor: self.
 	selector := aNode selector.

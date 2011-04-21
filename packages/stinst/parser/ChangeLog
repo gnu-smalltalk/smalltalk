@@ -1,5 +1,10 @@
 2011-04-21  Paolo Bonzini  <bonzini@gnu.org>
 
+	* STCompiler.st: Fix detection of return at the end of a "then"
+	branch.
+
+2011-04-21  Paolo Bonzini  <bonzini@gnu.org>
+
 	* STCompiler.st: Fix and extract inlining of #repeat.
 	* STCompLit.st: Enable it.
 
