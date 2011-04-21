@@ -219,7 +219,7 @@ indexed'' bytecode. The resulting stream is
 	jumpLen := displacement + 2.
 	jumpLen := displacement + (self sizeOfJump: jumpLen).
 	jumpLen := displacement + (self sizeOfJump: jumpLen).
-	self compileByte: JumpBack arg: displacement
+	self compileByte: JumpBack arg: jumpLen
     ]
 
     compileJump: displacement if: jmpCondition [
@@ -660,6 +660,30 @@ indexed'' bytecode. The resulting stream is
 	    arg: args
     ]
 
+    compileRepeat: aNode [
+	"Answer whether the loop can be optimized (that is,
+	 whether the only parameter is a STBlockNode)"
+
+	<category: 'compiling'>
+	| whileBytecodes |
+	aNode receiver isBlock ifFalse: [^false].
+	(aNode receiver arguments isEmpty 
+	    and: [aNode receiver body temporaries isEmpty]) ifFalse: [^false].
+	whileBytecodes := self bytecodesFor: aNode receiver
+			    atEndDo: 
+				[self
+				    compileByte: PopStackTop;
+				    depthDecr: 1].
+	self nextPutAll: whileBytecodes.
+	self compileBackJump: whileBytecodes size.
+
+	"The optimizer might like to see the return value of #repeat."
+	self
+	    depthIncr;
+	    compileByte: PushSpecial arg: NilIndex.
+	^true
+    ]
+
     compileWhileLoop: aNode [
 	"Answer whether the while loop can be optimized (that is,
 	 whether the only parameter is a STBlockNode)"
@@ -682,19 +706,16 @@ indexed'' bytecode. The resulting stream is
 				    depthDecr: 1]].
 	whileBytecodes := self bytecodesFor: aNode receiver.
 	self nextPutAll: whileBytecodes.
-	aNode selector == #repeat 
-	    ifFalse: 
-		[jumpOffsets := self displacementsToJumpAround: argBytecodes size
-			    and: whileBytecodes size + 2.	"for jump around jump"
+	jumpOffsets := self displacementsToJumpAround: argBytecodes size
+		    and: whileBytecodes size + 2.	"for jump around jump"
 
-		"The if: clause means: if selector is whileFalse:, compile
-		 a 'pop/jump if true'; else compile a 'pop/jump if false'"
-		self compileJump: (self sizeOfJump: jumpOffsets value)
-		    if: (aNode selector == #whileTrue or: [aNode selector == #whileTrue:]).
-		self compileByte: Jump arg: jumpOffsets value.
-		argBytecodes isNil ifFalse: [self nextPutAll: argBytecodes].
-		self compileByte: JumpBack arg: jumpOffsets key]
-	    ifTrue: [self compileBackJump: whileBytecodes size].
+	"The if: clause means: if selector is whileFalse:, compile
+	 a 'pop/jump if true'; else compile a 'pop/jump if false'"
+	self compileJump: (self sizeOfJump: jumpOffsets value)
+	    if: (aNode selector == #whileTrue or: [aNode selector == #whileTrue:]).
+	self compileByte: Jump arg: jumpOffsets value.
+	argBytecodes isNil ifFalse: [self nextPutAll: argBytecodes].
+	self compileByte: JumpBack arg: jumpOffsets key.
 
 	"Somebody might want to use the return value of #whileTrue:
 	 and #whileFalse:"
@@ -767,7 +788,7 @@ indexed'' bytecode. The resulting stream is
 		bc1 isNil 
 		    ifTrue: 
 			[bc1 := self bytecodesFor: each.
-			ret1 := each isReturn]
+			ret1 := each body lastIsReturn]
 		    ifFalse: [bc2 := self bytecodesFor: each]].
 	aNode receiver acceptVisitor: self.
 	selector := aNode selector.

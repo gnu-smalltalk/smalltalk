@@ -105,6 +105,7 @@ Eval [
 		at: #whileFalse put: #compileWhileLoop:;
 		at: #whileTrue: put: #compileWhileLoop:;
 		at: #whileFalse: put: #compileWhileLoop:;
+		at: #repeat put: #compileRepeat:;
 		at: #timesRepeat: put: #compileTimesRepeat:;
 		at: #to:do: put: #compileLoop:;
 		at: #to:by:do: put: #compileLoop:;
