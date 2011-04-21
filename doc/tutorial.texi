@@ -957,6 +957,28 @@ the value of void functions.  After all, at
 the time Smalltalk was being designed, C didn't
 even have a void data type.}
 
+Before going on, ere is how you could have written this code in a
+single declaration (i.e.@: without using @code{extend}):
+
+@example
+Object subclass: Account [
+    | balance |
+    <comment:
+        'I represent a place to deposit and withdraw money'>
+    Account class >> new [
+        <category: 'instance creation'>
+        | r |
+        r := super new.
+        r init.
+        ^r
+    ]
+    init [
+        <category: 'initialization'>
+        balance := 0
+    ]
+]
+@end example
+
 @node A look at our object
 @subsection Looking at our Account
 

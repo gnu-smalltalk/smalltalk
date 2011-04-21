@@ -711,6 +711,7 @@ instances.'>
 	        numArgs: self numArgs
 	        attributes: self attributes.
 	    newMethod descriptor: self descriptor.
+	    self isOldSyntax ifTrue: [ newMethod noteOldSyntax ].
 	    self become: newMethod.
 	    ^nil].
 
@@ -736,6 +737,7 @@ instances.'>
 	    attributes: self attributes.
 	newMethod isNil ifTrue: [^'C function not defined'].
 	newMethod descriptor: self descriptor.
+	self isOldSyntax ifTrue: [ newMethod noteOldSyntax ].
 	self become: newMethod.
 	^nil
     ]
@@ -750,6 +752,7 @@ instances.'>
 	    attributes: self attributes.
 	newMethod isNil ifTrue: [^'C function not defined'].
 	newMethod descriptor: self descriptor.
+	self isOldSyntax ifTrue: [ newMethod noteOldSyntax ].
 	self become: newMethod.
 	^nil
     ]
