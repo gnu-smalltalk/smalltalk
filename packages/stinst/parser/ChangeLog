@@ -1,5 +1,11 @@
 2011-04-21  Paolo Bonzini  <bonzini@gnu.org>
 
+	* STCompiler.st: Compile nil, true and false using short sequences.
+	This also avoids that nil is entered in the literals table,
+	for example when compiling "x := nil".
+
+2011-04-21  Paolo Bonzini  <bonzini@gnu.org>
+
 	* STCompiler.st: Fix detection of return at the end of a "then"
 	branch.
 
