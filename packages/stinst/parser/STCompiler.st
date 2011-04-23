@@ -175,7 +175,7 @@ indexed'' bytecode. The resulting stream is
 
     addLiteral: literal [
 	<category: 'accessing'>
-	^symTable addLiteral: literal
+	^(symTable addLiteral: literal)
     ]
 
     addPool: aNamespace [
@@ -358,6 +358,18 @@ indexed'' bytecode. The resulting stream is
 	    ifTrue: 
 		[self compileByte: PushInteger arg: value.
 		^self].
+        value isNil
+            ifTrue:
+                [self compileByte: PushSpecial arg: NilIndex.
+                ^self].
+        value == true
+            ifTrue:
+                [self compileByte: PushSpecial arg: TrueIndex.
+                ^self].
+        value == false
+            ifTrue:
+                [self compileByte: PushSpecial arg: FalseIndex.
+                ^self].
 	definition := self addLiteral: value.
 	self compileByte: PushLitConstant arg: definition
     ]

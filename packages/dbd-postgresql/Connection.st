@@ -131,7 +131,9 @@ Connection subclass: PGConnection [
 
     close [
 	<category: 'implementations'>
-	handle finish
+	handle ifNotNil: [
+	    handle finish.
+	    handle := nil].
     ]
 
     beginTransaction [
