@@ -1,5 +1,9 @@
 2011-04-29  Paolo Bonzini <bonzini@gnu.org>
 
+	* kernel/Integer.st: Add #printPaddedWith:to:.
+
+2011-04-29  Paolo Bonzini <bonzini@gnu.org>
+
 	* kernel/FileDescr.st: Fix finalizer.  Reported by Holger
 	Hans Peter Freyther.
 

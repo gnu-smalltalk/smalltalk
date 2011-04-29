@@ -521,7 +521,7 @@ efficiency.'>
         self printOn: aStream paddedWith: padding to: size base: 10
     ]
 
-    printPaddedWith: padding to: size base: baseInteger [
+    printPaddedWith: padding to: size [
 	"Return the base baseInteger representation of the receiver, padded if
 	 necessary to size characters with copies of padding."
 
