@@ -1,3 +1,8 @@
+2011-04-29  Paolo Bonzini  <bonzini@gnu.org>
+
+	* libgst/sym.c: Fix argument count of selectors starting with _.
+	Reported by Mathieu Suen.
+
 2011-04-10  Holger Hans Peter Freyther  <holger@freyther.de>
 
 	* libgst/cint.c: Free #string, #byteArray, #symbol, #wstring

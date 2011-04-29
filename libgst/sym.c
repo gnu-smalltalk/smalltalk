@@ -1577,15 +1577,16 @@ _gst_selector_num_args (OOP symbolOOP)
 
   len = _gst_string_oop_len (symbolOOP);
   bytes = (char *) (OOP_TO_OBJ (symbolOOP)->data);
-  if (bytes[0] < 'A' || bytes[0] > 'z')
-    return (1);
-
-  if (bytes[0] > 'Z' && bytes[0] < 'a')
-    return (1);
-
-  for (numArgs = 0; len;)
-    if (bytes[--len] == ':')
-      numArgs++;
+  if ((bytes[0] >= 'A' && bytes[0] <= 'Z')
+      || (bytes[0] >= 'a' && bytes[0] <= 'z')
+      || bytes[0] == '_')
+    {
+      for (numArgs = 0; len;)
+        if (bytes[--len] == ':')
+          numArgs++;
+    }
+  else
+    numArgs = 1;
 
   return (numArgs);
 }
