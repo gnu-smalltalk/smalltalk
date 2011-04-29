@@ -125,7 +125,10 @@ VMProxy gst_interpreter_proxy = {
   _gst_dladdsearchdir,
   _gst_dlpushsearchpath,
   _gst_dlpopsearchpath,
-  _gst_wakeup
+  _gst_wakeup,
+
+  /* New in 3.2.5.  */
+  _gst_uint_to_oop
 };
 
 /* Functions in comp.h.  */
@@ -262,6 +265,12 @@ OOP
 gst_int_to_oop (long i)
 {
   return _gst_int_to_oop (i);
+}
+
+OOP
+gst_uint_to_oop (long i)
+{
+  return _gst_uint_to_oop (i);
 }
 
 OOP

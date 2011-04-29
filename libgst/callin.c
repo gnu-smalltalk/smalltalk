@@ -217,7 +217,7 @@ _gst_va_msg_sendf (PTR resultPtr,
       switch (*fp)
         {
         case 'i':
-          args[++i] = FROM_INT (va_arg (ap, long));
+          args[++i] = FROM_C_INT (va_arg (ap, long));
 	  INC_ADD_OOP (args[i]);
           break;
 
@@ -309,7 +309,7 @@ _gst_va_msg_sendf (PTR resultPtr,
       switch (fmt[1])
 	{
 	case 'i':
-	  *(int *) resultPtr = IS_NIL (result) ? 0 : TO_INT (result);
+	  *(int *) resultPtr = IS_NIL (result) ? 0 : TO_C_INT (result);
 	  break;
 
 	case 'c':
@@ -478,12 +478,21 @@ _gst_class_name_to_oop (const char *name)
 
 
 OOP
+_gst_uint_to_oop (long int i)
+{
+  if (!_gst_smalltalk_initialized)
+    _gst_initialize (NULL, NULL, GST_NO_TTY);
+
+  return (FROM_C_ULONG (i));
+}
+
+OOP
 _gst_int_to_oop (long int i)
 {
   if (!_gst_smalltalk_initialized)
     _gst_initialize (NULL, NULL, GST_NO_TTY);
 
-  return (FROM_INT (i));
+  return (FROM_C_LONG (i));
 }
 
 OOP
@@ -628,8 +637,8 @@ _gst_oop_to_c (OOP oop)
   if (!_gst_smalltalk_initialized)
     _gst_initialize (NULL, NULL, GST_NO_TTY);
 
-  if (IS_INT (oop))
-    return (TO_INT (oop));
+  if (IS_C_LONG (oop) || IS_C_ULONG (oop))
+    return (TO_C_LONG (oop));
 
   else if (OOP_CLASS (oop) == _gst_true_class
 	   || OOP_CLASS (oop) == _gst_false_class)
@@ -655,7 +664,7 @@ _gst_oop_to_int (OOP oop)
   if (!_gst_smalltalk_initialized)
     _gst_initialize (NULL, NULL, GST_NO_TTY);
 
-  return (TO_INT (oop));
+  return (TO_C_LONG (oop));
 }
 
 long

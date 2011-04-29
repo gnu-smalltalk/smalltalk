@@ -3836,11 +3836,12 @@ functions all @dfn{end} with @code{ToOOP}, except
 
 @deftypefun OOP intToOOP (long)
 This object returns a Smalltalk @code{Integer} which contains the same value as
-the passed C @code{long}.  Note that Smalltalk integers are always
-signed and have a bit less of precision with respect to C longs.  On 32
-bit machines, their precision is 30 bits (if unsigned) or 31 bits (if
-signed); on 64 bit machines, their precision is 62 bits (if unsigned) or
-63 bits (if signed).
+the passed C @code{long}.
+@end deftypefun
+
+@deftypefun OOP uintToOOP (unsigned long)
+This object returns a Smalltalk @code{Integer} which contains the same value as
+the passed C @code{unsigned long}.
 @end deftypefun
 
 @deftypefun OOP idToOOP (OOP)

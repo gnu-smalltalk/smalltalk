@@ -327,7 +327,7 @@ do arbitrary processing on the files.'>
 
 	<category: 'basic'>
 	AllOpenFiles remove: self ifAbsent: [].
-	self isOpen ifFalse: [self close]
+	self isOpen ifTrue: [self close]
     ]
 
     next [

@@ -132,6 +132,7 @@ Connection subclass: PGConnection [
     close [
 	<category: 'implementations'>
 	handle ifNotNil: [
+	    self removeToBeFinalized.
 	    handle finish.
 	    handle := nil].
     ]
