@@ -11,6 +11,8 @@ includedir = @includedir@
 Name: gnu-smalltalk
 Description: GNU Smalltalk
 Version: @VERSION@
-Libs: -L${libdir} -lgst @LIBS@
+Requires.private: libffi
+Libs: -L${libdir} -lgst
+Libs.private: @LIBS@ @LIBSIGSEGV@ @LIBREADLINE@ @LIBLTDL@ @LIBGMP@ @LIBTHREAD@
 Cflags: -I${includedir}
 
