@@ -119,19 +119,20 @@ AC_ARG_WITH(system-libltdl,
 [], [with_system_libltdl=detect])
 
 GST_HAVE_LIB([ltdl], [lt_dlopen])
-if test $with_system_libltdl = detect; then
-  with_system_libltdl=$ac_cv_lib_ltdl_lt_dlopen
-fi
-
-if test $with_system_libltdl = no; then
-  AC_MSG_ERROR([libltdl is required to compile GNU Smalltalk])
-fi
-if test $with_system_libltdl = yes; then
-  INCLTDL= LIBLTDL=-lltdl
-else
-  INCLTDL="-I$with_system_libltdl/../include"
-  LIBLTDL="-L$with_system_libltdl -lltdl"
-fi
+case $with_system_libltdl in
+  yes|no|detect)
+    if test $ac_cv_lib_ltdl_lt_dlopen = no; then
+      AC_MSG_ERROR([libltdl is required to compile GNU Smalltalk])
+    elif test $with_system_libltdl = no; then
+      AC_MSG_WARN([libltdl is required to compile GNU Smalltalk])
+      AC_MSG_WARN([ignoring --without-system-libltdl])
+    fi
+    INCLTDL= LIBLTDL=-lltdl
+    ;;
+  *)
+    INCLTDL="-I$with_system_libltdl/../include"
+    LIBLTDL="-L$with_system_libltdl -lltdl"
+esac
 AC_SUBST(INCLTDL)
 AC_SUBST(LIBLTDL)
 
@@ -142,19 +143,21 @@ AC_ARG_WITH(system-libffi,
 PKG_CHECK_MODULES(LIBFFI, libffi,
                   [ac_cv_lib_libffi_ffi_prep_cif=yes],
                   [GST_HAVE_LIB(libffi, ffi_prep_cif)])
-if test $with_system_libffi = detect; then
-  with_system_libffi=$ac_cv_lib_libffi_ffi_prep_cif
-fi
-if test $with_system_libffi = no; then
-  AC_MSG_ERROR([libffi is required to compile GNU Smalltalk])
-fi
-if test $with_system_libffi = yes; then
-  INCFFI=$LIBFFI_CFLAGS
-  LIBFFI=${LIBFFI_LIBS:-'-lffi'}
-else
-  INCFFI="-I$with_system_libffi/../include"
-  LIBFFI="-L$with_system_libffi -lffi"
-fi
+case $with_system_libffi in
+  yes|no|detect)
+    if test $ac_cv_lib_libffi_ffi_prep_cif = no; then
+      AC_MSG_ERROR([libffi is required to compile GNU Smalltalk])
+    elif test $with_system_libffi = no; then
+      AC_MSG_WARN([libffi is required to compile GNU Smalltalk])
+      AC_MSG_WARN([ignoring --without-system-libffi])
+    fi
+    INCFFI=$LIBFFI_CFLAGS
+    LIBFFI=${LIBFFI_LIBS:-'-lffi'}
+    ;;
+  *)
+    INCFFI="-I$with_system_libffi/../include"
+    LIBFFI="-L$with_system_libffi -lffi"
+esac
 case $host in
   *-*-darwin[[912]]* ) LIBFFI_EXECUTABLE_LDFLAGS=-Wl,-allow_stack_execute ;;
   *) LIBFFI_EXECUTABLE_LDFLAGS= ;;
@@ -186,24 +189,27 @@ AC_ARG_WITH(system-libsigsegv,
 [], [with_system_libsigsegv=detect])
 
 GST_HAVE_LIB([sigsegv], [sigsegv_install_handler])
-if test $with_system_libsigsegv = detect; then
-  with_system_libsigsegv=$ac_cv_lib_sigsegv_sigsegv_install_handler
-fi
-
 if test $enable_generational_gc = no; then
   INCSIGSEGV= LIBSIGSEGV=
 else
-  AC_DEFINE(HAVE_SIGSEGV_H, 1, [Define to 1 if libsigsegv is being used])
-  if test $with_system_libsigsegv = no; then
-    AC_MSG_ERROR([libsigsegv is required by default to compile GNU Smalltalk
+  case $with_system_libsigsegv in
+    yes|no|detect)
+      if test $ac_cv_lib_sigsegv_sigsegv_install_handler = no; then
+        AC_MSG_ERROR([libsigsegv is required by default to compile GNU Smalltalk.
 To proceed, configure with --disable-generational-gc.])
-  fi
-  if test $with_system_libsigsegv = yes; then
-    INCSIGSEGV= LIBSIGSEGV=-lsigsegv
-  else
-    INCSIGSEGV="-I$with_system_libsigsegv/../include"
-    LIBSIGSEGV="-L$with_system_libsigsegv -lsigsegv"
-  fi
+      elif test $with_system_libsigsegv = no; then
+        AC_MSG_WARN([libsigsegv is required by default to compile GNU Smalltalk.])
+        AC_MSG_WARN([You specified --without-system-libsigsegv, but it will be])
+        AC_MSG_WARN([ignored; if you wanted to avoid using libsigsegv altogether])
+        AC_MSG_WARN([you should use --disable-generational-gc instead.])
+      fi
+      INCSIGSEGV= LIBSIGSEGV=-lsigsegv
+      ;;
+    *)
+      INCSIGSEGV="-I$with_system_libsigsegv/../include"
+      LIBSIGSEGV="-L$with_system_libsigsegv -lsigsegv"
+  esac
+  AC_DEFINE(HAVE_SIGSEGV_H, 1, [Define to 1 if libsigsegv is being used])
 fi
 AC_SUBST(INCSIGSEGV)
 AC_SUBST(LIBSIGSEGV)
