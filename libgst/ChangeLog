@@ -1,3 +1,13 @@
+2011-05-18  Paolo Bonzini  <bonzini@gnu.org>
+
+	* libgst/gst-parse.c: Allow creating unary pragmas.
+
+2011-05-18  Paolo Bonzini  <bonzini@gnu.org>
+
+	* libgst/gst-parse.c: Move creation of ATTRIBUTE_LIST contents here...
+	* libgst/tree.c: ... from here.
+	* libgst/tree.h: Adjust documentation.
+
 2011-05-18  Gwenael Casaccio  <mrgwen@gmail.com>
 
 	* libgst/gstpriv.h: Fix documentation of F_FIXED.
