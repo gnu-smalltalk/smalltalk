@@ -1264,18 +1264,34 @@ parse_attributes (gst_parser *p, tree_node prev_attrs)
 static tree_node
 parse_attribute (gst_parser *p)
 {
-  tree_node keywords, attr, constant;
-  OOP attributeOOP;
+  tree_node message, attr, constant;
+  OOP attributeOOP, selectorOOP, argsOOP;
+  char *sel;
+  YYLTYPE location = *loc (p, 0);
 
   lex_skip_mandatory (p, '<');
-  lex_must_be (p, KEYWORD);
-  keywords = parse_keyword_list (p, EXPR_BINOP);
+  if (token (p, 0) == IDENTIFIER)
+    {
+      sel = val(p, 0)->sval;
+      lex (p);
+      selectorOOP = _gst_intern_string (sel);
+      new_instance_with (_gst_array_class, 0, &argsOOP);
+      MAKE_OOP_READONLY (selectorOOP, true);
+      MAKE_OOP_READONLY (argsOOP, true);
+      message = _gst_make_unary_expr (&location, NULL, sel);
+      attributeOOP = _gst_message_new_args (selectorOOP, argsOOP);
+    }
+  else
+    {
+      lex_must_be (p, KEYWORD);
+      message = parse_keyword_list (p, EXPR_BINOP);
 
-  /* First convert the TREE_KEYWORD_EXPR into a Message object, then
-     into a TREE_CONST_EXPR, and finally embed this one into a
-     TREE_ATTRIBUTE_LIST.  */
-  attributeOOP = _gst_make_attribute (keywords);
-  constant = _gst_make_oop_constant (&keywords->location, attributeOOP);
+      /* First convert the TREE_KEYWORD_EXPR into a Message object, then
+         into a TREE_CONST_EXPR, and finally embed this one into a
+         TREE_ATTRIBUTE_LIST.  */
+      attributeOOP = _gst_make_attribute (message);
+    }
+  constant = _gst_make_oop_constant (&message->location, attributeOOP);
   attr = _gst_make_attribute_list (&constant->location, constant);
   lex_skip_mandatory (p, '>');
   return attr;
