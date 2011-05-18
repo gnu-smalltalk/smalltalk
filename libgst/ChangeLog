@@ -1,3 +1,8 @@
+2011-05-18  Gwenael Casaccio  <mrgwen@gmail.com>
+
+	* libgst/gstpriv.h: Fix documentation of F_FIXED.
+	* libgst/oop.c: Implement fixed young objects.
+
 2011-04-29  Paolo Bonzini  <bonzini@gnu.org>
 
 	* libgst/callin.c: Use FROM_C_INT and FROM_C_LONG properly.

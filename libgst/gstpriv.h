@@ -336,7 +336,7 @@ enum {
   /* Set for objects that live in oldspace.  */
   F_OLD = 0x100U,
 
-  /* Set together with F_OLD for objects that live in fixedspace.  */
+  /* Set for objects that live in fixedspace.  */
   F_FIXED = 0x200U,
 
   /* Set for untrusted classes, instances of untrusted classes,

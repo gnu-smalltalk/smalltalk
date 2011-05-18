@@ -134,6 +134,11 @@ struct statistical_data
    builtin OOPs into _gst_nil_oop et al.  */
 static void alloc_oop_table (size_t);
 
+/* Allocate a large object of SIZE bytes from fixedspace.  Put the
+   corresponding newly allocated OOP in *P_OOP.  */
+static gst_object alloc_large_obj (size_t size,
+				   OOP *p_oop);
+
 /* Free N slots from the beginning of the queue Q and return a pointer
    to their base.  */
 static OOP *queue_get (surv_space *q, int n);
@@ -720,8 +725,7 @@ _gst_make_oop_fixed (OOP oop)
       oop->object = newObj;
     }
 
-  oop->flags &= ~(F_SPACES | F_POOLED);
-  oop->flags |= F_OLD | F_FIXED;
+  oop->flags |= F_FIXED;
 }
 
 void
@@ -763,7 +767,7 @@ _gst_alloc_obj (size_t size,
   newAllocPtr = _gst_mem.eden.allocPtr + BYTES_TO_SIZE (size);
 
   if UNCOMMON (size >= _gst_mem.big_object_threshold)
-    return _gst_alloc_old_obj (size, p_oop);
+    return alloc_large_obj (size, p_oop);
 
   if UNCOMMON (newAllocPtr >= _gst_mem.eden.maxPtr)
     {
@@ -776,6 +780,38 @@ _gst_alloc_obj (size_t size,
   *p_oop = alloc_oop (p_instance, _gst_mem.active_flag);
   p_instance->objSize = FROM_INT (BYTES_TO_SIZE (size));
 
+  return p_instance;
+}
+
+gst_object
+alloc_large_obj (size_t size,
+                 OOP *p_oop)
+{
+  gst_object p_instance;
+
+  size = ROUNDED_BYTES (size);
+
+  /* If the object is big enough, we put it directly in fixedspace.  */
+  p_instance = (gst_object) _gst_mem_alloc (_gst_mem.fixed, size);
+  if COMMON (p_instance)
+    goto ok;
+
+  _gst_global_gc (size);
+  p_instance = (gst_object) _gst_mem_alloc (_gst_mem.fixed, size);
+  if COMMON (p_instance)
+    goto ok;
+
+  _gst_compact (0);
+  p_instance = (gst_object) _gst_mem_alloc (_gst_mem.fixed, size);
+  if UNCOMMON (!p_instance)
+    {
+      _gst_errorf ("Cannot recover, exiting...");
+      exit (1);
+    }
+
+ok:
+  *p_oop = alloc_oop (p_instance, _gst_mem.active_flag | F_FIXED);
+  p_instance->objSize = FROM_INT (BYTES_TO_SIZE (size));
   return p_instance;
 }
 
@@ -1452,20 +1488,18 @@ _gst_sweep_oop (OOP oop)
     _gst_make_oop_non_weak (oop);
 
   /* Free unreachable oldspace objects.  */
-  if UNCOMMON (oop->flags & F_FIXED)
+  if UNCOMMON (oop->flags & F_OLD)
     {
       _gst_mem.numOldOOPs--;
       stats.reclaimedOldSpaceBytesSinceLastGlobalGC +=
-	SIZE_TO_BYTES (TO_INT (OOP_TO_OBJ (oop)->objSize));
-      if ((oop->flags & F_LOADED) == 0)
-        _gst_mem_free (_gst_mem.fixed, oop->object);
+        SIZE_TO_BYTES (TO_INT (OOP_TO_OBJ (oop)->objSize));
     }
-  else if UNCOMMON (oop->flags & F_OLD)
+
+  if ((oop->flags & F_LOADED) == 0)
     {
-      _gst_mem.numOldOOPs--;
-      stats.reclaimedOldSpaceBytesSinceLastGlobalGC +=
-	SIZE_TO_BYTES (TO_INT (OOP_TO_OBJ (oop)->objSize));
-      if ((oop->flags & F_LOADED) == 0)
+      if UNCOMMON (oop->flags & F_FIXED)
+        _gst_mem_free (_gst_mem.fixed, oop->object);
+      else if UNCOMMON (oop->flags & F_OLD)
         _gst_mem_free (_gst_mem.old, oop->object);
     }
 
@@ -1617,7 +1651,9 @@ tenure_one_object ()
     _gst_tenure_oop (oop);
 
   queue_get (&_gst_mem.tenuring_queue, 1);
-  queue_get (_gst_mem.active_half, TO_INT (oop->object->objSize));
+
+  if (!(oop->flags & F_FIXED))
+    queue_get (_gst_mem.active_half, TO_INT (oop->object->objSize));
 }
 
 void
@@ -2061,8 +2097,10 @@ _gst_copy_an_oop (OOP oop)
 #endif
 
       queue_put (&_gst_mem.tenuring_queue, &oop, 1);
-      obj = oop->object = (gst_object)
-	queue_put (_gst_mem.active_half, pData, TO_INT (obj->objSize));
+
+      if (!(oop->flags & F_FIXED))
+        obj = oop->object = (gst_object)
+	  queue_put (_gst_mem.active_half, pData, TO_INT (obj->objSize));
 
       oop->flags &= ~(F_SPACES | F_POOLED);
       oop->flags |= _gst_mem.active_flag;
