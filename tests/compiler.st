@@ -99,6 +99,65 @@ Eval [
     Undeclared keys size - a
 ]
 
+!BugTest class methodsFor: 'bugs'!
+
+pragma1
+    <test>
+!
+
+pragma2
+    <test: #abc>
+!
+
+pragma3
+    <primitive: 100>
+!
+
+pragma4
+    <primitive: 100>
+    <test: #abc>
+! !
+
+Eval [
+    (BugTest class >> #pragma1) attributes size
+]
+Eval [
+    (BugTest class >> #pragma1) attributes first class
+]
+Eval [
+    (BugTest class >> #pragma1) attributes first selector
+]
+Eval [
+    (BugTest class >> #pragma1) attributes first arguments
+]
+Eval [
+    (BugTest class >> #pragma2) attributes size
+]
+Eval [
+    (BugTest class >> #pragma2) attributes first class
+]
+Eval [
+    (BugTest class >> #pragma2) attributes first selector
+]
+Eval [
+    (BugTest class >> #pragma2) attributes first arguments
+]
+Eval [
+    (BugTest class >> #pragma3) attributes size
+]
+Eval [
+    (BugTest class >> #pragma3) attributes first class
+]
+Eval [
+    (BugTest class >> #pragma3) attributes first selector
+]
+Eval [
+    (BugTest class >> #pragma3) attributes first arguments
+]
+Eval [
+    (BugTest class >> #pragma4) attributes size
+]
+
 "Various errors in the recursive-descent parser"
 !BugTest class methodsFor: 'bugs'!
 

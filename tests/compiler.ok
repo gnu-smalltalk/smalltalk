@@ -8,15 +8,54 @@ returned value is 'bar'
 
 Execution begins...
 returned value is 100
-compiler.st:118: parse error, expected '!'
-compiler.st:121: parse error, expected keyword
+
+Execution begins...
+returned value is 1
+
+Execution begins...
+returned value is Message
+
+Execution begins...
+returned value is #test
+
+Execution begins...
+returned value is Array new: 0 "<0>"
+
+Execution begins...
+returned value is 1
+
+Execution begins...
+returned value is Message
+
+Execution begins...
+returned value is #test:
+
+Execution begins...
+returned value is Array new: 1 "<0>"
+
+Execution begins...
+returned value is 1
+
+Execution begins...
+returned value is Message
+
+Execution begins...
+returned value is #primitive:
+
+Execution begins...
+returned value is Array new: 1 "<0>"
+
+Execution begins...
+returned value is 2
+compiler.st:177: parse error, expected '!'
+compiler.st:180: parse error, expected keyword
 
 Execution begins...
 returned value is 2
 
 Execution begins...
 returned value is 'No crashes'
-compiler.st:131: undefined variable C referenced
+compiler.st:190: undefined variable C referenced
 
 Execution begins...
 a Smalltalk string:1: undefined variable a referenced
@@ -55,26 +94,26 @@ returned value is '-123.000s3'
 
 Execution begins...
 a Smalltalk string:1: parse error, expected positive numeric literal
-returned value is CompiledMethod new: 6 "<0>"
+returned value is CompiledMethod new: 8 "<0>"
 
 Execution begins...
 a Smalltalk string:1: parse error, expected positive numeric literal
-returned value is CompiledMethod new: 6 "<0>"
+returned value is CompiledMethod new: 8 "<0>"
 
 Execution begins...
 a Smalltalk string:1: parse error, expected positive numeric literal
-returned value is CompiledMethod new: 6 "<0>"
+returned value is CompiledMethod new: 8 "<0>"
 
 Execution begins...
 a Smalltalk string:1: parse error, expected positive numeric literal
-returned value is CompiledMethod new: 6 "<0>"
+returned value is CompiledMethod new: 8 "<0>"
 
 Execution begins...
 returned value is FileSegment
 
 Execution begins...
 returned value is String
-compiler.st:257: class method expected inside class block
+compiler.st:316: class method expected inside class block
 
 Execution begins...
 returned value is CompiledMethod new: 0 "<0>"

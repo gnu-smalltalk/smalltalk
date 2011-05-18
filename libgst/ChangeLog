@@ -1,3 +1,7 @@
+2011-05-18  Mathieu Suen  <mathieusuen@yahoo.fr>
+
+	* libgst/gst-parse.c: Allow creating unary pragmas.
+
 2011-05-18  Paolo Bonzini  <bonzini@gnu.org>
 
 	* libgst/gst-parse.c: Move creation of ATTRIBUTE_LIST contents here...
