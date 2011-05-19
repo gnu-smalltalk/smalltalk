@@ -264,9 +264,12 @@ static inline OOP from_c_int_64 (int64_t i);
 static inline OOP from_c_uint_64 (uint64_t ui);
 
 /* Converts the OOP (which must be a SmallInteger or a small enough
-   LargeInteger) to a long int.  If the OOP was for an unsigned long,
-   you can simply cast the result to an unsigned long.  */
+   LargeInteger) to a 64-bit signed integer.  */
 static inline int64_t to_c_int_64 (OOP oop);
+
+/* Converts the OOP (which must be a SmallInteger or a small enough
+   LargeInteger) to a 64-bit unsigned integer.  */
+static inline uint64_t to_c_uint_64 (OOP oop);
 
 
 #define TO_C_INT(integer)	to_c_int_32(integer)
@@ -1247,7 +1250,7 @@ index_oop_put_spec (OOP oop,
       }
 
       case GST_ISP_UINT64: {
-        DO_INDEX_OOP_PUT (uint64_t, is_c_uint_64 (value), to_c_int_64 (value));
+        DO_INDEX_OOP_PUT (uint64_t, is_c_uint_64 (value), to_c_uint_64 (value));
 	return (false);
       }
 
@@ -1434,17 +1437,17 @@ is_c_int_64 (OOP oop)
     return (true);
 
   ba = (gst_byte_array) OOP_TO_OBJ (oop);
-  if (ba->objClass == _gst_large_negative_integer_class)
-    return (NUM_INDEXABLE_FIELDS (oop) == 8);
-
-  else if COMMON (ba->objClass == _gst_large_positive_integer_class)
+  if COMMON (ba->objClass == _gst_large_negative_integer_class
+             || ba->objClass == _gst_large_positive_integer_class)
     {
       switch (NUM_INDEXABLE_FIELDS (oop))
 	{
+	case 4:
+	case 5:
+	case 6:
+	case 7:
 	case 8:
 	  return (true);
-	case 9:
-	  return (ba->bytes[8] == 0);
 	}
     }
 
@@ -1464,6 +1467,10 @@ is_c_uint_64 (OOP oop)
     {
       switch (NUM_INDEXABLE_FIELDS (oop))
 	{
+	case 4:
+	case 5:
+	case 6:
+	case 7:
 	case 8:
 	  return (true);
 	case 9:
@@ -1474,24 +1481,59 @@ is_c_uint_64 (OOP oop)
   return (false);
 }
 
-int64_t
-to_c_int_64 (OOP oop)
+uint64_t
+to_c_uint_64 (OOP oop)
 {
   gst_byte_array ba;
+  uint64_t result, mask;
 
   if COMMON (IS_INT (oop))
     return (TO_INT (oop));
 
   ba = (gst_byte_array) OOP_TO_OBJ (oop);
-  return ((int64_t) (
-		   (((uint64_t) ba->bytes[7]) << 56) +
-		   (((uint64_t) ba->bytes[6]) << 48) +
-		   (((uint64_t) ba->bytes[5]) << 40) +
-		   (((uint64_t) ba->bytes[4]) << 32) +
-		   (((uint64_t) ba->bytes[3]) << 24) +
-		   (((uint64_t) ba->bytes[2]) << 16) +
-		   (((uint64_t) ba->bytes[1]) << 8) +
-		   ((uint64_t) ba->bytes[0])));
+  mask = (((uint64_t)2) << (NUM_INDEXABLE_FIELDS (oop) * 8 - 1)) - 1;
+  result = ((int64_t) (
+	   (((uint64_t) ba->bytes[3]) << 24) +
+	   (((uint64_t) ba->bytes[2]) << 16) +
+	   (((uint64_t) ba->bytes[1]) << 8) +
+	   ((uint64_t) ba->bytes[0])));
+
+  if (NUM_INDEXABLE_FIELDS (oop) > 4)
+    result |= mask & ((int64_t) (
+		    (((uint64_t) ba->bytes[7]) << 56) +
+		    (((uint64_t) ba->bytes[6]) << 48) +
+		    (((uint64_t) ba->bytes[5]) << 40) +
+		    (((uint64_t) ba->bytes[4]) << 32)));
+
+  return result;
+}
+
+int64_t
+to_c_int_64 (OOP oop)
+{
+  gst_byte_array ba;
+  int64_t result, mask;
+
+  if COMMON (IS_INT (oop))
+    return (TO_INT (oop));
+
+  ba = (gst_byte_array) OOP_TO_OBJ (oop);
+  mask = (((uint64_t)2) << (NUM_INDEXABLE_FIELDS (oop) * 8 - 1)) - 1;
+  result = (ba->objClass == _gst_large_negative_integer_class) ? ~mask : 0;
+  result |= ((int64_t) (
+	   (((uint64_t) ba->bytes[3]) << 24) +
+	   (((uint64_t) ba->bytes[2]) << 16) +
+	   (((uint64_t) ba->bytes[1]) << 8) +
+	   ((uint64_t) ba->bytes[0])));
+
+  if (NUM_INDEXABLE_FIELDS (oop) > 4)
+    result |= mask & ((int64_t) (
+		    (((uint64_t) ba->bytes[7]) << 56) +
+		    (((uint64_t) ba->bytes[6]) << 48) +
+		    (((uint64_t) ba->bytes[5]) << 40) +
+		    (((uint64_t) ba->bytes[4]) << 32)));
+
+  return result;
 }
 
 OOP

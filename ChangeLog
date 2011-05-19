@@ -1,5 +1,10 @@
 2011-05-19  Paolo Bonzini <bonzini@gnu.org>
 
+	* kernel/SysExcept.st: Wrap modifications to #'__terminate' with
+	#makeReadOnly:.
+
+2011-05-19  Paolo Bonzini <bonzini@gnu.org>
+
 	* kernel/AnsiDates.st: Implement #today sensibly.  Reported by
 	Holger Hans Peter Freyther.
 

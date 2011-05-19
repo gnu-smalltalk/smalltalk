@@ -251,6 +251,7 @@ Notification subclass: ProcessBeingTerminated [
 
     ProcessBeingTerminated class >> initialize [
 	(UndefinedObject>>#'__terminate')
+	    makeReadOnly: false;
 	    descriptor: ((MethodInfo new: 1)
 		methodClass: UndefinedObject;
 		selector: #'__terminate';
@@ -268,7 +269,8 @@ Notification subclass: ProcessBeingTerminated [
 				    #found ]
 				ifFalse: [nil] ].
 			[ :context | ] });
-		yourself)
+		yourself);
+	    makeReadOnly: true
     ]
 
     description [

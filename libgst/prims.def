@@ -3006,7 +3006,7 @@ primitive VMpr_Time_timezoneBias [succeed]
 
       oop1 = POP_OOP ();
       /* 25202 = days between 1901 and 1970 */
-      t = to_c_int_64 (oop1) - 86400 * 25202;
+      t = to_c_int_64 (oop1) - (int64_t)86400 * 25202;
       t = _gst_adjust_time_zone (t) - t;
       SET_STACKTOP_INT (t);
     }
