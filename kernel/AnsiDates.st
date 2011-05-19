@@ -114,6 +114,21 @@ Date subclass: DateTime [
 	^(super readFrom: aStream) + (Duration readFrom: aStream)
     ]
 
+    DateTime class >> today [
+	"Answer an instance of the receiver referring to midnight of today
+	 in local time."
+
+	<category: 'instance creation'>
+	| t seconds secondsAtMidnight biasNow biasAtMidnight |
+        t := self now.
+        seconds := t asSeconds.
+        secondsAtMidnight := seconds - t seconds.
+        biasAtMidnight := Time timezoneBias: secondsAtMidnight.
+        ^DateTime
+            fromSeconds: secondsAtMidnight
+            offset: (Duration fromSeconds: biasAtMidnight)
+    ]
+
     DateTime class >> now [
 	"Answer an instance of the receiver referring to the current
 	 date and time."
