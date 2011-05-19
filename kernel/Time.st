@@ -69,12 +69,26 @@ time value, and a block execution timing facility.'>
     ]
 
     Time class >> timezoneBias [
-	"Specifies the current bias, in minutes, for local time translation for
+	"Specifies the current bias, in seconds, for local time translation for
 	 the current time. The bias is the difference, in seconds, between
 	 Coordinated Universal Time (UTC) and local time; a positive bias
 	 indicates that the local timezone is to the east of Greenwich (e.g.
 	 Europe, Asia), while a negative bias indicates that it is to the
 	 west (e.g. America)"
+
+	<category: 'builtins'>
+	<primitive: VMpr_Time_timezoneBias>
+	^self primitiveFailed
+    ]
+
+    Time class >> timezoneBias: seconds [
+	"Specifies the bias, in seconds, for local time translation for
+	 the given second clock value (0 being midnight of 1/1/1901).
+	 The bias is the difference, in seconds, between Coordinated
+	 Universal Time (UTC) and local time; a positive bias indicates
+	 that the local timezone is to the east of Greenwich (e.g.
+	 Europe, Asia), while a negative bias indicates that it is to
+	 the west (e.g. America)"
 
 	<category: 'builtins'>
 	<primitive: VMpr_Time_timezoneBias>

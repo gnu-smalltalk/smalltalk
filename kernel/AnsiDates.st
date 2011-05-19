@@ -343,7 +343,12 @@ Date subclass: DateTime [
 	 in Local time"
 
 	<category: 'time zones'>
-	^self
+        | utcSecs offset |
+	utcSecs := self asSeconds - self offset asSeconds.
+        offset := Time timezoneBias: utcSecs.
+	^DateTime
+            fromSeconds: utcSecs + offset
+            offset: (Duration fromSeconds: offset)
     ]
 
     asUTC [

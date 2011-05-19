@@ -2996,8 +2996,23 @@ primitive VMpr_Object_changeClassTo [succeed,fail]
 /* Time class timezoneBias */
 primitive VMpr_Time_timezoneBias [succeed]
 {
+  OOP oop1;
+  uint64_t t;
+
   _gst_primitives_executed++;
-  SET_STACKTOP_INT (_gst_current_time_zone_bias ());
+  if (numArgs == 1)
+    {
+      if (!is_c_int_64 (STACKTOP ()))
+        PRIM_FAILED;
+
+      oop1 = POP_OOP ();
+      t = to_c_int_64 (oop1) - 86400 * 10957;
+      t = _gst_adjust_time_zone (t) - t;
+      SET_STACKTOP_INT (t);
+    }
+  else
+    SET_STACKTOP_INT (_gst_current_time_zone_bias ());
+
   PRIM_SUCCEEDED;
 }
 
