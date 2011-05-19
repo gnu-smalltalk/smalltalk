@@ -1,3 +1,7 @@
+2011-05-19  Paolo Bonzini  <bonzini@gnu.org>
+
+	* libgst/prims.def: Implement one-argument VMpr_Time_timezoneBias.
+
 2011-05-18  Mathieu Suen  <mathieusuen@yahoo.fr>
 
 	* libgst/gst-parse.c: Allow creating unary pragmas.

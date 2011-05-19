@@ -1,3 +1,13 @@
+2011-05-19  Paolo Bonzini <bonzini@gnu.org>
+
+	* kernel/AnsiDates.st: Implement #today sensibly.  Reported by
+	Holger Hans Peter Freyther.
+
+2011-05-19  Paolo Bonzini <bonzini@gnu.org>
+
+	* kernel/AnsiDates.st: Implement #asLocal correctly.
+	* kernel/Time.st: Implement #timezoneBias: helper primitive.
+
 2011-05-18  Paolo Bonzini <bonzini@gnu.org>
 
 	* tests/compiler.st: Add testcases.
