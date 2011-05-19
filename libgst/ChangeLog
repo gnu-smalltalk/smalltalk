@@ -1,4 +1,4 @@
-2011-05-18  Paolo Bonzini  <bonzini@gnu.org>
+2011-05-18  Mathieu Suen  <mathieusuen@yahoo.fr>
 
 	* libgst/gst-parse.c: Allow creating unary pragmas.
 

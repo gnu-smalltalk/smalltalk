@@ -8,9 +8,48 @@ returned value is 'bar'
 
 Execution begins...
 returned value is 100
-compiler.st:118: parse error, expected '!'
+
+Execution begins...
+returned value is 1
+
+Execution begins...
+returned value is Message
+
+Execution begins...
+returned value is #test
+
+Execution begins...
+returned value is Array new: 0 "<0>"
+
+Execution begins...
+returned value is 1
+
+Execution begins...
+returned value is Message
+
+Execution begins...
+returned value is #test:
+
+Execution begins...
+returned value is Array new: 1 "<0>"
+
+Execution begins...
+returned value is 1
+
+Execution begins...
+returned value is Message
+
+Execution begins...
+returned value is #primitive:
+
+Execution begins...
+returned value is Array new: 1 "<0>"
+
+Execution begins...
+returned value is 2
+compiler.st:177: parse error, expected '!'
  error: did not understand #<
-compiler.st:122: expected object
+compiler.st:181: expected object
 
 Execution begins...
 returned value is 2
@@ -74,7 +113,7 @@ returned value is FileSegment
 
 Execution begins...
 returned value is String
-compiler.st:257: class method expected inside class block
+compiler.st:316: class method expected inside class block
 
 Execution begins...
 returned value is CompiledMethod new: 0 "<0>"

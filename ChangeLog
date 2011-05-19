@@ -1,3 +1,8 @@
+2011-05-18  Paolo Bonzini <bonzini@gnu.org>
+
+	* tests/compiler.st: Add testcases.
+	* tests/compiler.ok: Regenerate.
+
 2011-04-29  Paolo Bonzini <bonzini@gnu.org>
 
 	* kernel/Integer.st: Add #printPaddedWith:to:.
