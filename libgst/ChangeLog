@@ -1,3 +1,8 @@
+2011-05-23  Gwenael Casaccio  <mrgwen@gmail.com>
+
+	* libgst/comp.c: Use MethodDictionary>>#at:put: to install Smalltalk
+	methods after the kernel has been initialized.
+
 2011-05-19  Paolo Bonzini  <bonzini@gnu.org>
 
 	* libgst/dict.inl: Fix conversion to/from 64-bit values on 32-bit

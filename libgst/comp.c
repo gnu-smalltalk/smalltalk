@@ -2481,8 +2481,11 @@ install_method (OOP methodOOP, OOP classOOP, mst_Boolean untrusted)
     }
 
   MAKE_OOP_READONLY (methodOOP, true);
-  oldMethod = _gst_identity_dictionary_at_put (methodDictionaryOOP,
-					       selector, methodOOP);
+  if (_gst_kernel_initialized)
+      _gst_msg_sendf (&oldMethod, "%o %o at: %o put: %o", methodDictionaryOOP, selector, methodOOP);
+  else
+    oldMethod = _gst_identity_dictionary_at_put (methodDictionaryOOP,
+    					       selector, methodOOP);
 
 #ifdef ENABLE_JIT_TRANSLATION
   if (oldMethod != _gst_nil_oop)
