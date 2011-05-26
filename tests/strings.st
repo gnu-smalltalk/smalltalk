@@ -144,3 +144,14 @@ Eval [ '1e+1' asNumber ]                                       "10"
 "This returns 0xFFFD"
 Eval [ (ByteArray new: 4 withAll: 255) changeClassTo: UnicodeString; first ]
 
+Eval [ 'abc%1' % {'def'} ]
+Eval [ 'abc%1' % {true} ]
+Eval [ 'abc%<def|ghi>1' % {true} ]
+Eval [ 'abc%<def|ghi>1' % {false} ]
+Eval [ 'abc%(string)' % (Dictionary from: {'string' -> 'def'}) ]
+Eval [ 'abc%(string)' % (Dictionary from: {'string' -> true}) ]
+Eval [ 'abc%<def|ghi>(string)' % (Dictionary from: {'string' -> true}) ]
+Eval [ 'abc%<def|ghi>(string)' % (Dictionary from: {'string' -> false}) ]
+
+Eval [ 'abc%%1' % {'def'} ]
+Eval [ 'abc%%%1' % {'def'} ]
