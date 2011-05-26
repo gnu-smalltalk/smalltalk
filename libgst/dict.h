@@ -125,7 +125,9 @@ typedef struct gst_identity_dictionary
 {
   OBJ_HEADER;
   OOP tally;			/* really, an int */
-  OOP keys[1];			/* variable sized array of OOPS (keys/values) */
+
+  /* Other, indexable fields that contain keys and values for this
+     dictionary.  */
 }
  *gst_identity_dictionary;
 
@@ -588,7 +590,7 @@ extern gst_object _gst_grow_dictionary (OOP dictionaryOOP)
    replaces the IdentityDictionary instance that IDENTITYDICTIONARYOOP
    is pointing to with a new, larger dictionary, and returns this new
    dictionary (the object pointer, not the OOP).  */
-extern gst_identity_dictionary _gst_grow_identity_dictionary (OOP identityDictionaryOOP) 
+extern gst_object _gst_grow_identity_dictionary (OOP identityDictionaryOOP) 
   ATTRIBUTE_HIDDEN;
 
 /* Allocates and returns a new C (NULL-terminated) string that has the same

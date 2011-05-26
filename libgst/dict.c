@@ -1384,10 +1384,11 @@ _gst_valid_class_method_dictionary (OOP class_oop)
   class = (gst_class) OOP_TO_OBJ (class_oop);
   if (IS_NIL (class->methodDictionary))
     {
-      OOP identDict;
-      identDict = identity_dictionary_new (_gst_method_dictionary_class, 32);
+      OOP methodDictionaryOOP;
+      methodDictionaryOOP =
+        identity_dictionary_new (_gst_method_dictionary_class, 32);
       class = (gst_class) OOP_TO_OBJ (class_oop);
-      class->methodDictionary = identDict;
+      class->methodDictionary = methodDictionaryOOP;
     }
 
   return (class->methodDictionary);
@@ -1395,12 +1396,13 @@ _gst_valid_class_method_dictionary (OOP class_oop)
 
 OOP
 _gst_find_class_method (OOP class_oop,
-			OOP selector)
+                       OOP selector)
 {
   gst_class class;
-  gst_identity_dictionary methodDictionary;
+  gst_object methodDictionary;
   OOP method_dictionary_oop;
   int index;
+  size_t numFixedFields;
 
   class = (gst_class) OOP_TO_OBJ (class_oop);
   method_dictionary_oop = class->methodDictionary;
@@ -1414,10 +1416,10 @@ _gst_find_class_method (OOP class_oop,
   if (index < 0)
     return (_gst_nil_oop);
 
-  methodDictionary =
-    (gst_identity_dictionary) OOP_TO_OBJ (method_dictionary_oop);
+  methodDictionary = OOP_TO_OBJ (method_dictionary_oop);
+  numFixedFields = OOP_FIXED_FIELDS (method_dictionary_oop);
 
-  return (methodDictionary->keys[index]);
+  return (methodDictionary->data[index + numFixedFields]);
 }
 
 OOP
@@ -1587,59 +1589,59 @@ _gst_grow_dictionary (OOP oldDictionaryOOP)
   return (OOP_TO_OBJ (oldDictionaryOOP));
 }
 
-gst_identity_dictionary
+gst_object
 _gst_grow_identity_dictionary (OOP oldIdentityDictionaryOOP)
 {
-  gst_identity_dictionary oldIdentityDictionary, identityDictionary;
+  gst_object oldIdentityDictionary, identityDictionary;
+  gst_identity_dictionary oldIdentDict, identDict;
   OOP key, identityDictionaryOOP;
-  size_t oldNumFields, numFields, i, index;
+  size_t oldNumFields, numFields, numFixedFields, i, index;
 
-  oldIdentityDictionary =
-    (gst_identity_dictionary) OOP_TO_OBJ (oldIdentityDictionaryOOP);
-  oldNumFields =
-    (NUM_WORDS (oldIdentityDictionary) - 1) / 2;
+  oldIdentityDictionary = OOP_TO_OBJ (oldIdentityDictionaryOOP);
+  numFixedFields = OOP_FIXED_FIELDS (oldIdentityDictionaryOOP);
+  oldNumFields = (NUM_WORDS (oldIdentityDictionary) - numFixedFields) / 2;
 
   numFields = new_num_fields (oldNumFields);
 
-  identityDictionary = (gst_identity_dictionary)
+  identityDictionary = 
     instantiate_with (OOP_CLASS (oldIdentityDictionaryOOP), numFields * 2,
-		      &identityDictionaryOOP);
+                     &identityDictionaryOOP);
 
-  oldIdentityDictionary =
-    (gst_identity_dictionary) OOP_TO_OBJ (oldIdentityDictionaryOOP);
-
-  identityDictionary->tally = oldIdentityDictionary->tally;
+  oldIdentityDictionary = OOP_TO_OBJ (oldIdentityDictionaryOOP);
+  oldIdentDict = (gst_identity_dictionary) oldIdentityDictionary;
+  identDict = (gst_identity_dictionary) identityDictionary;
+  identDict->tally = INCR_INT (oldIdentDict->tally);
 
   /* rehash all associations from old dictionary into new one */
   for (i = 0; i < oldNumFields; i++)
     {
-      key = oldIdentityDictionary->keys[i * 2];
+      key = oldIdentityDictionary->data[i * 2 + numFixedFields];
       if COMMON (!IS_NIL (key))
-	{
-	  index =
-	    identity_dictionary_find_key_or_nil (identityDictionaryOOP,
-						 key);
-	  identityDictionary->keys[index - 1] = key;
-	  identityDictionary->keys[index] = oldIdentityDictionary->keys[i*2+1];
-	}
+       {
+         index =
+           identity_dictionary_find_key_or_nil (identityDictionaryOOP,
+                                                key);
+         identityDictionary->data[index - 1 + numFixedFields] = key;
+         identityDictionary->data[index + numFixedFields] = oldIdentityDictionary->data[i * 2 + 1 + numFixedFields];
+       }
     }
 
   _gst_swap_objects (identityDictionaryOOP, oldIdentityDictionaryOOP);
-  return ((gst_identity_dictionary) OOP_TO_OBJ (oldIdentityDictionaryOOP));
+  return (OOP_TO_OBJ (oldIdentityDictionaryOOP));
 }
 
 
 ssize_t
 identity_dictionary_find_key (OOP identityDictionaryOOP,
-			      OOP keyOOP)
+                             OOP keyOOP)
 {
-  gst_identity_dictionary identityDictionary;
-  size_t index, count, numFields;
+  gst_object identityDictionary;
+  size_t index, count, numFields, numFixedFields;
 
-  identityDictionary =
-    (gst_identity_dictionary) OOP_TO_OBJ (identityDictionaryOOP);
+  identityDictionary = OOP_TO_OBJ (identityDictionaryOOP);
+  numFixedFields = OOP_FIXED_FIELDS (identityDictionaryOOP);
 
-  numFields = NUM_WORDS (identityDictionary) - 1;
+  numFields = NUM_WORDS (identityDictionary) - numFixedFields;
   index = scramble (OOP_INDEX (keyOOP)) * 2;
   count = numFields / 2;
   /* printf ("%d %d %O\n", count, index & numFields - 1, keyOOP); */
@@ -1647,11 +1649,11 @@ identity_dictionary_find_key (OOP identityDictionaryOOP,
     {
       index &= numFields - 1;
 
-      if COMMON (IS_NIL (identityDictionary->keys[index]))
-	return (-1);
+      if COMMON (IS_NIL (identityDictionary->data[index + numFixedFields]))
+       return (-1);
 
-      if COMMON (identityDictionary->keys[index] == keyOOP)
-	return (index + 1);
+      if COMMON (identityDictionary->data[index + numFixedFields] == keyOOP)
+       return (index + 1);
 
       /* linear reprobe -- it is simple and guaranteed */
       index += 2;
@@ -1667,15 +1669,15 @@ identity_dictionary_find_key (OOP identityDictionaryOOP,
 
 size_t
 identity_dictionary_find_key_or_nil (OOP identityDictionaryOOP,
-				     OOP keyOOP)
+                                    OOP keyOOP)
 {
-  gst_identity_dictionary identityDictionary;
-  size_t index, count, numFields;
+  gst_object identityDictionary;
+  size_t index, count, numFields, numFixedFields;
 
-  identityDictionary =
-    (gst_identity_dictionary) OOP_TO_OBJ (identityDictionaryOOP);
+  identityDictionary = OOP_TO_OBJ (identityDictionaryOOP);
+  numFixedFields = OOP_FIXED_FIELDS (identityDictionaryOOP);
 
-  numFields = NUM_WORDS (identityDictionary) - 1;
+  numFields = NUM_WORDS (identityDictionary) - numFixedFields;
   index = scramble (OOP_INDEX (keyOOP)) * 2;
   count = numFields / 2;
   /* printf ("%d %d %O\n", count, index & numFields - 1, keyOOP); */
@@ -1683,11 +1685,11 @@ identity_dictionary_find_key_or_nil (OOP identityDictionaryOOP,
     {
       index &= numFields - 1;
 
-      if COMMON (IS_NIL (identityDictionary->keys[index]))
-	return (index + 1);
+      if COMMON (IS_NIL (identityDictionary->data[index + numFixedFields]))
+       return (index + 1);
 
-      if COMMON (identityDictionary->keys[index] == keyOOP)
-	return (index + 1);
+      if COMMON (identityDictionary->data[index + numFixedFields] == keyOOP)
+       return (index + 1);
 
       /* linear reprobe -- it is simple and guaranteed */
       index += 2;
@@ -1716,52 +1718,56 @@ identity_dictionary_new (OOP classOOP, int size)
 
 OOP
 _gst_identity_dictionary_at_put (OOP identityDictionaryOOP,
-				 OOP keyOOP,
-				 OOP valueOOP)
+                                OOP keyOOP,
+                                OOP valueOOP)
 {
-  gst_identity_dictionary identityDictionary;
+  gst_object identityDictionary;
+  gst_identity_dictionary identDict;
   intptr_t index;
   OOP oldValueOOP;
+  size_t numFixedFields;
 
-  identityDictionary =
-    (gst_identity_dictionary) OOP_TO_OBJ (identityDictionaryOOP);
+  identityDictionary = OOP_TO_OBJ (identityDictionaryOOP);
+  numFixedFields = OOP_FIXED_FIELDS (identityDictionaryOOP);
 
   /* Never make dictionaries too full! For simplicity, we do this even
      if the key is present in the dictionary (because it will most
      likely resolve some collisions and make things faster).  */
 
-  if UNCOMMON (TO_INT (identityDictionary->tally) >=
-      	       TO_INT (identityDictionary->objSize) * 3 / 8)
-    identityDictionary =
-      _gst_grow_identity_dictionary (identityDictionaryOOP);
+  identDict = (gst_identity_dictionary) identityDictionary;
+  if UNCOMMON (TO_INT (identDict->tally) >= TO_INT (identDict->objSize) * 3 / 8)
+    identityDictionary = _gst_grow_identity_dictionary (identityDictionaryOOP);
 
   index =
     identity_dictionary_find_key_or_nil (identityDictionaryOOP, keyOOP);
 
-  if COMMON (IS_NIL (identityDictionary->keys[index - 1]))
-    identityDictionary->tally = INCR_INT (identityDictionary->tally);
+  if COMMON (IS_NIL (identityDictionary->data[index - 1 + numFixedFields]))
+    {
+      identDict = (gst_identity_dictionary) identityDictionary;
+      identDict->tally = INCR_INT (identDict->tally);
+    }
 
-  identityDictionary->keys[index - 1] = keyOOP;
-  oldValueOOP = identityDictionary->keys[index];
-  identityDictionary->keys[index] = valueOOP;
+  identityDictionary->data[index - 1 + numFixedFields] = keyOOP;
+  oldValueOOP = identityDictionary->data[index + numFixedFields];
+  identityDictionary->data[index + numFixedFields] = valueOOP;
 
   return (oldValueOOP);
 }
-
 OOP
 _gst_identity_dictionary_at (OOP identityDictionaryOOP,
-			     OOP keyOOP)
+                            OOP keyOOP)
 {
-  gst_identity_dictionary identityDictionary;
+  gst_object identityDictionary;
   intptr_t index;
+  size_t numFixedFields;
 
-  identityDictionary =
-    (gst_identity_dictionary) OOP_TO_OBJ (identityDictionaryOOP);
+  identityDictionary = OOP_TO_OBJ (identityDictionaryOOP);
+  numFixedFields = OOP_FIXED_FIELDS (identityDictionaryOOP);
 
   index =
     identity_dictionary_find_key_or_nil (identityDictionaryOOP, keyOOP);
 
-  return identityDictionary->keys[index];
+  return identityDictionary->data[index + numFixedFields];
 }
 
 OOP
@@ -2203,38 +2209,40 @@ _gst_record_profile (OOP oldMethod, OOP newMethod, int ipOffset)
    increase the value by INC or set it to INC if it does not exist.  */
 int
 _gst_identity_dictionary_at_inc (OOP identityDictionaryOOP,
-				 OOP keyOOP,
-				 int inc)
+                                OOP keyOOP,
+                                int inc)
 {
-  gst_identity_dictionary identityDictionary;
+  gst_object identityDictionary;
+  gst_identity_dictionary identDict;
   intptr_t index;
   int oldValue;
+  size_t numFixedFields;
 
-  identityDictionary =
-    (gst_identity_dictionary) OOP_TO_OBJ (identityDictionaryOOP);
+  identityDictionary = OOP_TO_OBJ (identityDictionaryOOP);
+  numFixedFields = OOP_FIXED_FIELDS (identityDictionaryOOP);
 
   /* Never make dictionaries too full! For simplicity, we do this even
      if the key is present in the dictionary (because it will most
      likely resolve some collisions and make things faster).  */
 
-  if UNCOMMON (TO_INT (identityDictionary->tally) >=
-      	       TO_INT (identityDictionary->objSize) * 3 / 8)
+  identDict = (gst_identity_dictionary) identityDictionary;
+  if UNCOMMON (TO_INT (identDict->tally) >= TO_INT (identDict->objSize) * 3 / 8)
     identityDictionary =
       _gst_grow_identity_dictionary (identityDictionaryOOP);
-
   index =
     identity_dictionary_find_key_or_nil (identityDictionaryOOP, keyOOP);
 
-  if UNCOMMON (IS_NIL (identityDictionary->keys[index - 1]))
+  if UNCOMMON (IS_NIL (identityDictionary->data[index - 1 + numFixedFields]))
     {
-      identityDictionary->tally = INCR_INT (identityDictionary->tally);
+      identDict = (gst_identity_dictionary) identityDictionary;
+      identDict->tally = INCR_INT (identDict->tally);
       oldValue = 0;
     }
   else 
-    oldValue = TO_INT(identityDictionary->keys[index]);
+    oldValue = TO_INT(identityDictionary->data[index + numFixedFields]);
   
-  identityDictionary->keys[index - 1] = keyOOP;
-  identityDictionary->keys[index] = FROM_INT(inc+oldValue);
+  identityDictionary->data[index - 1 + numFixedFields] = keyOOP;
+  identityDictionary->data[index + numFixedFields] = FROM_INT(inc+oldValue);
 
   return (oldValue);
 }

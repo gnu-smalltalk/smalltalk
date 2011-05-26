@@ -1,5 +1,10 @@
 2011-05-26  Gwenael Casaccio  <mrgwen@gmail.com>
 
+	* libgst/dict.c: Allow arbitrary instance variables in
+	IdentityDictionaries.
+
+2011-05-26  Gwenael Casaccio  <mrgwen@gmail.com>
+
 	* libgst/dict.c: Fix superclass of MethodDictionary.
 
 2011-05-23  Gwenael Casaccio  <mrgwen@gmail.com>
