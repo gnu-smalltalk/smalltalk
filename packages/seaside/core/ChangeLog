@@ -1,3 +1,8 @@
+2011-05-26  Paolo Bonzini  <bonzini@gnu.org>
+
+	* core/Seaside-Core.st: Convert output of #selectors to an Array
+	before building filenames.  Reported by Gwenael Casaccio.
+
 2010-12-04  Paolo Bonzini  <bonzini@gnu.org>
 
 	* package.xml: Remove now superfluous <file> tags.

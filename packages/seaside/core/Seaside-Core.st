@@ -7625,7 +7625,7 @@ Object subclass: WALibrary [
 
     filenames [
 	<category: 'accessing'>
-	^self fileSelectors collect: [:each | self asFilename: each]
+	^self fileSelectors asArray collect: [:each | self asFilename: each]
     ]
 
     mimetypeForFile: aFilename [

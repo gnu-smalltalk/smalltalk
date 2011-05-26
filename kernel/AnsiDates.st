@@ -454,8 +454,8 @@ Date subclass: DateTime [
 	    next: (self second < 10 ifTrue: [1] ifFalse: [0]) put: $0;
 	    print: self second;
 	    nextPut: (self offset negative ifTrue: [$-] ifFalse: [$+]);
-	    next: (self offset hours < 10 ifTrue: [1] ifFalse: [0]) put: $0;
-	    print: self offset hours;
+	    next: (self offset hours abs < 10 ifTrue: [1] ifFalse: [0]) put: $0;
+	    print: self offset hours abs;
 	    nextPut: $:;
 	    next: (self offset minutes < 10 ifTrue: [1] ifFalse: [0]) put: $0;
 	    print: self offset minutes.

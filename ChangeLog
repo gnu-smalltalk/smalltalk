@@ -1,3 +1,14 @@
+2011-05-26  Paolo Bonzini <bonzini@gnu.org>
+
+	* kernel/CharArray.st: Support string keys in #%.
+	* tests/strings.st: Add testcases.
+	* tests/strings.ok: Regenerate.
+
+2011-05-26  Paolo Bonzini <bonzini@gnu.org>
+
+	* kernel/AnsiDates.st: Fix printing of negative offsets.
+	Reported by Holger Hans Peter Freyther.
+
 2011-05-19  Paolo Bonzini <bonzini@gnu.org>
 
 	* kernel/SysExcept.st: Wrap modifications to #'__terminate' with

@@ -392,45 +392,57 @@ accessing and manipulation methods for strings.'>
 		s4}
     ]
 
-    bindWithArguments: anArray [
-	"Answer the receiver with every %n (1<=n<=9) replaced by the n-th element
-	 of anArray.  The replaced elements are `displayed' (i.e. their
-	 displayString is used).  In addition, the special pattern
-	 %<trueString|falseString>n is replaced with one of the two
-	 strings depending on the n-th element of anArray being true or false."
+    bindWithArguments: aCollection [
+	"Answer the receiver with special escape sequences replaced by
+         elements of aCollection.   %n (1<=n<=9, A<=n<=Z) are replaced by
+         the n-th element of aCollection (A being the 10-th element and so on
+         until the 35th).  %(string) sequences are accessed as strings, which
+         makes sense only if aCollection is a Dictionary or LookupTable.
+	 In addition, the special pattern %<trueString|falseString>n
+	 or %<trueString|falseString>(string) is replaced with one of
+	 the two strings depending on the element of aCollection being
+	 true or false.  The replaced elements are `displayed' (i.e. their
+	 displayString is used)."
 
 	<category: 'string processing'>
-	^self % anArray
+	^self % aCollection
     ]
 
-    % anArray [
-	"Answer the receiver with every %n (1<=n<=9) replaced by the n-th element
-	 of anArray.  The replaced elements are `displayed' (i.e. their
-	 displayString is used).  In addition, the special pattern
-	 %<trueString|falseString>n is replaced with one of the two
-	 strings depending on the n-th element of anArray being true or false."
+    % aCollection [
+	"Answer the receiver with special escape sequences replaced by
+         elements of aCollection.   %n (1<=n<=9, A<=n<=Z) are replaced by
+         the n-th element of aCollection (A being the 10-th element and so on
+         until the 35th).  %(string) sequences are accessed as strings, which
+         makes sense only if aCollection is a Dictionary or LookupTable.
+	 In addition, the special pattern %<trueString|falseString>n
+	 or %<trueString|falseString>(string) is replaced with one of
+	 the two strings depending on the element of aCollection being
+	 true or false.  The replaced elements are `displayed' (i.e. their
+	 displayString is used)."
 
 	<category: 'string processing'>
-	| result wasPercent pattern char ifTrue ifFalse |
+	| result wasPercent pattern char trueString falseString key value |
 	result := WriteStream on: (self copyEmpty: self size + 20).
 	wasPercent := false.
 	pattern := ReadStream on: self.
 	[pattern atEnd] whileFalse: 
-		[char := pattern next.
-		wasPercent 
+	    [char := pattern next.
+            char = $% ifFalse: [result nextPut: char] ifTrue: [
+		char := pattern next.
+                char = $% ifTrue: [result nextPut: char] ifFalse: [
+		char = $< 
 		    ifTrue: 
-			[char = $< 
-			    ifTrue: 
-				[ifTrue := pattern upTo: $|.
-				ifFalse := pattern upTo: $>.
-				result nextPutAll: ((anArray at: pattern next digitValue) 
-					    ifTrue: [ifTrue]
-					    ifFalse: [ifFalse])].
-			char = $% ifTrue: [result nextPut: char].
-			char isAlphaNumeric 
-			    ifTrue: [result display: (anArray at: char digitValue)].
-			wasPercent := false]
-		    ifFalse: [(wasPercent := char = $%) ifFalse: [result nextPut: char]]].
+			[trueString := pattern upTo: $|.
+			falseString := pattern upTo: $>.
+                        char := pattern next].
+		key := char = $(
+                    ifTrue: [pattern upTo: $)]
+                    ifFalse: [char digitValue].
+                value := trueString isNil
+                    ifTrue: [aCollection at: key]
+                    ifFalse: [(aCollection at: key) ifTrue: [trueString] ifFalse: [falseString]].
+                trueString := falseString := nil.
+		result display: value]]].
 	^result contents
     ]
 
