@@ -177,6 +177,20 @@ OOP _gst_weak_value_identity_dictionary_class = NULL;
 OOP _gst_write_stream_class = NULL;
 OOP _gst_processor_oop = NULL;
 
+/* Called when a dictionary becomes full, this routine replaces the
+   dictionary instance that DICTIONARYOOP is pointing to with a new,
+   larger dictionary, and returns this new dictionary (the object
+   pointer, not the OOP).  */
+static gst_object grow_dictionary (OOP dictionaryOOP) 
+  ATTRIBUTE_HIDDEN;
+
+/* Called when an IdentityDictionary becomes full, this routine
+   replaces the IdentityDictionary instance that IDENTITYDICTIONARYOOP
+   is pointing to with a new, larger dictionary, and returns this new
+   dictionary (the object pointer, not the OOP).  */
+static gst_object grow_identity_dictionary (OOP identityDictionaryOOP) 
+  ATTRIBUTE_HIDDEN;
+
 /* Answer the number of slots that are in a dictionary of
    OLDNUMFIELDS items after growing it.  */
 static size_t new_num_fields (size_t oldNumFields);
@@ -1551,7 +1565,7 @@ find_key_or_nil (OOP dictionaryOOP,
 }
 
 gst_object
-_gst_grow_dictionary (OOP oldDictionaryOOP)
+grow_dictionary (OOP oldDictionaryOOP)
 {
   gst_object oldDictionary, dictionary;
   size_t oldNumFields, numFields, i, index, numFixedFields;
@@ -1590,7 +1604,7 @@ _gst_grow_dictionary (OOP oldDictionaryOOP)
 }
 
 gst_object
-_gst_grow_identity_dictionary (OOP oldIdentityDictionaryOOP)
+grow_identity_dictionary (OOP oldIdentityDictionaryOOP)
 {
   gst_object oldIdentityDictionary, identityDictionary;
   gst_identity_dictionary oldIdentDict, identDict;
@@ -1736,7 +1750,7 @@ _gst_identity_dictionary_at_put (OOP identityDictionaryOOP,
 
   identDict = (gst_identity_dictionary) identityDictionary;
   if UNCOMMON (TO_INT (identDict->tally) >= TO_INT (identDict->objSize) * 3 / 8)
-    identityDictionary = _gst_grow_identity_dictionary (identityDictionaryOOP);
+    identityDictionary = grow_identity_dictionary (identityDictionaryOOP);
 
   index =
     identity_dictionary_find_key_or_nil (identityDictionaryOOP, keyOOP);
@@ -1842,7 +1856,7 @@ _gst_dictionary_add (OOP dictionaryOOP,
   if UNCOMMON (TO_INT (dict->tally) >= 
 	       TO_INT (dict->objSize) * 3 / 4)
     {
-      dictionary = _gst_grow_dictionary (dictionaryOOP);
+      dictionary = grow_dictionary (dictionaryOOP);
       dict = (gst_dictionary) dictionary;
     }
 
@@ -2228,7 +2242,7 @@ _gst_identity_dictionary_at_inc (OOP identityDictionaryOOP,
   identDict = (gst_identity_dictionary) identityDictionary;
   if UNCOMMON (TO_INT (identDict->tally) >= TO_INT (identDict->objSize) * 3 / 8)
     identityDictionary =
-      _gst_grow_identity_dictionary (identityDictionaryOOP);
+      grow_identity_dictionary (identityDictionaryOOP);
   index =
     identity_dictionary_find_key_or_nil (identityDictionaryOOP, keyOOP);
 

@@ -579,20 +579,6 @@ extern OOP _gst_identity_dictionary_at_put (OOP identityDictionaryOOP,
 					    OOP valueOOP) 
   ATTRIBUTE_HIDDEN;
 
-/* Called when a dictionary becomes full, this routine replaces the
-   dictionary instance that DICTIONARYOOP is pointing to with a new,
-   larger dictionary, and returns this new dictionary (the object
-   pointer, not the OOP).  */
-extern gst_object _gst_grow_dictionary (OOP dictionaryOOP) 
-  ATTRIBUTE_HIDDEN;
-
-/* Called when an IdentityDictionary becomes full, this routine
-   replaces the IdentityDictionary instance that IDENTITYDICTIONARYOOP
-   is pointing to with a new, larger dictionary, and returns this new
-   dictionary (the object pointer, not the OOP).  */
-extern gst_object _gst_grow_identity_dictionary (OOP identityDictionaryOOP) 
-  ATTRIBUTE_HIDDEN;
-
 /* Allocates and returns a new C (NULL-terminated) string that has the same
    contents as STRINGOOP.  Even if there are embedded NULs, the
    allocated area has always a size of "stringOOP size + 1" bytes.  */

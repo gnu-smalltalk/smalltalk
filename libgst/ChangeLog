@@ -1,3 +1,9 @@
+2011-05-26  Paolo Bonzini  <bonzini@gnu.org>
+
+	* libgst/dict.h: Remove _gst_grow_dictionary and
+	_gst_grow_identity_dictionary.
+	* libgst/dict.c: Make them static, remove _gst_ prefix.
+
 2011-05-26  Gwenael Casaccio  <mrgwen@gmail.com>
 
 	* libgst/dict.c: Add mutex to MethodDictionary.
