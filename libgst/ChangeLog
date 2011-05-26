@@ -1,5 +1,9 @@
 2011-05-26  Gwenael Casaccio  <mrgwen@gmail.com>
 
+	* libgst/dict.c: Add mutex to MethodDictionary.
+
+2011-05-26  Gwenael Casaccio  <mrgwen@gmail.com>
+
 	* libgst/dict.c: Allow arbitrary instance variables in
 	IdentityDictionaries.
 

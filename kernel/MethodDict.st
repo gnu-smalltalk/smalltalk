@@ -31,28 +31,38 @@
 
 
 
+
+
 IdentityDictionary subclass: MethodDictionary [
-    
+    | mutex |
+
     <shape: #pointer>
     <category: 'Language-Implementation'>
     <comment: 'I am similar to an IdentityDictionary, except that removal and
 rehashing operations inside my instances look atomic to the
 interpreter.'>
 
-    at: key put: value [
-	"Store value as associated to the given key"
+    mutex [
+       <category: 'initialization'>
 
-	<category: 'adding'>
-	| index |
-	index := self findIndex: key.
-	(self primAt: index) isNil 
-	    ifTrue: 
-		[self incrementTally ifTrue: [index := self findIndex: key].
-		self primAt: index put: key]
-	    ifFalse: [(self valueAt: index) discardTranslation].
-	self valueAt: index put: value.
-	Behavior flushCache.
-	^value
+       ^ mutex ifNil: [ mutex := Semaphore forMutualExclusion ]
+    ]
+
+    at: key put: value [
+       "Store value as associated to the given key"
+
+       <category: 'adding'>
+       self mutex critical: [
+           | index |
+           index := self findIndex: key.
+           (self primAt: index) isNil 
+               ifTrue: 
+                   [self incrementTally ifTrue: [index := self findIndex: key].
+                   self primAt: index put: key]
+               ifFalse: [(self valueAt: index) discardTranslation].
+           self valueAt: index put: value.
+           Behavior flushCache].
+       ^value
     ]
 
     remove: anAssociation [
@@ -62,15 +72,17 @@ interpreter.'>
 	 this method is running!!  Therefore we perform the removal
 	 in a copy, and then atomically become that copy"
 
-	<category: 'removing'>
-	| copy result |
-	(self includesKey: anAssociation key) 
-	    ifFalse: [SystemExceptions.NotFound signalOn: anAssociation key what: 'key'].
-	copy := self copy.
-	result := copy dangerouslyRemove: anAssociation.
-	self become: copy.
-	Behavior flushCache.
-	^result
+
+       <category: 'removing'>
+       | copy result |
+       self mutex critical: [
+           (self includesKey: anAssociation key) 
+               ifFalse: [SystemExceptions.NotFound signalOn: anAssociation key what: 'key'].
+           copy := self copy.
+           result := copy dangerouslyRemove: anAssociation.
+           self become: copy.
+           Behavior flushCache].
+       ^result
     ]
 
     removeKey: anElement ifAbsent: aBlock [
@@ -81,14 +93,16 @@ interpreter.'>
 	 this method is running!!  Therefore we perform the removal
 	 in a copy, and then atomically become that copy"
 
-	<category: 'removing'>
-	| copy result |
-	(self includesKey: anElement) ifFalse: [^aBlock value].
-	copy := self copy.
-	result := copy dangerouslyRemoveKey: anElement.
-	self become: copy.
-	Behavior flushCache.
-	^result
+
+       <category: 'removing'>
+       | copy result |
+       self mutex critical: [
+           (self includesKey: anElement) ifFalse: [^aBlock value].
+           copy := self copy.
+           result := copy dangerouslyRemoveKey: anElement.
+           self become: copy.
+           Behavior flushCache].
+       ^result
     ]
 
     rehash [
@@ -97,10 +111,10 @@ interpreter.'>
 	"The interpreter might be using this MethodDictionary while
 	 this method is running!!  Therefore we create a copy that
 	 has correct hashing (it is built on the fly), then atomically
-	 become that copy"
+        become that copy"
 
-	<category: 'rehashing'>
-	self growBy: 0
+       <category: 'rehashing'>
+       self mutex critical: [ self growBy: 0 ]
     ]
 
     dangerouslyRemove: anAssociation [
