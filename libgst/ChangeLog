@@ -1,3 +1,7 @@
+2011-05-26  Gwenael Casaccio  <mrgwen@gmail.com>
+
+	* libgst/dict.c: Fix superclass of MethodDictionary.
+
 2011-05-19  Paolo Bonzini  <bonzini@gnu.org>
 
 	* libgst/dict.inl: Fix conversion to/from 64-bit values on 32-bit

@@ -1,3 +1,8 @@
+2011-05-26  Gwenael Casaccio  <mrgwen@gmail.com>
+
+	* kernel/MethodDict.st: Temporarily return Set from
+	MethodDictionary>>#keys.
+
 2011-05-19  Paolo Bonzini <bonzini@gnu.org>
 
 	* kernel/SysExcept.st: Wrap modifications to #'__terminate' with

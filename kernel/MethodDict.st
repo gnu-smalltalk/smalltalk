@@ -131,5 +131,14 @@ interpreter.'>
 	value discardTranslation.
 	^value
     ]
+
+    keysClass [
+	"Answer the class answered by #keys.  Return Set in 3.2.x for
+         backwards compatibility.  This method will be removed in 3.3,
+         and #keys will return IdentitySet."
+
+	<category: 'private methods'>
+	^Set
+    ]
 ]
 

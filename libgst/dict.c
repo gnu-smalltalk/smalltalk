@@ -565,7 +565,7 @@ static const class_definition class_info[] = {
    GST_ISP_POINTER, true, 0,
    "IdentityDictionary", NULL, NULL, NULL },
 
-  {&_gst_method_dictionary_class, &_gst_lookup_table_class,
+  {&_gst_method_dictionary_class, &_gst_identity_dictionary_class,
    GST_ISP_POINTER, true, 0,
    "MethodDictionary", NULL, NULL, NULL },
 
