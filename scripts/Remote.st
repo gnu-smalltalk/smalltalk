@@ -182,10 +182,10 @@ available in the PATH of the remote machine.
     opt isNil ifTrue: [
 	host isNil ifFalse: [ self error: 'multiple hosts are invalid' ].
 	(arg includes: $@)
-	    ifFalse: [ host := arg ]
+	    ifFalse: [ host := TCP.SocketAddress byName: arg ]
 	    ifTrue: [
 		login isNil ifFalse: [ self error: 'multiple logins are invalid' ].
-		login := arg copyUpTo: $@.
+		login := TCP.SocketAddress byName: (arg copyUpTo: $@).
 		host := arg copyAfter: $@ ] ].
     ]
 
