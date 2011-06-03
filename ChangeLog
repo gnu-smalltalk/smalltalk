@@ -1,3 +1,7 @@
+2011-06-02  Paolo Bonzini <bonzini@gnu.org>
+
+	* kernel/ObjDumper.st: Call #postLoad on fixed objects.
+
 2011-05-30  Holger Hans Peter Freyther  <holger@freyther.de>
 
 	* scripts/Remote.st: Resolve the hostname to an address to be
