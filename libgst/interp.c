@@ -113,13 +113,6 @@
    to speed up these messages for Arrays, Strings, and ByteArrays.  */
 #define METHOD_CACHE_SIZE		(1 << 11)
 
-typedef struct async_queue_entry
-{
-  void (*func) (OOP);
-  OOP data;
-}
-async_queue_entry;
-
 typedef struct interp_jmp_buf
 {
   jmp_buf jmpBuf;
@@ -247,14 +240,10 @@ static int class_cache_prim;
 #endif
 
 /* Queue for async (outside the interpreter) semaphore signals */
-gl_lock_define (static, async_queue_lock);
 static mst_Boolean async_queue_enabled = true;
-static int async_queue_index;
-static int async_queue_size;
-static async_queue_entry *queued_async_signals;
-
-static int async_queue_index_sig;
-static async_queue_entry queued_async_signals_sig[NSIG];
+static async_queue_entry queued_async_signals_tail;
+static async_queue_entry *queued_async_signals = &queued_async_signals_tail;
+static async_queue_entry *queued_async_signals_sig = &queued_async_signals_tail;
 
 /* When not NULL, this causes the byte code interpreter to immediately
    send the message whose selector is here to the current stack
@@ -294,6 +283,9 @@ static inline mst_Boolean cached_index_oop_put_primitive (OOP rec,
 							  OOP idx,
 							  OOP val,
 							  intptr_t spec);
+
+/* Empty the queue of asynchronous calls.  */
+static void empty_async_queue (void);
 
 /* Try to find another process with higher or same priority as the
    active one.  Return whether there is one.  */
@@ -1602,73 +1594,130 @@ _gst_sync_signal (OOP semaphoreOOP, mst_Boolean incr_if_empty)
   return true;
 }
 
-static void
-do_async_signal (OOP semaphoreOOP)
+void
+_gst_do_async_signal (OOP semaphoreOOP)
 {
   _gst_sync_signal (semaphoreOOP, true);
 }
 
 void
+_gst_do_async_signal_and_unregister (OOP semaphoreOOP)
+{
+  _gst_sync_signal (semaphoreOOP, true);
+  _gst_unregister_oop (semaphoreOOP);
+}
+
+/* Async-signal-safe version, does no allocation.  Using an atomic operation
+   is still the simplest choice, but on top of that we check that the entry
+   is not already in the list.  Also, the datum and next field are NULLed
+   automatically when the call is made.  */
+void
+_gst_async_call_internal (async_queue_entry *e)
+{
+  /* For async-signal safety, we need to check that the entry is not
+     already in the list.  Checking that atomically with CAS is the
+     simplest way.  */
+  do
+    if (__sync_val_compare_and_swap(&e->next, NULL, queued_async_signals_sig))
+      return;
+  while (!__sync_bool_compare_and_swap (&queued_async_signals_sig, e->next, e));
+  SET_EXCEPT_FLAG (true);
+}
+
+void
 _gst_async_call (void (*func) (OOP), OOP arg)
 {
-  if (_gst_signal_count)
-    {
-      /* Async-signal-safe version.  Because the discriminant is
-	 _gst_signal_count, can only be called from within libgst.la
-	 (in particular events.c).  Also, because of that we assume
-	 interrupts are already disabled.  */
+  /* Thread-safe version for the masses.  This lockless stack
+     is reversed in the interpreter loop to get FIFO behavior.  */
+  async_queue_entry *sig = xmalloc (sizeof (async_queue_entry));
+  sig->func = func;
+  sig->data = arg;
 
-      if (async_queue_index_sig == NSIG)
-        {
-	  static const char errmsg[] = "Asynchronous signal queue full!\n";
-	  write (2, errmsg, sizeof (errmsg) - 1);
-	  abort ();
-	}
-
-      queued_async_signals_sig[async_queue_index_sig].func = func;
-      queued_async_signals_sig[async_queue_index_sig++].data = arg;
-    }
-  else
-    {
-      /* Thread-safe version for the masses.  */
-
-      gl_lock_lock (async_queue_lock);
-      if (async_queue_index == async_queue_size)
-        {
-          async_queue_size *= 2;
-          queued_async_signals =
-	    realloc (queued_async_signals,
-		 sizeof (async_queue_entry) * async_queue_size);
-	}
-
-      queued_async_signals[async_queue_index].func = func;
-      queued_async_signals[async_queue_index++].data = arg;
-      gl_lock_unlock (async_queue_lock);
-      _gst_wakeup ();
-    }
-  
+  do
+    sig->next = queued_async_signals;
+  while (!__sync_bool_compare_and_swap (&queued_async_signals,
+                                        sig->next, sig));
+  _gst_wakeup ();
   SET_EXCEPT_FLAG (true);
 }
 
 mst_Boolean
 _gst_have_pending_async_calls ()
 {
-  return async_queue_index_sig > 0 || async_queue_index > 0;
+  return (queued_async_signals != &queued_async_signals_tail
+          || queued_async_signals_sig != &queued_async_signals_tail);
+}
+
+void
+empty_async_queue ()
+{
+  async_queue_entry *sig, *sig_reversed;
+
+  /* Process a batch of asynchronous requests.  These are pushed
+     in LIFO order by _gst_async_call.  By reversing the list
+     in place before walking it, we get FIFO order.  */
+  sig = __sync_swap (&queued_async_signals, &queued_async_signals_tail);
+  sig_reversed = &queued_async_signals_tail;
+  while (sig != &queued_async_signals_tail)
+    {
+      async_queue_entry *next = sig->next;
+      sig->next = sig_reversed;
+      sig_reversed = sig;
+      sig = next;
+    }
+
+  sig = sig_reversed;
+  while (sig != &queued_async_signals_tail)
+    {
+      async_queue_entry *next = sig->next;
+      sig->func (sig->data);
+      free (sig);
+      sig = next;
+    }
+
+  /* For async-signal-safe processing, we need to avoid entering
+     the same item twice into the list.  So we use NEXT to mark
+     items that have been added...  */
+  sig = __sync_swap (&queued_async_signals_sig, &queued_async_signals_tail);
+  sig_reversed = &queued_async_signals_tail;
+  while (sig != &queued_async_signals_tail)
+    {
+      async_queue_entry *next = sig->next;
+      sig->next = sig_reversed;
+      sig_reversed = sig;
+      sig = next;
+    }
+
+  sig = sig_reversed;
+  while (sig != &queued_async_signals_tail)
+    {
+      async_queue_entry *next = sig->next;
+      void (*func) (OOP) = sig->func;
+      OOP data = sig->data;
+      barrier ();
+
+      sig->data = NULL;
+      barrier ();
+
+      /* ... and we only NULL it after a signal handler can start
+         writing to it.  */
+      sig->next = NULL;
+      barrier ();
+      func (data);
+      sig = next;
+    }
 }
 
 void
 _gst_async_signal (OOP semaphoreOOP)
 {
-  _gst_async_call (do_async_signal, semaphoreOOP);
+  _gst_async_call (_gst_do_async_signal, semaphoreOOP);
 }
 
 void
 _gst_async_signal_and_unregister (OOP semaphoreOOP)
 {
-  _gst_disable_interrupts (false);	/* block out everything! */
-  _gst_async_call (do_async_signal, semaphoreOOP);
-  _gst_async_call (_gst_unregister_oop, semaphoreOOP);
-  _gst_enable_interrupts (false);
+  _gst_async_call (_gst_do_async_signal_and_unregister, semaphoreOOP);
 }
 
 void
@@ -2194,12 +2243,6 @@ _gst_init_interpreter (void)
 #endif
 
   _gst_this_context_oop = _gst_nil_oop;
-  async_queue_index = 0;
-  async_queue_index_sig = 0;
-  async_queue_size = 32;
-  queued_async_signals = malloc (sizeof (async_queue_entry) * async_queue_size);
-  gl_lock_init (async_queue_lock);
-
   for (i = 0; i < MAX_LIFO_DEPTH; i++)
     lifo_contexts[i].flags = F_POOLED | F_CONTEXT;
 
@@ -2368,16 +2411,14 @@ _gst_copy_processor_registers (void)
 void
 copy_semaphore_oops (void)
 {
-  int i;
+  async_queue_entry *sig;
 
-  _gst_disable_interrupts (false);	/* block out everything! */
-
-  for (i = 0; i < async_queue_index; i++)
-    if (queued_async_signals[i].data)
-      MAYBE_COPY_OOP (queued_async_signals[i].data);
-  for (i = 0; i < async_queue_index_sig; i++)
-    if (queued_async_signals_sig[i].data)
-      MAYBE_COPY_OOP (queued_async_signals_sig[i].data);
+  for (sig = queued_async_signals; sig != &queued_async_signals_tail;
+       sig = sig->next)
+    MAYBE_COPY_OOP (sig->data);
+  for (sig = queued_async_signals_sig; sig != &queued_async_signals_tail;
+       sig = sig->next)
+    MAYBE_COPY_OOP (sig->data);
 
   /* there does seem to be a window where this is not valid */
   if (single_step_semaphore)
@@ -2385,8 +2426,6 @@ copy_semaphore_oops (void)
 
   /* there does seem to be a window where this is not valid */
   MAYBE_COPY_OOP (switch_to_process);
-
-  _gst_enable_interrupts (false);
 }
 
 
@@ -2406,16 +2445,14 @@ _gst_mark_processor_registers (void)
 void
 mark_semaphore_oops (void)
 {
-  int i;
+  async_queue_entry *sig;
 
-  _gst_disable_interrupts (false);	/* block out everything! */
-
-  for (i = 0; i < async_queue_index; i++)
-    if (queued_async_signals[i].data)
-      MAYBE_MARK_OOP (queued_async_signals[i].data);
-  for (i = 0; i < async_queue_index_sig; i++)
-    if (queued_async_signals_sig[i].data)
-      MAYBE_MARK_OOP (queued_async_signals_sig[i].data);
+  for (sig = queued_async_signals; sig != &queued_async_signals_tail;
+       sig = sig->next)
+    MAYBE_MARK_OOP (sig->data);
+  for (sig = queued_async_signals_sig; sig != &queued_async_signals_tail;
+       sig = sig->next)
+    MAYBE_MARK_OOP (sig->data);
 
   /* there does seem to be a window where this is not valid */
   if (single_step_semaphore)
@@ -2423,8 +2460,6 @@ mark_semaphore_oops (void)
 
   /* there does seem to be a window where this is not valid */
   MAYBE_MARK_OOP (switch_to_process);
-
-  _gst_enable_interrupts (false);
 }
 
 

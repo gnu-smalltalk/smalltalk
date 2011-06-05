@@ -207,7 +207,7 @@ _gst_async_timed_wait (OOP semaphoreOOP,
 mst_Boolean
 _gst_is_timeout_programmed (void)
 {
-  return (!IS_NIL (_gst_sem_int_vec[SIGALRM]));
+  return (!IS_NIL (no_opt (_gst_sem_int_vec[SIGALRM].data)));
 }
 
 void
@@ -341,9 +341,9 @@ file_polling_handler (int sig)
 {
   if (num_used_pollfds > 0)
     {
-      _gst_disable_interrupts (true);
-      _gst_async_call (async_signal_polled_files, NULL);
-      _gst_enable_interrupts (true);
+      static async_queue_entry e = { async_signal_polled_files, NULL, NULL };
+      e.data = _gst_nil_oop;
+      _gst_async_call_internal (&e);
     }
 
   _gst_set_signal_handler (sig, file_polling_handler);

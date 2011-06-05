@@ -54,7 +54,7 @@
 #define GST_EVENTS_H
 
 /* Array of semaphores associated to the C signals.  */
-extern volatile OOP _gst_sem_int_vec[NSIG]
+extern async_queue_entry _gst_sem_int_vec[NSIG]
   ATTRIBUTE_HIDDEN;
 
 /* Initialize the data structures used to hold information about

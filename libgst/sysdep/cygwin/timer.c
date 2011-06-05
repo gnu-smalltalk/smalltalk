@@ -96,7 +96,7 @@ alarm_thread (unused)
 }
 
 void
-_gst_init_sysdep_win32 ()
+_gst_init_sysdep_win32 (void)
 {
   HANDLE hthread;
   DWORD tid;

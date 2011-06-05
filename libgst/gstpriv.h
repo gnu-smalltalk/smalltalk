@@ -199,9 +199,10 @@
   DO_PREFETCH ((x), 0, (k));
 
 /* Synchronization primitives.  */
-#if !defined HAVE_SYNC_BUILTINS && defined __GNUC__
-#define __sync_synchronize()	__asm__ ("" : : : "memory")
-#endif
+#define __sync_swap(ptr, val) \
+  ({ __typeof__ (*(ptr)) _x; \
+   do _x = *(ptr); while (!__sync_bool_compare_and_swap ((ptr), (_x), (val))); \
+   _x; })
 
 /* Kill a warning when using GNU C.  Note that this allows using
    break or continue inside a macro, unlike do...while(0) */
@@ -518,8 +519,10 @@ extern OOP _gst_nil_oop
 #ifdef __GNUC__
 #define no_opt(x)	({ __typeof__ ((x)) _result; \
 			 asm ("" : "=r" (_result) : "0" ((x))); _result; })
+#define barrier()       asm ("")
 #else
 #define no_opt(x)	(x)
+#define barrier()
 #endif
 
 /* integer conversions and some information on SmallIntegers.  */
@@ -599,7 +602,6 @@ extern OOP _gst_nil_oop
 #include "callin.h"
 #include "cint.h"
 #include "dict.h"
-#include "events.h"
 #include "heap.h"
 #include "lex.h"
 #include "gst-parse.h"
@@ -608,6 +610,7 @@ extern OOP _gst_nil_oop
 #include "sym.h"
 #include "comp.h"
 #include "interp.h"
+#include "events.h"
 #include "opt.h"
 #include "save.h"
 #include "str.h"
