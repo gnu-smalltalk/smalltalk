@@ -1,5 +1,9 @@
 2011-06-06  Paolo Bonzini <bonzini@gnu.org>
 
+	* kernel/VFS.st: Fix previous commit.
+
+2011-06-06  Paolo Bonzini <bonzini@gnu.org>
+
 	* kernel/Collection.st: Add #includesAllOf:.
 
 2011-06-02  Paolo Bonzini <bonzini@gnu.org>

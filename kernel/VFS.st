@@ -386,8 +386,13 @@ VFS.FileWrapper subclass: RecursiveFileWrapper [
 	 tree recursively."
 
 	<category: 'enumerating'>
+        | n base |
 	aBlock value: '.'.
-        self namesDo: aBlock prefixLength: self asString size + 1
+        base := self asString.
+        n := base last = Directory pathSeparator
+            ifTrue: [ base size + 1 ]
+            ifFalse: [ base size + 2 ].
+        self namesDo: aBlock prefixLength: n
      ]
 
      remove [

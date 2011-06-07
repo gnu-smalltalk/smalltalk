@@ -478,7 +478,7 @@ _gst_class_name_to_oop (const char *name)
 
 
 OOP
-_gst_uint_to_oop (long int i)
+_gst_uint_to_oop (unsigned long int i)
 {
   if (!_gst_smalltalk_initialized)
     _gst_initialize (NULL, NULL, GST_NO_TTY);

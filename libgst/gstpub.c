@@ -268,7 +268,7 @@ gst_int_to_oop (long i)
 }
 
 OOP
-gst_uint_to_oop (long i)
+gst_uint_to_oop (unsigned long i)
 {
   return _gst_uint_to_oop (i);
 }

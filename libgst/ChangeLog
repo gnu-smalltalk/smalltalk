@@ -1,3 +1,10 @@
+2011-06-07  Paolo Bonzini  <bonzini@gnu.org>
+
+	* libgst/callin.c: Fix type of _gst_uint_to_oop argument.
+	* libgst/callin.h: Fix type of _gst_uint_to_oop argument.
+	* libgst/gstpub.c: Fix type of gst_uint_to_oop argument.
+	* libgst/gstpub.h: Fix type of gst_uint_to_oop argument.
+
 2011-05-26  Paolo Bonzini  <bonzini@gnu.org>
 
 	* libgst/dict.h: Remove _gst_grow_dictionary and

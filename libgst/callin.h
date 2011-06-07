@@ -173,7 +173,7 @@ extern OOP _gst_id_to_oop (long i)
   ATTRIBUTE_HIDDEN;
 extern OOP _gst_int_to_oop (long i) 
   ATTRIBUTE_HIDDEN;
-extern OOP _gst_uint_to_oop (long i) 
+extern OOP _gst_uint_to_oop (unsigned long i) 
   ATTRIBUTE_HIDDEN;
 extern OOP _gst_float_to_oop (double f) 
   ATTRIBUTE_HIDDEN;
