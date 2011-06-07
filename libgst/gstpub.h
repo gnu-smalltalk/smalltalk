@@ -284,7 +284,7 @@ extern OOP gst_register_oop (OOP oop);
 extern void gst_unregister_oop (OOP oop);
 extern OOP gst_id_to_oop (long i);
 extern OOP gst_int_to_oop (long i);
-extern OOP gst_uint_to_oop (long i);
+extern OOP gst_uint_to_oop (unsigned long i);
 extern OOP gst_float_to_oop (double f);
 extern OOP gst_bool_to_oop (int b);
 extern OOP gst_char_to_oop (char c);
