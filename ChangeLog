@@ -1,3 +1,21 @@
+2011-06-06  Paolo Bonzini <bonzini@gnu.org>
+
+	* kernel/Collection.st: Add #includesAllOf:.
+
+2011-06-02  Paolo Bonzini <bonzini@gnu.org>
+
+	* kernel/ObjDumper.st: Call #postLoad on fixed objects.
+
+2011-05-30  Holger Hans Peter Freyther  <holger@freyther.de>
+
+	* scripts/Remote.st: Resolve the hostname to an address to be
+	used by Sockets.ServerSocket>>#port:bindTo:.
+
+2011-05-26  Paolo Bonzini <bonzini@gnu.org>
+
+	* kernel/VFS.st: Fix off-by-one in RecursiveFileWrapper>>#namesDo:.
+	Reported by Gwenael Casaccio.
+
 2011-05-26  Gwenael Casaccio <mrgwen@gmail.com>
 
 	* kernel/MethodDict.st: Wrap operation with a mutex.

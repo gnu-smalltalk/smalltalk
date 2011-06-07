@@ -387,7 +387,7 @@ VFS.FileWrapper subclass: RecursiveFileWrapper [
 
 	<category: 'enumerating'>
 	aBlock value: '.'.
-        self namesDo: aBlock prefixLength: self asString size + 2
+        self namesDo: aBlock prefixLength: self asString size + 1
      ]
 
      remove [

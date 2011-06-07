@@ -233,12 +233,18 @@ of objects.'>
 	^self basicSize
     ]
 
+    includesAllOf: aCollection [
+	"Answer whether we include all of the objects in aCollection"
+
+	<category: 'testing collections'>
+	^self allSatisfy: [:element | aCollection includes: element ]
+    ]
+
     includesAnyOf: aCollection [
 	"Answer whether we include any of the objects in aCollection"
 
 	<category: 'testing collections'>
-	self do: [:element | (aCollection includes: element) ifTrue: [^true]].
-	^false
+	^self anySatisfy: [:element | aCollection includes: element ]
     ]
 
     includes: anObject [

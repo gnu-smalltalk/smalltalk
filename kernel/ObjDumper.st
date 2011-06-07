@@ -548,7 +548,7 @@ references at design time and you override #storeOn: to deal with them'>
 	class := self loadClass.
 	class isMetaclass ifTrue: [^class instanceClass].
 	object := self loadFixedPart: class.
-	class isVariable ifFalse: [^object].
+	class isVariable ifFalse: [^object postLoad; yourself].
 	class isPointers ifTrue: [^self load: object through: [self load]].
 	shape := class shape.
 	shape == #character ifTrue: [^self load: object through: [Character value: self nextByte]].
