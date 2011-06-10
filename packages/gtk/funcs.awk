@@ -62,6 +62,7 @@ BEGIN {
     type["GScanner"] = "__skip_this__"
     type["GBoxed"] = "__skip_this__"
     type["GSignal"] = "__skip_this__"
+    type["GSource"] = "__skip_this__"
 
     type["PangoCoverage"] = "__skip_this__" #FIXME
     

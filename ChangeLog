@@ -1,3 +1,7 @@
+2011-06-10  Mathieu Suen  <mathieusuen@yahoo.fr>
+
+	* kernel/CType.st: Add methods for equality and hashing.
+
 2011-06-06  Paolo Bonzini <bonzini@gnu.org>
 
 	* kernel/VFS.st: Fix previous commit.
