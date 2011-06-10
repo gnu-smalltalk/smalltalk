@@ -1,3 +1,7 @@
+2011-06-10  Paolo Bonzini  <bonzini@gnu.org>
+
+	* funcs.awk: Remove GSource.
+
 2011-03-31  Paolo Bonzini  <bonzini@gnu.org>
 
 	* GtkImpl.st: Remove #setSensitive:.
