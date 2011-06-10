@@ -136,6 +136,20 @@ elements.'>
 	structureType == #ptr ifTrue: [^CPtrCType from: type]
     ]
 
+    = anObject [
+        "Return whether the receiver and anObject are equal."
+	<category: 'basic'>
+        ^self class == anObject class and: [
+            self cObjectType = anObject cObjectType
+        ]
+    ]
+
+    hash [
+        "Return a hash code for the receiver."
+	<category: 'basic'>
+        ^self class hash bitXor: self cObjectType hash
+    ]
+
     gcNew [
 	"Allocate a new CObject with the type (class) identified by the receiver.
 	 The object is movable in memory, but on the other hand it is
@@ -319,6 +333,18 @@ CType subclass: CPtrCType [
 	    yourself
     ]
 
+    = anObject [
+        "Return whether the receiver and anObject are equal."
+	<category: 'basic'>
+        ^super = anObject and: [self elementType = anObject elementType]
+    ]
+
+    hash [
+        "Return a hash code for the receiver."
+	<category: 'basic'>
+        ^super hash bitXor: self elementType hash
+    ]
+
     elementType [
 	"Answer the type of the elements in the receiver's instances"
 
@@ -377,6 +403,19 @@ CPtrCType subclass: CArrayCType [
 	    elementType: aCType;
 	    numberOfElements: anInteger;
 	    yourself
+    ]
+
+    = anObject [
+        "Return whether the receiver and anObject are equal."
+	<category: 'basic'>
+        ^super = anObject and: [
+            self numberOfElements = anObject numberOfElements]
+    ]
+
+    hash [
+        "Return a hash code for the receiver."
+	<category: 'basic'>
+        ^super hash bitXor: self numberOfElements hash
     ]
 
     storeOn: aStream [
