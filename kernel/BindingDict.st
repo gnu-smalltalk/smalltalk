@@ -238,8 +238,6 @@ more speed.'>
 
 	<category: 'private'>
 	| index size element |
-	self beConsistent.
-
 	"Sorry for the lack of readability, but I want speed... :-)"
 	index := (anObject identityHash scramble 
 		    bitAnd: (size := self primSize) - 1) + 1.

@@ -435,7 +435,6 @@ certain special cases.'>
 
 	<category: 'printing'>
 	| class instVars i |
-	self beConsistent.
 	class := self class.
 	instVars := class allInstVarNames.
 	aStream nextPutAll: 'An instance of '.
@@ -568,8 +567,6 @@ certain special cases.'>
 
         <category: 'private methods'>
         | index size element |
-        self beConsistent.
-
         "Sorry for the lack of readability, but I want speed... :-)"
         index := (anObject key hash scramble bitAnd: (size := self primSize) - 1) + 1.
    
@@ -585,8 +582,6 @@ certain special cases.'>
 
 	<category: 'private methods'>
 	| index size element |
-	self beConsistent.
-
 	"Sorry for the lack of readability, but I want speed... :-)"
 	index := (anObject hash scramble bitAnd: (size := self primSize) - 1) + 1.
 	

@@ -320,21 +320,6 @@ of objects.'>
 	^self isEmpty ifTrue: [#()] ifFalse: [self anyOne species join: self]
     ]
 
-    beConsistent [
-	"This method is private, but it is quite interesting so it is
-	 documented. It ensures that a collection is in a consistent
-	 state before attempting to iterate on it; its presence reduces
-	 the number of overrides needed by collections who try to
-	 amortize their execution times.  The default implementation
-	 does nothing, so it is optimized out by the virtual machine
-	 and so it loses very little on the performance side.  Note
-	 that descendants of Collection have to call it explicitly
-	 since #do: is abstract in Collection."
-
-	<category: 'enumeration'>
-	
-    ]
-
     readStream [
         "Answer a stream that gives elements of the receiver"
 
@@ -571,7 +556,6 @@ of objects.'>
 
 	<category: 'printing'>
 	| instVars output object |
-	self beConsistent.
 	aStream
 	    nextPutAll: 'An instance of ';
 	    print: self class;

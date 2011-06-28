@@ -61,7 +61,6 @@ on content (such as add:after:)'>
 
         <category: 'enumerating'>
         | index |
-        self beConsistent.
         index := firstIndex.
         [ index <= lastIndex ] whileTrue: [
             aBlock value: (self basicAt: index).
@@ -72,7 +71,6 @@ on content (such as add:after:)'>
 	"Answer the first item of the receiver"
 
 	<category: 'accessing'>
-	self beConsistent.
 	^lastIndex >= firstIndex
 	    ifTrue: [self basicAt: firstIndex]
 	    ifFalse: [SystemExceptions.IndexOutOfRange signalOn: self withIndex: 1]
@@ -82,7 +80,6 @@ on content (such as add:after:)'>
 	"Answer the last item of the receiver"
 
 	<category: 'accessing'>
-	self beConsistent.
 	^lastIndex >= firstIndex
 	    ifTrue: [self basicAt: lastIndex]
 	    ifFalse: [SystemExceptions.IndexOutOfRange signalOn: self withIndex: 0]
@@ -93,7 +90,6 @@ on content (such as add:after:)'>
 
 	<category: 'accessing'>
 	| index |
-	self beConsistent.
 	index := anIndex + firstIndex - 1.
 	^(index >= firstIndex and: [index <= lastIndex]) 
 	    ifTrue: [self basicAt: index]
@@ -105,7 +101,6 @@ on content (such as add:after:)'>
 
 	<category: 'accessing'>
 	| index |
-	self beConsistent.
 	index := anIndex + firstIndex - 1.
 	(index >= firstIndex and: [index <= lastIndex]) 
 	    ifTrue: [^self basicAt: index put: anObject]
@@ -292,7 +287,6 @@ on content (such as add:after:)'>
 
 	<category: 'removing'>
 	| answer |
-	self beConsistent.
 	lastIndex < firstIndex 
 	    ifTrue: [^SystemExceptions.EmptyCollection signalOn: self].
 	answer := self basicAt: firstIndex.	"Get the element"
@@ -310,7 +304,6 @@ on content (such as add:after:)'>
 
 	<category: 'removing'>
 	| answer |
-	self beConsistent.
 	lastIndex < firstIndex 
 	    ifTrue: [^SystemExceptions.EmptyCollection signalOn: self].
 	answer := self basicAt: lastIndex.	"Get the element"
@@ -370,7 +363,6 @@ on content (such as add:after:)'>
 
 	<category: 'private methods'>
 	| answer |
-	self beConsistent.
 	lastIndex < firstIndex 
 	    ifTrue: [^SystemExceptions.EmptyCollection signalOn: self].
 	(anIndex < 1 or: [anIndex > self size]) 

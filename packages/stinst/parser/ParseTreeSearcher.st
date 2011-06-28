@@ -340,7 +340,6 @@ LookupTable subclass: RBSmallDictionary [
 
 	<category: 'private'>
 	| element |
-	self beConsistent.
 	1 to: self size
 	    do: 
 		[:i | 

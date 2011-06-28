@@ -296,8 +296,6 @@ one of them, I swiftly remove all.'>
 
         <category: 'private methods'>
         | index size element |
-        self beConsistent.
-
         "Sorry for the lack of readability, but I want speed... :-)"
         index := (anObject key hash scramble bitAnd: (size := self primSize) - 1) + 1.
    
@@ -313,8 +311,6 @@ one of them, I swiftly remove all.'>
 
 	<category: 'private'>
 	| index size element |
-	self beConsistent.
-
 	"Sorry for the lack of readability, but I want speed... :-)"
 	index := (anObject identityHash scramble 
 		    bitAnd: (size := self primSize) - 1) + 1.
@@ -427,6 +423,22 @@ for the garbage collected values'>
 	^true
     ]
 
+    keysDo: aBlock [
+        "Pass each key in the LookupTable to aBlock."
+
+        <category: 'enumerating'>
+        self beConsistent.
+	super keysDo: aBlock
+    ]
+
+    do: aBlock [
+        "Pass each value in the LookupTable to aBlock."
+
+        <category: 'enumerating'>
+        self beConsistent.
+	super do: aBlock
+    ]
+
     beConsistent [
 	"Private - Clean the dictionary of key->(finalized value) pairs"
 
@@ -506,6 +518,33 @@ for the garbage collected values'>
 		(key at: i) isNil 
 		    ifFalse: [self whileGrowingAt: (key at: i) put: (val at: i)]]
     ]
+
+    findElementIndex: anObject [
+        "Tries to see where anObject can be placed as an indexed variable.
+         As soon as nil is found, the index of that slot is answered.
+         anObject also comes from an indexed variable."
+
+        <category: 'private methods'>
+        self beConsistent.
+	^ super findElementIndex: anObject
+    ]
+
+    findIndex: anObject [
+        "Tries to see if anObject exists as an indexed variable. As soon as nil
+         or anObject is found, the index of that slot is answered"
+
+        <category: 'private methods'>
+        self beConsistent.
+	^ super findIndex: anObject
+    ]
+
+    examineOn: aStream [
+        "Print all the instance variables and objects in the receiver on aStream"
+
+        <category: 'printing'>
+        self beConsistent.
+	super examineOn: aStream
+    ]
 ]
 
 
@@ -533,8 +572,6 @@ encounter one of them, I swiftly remove all the garbage collected keys'>
 
 	<category: 'private methods'>
 	| index size element |
-	self beConsistent.
-
 	"Sorry for the lack of readability, but I want speed... :-)"
 	index := (anObject identityHash scramble 
 		    bitAnd: (size := self primSize) - 1) + 1.
@@ -578,8 +615,6 @@ for the garbage collected keys'>
 
 	<category: 'private methods'>
 	| index size element |
-	self beConsistent.
-
 	"Sorry for the lack of readability, but I want speed... :-)"
 	index := (anObject identityHash scramble 
 		    bitAnd: (size := self primSize) - 1) + 1.

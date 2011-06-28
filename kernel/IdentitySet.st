@@ -59,8 +59,6 @@ use the == operator to determine duplication of objects.'>
 
 	<category: 'private methods'>
 	| index size element |
-	self beConsistent.
-
 	"Sorry for the lack of readability, but I want speed... :-)"
 	index := (anObject identityHash scramble 
 		    bitAnd: (size := self primSize) - 1) + 1.

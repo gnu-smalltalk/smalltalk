@@ -1,3 +1,8 @@
+2011-06-28  Gwenael Casaccio <mrgwen@gmail.com>
+
+	* ParseTreeSearcher.st: Remove #beConsistent.
+	* STSymTable.st: Remove #beConsistent.
+
 2011-04-21  Paolo Bonzini  <bonzini@gnu.org>
 
 	* STCompiler.st: Compile nil, true and false using short sequences.

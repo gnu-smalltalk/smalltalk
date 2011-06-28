@@ -59,7 +59,6 @@ some access and manipulation methods.'>
 
 	<category: 'testing'>
 	| instVars object output |
-	self beConsistent.
 	aStream
 	    nextPutAll: 'An instance of ';
 	    print: self class;

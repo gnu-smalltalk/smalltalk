@@ -153,7 +153,6 @@ equality comparison message #= to determine equivalence of indices.'>
 	"Pass each key in the LookupTable to aBlock."
 
 	<category: 'enumerating'>
-	self beConsistent.
 	1 to: self primSize
 	    do: [:i | (self primAt: i) notNil ifTrue: [aBlock value: (self primAt: i)]]
     ]
@@ -162,7 +161,6 @@ equality comparison message #= to determine equivalence of indices.'>
 	"Pass each value in the LookupTable to aBlock."
 
 	<category: 'enumerating'>
-	self beConsistent.
 	1 to: self primSize
 	    do: [:i | (self primAt: i) notNil ifTrue: [aBlock value: (self valueAt: i)]]
     ]
@@ -326,8 +324,6 @@ equality comparison message #= to determine equivalence of indices.'>
 
         <category: 'private methods'>
         | index size element |
-        self beConsistent.
-
         "Sorry for the lack of readability, but I want speed... :-)"
         index := (anObject hash scramble bitAnd: (size := self primSize) - 1) + 1.
    
@@ -343,8 +339,6 @@ equality comparison message #= to determine equivalence of indices.'>
 
 	<category: 'private methods'>
 	| index size element |
-	self beConsistent.
-
 	"Sorry for the lack of readability, but I want speed... :-)"
 	index := (anObject hash scramble bitAnd: (size := self primSize) - 1) + 1.
 	

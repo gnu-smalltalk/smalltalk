@@ -113,6 +113,22 @@ above criteria -- actually any object which responds to #value:value:.'>
 	self shouldNotImplement
     ]
 
+    do: aBlock [
+        "Evaluate aBlock for all the elements in the collection"
+
+        <category: 'enumerating'>
+        self beConsistent.
+	super do: aBlock
+    ]
+
+    first [
+        "Answer the first item of the receiver"
+
+        <category: 'accessing'>
+        self beConsistent.
+        ^ super first
+    ]
+
     last [
 	"Answer the last item of the receiver"
 
@@ -122,6 +138,31 @@ above criteria -- actually any object which responds to #value:value:.'>
 	^sorted 
 	    ifTrue: [self basicAt: lastIndex]
 	    ifFalse: [self basicAt: firstIndex]
+    ]
+
+    at: anIndex [
+        "Answer the anIndex-th item of the receiver"
+
+        <category: 'accessing'>
+        self beConsistent.
+        ^ super at: anIndex
+    ]
+
+    at: anIndex put: anObject [
+        "Store anObject at the anIndex-th item of the receiver, answer anObject"
+
+        <category: 'accessing'>
+        self beConsistent.
+	super at: anIndex put: anObject
+    ]
+
+    removeFirst [
+        "Remove an object from the start of the receiver. Fail if the receiver
+         is empty"
+
+        <category: 'removing'>
+        self beConsistent.
+        ^ super removeFirst
     ]
 
     removeLast [
@@ -282,6 +323,7 @@ above criteria -- actually any object which responds to #value:value:.'>
 
 	<category: 'private methods'>
 	| answer |
+	self beConsistent.
 	answer := super basicRemoveAtIndex: anIndex.
 
 	"Ensure the invariant that lastOrdered <= lastIndex, otherwise
@@ -729,6 +771,14 @@ above criteria -- actually any object which responds to #value:value:.'>
 			ifTrue: [low := mid + 1]
 			ifFalse: [high := mid - 1]].
 	^low
+    ]
+
+    examineOn: aStream [
+        "Print all the instance variables and objects in the receiver on aStream"
+
+        <category: 'printing'>
+        self beConsistent.
+	super examineOn: aStream
     ]
 ]
 

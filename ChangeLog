@@ -1,3 +1,18 @@
+2011-06-28  Gwenael Casaccio <mrgwen@gmail.com>
+
+	* kernel/BindingDict.st: Remove #beConsistent.
+	* kernel/Collection.st: Remove #beConsistent.
+	* kernel/Dictionary.st: Remove #beConsistent.
+	* kernel/HashedColl.st: Remove #beConsistent.
+	* kernel/IdentDict.st: Remove #beConsistent.
+	* kernel/IdentitySet.st: Remove #beConsistent.
+	* kernel/LookupTable.st: Remove #beConsistent.
+	* kernel/OrderColl.st: Remove #beConsistent.
+	* kernel/SeqCollect.st: Remove #beConsistent.
+	* kernel/Set.st: Remove #beConsistent.
+	* kernel/SortCollect.st: Add #beConsistent here.
+	* kernel/WeakObjects.st: Add #beConsistent here.
+
 2011-06-10  Mathieu Suen  <mathieusuen@yahoo.fr>
 
 	* kernel/CType.st: Add methods for equality and hashing.

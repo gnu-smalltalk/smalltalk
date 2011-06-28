@@ -60,8 +60,6 @@ comparision message == to determine equivalence of indices.'>
 
         <category: 'private methods'>
         | index size element |
-        self beConsistent.
-
         "Sorry for the lack of readability, but I want speed... :-)"
         index := (anObject identityHash scramble bitAnd: (size := self primSize) - 1) + 1.
    
@@ -77,8 +75,6 @@ comparision message == to determine equivalence of indices.'>
 
 	<category: 'private methods'>
 	| index size element |
-	self beConsistent.
-
 	"Sorry for the lack of readability, but I want speed... :-)"
 	index := (anObject identityHash scramble 
 		    bitAnd: (size := self primSize) - 1) + 1.

@@ -123,8 +123,6 @@ on my instances.'>
 
 	<category: 'private methods'>
 	| index size element |
-	self beConsistent.
-
 	"Sorry for the lack of readability, but I want speed... :-)"
 	index := (anObject hash scramble bitAnd: (size := self primSize) - 1) + 1.
 	

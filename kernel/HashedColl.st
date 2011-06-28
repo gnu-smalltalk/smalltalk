@@ -196,7 +196,6 @@ give fast responses on their presence in the collection.'>
 	"Enumerate all the non-nil members of the set"
 
 	<category: 'enumerating the elements of a collection'>
-	self beConsistent.
 	1 to: self primSize
 	    do: [:i | (self primAt: i) notNil ifTrue: [aBlock value: (self primAt: i)]]
     ]
@@ -334,8 +333,6 @@ give fast responses on their presence in the collection.'>
 
         <category: 'private methods'>
         | index size element |
-        self beConsistent.
-
         "Sorry for the lack of readability, but I want speed... :-)"
         index := (anObject hash scramble bitAnd: (size := self primSize) - 1) + 1.
    
