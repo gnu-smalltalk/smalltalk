@@ -1,3 +1,10 @@
+2011-06-30  Paolo Bonzini <bonzini@gnu.org>
+
+	* kernel/Collection.st: Prefer accessing class variables using
+	namespace syntax.
+	* kernel/Object.st: Likewise.  Change FinalizableObjects to an
+	IdentitySet.
+
 2011-06-10  Mathieu Suen  <mathieusuen@yahoo.fr>
 
 	* kernel/CType.st: Add methods for equality and hashing.
