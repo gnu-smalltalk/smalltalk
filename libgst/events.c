@@ -57,7 +57,7 @@
 
 /* Holds the semaphores to be signaled when the operating system sends
    us a C-style signal.  */
-volatile OOP _gst_sem_int_vec[NSIG];
+async_queue_entry _gst_sem_int_vec[NSIG];
 
 /* Signals _gst_sem_int_vec[SIG] and removes the semaphore from the vector
    (because C-style signal handlers are one-shot).  */
@@ -67,14 +67,10 @@ static RETSIGTYPE signal_handler (int sig);
 RETSIGTYPE
 signal_handler (int sig)
 {
-  _gst_disable_interrupts (true);
-  if (_gst_sem_int_vec[sig])
+  if (_gst_sem_int_vec[sig].data)
     {
-      if (IS_CLASS (_gst_sem_int_vec[sig], _gst_semaphore_class))
-	{
-	  _gst_async_signal_and_unregister (_gst_sem_int_vec[sig]);
-	  _gst_sem_int_vec[sig] = NULL;
-	}
+      if (IS_CLASS (_gst_sem_int_vec[sig].data, _gst_semaphore_class))
+        _gst_async_call_internal (&_gst_sem_int_vec[sig]);
       else
 	{
 	  _gst_errorf
@@ -83,7 +79,6 @@ signal_handler (int sig)
 	}
     }
 
-  _gst_enable_interrupts (true);
   _gst_set_signal_handler (sig, SIG_DFL);
   _gst_wakeup ();
 }
@@ -95,8 +90,9 @@ _gst_async_interrupt_wait (OOP semaphoreOOP,
   if (sig < 0 || sig >= NSIG)
     return;
 
-  _gst_sem_int_vec[sig] = semaphoreOOP;
   _gst_register_oop (semaphoreOOP);
+  _gst_sem_int_vec[sig].func = _gst_do_async_signal_and_unregister;
+  _gst_sem_int_vec[sig].data = semaphoreOOP;
   _gst_set_signal_handler (sig, signal_handler);
 
   /* should probably package up the old interrupt state here for return

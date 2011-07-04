@@ -1529,7 +1529,12 @@ mourn_objects (void)
       array = new_instance_with (_gst_array_class, size, &processor->gcArray);
       _gst_copy_buffer (array->data);
       if (!IS_NIL (processor->gcSemaphore))
-        _gst_async_signal (processor->gcSemaphore);
+        {
+          static async_queue_entry e;
+          e.func = _gst_do_async_signal;
+          e.data = processor->gcSemaphore;
+          _gst_async_call_internal (&e);
+        }
       else
 	{
 	  _gst_errorf ("Running finalizers before initialization.");

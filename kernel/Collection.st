@@ -645,6 +645,6 @@ of objects.'>
 
 	<category: 'finalization'>
 	self remove: anObject ifAbsent: [].
-	self == Object finalizableObjects ifTrue: [anObject key finalize]
+	self == Object.FinalizableObjects ifTrue: [anObject key finalize]
     ]
 ]

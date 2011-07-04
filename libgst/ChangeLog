@@ -1,3 +1,30 @@
+2011-07-04  Paolo Bonzini  <bonzini@gnu.org>
+
+	* libgst/events.c: Change _gst_sem_int_vec to async_queue_entry.
+	Adjust uses.  Enqueue it with _gst_async_call_internal.
+	* libgst/events.h: Change declaration.
+	* libgst/gstpriv.h: Remove dummy __sync_synchronize.  Add __sync_swap
+	and barrier().  Include events.h later.
+	* libgst/interp-bc.inl: Use empty_async_queue.
+	* libgst/interp-jit.inl: Likewise.
+	* libgst/interp.c: Remove async_queue_entry.  Change async signal
+	vectors to lists.  Export do_async_signal and add the new function
+	_gst_do_async_signal_and_unregister.  Add gst_async_call_internal.
+	Remove async-signal safe stuff from _gst_async_call, and always
+	allocate an async_queue_entry; use a lockless stack (which is
+	also async-signal-safe, so the same algorithms can be used in both
+	cases).  Rewrite _gst_have_pending_async_calls and add
+	empty_async_queue.  Adjust copying and marking of the lists.
+	* libgst/interp.h: Put async_queue_entry here, adding a next pointer.
+	Add declarations for the new functions.
+	* libgst/oop.c: Use _gst_async_call_internal.
+	* libgst/prims.def: Set exception flag when reenabling interrupts.
+	* libgst/sysdep.c: Include pthread header.
+	* libgst/cygwin/timer.c: Add void argument list.
+	* libgst/posix/events.c: Add no_opt to fix removed volatile qualifier.
+	Adjust access to _gst_sem_int_vec.  Enqueue the file polling call with
+	_gst_async_call_internal.
+
 2011-06-07  Paolo Bonzini  <bonzini@gnu.org>
 
 	* libgst/callin.c: Fix type of _gst_uint_to_oop argument.

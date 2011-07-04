@@ -3861,7 +3861,10 @@ primitive VMpr_Processor_disableEnableInterrupts :
   if (id == prim_id (VMpr_Processor_disableInterrupts) && count++ == 0)
     async_queue_enabled = false;
   else if (id == prim_id (VMpr_Processor_enableInterrupts) && --count == 0)
-    async_queue_enabled = true;
+    {
+      async_queue_enabled = true;
+      SET_EXCEPT_FLAG (true);
+    }
 
   process->interrupts = FROM_INT (count);
 

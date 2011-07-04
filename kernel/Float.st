@@ -494,8 +494,8 @@ if the hardware supports it.'>
 	<category: 'private'>
 	"First, take care of the easy cases."
 
-	| me exponential small num numDigits change weight prevWeight digit eps
-          precision digits digitStream exponent dotPrinted allNines adjust |
+	| me exponential small num sameUp sameDown weight prevWeight digit
+          eps precision digits digitStream exponent dotPrinted allNines adjust |
 	self isNaN 
 	    ifTrue: [^aStream nextPutAll: (whatToPrintArray at: 3) % {self class}].
 	self = self class infinity 
@@ -525,34 +525,34 @@ if the hardware supports it.'>
 	eps := 2 raisedToInteger: me exponent - me class precision + 1.
 
 	allNines := true.
-        change := false.
-        numDigits := me class decimalDigits.
+        sameDown := true.
+        sameUp := true.
 
         [digit := num // weight.
 	allNines := allNines and: [digit = 9].
-        change := change or: [(num + eps) // weight > digit].
+        sameDown := sameDown and: [(num - eps) // weight = digit].
+        sameUp := sameUp and: [(num + eps) // weight = digit].
 	digits := digits * 10 + digit.
 	num := num - (digit * weight).
 	prevWeight := weight.
 	weight := weight / 10.
-        numDigits := numDigits - 1.
-	numDigits <= 0 and: [change]] whileFalse.
+	sameDown or: [sameUp]] whileTrue.
 
-         "Round the last digit if it is a better approximation.
-	  For large numbers, don't let round-to-even bite us."
+        "For large numbers, don't let round-to-even bite us."
+        eps isInteger ifTrue: [eps := eps / 2].
 
-	eps isInteger ifTrue: [eps := eps / 2].
 	adjust := 0.
-	(digit = 0 and: [ num < (eps / 2) ]) ifFalse: [
-            (num - prevWeight) abs < num ifTrue: [adjust := 1].
-            (num + prevWeight) abs < num ifTrue: [adjust := -1]].
 
-        "... or if it allows to save trailing digits while not changing
-         the meaning."
+        "Round the last digit if it allows to save trailing digits while
+         not changing the meaning."
 	(digit <= 5 and: [num + (digit * prevWeight) < (eps / 2)])
             ifTrue: [adjust := digit negated].
 	(digit > 5 and: [num + ((digit - 10) * prevWeight) > (eps / -2)])
             ifTrue: [adjust := 10 - digit].
+
+         "... otherwise, try rounding it up if it is a better approximation."
+	(adjust = 0 and: [digit > 0]) ifTrue: [
+            (num - prevWeight) abs < num ifTrue: [adjust := 1]].
 
 	digits := digits + adjust.
 	(adjust > 0 and: [allNines])

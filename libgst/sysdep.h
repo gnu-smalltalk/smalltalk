@@ -113,7 +113,6 @@ extern void _gst_signal_after (int deltaMilli,
 /* Initialize system dependent stuff.  */
 extern void _gst_init_sysdep (void)
   ATTRIBUTE_HIDDEN;
-
 extern void _gst_init_sysdep_win32 (void)
   ATTRIBUTE_HIDDEN;
 

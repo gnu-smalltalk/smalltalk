@@ -327,6 +327,14 @@ typedef gst_uchar *ip_type;
 extern ip_type ip 
   ATTRIBUTE_HIDDEN;
 
+typedef struct async_queue_entry
+{
+  void (*func) (OOP);
+  OOP data;
+  struct async_queue_entry *next;
+}
+async_queue_entry;
+
 /* When not NULL, this causes the byte code interpreter to immediately
    send the message whose selector is here to the current stack
    top.  */
@@ -401,7 +409,19 @@ extern mst_Boolean _gst_have_pending_async_calls (void)
 /* Set up so that FUNC will be called, with ARGOOP as its argument,
    as soon as the next sequence point is reached.  */
 extern void _gst_async_call (void (*func) (OOP),
-			     OOP argOOP) 
+                             OOP argOOP) 
+  ATTRIBUTE_HIDDEN;
+
+/* Worker functions for _gst_async_call_internal.  */;
+extern void _gst_do_async_signal (OOP semaphoreOOP)
+  ATTRIBUTE_HIDDEN;
+extern void _gst_do_async_signal_and_unregister (OOP semaphoreOOP)
+  ATTRIBUTE_HIDDEN;
+
+/* Set up so that ENTRY->FUNC will be called, with ENTRY->DATA as its
+   argument, as soon as the next sequence point is reached.  Async-signal
+   safe version.  */
+extern void _gst_async_call_internal (async_queue_entry *entry)
   ATTRIBUTE_HIDDEN;
 
 /* Signal SEMAPHOREOOP so that one of the processes waiting on that

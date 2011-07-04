@@ -67,6 +67,7 @@
 #include "sysdep/cygwin/files.c"
 #include "sysdep/cygwin/mem.c"
 #elif !defined WIN32
+#include <pthread.h>
 #include "sysdep/posix/findexec.c"
 #include "sysdep/posix/timer.c"
 #include "sysdep/posix/signals.c"

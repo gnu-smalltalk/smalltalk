@@ -274,8 +274,16 @@ true->17.7674749
 returned value is 17.7675
 
 Execution begins...
+true->0.12344999999999999
+returned value is 0.123450
+
+Execution begins...
 true->0.12345
 returned value is 0.123450
+
+Execution begins...
+true->0.0000000012344999999999998
+returned value is 1.23450d-09
 
 Execution begins...
 true->0.0000000012345

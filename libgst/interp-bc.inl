@@ -525,25 +525,7 @@ monitor_byte_codes:
 
   /* First, deal with any async signals.  */
   if (async_queue_enabled)
-    {
-      gl_lock_lock (async_queue_lock);
-      _gst_disable_interrupts (false);
-      __sync_synchronize ();
-
-      if UNCOMMON (async_queue_index || async_queue_index_sig)
-	{
-	  int i;
-	  for (i = 0; i < async_queue_index; i++)
-	    queued_async_signals[i].func (queued_async_signals[i].data);
-	  for (i = 0; i < async_queue_index_sig; i++)
-	    queued_async_signals_sig[i].func (queued_async_signals_sig[i].data);
-
-	  async_queue_index = async_queue_index_sig = 0;
-	}
-
-      _gst_enable_interrupts (false);
-      gl_lock_unlock (async_queue_lock);
-    }
+    empty_async_queue ();
 
   if UNCOMMON (time_to_preempt)
     ACTIVE_PROCESS_YIELD ();

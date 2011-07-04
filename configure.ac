@@ -238,6 +238,10 @@ dnl ------------------------------ C COMPILER / OS ------------
 { echo; echo "${term_bold}Platform environment:${term_norm}"; } >& AS_MESSAGE_FD
 
 GST_C_SYNC_BUILTINS
+if test $gst_cv_have_sync_fetch_and_add = no; then
+  AC_MSG_ERROR([Synchronization primitives not found, please use a newer compiler.])
+fi
+
 GST_LOCK
 AC_SYS_LARGEFILE
 AC_C_INLINE
