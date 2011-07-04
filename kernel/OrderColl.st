@@ -368,8 +368,8 @@ on content (such as add:after:)'>
 	(anIndex < 1 or: [anIndex > self size]) 
 	    ifTrue: [^SystemExceptions.IndexOutOfRange signalOn: self withIndex: anIndex].
 	answer := self basicAt: anIndex + firstIndex - 1.
-	anIndex + firstIndex to: lastIndex
-	    do: [:index | self basicAt: index - 1 put: (self basicAt: index)].
+        self primReplaceFrom: anIndex + firstIndex - 1 to: lastIndex - 1
+            with: self startingAt: anIndex + firstIndex.
 	self basicAt: lastIndex put: nil.
 	lastIndex = firstIndex 
 	    ifTrue: [self initIndices]
@@ -500,13 +500,23 @@ on content (such as add:after:)'>
 	<category: 'private methods'>
 	| newOrderedCollection |
 	newOrderedCollection := self copyEmpty: self basicSize + delta.
-	firstIndex to: lastIndex
-	    do: 
-		[:index | 
-		newOrderedCollection basicAt: index + shiftCount put: (self basicAt: index)].
+        newOrderedCollection
+            primReplaceFrom: firstIndex + shiftCount to: lastIndex + shiftCount
+            with: self startingAt: firstIndex.
 	newOrderedCollection firstIndex: firstIndex + shiftCount
 	    lastIndex: lastIndex + shiftCount.
 	self become: newOrderedCollection
     ]
+
+    primReplaceFrom: start to: stop with: byteArray startingAt: replaceStart [
+        "Replace the characters from start to stop with new characters whose
+         ASCII codes are contained in byteArray, starting at the replaceStart
+         location of byteArray"
+
+        <category: 'built ins'>
+        <primitive: VMpr_ArrayedCollection_replaceFromToWithStartingAt>
+        self primitiveFailed
+    ]
+
 ]
 

@@ -1,4 +1,12 @@
 2011-07-04  Paolo Bonzini  <bonzini@gnu.org>
+            Gwenael Casaccio  <mrgwen@gmail.com>
+
+	* libgst/prims.def: Handle fixed instance variables in
+	VMpr_ArrayedCollection_replaceFromToWithStartingAt, keeping
+	existing failure conditions when the receiver has no fixed
+	instance variables.
+
+2011-07-04  Paolo Bonzini  <bonzini@gnu.org>
 
 	* libgst/events.c: Change _gst_sem_int_vec to async_queue_entry.
 	Adjust uses.  Enqueue it with _gst_async_call_internal.
