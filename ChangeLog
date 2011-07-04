@@ -5,6 +5,10 @@
 	primitives.
 	* kernel/SortedColl.st: Likewise.
 
+2011-07-04  Gwenael Casaccio  <mrgwen@gmail.com>
+
+	* kernel/OrderColl.st: Fix previous commit.
+
 2011-07-04  Paolo Bonzini <bonzini@gnu.org>
 
 	* kernel/OrderColl.st: Inline #makeRoomFirstFor: and #makeRoomLastFor:
