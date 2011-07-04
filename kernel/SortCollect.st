@@ -529,11 +529,11 @@ above criteria -- actually any object which responds to #value:value:.'>
 		[:element | 
 		| newIndex |
 		newIndex := self insertionIndexFor: element upTo: i.
-		[i >= newIndex] whileTrue: 
-			[self basicAt: i + add put: (self basicAt: i).
-			i := i - 1].
-		self basicAt: i + add put: element.
-		add := add - 1].
+                self primReplaceFrom: newIndex + add to: i + add
+                    with: self startingAt: newIndex.
+		add := add - 1.
+		self basicAt: newIndex + add put: element.
+                i := newIndex - 1].
 	lastOrdered := lastIndex.
 	sorted := true.
 	^self
@@ -605,32 +605,6 @@ above criteria -- actually any object which responds to #value:value:.'>
 		larger := larger - 1].
 	first < larger ifTrue: [self sortFrom: first to: larger].
 	smaller < last ifTrue: [self sortFrom: smaller to: last]
-    ]
-
-    moveElementsFrom: i by: add toMerge: element [
-	"Private - Move by add spaces all the elements before the i-th until
-	 we have created a place to insert element. Answer the new i (element will
-	 be inserted at position i + add)."
-
-	<category: 'private methods - sorting'>
-	"First do a binary search to find where to add the element.
-	 This economizes on expensive sort block evaluations."
-
-	| newIndex |
-	newIndex := self insertionIndexFor: element upTo: i.
-	i to: newIndex
-	    by: -1
-	    do: [:index | self basicAt: index + add put: (self basicAt: index)].
-	^newIndex - 1
-
-	"| anObject |
-	 i to: firstIndex by: -1 do: [ :index |
-	 anObject := self basicAt: index.
-	 (sortBlock value: anObject value: element)
-	 ifTrue: [ ^index ]
-	 ifFalse: [ self basicAt: index + add put: anObject ]
-	 ].
-	 ^firstIndex - 1"
     ]
 
     binarySearch: anObject low: low high: high [

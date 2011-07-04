@@ -3256,12 +3256,18 @@ primitive VMpr_ArrayedCollection_replaceFromToWithStartingAt [succeed,fail]
   if COMMON (IS_INT (srcIndexOOP) && IS_INT (dstStartIndexOOP)
              && IS_INT (dstEndIndexOOP) && !IS_INT (srcOOP))
     {
-      intptr_t srcSpec = OOP_INSTANCE_SPEC (srcOOP);
-      intptr_t dstSpec = OOP_INSTANCE_SPEC (dstOOP);
+      uintptr_t srcSpec = OOP_INSTANCE_SPEC (srcOOP);
+      uintptr_t dstSpec = OOP_INSTANCE_SPEC (dstOOP);
+      int srcOffset = srcSpec >> ISP_NUMFIXEDFIELDS;
+      int dstOffset = dstSpec >> ISP_NUMFIXEDFIELDS;
       int size;
-      if ((srcSpec & (~0 << ISP_NUMFIXEDFIELDS))
-          || (dstSpec & (~0 << ISP_NUMFIXEDFIELDS)))
-	goto bad;
+
+      /* Assume the receiver knows what it is doing for collections that
+         are not simple arrays.  Typically the primitive will not be
+         exposed to the user in that case.  Instead, be strict when
+         dstOffset == 0.  */
+      if (srcOffset && !dstOffset)
+        goto bad;
 
       /* Check compatibility.  */
       size = _gst_log2_sizes[srcSpec & ISP_SHAPE];
@@ -3290,8 +3296,8 @@ primitive VMpr_ArrayedCollection_replaceFromToWithStartingAt [succeed,fail]
       if COMMON (dstRangeLen > 0)
 	{
 	  /* do the copy */
-	  dstBase = (gst_uchar *) OOP_TO_OBJ (dstOOP)->data;
-	  srcBase = (gst_uchar *) OOP_TO_OBJ (srcOOP)->data;
+	  dstBase = (gst_uchar *) &(OOP_TO_OBJ (dstOOP)->data[dstOffset]);
+	  srcBase = (gst_uchar *) &(OOP_TO_OBJ (srcOOP)->data[srcOffset]);
 	  dstStartIndex = (dstStartIndex - 1) << size;
 	  srcIndex = (srcIndex - 1) << size;
 	  dstRangeLen <<= size;
