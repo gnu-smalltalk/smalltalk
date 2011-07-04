@@ -123,7 +123,7 @@ on content (such as add:after:)'>
 	"Add anObject in the receiver, answer it"
 
 	<category: 'adding'>
-	lastIndex == self basicSize ifTrue: [self growBy: self growSize shiftBy: 0]
+	lastIndex == self basicSize ifTrue: [self growBy: self growSize shiftBy: 0].
 	lastIndex := lastIndex + 1.
 	^self basicAt: lastIndex put: anObject
     ]
@@ -157,7 +157,7 @@ on content (such as add:after:)'>
 	(i between: 0 and: self size) 
 	    ifFalse: [^SystemExceptions.IndexOutOfRange signalOn: self withIndex: i].
 	index := i + firstIndex.
-	lastIndex == self basicSize ifTrue: [self growBy: self growSize shiftBy: 0]
+	lastIndex == self basicSize ifTrue: [self growBy: self growSize shiftBy: 0].
 	lastIndex to: index
 	    by: -1
 	    do: [:i | self basicAt: i + 1 put: (self basicAt: i)].
@@ -271,7 +271,7 @@ on content (such as add:after:)'>
 	 Answer newObject"
 
 	<category: 'adding'>
-	firstIndex <= 1 ifTrue: [self growBy: growSize shiftBy: self growSize].
+	firstIndex <= 1 ifTrue: [self growBy: self growSize shiftBy: self growSize].
 	firstIndex := firstIndex - 1.
 	^self basicAt: firstIndex put: newObject
     ]
@@ -281,7 +281,7 @@ on content (such as add:after:)'>
 	 Answer newObject"
 
 	<category: 'adding'>
-	lastIndex == self basicSize ifTrue: [self growBy: self growSize shiftBy: 0]
+	lastIndex == self basicSize ifTrue: [self growBy: self growSize shiftBy: 0].
 	lastIndex := lastIndex + 1.
 	^self basicAt: lastIndex put: newObject
     ]
@@ -390,7 +390,7 @@ on content (such as add:after:)'>
 	 Don't override this method!"
 
 	<category: 'private methods'>
-	lastIndex == self basicSize ifTrue: [self growBy: self growSize shiftBy: 0]
+	lastIndex == self basicSize ifTrue: [self growBy: self growSize shiftBy: 0].
 	lastIndex := lastIndex + 1.
 	^self basicAt: lastIndex put: newObject
     ]
