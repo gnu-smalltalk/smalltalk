@@ -39,6 +39,38 @@ DLD addLibrary: 'libc'.
         SystemDictionary compile: '
             getpid [ ^''--pid not available'' ]' ].
 
+Object subclass: RemoteServer [
+
+    RemoteServer class >> new [
+
+	^ super new
+		initialize;
+		yourself
+    ]
+
+    | remoteProcess |
+
+    initialize [
+        <category: 'initialize'>
+
+        ObjectMemory addDependent: self
+    ]
+
+    update: aSymbol [
+        <category: 'initialize'>
+
+	aSymbol == #aboutToSnapshot ifTrue: [ ^ remoteProcess suspend ].
+        aSymbol == #finishedSnapshot ifTrue: [ ^ remoteProcess resume ].
+        aSymbol == #returnFromSnapshot ifTrue: [ ObjectMemory removeDependent: self ].
+    ]
+
+    process: aProcess [
+	<category: 'accessing'>
+
+	remoteProcess := aProcess
+    ]
+]
+
 TextCollector subclass: MultiplexingTextCollector [
     | default outputs |
     initialize [
@@ -69,7 +101,7 @@ TextCollector subclass: MultiplexingTextCollector [
     ]
 ]
 
-| helpString commands server port host login |
+| helpString commands server port host login remoteServer |
 commands := OrderedCollection new.
 server := false.
 port := 12345.
@@ -207,7 +239,8 @@ available in the PATH of the remote machine.
 server ifTrue: [
     PackageLoader fileInPackage: 'Compiler'.
     Transcript := MultiplexingTextCollector message: Transcript message.
-    [
+    remoteServer := RemoteServer new.
+    remoteServer process: [
 	| queue |
 	queue := TCP.ServerSocket port: port bindTo: host.
 	[
