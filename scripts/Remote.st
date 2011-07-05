@@ -182,11 +182,14 @@ available in the PATH of the remote machine.
     opt isNil ifTrue: [
 	host isNil ifFalse: [ self error: 'multiple hosts are invalid' ].
 	(arg includes: $@)
-	    ifFalse: [ host := TCP.SocketAddress byName: arg ]
+	    ifFalse: [ host := arg ]
 	    ifTrue: [
 		login isNil ifFalse: [ self error: 'multiple logins are invalid' ].
-		login := TCP.SocketAddress byName: (arg copyUpTo: $@).
-		host := arg copyAfter: $@ ] ].
+		login := arg copyUpTo: $@.
+		host := arg copyAfter: $@ ].
+	(TCP.SocketAddress byName: host)
+	    ifNil: [ self error: 'invalid host %1' %{host} ]
+            ifNotNil: [ :addr | host := addr ] ].
     ]
 
     ifError: [
@@ -197,6 +200,7 @@ available in the PATH of the remote machine.
         ('gst-remote: ', ex messageText, '
 ') displayOn: stderr.
 	stderr flush.
+        "ex pass."
 	helpString displayOn: stderr.
 	ObjectMemory quit: 1 ].
 
