@@ -48,7 +48,7 @@ Object subclass: RemoteServer [
 		yourself
     ]
 
-    | remoteProcess |
+    | remoteProcess queue |
 
     initialize [
         <category: 'initialize'>
@@ -68,6 +68,49 @@ Object subclass: RemoteServer [
 	<category: 'accessing'>
 
 	remoteProcess := aProcess
+    ]
+
+    socket: aSocket [
+        queue := aSocket
+    ]
+
+    fork [
+        remoteProcess := [
+	    [
+		[
+		    queue waitForConnection.
+		    queue accept ifNotNil: [:conn | self forkClient: conn].
+                    queue isOpen.
+		] whileTrue: [ Processor yield ].
+	    ]
+	        on: Error
+	        do: [ :ex |
+		    ('gst-remote server: ', ex messageText, '
+') displayOn: stderr.
+		    ex pass.
+		    ObjectMemory quit: 1 ].
+        ] fork.
+    ]
+
+    forkClient: conn [
+	[
+	    [[
+		Transcript register: conn.
+		[ conn isPeerAlive ] whileTrue: [
+		    Behavior
+		        evaluate: (conn upTo: $<0>)
+		        to: nil
+		        ifError: [ :fname :line :msg |
+		 	   conn nextPutAll: ('gst-remote: error at line %1: %2
+' % { line. msg }) ].
+		   conn nextPut: $<0>; flush ] ]
+	        on: Error
+		do: [ :ex | ex return ]]
+
+	    ensure: [
+		Transcript unregister.
+		conn close ]
+	] fork
     ]
 ]
 
@@ -240,46 +283,8 @@ server ifTrue: [
     PackageLoader fileInPackage: 'Compiler'.
     Transcript := MultiplexingTextCollector message: Transcript message.
     remoteServer := RemoteServer new.
-    remoteServer process: [
-	| queue |
-	queue := TCP.ServerSocket port: port bindTo: host.
-	[
-	    [
-		| conn |
-		[
-		    queue waitForConnection.
-		    (conn := queue accept) isNil
-		] whileTrue: [
-		    queue isOpen ifFalse: [ Processor activeProcess terminate ].
-		    Processor yield
-		].
-		[
-		    [[
-			Transcript register: conn.
-		        [ conn isPeerAlive ] whileTrue: [
-			    Behavior
-			        evaluate: (conn upTo: $<0>)
-			        to: nil
-			        ifError: [ :fname :line :msg |
-				    conn nextPutAll: ('gst-remote: error at line %1: %2
-' % { line. msg }) ].
-			    conn nextPut: $<0>; flush ] ]
-			on: Error
-			do: [ :ex | ex return ]]
-
-			    ensure: [
-				Transcript unregister.
-				conn close ]
-		] fork
-	    ] repeat
-	]
-	    on: Error
-	    do: [ :ex |
-		('gst-remote server: ', ex messageText, '
-') displayOn: stderr.
-		ex pass.
-		ObjectMemory quit: 1 ].
-    ] fork.
+    remoteServer socket: (TCP.ServerSocket port: port bindTo: host).
+    remoteServer fork.
     Transcript nextPutAll: 'gst-remote server started.'; nl ].
 
 [
