@@ -58,6 +58,10 @@
 
 #include "gstpriv.h"
 
+#ifndef USE_POSIX_THREADS
+#define pthread_sigmask sigprocmask
+#endif
+
 #if defined FASYNC && !defined O_ASYNC
 #define O_ASYNC FASYNC
 #endif
@@ -89,7 +93,7 @@ _gst_disable_interrupts (mst_Boolean from_signal_handler)
       sigdelset (&newSet, SIGILL);
       sigdelset (&newSet, SIGQUIT);
       sigdelset (&newSet, SIGABRT);
-      sigprocmask (SIG_BLOCK, &newSet, &oldSet);
+      pthread_sigmask (SIG_BLOCK, &newSet, &oldSet);
     }
 }
 
@@ -102,7 +106,7 @@ _gst_enable_interrupts (mst_Boolean from_signal_handler)
       __sync_synchronize ();
       if (from_signal_handler)
         return;
-      sigprocmask (SIG_SETMASK, &oldSet, NULL);
+      pthread_sigmask (SIG_SETMASK, &oldSet, NULL);
     }
 }
 
