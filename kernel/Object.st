@@ -47,7 +47,7 @@ All classes in the system are subclasses of me.'>
 	<category: 'initialization'>
 	aspect == #returnFromSnapshot ifFalse: [^self].
 	ContextPart checkPresenceOfJIT.
-        FinalizableObjects := IdentitySet new.
+	FinalizableObjects := nil
     ]
 
     Object class >> dependencies [
@@ -57,13 +57,27 @@ All classes in the system are subclasses of me.'>
 	^Dependencies
     ]
 
+    Object class >> dependencies: anObject [
+	"Use anObject as the dictionary that associates an object with its dependents."
+
+	<category: 'initialization'>
+	Dependencies := anObject
+    ]
+
+    Object class >> finalizableObjects [
+	"Answer a set of finalizable objects."
+
+	<category: 'initialization'>
+	FinalizableObjects isNil ifTrue: [FinalizableObjects := Set new].
+	^FinalizableObjects
+    ]
+
     Object class >> initialize [
 	"Initialize the Dependencies dictionary to be a WeakKeyIdentityDictionary."
 
 	<category: 'initialization'>
 	self == Object ifFalse: [^self].
-	Dependencies := WeakKeyIdentityDictionary new.
-        FinalizableObjects := IdentitySet new.
+	self dependencies: WeakKeyIdentityDictionary new.
 	ObjectMemory addDependent: self
     ]
 
@@ -293,7 +307,7 @@ All classes in the system are subclasses of me.'>
 	 if an object has dependents, it won't be garbage collected."
 
 	<category: 'dependents access'>
-	^(Object.Dependencies at: self ifAbsentPut: [OrderedCollection new]) 
+	^(Dependencies at: self ifAbsentPut: [OrderedCollection new]) 
 	    add: anObject
     ]
 
@@ -303,10 +317,10 @@ All classes in the system are subclasses of me.'>
 
 	<category: 'dependents access'>
 	| dependencies |
-	dependencies := Object.Dependencies at: self ifAbsent: [^anObject].
+	dependencies := Dependencies at: self ifAbsent: [^anObject].
 	dependencies remove: anObject ifAbsent: [].
 	dependencies size < 1 ifTrue: [
-	    Object.Dependencies removeKey: self ifAbsent: []].
+	    Dependencies removeKey: self ifAbsent: []].
 	^anObject
     ]
 
@@ -315,7 +329,7 @@ All classes in the system are subclasses of me.'>
 
 	<category: 'dependents access'>
 	| dependencies |
-	dependencies := Object.Dependencies at: self ifAbsent: [^OrderedCollection new].
+	dependencies := Dependencies at: self ifAbsent: [^OrderedCollection new].
 	^dependencies asOrderedCollection
     ]
 
@@ -324,7 +338,7 @@ All classes in the system are subclasses of me.'>
 	 receiver to be garbage collected."
 
 	<category: 'dependents access'>
-	Object.Dependencies removeKey: self ifAbsent: []
+	Dependencies removeKey: self ifAbsent: []
     ]
 
     addToBeFinalized [
@@ -332,10 +346,10 @@ All classes in the system are subclasses of me.'>
 	 collector finds out there are only weak references to it."
 
 	<category: 'finalization'>
-	Object.FinalizableObjects add: ((HomedAssociation 
+	self class finalizableObjects add: ((HomedAssociation 
 		    key: self
 		    value: nil
-		    environment: Object.FinalizableObjects)
+		    environment: FinalizableObjects)
 		    makeEphemeron;
 		    yourself)
     ]
@@ -345,10 +359,10 @@ All classes in the system are subclasses of me.'>
 	 when the garbage collector finds out there are only weak references to it."
 
 	<category: 'finalization'>
-	Object.FinalizableObjects remove: (HomedAssociation 
+	self class finalizableObjects remove: (HomedAssociation 
 		    key: self
 		    value: nil
-		    environment: Object.FinalizableObjects)
+		    environment: self class finalizableObjects)
 	    ifAbsent: []
     ]
 
@@ -385,7 +399,7 @@ All classes in the system are subclasses of me.'>
 
 	<category: 'change and update'>
 	| dependencies |
-	dependencies := Object.Dependencies at: self ifAbsent: [nil].
+	dependencies := Object dependencies at: self ifAbsent: [nil].
 	dependencies notNil 
 	    ifTrue: [dependencies do: [:dependent | dependent update: aParameter]]
     ]
@@ -402,7 +416,7 @@ All classes in the system are subclasses of me.'>
 
 	<category: 'change and update'>
 	| dependencies |
-	dependencies := Object.Dependencies at: self ifAbsent: [nil].
+	dependencies := Object dependencies at: self ifAbsent: [nil].
 	dependencies notNil 
 	    ifTrue: [dependencies do: [:dependent | dependent perform: aSymbol]]
     ]
@@ -413,7 +427,7 @@ All classes in the system are subclasses of me.'>
 
 	<category: 'change and update'>
 	| dependencies |
-	dependencies := Object.Dependencies at: self ifAbsent: [nil].
+	dependencies := Object dependencies at: self ifAbsent: [nil].
 	dependencies notNil 
 	    ifTrue: 
 		[dependencies do: [:dependent | dependent perform: aSymbol with: anObject]]
@@ -425,7 +439,7 @@ All classes in the system are subclasses of me.'>
 
 	<category: 'change and update'>
 	| dependencies |
-	dependencies := Object.Dependencies at: self ifAbsent: [nil].
+	dependencies := Object dependencies at: self ifAbsent: [nil].
 	dependencies notNil 
 	    ifTrue: 
 		[dependencies do: 
@@ -442,7 +456,7 @@ All classes in the system are subclasses of me.'>
 
 	<category: 'change and update'>
 	| dependencies |
-	dependencies := Object.Dependencies at: self ifAbsent: [nil].
+	dependencies := Object dependencies at: self ifAbsent: [nil].
 	dependencies notNil 
 	    ifTrue: 
 		[dependencies 
@@ -455,7 +469,7 @@ All classes in the system are subclasses of me.'>
 
 	<category: 'change and update'>
 	| dependencies |
-	dependencies := Object.Dependencies at: self ifAbsent: [nil].
+	dependencies := Object dependencies at: self ifAbsent: [nil].
 	dependencies notNil 
 	    ifTrue: 
 		[dependencies 

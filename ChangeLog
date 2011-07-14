@@ -20,13 +20,6 @@
 	* tests/floatmath.st: Add regression test.
 	* tests/floatmath.ok: Regenerate.
 
-2011-06-30  Paolo Bonzini <bonzini@gnu.org>
-
-	* kernel/Collection.st: Prefer accessing class variables using
-	namespace syntax.
-	* kernel/Object.st: Likewise.  Change FinalizableObjects to an
-	IdentitySet.
-
 2011-06-28  Gwenael Casaccio <mrgwen@gmail.com>
 
 	* kernel/BindingDict.st: Remove #beConsistent.
