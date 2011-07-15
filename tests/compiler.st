@@ -28,6 +28,11 @@
 |
  ======================================================================"
 
+Eval [
+   thisContext currentLineInFile
+       + 0
+]
+
 Object subclass: #BugTest
 	instanceVariableNames: 'value '
 	classVariableNames: ''

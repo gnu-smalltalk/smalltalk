@@ -1,4 +1,7 @@
-compiler.st:40: undefined variable undefVariable referenced
+
+Execution begins...
+returned value is 32
+compiler.st:45: undefined variable undefVariable referenced
 
 Execution begins...
 returned value is Array new: 3 "<0>"
@@ -47,8 +50,8 @@ returned value is Array new: 1 "<0>"
 
 Execution begins...
 returned value is 2
-compiler.st:177: parse error, expected '!'
-compiler.st:180: parse error, expected keyword
+compiler.st:182: parse error, expected '!'
+compiler.st:185: parse error, expected keyword
 
 Execution begins...
 returned value is 2
@@ -113,7 +116,7 @@ returned value is FileSegment
 
 Execution begins...
 returned value is String
-compiler.st:316: class method expected inside class block
+compiler.st:321: class method expected inside class block
 
 Execution begins...
 returned value is CompiledMethod new: 0 "<0>"
