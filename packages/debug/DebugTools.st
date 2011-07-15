@@ -48,7 +48,7 @@ pointer bytecodes to line numbers.'>
 	    ifTrue: [MethodLineMapCache := WeakKeyIdentityDictionary new].
 	lineMap := MethodLineMapCache at: method
 		    ifAbsentPut: [method sourceCodeMap].
-	^lineMap at: aContext ip + 1 ifAbsent: [1]
+	^lineMap at: aContext ip - 1 ifAbsent: [1]
     ]
 
     Debugger class >> on: aProcess [

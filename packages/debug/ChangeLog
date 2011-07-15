@@ -1,3 +1,7 @@
+2011-07-15  Ladislav Marek  <ladislav@marek.su>
+
+	* DebugTools.st: Fix off-by-one in computation of current line.
+
 2010-12-04  Paolo Bonzini  <bonzini@gnu.org>
 
 	* package.xml: Remove now superfluous <file> tags.
