@@ -1497,27 +1497,6 @@ _gst_hash_string (const char *str,
   return hashVal & MAX_ST_INT;
 }
 
-char *
-_gst_symbol_as_string (OOP symbolOOP)
-{
-  static char stringBuf[256];	/* probably large enough for most
-				   symbols */
-  unsigned int len;
-  gst_symbol symbol;
-
-  symbol = (gst_symbol) OOP_TO_OBJ (symbolOOP);
-
-  len = _gst_string_oop_len (symbolOOP);
-  if (len >= sizeof (stringBuf))
-    _gst_errorf ("symbol name too long: %d, max is %d", len,
-		 sizeof (stringBuf));
-
-  strncpy (stringBuf, symbol->symString, len);
-  stringBuf[len] = '\0';
-  return (stringBuf);
-}
-
-
 
 void
 _gst_check_symbol_chain (void)
