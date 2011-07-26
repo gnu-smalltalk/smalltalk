@@ -237,13 +237,6 @@ extern OOP _gst_get_undeclared_dictionary ()
 extern OOP _gst_intern_string_oop (OOP stringOOP)
   ATTRIBUTE_HIDDEN;
 
-/* Given a symbol, this routine returns a C string that corresponds to the
-   name of the symbol.  The returned value is a pointer to a static area,
-   so if it's to be used for anything other than immediate output, the
-   caller needs to make a copy of the retured string.  */
-extern char *_gst_symbol_as_string (OOP symbolOOP)
-  ATTRIBUTE_HIDDEN;
-
 /* This computes an hash of LEN bytes, starting at STR.  */
 extern uintptr_t _gst_hash_string (const char *str,
 				   int len)

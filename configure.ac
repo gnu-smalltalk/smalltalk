@@ -293,17 +293,10 @@ AC_LIBTOOL_DLOPEN
 AC_LIBTOOL_WIN32_DLL
 AC_PROG_LIBTOOL
 
-
-case "$GCC:`$CC -v 2>&1 | sed -n '[s/^gcc version \([0-9.]*\).*/\1/p]'`" in
-   no:* | \
-   [*:[12].*] | \
-   [*:3.[012]*])
-     AC_MSG_ERROR([GNU Smalltalk requires GCC 3.3 or later.]) ;;
-esac
-
+LIBGST_CFLAGS="$SYNC_CFLAGS"
 case '$host_cpu: $CFLAGS ' in
    i*86:*' -pg '*) ;;
-   i*86:*) LIBGST_CFLAGS='-fomit-frame-pointer' ;;
+   i*86:*) LIBGST_CFLAGS="$LIBGST_CFLAGS -fomit-frame-pointer" ;;
    *) ;;
 esac
 AC_SUBST(LIBGST_CFLAGS)
