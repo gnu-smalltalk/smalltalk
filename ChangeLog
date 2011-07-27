@@ -1,8 +1,10 @@
+2011-07-27  Paolo Bonzini <bonzini@gnu.org>
+
+	* kernel/ContextPart.st: Improve 2011-07-15 change.
+
 2011-07-15  Paolo Bonzini <bonzini@gnu.org>
 
 	* kernel/ContextPart.st: Fix off-by-one in accessing ip for currentLine.
-	* tests/compiler.st: Add testcase.
-	* tests/compiler.ok: Regenerate.
 
 2011-07-13  Paolo Bonzini <bonzini@gnu.org>
 

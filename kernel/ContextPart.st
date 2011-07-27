@@ -125,7 +125,7 @@ methods that can be used in inspection or debugging.'>
 	 thus making the implementation faster."
 
 	<category: 'debugging'>
-	^self method sourceCodeMap at: self ip - 1 ifAbsent: [1]
+	^self method sourceCodeMap at: (self ip - 1 max: 1) ifAbsent: [1]
     ]
 
     debugger [

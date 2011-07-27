@@ -1,3 +1,7 @@
+2011-07-27  Paolo Bonzini <bonzini@gnu.org>
+
+	* DebugTools.st: Improve 2011-07-15 change to fix testsuite failures.
+
 2011-07-15  Ladislav Marek  <ladislav@marek.su>
 
 	* DebugTools.st: Fix off-by-one in computation of current line.
