@@ -353,6 +353,9 @@ _gst_init_mem (size_t eden, size_t survivor, size_t old,
       _gst_inc_init_registry ();
     }
 
+  _gst_mem.markQueue = (struct mark_queue *)
+    xcalloc (8 * K, sizeof (struct mark_queue));
+  _gst_mem.lastMarkQueue = &_gst_mem.markQueue[8 * K];
 }
 
 void _gst_update_object_memory_oop (OOP oop)
@@ -477,7 +480,6 @@ alloc_oop_table (size_t size)
   _gst_false_oop = &_gst_mem.ot[FALSE_OOP_INDEX];
 
   _gst_mem.num_free_oops = size;
-  _gst_mem.first_allocated_oop = _gst_mem.ot;
   _gst_mem.last_allocated_oop = _gst_mem.last_swept_oop = _gst_mem.ot - 1;
   _gst_mem.next_oop_to_sweep = _gst_mem.ot - 1;
 }
@@ -1436,21 +1438,21 @@ reset_incremental_gc (OOP firstOOP)
       ;
 #endif
 
-  _gst_mem.first_allocated_oop = oop;
+  /* Initialize these here so that IS_OOP_VALID works correctly.  */
+  _gst_mem.next_oop_to_sweep = _gst_mem.last_allocated_oop;
+  _gst_mem.last_swept_oop = oop - 1;
 
 #ifdef NO_INCREMENTAL_GC
-  _gst_mem.next_oop_to_sweep = _gst_mem.last_allocated_oop;
   _gst_finish_incremental_gc ();
 #else
   /* Skip high OOPs that are unallocated.  */
-  for (oop = _gst_mem.last_allocated_oop; !IS_OOP_VALID_GC (oop); oop--)
+  for (oop = _gst_mem.last_allocated_oop; !IS_OOP_VALID (oop); oop--)
     _gst_sweep_oop (oop);
 
   _gst_mem.last_allocated_oop = oop;
   _gst_mem.next_oop_to_sweep = oop;
 #endif
 
-  _gst_mem.last_swept_oop = _gst_mem.first_allocated_oop - 1;
   _gst_mem.num_free_oops = _gst_mem.ot_size -
     (_gst_mem.last_allocated_oop - _gst_mem.ot);
 
@@ -1461,9 +1463,9 @@ reset_incremental_gc (OOP firstOOP)
       * (100 + _gst_mem.space_grow_rate) / 100);
 
 #if defined (GC_DEBUG_OUTPUT)
-  printf ("Found unallocated at OOP %p, last allocated OOP %p\n"
-          "Next OOP swept top to bottom %p, lowest swept bottom to top %p\n",
-	  _gst_mem.first_allocated_oop, _gst_mem.last_allocated_oop,
+  printf ("Last allocated OOP %p\n"
+          "Next OOP swept top to bottom %p, highest swept bottom to top %p\n",
+	  _gst_mem.last_allocated_oop,
 	  _gst_mem.next_oop_to_sweep, _gst_mem.last_swept_oop);
 #endif
 }
@@ -2224,50 +2226,70 @@ void
 _gst_mark_an_oop_internal (OOP oop)
 {
   OOP *curOOP, *atEndOOP;
+  struct mark_queue *markQueue = _gst_mem.markQueue;
+  struct mark_queue *lastMarkQueue = _gst_mem.lastMarkQueue;
+  struct mark_queue *currentMarkQueue = markQueue;
   goto markOne;
 
  markRange:
-  {			/* in the loop! */
-#if defined (GC_DEBUGGING)
-    gst_object obj = (gst_object) (curOOP - 1);	/* for debugging */
-#endif
-    for (;;)
+  {
+    OOP firstOOP = NULL;
+
+    /* The first unmarked OOP is used for tail recursion.  */
+    while (curOOP < atEndOOP)
       {
-        /* in a loop, do next iteration */
-        oop = *curOOP;
-        PREFETCH_LOOP (curOOP, PREF_READ | PREF_NTA);
-        curOOP++;
-        if (IS_OOP (oop))
+        oop = *curOOP++;
+        if (IS_OOP (oop) && !IS_OOP_MARKED (oop))
           {
-#if defined (GC_DEBUGGING)
-            if UNCOMMON (!IS_OOP_ADDR (oop))
+            oop->flags |= F_REACHABLE;
+            firstOOP = oop;
+            break;
+          }
+      }
+
+    /* The second unmarked OOP is the first that is placed on the mark
+       queue.  TODO: split REACHABLE and VISITED flags.  An object is
+       marked REACHABLE here, and REACHABLE|VISITED in the markOne label.
+       At the end of GC, all REACHABLE objects are also VISITED.
+       The above loop should seek an object that is not VISITED so
+       that it can be marked.  For the loop below, however, REACHABLE
+       objects are known to be somewhere else on the mark stack, and can
+       be skipped.
+
+       Skipping objects after the first unmarked OOP is still useful,
+       because it keeps the stack size a bit lower in the relatively common
+       case of many integer or nil instance variables.  */
+    while (curOOP < atEndOOP)
+      {
+        oop = *curOOP;
+
+        if (IS_OOP (oop) && !IS_OOP_MARKED (oop))
+          {
+            if (currentMarkQueue == lastMarkQueue)
               {
-                printf
-                  ("Error! Invalid OOP %p was found inside %p!\n",
-                   oop, obj);
-                abort ();
+                const size_t size = lastMarkQueue - markQueue;
+
+                _gst_mem.markQueue = (struct mark_queue *)
+                  xrealloc (_gst_mem.markQueue, 2 * size * sizeof (struct mark_queue));
+                _gst_mem.lastMarkQueue = &_gst_mem.markQueue[2 * size];
+
+		markQueue = _gst_mem.markQueue;
+		lastMarkQueue = _gst_mem.lastMarkQueue;
+                currentMarkQueue = &_gst_mem.markQueue[size];
               }
-            else
-#endif
-              if (!IS_OOP_MARKED (oop))
-                {
-                  PREFETCH_START (oop->object, PREF_READ | PREF_NTA);
-
-                  /* On the last object in the set, reuse the
-                     current invocation. oop is valid, so we go to
-                     the single-object case */
-                  if UNCOMMON (curOOP == atEndOOP)
-                    goto markOne;
-
-                  _gst_mark_an_oop_internal (oop);
-                  continue;
-                }
+            currentMarkQueue->firstOOP = curOOP;
+            currentMarkQueue->endOOP = atEndOOP;
+	    currentMarkQueue++;
+            break;
           }
 
-        /* Place the check here so that the continue above skips it.  */
-        if UNCOMMON (curOOP == atEndOOP)
-          return;
+        curOOP++;
       }
+
+    if (!firstOOP)
+      goto pop;
+
+    TAIL_MARK_OOP (firstOOP);
   }
 
  markOne:
@@ -2327,6 +2349,16 @@ _gst_mark_an_oop_internal (OOP oop)
 
         else if UNCOMMON (!IS_OOP_MARKED (objClass))
           TAIL_MARK_OOP (objClass);
+      }
+  }
+
+ pop:
+  {
+    if (currentMarkQueue > markQueue)
+      {
+        currentMarkQueue--;
+	TAIL_MARK_OOPRANGE (currentMarkQueue->firstOOP,
+			    currentMarkQueue->endOOP);
       }
   }
 }

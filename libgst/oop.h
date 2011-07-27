@@ -187,11 +187,18 @@ typedef struct cheney_scan_state {
   OOP current;			/* Currently scanned object */
 } cheney_scan_state;
 
+struct mark_queue
+{
+  OOP *firstOOP, *endOOP;
+};
+
 struct memory_space
 {
   heap_data *old, *fixed;
   struct new_space eden;
   struct surv_space surv[2], tenuring_queue;
+
+  struct mark_queue *markQueue, *lastMarkQueue;
 
   /* The current state of the copying collector's scan phase.  */
   struct cheney_scan_state scan;
@@ -217,11 +224,10 @@ struct memory_space
   weak_area_tree *weak_areas; 
 
   /* These are the pointer to the first allocated OOP since the last
-     completed incremental GC pass, to the first free OOP, to the
-     last low OOP considered by the incremental sweeper, to the
-     first high OOP not considered by the incremental sweeper.  */
-  OOP first_allocated_oop, last_allocated_oop, last_swept_oop,
-      next_oop_to_sweep;
+     completed incremental GC pass, to the last low OOP considered by
+     the incremental sweeper, to the first high OOP not considered by
+     the incremental sweeper.  */
+  OOP last_allocated_oop, last_swept_oop, next_oop_to_sweep;
 
   /* The active survivor space */
   struct surv_space *active_half;
