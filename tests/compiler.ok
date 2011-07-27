@@ -58,7 +58,7 @@ returned value is 2
 
 Execution begins...
 returned value is 'No crashes'
-compiler.st:190: undefined variable C referenced
+compiler.st:195: undefined variable C referenced
 
 Execution begins...
 a Smalltalk string:1: undefined variable a referenced
