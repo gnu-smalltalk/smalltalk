@@ -262,24 +262,10 @@ extern char *strdup ();
    from the bottom.
 
    bit 0-3: reserved for distinguishing byte objects and saving their size.
-   bit 4-11: non-volatile bits (special kinds of objects).
-   bit 12-23: volatile bits (GC/JIT-related).
-   bit 24-30: reserved for counting things.
+   bit 4-14: non-volatile bits (special kinds of objects).  Used up to 11.
+   bit 15-30: volatile bits (GC/JIT-related).  Used up to 23.
    bit 31: unused to avoid signedness mess. */
 enum {
-  /* Place to save various OOP counts (how many fields we have marked
-     in the object, how many pointer instance variables there are, 
-     etc.).  Here is a distribution of frequencies in a standard image:
-       2 to   31 words      24798 objects (96.10%)
-      32 to   63 words        816 objects ( 3.16%)
-      64 to   95 words         82 objects ( 0.32%)
-      96 to  127 words         54 objects ( 0.21%)
-     128 or more words         54 objects ( 0.21%)
-
-    which I hope justifies the choice :-) */
-  F_COUNT = (int) 0x7F000000U,
-  F_COUNT_SHIFT = 24,
-
   /* Set if the object is reachable, during the mark phases of oldspace
      garbage collection.  */
   F_REACHABLE = 0x800000U,
@@ -317,7 +303,7 @@ enum {
 
   /* The grouping of all the flags which are not valid across image
      saves and loads.  */
-  F_RUNTIME = 0xFF8000U,
+  F_RUNTIME = 0x7FF8000U,
 
   /* Set if the references to the instance variables of the object
      are weak.  */

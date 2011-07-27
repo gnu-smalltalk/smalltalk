@@ -380,15 +380,6 @@ make_oop_table_to_be_saved (struct save_file_header *header)
 	  int numPointers = NUM_OOPS (oop->object);
 
           myOOPTable[i].flags = (oop->flags & ~F_RUNTIME) | F_OLD;
-
-	  /* Cache the number of indexed instance variables.  We prefer
-	     to do more work upon saving (done once) than upon loading
-	     (done many times).  */
-	  if (numPointers < (F_COUNT >> F_COUNT_SHIFT))
-	    myOOPTable[i].flags |= numPointers << F_COUNT_SHIFT;
-	  else
-	    myOOPTable[i].flags |= F_COUNT;
-
 	  myOOPTable[i].object = (gst_object) TO_INT (oop->object->objSize);
 	}
       else
@@ -797,11 +788,7 @@ restore_oop_pointer_slots (OOP oop)
   object = OOP_TO_OBJ (oop);
   object->objClass = OOP_ABSOLUTE (object->objClass);
 
-  if UNCOMMON ((oop->flags & F_COUNT) == F_COUNT)
-    numPointers = NUM_OOPS (object);
-  else
-    numPointers = oop->flags >> F_COUNT_SHIFT;
-
+  numPointers = NUM_OOPS (object);
   for (i = object->data; numPointers--; i++)
     if (IS_OOP (*i))
       *i = OOP_ABSOLUTE (*i);
