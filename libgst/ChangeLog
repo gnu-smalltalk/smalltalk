@@ -1,5 +1,10 @@
 2011-07-27  Paolo Bonzini  <bonzini@gnu.org>
 
+	* libgst/oop.c: Clean up reset_incremental_gc.
+	* libgst/oop.h: Remove first_allocated_oop.
+
+2011-07-27  Paolo Bonzini  <bonzini@gnu.org>
+
 	* libgst/oop.c: Do not sweep below _gst_mem.last_swept_oop
 	when initializing the incremental GC.
 

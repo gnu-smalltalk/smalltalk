@@ -472,7 +472,6 @@ alloc_oop_table (size_t size)
   _gst_false_oop = &_gst_mem.ot[FALSE_OOP_INDEX];
 
   _gst_mem.num_free_oops = size;
-  _gst_mem.first_allocated_oop = _gst_mem.ot;
   _gst_mem.last_allocated_oop = _gst_mem.last_swept_oop = _gst_mem.ot - 1;
   _gst_mem.next_oop_to_sweep = _gst_mem.ot - 1;
 }
@@ -1400,8 +1399,6 @@ reset_incremental_gc (OOP firstOOP)
       ;
 #endif
 
-  _gst_mem.first_allocated_oop = oop;
-
   /* Initialize these here so that IS_OOP_VALID works correctly.  */
   _gst_mem.next_oop_to_sweep = _gst_mem.last_allocated_oop;
   _gst_mem.last_swept_oop = oop - 1;
@@ -1427,9 +1424,9 @@ reset_incremental_gc (OOP firstOOP)
       * (100 + _gst_mem.space_grow_rate) / 100);
 
 #if defined (GC_DEBUG_OUTPUT)
-  printf ("Found unallocated at OOP %p, last allocated OOP %p\n"
-          "Next OOP swept top to bottom %p, lowest swept bottom to top %p\n",
-	  _gst_mem.first_allocated_oop, _gst_mem.last_allocated_oop,
+  printf ("Last allocated OOP %p\n"
+          "Next OOP swept top to bottom %p, highest swept bottom to top %p\n",
+	  _gst_mem.last_allocated_oop,
 	  _gst_mem.next_oop_to_sweep, _gst_mem.last_swept_oop);
 #endif
 }
