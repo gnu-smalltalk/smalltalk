@@ -1402,19 +1402,21 @@ reset_incremental_gc (OOP firstOOP)
 
   _gst_mem.first_allocated_oop = oop;
 
-#ifdef NO_INCREMENTAL_GC
+  /* Initialize these here so that IS_OOP_VALID works correctly.  */
   _gst_mem.next_oop_to_sweep = _gst_mem.last_allocated_oop;
+  _gst_mem.last_swept_oop = oop - 1;
+
+#ifdef NO_INCREMENTAL_GC
   _gst_finish_incremental_gc ();
 #else
   /* Skip high OOPs that are unallocated.  */
-  for (oop = _gst_mem.last_allocated_oop; !IS_OOP_VALID_GC (oop); oop--)
+  for (oop = _gst_mem.last_allocated_oop; !IS_OOP_VALID (oop); oop--)
     _gst_sweep_oop (oop);
 
   _gst_mem.last_allocated_oop = oop;
   _gst_mem.next_oop_to_sweep = oop;
 #endif
 
-  _gst_mem.last_swept_oop = _gst_mem.first_allocated_oop - 1;
   _gst_mem.num_free_oops = _gst_mem.ot_size -
     (_gst_mem.last_allocated_oop - _gst_mem.ot);
 
