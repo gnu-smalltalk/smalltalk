@@ -187,11 +187,18 @@ typedef struct cheney_scan_state {
   OOP current;			/* Currently scanned object */
 } cheney_scan_state;
 
+struct mark_queue
+{
+  OOP *firstOOP, *endOOP;
+};
+
 struct memory_space
 {
   heap_data *old, *fixed;
   struct new_space eden;
   struct surv_space surv[2], tenuring_queue;
+
+  struct mark_queue *markQueue, *lastMarkQueue;
 
   /* The current state of the copying collector's scan phase.  */
   struct cheney_scan_state scan;

@@ -348,6 +348,9 @@ _gst_init_mem (size_t eden, size_t survivor, size_t old,
       _gst_inc_init_registry ();
     }
 
+  _gst_mem.markQueue = (struct mark_queue *)
+    xcalloc (8 * K, sizeof (struct mark_queue));
+  _gst_mem.lastMarkQueue = &_gst_mem.markQueue[8 * K];
 }
 
 void _gst_update_object_memory_oop (OOP oop)
@@ -2185,50 +2188,70 @@ void
 _gst_mark_an_oop_internal (OOP oop)
 {
   OOP *curOOP, *atEndOOP;
+  struct mark_queue *markQueue = _gst_mem.markQueue;
+  struct mark_queue *lastMarkQueue = _gst_mem.lastMarkQueue;
+  struct mark_queue *currentMarkQueue = markQueue;
   goto markOne;
 
  markRange:
-  {			/* in the loop! */
-#if defined (GC_DEBUGGING)
-    gst_object obj = (gst_object) (curOOP - 1);	/* for debugging */
-#endif
-    for (;;)
+  {
+    OOP firstOOP = NULL;
+
+    /* The first unmarked OOP is used for tail recursion.  */
+    while (curOOP < atEndOOP)
       {
-        /* in a loop, do next iteration */
-        oop = *curOOP;
-        PREFETCH_LOOP (curOOP, PREF_READ | PREF_NTA);
-        curOOP++;
-        if (IS_OOP (oop))
+        oop = *curOOP++;
+        if (IS_OOP (oop) && !IS_OOP_MARKED (oop))
           {
-#if defined (GC_DEBUGGING)
-            if UNCOMMON (!IS_OOP_ADDR (oop))
+            oop->flags |= F_REACHABLE;
+            firstOOP = oop;
+            break;
+          }
+      }
+
+    /* The second unmarked OOP is the first that is placed on the mark
+       queue.  TODO: split REACHABLE and VISITED flags.  An object is
+       marked REACHABLE here, and REACHABLE|VISITED in the markOne label.
+       At the end of GC, all REACHABLE objects are also VISITED.
+       The above loop should seek an object that is not VISITED so
+       that it can be marked.  For the loop below, however, REACHABLE
+       objects are known to be somewhere else on the mark stack, and can
+       be skipped.
+
+       Skipping objects after the first unmarked OOP is still useful,
+       because it keeps the stack size a bit lower in the relatively common
+       case of many integer or nil instance variables.  */
+    while (curOOP < atEndOOP)
+      {
+        oop = *curOOP;
+
+        if (IS_OOP (oop) && !IS_OOP_MARKED (oop))
+          {
+            if (currentMarkQueue == lastMarkQueue)
               {
-                printf
-                  ("Error! Invalid OOP %p was found inside %p!\n",
-                   oop, obj);
-                abort ();
+                const size_t size = lastMarkQueue - markQueue;
+
+                _gst_mem.markQueue = (struct mark_queue *)
+                  xrealloc (_gst_mem.markQueue, 2 * size * sizeof (struct mark_queue));
+                _gst_mem.lastMarkQueue = &_gst_mem.markQueue[2 * size];
+
+		markQueue = _gst_mem.markQueue;
+		lastMarkQueue = _gst_mem.lastMarkQueue;
+                currentMarkQueue = &_gst_mem.markQueue[size];
               }
-            else
-#endif
-              if (!IS_OOP_MARKED (oop))
-                {
-                  PREFETCH_START (oop->object, PREF_READ | PREF_NTA);
-
-                  /* On the last object in the set, reuse the
-                     current invocation. oop is valid, so we go to
-                     the single-object case */
-                  if UNCOMMON (curOOP == atEndOOP)
-                    goto markOne;
-
-                  _gst_mark_an_oop_internal (oop);
-                  continue;
-                }
+            currentMarkQueue->firstOOP = curOOP;
+            currentMarkQueue->endOOP = atEndOOP;
+	    currentMarkQueue++;
+            break;
           }
 
-        /* Place the check here so that the continue above skips it.  */
-        if UNCOMMON (curOOP == atEndOOP)
-          return;
+        curOOP++;
       }
+
+    if (!firstOOP)
+      goto pop;
+
+    TAIL_MARK_OOP (firstOOP);
   }
 
  markOne:
@@ -2288,6 +2311,16 @@ _gst_mark_an_oop_internal (OOP oop)
 
         else if UNCOMMON (!IS_OOP_MARKED (objClass))
           TAIL_MARK_OOP (objClass);
+      }
+  }
+
+ pop:
+  {
+    if (currentMarkQueue > markQueue)
+      {
+        currentMarkQueue--;
+	TAIL_MARK_OOPRANGE (currentMarkQueue->firstOOP,
+			    currentMarkQueue->endOOP);
       }
   }
 }
