@@ -406,14 +406,14 @@ an instance of me; it is called their `environment''. '>
 		[:each | 
 		each isClass 
 		    ifTrue: 
-			[each recompileAll.
-			each class recompileAll]].
+			[each compileAll.
+			each class compileAll]].
 	self allSubassociationsDo: 
 		[:assoc | 
 		assoc value isClass 
 		    ifTrue: 
-			[assoc value recompileAll.
-			assoc value class recompileAll]]
+			[assoc value compileAll.
+			assoc value class compileAll]]
     ]
 
     subspaces [

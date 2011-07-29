@@ -1,3 +1,7 @@
+2011-07-29  Gwenael Casaccio  <mrgwen@gmail.com>
+
+	* kernel/AbstNamespc.st: Fix name of #compileAll.
+
 2011-07-27  Paolo Bonzini <bonzini@gnu.org>
 
 	* kernel/ContextPart.st: Improve 2011-07-15 change.
