@@ -100,6 +100,10 @@ The string is this is a test
 returned value is nil
 
 Execution begins...
+Getting a long long 0x100110012002
+returned value is nil
+
+Execution begins...
 returned value is 'this is a test'
 
 Execution begins...

@@ -74,6 +74,7 @@ typedef struct cparam
     float floatVal;
     double doubleVal;
     long double longDoubleVal;
+    long long longLongVal;
     struct {
       PTR pPtrVal;
       PTR ptrVal;
@@ -432,6 +433,12 @@ my_opendir (const char *dir)
   return (result);
 }
 
+void 
+test_longlong (long long aVerylongInt)
+{
+  printf ("Getting a long long 0x%llx\n", aVerylongInt);
+}
+
 void
 test_callin (OOP oop, int(*callback)(const char *))
 {
@@ -585,6 +592,7 @@ _gst_init_cfuncs (void)
   _gst_define_cfunc ("getArgv", get_argv);
 
   /* Test functions */
+  _gst_define_cfunc ("testLongLong", test_longlong);
   _gst_define_cfunc ("testCallin", test_callin);
   _gst_define_cfunc ("testCString", test_cstring);
   _gst_define_cfunc ("testCObjectPtr", test_cobject_ptr);
@@ -973,6 +981,9 @@ get_ffi_type (OOP returnTypeOOP)
 #else
       return &ffi_type_sint64;
 #endif
+    case CDATA_LONGLONG:
+    case CDATA_ULONGLONG:
+      return &ffi_type_sint64;
 
     case CDATA_VOID:
     case CDATA_INT:
@@ -1041,9 +1052,13 @@ smalltalk_to_c (OOP oop,
     {
       switch (cType)
         {
+       case CDATA_LONGLONG:
+       case CDATA_ULONGLONG:
+         cp->u.longLongVal = to_c_int_64 (oop);
+         return &ffi_type_sint64;
         case CDATA_LONG:
-	case CDATA_ULONG:
-	  cp->u.longVal = TO_C_LONG (oop);
+       case CDATA_ULONG:
+         cp->u.longVal = TO_C_LONG (oop);
 #if LONG_MAX == 2147483647
           return &ffi_type_sint32;
 #else
@@ -1088,9 +1103,13 @@ smalltalk_to_c (OOP oop,
     {
       switch (cType)
         {
+       case CDATA_LONGLONG:
+       case CDATA_ULONGLONG:
+         cp->u.longLongVal = (long long)(oop == _gst_true_oop);
+         return &ffi_type_sint64;
         case CDATA_LONG:
-	case CDATA_ULONG:
-	  cp->u.longVal = (oop == _gst_true_oop);
+       case CDATA_ULONG:
+         cp->u.longVal = (oop == _gst_true_oop);
 #if LONG_MAX == 2147483647
           return &ffi_type_sint32;
 #else

@@ -614,9 +614,105 @@ CScalar subclass: CSmalltalk [
 ]
 
 
-
+CScalar subclass: CLongLong [
+
+    <category: 'Language-C interface'>
+    <comment: nil>
+
+    CLongLong class >> sizeof [
+       "Answer the receiver's instances size"
+
+       <category: 'accessing'>
+       ^8
+    ]
+
+    CLongLong class >> alignof [
+       "Answer the receiver's instances required aligment"
+
+       <category: 'accessing'>
+       ^CLongLongAlignment
+    ]
+
+    CLongLong class >> cObjStoredType [
+       "Private - Answer an index referring to the receiver's instances scalar type"
+
+       <category: 'accessing'>
+       ^30
+    ]
+
+    sizeof [
+       "Answer the receiver's size"
+
+       <category: 'accessing'>
+       ^8
+    ]
+
+    alignof [
+       "Answer the receiver's required aligment"
+
+       <category: 'accessing'>
+       ^CLongLongAlignment
+    ]
+
+    cObjStoredType [
+       "Private - Answer an index referring to the receiver's scalar type"
+
+       <category: 'accessing'>
+       ^30
+    ]                                                          
+]
+
+
+CScalar subclass: CULongLong [
+
+    <category: 'Language-C interface'>
+    <comment: nil>
+
+    CULongLong class >> sizeof [
+       "Answer the receiver's instances size"
+
+       <category: 'accessing'>
+       ^8
+    ]
+
+    CULongLong class >> alignof [
+       "Answer the receiver's instances required aligment"
+
+       <category: 'accessing'>
+       ^CLongLongAlignment
+    ]
+
+    CULongLong class >> cObjStoredType [
+       "Private - Answer an index referring to the receiver's instances scalar type"
+
+       <category: 'accessing'>
+       ^31
+    ]
+
+    sizeof [
+       "Answer the receiver's size"
+
+       <category: 'accessing'>
+       ^8
+    ]
+
+    alignof [
+       "Answer the receiver's required aligment"
+
+       <category: 'accessing'>
+       ^CLongLongAlignment
+    ]
+
+    cObjStoredType [
+       "Private - Answer an index referring to the receiver's scalar type"
+
+       <category: 'accessing'>
+       ^31
+    ]                                                          
+]
+
+
 CScalar subclass: CLong [
-    
     <category: 'Language-C interface'>
     <comment: nil>
 

@@ -1,3 +1,10 @@
+2011-08-01  Mathieu Suen  <mathieusuen@yahoo.fr>
+
+	* libgst/cint.c: Add long long support for calls.
+	* libgst/cint.h: Add CDATA_LONGLONG and CDATA_ULONGLONG.
+	* libgst/dict.c: Pass CLongLongAlignment to Smalltalk.
+	* libgst/prims.def: Add long long support for memory access.
+
 2011-07-27  Gwenael Casaccio  <mrgwen@gmail.com>
             Paolo Bonzini  <bonzini@gnu.org>
 

@@ -1,3 +1,11 @@
+2011-08-01  Mathieu Suen  <mathieusuen@yahoo.fr>
+
+	* kernel/CCallable.st: Add #longLong/#uLongLong.
+	* kernel/CObject.st: Add CLongLong and CULongLong.
+	* kernel/CType.st: Add CLongLongType and CULongLongType.
+	* tests/cobjects.ok: Add long long test cases.
+	* tests/cobjects.st: Regenerate.
+
 2011-07-29  Gwenael Casaccio  <mrgwen@gmail.com>
 
 	* kernel/AbstNamespc.st: Fix name of #compileAll.
