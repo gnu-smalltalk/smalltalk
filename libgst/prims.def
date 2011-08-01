@@ -3647,6 +3647,12 @@ primitive VMpr_Memory_at [succeed,fail]
 	case CDATA_ULONG:		/* unsigned long */
 	  PUSH_OOP (FROM_C_ULONG (*(unsigned long *) arg2));
 	  PRIM_SUCCEEDED;
+       case CDATA_LONGLONG:            /* long long */
+         PUSH_OOP (from_c_int_64 (*(long long *) arg2));
+         PRIM_SUCCEEDED;
+       case CDATA_ULONGLONG:           /* unsigned long long */
+         PUSH_OOP (from_c_uint_64 (*(unsigned long long *) arg2));
+         PRIM_SUCCEEDED;
 	case CDATA_FLOAT:		/* float */
 	  PUSH_OOP (floate_new (*(float *) arg2));
 	  PRIM_SUCCEEDED;
@@ -3724,12 +3730,20 @@ primitive VMpr_Memory_atPut [succeed,fail]
 	  break;
 	case CDATA_LONG:		/* long */
 	case CDATA_ULONG:		/* unsigned long */
-	  if (IS_C_LONG (oop4))
+	  if (IS_C_LONG (oop4) || IS_C_ULONG (oop4))
 	    {
 	      *(long *) arg2 = TO_C_LONG (oop4);
 	      PRIM_SUCCEEDED;
 	    }
 	  break;
+       case CDATA_LONGLONG:            /* long */
+       case CDATA_ULONGLONG:           /* unsigned long */
+         if (is_c_int_64 (oop4) || is_c_uint_64 (oop4))
+           {
+             *(long long *) arg2 = to_c_int_64 (oop4);
+             PRIM_SUCCEEDED;
+           }
+         break;
 	case CDATA_FLOAT:		/* float */
 	  if (IS_CLASS (oop4, _gst_floatd_class))
 	    {
@@ -3779,7 +3793,7 @@ primitive VMpr_Memory_atPut [succeed,fail]
 	  PRIM_SUCCEEDED;
 	case CDATA_INT:		/* int */
 	case CDATA_UINT:		/* unsigned int */
-	  if (IS_C_INT (oop4))
+	  if (IS_C_INT (oop4) || is_c_uint_32 (oop4))
 	    {
 	      *(int *) arg2 = TO_C_INT (oop4);
 	      PRIM_SUCCEEDED;
@@ -4623,10 +4637,17 @@ primitive VMpr_CObject_at :
 	      SET_STACKTOP_INT (*(unsigned short *) addr);
 	      PRIM_SUCCEEDED;
 
+           case CDATA_LONGLONG:
+             SET_STACKTOP (from_c_int_64 (*(long long *) addr));
+             PRIM_SUCCEEDED;
+
+           case CDATA_ULONGLONG:
+             SET_STACKTOP (from_c_uint_64 (*(unsigned long long *) addr));
+             PRIM_SUCCEEDED;
+
 	    case CDATA_LONG:
 	      SET_STACKTOP (FROM_C_LONG (*(long *) addr));
 	      PRIM_SUCCEEDED;
-
 	    case CDATA_ULONG:
 	      SET_STACKTOP (FROM_C_ULONG (*(unsigned long *) addr));
 	      PRIM_SUCCEEDED;
@@ -4778,6 +4799,15 @@ primitive VMpr_CObject_atPut [succeed,fail]
 	      PRIM_SUCCEEDED;
 	    }
 	  break;
+
+       case CDATA_LONGLONG:            /* long */
+       case CDATA_ULONGLONG:           /* ulong */
+         if (IS_C_LONG (oop3))
+           {
+             *(long long *) addr = (long long) to_c_int_64 (oop3);
+             PRIM_SUCCEEDED;
+           }
+         break;
 
 	case CDATA_FLOAT:
 	  {

@@ -1173,6 +1173,8 @@ init_c_symbols ()
 		    FROM_INT (DBL_MAX_EXP));
   NAMESPACE_AT_PUT (cSymbolsOOP, _gst_intern_string ("CDoubleAlignment"),
 		    FROM_INT (ALIGNOF_DOUBLE));
+  NAMESPACE_AT_PUT (cSymbolsOOP, _gst_intern_string ("CLongLongAlignment"),
+		    FROM_INT (ALIGNOF_LONG_LONG));
 
   NAMESPACE_AT_PUT (cSymbolsOOP, _gst_intern_string ("CFloatPInf"),
 		    floate_new ((float) INFINITY));

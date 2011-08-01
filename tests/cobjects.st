@@ -119,11 +119,17 @@ Object extend [
     testCObjectPtr: cObject [
         <cCall: 'testCObjectPtr' returning: #void args: #(#cObjectPtr)>
     ]
+
+    testLongLong: aLong [
+         <cCall: 'testLongLong' returning: #void args: #(#longLong)>
+    ]
 ]
 
 Eval [ true testCallin: (CCallbackDescriptor for: [ :x | x printNl. 3 ]
-	returning: #int withArgs: #(#string)) ]
+       returning: #int withArgs: #(#string)) ]
 Eval [ nil testCString: (CString value: 'this is a test') ]
+
+Eval [ nil testLongLong: 16r100110012002. ^nil ]
 
 Eval [
     cObject := CCharType new.
