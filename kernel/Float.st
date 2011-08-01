@@ -529,11 +529,11 @@ if the hardware supports it.'>
         sameUp := true.
 
         [digit := num // weight.
+        num := num \\ weight.
 	allNines := allNines and: [digit = 9].
-        sameDown := sameDown and: [(num - eps) // weight = digit].
-        sameUp := sameUp and: [(num + eps) // weight = digit].
+        sameDown := sameDown and: [num >= eps].
+        sameUp := sameUp and: [num < (weight - eps)].
 	digits := digits * 10 + digit.
-	num := num - (digit * weight).
 	prevWeight := weight.
 	weight := weight / 10.
 	sameDown or: [sameUp]] whileTrue.
