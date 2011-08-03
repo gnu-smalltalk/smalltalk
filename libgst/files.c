@@ -286,7 +286,6 @@ static const char standard_files[] = {
   "Getopt.st\0"
   "Generator.st\0"
   "StreamOps.st\0"
-  "ObjDumper.st\0"
   "Regex.st\0"
   "PkgLoader.st\0"
   "Autoload.st\0"

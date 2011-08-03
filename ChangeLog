@@ -1,3 +1,9 @@
+2011-08-03  Gwenael Casaccio  <mrgwen@gmail.com>
+
+	* kernel/ObjDumper.st: Remove.
+	* tests/objdump.ok: Remove.
+	* tests/objdump.st: Remove.
+
 2011-08-03  Paolo Bonzini <bonzini@gnu.org>
 
 	* kernel/ObjDumper.st: Fix VersionableObjectProxy.  Reported by

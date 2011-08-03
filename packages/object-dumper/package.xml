@@ -1,0 +1,12 @@
+<package>
+  <name>ObjectDumper</name>
+
+  <test>
+    <sunit>AbstractObjectDumperTest*</sunit>
+    <filein>ObjectDumperTest.st</filein>
+  </test>
+
+  <filein>ObjDumper.st</filein>
+  <filein>Proxy.st</filein>
+  <filein>Init.st</filein>
+</package>

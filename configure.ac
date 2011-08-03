@@ -404,6 +404,7 @@ GST_PACKAGE_ENABLE([Complex], [complex])
 GST_PACKAGE_ENABLE([Continuations], [continuations])
 GST_PACKAGE_ENABLE([CParser], [cpp])
 GST_PACKAGE_ENABLE([DebugTools], [debug])
+GST_PACKAGE_ENABLE([ObjectDumper], [object-dumper])
 
 GST_PACKAGE_ENABLE([DBD-MySQL], [dbd-mysql])
 AC_MSG_CHECKING([whether to run MySQL tests])

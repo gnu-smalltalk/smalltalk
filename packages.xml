@@ -139,7 +139,6 @@
   <file>ByteArray.st</file>
   <file>FilePath.st</file>
   <file>File.st</file>
-  <file>ObjDumper.st</file>
   <file>SysDict.st</file>
   <file>ScaledDec.st</file>
   <file>FileSegment.st</file>

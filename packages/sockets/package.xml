@@ -2,6 +2,8 @@
   <name>Sockets</name>
   <namespace>Sockets</namespace>
 
+  <prereq>ObjectDumper</prereq>
+
   <callout>TCPaccept</callout>
 
   <filein>Buffers.st</filein>

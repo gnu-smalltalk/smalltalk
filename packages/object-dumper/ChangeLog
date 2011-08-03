@@ -1,0 +1,7 @@
+2011-08-03  Gwenael Casaccio  <mrgwen@gmail.com>
+
+	* ObjDumper.st: New, split from kernel/ObjDumper.st.
+	* Proxy.st: New, split from kernel/ObjDumper.st.
+	* Init.st: New, split from kernel/ObjDumper.st.
+	* ObjectDumperTests: New, refactored from tests/objdump.st.
+

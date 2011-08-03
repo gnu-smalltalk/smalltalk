@@ -1,6 +1,9 @@
 <package>
   <name>SandstoneDb</name>
   <namespace>SandstoneDb</namespace>
+
+  <prereq>ObjectDumper</prereq>
+
   <test>
     <filein>Tests/Extensions.st</filein>
     <filein>Tests/SDPersonMock.st</filein>

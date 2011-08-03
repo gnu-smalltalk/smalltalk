@@ -13,7 +13,7 @@ floatmath.ok floatmath.st getopt.ok getopt.st geometry.ok geometry.st hash.ok \
 hash.st hash2.ok hash2.st heapsort.ok heapsort.st intmath.ok intmath.st \
 lists.ok lists.st lists1.ok lists1.st lists2.ok lists2.st matrix.ok \
 matrix.st methcall.ok methcall.st mutate.ok mutate.st nestedloop.ok \
-nestedloop.st objdump.ok objdump.st objects.ok objects.st objinst.ok \
+nestedloop.st objects.ok objects.st objinst.ok \
 objinst.st processes.ok processes.st prodcons.ok prodcons.st quit.ok \
 quit.st random-bench.ok random-bench.st untrusted.ok untrusted.st sets.ok \
 sets.st sieve.ok sieve.st strcat.ok strcat.st strings.ok strings.st \
