@@ -293,12 +293,13 @@ references at design time and you override #storeOn: to deal with them'>
 	<category: 'loading/dumping objects'>
 	"Special-case metaclasses and other objects"
 
-	| index |
+	| index class |
 	stream atEnd ifTrue: [^self pastEnd].
 	index := self nextLong.
-	^index < 0 
-	    ifTrue: [self specialCaseLoad: index]
-	    ifFalse: [self primLoad: index]
+	index < 0 ifTrue: [^self specialCaseLoad: index].
+	index > 0 ifTrue: [^self lookupIndex: index].
+	class := self loadClass.
+	^self primLoad: class
     ]
 
     flush [
@@ -480,7 +481,7 @@ references at design time and you override #storeOn: to deal with them'>
 	self notYetImplemented
     ]
 
-    loadFromVersion: version fixedSize: instSize [
+    loadFromVersion: version fixedSize: instSize index: index [
 	"Private - Basic code to load an object from a stream associated with
 	 the receiver, calling the class'
 	 #convertFromVersion:withFixedVariables:instanceVariables:for: method.
@@ -489,16 +490,16 @@ references at design time and you override #storeOn: to deal with them'>
 	 that method is registered and returned."
 
 	<category: 'private'>
-	| object class realSize size fixed indexed placeholder index shape |
-	index := self nextLong.
+	| object class realSize size fixed indexed placeholder shape |
 	index > 0 ifTrue: [^self lookupIndex: index].
-	self register: (placeholder := Object new).
 	class := self loadClass.
+        version == class binaryRepresentationVersion ifTrue: [ ^ self primLoad: class ].
+	self register: (placeholder := Object new).
 	class isVariable ifTrue: [size := self nextUlong].
 	realSize := instSize isNil 
 		    ifTrue: [class nonVersionedInstSize]
 		    ifFalse: [instSize].
-	(1 to: realSize) collect: [:i | self load].
+	fixed := (1 to: realSize) collect: [:i | self load].
 	class isVariable 
 	    ifTrue: 
 		[class isPointers 
@@ -537,15 +538,13 @@ references at design time and you override #storeOn: to deal with them'>
 	^placeholder
     ]
 
-    primLoad: index [
+    primLoad: class [
 	"Private - Basic code to load an object from the stream associated with the
-	 receiver, assuming it doesn't use proxies and the like.  The first four
-	 bytes of the encoding are in index"
+	 receiver, assuming it doesn't use proxies and the like.  The class of the
+	 loaded object is in index"
 
 	<category: 'private'>
-	| object class shape |
-	index > 0 ifTrue: [^self lookupIndex: index].
-	class := self loadClass.
+	| object shape |
 	class isMetaclass ifTrue: [^class instanceClass].
 	object := self loadFixedPart: class.
 	class isVariable ifFalse: [^object postLoad; yourself].
@@ -1019,21 +1018,19 @@ information.'>
 	 non-versioned object."
 
 	<category: 'saving and restoring'>
-	| version object instSize |
+	| version object instSize index |
 	version := anObjectDumper nextLong.
 	version := version >= 0 
 		    ifTrue: 
-			["The version was actually an object index -- move back in the stream."
-
-			anObjectDumper stream skip: -4.
+			["The version was actually an object index."
 			instSize := nil.
+			index := version.
 			nil]
 		    ifFalse: 
 			[instSize := anObjectDumper nextUlong.
+			index := self nextLong.
 			-1 - version].
-	^version == self object class binaryRepresentationVersion 
-	    ifTrue: [anObjectDumper load]
-	    ifFalse: [anObjectDumper loadFromVersion: version fixedSize: instSize]
+	^anObjectDumper loadFromVersion: version fixedSize: instSize index: index
     ]
 
     dumpTo: anObjectDumper [
