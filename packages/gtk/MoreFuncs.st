@@ -48,6 +48,20 @@ GLib class extend [
 
 GObject extend [
 
+    connectSignalAfter: name to: handler selector: sel userData: userData [
+       <category: 'C call-outs'>
+       <cCall: 'gstGtkConnectSignalAfter' returning: #int
+       args: #(#selfSmalltalk #string #smalltalk #smalltalk #smalltalk )>
+       
+    ]
+
+    connectSignalAfter: name to: handler selector: sel [
+       <category: 'C call-outs'>
+       <cCall: 'gstGtkConnectSignalAfterNoUserData' returning: #int
+       args: #(#selfSmalltalk #string #smalltalk #smalltalk )>
+       
+    ]
+
     connectSignal: name to: handler selector: sel userData: userData [
        <category: 'C call-outs'>
        <cCall: 'gstGtkConnectSignal' returning: #int

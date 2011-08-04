@@ -600,11 +600,12 @@ invoke_smalltalk_closure (GClosure     *closure,
 
 /* Signal implementation.  */
 int
-connect_signal (OOP widget, 
-		char *event_name, 
-		OOP receiver, 
-		OOP selector,
-		OOP user_data)
+connect_signal_smalltalk (OOP widget, 
+			  char *event_name, 
+			  OOP receiver, 
+			  OOP selector,
+			  OOP user_data,
+			  gboolean after)
 {
   GtkWidget    *cWidget = _gst_vm_proxy->OOPToCObject (widget);
   GClosure     *closure;
@@ -642,7 +643,18 @@ connect_signal (OOP widget,
   closure = create_smalltalk_closure (receiver, selector, user_data,
                                      widget, n_params);
 
-  return g_signal_connect_closure (cWidget, event_name, closure, FALSE);
+  return g_signal_connect_closure (cWidget, event_name, closure, after);
+}
+
+int
+connect_signal (OOP widget, 
+		char *event_name, 
+		OOP receiver, 
+		OOP selector,
+		OOP user_data)
+{
+  return connect_signal_smalltalk (widget, event_name, receiver, selector,
+                                   user_data, FALSE);
 }
 
 int
@@ -652,6 +664,26 @@ connect_signal_no_user_data (OOP widget,
 			     OOP selector)
 {
   return connect_signal (widget, event_name, receiver, selector, NULL);
+}
+
+int
+connect_signal_after (OOP widget, 
+                      char *event_name, 
+                      OOP receiver, 
+                      OOP selector,
+                      OOP user_data)
+{
+  return connect_signal_smalltalk (widget, event_name, receiver, selector,
+                                   user_data, TRUE);
+}
+
+int
+connect_signal_after_no_user_data (OOP widget, 
+                                   char *event_name, 
+                                   OOP receiver, 
+                                   OOP selector)
+{
+  return connect_signal_after (widget, event_name, receiver, selector, NULL);
 }
 
 static int
@@ -1280,6 +1312,8 @@ gst_initModule (proxy)
   _gst_vm_proxy->defineCFunc ("gstGtkConnectAccelGroupNoUserData", connect_accel_group_no_user_data);
   _gst_vm_proxy->defineCFunc ("gstGtkConnectSignal", connect_signal);
   _gst_vm_proxy->defineCFunc ("gstGtkConnectSignalNoUserData", connect_signal_no_user_data);
+  _gst_vm_proxy->defineCFunc ("gstGtkConnectSignalAfter", connect_signal_after);
+  _gst_vm_proxy->defineCFunc ("gstGtkConnectSignalAfterNoUserData", connect_signal_after_no_user_data);
   _gst_vm_proxy->defineCFunc ("gstGtkMain", create_main_loop_thread);
   _gst_vm_proxy->defineCFunc ("gstGtkMainContextIterate", main_context_iterate);
   _gst_vm_proxy->defineCFunc ("gstGtkGetProperty", object_get_property);
