@@ -136,7 +136,8 @@ extern int g_signal_connect_smalltalk_closure (OOP widget,
 			   char *event_name, 
 			   OOP receiver, 
 			   OOP selector,
-			   OOP user_data);
+			   OOP user_data,
+                           gboolean after);
 
 extern void gst_gobject_init (void);
 

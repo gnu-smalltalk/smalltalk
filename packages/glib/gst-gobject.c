@@ -473,10 +473,11 @@ smalltalk_closure_new (OOP receiver,
 /* Signal implementation.  */
 int
 g_signal_connect_smalltalk_closure (OOP widget, 
-		char *event_name, 
-		OOP receiver, 
-		OOP selector,
-		OOP user_data)
+                                    char *event_name, 
+                                    OOP receiver, 
+                                    OOP selector,
+                                    OOP user_data,
+                                    gboolean after)
 {
   GObject      *gObject = gst_oop_to_c_object (widget);
   GClosure     *closure;
@@ -514,5 +515,5 @@ g_signal_connect_smalltalk_closure (OOP widget,
   closure = smalltalk_closure_new (receiver, selector, user_data,
 				   widget, n_params);
 
-  return g_signal_connect_closure (gObject, event_name, closure, FALSE);
+  return g_signal_connect_closure (gObject, event_name, closure, after);
 }

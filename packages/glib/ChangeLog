@@ -1,3 +1,10 @@
+2011-08-04  Paolo Bonzini  <bonzini@gnu.org>
+
+	* gst-gobject.c: Add AFTER parameter to g_signal_connect_smalltalk_closure.
+	* gst-gobject.h: Adjust prototype.
+	* gst-glib.c: Add functions to connect signal at end of list.
+	* GLib.st: Likewise.
+
 2011-01-20  Denis Washington <denisw@online.de>
 
 	* gst-gobject.c: Adopt new names for the API.
