@@ -1760,7 +1760,7 @@ URIIdentifier subclass: SiteIdentifier [
 	    ifTrue: [^true].
 	"is this always good?"
 	myIP := SpIPAddress hostName: self ip port: self port.
-	otherIP := SpIPAddress hostName: aSiteIdentifier ip
+	otherIP := SpIPAddress hostName: aSiteIdentifier ip hostAddressString
 		    port: aSiteIdentifier port.
 	^myIP hostAddress = otherIP hostAddress
     ]

@@ -407,14 +407,14 @@ HTTPMessage subclass: HTTPRequest [
     printOn: aStream [
 	<category: 'private'>
 	aStream nextPutAll: 'a HTTPRequest ' , self methodName.
-	self isHttp10 ifTrue: [aStream nextPut: ' HTTP/1.0'].
+	self isHttp10 ifTrue: [aStream nextPutAll: ' HTTP/1.0'].
 	self peer notNil 
 	    ifTrue: 
 		[aStream
 		    cr;
 		    tab;
 		    nextPutAll: ' from: ';
-		    nextPutAll: self peer].
+		    nextPutAll: self peer hostAddressString].
 	aStream
 	    cr;
 	    tab;

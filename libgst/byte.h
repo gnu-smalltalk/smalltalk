@@ -199,7 +199,7 @@ extern bc_vector _gst_save_bytecode_array ()
    BYTECODES, which should have been returned at some previous point
    from _gst_save_bytecode_array().  Return the TAG that was passed
    to _gst_save_bytecode_array.  */
-extern void _gst_restore_bytecode_array () 
+extern void _gst_restore_bytecode_array (bc_vector)
   ATTRIBUTE_HIDDEN;
 
 /* This copies the byte instance variables out of the Smalltalk
