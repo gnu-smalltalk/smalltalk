@@ -120,12 +120,12 @@ const struct tool tools[] = {
   },
   {
     "gst-browser", "scripts/Load.st",
-    "-I|--image-file: --kernel-directory: -v|-V|--verbose",
+    "-i|--rebuild-image -I|--image-file: --kernel-directory: -v|-V|--verbose",
     "--dry-run\0--start\0Browser\0", false
   },
   {
     "gst-blox", "scripts/Load.st",
-    "-I|--image-file: --kernel-directory: -v|-V|--verbose",
+    "-i|--rebuild-image -I|--image-file: --kernel-directory: -v|-V|--verbose",
     "--dry-run\0--start\0BLOXBrowser\0", false
   },
   {
