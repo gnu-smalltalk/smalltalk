@@ -1,5 +1,10 @@
 2011-08-05  Holger Freyther  <holger@freyther.de>
 
+	* Messages.st: Fix HTTPRequest>>#printOn:.
+	by using nextPutAll: for Strings.
+
+2011-08-05  Holger Freyther  <holger@freyther.de>
+
 	* HTTP.st: Fix response generation for websites
 	available on a specific interface. Convert the
 	SpIPAddress to a string so it can be resolved
