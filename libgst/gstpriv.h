@@ -303,7 +303,7 @@ enum {
 
   /* The grouping of all the flags which are not valid across image
      saves and loads.  */
-  F_RUNTIME = 0x7FF8000U,
+  F_RUNTIME = 0x7FFF8000U,
 
   /* Set if the references to the instance variables of the object
      are weak.  */
