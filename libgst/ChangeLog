@@ -1,5 +1,10 @@
 2011-08-05  Holger Freyther  <holger@freyther.de>
 
+	* libgst/interp.inl: Make smatch happy and add
+	parameters to the function.
+
+2011-08-05  Holger Freyther  <holger@freyther.de>
+
 	* libgst/byte.h: Make smatch happy and add
 	parameters to the function.
 
