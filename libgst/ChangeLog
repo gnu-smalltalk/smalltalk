@@ -1,4 +1,9 @@
+2011-08-06  Paolo Bonzini  <bonzini@gnu.org>
+
+	* libgst/interp.inl: Fix previous commit.
+
 2011-08-05  Holger Freyther  <holger@freyther.de>
+            Paolo Bonzini  <bonzini@gnu.org>
 
 	* libgst/interp.inl: Make smatch happy and add
 	parameters to the function.

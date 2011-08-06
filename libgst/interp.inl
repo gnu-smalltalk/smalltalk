@@ -61,7 +61,7 @@ static inline OOP mul_with_check (OOP op1, OOP op2,
                                   mst_Boolean *overflow);
 
 /* Generate random number using the Mersenne Twister technique */
-static inline uint32_t random_next (void);
+static inline uint32_t random_next (uint32_t *);
 static inline void random_generate (uint32_t *);
 
 /* These do not need overflow checking.  */
