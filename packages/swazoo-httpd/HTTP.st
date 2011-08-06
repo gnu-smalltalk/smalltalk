@@ -192,7 +192,7 @@ Object subclass: HTTPConnection [
 			ifTrue: [aSwazooTask response: HTTPResponse badRequest].
 		[request peer: self stream socket remoteAddress] on: Error do: [:ex | ].
 		request
-		    ip: self stream socket localAddress;
+		    ip: self stream socket localAddress hostAddressString;
 		    setTimestamp.
 		aSwazooTask request: request]
 	    on: SpError , HTTPException
@@ -1745,7 +1745,7 @@ URIIdentifier subclass: SiteIdentifier [
 	    ifTrue: [^true].
 	"is this always good?"
 	myIP := SpIPAddress hostName: self ip port: self port.
-	otherIP := SpIPAddress hostName: aSiteIdentifier ip hostAddressString
+	otherIP := SpIPAddress hostName: aSiteIdentifier ip
 		    port: aSiteIdentifier port.
 	^myIP hostAddress = otherIP hostAddress
     ]
