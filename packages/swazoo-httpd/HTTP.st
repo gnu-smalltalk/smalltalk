@@ -1371,7 +1371,7 @@ Object subclass: SwazooURI [
     fromString: aString [
 	<category: 'initialize-release'>
 	| sourceStream |
-	sourceStream := ReadStream on: (HTTPString decodedHTTPFrom: aString).
+	sourceStream := ReadStream on: aString.
 	self fromStream: sourceStream.
 	^self
     ]
@@ -1423,21 +1423,6 @@ Object subclass: SwazooURI [
 		    collect: [:each | HTTPString decodedHTTPFrom: each].
 	self identifier first = $/ ifTrue: [parts addFirst: '/'].
 	^parts reject: [:each | each isEmpty]
-    ]
-
-    identifierPathString [
-	"^aString
-	 I return the 'directory' part of the path name."
-
-	<category: 'accessing'>
-	| sourceStream targetStream |
-	targetStream := WriteStream on: String new.
-	sourceStream := ReadStream on: self identifier.
-	[sourceStream atEnd] whileFalse: 
-		[| fragment |
-		fragment := sourceStream throughAll: '/'.
-		fragment last = $/ ifTrue: [targetStream nextPutAll: fragment]].
-	^targetStream contents
     ]
 
     includesQuery: aString [
@@ -1494,7 +1479,7 @@ Object subclass: SwazooURI [
 		    nextPut: $?;
 		    nextPutAll: firstQuery key;
 		    nextPut: $=;
-		    nextPutAll: firstQuery value.
+		    nextPutAll: (HTTPString encodedHTTPFrom: firstQuery value).
 		2 to: self queries size
 		    do: 
 			[:queryIndex | 
@@ -1504,7 +1489,7 @@ Object subclass: SwazooURI [
 			    nextPut: $&;
 			    nextPutAll: aQuery key;
 			    nextPut: $=;
-			    nextPutAll: aQuery value]].
+			    nextPutAll: (HTTPString encodedHTTPFrom: aQuery value)]].
 	^self
     ]
 
@@ -1555,7 +1540,7 @@ Object subclass: SwazooURI [
 	| result |
 	result := self queries detect: [:aQuery | aQuery key = aString]
 		    ifNone: [aBlock].
-	^result == aBlock ifTrue: [aBlock value] ifFalse: [result value]
+	^result value
     ]
 
     readHostFrom: aStream [

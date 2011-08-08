@@ -1,3 +1,8 @@
+2011-08-08  Paolo Bonzini  <bonzini@gnu.org>
+
+	* HTTP.st: Fix parsing of encoded URIs.  Reported by Dale Henrichs.
+	* Tests.st: Add regression tests.
+
 2011-08-05  Holger Freyther  <holger@freyther.de>
 
 	* Messages.st: Fix HTTPRequest>>#printOn:.
