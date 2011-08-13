@@ -205,10 +205,12 @@ size and timestamps.'>
 		    into: [:old :each | old , Directory pathSeparatorString , each].
 
 	"Remove initial / from /C:/"
-	(isWindows and: 
-		[result size >= 4 and: 
-			[(result at: 1) isPathSeparator 
-			    and: [(result at: 3) = $: and: [(result at: 4) isPathSeparator]]]]) 
+	(isWindows
+		and: [result size >= 3
+		and: [(result at: 1) isPathSeparator 
+		and: [(result at: 3) = $:
+		and: [result size = 3 ifTrue: [result := result, '\'].
+		      (result at: 4) isPathSeparator]]]]) 
 	    ifTrue: [^result copyFrom: 2].
 
 	"Restore UNC paths."
