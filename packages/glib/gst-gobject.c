@@ -473,7 +473,7 @@ smalltalk_closure_new (OOP receiver,
 /* Signal implementation.  */
 int
 g_signal_connect_smalltalk_closure (OOP widget, 
-                                    char *event_name, 
+                                    char *signal_name, 
                                     OOP receiver, 
                                     OOP selector,
                                     OOP user_data,
@@ -490,9 +490,9 @@ g_signal_connect_smalltalk_closure (OOP widget,
   if (!G_IS_OBJECT(gObject))
      return (-1); /* Invalid widget passed */
 
-  sig_id = g_signal_lookup (event_name, G_OBJECT_TYPE(gObject));
+  sig_id = g_signal_lookup (signal_name, G_OBJECT_TYPE(gObject));
   if (sig_id == 0) 
-    return (-2); /* Invalid event name */
+    return (-2); /* Invalid signal name */
 
   g_signal_query (sig_id, &qry);
   oop_sel_args = gst_str_msg_send (selector, "numArgs", NULL);
@@ -500,12 +500,13 @@ g_signal_connect_smalltalk_closure (OOP widget,
     return (-3); /* Invalid selector */ 
 
   /* Check the number of arguments in the selector against the number of 
-     arguments in the event callback */
-  /* We can return fewer arguments than are in the event, if the others aren't 
-     wanted, but we can't return more, and returning nilOOPs instead is not 
-     100% satisfactory, so fail. */
+     arguments in the signal callback.
+
+     We can pass fewer arguments than are in the signal, if the others aren't 
+     wanted, but we can't pass more (passing nilOOPs instead is not 
+     100% satisfactory), so fail. */
   n_params = gst_oop_to_int (oop_sel_args);
-  if (n_params - qry.n_params > 2)
+  if (n_params > qry.n_params + 2)
     return (-4);
 
   /* Receiver is assumed to be OK, no matter what it is */
@@ -515,5 +516,5 @@ g_signal_connect_smalltalk_closure (OOP widget,
   closure = smalltalk_closure_new (receiver, selector, user_data,
 				   widget, n_params);
 
-  return g_signal_connect_closure (gObject, event_name, closure, after);
+  return g_signal_connect_closure (gObject, signal_name, closure, after);
 }

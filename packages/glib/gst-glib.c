@@ -508,6 +508,7 @@ gst_initModule (proxy)
   gst_log_set_handler (NULL);
   gst_log_set_handler ("Gtk");
   gst_log_set_handler ("GLib");
+  gst_log_set_handler ("GLib-GObject");
 
   _glib_vm_proxy = proxy;
   _glib_vm_proxy->defineCFunc ("gtkInitialized", gst_gtk_initialized);
