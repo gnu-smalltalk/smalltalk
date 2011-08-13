@@ -128,7 +128,10 @@ VMProxy gst_interpreter_proxy = {
   _gst_wakeup,
 
   /* New in 3.2.5.  */
-  _gst_uint_to_oop
+  _gst_uint_to_oop,
+
+  /* New in 3.3.  */
+  _gst_set_event_loop_handlers
 };
 
 /* Functions in comp.h.  */
@@ -598,3 +601,11 @@ gst_relocate_path (const char *path)
   return _gst_relocate_path (path);
 }
 
+
+/* Functions in events.h.  */
+mst_Boolean
+gst_set_event_loop_handlers(mst_Boolean (*poll) (int ms),
+			    void (*dispatch) (void))
+{
+  return _gst_set_event_loop_handlers(poll, dispatch);
+}

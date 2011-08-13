@@ -284,6 +284,12 @@ static inline mst_Boolean cached_index_oop_put_primitive (OOP rec,
 							  OOP val,
 							  intptr_t spec);
 
+/* This functions accepts an OOP for a Semaphore object and puts the
+   PROCESSOOP to sleep, unless the semaphore has excess signals
+   on it.  */
+static void sync_wait_process (OOP semaphoreOOP,
+			       OOP processOOP);
+
 /* Empty the queue of asynchronous calls.  */
 static void empty_async_queue (void);
 
@@ -1727,11 +1733,20 @@ _gst_async_signal_and_unregister (OOP semaphoreOOP)
 }
 
 void
-_gst_sync_wait (OOP semaphoreOOP)
+sync_wait_process (OOP semaphoreOOP, OOP processOOP)
 {
   gst_semaphore sem;
+  mst_Boolean isActive;
 
   sem = (gst_semaphore) OOP_TO_OBJ (semaphoreOOP);
+  if (IS_NIL (processOOP))
+    {
+      processOOP = get_active_process ();
+      isActive = true;
+    }
+  else
+    isActive = (processOOP == get_active_process ());
+
   if (TO_INT (sem->signals) <= 0)
     {
       /* Have to suspend.  Prepare return value for #wait and move
@@ -1740,8 +1755,9 @@ _gst_sync_wait (OOP semaphoreOOP)
          Tweaking the stack top means that this function should only
 	 be called from a primitive.  */
       SET_STACKTOP (_gst_nil_oop);
-      add_last_link (semaphoreOOP, get_active_process ());
-      if (IS_NIL (ACTIVE_PROCESS_YIELD ()))
+      remove_process_from_list (processOOP);
+      add_last_link (semaphoreOOP, processOOP);
+      if (isActive && IS_NIL (ACTIVE_PROCESS_YIELD ()))
         {
 	  printf ("No runnable process");
 	  activate_process (_gst_prepare_execution_environment ());
@@ -1751,6 +1767,12 @@ _gst_sync_wait (OOP semaphoreOOP)
     sem->signals = DECR_INT (sem->signals);
 
   /* printf ("wait %O %O\n", semaphoreOOP, sem->firstLink); */
+}
+
+void
+_gst_sync_wait (OOP semaphoreOOP)
+{
+  sync_wait_process (semaphoreOOP, _gst_nil_oop);
 }
 
 OOP

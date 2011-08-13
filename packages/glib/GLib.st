@@ -391,7 +391,7 @@ run
     <cCall: 'g_main_loop_run' returning: #void
         args: #( #self )>!
 
-quit
+primQuit
     <cCall: 'g_main_loop_quit' returning: #void
         args: #( #self )>!
 
@@ -452,20 +452,16 @@ CStruct subclass: GSList [
     ]
 ]
 
-GMainContext extend [
-    iterate [
-        <category: 'C call-outs'>
-        <asyncCCall: 'gstGtkMainContextIterate' args: #(#self )>
-
-    ]
-]
-
-
 GMainLoop class extend [
 
-    main: aSemaphore [
+    popMainLoop [
 	<category: 'C call-outs'>
-	<cCall: 'gstGtkMain' returning: #{GMainLoop} args: #(#smalltalk )>
+	<cCall: 'gstGtkPopMainLoop' returning: #{GMainLoop} args: #() >
+    ]
+
+    pushMainLoop [
+	<category: 'C call-outs'>
+	<cCall: 'gstGtkPushMainLoop' returning: #{GMainLoop} args: #() >
     ]
 ]
 
@@ -578,6 +574,31 @@ GList extend [
 ]
 
 
+GMainLoop extend [
+    | process sem |
+
+    quit [
+        | saveSem |
+        saveSem := sem.
+        process terminate.
+        process := nil.
+        sem := nil.
+        self primQuit.
+        saveSem signal.
+    ]
+
+    run [
+        sem := Semaphore new.
+        process := Processor forkEventLoop.
+        sem wait
+    ]
+
+    pop [
+        self address: 0.
+        self class popMainLoop unref
+    ]
+]
+
 GMainLoop class extend [
     | loop |
 
@@ -586,23 +607,12 @@ GMainLoop class extend [
     ]
 
     main [
-	"Main loop implementation.  Same as gtk_main, but it splits
-         g_main_context_run in two threads so that Smalltalk processes
-         run.  It is ended with GMainLoop>>#mainQuit."
+	"Main loop implementation.  The main loop is already running, this
+         only waits for it to be ended by GMainLoop>>#mainQuit."
 
 	<category: 'event loop'>
-	| sem newLoop context |
-	sem := Semaphore new.
-	newLoop := self main: sem.
-        newLoop isNil ifTrue: [ ^self ].
-        loop := newLoop.
-        context := loop getContext.
-
-	[
-            [sem wait.
-	    context iterate.
-            loop isRunning] whileTrue]
-                 ensure: [loop unref]
+        loop := self pushMainLoop.
+	[loop run] ensure: [loop := nil. self popMainLoop unref]
     ]
 
 ]

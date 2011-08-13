@@ -455,6 +455,7 @@ _gst_initialize (const char *kernel_dir,
 
   _gst_init_sysdep ();
   _gst_init_signals ();
+  _gst_init_event_loop();
   _gst_init_cfuncs ();
   _gst_init_sockets ();
   _gst_init_primitives ();

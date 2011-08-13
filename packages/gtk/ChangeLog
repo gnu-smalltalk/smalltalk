@@ -1,5 +1,10 @@
 2011-08-13  Paolo Bonzini  <bonzini@gnu.org>
 
+	* GtkImpl.st: Use GLib's support for nested event loops.
+	* gst-gtk.c: Disable gdk threads support.
+
+2011-08-13  Paolo Bonzini  <bonzini@gnu.org>
+
 	* gst-gtk.c: Show backtraces for GObject errors.
 
 2011-08-13  Paolo Bonzini  <bonzini@gnu.org>

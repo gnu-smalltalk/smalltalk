@@ -1,4 +1,19 @@
 2011-08-13  Paolo Bonzini  <bonzini@gnu.org>
+            Mathieu Suen  <mathieusuen@yahoo.fr>
+
+	* libgst/dict.c: Add eventSemaphore to the ProcessorScheduler
+	class.
+	* libgst/events.c: Add support for event polling handlers.
+	* libgst/events.h: Add declarations.
+	* libgst/files.c: Call _gst_init_event_loop.
+	* libgst/gstpub.c: Add _gst_set_event_loop_handlers to VMProxy
+	and add wrapper for libgst.so.
+	* libgst/gstpub.h: Likewise.
+	* libgst/interp.c: Add sync_wait_process.
+	* libgst/interp.h: Add eventSemaphore to ProcessorScheduler.
+	* libgst/prims.def: Add VMpr_Processor_dispatchEvents.
+
+2011-08-13  Paolo Bonzini  <bonzini@gnu.org>
 
 	* libgst/prims.def: Atomically nil the file descriptor field
 	when closing a FileDescriptor or socket.

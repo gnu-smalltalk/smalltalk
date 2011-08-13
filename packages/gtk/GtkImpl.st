@@ -556,24 +556,24 @@ GTK.GtkDialog extend [
     run [
         <category: 'services'>
 
-        | signals sema answer modal destroyed |
-        sema := Semaphore new.
+        | signals loop answer modal destroyed |
         modal := self getModal.
         self setModal: true.
+        destroyed := false.
         signals := {
             self
                 connectSignal: 'response'
-                to: [ :dialog :integer | answer := integer. sema signal ]
+                to: [ :dialog :integer | answer := integer. loop quit ]
                 selector: #value:value:.
 
             self
                 connectSignal: 'unmap'
-                to: sema
-                selector: #signal.
+                to: loop
+                selector: #quit.
 
             self
                 connectSignal: 'delete_event'
-                to: [ answer := Gtk gtkResponseDeleteEvent. sema signal. true ]
+                to: [ answer := Gtk gtkResponseDeleteEvent. loop quit. true ]
                 selector: #value.
 
             self
@@ -581,8 +581,8 @@ GTK.GtkDialog extend [
                 to: [ destroyed := true ]
                 selector: #value }.
 
-        self show.
-        sema wait.
+        loop := GLib.GMainLoop pushMainLoop.
+        [self show. loop run] ensure: [loop pop].
         destroyed ifFalse: [
             self setModal: modal.
             signals do: [ :each | self disconnectSignal: each ] ].

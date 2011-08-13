@@ -2930,6 +2930,52 @@ primitive VMpr_Process_yield [succeed,check_interrupt]
   PRIM_SUCCEEDED;
 }
 
+/* Processor waitForEvents */
+primitive VMpr_Processor_dispatchEvents [succeed,check_interrupt]
+{
+  interp_jmp_buf jb;
+  gst_processor_scheduler processor;
+  OOP oop1 = STACKTOP ();
+  OOP semaphoreOOP;
+  OOP processOOP;
+  inc_ptr incPtr;
+
+  incPtr = INC_SAVE_POINTER ();
+  _gst_primitives_executed++;
+  processor = (gst_processor_scheduler) OOP_TO_OBJ (oop1);
+  if (TO_INT (processor->objSize)
+      > offsetof (struct gst_processor_scheduler, eventSemaphore) / sizeof(OOP))
+    {
+      processor = (gst_processor_scheduler) OOP_TO_OBJ (_gst_processor_oop);
+      semaphoreOOP = processor->eventSemaphore;
+      INC_ADD_OOP (semaphoreOOP);
+    }
+  else
+    semaphoreOOP = _gst_nil_oop;
+
+  processOOP = get_active_process ();
+  INC_ADD_OOP (processOOP);
+
+  push_jmp_buf (&jb, false, processOOP);
+  if (setjmp (jb.jmpBuf) == 0)
+    _gst_dispatch_events ();
+
+  if (pop_jmp_buf ())
+    stop_execution ();
+
+  if (!IS_NIL (semaphoreOOP))
+    {
+      /* If there was a context switch in the meanwhile, be sure to
+         suspend the process that invoked us!  */
+      sync_wait_process (semaphoreOOP, processOOP);
+      processor = (gst_processor_scheduler) OOP_TO_OBJ (_gst_processor_oop);
+      processor->eventSemaphore = semaphoreOOP;
+    }
+
+  INC_RESTORE_POINTER (incPtr);
+  PRIM_SUCCEEDED;
+}
+
 /* Processor pause: waitForSignal */
 primitive VMpr_Processor_pause [succeed,check_interrupt]
 {
@@ -2938,12 +2984,7 @@ primitive VMpr_Processor_pause [succeed,check_interrupt]
   _gst_primitives_executed++;
   oop1 = POP_OOP ();
   if (would_reschedule_process ())
-    {
-      if (oop1 == _gst_true_oop)
-	_gst_pause ();
-      else
-	_gst_usleep (20000);
-    }
+    _gst_idle (oop1 == _gst_true_oop);
 
   active_process_yield ();
   PRIM_SUCCEEDED;

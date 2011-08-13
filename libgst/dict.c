@@ -650,9 +650,10 @@ static const class_definition class_info[] = {
    "True", "truthValue", NULL, NULL },
 
   {&_gst_processor_scheduler_class, &_gst_object_class,
-   GST_ISP_FIXED, false, 6,
+   GST_ISP_FIXED, false, 7,
    "ProcessorScheduler",
-   "processLists activeProcess idleTasks processTimeslice gcSemaphore gcArray",
+   "processLists activeProcess idleTasks processTimeslice gcSemaphore gcArray "
+   "eventSemaphore",
    NULL, NULL },
 
   /* Change this, classDescription, or gst_class, and you must change

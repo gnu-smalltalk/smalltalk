@@ -1,4 +1,9 @@
 2011-08-13  Paolo Bonzini <bonzini@gnu.org>
+            Mathieu Suen  <mathieusuen@yahoo.fr>
+
+	* kernel/ProcSched.st: Add #dispatchEvents and #forkEventLoop.
+
+2011-08-13  Paolo Bonzini <bonzini@gnu.org>
 
 	* scripts/Remote.st: Move server logic to RemoteServer class.
 

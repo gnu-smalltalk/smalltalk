@@ -232,6 +232,7 @@ typedef struct gst_processor_scheduler
   OOP processTimeslice;
   OOP gcSemaphore;
   OOP gcArray;
+  OOP eventSemaphore;
 }
  *gst_processor_scheduler;
 

@@ -132,4 +132,20 @@ extern void _gst_pause (void);
 /* Wake up from a pause.  */
 extern void _gst_wakeup (void);
 
+/* Initialize the event loop.  */
+void _gst_init_event_loop();
+
+/* Call the event dispatching handler (as part of handling the
+   ProcessorScheduler>>#dispatchEvents primitive).  */
+void _gst_dispatch_events (void);
+
+/* The VM is idle, call the polling handler or just wait for something
+   (a signal) to happen if none is installed.  */
+void _gst_idle (mst_Boolean blocking);
+
+/* Set the polling and dispatching handlers for the VM's internal
+   event loop.  */
+mst_Boolean _gst_set_event_loop_handlers(mst_Boolean (*poll) (int ms),
+                                         void (*dispatch) (void));
+
 #endif /* GST_EVENTS_H */

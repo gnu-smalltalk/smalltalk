@@ -305,8 +305,6 @@ gst_initModule (proxy)
   gchar **argv = argvArray;
 
   initialized = gtk_init_check (&argc, &argv);
-  if (initialized)
-    gdk_threads_init ();
 
   _gtk_vm_proxy = proxy;
   _gtk_vm_proxy->defineCFunc ("gstGtkConnectAccelGroup", connect_accel_group);

@@ -218,6 +218,10 @@ typedef struct VMProxy
 
   /* 3.2.5+ functions.  */
   OOP (*uintToOOP) (unsigned long i);
+
+  /* 3.3+ functions.  */
+  mst_Boolean (*setEventLoopHandlers)(mst_Boolean (*poll) (int ms),
+				      void (*dispatch) (void));
 } VMProxy;
 
 /* Compatibility section */
@@ -334,6 +338,9 @@ extern OOP gst_wchar_to_oop (wchar_t c);
 extern OOP gst_wstring_to_oop (const wchar_t *str);
 extern wchar_t gst_oop_to_wchar (OOP oop);
 extern wchar_t *gst_oop_to_wstring (OOP oop);
+
+extern mst_Boolean gst_set_event_loop_handlers(mst_Boolean (*poll) (int ms),
+					       void (*dispatch) (void));
 
 /* This is exclusively for programs who link with libgst.a; plugins
    should not use this VMProxy but rather the one they receive in

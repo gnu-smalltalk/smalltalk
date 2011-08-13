@@ -33,7 +33,8 @@
 
 
 Object subclass: ProcessorScheduler [
-    | processLists activeProcess idleTasks processTimeslice gcSemaphore gcArray |
+    | processLists activeProcess idleTasks processTimeslice gcSemaphore gcArray
+      eventSemaphore |
     
     <category: 'Language-Processes'>
     <comment: 'I provide methods that control the execution of processes.'>
@@ -227,6 +228,23 @@ Object subclass: ProcessorScheduler [
 	<primitive: VMpr_Processor_pause>
     ]
 
+    dispatchEvents [
+	"Private - Main body of the event loop."
+
+	<category: 'idle tasks'>
+	<primitive: VMpr_Processor_dispatchEvents>
+    ]
+
+    forkEventLoop [
+        eventSemaphore isNil ifTrue: [^self].
+        eventSemaphore := Semaphore new.
+        ^[[Processor dispatchEvents] repeat] newProcess
+            priority: Processor userSchedulingPriority;
+            name: 'event dispatcher';
+            resume;
+            yourself
+    ]
+
     idle [
 	"Private - Call the next idle task.  Return whether GNU Smalltalk
 	 should pause until the next OS signal."
@@ -270,6 +288,7 @@ Object subclass: ProcessorScheduler [
 	| finalizerProcess |
 	idleTasks := OrderedCollection with: 0.
 	gcSemaphore := Semaphore new.
+	eventSemaphore := Semaphore new.
 	ObjectMemory addDependent: self.
 	finalizerProcess := 
 		[[gcSemaphore wait.  self startFinalizers] repeat]

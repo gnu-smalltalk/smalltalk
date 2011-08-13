@@ -136,182 +136,30 @@ connect_signal_after_no_user_data (OOP widget,
    are polled.  */
 
 static GMainLoop *loop;
-static GThread *thread; 
-static GMutex *mutex;
-static GCond *cond;
-static GCond *cond_dispatch;
-static volatile gboolean queued;
-
-#ifdef G_WIN32_MSG_HANDLE
-static gint
-gst_glib_poll (GPollFD *fds,
-	      guint    nfds,
-	      gint     timeout)
-{
-  HANDLE handles[MAXIMUM_WAIT_OBJECTS];
-  gint win32_timeout;
-  gint poll_msgs = -1;
-  GPollFD *f;
-  DWORD ready;
-  gint nhandles = 0;
-
-  for (f = fds; f < &fds[nfds]; ++f)
-      {
-        HANDLE h;
-        assert (f->fd >= 0);
-        if (f->fd == G_WIN32_MSG_HANDLE)
-          {
-            assert (poll_msgs == -1 && nhandles == f - fds);
-            poll_msgs = nhandles;
-#if 1
-            continue;
-#else
-	    /* Once the VM will host the event loop, it will be possible to
-	       have a MsgWaitForMultipleObjects call in the VM thread and use
-	       the result to wake up this side of the loop.  For now resort
-	       to polling; messages are checked by the VM thread every 20ms
-	       (in the GTK check function, called by g_main_context_check).  */
-            h = hWokenUpEvent;
-#endif
-          }
-        else
-          h = (HANDLE) f->fd;
-        if (nhandles == MAXIMUM_WAIT_OBJECTS)
-          {
-            g_warning (G_STRLOC ": Too many handles to wait for!\n");
-            break;
-          }
-        handles[nhandles++] = (HANDLE) f->fd;
-      }
-
-  if (nhandles == 0)
-    {
-      /* Wait for nothing (huh?) */
-      return 0;
-    }
-
-  /* If the VM were idling, it could in principle use MsgWaitForMultipleObjects
-     and tell us when it gets a message on its queue.  This would remove the
-     need for polling.  However, we cannot implement this until the main
-     loop is moved inside the VM.  */
-  if (poll_msgs != -1 /* && !idle */ )
-    win32_timeout = (timeout == -1 || timeout > 20) ? 20 : timeout;
-  else
-    win32_timeout = (timeout == -1) ? INFINITE : timeout;
-
-  ready = WaitForMultipleObjects (nhandles, handles, FALSE, win32_timeout);
-  if (ready == WAIT_FAILED)
-    {
-      gchar *emsg = g_win32_error_message (GetLastError ());
-      g_warning (G_STRLOC ": WaitForMultipleObjects() failed: %s", emsg);
-      g_free (emsg);
-    }
-
-  for (f = fds; f < &fds[nfds]; ++f)
-    f->revents = 0;
-
-#if 1
-  if (poll_msgs != -1)
-    {
-      if (ready >= WAIT_OBJECT_0 + poll_msgs
-	  && ready <= WAIT_OBJECT_0 + nhandles)
-        ready++;
-
-      else if (ready == WAIT_TIMEOUT
-	       && win32_timeout != INFINITE)
-        ready = WAIT_OBJECT_0 + poll_msgs;
-    }
-#endif
-
-  if (ready == WAIT_FAILED)
-    return -1;
-  if (ready == WAIT_TIMEOUT)
-    return 0;
-
-  f = &fds[ready - WAIT_OBJECT_0];
-  if (f->events & (G_IO_IN | G_IO_OUT))
-    {
-      if (f->events & G_IO_IN)
-        f->revents |= G_IO_IN;
-      else
-        f->revents |= G_IO_OUT;
-    }
-
-  return 1;
-}
-
-#if 0
-/* libgst should have something like this: */
-
-static gint
-_gst_pause ()
-{
-  idle = true;
-  ResetEvent (hWakeUpEvent);
-  MsgWaitForMultipleObjects (1, &hWakeUpEvent, FALSE, INFINITE, QS_ALLEVENTS);
-  SetEvent (hWokenUpEvent);
-}
-
-static gint
-_gst_wakeup ()
-{
-  idle = false;
-  SetEvent (hWakeUpEvent);
-}
-#endif
-#else
-#define gst_glib_poll g_poll
-#endif
-
-
-static void
-main_context_acquire_wait (GMainContext *context)
-{
-  while (!g_main_context_wait (context, cond, mutex));
-}
-
-static void
-main_context_signal (GMainContext *context)
-{
-  /* Restart the polling thread.  Note that #iterate is asynchronous, so
-     this might execute before the Smalltalk code finishes running!  This
-     allows debugging GTK+ signal handlers.  */
-  g_mutex_lock (mutex);
-  queued = false;
-  g_cond_broadcast (cond_dispatch);
-  g_mutex_unlock (mutex);
-}
-
+static GSList *loop_list;
 static GPollFD *fds;
 static int allocated_nfds, nfds;
 static int maxprio;
 
 static void
-main_context_iterate (GMainContext *context)
+main_loop_dispatch (void)
 {
-  g_mutex_lock (mutex);
-  if (!fds)
-    {
-      g_mutex_unlock (mutex);
-      return;
-    }
+  GMainContext *context = g_main_loop_get_context (loop);
+  if (!g_main_context_acquire (context))
+    abort ();
 
-  /* No need to keep the mutex except during g_main_context_acquire_wait
-     and g_main_context_release_signal, i.e. except while we operate on
-     cond.  */
-  main_context_acquire_wait (context);
-  g_mutex_unlock (mutex);
-  g_main_context_check (context, maxprio, fds, nfds);
   g_main_context_dispatch (context);
   g_main_context_release (context);
-  main_context_signal (context);
 }
 
-static gpointer
-main_loop_thread (gpointer semaphore)
+static mst_Boolean
+main_loop_poll (int ms)
 {
-  OOP semaphoreOOP = semaphore;
-  GMainContext *context = g_main_loop_get_context (loop);
+  GMainContext *context;
+  int timeout;
+
+  if (!loop || !g_main_loop_is_running (loop))
+    return FALSE;
 
   if (!fds)
     {
@@ -319,98 +167,57 @@ main_loop_thread (gpointer semaphore)
       allocated_nfds = 20;
     }
 
-  /* Mostly based on g_main_context_iterate (a static function in gmain.c)
-     except that we have to use our own mutex and that g_main_context_dispatch
-     is replaced by signaling semaphoreOOP.  */
+  context = g_main_loop_get_context (loop);
+  if (!g_main_context_acquire (context))
+    abort ();
 
-  g_mutex_lock (mutex);
-  while (g_main_loop_is_running (loop))
+  timeout = -1;
+  g_main_context_prepare (context, &maxprio);
+  while ((nfds = g_main_context_query (context, maxprio,
+                                       &timeout, fds, allocated_nfds))
+         > allocated_nfds)
     {
-      int timeout;
-
-      main_context_acquire_wait (context);
-      g_main_context_prepare (context, &maxprio);
-      while ((nfds = g_main_context_query (context, maxprio,
-                                           &timeout, fds, allocated_nfds))
-             > allocated_nfds)
-        {
-          g_free (fds);
-          fds = g_new (GPollFD, nfds);
-          allocated_nfds = nfds;
-        }
-
-      /* Release the context so that the other thread can dispatch while
-         this one polls.  g_main_context_release unlocks the mutex for us.  */
-      g_mutex_unlock (mutex);
-      g_main_context_release (context);
-
-      gst_glib_poll (fds, nfds, timeout);
-
-      /* Dispatch on the other thread and wait for it to rendez-vous.  */
-      g_mutex_lock (mutex);
-      queued = true;
-      _glib_vm_proxy->asyncSignal (semaphoreOOP);
-      
-      /* TODO: shouldn't be necessary.  */
-      _glib_vm_proxy->wakeUp ();
-      while (queued)
-        g_cond_wait (cond_dispatch, mutex);
+      g_free (fds);
+      fds = g_new (GPollFD, nfds);
+      allocated_nfds = nfds;
     }
 
-  g_main_loop_unref (loop);
-  loop = NULL;
-  thread = NULL;
-  g_mutex_unlock (mutex);
+  if (ms != -1 && (timeout == -1 || timeout > ms))
+    timeout = ms;
 
-  /* TODO: Not thread-safe! */
-  _glib_vm_proxy->unregisterOOP (semaphoreOOP);
-  return NULL;
+  g_main_context_release (context);
+#ifdef G_WIN32_MSG_HANDLE
+  g_poll (fds, nfds, timeout);
+#else
+  poll ((struct pollfd *) fds, nfds, timeout);
+#endif
+  return g_main_context_check (context, maxprio, fds, nfds);
 }
 
 GMainLoop *
-create_main_loop_thread (OOP semaphore)
+push_main_loop (void)
 {
-  if (!mutex)
-    {
-      /* One-time initialization.  */
-      mutex = g_mutex_new ();
-      cond = g_cond_new ();
-      cond_dispatch = g_cond_new ();
-    }
-
-  g_mutex_lock (mutex);
-  if (loop)
-    {
-      /* A loop exists.  If it is exiting, wait for it, otherwise
-         leave immediately.  */
-      GThread *loop_thread = thread;
-      gboolean exiting = g_main_loop_is_running (loop);
-      g_mutex_unlock (mutex);
-      if (!exiting)
-        return NULL;
-      if (loop_thread)
-        g_thread_join (loop_thread);
-    }
-  else
-    g_mutex_unlock (mutex);
-
-  _glib_vm_proxy->registerOOP (semaphore);
+  loop_list = g_slist_prepend (loop_list, loop);
   loop = g_main_loop_new (NULL, TRUE);
 
-  /* Add a second reference to be released when the thread exits.  The first
-     one is passed to Smalltalk ("return loop" below).  */
-  g_main_loop_ref (loop);
-  thread = g_thread_create (main_loop_thread, semaphore, TRUE, NULL);
-  if (!thread)
-    {
-      /* Destroy both references, since the thread won't have any occasion
-         to release his.  */
-      g_main_loop_unref (loop);
-      g_main_loop_unref (loop);
-      return NULL;
-    }
+  main_loop_poll (0);
 
+  /* Add a second reference that is passed to Smalltalk.  */
+  g_main_loop_ref (loop);
   return loop;
+}
+
+GMainLoop *
+pop_main_loop (void)
+{
+  GMainLoop *old_loop = loop;
+  loop = loop_list->data;
+  loop_list = g_slist_delete_link (loop_list, loop_list);
+
+  /* The Smalltalk code should still have a reference.  If not, it
+     ought to ignore the return value.  */
+  g_main_loop_unref (old_loop);
+  return old_loop;
 }
 
 /* Wrappers for GValue users.  */
@@ -520,11 +327,13 @@ gst_initModule (proxy)
   _glib_vm_proxy->defineCFunc ("gstGtkConnectSignalNoUserData", connect_signal_no_user_data);
   _glib_vm_proxy->defineCFunc ("gstGtkConnectSignalAfter", connect_signal_after);
   _glib_vm_proxy->defineCFunc ("gstGtkConnectSignalAfterNoUserData", connect_signal_after_no_user_data);
-  _glib_vm_proxy->defineCFunc ("gstGtkMain", create_main_loop_thread);
-  _glib_vm_proxy->defineCFunc ("gstGtkMainContextIterate", main_context_iterate);
+  _glib_vm_proxy->defineCFunc ("gstGtkPushMainLoop", push_main_loop);
+  _glib_vm_proxy->defineCFunc ("gstGtkPopMainLoop", pop_main_loop);
   _glib_vm_proxy->defineCFunc ("gstGtkGetProperty", object_get_property);
   _glib_vm_proxy->defineCFunc ("gstGtkSetProperty", object_set_property);
   _glib_vm_proxy->dlPushSearchPath ();
 #include "libs.def"
   _glib_vm_proxy->dlPopSearchPath ();
+
+  _glib_vm_proxy->setEventLoopHandlers(main_loop_poll, main_loop_dispatch);
 }

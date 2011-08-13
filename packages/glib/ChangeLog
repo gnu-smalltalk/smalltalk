@@ -1,3 +1,10 @@
+2011-08-13  Paolo Bonzini  <bonzini@gnu.org>
+
+	* GLib.st: Change main loop-related callouts to support the
+	new event polling support in the VM.
+	* gst-glib.c: Use the VM's event polling support so that polling
+	and dispatching happen in the same thread.
+
 2011-08-04  Paolo Bonzini  <bonzini@gnu.org>
 
 	* gst-gobject.c: Add AFTER parameter to g_signal_connect_smalltalk_closure.
