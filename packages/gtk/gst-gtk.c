@@ -1298,6 +1298,11 @@ gst_initModule (proxy)
 		     | G_LOG_LEVEL_ERROR
 		     | G_LOG_FLAG_FATAL | G_LOG_FLAG_RECURSION,
 		     my_log_handler, NULL);
+  g_log_set_handler ("GLib-GObject",
+		     G_LOG_LEVEL_WARNING | G_LOG_LEVEL_CRITICAL
+		     | G_LOG_LEVEL_ERROR
+		     | G_LOG_FLAG_FATAL | G_LOG_FLAG_RECURSION,
+		     my_log_handler, NULL);
 
   gtype_oop_info.value_table = &gtype_oop_value_table;
   G_TYPE_OOP = g_type_register_static (G_TYPE_BOXED, "OOP", &gtype_oop_info, 0);
