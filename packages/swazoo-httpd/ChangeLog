@@ -1,5 +1,16 @@
 2011-08-05  Holger Freyther  <holger@freyther.de>
 
+	* HTTP.st: The SiteIdentifier>>#ip should return a String, the
+	SiteIdentifierTest ended in a DNU on hostAddressString. Change
+	HTTPRequest to keep the remote address as string instead.
+
+2011-08-08  Paolo Bonzini  <bonzini@gnu.org>
+
+	* HTTP.st: Fix parsing of encoded URIs.  Reported by Dale Henrichs.
+	* Tests.st: Add regression tests.
+
+2011-08-05  Holger Freyther  <holger@freyther.de>
+
 	* Messages.st: Fix HTTPRequest>>#printOn:.
 	by using nextPutAll: for Strings.
 

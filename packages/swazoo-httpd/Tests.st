@@ -2562,7 +2562,7 @@ TestCase subclass: SwazooStreamTest [
 
 
 TestCase subclass: SwazooURITest [
-    | fooURI barURI queryURI |
+    | fooURI encodedURI barURI queryURI |
     
     <comment: nil>
     <category: 'Swazoo-Tests'>
@@ -2570,13 +2570,15 @@ TestCase subclass: SwazooURITest [
     setUp [
 	<category: 'running'>
 	fooURI := SwazooURI fromString: 'www.foo.com/index.html'.
-	queryURI := SwazooURI fromString: 'www.foo.com/index.html?foo=1&bar=hi'.
+	encodedURI := SwazooURI fromString: 'www.foo.com/index%3F.html'.
+	queryURI := SwazooURI fromString: 'www.foo.com/index.html?foo=1&bar=hi%26'.
 	barURI := SwazooURI fromString: 'www.bar.com:8080/files/'
     ]
 
     testHostname [
 	<category: 'running'>
 	self assert: fooURI hostname = 'www.foo.com'.
+	self assert: encodedURI hostname = 'www.foo.com'.
 	self assert: queryURI hostname = 'www.foo.com'.
 	self assert: barURI hostname = 'www.bar.com'
     ]
@@ -2584,6 +2586,7 @@ TestCase subclass: SwazooURITest [
     testIdentifier [
 	<category: 'running'>
 	self assert: fooURI identifier = '/index.html'.
+	self assert: encodedURI identifier = '/index%3F.html'.
 	self assert: queryURI identifier = '/index.html'.
 	self assert: barURI identifier = '/files/'
     ]
@@ -2592,6 +2595,8 @@ TestCase subclass: SwazooURITest [
 	<category: 'running'>
 	self assert: fooURI identifierPath 
 		    = (OrderedCollection with: '/' with: 'index.html').
+	self assert: encodedURI identifierPath 
+		    = (OrderedCollection with: '/' with: 'index?.html').
 	self assert: queryURI identifierPath 
 		    = (OrderedCollection with: '/' with: 'index.html').
 	self 
@@ -2601,6 +2606,7 @@ TestCase subclass: SwazooURITest [
     testIsDirectory [
 	<category: 'running'>
 	self deny: fooURI isDirectory.
+	self deny: encodedURI isDirectory.
 	self deny: queryURI isDirectory.
 	self assert: barURI isDirectory
     ]
@@ -2608,6 +2614,7 @@ TestCase subclass: SwazooURITest [
     testPort [
 	<category: 'running'>
 	self assert: fooURI port = 80.
+	self assert: encodedURI port = 80.
 	self assert: queryURI port = 80.
 	self assert: barURI port = 8080
     ]
@@ -2618,13 +2625,14 @@ TestCase subclass: SwazooURITest [
 	self assert: (queryURI includesQuery: 'foo').
 	self assert: (queryURI includesQuery: 'bar').
 	self assert: (queryURI queryAt: 'foo') = '1'.
-	self assert: (queryURI queryAt: 'bar') = 'hi'
+	self assert: (queryURI queryAt: 'bar') = 'hi&'
     ]
 
     testValue [
 	<category: 'running'>
 	self assert: fooURI value = 'http://www.foo.com/index.html'.
-	self assert: queryURI value = 'http://www.foo.com/index.html?foo=1&bar=hi'.
+	self assert: encodedURI value = 'http://www.foo.com/index%3F.html'.
+	self assert: queryURI value = 'http://www.foo.com/index.html?foo=1&bar=hi%26'.
 	self assert: barURI value = 'http://www.bar.com:8080/files/'
     ]
 ]
