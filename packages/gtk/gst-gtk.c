@@ -198,7 +198,7 @@ static void invoke_smalltalk_closure (GClosure     *closure,
 /* A wrapper around g_signal_connect_closure that looks up the
    selector and creates a Smalltalk GClosure.  */
 static int connect_signal (OOP widget, 
-			    char *event_name, 
+			    char *signal_name, 
 			    OOP receiver, 
 			    OOP selector,
 			    OOP user_data);
@@ -206,7 +206,7 @@ static int connect_signal (OOP widget,
 /* A wrapper around g_signal_connect_closure that looks up the
    selector and creates a Smalltalk GClosure.  */
 static int connect_signal_no_user_data (OOP widget, 
-					char *event_name, 
+					char *signal_name, 
 					OOP receiver, 
 					OOP selector);
 
@@ -601,7 +601,7 @@ invoke_smalltalk_closure (GClosure     *closure,
 /* Signal implementation.  */
 int
 connect_signal_smalltalk (OOP widget, 
-			  char *event_name, 
+			  char *signal_name, 
 			  OOP receiver, 
 			  OOP selector,
 			  OOP user_data,
@@ -618,9 +618,9 @@ connect_signal_smalltalk (OOP widget,
   if (!G_IS_OBJECT(cWidget))
      return (-1); /* Invalid widget passed */
 
-  sig_id = g_signal_lookup (event_name, G_OBJECT_TYPE(G_OBJECT(cWidget)));
+  sig_id = g_signal_lookup (signal_name, G_OBJECT_TYPE(G_OBJECT(cWidget)));
   if (sig_id == 0) 
-    return (-2); /* Invalid event name */
+    return (-2); /* Invalid signal name */
 
   g_signal_query (sig_id, &qry);
   oop_sel_args = _gst_vm_proxy->strMsgSend (selector, "numArgs", NULL);
@@ -628,12 +628,12 @@ connect_signal_smalltalk (OOP widget,
     return (-3); /* Invalid selector */ 
 
   /* Check the number of arguments in the selector against the number of 
-     arguments in the event callback */
-  /* We can return fewer arguments than are in the event, if the others aren't 
-     wanted, but we can't return more, and returning nilOOPs instead is not 
-     100% satisfactory, so fail. */
+     arguments in the signal callback */
+  /* We can pass fewer arguments than are in the signal, if the others aren't 
+     wanted, but we can't pass more (passing nilOOPs instead is not 
+     100% satisfactory), so fail. */
   n_params = _gst_vm_proxy->OOPToInt (oop_sel_args);
-  if (n_params - qry.n_params > 2)
+  if (n_params > qry.n_params + 2)
     return (-4);
 
   /* Receiver is assumed to be OK, no matter what it is */
@@ -643,47 +643,47 @@ connect_signal_smalltalk (OOP widget,
   closure = create_smalltalk_closure (receiver, selector, user_data,
                                      widget, n_params);
 
-  return g_signal_connect_closure (cWidget, event_name, closure, after);
+  return g_signal_connect_closure (cWidget, signal_name, closure, after);
 }
 
 int
 connect_signal (OOP widget, 
-		char *event_name, 
+		char *signal_name, 
 		OOP receiver, 
 		OOP selector,
 		OOP user_data)
 {
-  return connect_signal_smalltalk (widget, event_name, receiver, selector,
+  return connect_signal_smalltalk (widget, signal_name, receiver, selector,
                                    user_data, FALSE);
 }
 
 int
 connect_signal_no_user_data (OOP widget, 
-			     char *event_name, 
+			     char *signal_name, 
 			     OOP receiver, 
 			     OOP selector)
 {
-  return connect_signal (widget, event_name, receiver, selector, NULL);
+  return connect_signal (widget, signal_name, receiver, selector, NULL);
 }
 
 int
 connect_signal_after (OOP widget, 
-                      char *event_name, 
+                      char *signal_name, 
                       OOP receiver, 
                       OOP selector,
                       OOP user_data)
 {
-  return connect_signal_smalltalk (widget, event_name, receiver, selector,
+  return connect_signal_smalltalk (widget, signal_name, receiver, selector,
                                    user_data, TRUE);
 }
 
 int
 connect_signal_after_no_user_data (OOP widget, 
-                                   char *event_name, 
+                                   char *signal_name, 
                                    OOP receiver, 
                                    OOP selector)
 {
-  return connect_signal_after (widget, event_name, receiver, selector, NULL);
+  return connect_signal_after (widget, signal_name, receiver, selector, NULL);
 }
 
 static int
