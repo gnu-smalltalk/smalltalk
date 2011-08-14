@@ -5319,6 +5319,7 @@ primitive VMpr_ObjectMemory_snapshot [succeed,fail]
 {
   char *fileName;
   OOP oop2;
+  interp_jmp_buf jb;
   _gst_primitives_executed++;
 
   oop2 = POP_OOP ();
@@ -5332,9 +5333,22 @@ primitive VMpr_ObjectMemory_snapshot [succeed,fail]
 	 the save, the stack will be in this state. See below. */
       SET_STACKTOP (_gst_true_oop);
 
-      success = _gst_save_to_file (fileName);
+      push_jmp_buf (&jb, false, get_active_process ());
+      if (setjmp (jb.jmpBuf) == 0)
+        success = _gst_save_to_file (fileName);
+      else
+        {
+          success = false;
+          errno = EINTR;
+        }
+
       xfree (fileName);
-      if (success)
+      if (pop_jmp_buf ())
+        {
+          stop_execution ();
+          PRIM_SUCCEEDED;
+        }
+      else if (success)
 	{
 	  /* We're returning in the parent, not resuming from
 	     save. Overwite the stack top again, with false this time,
@@ -5413,7 +5427,7 @@ primitive VMpr_FileDescriptor_fileOp [succeed,fail]
 {
   char *fileName, *fileName2;
   gst_file_stream fileStream;
-  int fd;
+  int fd, rc;
   OOP oop1;
   OOP *oopVec = alloca (numArgs * sizeof (OOP));
   int i;
@@ -5517,7 +5531,10 @@ primitive VMpr_FileDescriptor_fileOp [succeed,fail]
     {
     case PRIM_CLOSE_FILE:	/* FileDescriptor close */
       _gst_remove_fd_polling_handlers (fd);
-      resultOOP = FROM_INT (close (fd));
+      rc = close (fd);
+      if (rc == 0)
+        fileStream->fd = _gst_nil_oop;
+      resultOOP = FROM_INT (rc);
       goto succeed;
 
     case PRIM_FSEEK_SET:		/* FileDescriptor position: position */
@@ -5799,7 +5816,7 @@ primitive VMpr_FileDescriptor_fileOp [succeed,fail]
 primitive VMpr_FileDescriptor_socketOp [succeed,fail]
 {
   gst_file_stream fileStream;
-  int fd;
+  int fd, rc;
   OOP oop1, resultOOP;
   OOP *oopVec = alloca (numArgs * sizeof (OOP));
   int i;
@@ -5829,8 +5846,10 @@ primitive VMpr_FileDescriptor_socketOp [succeed,fail]
       {
 	int result;
         _gst_remove_fd_polling_handlers (fd);
-        result = close (fd);
-        resultOOP = FROM_INT (result);
+        rc = close (fd);
+        if (rc == 0)
+          fileStream->fd = _gst_nil_oop;
+        resultOOP = FROM_INT (rc);
         goto succeed;
       }
 

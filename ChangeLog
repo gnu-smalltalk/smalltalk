@@ -1,4 +1,21 @@
 2011-08-13  Paolo Bonzini <bonzini@gnu.org>
+
+	* scripts/Remote.st: Move server logic to RemoteServer class.
+
+2011-08-13  Gwenael Casaccio  <mrgwen@gmail.com>
+
+	* scripts/Remote.st: Suspend/resume server process across snapshots.
+
+2011-08-13  Paolo Bonzini <bonzini@gnu.org>
+
+	* scripts/Remote.st: Fix typo in 2fc74b9.
+
+2011-08-13  Paolo Bonzini <bonzini@gnu.org>
+
+	* kernel/FileDescr.st: Recheck file descriptor state between
+	async and sync polling.
+
+2011-08-13  Paolo Bonzini <bonzini@gnu.org>
             Mathieu Suen  <mathieusuen@yahoo.fr>
 
 	* kernel/FilePath.st: Fix Windows "File fullNameFor: 'C:'".

@@ -39,6 +39,81 @@ DLD addLibrary: 'libc'.
         SystemDictionary compile: '
             getpid [ ^''--pid not available'' ]' ].
 
+Object subclass: RemoteServer [
+
+    RemoteServer class >> new [
+
+	^ super new
+		initialize;
+		yourself
+    ]
+
+    | remoteProcess queue |
+
+    initialize [
+        <category: 'initialize'>
+
+        ObjectMemory addDependent: self
+    ]
+
+    update: aSymbol [
+        <category: 'initialize'>
+
+	aSymbol == #aboutToSnapshot ifTrue: [ ^ remoteProcess suspend ].
+        aSymbol == #finishedSnapshot ifTrue: [ ^ remoteProcess resume ].
+        aSymbol == #returnFromSnapshot ifTrue: [ ObjectMemory removeDependent: self ].
+    ]
+
+    process: aProcess [
+	<category: 'accessing'>
+
+	remoteProcess := aProcess
+    ]
+
+    socket: aSocket [
+        queue := aSocket
+    ]
+
+    fork [
+        remoteProcess := [
+	    [
+		[
+		    queue waitForConnection.
+		    queue accept ifNotNil: [:conn | self forkClient: conn].
+                    queue isOpen.
+		] whileTrue: [ Processor yield ].
+	    ]
+	        on: Error
+	        do: [ :ex |
+		    ('gst-remote server: ', ex messageText, '
+') displayOn: stderr.
+		    ex pass.
+		    ObjectMemory quit: 1 ].
+        ] fork.
+    ]
+
+    forkClient: conn [
+	[
+	    [[
+		Transcript register: conn.
+		[ conn isPeerAlive ] whileTrue: [
+		    Behavior
+		        evaluate: (conn upTo: $<0>)
+		        to: nil
+		        ifError: [ :fname :line :msg |
+		 	   conn nextPutAll: ('gst-remote: error at line %1: %2
+' % { line. msg }) ].
+		   conn nextPut: $<0>; flush ] ]
+	        on: Error
+		do: [ :ex | ex return ]]
+
+	    ensure: [
+		Transcript unregister.
+		conn close ]
+	] fork
+    ]
+]
+
 TextCollector subclass: MultiplexingTextCollector [
     | default outputs |
     initialize [
@@ -69,7 +144,7 @@ TextCollector subclass: MultiplexingTextCollector [
     ]
 ]
 
-| helpString commands server port host login |
+| helpString commands server port host login remoteServer |
 commands := OrderedCollection new.
 server := false.
 port := 12345.
@@ -182,11 +257,14 @@ available in the PATH of the remote machine.
     opt isNil ifTrue: [
 	host isNil ifFalse: [ self error: 'multiple hosts are invalid' ].
 	(arg includes: $@)
-	    ifFalse: [ host := TCP.SocketAddress byName: arg ]
+	    ifFalse: [ host := arg ]
 	    ifTrue: [
 		login isNil ifFalse: [ self error: 'multiple logins are invalid' ].
-		login := TCP.SocketAddress byName: (arg copyUpTo: $@).
-		host := arg copyAfter: $@ ] ].
+		login := arg copyUpTo: $@.
+		host := arg copyAfter: $@ ].
+	(TCP.SocketAddress byName: host)
+	    ifNil: [ self error: 'invalid host %1' %{host} ]
+            ifNotNil: [ :addr | host := addr ] ].
     ]
 
     ifError: [
@@ -197,52 +275,16 @@ available in the PATH of the remote machine.
         ('gst-remote: ', ex messageText, '
 ') displayOn: stderr.
 	stderr flush.
+        "ex pass."
 	helpString displayOn: stderr.
 	ObjectMemory quit: 1 ].
 
 server ifTrue: [
     PackageLoader fileInPackage: 'Compiler'.
     Transcript := MultiplexingTextCollector message: Transcript message.
-    [
-	| queue |
-	queue := TCP.ServerSocket port: port bindTo: host.
-	[
-	    [
-		| conn |
-		[
-		    queue waitForConnection.
-		    (conn := queue accept) isNil
-		] whileTrue: [
-		    queue isOpen ifFalse: [ Processor activeProcess terminate ].
-		    Processor yield
-		].
-		[
-		    [[
-			Transcript register: conn.
-		        [ conn isPeerAlive ] whileTrue: [
-			    Behavior
-			        evaluate: (conn upTo: $<0>)
-			        to: nil
-			        ifError: [ :fname :line :msg |
-				    conn nextPutAll: ('gst-remote: error at line %1: %2
-' % { line. msg }) ].
-			    conn nextPut: $<0>; flush ] ]
-			on: Error
-			do: [ :ex | ex return ]]
-
-			    ensure: [
-				Transcript unregister.
-				conn close ]
-		] fork
-	    ] repeat
-	]
-	    on: Error
-	    do: [ :ex |
-		('gst-remote server: ', ex messageText, '
-') displayOn: stderr.
-		ex pass.
-		ObjectMemory quit: 1 ].
-    ] fork.
+    remoteServer := RemoteServer new.
+    remoteServer socket: (TCP.ServerSocket port: port bindTo: host).
+    remoteServer fork.
     Transcript nextPutAll: 'gst-remote server started.'; nl ].
 
 [

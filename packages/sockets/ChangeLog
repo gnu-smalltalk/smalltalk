@@ -1,3 +1,13 @@
+2011-08-13  Paolo Bonzini <bonzini@gnu.org>
+
+	* AbstractSocketImpl.st: Recheck file descriptor state between
+	async and sync polling.
+
+2011-08-13  Paolo Bonzini  <bonzini@gnu.org>
+
+	* AbstractSocketImpl.st: Add #checkSoError, test file open in it
+	first.
+
 2011-03-24  Paolo Bonzini  <bonzini@gnu.org>
 
 	* Buffers.st: Allow interruption of the fill block.
