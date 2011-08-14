@@ -93,7 +93,7 @@ this can be changed by class methods on SocketAddress sublcasses.'>
 		    accept: fd
 		    peer: peer
 		    addrLen: addrLen.
-        newFD < 0 ifTrue: [ File checkError: self soError ].
+        newFD < 0 ifTrue: [ self checkSoError ].
 	^(implementationClass on: newFD)
 	    hasBeenBound;
 	    hasBeenConnectedTo: peer;
@@ -425,6 +425,14 @@ this can be changed by class methods on SocketAddress sublcasses.'>
 	self hasBeenBoundTo: self getSockName
     ]
 
+    checkSoError [
+        "Retrieve SO_ERROR and, if non-zero, raise an exception for its value."
+
+	<category: 'private'>
+        self isOpen ifFalse: [^SystemExceptions.FileError signal: 'file closed'].
+        File checkError: self soError
+    ]
+
     ensureReadable [
 	"If the file is open, wait until data can be read from it.  The wait
 	 allows other Processes to run."
@@ -435,11 +443,11 @@ this can be changed by class methods on SocketAddress sublcasses.'>
 	    fileOp: 14
 	    with: 0
 	    with: Semaphore new
-	    ifFail: [[File checkError: self soError] ensure: [^self close]].
+	    ifFail: [[self checkSoError] ensure: [^self close]].
 	self 
 	    fileOp: 13
 	    with: 0
-	    ifFail: [[File checkError: self soError] ensure: [self close]]
+	    ifFail: [[self checkSoError] ensure: [self close]]
     ]
 
     ensureWriteable [
@@ -456,11 +464,11 @@ this can be changed by class methods on SocketAddress sublcasses.'>
 	    fileOp: 14
 	    with: 1
 	    with: Semaphore new
-	    ifFail: [[File checkError: self soError] ensure: [^self close]].
+	    ifFail: [[self checkSoError] ensure: [^self close]].
 	self 
 	    fileOp: 13
 	    with: 1
-	    ifFail: [[File checkError: self soError] ensure: [self close]]
+	    ifFail: [[self checkSoError] ensure: [self close]]
     ]
 
     waitForException [
@@ -474,11 +482,11 @@ this can be changed by class methods on SocketAddress sublcasses.'>
 	    fileOp: 14
 	    with: 2
 	    with: Semaphore new
-	    ifFail: [[File checkError: self soError] ensure: [^self close]].
+	    ifFail: [[self checkSoError] ensure: [^self close]].
 	self 
 	    fileOp: 13
 	    with: 2
-	    ifFail: [[File checkError: self soError] ensure: [self close]]
+	    ifFail: [[self checkSoError] ensure: [self close]]
     ]
 
     soError [
@@ -530,7 +538,7 @@ implementations.'>
 	(self 
 	    connect: fd
 	    to: addr
-	    addrLen: addr size) < 0 ifTrue: [File checkError: self soError] ]
+	    addrLen: addr size) < 0 ifTrue: [self checkSoError] ]
 		ifCurtailed: [self close].
 
 	"connect does not block, so wait for"
@@ -659,7 +667,7 @@ implementations.'>
 	    flags: (self flags bitOr: flags)
 	    from: from
 	    size: addrLen.
-	read < 0 ifTrue: [ File checkError: self soError ].
+	read < 0 ifTrue: [ self checkSoError ].
 	port := ValueHolder new.
 	^aDatagram
 	    data: data;
@@ -687,7 +695,7 @@ implementations.'>
 	    flags: self flags
 	    to: receiver
 	    size: size.
-	sent < 0 ifTrue: [ File checkError: self soError ].
+	sent < 0 ifTrue: [ self checkSoError ].
     ]
 
     flags [
