@@ -1,3 +1,9 @@
+2011-08-13  Paolo Bonzini  <bonzini@gnu.org>
+
+	* libgst/prims.def: Wrap #snapshot in push_jmp_buf/pop_jmp_buf,
+	since it will do call-ins via _gst_invoke_hook.  Suggested by
+	Gwenael Casaccio.
+
 2011-08-05  Holger Freyther  <holger@freyther.de>
 
 	* libgst/byte.h: Make smatch happy and add

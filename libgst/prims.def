@@ -5323,6 +5323,7 @@ primitive VMpr_ObjectMemory_snapshot [succeed,fail]
 {
   char *fileName;
   OOP oop2;
+  interp_jmp_buf jb;
   _gst_primitives_executed++;
 
   oop2 = POP_OOP ();
@@ -5336,9 +5337,22 @@ primitive VMpr_ObjectMemory_snapshot [succeed,fail]
 	 the save, the stack will be in this state. See below. */
       SET_STACKTOP (_gst_true_oop);
 
-      success = _gst_save_to_file (fileName);
+      push_jmp_buf (&jb, false, get_active_process ());
+      if (setjmp (jb.jmpBuf) == 0)
+        success = _gst_save_to_file (fileName);
+      else
+        {
+          success = false;
+          errno = EINTR;
+        }
+
       xfree (fileName);
-      if (success)
+      if (pop_jmp_buf ())
+        {
+          stop_execution ();
+          PRIM_SUCCEEDED;
+        }
+      else if (success)
 	{
 	  /* We're returning in the parent, not resuming from
 	     save. Overwite the stack top again, with false this time,
