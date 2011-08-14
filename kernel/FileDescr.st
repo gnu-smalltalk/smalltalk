@@ -541,6 +541,7 @@ do arbitrary processing on the files.'>
 	    fileOp: 14
 	    with: 0
 	    with: Semaphore new.
+	self isOpen ifFalse: [^self].
 	self 
 	    fileOp: 13
 	    with: 0
@@ -552,6 +553,7 @@ do arbitrary processing on the files.'>
 	 allows other Processes to run."
 
 	<category: 'accessing'>
+	self isOpen ifFalse: [^self].
 	self 
 	    fileOp: 13
 	    with: 1
@@ -570,6 +572,7 @@ do arbitrary processing on the files.'>
 	    fileOp: 14
 	    with: 2
 	    with: Semaphore new.
+	self isOpen ifFalse: [^self].
 	self 
 	    fileOp: 13
 	    with: 2
