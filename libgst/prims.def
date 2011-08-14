@@ -5434,7 +5434,7 @@ primitive VMpr_FileDescriptor_fileOp [succeed,fail]
 {
   char *fileName, *fileName2;
   gst_file_stream fileStream;
-  int fd;
+  int fd, rc;
   OOP oop1;
   OOP *oopVec = alloca (numArgs * sizeof (OOP));
   int i;
@@ -5538,7 +5538,10 @@ primitive VMpr_FileDescriptor_fileOp [succeed,fail]
     {
     case PRIM_CLOSE_FILE:	/* FileDescriptor close */
       _gst_remove_fd_polling_handlers (fd);
-      resultOOP = FROM_INT (close (fd));
+      rc = close (fd);
+      if (rc == 0)
+        fileStream->fd = _gst_nil_oop;
+      resultOOP = FROM_INT (rc);
       goto succeed;
 
     case PRIM_FSEEK_SET:		/* FileDescriptor position: position */
@@ -5820,7 +5823,7 @@ primitive VMpr_FileDescriptor_fileOp [succeed,fail]
 primitive VMpr_FileDescriptor_socketOp [succeed,fail]
 {
   gst_file_stream fileStream;
-  int fd;
+  int fd, rc;
   OOP oop1, resultOOP;
   OOP *oopVec = alloca (numArgs * sizeof (OOP));
   int i;
@@ -5850,8 +5853,10 @@ primitive VMpr_FileDescriptor_socketOp [succeed,fail]
       {
 	int result;
         _gst_remove_fd_polling_handlers (fd);
-        result = close (fd);
-        resultOOP = FROM_INT (result);
+        rc = close (fd);
+        if (rc == 0)
+          fileStream->fd = _gst_nil_oop;
+        resultOOP = FROM_INT (rc);
         goto succeed;
       }
 
