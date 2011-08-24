@@ -1028,7 +1028,7 @@ information.'>
 			nil]
 		    ifFalse: 
 			[instSize := anObjectDumper nextUlong.
-			index := self nextLong.
+			index := anObjectDumper nextLong.
 			-1 - version].
 	^anObjectDumper loadFromVersion: version fixedSize: instSize index: index
     ]
