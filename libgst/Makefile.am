@@ -27,7 +27,7 @@ libgst_la_LIBADD=$(top_builddir)/lib-src/library.la $(SOCKET_LIBS) \
 libgst_la_DEPENDENCIES=$(top_builddir)/lib-src/library.la $(LIBSNPRINTFV)
 
 libgst_la_LDFLAGS = -version-info $(VERSION_INFO) -no-undefined \
-	-export-symbols-regex "^gst_.*"
+	-export-symbols-regex "^gst_.*" -bindir $(bindir)
 
 libgst_la_SOURCES = \
        gstpub.c    files.c       gst-parse.c    lex.c        \
