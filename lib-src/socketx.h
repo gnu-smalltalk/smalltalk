@@ -135,13 +135,13 @@ typedef int SOCKET;
 #endif
 #endif
 
+#endif /* !__MSVCRT__ */
+
 #ifndef SHUT_RDWR
 #define SHUT_RD		0
 #define SHUT_WR		1
 #define SHUT_RDWR	2
 #endif
-
-#endif /* !__MSVCRT__ */
 
 #include "getaddrinfo.h"
 
