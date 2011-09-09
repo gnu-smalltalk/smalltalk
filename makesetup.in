@@ -159,8 +159,8 @@ cd $DESTDIR/nonexistent
 # not distributed
 rm -f smalltalk/VFSAddOns.star
 
-# libtool stupidity
-ln -sf bin/libgst*.dll .
+# no need to manually load dependencies
+find . -name "*.la" | xargs sed -i "s/^dependency_libs=.*/dependency_libs=''/"
 
 # --------------------------------------------------------------------------
 # Shell functions to build installation sections

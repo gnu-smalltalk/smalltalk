@@ -240,8 +240,7 @@ main (int argc, char **argv)
     gnutls_deinit (session);
 
  out:
-  shutdown (fd, SHUT_RDWR);	/* no more receptions */
-  close (fd);
+  shutdown (fd, SHUT_RDWR);	/* shutdown now, close on exit */
   gnutls_anon_free_client_credentials (anon_cred);
   gnutls_certificate_free_credentials (xcred);
   gnutls_global_deinit ();
