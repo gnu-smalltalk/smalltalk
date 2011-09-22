@@ -765,6 +765,13 @@ fixup_object (OOP oop, gst_object dest, gst_object src, int numBytes)
 	}
     }
 
+  /* File descriptors are invalidated on resume.  */
+  else if (is_a_kind_of (class_oop, _gst_file_descriptor_class))
+    {
+      gst_file_stream file = (gst_file_stream) dest;
+      file->fd = _gst_nil_oop;
+    }
+
   /* The other case is to reset CFunctionDescriptor objects, so that we'll
      relink the external functions when we reload the image.  */
   else if (is_a_kind_of (class_oop, _gst_c_callable_class))
