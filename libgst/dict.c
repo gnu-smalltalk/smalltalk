@@ -337,7 +337,7 @@ static const class_definition class_info[] = {
   {&_gst_time_class, &_gst_magnitude_class,
    GST_ISP_FIXED, false, 1,
    "Time", "seconds",
-   "SecondClockAdjustment ClockOnStartup", NULL },
+   "SecondClockAdjustment ClockOnStartup ClockOnImageSave", NULL },
 
   {&_gst_date_class, &_gst_magnitude_class,
    GST_ISP_FIXED, false, 4,

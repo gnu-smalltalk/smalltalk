@@ -42,6 +42,7 @@ time value, and a block execution timing facility.'>
 
     SecondClockAdjustment := nil.
     ClockOnStartup := nil.
+    ClockOnImageSave := nil.
 
     Time class >> utcSecondClock [
 	"Answer the number of seconds since the midnight of 1/1/1901 (unlike
@@ -143,6 +144,7 @@ time value, and a block execution timing facility.'>
 
 	<category: 'initialization'>
 	SecondClockAdjustment := 86400 * 36159.
+        ClockOnImageSave := 0.
 	ObjectMemory addDependent: self
     ]
 
@@ -150,8 +152,11 @@ time value, and a block execution timing facility.'>
 	"Private - Initialize the receiver's instance variables"
 
 	<category: 'initialization'>
-	aspect == #returnFromSnapshot 
-	    ifTrue: [ClockOnStartup := Time primMillisecondClock]
+        | time |
+	aspect == #returnFromSnapshot ifTrue: [
+            ClockOnStartup := Time primMillisecondClock - ClockOnImageSave].
+	aspect == #aboutToSnapshot ifTrue: [
+            ClockOnImageSave := Time millisecondClock].
     ]
 
     Time class >> now [
