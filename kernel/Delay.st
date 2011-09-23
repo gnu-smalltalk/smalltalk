@@ -166,7 +166,13 @@ created.'>
 		    sortBlock: [:d1 :d2 | d1 resumptionTime >= d2 resumptionTime].
 	TimeoutSem := Semaphore new.
 	DelayProcess := [self runDelayProcess] forkAt: Processor timingPriority.
-	TimeoutSem signal	"get going"
+        ObjectMemory addDependent: self.
+        self update: #returnFromSnapshot
+    ]
+
+    Delay class >> update: aspect [
+	"Prime the timer event loop when the image starts running."
+	aspect == #returnFromSnapshot ifTrue: [TimeoutSem signal]
     ]
 
     Delay class >> initialize [

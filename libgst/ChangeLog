@@ -1,3 +1,11 @@
+2011-09-22  Paolo Bonzini  <bonzini@gnu.org>
+
+	* libgst/save.c: Close file descriptors upon image save.
+
+2011-09-22  Paolo Bonzini  <bonzini@gnu.org>
+
+	* libgst/dict.c: Add the ClockOnImageSave class variable to time.
+
 2011-08-13  Paolo Bonzini  <bonzini@gnu.org>
             Mathieu Suen  <mathieusuen@yahoo.fr>
 
