@@ -795,6 +795,7 @@ indexed'' bytecode. The resulting stream is
 	| bc1 ret1 bc2 selector |
 	aNode arguments do: 
 		[:each | 
+		each isBlock ifFalse: [^false].
 		(each arguments isEmpty and: [each body temporaries isEmpty]) 
 		    ifFalse: [^false].
 		bc1 isNil 
