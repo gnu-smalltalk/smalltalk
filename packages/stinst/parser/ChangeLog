@@ -1,3 +1,9 @@
+2011-09-24  Paolo Bonzini  <bonzini@gnu.org>
+
+	* STCompiler.st: Do not attempt inlining of boolean methods if
+	the arguments are not literal blocks.  Reported by Holger
+	Freyther.
+
 2011-06-28  Gwenael Casaccio <mrgwen@gmail.com>
 
 	* ParseTreeSearcher.st: Remove #beConsistent.
