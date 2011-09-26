@@ -1,3 +1,8 @@
+2011-09-24  Holger Hans Peter Freyther  <holger@freyther.de>
+
+	* STCompiler.st: Do not attempt inlining of #to:do: if the
+	block argument is not a literal.
+
 2011-09-24  Paolo Bonzini  <bonzini@gnu.org>
 
 	* STCompiler.st: Do not attempt inlining of boolean methods if
