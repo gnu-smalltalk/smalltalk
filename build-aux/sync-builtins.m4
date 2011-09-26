@@ -6,6 +6,7 @@ AC_DEFUN([GST_C_SYNC_BUILTINS], [
                  gst_cv_have_sync_fetch_and_add, [
     save_CFLAGS="$CFLAGS"
     case $host in
+      i?86-apple-darwin*) ;;
       i?86-*-*) CFLAGS="$CFLAGS -march=i486" ;;
     esac
     AC_LINK_IFELSE([AC_LANG_PROGRAM([[int foovar = 0;]], [[

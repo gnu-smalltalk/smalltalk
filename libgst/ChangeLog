@@ -1,3 +1,7 @@
+2011-09-26  Tony Garnock-Jones  <tonygarnockjones@gmail.com>
+
+	* libgst/cint.c: Try .dylib as a last resort on Mac OS X.
+
 2011-09-22  Paolo Bonzini  <bonzini@gnu.org>
 
 	* libgst/save.c: Close file descriptors upon image save.

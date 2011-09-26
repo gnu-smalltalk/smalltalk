@@ -498,6 +498,17 @@ dld_open (const char *filename)
   handle = lt_dlopen (filename);
   if (!handle)
     handle = lt_dlopenext (filename);
+#ifdef __APPLE__
+  if (!handle)
+    {
+      /* For some reason, lt_dlopenext on OS X doesn't try ".dylib" as
+         a possible extension, so we're left with trying it here. */
+      char *full_filename;
+      asprintf(&full_filename, "%s.dylib", filename);
+      handle = lt_dlopen (full_filename);
+      free (full_filename);
+    }
+#endif
   if (handle)
     {
       initModule = lt_dlsym (handle, "gst_initModule");
