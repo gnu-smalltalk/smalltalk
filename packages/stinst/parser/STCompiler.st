@@ -780,6 +780,7 @@ indexed'' bytecode. The resulting stream is
 		stop := step.	"to:"
 		step := block.	"by:"
 		block := each	"do:"].
+	block isBlock ifFalse: [^false].
 	(block arguments size = 1 and: [block body temporaries isEmpty]) 
 	    ifFalse: [^false].
 	stop isNil 
