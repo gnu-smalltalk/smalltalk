@@ -13,7 +13,7 @@ libgst_gobject_la_LIBADD = $(ALL_LIBS) ../../libgst/libgst.la
 
 moduleexec_LTLIBRARIES = gst-glib.la
 gst_glib_la_LDFLAGS = $(gst_module_ldflags)
-gst_glib_la_LIBADD = $(ALL_LIBS) libgst-gobject.la
+gst_glib_la_LIBADD = $(ALL_LIBS) libgst-gobject.la ../../lib-src/library.la 
 gst_glib_la_DEPENDENCIES = libgst-gobject.la
 dist_gst_glib_la_SOURCES = gst-glib.c
 nodist_gst_glib_la_SOURCES = libs.def
