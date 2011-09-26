@@ -248,15 +248,11 @@ STInST.STFileInParser subclass: GSTFileInParser [
         argument := self parsePrimitiveObject.
         self skipExpectedToken: #>.
         
-        argument isVariable
-            ifTrue: [stmt := RBMessageNode
-    	                     receiver: taggee
-    	                     selector: selector
-    	                     arguments: { argument }.
-                     self evaluateStatement: stmt]
-            ifFalse: [self evaluateMessageOn: taggee
-                           selector: selector
-                           argument: argument value]
+        stmt := RBMessageNode
+    	             receiver: taggee
+    	             selector: selector
+    	             arguments: { argument }.
+        self evaluateStatement: stmt.
     ]
     
     parseClassVariable [ 
