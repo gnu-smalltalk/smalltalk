@@ -1,3 +1,12 @@
+2011-10-21  Paolo Bonzini  <bonzini@gnu.org>
+
+	Revert commit c51f7d2 (do not automatically tenure large objects)
+
+	2011-05-18  Gwenael Casaccio  <mrgwen@gmail.com>
+
+	* libgst/gstpriv.h: Fix documentation of F_FIXED.
+	* libgst/oop.c: Implement fixed young objects.
+
 2011-09-26  Tony Garnock-Jones  <tonygarnockjones@gmail.com>
 
 	* libgst/cint.c: Try .dylib as a last resort on Mac OS X.
