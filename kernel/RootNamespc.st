@@ -45,7 +45,7 @@ an instance of me; it is called their `environment''. '>
 
 	<category: 'instance creation'>
 	^Smalltalk at: spaceName asGlobalKey
-	    put: ((super new: 24) setSuperspace: nil)
+	    put: ((super new: 24) name: spaceName asSymbol; yourself)
     ]
 
     inheritedKeys [
