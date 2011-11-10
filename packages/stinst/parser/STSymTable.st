@@ -399,7 +399,7 @@ Object subclass: STSymbolTable [
 	    to: namesArray size
 	    keysAndValuesDo: 
 		[:i :each | 
-		assoc := assoc value associationAt: each asSymbol
+		assoc := assoc value scopeDictionary associationAt: each asSymbol
 			    ifAbsent: 
 				[| symbol |
 				i < namesArray size ifTrue: [self invalidScopeResolution: stCompiler].
@@ -586,7 +586,7 @@ default.'>
 	"Search all pools in order (see super comment)."
 	<category: 'accessing'>
 	pools do: [:pool |
-	    (pool associationAt: symbol ifAbsent: [nil])
+	    (pool scopeDictionary associationAt: symbol ifAbsent: [nil])
 		ifNotNil: [:assoc | ^assoc]].
 	^nil
     ]

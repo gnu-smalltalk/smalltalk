@@ -1691,5 +1691,12 @@ method dictionary, and iterating over the class hierarchy.'>
 	<primitive: VMpr_Behavior_primCompileIfError>
 	^self primitiveFailed
     ]
+
+    scopeDictionary [
+        "Answer the dictionary that is used when the receiver is before
+         a period in Smalltalk source code."
+        <category: 'compilation'>
+        ^self classPool
+    ]
 ]
 
