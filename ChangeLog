@@ -1,3 +1,7 @@
+2011-11-14  Mehul Sanghvi  <mehul.sanghvi@gmail.com>
+
+	* kernel/CFuncs.st: Add #environ.
+
 2011-11-10  Gwenael Casaccio  <mrgwen@gmail.com>
             Paolo Bonzini  <bonzini@gnu.org>
 
