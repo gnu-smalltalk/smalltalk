@@ -127,6 +127,12 @@ SystemDictionary extend [
 	
     ]
 
+    environ [
+	<category: 'c call-outs'>
+	<cCall: 'environ' returning: #{CString} args: #()>
+	
+    ]
+
     putenv: aString [
 	<category: 'c call-outs'>
 	<cCall: 'putenv' returning: #int args: #(#string)>

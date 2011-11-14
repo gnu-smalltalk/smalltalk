@@ -723,6 +723,13 @@ certain special cases.'>
         ^self hereAt: key
             ifAbsent: [SystemExceptions.NotFound signalOn: key what: 'key']
     ]
+
+    scopeDictionary [
+        "Answer the dictionary that is used when the receiver is before
+         a period in Smalltalk source code."
+        <category: 'compilation'>
+        ^self
+    ]
 ]
 
 

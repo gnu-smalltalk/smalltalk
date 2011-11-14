@@ -1,3 +1,7 @@
+2011-11-14  Mehul Sanghvi  <mehul.sanghvi@gmail.com>
+
+	* libgst/cint.c: Add get_environ and pass it to Smalltalk.
+
 2011-10-21  Paolo Bonzini  <bonzini@gnu.org>
 
 	Revert commit c51f7d2 (do not automatically tenure large objects)

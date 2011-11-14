@@ -196,6 +196,7 @@ static int my_lstat (const char *name,
 		     OOP out);
 #endif
 static int my_putenv (const char *str);
+static char **get_environ (void);
 static int my_chdir (const char *str);
 static int my_chown (const char *file, const char *owner, const char *group);
 static int my_symlink (const char* oldpath, const char* newpath);
@@ -391,6 +392,12 @@ my_putenv (const char *str)
   clone = (char *) xmalloc (len);
   strcpy (clone, str);
   return (putenv (clone));
+}
+
+static char **
+get_environ (void)
+{
+  return environ;
 }
 
 
@@ -611,6 +618,7 @@ _gst_init_cfuncs (void)
   /* Access to C library */
   _gst_define_cfunc ("system", system);
   _gst_define_cfunc ("getenv", getenv);
+  _gst_define_cfunc ("environ", get_environ);
   _gst_define_cfunc ("putenv", my_putenv);
   _gst_define_cfunc ("printf", printf);
 
