@@ -457,8 +457,8 @@ Date subclass: DateTime [
 	    next: (self offset hours abs < 10 ifTrue: [1] ifFalse: [0]) put: $0;
 	    print: self offset hours abs;
 	    nextPut: $:;
-	    next: (self offset minutes < 10 ifTrue: [1] ifFalse: [0]) put: $0;
-	    print: self offset minutes.
+	    next: (self offset minutes abs < 10 ifTrue: [1] ifFalse: [0]) put: $0;
+	    print: self offset minutes abs.
 	self offset seconds = 0 ifTrue: [^self].
 	aStream
 	    nextPut: $:;
