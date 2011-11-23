@@ -253,20 +253,26 @@ method.'>
 	    do: 
 		[:i | 
 		ws := WriteStream on: (String new: 10).
-		[aStream atEnd not and: [(ch := aStream next) isAlphaNumeric not]] 
-		    whileTrue.
-		ch isAlphaNumeric 
-		    ifTrue: 
-			[
-			[ws nextPut: ch.
-			aStream atEnd not and: [(ch := aStream next) isAlphaNumeric]] 
-				whileTrue].
+		[aStream atEnd not and: [(ch := aStream peek) isAlphaNumeric not
+                       and: [ch ~= $-]]] 
+		    whileTrue: [aStream next].
+                aStream atEnd ifFalse: [
+		    aStream next.
+                    ch isLetter
+		        ifTrue: 
+			    [[ws nextPut: ch.
+			    aStream atEnd not and: [(ch := aStream next) isLetter]] 
+				    whileTrue]
+                        ifFalse:
+			    [[ws nextPut: ch.
+			        aStream atEnd not and: [(ch := aStream next) isDigit]] 
+				    whileTrue]].
 		t1 := t2.
 		t2 := t3.
 		t3 := ws contents.
-		(t3 at: 1) isDigit 
-		    ifTrue: [t3 := t3 asNumber]
-		    ifFalse: 
+		(t3 at: 1) isLetter 
+		    ifFalse: [t3 := t3 asNumber]
+		    ifTrue: 
 			[month := i.
 			t3 := self indexOfMonth: t3 asSymbol].
 		(i = 2 and: [month = 1 and: [t3 > 31]]) 
@@ -279,8 +285,8 @@ method.'>
 			    year: t3]].
 	month isNil 
 	    ifTrue: 
-		[t1 > 31 
-		    ifTrue: 
+		[(t1 between: 1 and: 31)
+		    ifFalse: 
 			[^self 
 			    newDay: t3
 			    monthIndex: t2

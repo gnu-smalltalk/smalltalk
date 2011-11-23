@@ -111,7 +111,17 @@ Date subclass: DateTime [
 	"Parse an instance of the receiver from aStream"
 
 	<category: 'instance creation'>
-	^(super readFrom: aStream) + (Duration readFrom: aStream)
+        | date time ofs ch |
+        date := super readFrom: aStream.
+        (aStream peekFor: $T) ifFalse: [aStream skipSeparators].
+        time := (aStream atEnd or: [aStream peek isDigit])
+            ifTrue: [Duration readFrom: aStream]
+            ifFalse: [Duration zero].
+        aStream skipSeparators.
+        ch := aStream peek.
+        (ch = $+ or: [ch = $-]) ifFalse: [^date + time].
+        ofs := Duration readFrom: aStream.
+        ^(date + time) setOffset: ofs
     ]
 
     DateTime class >> today [
@@ -457,8 +467,8 @@ Date subclass: DateTime [
 	    next: (self offset hours abs < 10 ifTrue: [1] ifFalse: [0]) put: $0;
 	    print: self offset hours abs;
 	    nextPut: $:;
-	    next: (self offset minutes < 10 ifTrue: [1] ifFalse: [0]) put: $0;
-	    print: self offset minutes.
+	    next: (self offset minutes abs < 10 ifTrue: [1] ifFalse: [0]) put: $0;
+	    print: self offset minutes abs.
 	self offset seconds = 0 ifTrue: [^self].
 	aStream
 	    nextPut: $:;
@@ -584,25 +594,31 @@ Time subclass: Duration [
          aStream"
 
         <category: 'instance creation'>
-        | t1 t2 t3 t4 i ch ws |
-        t1 := t2 := t3 := t4 := 0.
-        ch := $:.
+        | sign sec hms i ch ws |
+        hms := {0. 0. 0}.
+        sign := (aStream peekFor: $-)
+            ifTrue: [-1]
+            ifFalse: [aStream peekFor: $+. 1].
         i := 1.
-        [i <= 4 and: [(aStream atEnd not and: [ch isSeparator not]) or: [i < 4]]] whileTrue: [
+        ch := $:.
+        [aStream atEnd not and: [ch isSeparator not and: [
+             ch ~= $+ and: [ch ~= $- and: [
+                 i > 1 ifTrue: [aStream next].
+                 i <= 4 and: [(ch := aStream peek) isDigit]]]]]] whileTrue: [
             ws := WriteStream on: (String new: 10).
-
-            ch := $:.
-            [aStream atEnd not and: [(ch := aStream next) isDigit not]] whileTrue.
-            ch isDigit ifTrue: [
-                [ws nextPut: ch.
-                aStream atEnd not and: [(ch := aStream next) isDigit]]
-                        whileTrue].
-	    t1 := t2.
-	    t2 := t3.
-	    t3 := t4.
-            t4 := ws contents asNumber.
+            [ws nextPut: aStream next.
+             aStream atEnd not and: [(ch := aStream peek) isDigit]] whileTrue.
+            i = 4
+                ifTrue: [
+                    hms := {
+                        (hms at: 1) * 24 + (hms at: 2).
+                        hms at: 3.
+                        ws contents asNumber}]
+                ifFalse: [
+                    hms at: i put: ws contents asNumber].
 	    i := i + 1].
-        ^self fromSeconds: (t1 * 24 + t2) * 3600 + (t3 * 60) + t4
+        sec := ((hms at: 1) * 3600 + ((hms at: 2) * 60) + (hms at: 3)) * sign.
+        ^self fromSeconds: sec
     ]
 
     Duration class >> initialize [
