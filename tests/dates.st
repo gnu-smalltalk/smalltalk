@@ -115,3 +115,240 @@ Date class extend [
 Eval [ Date test ]
 Eval [ Date test2 ]
 Eval [ Date test3 ]
+
+String extend [
+    suffix: suffix testReading: aClass [
+        | stream result |
+        stream := (self, suffix) readStream.
+        result := aClass readFrom: (self, suffix) readStream.
+        (stream upToEnd endsWith: suffix trimSeparators) ifFalse: [^nil].
+        result = (aClass readFrom: self readStream) ifFalse: [^nil].
+        ^result->self
+    ]
+]
+
+Eval [
+    ('2011-02-01' suffix: ' abcd' testReading: Date) printNl.
+    ('2011-02-01' suffix: 'abcd' testReading: Date) printNl.
+    ('Feb 1 2011' suffix: ' abcd' testReading: Date) printNl.
+    ('Feb 1 2011' suffix: 'abcd' testReading: Date) printNl.
+    ('-2011-02-01' suffix: ' abcd' testReading: Date) printNl.
+    ('-2011-02-01' suffix: 'abcd' testReading: Date) printNl.
+    ('Feb 1 -2011' suffix: ' abcd' testReading: Date) printNl.
+    ('Feb 1 -2011' suffix: 'abcd' testReading: Date) printNl.
+
+    ('09:00:02' suffix: ' 1234' testReading: Time) printNl.
+    ('09:00:02' suffix: ':1234' testReading: Time) printNl.
+    ('09:00:02' suffix: ' abcd' testReading: Time) printNl.
+    ('09:00:02' suffix: 'abcd' testReading: Time) printNl.
+    ('09:00' suffix: ' 1234' testReading: Time) printNl.
+    ('09:00' suffix: '::1234' testReading: Time) printNl.
+    ('09:00' suffix: ' abcd' testReading: Time) printNl.
+    ('09:00' suffix: 'abcd' testReading: Time) printNl.
+    ('9:00' suffix: ' 1234' testReading: Time) printNl.
+    ('9:00' suffix: '::1234' testReading: Time) printNl.
+    ('9:00' suffix: ' abcd' testReading: Time) printNl.
+    ('9:00' suffix: 'abcd' testReading: Time) printNl.
+
+    ('01:09:00:02' suffix: ' 1234' testReading: Duration) printNl.
+    ('01:09:00:02' suffix: ':1234' testReading: Duration) printNl.
+    ('01:09:00:02' suffix: ' abcd' testReading: Duration) printNl.
+    ('01:09:00:02' suffix: 'abcd' testReading: Duration) printNl.
+    ('1:09:00:02' suffix: ' 1234' testReading: Duration) printNl.
+    ('1:09:00:02' suffix: ':1234' testReading: Duration) printNl.
+    ('1:09:00:02' suffix: ' abcd' testReading: Duration) printNl.
+    ('1:09:00:02' suffix: 'abcd' testReading: Duration) printNl.
+    ('1:9:00:02' suffix: ' 1234' testReading: Duration) printNl.
+    ('1:9:00:02' suffix: ':1234' testReading: Duration) printNl.
+    ('1:9:00:02' suffix: ' abcd' testReading: Duration) printNl.
+    ('1:9:00:02' suffix: 'abcd' testReading: Duration) printNl.
+    ('09:00:02' suffix: ' 1234' testReading: Duration) printNl.
+    ('09:00:02' suffix: '::1234' testReading: Duration) printNl.
+    ('09:00:02' suffix: ' abcd' testReading: Duration) printNl.
+    ('09:00:02' suffix: 'abcd' testReading: Duration) printNl.
+    ('9:00:02' suffix: ' 1234' testReading: Duration) printNl.
+    ('9:00:02' suffix: '::1234' testReading: Duration) printNl.
+    ('9:00:02' suffix: ' abcd' testReading: Duration) printNl.
+    ('9:00:02' suffix: 'abcd' testReading: Duration) printNl.
+    ('09:00' suffix: ' 1234' testReading: Duration) printNl.
+    ('09:00' suffix: '::1234' testReading: Duration) printNl.
+    ('09:00' suffix: ' abcd' testReading: Duration) printNl.
+    ('09:00' suffix: 'abcd' testReading: Duration) printNl.
+    ('9:00' suffix: ' 1234' testReading: Duration) printNl.
+    ('9:00' suffix: '::1234' testReading: Duration) printNl.
+    ('9:00' suffix: ' abcd' testReading: Duration) printNl.
+    ('9:00' suffix: 'abcd' testReading: Duration) printNl.
+    ('-01:09:00:02' suffix: ' 1234' testReading: Duration) printNl.
+    ('-01:09:00:02' suffix: ':1234' testReading: Duration) printNl.
+    ('-01:09:00:02' suffix: ' abcd' testReading: Duration) printNl.
+    ('-01:09:00:02' suffix: 'abcd' testReading: Duration) printNl.
+    ('-1:09:00:02' suffix: ' 1234' testReading: Duration) printNl.
+    ('-1:09:00:02' suffix: ':1234' testReading: Duration) printNl.
+    ('-1:09:00:02' suffix: ' abcd' testReading: Duration) printNl.
+    ('-1:09:00:02' suffix: 'abcd' testReading: Duration) printNl.
+    ('-1:9:00:02' suffix: ' 1234' testReading: Duration) printNl.
+    ('-1:9:00:02' suffix: ':1234' testReading: Duration) printNl.
+    ('-1:9:00:02' suffix: ' abcd' testReading: Duration) printNl.
+    ('-1:9:00:02' suffix: 'abcd' testReading: Duration) printNl.
+    ('-09:00:02' suffix: ' 1234' testReading: Duration) printNl.
+    ('-09:00:02' suffix: '::1234' testReading: Duration) printNl.
+    ('-09:00:02' suffix: ' abcd' testReading: Duration) printNl.
+    ('-09:00:02' suffix: 'abcd' testReading: Duration) printNl.
+    ('-9:00:02' suffix: ' 1234' testReading: Duration) printNl.
+    ('-9:00:02' suffix: '::1234' testReading: Duration) printNl.
+    ('-9:00:02' suffix: ' abcd' testReading: Duration) printNl.
+    ('-9:00:02' suffix: 'abcd' testReading: Duration) printNl.
+    ('-09:00' suffix: ' 1234' testReading: Duration) printNl.
+    ('-09:00' suffix: '::1234' testReading: Duration) printNl.
+    ('-09:00' suffix: ' abcd' testReading: Duration) printNl.
+    ('-09:00' suffix: 'abcd' testReading: Duration) printNl.
+    ('-9:00' suffix: ' 1234' testReading: Duration) printNl.
+    ('-9:00' suffix: '::1234' testReading: Duration) printNl.
+    ('-9:00' suffix: ' abcd' testReading: Duration) printNl.
+    ('-9:00' suffix: 'abcd' testReading: Duration) printNl.
+    ('+01:09:00:02' suffix: ' 1234' testReading: Duration) printNl.
+    ('+01:09:00:02' suffix: ':1234' testReading: Duration) printNl.
+    ('+01:09:00:02' suffix: ' abcd' testReading: Duration) printNl.
+    ('+01:09:00:02' suffix: 'abcd' testReading: Duration) printNl.
+    ('+1:09:00:02' suffix: ' 1234' testReading: Duration) printNl.
+    ('+1:09:00:02' suffix: ':1234' testReading: Duration) printNl.
+    ('+1:09:00:02' suffix: ' abcd' testReading: Duration) printNl.
+    ('+1:09:00:02' suffix: 'abcd' testReading: Duration) printNl.
+    ('+1:9:00:02' suffix: ' 1234' testReading: Duration) printNl.
+    ('+1:9:00:02' suffix: ':1234' testReading: Duration) printNl.
+    ('+1:9:00:02' suffix: ' abcd' testReading: Duration) printNl.
+    ('+1:9:00:02' suffix: 'abcd' testReading: Duration) printNl.
+    ('+09:00:02' suffix: ' 1234' testReading: Duration) printNl.
+    ('+09:00:02' suffix: '::1234' testReading: Duration) printNl.
+    ('+09:00:02' suffix: ' abcd' testReading: Duration) printNl.
+    ('+09:00:02' suffix: 'abcd' testReading: Duration) printNl.
+    ('+9:00:02' suffix: ' 1234' testReading: Duration) printNl.
+    ('+9:00:02' suffix: '::1234' testReading: Duration) printNl.
+    ('+9:00:02' suffix: ' abcd' testReading: Duration) printNl.
+    ('+9:00:02' suffix: 'abcd' testReading: Duration) printNl.
+    ('+09:00' suffix: ' 1234' testReading: Duration) printNl.
+    ('+09:00' suffix: '::1234' testReading: Duration) printNl.
+    ('+09:00' suffix: ' abcd' testReading: Duration) printNl.
+    ('+09:00' suffix: 'abcd' testReading: Duration) printNl.
+    ('+9:00' suffix: ' 1234' testReading: Duration) printNl.
+    ('+9:00' suffix: '::1234' testReading: Duration) printNl.
+    ('+9:00' suffix: ' abcd' testReading: Duration) printNl.
+    ('+9:00' suffix: 'abcd' testReading: Duration) printNl.
+
+    ('2011-02-01 09:00  +01:30' suffix: ' 1234' testReading: DateTime) printNl.
+    ('2011-02-01 09:00  +01:30' suffix: ' abcd' testReading: DateTime) printNl.
+    ('2011-02-01 09:00  +01:30' suffix: 'abcd' testReading: DateTime) printNl.
+    ('2011-02-01 09:00 +01:30' suffix: ' 1234' testReading: DateTime) printNl.
+    ('2011-02-01 09:00 +01:30' suffix: ' abcd' testReading: DateTime) printNl.
+    ('2011-02-01 09:00 +01:30' suffix: 'abcd' testReading: DateTime) printNl.
+    ('2011-02-01 09:00+01:30' suffix: ' 1234' testReading: DateTime) printNl.
+    ('2011-02-01 09:00+01:30' suffix: ' abcd' testReading: DateTime) printNl.
+    ('2011-02-01 09:00+01:30' suffix: 'abcd' testReading: DateTime) printNl.
+    ('2011-02-01 09:00+1:30' suffix: ' abcd' testReading: DateTime) printNl.
+    ('2011-02-01 09:00+1:30' suffix: 'abcd' testReading: DateTime) printNl.
+    ('2011-02-01 09:00+01' suffix: ' 1234' testReading: DateTime) printNl.
+    ('2011-02-01 09:00+01' suffix: ' abcd' testReading: DateTime) printNl.
+    ('2011-02-01 09:00+01' suffix: 'abcd' testReading: DateTime) printNl.
+    ('2011-02-01 09:00:10+01:30' suffix: ' 1234' testReading: DateTime) printNl.
+    ('2011-02-01 09:00:10+01:30' suffix: ' abcd' testReading: DateTime) printNl.
+    ('2011-02-01 09:00:10+01:30' suffix: 'abcd' testReading: DateTime) printNl.
+    ('2011-02-01 09:00:10+1:30' suffix: ' abcd' testReading: DateTime) printNl.
+    ('2011-02-01 09:00:10+1:30' suffix: 'abcd' testReading: DateTime) printNl.
+    ('2011-02-01 09:00:10+01' suffix: ' 1234' testReading: DateTime) printNl.
+    ('2011-02-01 09:00:10+01' suffix: ' abcd' testReading: DateTime) printNl.
+    ('2011-02-01 09:00:10+01' suffix: 'abcd' testReading: DateTime) printNl.
+    ('2011-02-01 09:00  -01:30' suffix: ' abcd' testReading: DateTime) printNl.
+    ('2011-02-01 09:00  -01:30' suffix: 'abcd' testReading: DateTime) printNl.
+    ('2011-02-01 09:00 -01:30' suffix: ' abcd' testReading: DateTime) printNl.
+    ('2011-02-01 09:00 -01:30' suffix: 'abcd' testReading: DateTime) printNl.
+    ('2011-02-01 09:00:10-01:30' suffix: ' abcd' testReading: DateTime) printNl.
+    ('2011-02-01 09:00:10-01:30' suffix: 'abcd' testReading: DateTime) printNl.
+    ('2011-02-01 09:00:10-1:30' suffix: ' abcd' testReading: DateTime) printNl.
+    ('2011-02-01 09:00:10-1:30' suffix: 'abcd' testReading: DateTime) printNl.
+    ('2011-02-01 09:00-01:30' suffix: ' abcd' testReading: DateTime) printNl.
+    ('2011-02-01 09:00-01:30' suffix: 'abcd' testReading: DateTime) printNl.
+    ('2011-02-01 09:00-1:30' suffix: ' abcd' testReading: DateTime) printNl.
+    ('2011-02-01 09:00-1:30' suffix: 'abcd' testReading: DateTime) printNl.
+    ('2011-02-01 09:00:10' suffix: ' abcd' testReading: DateTime) printNl.
+    ('2011-02-01 09:00:10' suffix: 'abcd' testReading: DateTime) printNl.
+    ('2011-02-01 09:00' suffix: ' abcd' testReading: DateTime) printNl.
+    ('2011-02-01 09:00' suffix: 'abcd' testReading: DateTime) printNl.
+
+    ('2011-02-01T09:00+01:30' suffix: ' abcd' testReading: DateTime) printNl.
+    ('2011-02-01T09:00+01:30' suffix: 'abcd' testReading: DateTime) printNl.
+    ('2011-02-01T09:00+1:30' suffix: ' abcd' testReading: DateTime) printNl.
+    ('2011-02-01T09:00+1:30' suffix: 'abcd' testReading: DateTime) printNl.
+    ('2011-02-01T09:00+01' suffix: ' abcd' testReading: DateTime) printNl.
+    ('2011-02-01T09:00+01' suffix: 'abcd' testReading: DateTime) printNl.
+    ('2011-02-01T09:00:10+01:30' suffix: ' abcd' testReading: DateTime) printNl.
+    ('2011-02-01T09:00:10+01:30' suffix: 'abcd' testReading: DateTime) printNl.
+    ('2011-02-01T09:00:10+1:30' suffix: ' abcd' testReading: DateTime) printNl.
+    ('2011-02-01T09:00:10+1:30' suffix: 'abcd' testReading: DateTime) printNl.
+    ('2011-02-01T09:00:10+01' suffix: ' abcd' testReading: DateTime) printNl.
+    ('2011-02-01T09:00:10+01' suffix: 'abcd' testReading: DateTime) printNl.
+    ('2011-02-01T09:00:10-01:30' suffix: ' abcd' testReading: DateTime) printNl.
+    ('2011-02-01T09:00:10-01:30' suffix: 'abcd' testReading: DateTime) printNl.
+    ('2011-02-01T09:00:10-1:30' suffix: ' abcd' testReading: DateTime) printNl.
+    ('2011-02-01T09:00:10-1:30' suffix: 'abcd' testReading: DateTime) printNl.
+    ('2011-02-01T09:00-01:30' suffix: ' abcd' testReading: DateTime) printNl.
+    ('2011-02-01T09:00-01:30' suffix: 'abcd' testReading: DateTime) printNl.
+    ('2011-02-01T09:00-1:30' suffix: ' abcd' testReading: DateTime) printNl.
+    ('2011-02-01T09:00-1:30' suffix: 'abcd' testReading: DateTime) printNl.
+    ('2011-02-01T09:00:10' suffix: ' abcd' testReading: DateTime) printNl.
+    ('2011-02-01T09:00:10' suffix: 'abcd' testReading: DateTime) printNl.
+    ('2011-02-01T09:00' suffix: ' abcd' testReading: DateTime) printNl.
+    ('2011-02-01T09:00' suffix: 'abcd' testReading: DateTime) printNl.
+
+    ('2011-02-01' suffix: ' abcd' testReading: DateTime) printNl.
+    ('2011-02-01' suffix: 'abcd' testReading: DateTime) printNl.
+    ('Feb 1 2011' suffix: ' abcd' testReading: DateTime) printNl.
+    ('Feb 1 2011' suffix: 'abcd' testReading: DateTime) printNl.
+
+    ('-2011-02-01T09:00+01:30' suffix: ' abcd' testReading: DateTime) printNl.
+    ('-2011-02-01T09:00+01:30' suffix: 'abcd' testReading: DateTime) printNl.
+    ('-2011-02-01' suffix: ' abcd' testReading: DateTime) printNl.
+    ('-2011-02-01' suffix: 'abcd' testReading: DateTime) printNl.
+    ('Feb 1 -2011' suffix: ' abcd' testReading: DateTime) printNl.
+    ('Feb 1 -2011' suffix: 'abcd' testReading: DateTime) printNl.
+
+    ('Feb 1 2011 09:00  +01:30' suffix: ' 1234' testReading: DateTime) printNl.
+    ('Feb 1 2011 09:00  +01:30' suffix: ' abcd' testReading: DateTime) printNl.
+    ('Feb 1 2011 09:00  +01:30' suffix: 'abcd' testReading: DateTime) printNl.
+    ('Feb 1 2011 09:00 +01:30' suffix: ' 1234' testReading: DateTime) printNl.
+    ('Feb 1 2011 09:00 +01:30' suffix: ' abcd' testReading: DateTime) printNl.
+    ('Feb 1 2011 09:00 +01:30' suffix: 'abcd' testReading: DateTime) printNl.
+    ('Feb 1 2011 09:00+01:30' suffix: ' 1234' testReading: DateTime) printNl.
+    ('Feb 1 2011 09:00+01:30' suffix: ' abcd' testReading: DateTime) printNl.
+    ('Feb 1 2011 09:00+01:30' suffix: 'abcd' testReading: DateTime) printNl.
+    ('Feb 1 2011 09:00+01' suffix: ' 1234' testReading: DateTime) printNl.
+    ('Feb 1 2011 09:00+01' suffix: ' abcd' testReading: DateTime) printNl.
+    ('Feb 1 2011 09:00+01' suffix: 'abcd' testReading: DateTime) printNl.
+    ('Feb 1 2011 09:00:10+01:30' suffix: ' 1234' testReading: DateTime) printNl.
+    ('Feb 1 2011 09:00:10+01:30' suffix: ' abcd' testReading: DateTime) printNl.
+    ('Feb 1 2011 09:00:10+01:30' suffix: 'abcd' testReading: DateTime) printNl.
+    ('Feb 1 2011 09:00:10+01' suffix: ' 1234' testReading: DateTime) printNl.
+    ('Feb 1 2011 09:00:10+01' suffix: ' abcd' testReading: DateTime) printNl.
+    ('Feb 1 2011 09:00:10+01' suffix: 'abcd' testReading: DateTime) printNl.
+    ('Feb 1 2011 09:00:10+1:30' suffix: ' abcd' testReading: DateTime) printNl.
+    ('Feb 1 2011 09:00:10+1:30' suffix: 'abcd' testReading: DateTime) printNl.
+    ('Feb 1 2011 09:00+1:30' suffix: ' abcd' testReading: DateTime) printNl.
+    ('Feb 1 2011 09:00+1:30' suffix: 'abcd' testReading: DateTime) printNl.
+
+    ('Feb 1 2011 09:00  -01:30' suffix: ' abcd' testReading: DateTime) printNl.
+    ('Feb 1 2011 09:00  -01:30' suffix: 'abcd' testReading: DateTime) printNl.
+    ('Feb 1 2011 09:00 -01:30' suffix: ' abcd' testReading: DateTime) printNl.
+    ('Feb 1 2011 09:00 -01:30' suffix: 'abcd' testReading: DateTime) printNl.
+    ('Feb 1 2011 09:00-01:30' suffix: ' abcd' testReading: DateTime) printNl.
+    ('Feb 1 2011 09:00-01:30' suffix: 'abcd' testReading: DateTime) printNl.
+    ('Feb 1 2011 09:00:10-01:30' suffix: ' abcd' testReading: DateTime) printNl.
+    ('Feb 1 2011 09:00:10-01:30' suffix: 'abcd' testReading: DateTime) printNl.
+    ('Feb 1 2011 09:00:10-1:30' suffix: ' abcd' testReading: DateTime) printNl.
+    ('Feb 1 2011 09:00:10-1:30' suffix: 'abcd' testReading: DateTime) printNl.
+    ('Feb 1 2011 09:00-1:30' suffix: ' abcd' testReading: DateTime) printNl.
+    ('Feb 1 2011 09:00-1:30' suffix: 'abcd' testReading: DateTime) printNl.
+
+    ('Feb 1 2011 09:00:10' suffix: ' abcd' testReading: DateTime) printNl.
+    ('Feb 1 2011 09:00:10' suffix: 'abcd' testReading: DateTime) printNl.
+    ('Feb 1 2011 09:00' suffix: ' abcd' testReading: DateTime) printNl.
+    ('Feb 1 2011 09:00' suffix: 'abcd' testReading: DateTime) printNl.
+]

@@ -1,5 +1,15 @@
 2011-11-23  Paolo Bonzini  <bonzini@gnu.org>
 
+	* kernel/AnsiDates.st: Improve #readFrom: to not read ahead too much
+	and parse more formats.  Reported by Maarten van Beek.
+	* kernel/Date.st: Improve #readFrom: to not read ahead too much
+	and parse negative years.
+	* kernel/Time.st: Improve #readFrom: to not read ahead too much.
+	* tests/dates.st: Add testcases.
+	* tests/dates.ok: Regenerate.
+
+2011-11-23  Paolo Bonzini  <bonzini@gnu.org>
+
 	* kernel/AnsiDates.st: Fix printing DateTimes with negative
 	fractional offsets.
 
