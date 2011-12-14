@@ -1,3 +1,8 @@
+2011-11-28  Paolo Bonzini  <bonzini@gnu.org>
+
+	* scripts/Package.st: Use #symlinkFrom: to create absolute-path
+	symlinks.
+
 2011-11-23  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/AnsiDates.st: Improve #readFrom: to not read ahead too much
