@@ -399,7 +399,7 @@ File extend [
 	Command execute: [
 	    destFile := File name: dest.
 	    destFile exists ifTrue: [ destFile remove ].
-	    self symlinkAs: dest ].
+	    destFile symlinkFrom: self name ].
     ]
 
     emitInstall: dest [
