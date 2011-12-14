@@ -1,3 +1,8 @@
+2011-12-14  Paolo Bonzini  <pbonzini@redhat.com>
+
+	* libgst/gst-parse.c: Only increase lookahead by one token at
+	a time, so that we do not lookahead past EOF.
+
 2011-11-14  Mehul Sanghvi  <mehul.sanghvi@gmail.com>
 
 	* libgst/cint.c: Add get_environ and pass it to Smalltalk.

@@ -198,7 +198,6 @@ lex_lookahead (gst_parser *p, int n)
   while (p->la_size < n)
     {
       int i = (p->la_first + p->la_size) % 4;
-      assert (p->la_size == 0 || token (p, p->la_size - 1) != EOF);
       p->la[i].token = _gst_yylex (&p->la[i].val, &p->la[i].loc);
       p->la_size++;
     }
@@ -685,11 +684,11 @@ parse_namespace_definition (gst_parser *p, tree_node first_stmt)
 static mst_Boolean
 parse_class_definition (gst_parser *p, OOP classOOP, mst_Boolean extend)
 {
-  int t1, t2, t3;
   mst_Boolean add_inst_vars = extend;
 
   for (;;)
     {
+      int t1, t2, t3;
       if (_gst_had_error)
 	break;
 
@@ -697,14 +696,11 @@ parse_class_definition (gst_parser *p, OOP classOOP, mst_Boolean extend)
       if (token (p, 0) == ']' || token (p, 0) == EOF)
 	break;
 
-      lex_lookahead (p, 3);
 #if 0
       print_tokens (p);      
 #endif
       
       t1 = token (p, 0);
-      t2 = token (p, 1);
-      t3 = token (p, 2);
 
       switch (t1) 
 	{	
@@ -722,6 +718,8 @@ parse_class_definition (gst_parser *p, OOP classOOP, mst_Boolean extend)
 	  continue;
 	  
 	case '<':
+	  lex_lookahead (p, 2);
+	  t2 = token (p, 1);
 	  if (t2 == IDENTIFIER) 
 	    {
 #if 0
@@ -741,6 +739,8 @@ parse_class_definition (gst_parser *p, OOP classOOP, mst_Boolean extend)
 	  break;
    
 	case IDENTIFIER:
+	  lex_lookahead (p, 2);
+	  t2 = token (p, 1);
 	  if (t2 == ASSIGNMENT)
 	    {
 #if 0
@@ -814,6 +814,8 @@ parse_class_definition (gst_parser *p, OOP classOOP, mst_Boolean extend)
 	    }
 	  else if (t2 == IDENTIFIER)
 	    {
+	      lex_lookahead (p, 3);
+	      t3 = token (p, 2);
 	      if (t3 == BINOP) 
 		{
 #if 0
@@ -853,6 +855,8 @@ parse_class_definition (gst_parser *p, OOP classOOP, mst_Boolean extend)
 	  break;
 	  
 	case '|':
+	  lex_lookahead (p, 2);
+	  t2 = token (p, 1);
 	  if (t2  == '|') 
 	    {
 #if 0
@@ -863,6 +867,8 @@ parse_class_definition (gst_parser *p, OOP classOOP, mst_Boolean extend)
 	    }
 	  else if (t2 == IDENTIFIER) 
 	    {
+	      lex_lookahead (p, 3);
+	      t3 = token (p, 2);
 	      if (t3 == IDENTIFIER || t3 == '|') 
 		{
 #if 0
