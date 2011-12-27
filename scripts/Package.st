@@ -382,7 +382,9 @@ File extend [
 	Command
 	    execute: [
 	        Directory working: dir name.
-		Smalltalk system: '%1 -n .st:.xml -qr %2 .' % { Command zip. self }
+		Smalltalk
+		     system: '%1 -n .st:.xml -qr %2 .'
+                     withArguments: { Command zip. self }
 	    ]
 	    ensure: [ Directory working: saveDir ]
     ]
@@ -729,12 +731,14 @@ PackageCommand subclass: PkgInstall [
 	self packages
 	    do: [ :each | packageList := packageList, ' ', each name ].
 
-	Smalltalk system: (pat % {
-	    gstLoad.
-	    File image.
-	    Directory kernel.
-	    (self isOption: 'test') ifTrue: [ '--test' ] ifFalse: [ '' ].
-	    packageList })
+	Smalltalk
+            system: pat
+            withArguments: {
+	        gstLoad.
+	        File image.
+	        Directory kernel.
+	        (self isOption: 'test') ifTrue: [ '--test' ] ifFalse: [ '' ].
+	        packageList }
     ]
 
     tmpDir [

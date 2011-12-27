@@ -1,3 +1,8 @@
+2011-12-27  Paolo Bonzini  <bonzini@gnu.org>
+
+	* VFS.st: Use #system:withArguments: instead of #%.
+	Reported by Maarten van Beek.
+
 2010-12-04  Paolo Bonzini  <bonzini@gnu.org>
 
 	* package.xml: Remove now superfluous <file> tags.

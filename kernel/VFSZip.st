@@ -57,8 +57,8 @@ files from a ZIP archive.'>
 
 	<category: 'members'>
 	Smalltalk 
-	    system: 'unzip -p %1 %2 > %3' % 
-			{self file name.
+	    system: 'unzip -p %1 %2 > %3'
+	    withArguments: {self file name.
 			anArchiveMember name.
 			temp name}
     ]
@@ -68,8 +68,8 @@ files from a ZIP archive.'>
 
 	<category: 'members'>
 	Smalltalk 
-	    system: 'zip -d %1 %2' % 
-			{self file name.
+	    system: 'zip -d %1 %2'
+	    withArguments: {self file name.
 			anArchiveMember name}
     ]
 
