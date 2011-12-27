@@ -1,5 +1,11 @@
 2011-12-27  Paolo Bonzini  <bonzini@gnu.org>
 
+	* kernel/CFuncs.st: Add #system:withArguments:.
+	* kernel/VFSZip.st: Use it instead of #%.  Reported by Maarten van Beek.
+	* scripts/Package.st: Use it instead of #%.
+
+2011-12-27  Paolo Bonzini  <bonzini@gnu.org>
+
 	* kernel/FilePath.st: Add #withShellEscapes and use it for printing.
 
 2011-12-27  Paolo Bonzini  <bonzini@gnu.org>

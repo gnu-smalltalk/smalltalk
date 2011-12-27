@@ -104,8 +104,8 @@ Commander and with GNOME VFS.'>
 
 	<category: 'members'>
 	Smalltalk 
-	    system: '%1 mkdir %2 %3' % 
-			{command.
+	    system: '%1 mkdir %2 %3'
+	    withArguments: {command.
 			self file name.
 			dirName}
     ]
@@ -133,8 +133,8 @@ Commander and with GNOME VFS.'>
 
 	<category: 'ArchiveMember protocol'>
 	Smalltalk 
-	    system: '%1 copyout %2 %3 %4' % 
-			{command.
+	    system: '%1 copyout %2 %3 %4'
+	    withArguments: {command.
 			self file name.
 			anArchiveMember name.
 			file name}
@@ -149,8 +149,8 @@ Commander and with GNOME VFS.'>
 		    ifTrue: ['rmdir']
 		    ifFalse: ['rm'].
 	Smalltalk 
-	    system: '%1 %2 %3 %4' % 
-			{command.
+	    system: '%1 %2 %3 %4'
+	    withArguments: {command.
 			subcmd.
 			self file name.
 			anArchiveMember name}
@@ -163,8 +163,8 @@ Commander and with GNOME VFS.'>
 
 	<category: 'ArchiveMember protocol'>
 	Smalltalk 
-	    system: '%1 copyin %2 %3 %4' % 
-			{command.
+	    system: '%1 copyin %2 %3 %4'
+	    withArguments: {command.
 			self file name.
 			anArchiveMember name.
 			anArchiveMember file name}
