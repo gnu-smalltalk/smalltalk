@@ -282,23 +282,26 @@ size and timestamps.'>
 	^self
     ]
 
+    asString [
+	"Print a representation of the receiver on aStream."
+
+	<category: 'printing'>
+	self subclassResponsibility
+    ]
+
     displayOn: aStream [
 	"Print a representation of the receiver on aStream."
 
 	<category: 'printing'>
-	| name string |
-	name := self asString.
-	(name anySatisfy: [:each | '"(){}[]$\<>#'' `' includes: each]) 
-	    ifFalse: 
-		[aStream nextPutAll: name.
-		^self].
-	string := Directory pathSeparator = $/ 
-		    ifTrue: ['''%1''' % {name copyReplaceAll: '''' with: '''\'''''}]
-		    ifFalse: [
-			{'"'.
-			name.
-			'"'} join].
-	aStream nextPutAll: string
+	aStream nextPutAll: self asString withShellEscapes
+    ]
+
+    withShellEscapes [
+	"Return the representation of the receiver with shell characters
+         escaped."
+
+	<category: 'printing'>
+	^self asString withShellEscapes
     ]
 
     printOn: aStream [
