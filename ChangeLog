@@ -1,3 +1,7 @@
+2011-12-27  Paolo Bonzini  <bonzini@gnu.org>
+
+	* kernel/CharArray.st: Add #withShellEscapes (and OS-specific workers).
+
 2011-11-28  Paolo Bonzini  <bonzini@gnu.org>
 
 	* scripts/Package.st: Use #symlinkFrom: to create absolute-path

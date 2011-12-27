@@ -446,6 +446,85 @@ accessing and manipulation methods for strings.'>
 	^result contents
     ]
 
+    withShellEscapes [
+	"Answer the receiver with special shell characters converted to a
+         backslash sequence."
+
+	<category: 'string processing'>
+        ^Directory pathSeparator == $\ 
+            ifTrue: [ self withWindowsShellEscapes ]
+            ifFalse: [ self withUnixShellEscapes ]
+    ]
+
+    withWindowsShellEscapes [
+	"Answer the receiver with Windows shell characters escaped properly."
+
+	| num result table slashes |
+        table := ##(
+            | t |
+            t := ByteArray new: 256.
+            #($% $" $< $> $| $& $^ $ ) do: [ :each | t at: each codePoint put: 1 ].
+            t).
+
+        num := 0.
+        1 to: self size do: [ :i |
+            num := num + (table at: (self valueAt: i) ifAbsent: [0])].
+
+        num = 0 ifTrue: [^self].
+        result := self copyEmpty writeStream.
+        result nextPut: $".
+        slashes := 0.
+        self do: [:each|
+            (each = $" or: [each = $%])
+                ifFalse: [
+                    "Backslash is not special per se, but must be treated
+                     specially inside quotes."
+                    slashes := each = $\ ifTrue: [slashes+1] ifFalse: [0].
+                    result nextPut: each]
+                ifTrue: [
+                    slashes > 0 ifTrue: [result next: slashes put: $\].
+                    slashes := 0.
+                    result nextPut: $".
+                    each = $% ifTrue: [ result nextPut: $% ].
+                    result nextPut: $"]].
+        result next: slashes put: $\.
+        result nextPut: $".
+
+        ^result contents
+    ]
+
+    withUnixShellEscapes [
+        "Answer the receiver with special shell characters converted to a
+         backslash sequence."
+
+        | num result table i j ch |
+        table := ##(
+            | t |
+            t := ByteArray new: 256.
+            #($  $' $" $` $| $^ $> $[ $= $< $; $( $) $*
+              $& $$ $" $! $# $~ ${ $} $? $\) do: [ :each |
+                t at: each codePoint put: 1 ].
+            t).
+
+        num := 0.
+        1 to: self size do: [ :i |
+            num := num + (table at: (self valueAt: i) ifAbsent: [0])].
+
+        num = 0 ifTrue: [^self].
+        result := self copyEmpty: self size + num.
+        i := 1. j := 0.
+        [j < num] whileTrue: [
+            ch := self valueAt: i.
+            (table at: ch ifAbsent: [0]) = 0 ifFalse: [
+                result at: j + i put: $\.
+                j := j + 1].
+            result valueAt: j + i put: ch.
+            i := i + 1].
+
+        result replaceFrom: j+i to: self size + num with: self startingAt: i.
+        ^result
+    ]
+
     asNumber [
 	"Parse a Number from the receiver until the input character is invalid
 	 and answer the result at this point"
