@@ -106,6 +106,7 @@ OOP _gst_date_class = NULL;
 OOP _gst_deferred_variable_binding_class = NULL;
 OOP _gst_dictionary_class = NULL;
 OOP _gst_directed_message_class = NULL;
+OOP _gst_message_lookup_class = NULL;
 OOP _gst_false_class = NULL;
 OOP _gst_file_descriptor_class = NULL;
 OOP _gst_file_segment_class = NULL;
@@ -335,6 +336,10 @@ static const class_definition class_info[] = {
   {&_gst_directed_message_class, &_gst_message_class,
    GST_ISP_FIXED, false, 1,
    "DirectedMessage", "receiver", NULL, NULL },
+
+  {&_gst_message_lookup_class, &_gst_message_class,
+   GST_ISP_FIXED, true, 1,
+   "MessageLookup", "startingClass", NULL, NULL },
 
   {&_gst_magnitude_class, &_gst_object_class,
    GST_ISP_FIXED, false, 0,

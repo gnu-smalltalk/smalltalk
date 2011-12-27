@@ -263,6 +263,15 @@ typedef struct gst_directed_message
 }
  *gst_directed_message;
 
+typedef struct gst_message_lookup
+{
+  OBJ_HEADER;
+  OOP selector;
+  OOP args;
+  OOP startingClass;
+}
+ *gst_message_lookup;
+
 typedef struct gst_string
 {
   OBJ_HEADER;
@@ -368,6 +377,7 @@ extern OOP _gst_date_class ATTRIBUTE_HIDDEN;
 extern OOP _gst_deferred_variable_binding_class ATTRIBUTE_HIDDEN;
 extern OOP _gst_dictionary_class ATTRIBUTE_HIDDEN;
 extern OOP _gst_directed_message_class ATTRIBUTE_HIDDEN;
+extern OOP _gst_message_lookup_class ATTRIBUTE_HIDDEN;
 extern OOP _gst_false_class ATTRIBUTE_HIDDEN;
 extern OOP _gst_file_descriptor_class ATTRIBUTE_HIDDEN;
 extern OOP _gst_file_segment_class ATTRIBUTE_HIDDEN;

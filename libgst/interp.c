@@ -938,6 +938,8 @@ lookup_method (OOP sendSelector,
 {
   inc_ptr inc;
   OOP argsArrayOOP;
+  gst_message_lookup messageLookup;
+  OOP messageLookupOOP;
 
   if (_gst_find_method (method_class, sendSelector, methodData))
     return (true);
@@ -945,8 +947,16 @@ lookup_method (OOP sendSelector,
   inc = INC_SAVE_POINTER ();
   argsArrayOOP = create_args_array (sendArgs);
   INC_ADD_OOP (argsArrayOOP);
-  PUSH_OOP (_gst_message_new_args (sendSelector, argsArrayOOP));
+
+  messageLookup = (gst_message_lookup) new_instance (_gst_message_lookup_class,
+					             &messageLookupOOP);
+
+  messageLookup->selector = sendSelector;
+  messageLookup->args = argsArrayOOP;
+  messageLookup->startingClass = method_class;
+  PUSH_OOP (messageLookupOOP);
   INC_RESTORE_POINTER (inc);
+
   return (false);
 }
 

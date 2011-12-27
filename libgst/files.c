@@ -162,6 +162,7 @@ static const char standard_files[] = {
   "SysDict.st\0"
   "Object.st\0"
   "Message.st\0"
+  "MessageLookup.st\0"
   "DirMessage.st\0"
   "Boolean.st\0"
   "False.st\0"

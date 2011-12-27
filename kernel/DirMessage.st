@@ -81,6 +81,13 @@ for a message.'>
 	super printOn: aStream
     ]
 
+    method [
+	"Return the method that is the result of the lookup."
+
+	<category: 'basic'>
+        ^receiver class lookupSelector: self selector
+    ]
+
     send [
 	"Send the message"
 

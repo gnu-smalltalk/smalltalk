@@ -1,3 +1,10 @@
+2011-12-27  Paolo Bonzini  <bonzini@gnu.org>
+
+	* libgst/dict.c: Add MessageLookup declaration.
+	* libgst/dict.h: Add gst_message_lookup.
+	* libgst/files.c: Load MessageLookup.st.
+	* libgst/interp.c: Pass a MessageLookup to #doesNotUnderstand:.
+
 2011-12-14  Paolo Bonzini  <pbonzini@redhat.com>
 
 	* libgst/gst-parse.c: Only increase lookahead by one token at
