@@ -1,3 +1,7 @@
+2012-01-21  Gwenael Casaccio  <mrgwen@gmail.com>
+
+	* kernel/Delay.st: Reset delay before removing.
+
 2011-12-27  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/CFuncs.st: Add #system:withArguments:.

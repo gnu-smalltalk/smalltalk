@@ -143,9 +143,9 @@ created.'>
         | activeDelay |
 	activeDelay := self activeDelay.
 	activeDelay isNil ifTrue: [^self].
+	aDelay reset.
 	activeDelay == aDelay ifTrue: [^Queue removeLast].
 	Queue identityRemove: aDelay ifAbsent: [].
-	aDelay reset
     ]
 
     Delay class >> startDelayLoop [
