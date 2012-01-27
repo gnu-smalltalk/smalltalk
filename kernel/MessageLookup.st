@@ -75,7 +75,7 @@ but also the starting class for the search.'>
 	"Send the message to the given receiver"
 
 	<category: 'basic'>
-	^receiver perform: self method with: anObject
+	^receiver perform: self method withArguments: self arguments
     ]
 
     startingClass: aClass [

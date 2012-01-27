@@ -1,3 +1,7 @@
+2012-01-27  Paolo Bonzini  <bonzini@gnu.org>
+
+	* kernel/MessageLookup.st: Fix cut-and-paste error, reported by Gwen.
+
 2012-01-21  Gwenael Casaccio  <mrgwen@gmail.com>
 
 	* kernel/Delay.st: Reset delay before removing.
