@@ -195,3 +195,20 @@ Eval [
     [1 doSomething] on: Error do: [:err | error := err].
     error signalingContext
 ]
+
+"Test MessageLookup"
+Object subclass: TestDNU [
+    doesNotUnderstand: aMessage [
+        ^(aMessage selector = #'foo:bar:'
+            and: [ aMessage arguments first = 1 ])
+            and: [ aMessage startingClass = aMessage arguments last ]
+    ]
+]
+
+TestDNU subclass: TestSuperDNU [
+    foo: a baz: b [ ^super foo: a bar: b ]
+]
+
+Eval [ TestDNU new foo: 1 bar: TestDNU ]
+Eval [ TestSuperDNU new foo: 1 bar: TestSuperDNU ]
+Eval [ TestSuperDNU new foo: 1 baz: TestDNU ]
