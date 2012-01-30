@@ -27,3 +27,6 @@ Execution begins...
 'timeout'
 'ensure-out'
 returned value is 'timeout'
+
+Execution begins...
+returned value is true

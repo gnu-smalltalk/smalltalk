@@ -1,3 +1,9 @@
+2012-01-30  Paolo Bonzini  <bonzini@gnu.org>
+
+	* kernel/Delay.st: Fix previous commit.
+	* tests/delays.st: Add testcase.
+	* tests/delays.ok: Regenerate.
+
 2012-01-21  Gwenael Casaccio  <mrgwen@gmail.com>
 
 	* kernel/Delay.st: Reset delay before removing.

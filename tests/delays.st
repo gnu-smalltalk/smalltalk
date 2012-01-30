@@ -87,3 +87,11 @@ Eval [
              onTimeoutDo: ['timeout' printNl].
      ] ensure: ['ensure-out' printNl].
 ]
+
+Eval [
+    |d|
+    d := Delay forSeconds: 1.
+    d wait.
+    ^(Time millisecondsToRun: [ d wait ]) >= 500
+]
+
