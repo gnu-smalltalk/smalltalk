@@ -1375,51 +1375,6 @@ get_scheduled_process (void)
   return (processor->activeProcess);
 }
 
-void
-add_first_link (OOP semaphoreOOP,
-		OOP processOOP)
-{
-  gst_semaphore sem;
-  gst_process process, lastProcess;
-  OOP lastProcessOOP;
-
-  process = (gst_process) OOP_TO_OBJ (processOOP);
-  if (!IS_NIL (process->myList))
-    {
-      sem = (gst_semaphore) OOP_TO_OBJ (process->myList);
-      if (sem->firstLink == processOOP)
-	{
-	  sem->firstLink = process->nextLink;
-	  if (sem->lastLink == processOOP)
-	    {
-	      /* It was the only process in the list */
-	      sem->lastLink = _gst_nil_oop;
-	    }
-	}
-      else if (sem->lastLink == processOOP)
-	{
-	  /* Find the new last link */
-	  lastProcessOOP = sem->firstLink;
-	  lastProcess = (gst_process) OOP_TO_OBJ (lastProcessOOP);
-	  while (lastProcess->nextLink != processOOP)
-	    {
-	      lastProcessOOP = lastProcess->nextLink;
-	      lastProcess = (gst_process) OOP_TO_OBJ (lastProcessOOP);
-	    }
-	  sem->lastLink = lastProcessOOP;
-	  lastProcess->nextLink = _gst_nil_oop;
-	}
-    }
-
-  sem = (gst_semaphore) OOP_TO_OBJ (semaphoreOOP);
-  process->myList = semaphoreOOP;
-  process->nextLink = sem->firstLink;
-
-  sem->firstLink = processOOP;
-  if (IS_NIL (sem->lastLink))
-    sem->lastLink = processOOP;
-}
-
 static void
 remove_process_from_list (OOP processOOP)
 {
@@ -1444,7 +1399,7 @@ remove_process_from_list (OOP processOOP)
         }
       else
         {
-          /* Find the new last link */
+          /* Find the new prev node */
           lastProcessOOP = sem->firstLink;
           lastProcess = (gst_process) OOP_TO_OBJ (lastProcessOOP);
           while (lastProcess->nextLink != processOOP)
@@ -1462,6 +1417,25 @@ remove_process_from_list (OOP processOOP)
     }
 
   process->nextLink = _gst_nil_oop;
+}
+
+void
+add_first_link (OOP semaphoreOOP,
+		OOP processOOP)
+{
+  gst_semaphore sem;
+  gst_process process;
+
+  process = (gst_process) OOP_TO_OBJ (processOOP);
+  remove_process_from_list (processOOP);
+
+  sem = (gst_semaphore) OOP_TO_OBJ (semaphoreOOP);
+  process->myList = semaphoreOOP;
+  process->nextLink = sem->firstLink;
+
+  sem->firstLink = processOOP;
+  if (IS_NIL (sem->lastLink))
+    sem->lastLink = processOOP;
 }
 
 void
@@ -1491,32 +1465,7 @@ add_last_link (OOP semaphoreOOP,
   OOP lastProcessOOP;
 
   process = (gst_process) OOP_TO_OBJ (processOOP);
-  if (!IS_NIL (process->myList))
-    {
-      sem = (gst_semaphore) OOP_TO_OBJ (process->myList);
-      if (sem->firstLink == processOOP)
-	{
-	  sem->firstLink = process->nextLink;
-	  if (sem->lastLink == processOOP)
-	    {
-	      /* It was the only process in the list */
-	      sem->lastLink = _gst_nil_oop;
-	    }
-	}
-      else if (sem->lastLink == processOOP)
-	{
-	  /* Find the new last link */
-	  lastProcessOOP = sem->firstLink;
-	  lastProcess = (gst_process) OOP_TO_OBJ (lastProcessOOP);
-	  while (lastProcess->nextLink != processOOP)
-	    {
-	      lastProcessOOP = lastProcess->nextLink;
-	      lastProcess = (gst_process) OOP_TO_OBJ (lastProcessOOP);
-	    }
-	  sem->lastLink = lastProcessOOP;
-	  lastProcess->nextLink = _gst_nil_oop;
-	}
-    }
+  remove_process_from_list (processOOP);
 
   sem = (gst_semaphore) OOP_TO_OBJ (semaphoreOOP);
   process->myList = semaphoreOOP;

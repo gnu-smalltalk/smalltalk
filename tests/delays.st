@@ -95,3 +95,15 @@ Eval [
     ^(Time millisecondsToRun: [ d wait ]) >= 500
 ]
 
+Eval [
+    | d1 d2 p1 p2 |
+    sem := Semaphore new.
+    d1 := Delay forSeconds: 1.
+    p1 := [ d1 value: [ sem signal ] onTimeoutDo: [ ] ] fork.
+    sem wait.
+
+    'value:onTimeoutDo:' displayNl.
+    d1 := Delay forMilliseconds: 100.
+    d1 value: [ [ true ] whileTrue ] onTimeoutDo: [ ]. 
+    [ p1 isTerminated ] whileFalse: [ Processor yield ]
+]

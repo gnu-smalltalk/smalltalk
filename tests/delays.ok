@@ -30,3 +30,7 @@ returned value is 'timeout'
 
 Execution begins...
 returned value is true
+
+Execution begins...
+value:onTimeoutDo:
+returned value is nil

@@ -1,4 +1,10 @@
 2012-02-02  Paolo Bonzini  <bonzini@gnu.org>
+            Gwenael Casaccio  <mrgwen@gmail.com>
+
+	* tests/delays.st: Add testcase.
+	* tests/delays.ok: Regenerate.
+
+2012-02-02  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/Process.st: Do not interrupt a terminated process.
 
