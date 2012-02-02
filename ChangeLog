@@ -1,3 +1,7 @@
+2012-02-02  Paolo Bonzini  <bonzini@gnu.org>
+
+	* kernel/Process.st: Do not interrupt a terminated process.
+
 2012-01-30  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/Delay.st: Fix previous commit.
