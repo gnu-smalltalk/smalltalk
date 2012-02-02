@@ -1,3 +1,8 @@
+2011-07-04  Paolo Bonzini  <bonzini@gnu.org>
+
+	* libgst/sysdep/posix/events.c: Fix signal handling race.
+	Reported by Derek Zhou.
+
 2012-02-02  Gwenael Casaccio  <mrgwen@gmail.com>
             Paolo Bonzini  <pbonzini@redhat.com>
 

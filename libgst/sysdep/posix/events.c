@@ -170,7 +170,7 @@ polling_queue;
    array of pollfd structures must be scanned and kept sequential
    every time that I/O happens, so it does not bother us very much to
    have to scan the list to find the semaphore that is to be signaled.  */
-static polling_queue *head, **p_tail_next;
+static polling_queue *head, **p_tail_next = &head;
 
 /* This variable holds a variable-sized array of pollfd structures.
    NUM_USED_POLLFDS of the total NUM_TOTAL_POLLFDS items available are
@@ -391,63 +391,57 @@ _gst_async_file_polling (int fd,
 			 OOP semaphoreOOP)
 {
   int result;
+  int index;
   polling_queue *new;
 
+  index = num_used_pollfds++;
   result = _gst_sync_file_polling (fd, cond);
   if (result != 0)
-    return (result);
+    {
+      --num_used_pollfds;
+      return (result);
+    }
 
   new = (polling_queue *) xmalloc (sizeof (polling_queue));
-  new->poll = num_used_pollfds;
+  new->poll = index;
   new->semaphoreOOP = semaphoreOOP;
   new->next = NULL;
 
-  if (num_used_pollfds == num_total_pollfds)
+  if (index == num_total_pollfds)
     {
       num_total_pollfds += 64;
       pollfds = (struct pollfd *)
 	xrealloc (pollfds, num_total_pollfds * sizeof (struct pollfd));
     }
 
-  pollfds[num_used_pollfds].fd = fd;
+  pollfds[index].fd = fd;
   switch (cond)
     {
     case 0:
-      pollfds[num_used_pollfds].events = POLLIN;
+      pollfds[index].events = POLLIN;
       break;
     case 1:
-      pollfds[num_used_pollfds].events = POLLOUT;
+      pollfds[index].events = POLLOUT;
       break;
     case 2:
-      pollfds[num_used_pollfds].events = POLLPRI;
+      pollfds[index].events = POLLPRI;
       break;
     default:
       return -1;
     }
-  pollfds[num_used_pollfds].revents = 0;
+  pollfds[index].revents = 0;
 
   set_file_interrupt (fd, file_polling_handler);
 
-  /* Now check if I/O was made possible while setting up our machinery...
-     If so, exit; otherwise, wait on the semaphore and the SIGIO
-     will wake us up.  */
+  /* Even if I/O was made possible while setting up our machinery,
+     the list will only be walked before the next bytecode, so there
+     is no race.  We incremented num_used_pollfds very early so that
+     the async call will be scheduled.  */
+  *p_tail_next = new;
+  p_tail_next = &new->next;
 
-  result = _gst_sync_file_polling (fd, cond);
-  if (result == 0)
-    {
-      if (!head)
-	head = new;
-      else
-	*p_tail_next = new;
-      p_tail_next = &new->next;
-
-      num_used_pollfds++;
-      _gst_register_oop (semaphoreOOP);
-      _gst_sync_wait (semaphoreOOP);
-    }
-  else
-    xfree (new);
-
+  _gst_register_oop (semaphoreOOP);
+  _gst_sync_wait (semaphoreOOP);
   return (result);
 }
 
