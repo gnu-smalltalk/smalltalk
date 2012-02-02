@@ -1399,6 +1399,12 @@ to an end.'>
         <category: 'private'>
         ^ false
     ]
+
+    defaultAction [
+	"We are not resumable, so do nothing.  This should really never happen."
+
+	<category: 'exception description'>
+    ]
 ]
 
 ]

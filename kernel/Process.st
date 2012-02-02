@@ -298,10 +298,11 @@ can suspend themselves and resume themselves however they wish.'>
                     ifTrue:
                         [anException signal.
                          ^self].
-                 block := [self evaluate: [anException signal]
-                     ifNotTerminated: [self resume]].
-                 suspendedContext := block asContext: suspendedContext.
-                 self resume]
+                 self isTerminated ifFalse: [
+                     block := [self evaluate: [anException signal]
+                         ifNotTerminated: [self resume]].
+                     suspendedContext := block asContext: suspendedContext.
+                     self resume]]
     ]
 
     queueInterrupt: aBlock [
