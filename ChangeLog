@@ -1,3 +1,8 @@
+2012-02-04  Paolo Bonzini  <bonzini@gnu.org>
+
+	* kernel/MessageLookup.st: Change #sendTo: to #retrySendTo:.
+	Keep inherited implementation of #sendTo:.
+
 2012-02-02  Paolo Bonzini  <bonzini@gnu.org>
             Gwenael Casaccio  <mrgwen@gmail.com>
 

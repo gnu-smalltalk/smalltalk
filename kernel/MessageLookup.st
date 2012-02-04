@@ -71,8 +71,9 @@ but also the starting class for the search.'>
         ^self startingClass lookupSelector: self selector
     ]
 
-    sendTo: receiver [
-	"Send the message to the given receiver"
+    retrySendTo: receiver [
+	"Send the message to the given receiver, looking up the
+         method starting at #startingClass."
 
 	<category: 'basic'>
 	^receiver perform: self method withArguments: self arguments
