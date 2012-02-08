@@ -1,3 +1,7 @@
+2012-02-08  Gwenael Casaccio  <mrgwen@gmail.com>
+
+	* kernel/MethodDict.st: Fix initialization of mutex.
+
 2012-02-04  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/MessageLookup.st: Change #sendTo: to #retrySendTo:.

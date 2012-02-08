@@ -45,7 +45,9 @@ interpreter.'>
     mutex [
        <category: 'initialization'>
 
-       ^ mutex ifNil: [ mutex := Semaphore forMutualExclusion ]
+       mutex isNil ifFalse: [ ^ mutex ].
+       ^ [ mutex isNil ifTrue: [ mutex := Semaphore forMutualExclusion ].
+	   mutex ] valueWithoutPreemption
     ]
 
     at: key put: value [
