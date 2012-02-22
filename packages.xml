@@ -107,6 +107,7 @@
   <file>Bag.st</file>
   <file>Date.st</file>
   <file>Message.st</file>
+  <file>MessageLookup.st</file>
   <file>SharedQueue.st</file>
   <file>Behavior.st</file>
   <file>Delay.st</file>
