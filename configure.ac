@@ -322,7 +322,7 @@ AC_HEADER_ASSERT
 AC_CHECK_HEADERS_ONCE(stdint.h inttypes.h unistd.h poll.h sys/ioctl.h \
 	sys/resource.h sys/utsname.h stropts.h sys/param.h stddef.h limits.h \
 	sys/timeb.h termios.h sys/mman.h sys/file.h execinfo.h utime.h \
-	sys/select.h sys/wait.h fcntl.h, [], [], [AC_INCLUDES_DEFAULT])
+	sys/select.h sys/wait.h fcntl.h crt_externs.h, [], [], [AC_INCLUDES_DEFAULT])
 
 AC_CHECK_MEMBERS([struct stat.st_mtim.tv_nsec, struct stat.st_mtimensec,
 		  struct stat.st_mtimespec.tv_nsec])
@@ -358,8 +358,14 @@ AC_REPLACE_FUNCS(putenv strdup strerror strsignal mkstemp getpagesize \
 AC_CHECK_FUNCS_ONCE(gethostname memcpy memmove sighold uname usleep lstat \
 	grantpt popen getrusage gettimeofday fork strchr utimes utime readlink \
 	sigsetmask alarm select mprotect madvise waitpid accept4 \
-	setsid spawnl pread pwrite _NSGetExecutablePath \
+	setsid spawnl pread pwrite _NSGetExecutablePath _NSGetEnviron \
 	chown getgrnam getpwnam endgrent endpwent setgroupent setpassent)
+
+if test "$ac_cv_func__NSGetEnviron" = yes; then
+  AC_DEFINE([environ], [_NSGetEnviron()],
+    [Define to an appropriate function call if the system does not provide the
+     environ variable.])
+fi
 
 AC_SEARCH_LIBS([nanosleep], [rt])
 if test "$ac_cv_search_nanosleep" != no; then

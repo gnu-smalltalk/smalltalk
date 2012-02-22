@@ -78,6 +78,10 @@
 #include <sys/time.h>
 #include <time.h>
 
+#ifdef HAVE_CRT_EXTERNS_H
+#include <crt_externs.h>
+#endif
+
 #ifdef HAVE_SYS_RESOURCE_H
 #include <sys/resource.h>
 #endif
