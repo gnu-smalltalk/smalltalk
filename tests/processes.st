@@ -279,3 +279,99 @@ Eval [
 	do: [ :sig | 'nothing should follow' display. sig pass ].
     'failed' displayNl
 ]
+
+"The exception should not be resumable to avoid that execution
+ is continued without the process actually having gotten a signal
+ on the semaphore."
+Notification subclass: ProcessInterrupt [
+    isResumable [ ^false ]
+    defaultAction [ Processor activeProcess terminate ]
+]
+
+"Signal a process from itself."
+Eval [
+    | p1 |
+    p1 := [ Processor activeProcess signalInterrupt: ProcessInterrupt new ] fork.
+    p1 executeUntilTermination
+]
+
+"Signal a process from the outside."
+Eval [
+    | p1 p2 |
+    p1 := [ [ Processor activeProcess yield ] repeat ] fork.
+    p2 := [ (Delay forMilliseconds: 500) wait.
+        p1 signalInterrupt: (ProcessInterrupt new) ] fork.
+    p1 executeUntilTermination.
+    p2 executeUntilTermination
+]
+
+"Signal a process from the outside, and catch the exception."
+Eval [
+    | p1 p2 sem |
+    sem := Semaphore new.
+    p1 := [ [ [ Processor activeProcess yield ] repeat ]
+               on: ProcessInterrupt
+               do: [ :ex | ex return ].
+            sem signal ] fork.
+    p2 := [ (Delay forMilliseconds: 500) wait.
+        p1 signalInterrupt: (ProcessInterrupt new) ] fork.
+    sem wait.
+    p1 executeUntilTermination.
+    p2 executeUntilTermination
+]
+
+"Signal a process from the outside, and pass the exception."
+Eval [
+    | p1 p2 sem |
+    sem := Semaphore new.
+    p1 := [ [ [ Processor activeProcess yield ] repeat ]
+               on: ProcessInterrupt
+               do: [ :ex | sem signal. ex pass ] ] fork.
+    p2 := [ (Delay forMilliseconds: 500) wait.
+        p1 signalInterrupt: (ProcessInterrupt new) ] fork.
+    sem wait.
+    p1 executeUntilTermination.
+    p2 executeUntilTermination
+]
+
+"Signal a sleeping process from the outside."
+Eval [
+    | p1 p2 sem |
+    p1 := [ (Delay forSeconds: 100000) wait ] fork.
+    [ p1 isActive ] whileTrue: [ Processor activeProcess yield ].
+    p2 := [ (Delay forMilliseconds: 500) wait.
+        p1 signalInterrupt: (ProcessInterrupt new) ] fork.
+    p1 executeUntilTermination.
+    p2 executeUntilTermination
+]
+
+"Signal a sleeping process from the outside, and pass the exception."
+Eval [
+    | p1 p2 sem |
+    sem := Semaphore new.
+    p1 := [ [ (Delay forSeconds: 100000) wait ]
+               on: ProcessInterrupt
+               do: [ :ex | ex return ].
+            sem signal ] fork.
+    [ p1 isActive ] whileTrue: [ Processor activeProcess yield ].
+    p2 := [ (Delay forMilliseconds: 500) wait.
+        p1 signalInterrupt: (ProcessInterrupt new) ] fork.
+    sem wait.
+    p1 executeUntilTermination.
+    p2 executeUntilTermination
+]
+
+"Signal a sleeping process from the outside, and pass the exception."
+Eval [
+    | p1 p2 sem |
+    sem := Semaphore new.
+    p1 := [ [ (Delay forSeconds: 100000) wait ]
+               on: ProcessInterrupt
+               do: [ :ex | sem signal. ex pass ] ] fork.
+    [ p1 isActive ] whileTrue: [ Processor activeProcess yield ].
+    p2 := [ (Delay forMilliseconds: 500) wait.
+        p1 signalInterrupt: (ProcessInterrupt new) ] fork.
+    sem wait.
+    p1 executeUntilTermination.
+    p2 executeUntilTermination
+]
