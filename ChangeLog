@@ -1,4 +1,8 @@
 2012-02-22  Paolo Bonzini  <bonzini@gnu.org>
+
+	* kernel/LinkedList: Add #first, #last, and improve error on #at:.
+
+2012-02-22  Paolo Bonzini  <bonzini@gnu.org>
             Gwenael Casaccio  <mrgwen@gmail.com>
 
 	* tests/processes.st: Add testcase.

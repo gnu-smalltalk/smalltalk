@@ -44,6 +44,8 @@ the methods that class Link supplies to implement my methods.'>
 	"Return the element that is index into the linked list."
 
 	<category: 'accessing'>
+        self isEmpty ifTrue: [
+            ^SystemExceptions.IndexOutOfRange signalOn: self withIndex: index ].
 	^firstLink at: index
     ]
 
@@ -76,6 +78,26 @@ the methods that class Link supplies to implement my methods.'>
 	firstLink isNil ifTrue: [firstLink := aLink].
 	lastLink notNil ifTrue: [lastLink nextLink: aLink].
 	^lastLink := aLink
+    ]
+
+    first [
+        "Retrieve the first element of the list and return it, or error if the
+         list is empty."
+
+        <category: 'iteration'>
+        self isEmpty ifTrue: [
+            ^SystemExceptions.IndexOutOfRange signalOn: self withIndex: 1 ].
+        ^firstLink
+    ]
+
+    last [
+        "Retrieve the last element of the list and return it, or error if the
+         list is empty."
+
+        <category: 'iteration'>
+        self isEmpty ifTrue: [
+            ^SystemExceptions.IndexOutOfRange signalOn: self withIndex: 0 ].
+        ^lastLink
     ]
 
     removeFirst [
