@@ -1,3 +1,7 @@
+2012-02-08  Paolo Bonzini  <bonzini@gnu.org>
+
+	* gstGlu.c: Fix warnings.
+
 2011-03-12  Paolo Bonzini  <bonzini@gnu.org>
 
 	* gstGl.c: Remove dead code signaled by clang analyzer.

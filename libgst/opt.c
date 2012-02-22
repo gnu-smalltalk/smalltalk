@@ -240,7 +240,7 @@ _gst_is_simple_return (bc_vector bytecodes,
 
   bytes = bytecodes->base;
 
-  for (i = 1; i <= 3; i++)
+  for (i = 1; i <= 4; i++)
     {
       int should_have_been_return = (maybe != MTH_NORMAL);
       if (bytes == bytecodes->ptr)

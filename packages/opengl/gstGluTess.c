@@ -195,7 +195,7 @@ static GLUtesselator *
 gst_opengl_gluNewTess (void)
 {
   GLUtesselator *tess = gluNewTess ();
-  gluTessCallback(tess, GLU_TESS_BEGIN, glBegin);
+  gluTessCallback(tess, GLU_TESS_BEGIN, (GLUfuncptr) glBegin);
   gluTessCallback(tess, GLU_TESS_VERTEX, (GLUfuncptr) gst_opengl_glVertexv);
   gluTessCallback(tess, GLU_TESS_END, glEnd);
   return tess;

@@ -1,4 +1,8 @@
-2011-07-04  Paolo Bonzini  <bonzini@gnu.org>
+2012-02-22  Gwenael Casaccio  <mrgwen@gmail.com>
+
+	* libgst/opt.c: Account for two line number bytecodes.
+
+2011-02-02  Paolo Bonzini  <bonzini@gnu.org>
 
 	* libgst/sysdep/posix/events.c: Fix signal handling race.
 	Reported by Derek Zhou.
