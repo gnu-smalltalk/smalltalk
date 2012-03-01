@@ -1,3 +1,8 @@
+2012-03-01  Paolo Bonzini  <bonzini@gnu.org>
+
+	* kernel/CompildMeth.st: Return self from #makeLiteralsReadOnly.
+	Do not make globals read-only.  Reported by Gwenael Casaccio.
+
 2012-02-22  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/LinkedList: Add #first, #last, and improve error on #at:.

@@ -605,7 +605,7 @@ instances.'>
     makeLiteralsReadOnly [
 	<category: 'private'>
 	literals isNil ifTrue: [^self].
-	^self makeLiteralsReadOnly: literals
+	self makeLiteralsReadOnly: literals
     ]
 
     makeLiteralsReadOnly: array [
@@ -613,7 +613,7 @@ instances.'>
 	array do: 
 		[:each | 
 		each class == Array ifTrue: [self makeLiteralsReadOnly: each].
-		each makeReadOnly: true]
+		(each class isKindOf: LookupKey) ifFalse: [each makeReadOnly: true]].
     ]
 
     initialize [
