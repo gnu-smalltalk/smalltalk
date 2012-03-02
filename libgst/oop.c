@@ -1716,7 +1716,7 @@ check_weak_refs ()
       if (!IS_OOP_VALID_GC (oop))
 	continue;
 
-      for (field = (OOP *) oop->object, n = TO_INT (oop->object->objSize);
+      for (field = (OOP *) oop->object, n = NUM_OOPS (oop->object);
 	   n--; field++)
         {
 	  OOP oop = *field;
