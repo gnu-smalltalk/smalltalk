@@ -1940,10 +1940,7 @@ scanned_fields_in (gst_object object,
   if COMMON (!(flags & (F_WEAK | F_CONTEXT)))
     {
       int size = NUM_OOPS (object);
-      if COMMON (size)
-	return object->data + size - &object->objClass;
-      else
-	return UNCOMMON (!IS_OOP_COPIED (objClass));
+      return object->data + size - &object->objClass;
     }
 
   if COMMON (flags & F_CONTEXT)
@@ -1954,14 +1951,9 @@ scanned_fields_in (gst_object object,
       methodSP = TO_INT (ctx->spOffset);
       return ctx->contextStack + methodSP + 1 - &ctx->objClass;
     }
-  else
-    {
-      /* In general, there will be many instances of a class,
-	 but only the first time will it need to be copied;
-         moreover, classes are often old.  So I'm
-	 marking this as uncommon.  */
-      return UNCOMMON (!IS_OOP_COPIED (objClass));
-    }
+
+  /* Weak object, only mark the class.  */
+  return 1;
 }
 
 void
