@@ -1,3 +1,7 @@
+2012-02-02  Holger Hans Peter Freyther  <holger@freyther.de>
+
+	* scripts/Package.st: Scan for new *.star files.
+
 2011-09-25  Holger Hans Peter Freyther  <holger@freyther.de>
 
 	* kernel/File.st: Add a <category: 'text'> to the class.

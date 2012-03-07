@@ -689,6 +689,9 @@ PackageCommand subclass: PkgInstall [
 	[ super run ] ensure: [
 	    tmpDir isNil ifFalse: [ tmpDir all remove ] ].
 
+	PackageLoader
+            flush;
+            refresh.
 	(Command dryRun not and: [ self isOption: 'load' ])
 	    ifTrue: [ ^self loadPackages ].
 
