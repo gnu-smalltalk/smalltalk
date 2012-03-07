@@ -646,6 +646,7 @@ FilePath subclass: File [
 Namespace current: Kernel [
 
 Object subclass: Stat [
+    <category: 'Streams-Files'>
     
     | stMode stSize stAtime stMtime stCtime |
     stMode [ ^stMode ]

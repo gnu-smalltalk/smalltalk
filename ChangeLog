@@ -1,3 +1,9 @@
+2011-09-25  Holger Hans Peter Freyther  <holger@freyther.de>
+
+	* kernel/File.st: Add a <category: 'text'> to the class.
+	* kernel/PkgLoader.st: Ditto.
+	* kernel/VFS.st: Ditto.
+
 2012-03-01  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/CompildMeth.st: Return self from #makeLiteralsReadOnly.
@@ -51,6 +57,7 @@
 
 	* scripts/Package.st: Use #symlinkFrom: to create absolute-path
 	symlinks.
+
 
 2011-11-23  Paolo Bonzini  <bonzini@gnu.org>
 
