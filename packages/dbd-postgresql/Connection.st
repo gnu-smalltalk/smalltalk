@@ -167,6 +167,8 @@ Connection subclass: PGConnection [
 
 
 CObject subclass: PQConnection [
+    <category: 'private'>
+
     "Connections"
     PQConnection class >> connect: aString [
         <cCall: 'PQconnectdb' returning: #{PQConnection} args: #(#string)>

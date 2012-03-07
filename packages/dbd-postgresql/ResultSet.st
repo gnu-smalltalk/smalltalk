@@ -267,6 +267,8 @@ ResultSet subclass: PGResultSet [
 
 
 CObject subclass: PQResultSet [
+    <category: 'private'>
+
     "Results"
     status [
         <cCall: 'PQresultStatus' returning: #int args: #( #self)>
