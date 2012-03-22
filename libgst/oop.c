@@ -1720,8 +1720,8 @@ check_weak_refs ()
       if (!IS_OOP_VALID_GC (oop))
 	continue;
 
-      for (field = (OOP *) oop->object, n = NUM_OOPS (oop->object);
-	   n--; field++)
+      for (field = (OOP *) oop->object + OBJ_HEADER_SIZE_WORDS,
+	   n = NUM_OOPS (oop->object); n--; field++)
         {
 	  OOP oop = *field;
           if (IS_INT (oop))
@@ -1939,8 +1939,6 @@ int
 scanned_fields_in (gst_object object,
 		  int flags)
 {
-  OOP objClass = object->objClass;
-
   if COMMON (!(flags & (F_WEAK | F_CONTEXT)))
     {
       int size = NUM_OOPS (object);
