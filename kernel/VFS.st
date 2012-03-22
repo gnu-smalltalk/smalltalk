@@ -347,6 +347,7 @@ virtual files that refer to a real file on disk.'>
 Namespace current: Kernel [
 
 VFS.FileWrapper subclass: RecursiveFileWrapper [
+    <category: 'Streams-Files'>
 
      do: aBlock [
 	"Same as the wrapped #do:, but reuses the file object for efficiency."

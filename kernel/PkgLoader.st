@@ -388,6 +388,8 @@ Namespace current: Kernel [
 PackageContainer subclass: PackageDirectory [
     | baseDirectories baseDirCache |
 
+    <category: 'Language-Packaging'>
+
     PackageContainer class >> on: aFile baseDirectories: aBlock [
 	<category: 'accessing'>
 	^(super new)
@@ -1107,6 +1109,8 @@ Namespace current: Kernel [
 
 Object subclass: Version [
     | major minor patch |
+
+    <category: 'Language-Packaging'>
 
     Version class >> fromString: aString [
 	<category: 'instance creation'>

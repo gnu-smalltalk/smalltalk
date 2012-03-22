@@ -1,3 +1,8 @@
+2011-10-26  Holger Hans Peter Freyther  <holger@freyther.de>
+
+	* Connection.st: Put PQConnection into 'private'.
+	* ResultSet.st: Put PQResultSet into 'private'.
+
 2011-04-23  Paolo Bonzini  <bonzini@gnu.org>
 
 	* Connection.st: Remove finalization after closing.

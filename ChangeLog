@@ -1,3 +1,13 @@
+2012-02-02  Holger Hans Peter Freyther  <holger@freyther.de>
+
+	* scripts/Package.st: Scan for new *.star files.
+
+2011-09-25  Holger Hans Peter Freyther  <holger@freyther.de>
+
+	* kernel/File.st: Add a <category: 'text'> to the class.
+	* kernel/PkgLoader.st: Ditto.
+	* kernel/VFS.st: Ditto.
+
 2012-03-01  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/CompildMeth.st: Return self from #makeLiteralsReadOnly.

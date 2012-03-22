@@ -893,23 +893,27 @@ oldspace_before_freeing (heap_data *h, heap_block *blk, size_t sz)
 heap_data *
 oldspace_nomemory (heap_data *h, size_t sz)
 {
+  heap_data **p_heap;
+
+  assert (h == _gst_mem.old || h == _gst_mem.fixed);
+  p_heap = (h == _gst_mem.old ? &_gst_mem.old : &_gst_mem.fixed);
+
   if (!_gst_gc_running)
     _gst_global_gc (sz);
   else
     {
       /* Already garbage collecting, emergency growth just to satisfy
 	 tenuring necessities.  */
-      int grow_amount_to_satisfy_rate = _gst_mem.old->heap_limit
+      int grow_amount_to_satisfy_rate = h->heap_limit
            * (100.0 + _gst_mem.space_grow_rate) / 100;
-      int grow_amount_to_satisfy_threshold = 
-	   (sz + _gst_mem.old->heap_total)
+      int grow_amount_to_satisfy_threshold = (sz + h->heap_total)
 	   * 100.0 /_gst_mem.grow_threshold_percent;
 
-      _gst_mem.old->heap_limit = MAX (grow_amount_to_satisfy_rate,
-				      grow_amount_to_satisfy_threshold);
+      h->heap_limit = MAX (grow_amount_to_satisfy_rate,
+                           grow_amount_to_satisfy_threshold);
     }
 
-  return _gst_mem.old;
+  return *p_heap;
 }
 
 #ifndef NO_SIGSEGV_HANDLING
@@ -1716,7 +1720,7 @@ check_weak_refs ()
       if (!IS_OOP_VALID_GC (oop))
 	continue;
 
-      for (field = (OOP *) oop->object, n = TO_INT (oop->object->objSize);
+      for (field = (OOP *) oop->object, n = NUM_OOPS (oop->object);
 	   n--; field++)
         {
 	  OOP oop = *field;
@@ -1940,10 +1944,7 @@ scanned_fields_in (gst_object object,
   if COMMON (!(flags & (F_WEAK | F_CONTEXT)))
     {
       int size = NUM_OOPS (object);
-      if COMMON (size)
-	return object->data + size - &object->objClass;
-      else
-	return UNCOMMON (!IS_OOP_COPIED (objClass));
+      return object->data + size - &object->objClass;
     }
 
   if COMMON (flags & F_CONTEXT)
@@ -1954,14 +1955,9 @@ scanned_fields_in (gst_object object,
       methodSP = TO_INT (ctx->spOffset);
       return ctx->contextStack + methodSP + 1 - &ctx->objClass;
     }
-  else
-    {
-      /* In general, there will be many instances of a class,
-	 but only the first time will it need to be copied;
-         moreover, classes are often old.  So I'm
-	 marking this as uncommon.  */
-      return UNCOMMON (!IS_OOP_COPIED (objClass));
-    }
+
+  /* Weak object, only mark the class.  */
+  return 1;
 }
 
 void
