@@ -893,23 +893,27 @@ oldspace_before_freeing (heap_data *h, heap_block *blk, size_t sz)
 heap_data *
 oldspace_nomemory (heap_data *h, size_t sz)
 {
+  heap_data **p_heap;
+
+  assert (h == _gst_mem.old || h == _gst_mem.fixed);
+  p_heap = (h == _gst_mem.old ? &_gst_mem.old : &_gst_mem.fixed);
+
   if (!_gst_gc_running)
     _gst_global_gc (sz);
   else
     {
       /* Already garbage collecting, emergency growth just to satisfy
 	 tenuring necessities.  */
-      int grow_amount_to_satisfy_rate = _gst_mem.old->heap_limit
+      int grow_amount_to_satisfy_rate = h->heap_limit
            * (100.0 + _gst_mem.space_grow_rate) / 100;
-      int grow_amount_to_satisfy_threshold = 
-	   (sz + _gst_mem.old->heap_total)
+      int grow_amount_to_satisfy_threshold = (sz + h->heap_total)
 	   * 100.0 /_gst_mem.grow_threshold_percent;
 
-      _gst_mem.old->heap_limit = MAX (grow_amount_to_satisfy_rate,
-				      grow_amount_to_satisfy_threshold);
+      h->heap_limit = MAX (grow_amount_to_satisfy_rate,
+                           grow_amount_to_satisfy_threshold);
     }
 
-  return _gst_mem.old;
+  return *p_heap;
 }
 
 #ifndef NO_SIGSEGV_HANDLING
