@@ -325,3 +325,6 @@ Object subclass: A [
 Eval [A class >> #a]
 Eval [A >> #a]
 
+"Check that lookahead tokens are not discarded after compiling a doit."
+Eval ['''abc'' printNl ''def'' printNl' readStream fileIn]
+
