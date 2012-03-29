@@ -644,7 +644,12 @@ parse_doit (gst_parser *p, mst_Boolean fail_at_eof)
   else if (statement)
     {
       execute_doit (p, NULL, statement, NULL, true, false);
-      _gst_free_tree ();
+
+      /* Because a '.' could be inserted automagically, the next token
+         value might be already on the obstack.  Do not free in that
+         case!  */
+      if (p->la_size == 0)
+        _gst_free_tree ();
     }
 
   _gst_had_error = false;
@@ -747,6 +752,7 @@ parse_eval_definition (gst_parser *p)
     {
       tmps = parse_temporaries (p, false);
       stmts = parse_statements (p, NULL, true);
+      lex_must_be (p, ']');
     }
 
   if (stmts && !_gst_had_error)
@@ -773,6 +779,7 @@ parse_eval_definition (gst_parser *p)
       _gst_had_error = false;
     }
 
+  assert (p->la_size <= 1);
   _gst_free_tree ();
   _gst_pop_temporaries_dictionary (oldDictionary);
   memcpy (p->recover, old_recover, sizeof (p->recover));
@@ -1366,6 +1373,7 @@ parse_method (gst_parser *p, int at_end)
       INC_ADD_OOP (_gst_current_parser->lastMethodOOP);
     }
 
+  assert (p->la_size <= 1);
   _gst_free_tree ();
   _gst_had_error = false;
   if (at_end != EOF)

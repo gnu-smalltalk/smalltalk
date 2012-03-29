@@ -1,3 +1,13 @@
+2012-03-29  Paolo Bonzini  <bonzini@gnu.org>
+
+	* libgst/gst-parse.c: Do not call _gst_free_tree in the presence
+	of lookahead, or add assertions that we can do so.  Reported by
+	Gwenael Casaccio.
+
+2012-03-29  Paolo Bonzini  <bonzini@gnu.org>
+
+	* libgst/lex.c: Report location of EOF token.
+
 2012-03-23  Paolo Bonzini  <bonzini@gnu.org>
 
 	* libgst/oop.c: Fix weak objects thinko in Gwen's patch.

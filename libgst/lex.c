@@ -405,6 +405,7 @@ _gst_yylex (PTR lvalp, YYLTYPE *llocp)
 	}
     }
 
+  *llocp = _gst_get_location ();
   return (EOF);
 }
 

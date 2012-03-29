@@ -359,3 +359,6 @@ Namespace current: Subspace [
 "Test referring to an invalid binding"
 Eval [ ##(#{ABC}) ]
 Eval [ #((#{ABC})) ]
+
+"Check that lookahead tokens are not discarded after compiling a doit."
+Eval ['''abc'' printNl ''def'' printNl' readStream fileIn]
