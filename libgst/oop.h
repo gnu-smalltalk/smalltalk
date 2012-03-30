@@ -325,10 +325,6 @@ extern void _gst_finished_incremental_gc (void)
 extern void _gst_finish_incremental_gc (void) 
   ATTRIBUTE_HIDDEN;
 
-/* Compact the old objects.  Grow oldspace to NEWSIZE bytes.  */
-extern void _gst_compact (size_t newSize) 
-  ATTRIBUTE_HIDDEN;
-
 /* Move all the object in survivor space to old space.  */
 extern void _gst_tenure_all_survivors () 
   ATTRIBUTE_HIDDEN;
@@ -413,11 +409,6 @@ extern void _gst_inc_grow_registry (void)
    stored in P_OOP.  */
 extern gst_object _gst_alloc_obj (size_t size,
 				  OOP *p_oop) 
-  ATTRIBUTE_HIDDEN;
-
-/* The same, but for an oldspace object */
-extern gst_object _gst_alloc_old_obj (size_t size,
-				      OOP *p_oop) 
   ATTRIBUTE_HIDDEN;
 
 /* Allocate and return space for an object of SIZE words, without
