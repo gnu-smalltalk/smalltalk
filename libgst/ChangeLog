@@ -1,3 +1,8 @@
+2012-03-30  Paolo Bonzini  <bonzini@gnu.org>
+
+	* libgst/oop.h: Remove _gst_compact and _gst_alloc_old_obj.
+	* libgst/oop.c: Make them static.
+
 2012-03-30  Gwenael Casaccio  <mrgwen@gmail.com>
 
 	* libgst/alloc.c: Allocate heaps with xcalloc.

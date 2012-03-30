@@ -166,6 +166,15 @@ static inline mst_Boolean incremental_gc_running (void);
    always passed, but you never know).  */
 static void reset_incremental_gc (OOP firstOOP);
 
+/* Compact the old objects.  Grow oldspace to NEWSIZE bytes.  */
+static void compact (size_t new_heap_limit);
+
+/* Allocate and return space for an oldspace object of SIZE bytes.
+   The pointer to the object data is returned, the OOP is
+   stored in P_OOP.  */
+static gst_object alloc_old_obj (size_t size,
+                                 OOP *p_oop);
+
 /* Gather statistics.  */
 static void update_stats (unsigned long *last, double *between, double *duration);
 
@@ -765,7 +774,7 @@ _gst_alloc_obj (size_t size,
   newAllocPtr = _gst_mem.eden.allocPtr + BYTES_TO_SIZE (size);
 
   if UNCOMMON (size >= _gst_mem.big_object_threshold)
-    return _gst_alloc_old_obj (size, p_oop);
+    return alloc_old_obj (size, p_oop);
 
   if UNCOMMON (newAllocPtr >= _gst_mem.eden.maxPtr)
     {
@@ -782,8 +791,8 @@ _gst_alloc_obj (size_t size,
 }
 
 gst_object
-_gst_alloc_old_obj (size_t size,
-		    OOP *p_oop)
+alloc_old_obj (size_t size,
+	       OOP *p_oop)
 {
   gst_object p_instance;
 
@@ -799,7 +808,7 @@ _gst_alloc_old_obj (size_t size,
   if COMMON (p_instance)
     goto ok;
 
-  _gst_compact (0);
+  compact (0);
   p_instance = (gst_object) _gst_mem_alloc (_gst_mem.old, size);
   if UNCOMMON (!p_instance)
     {
@@ -978,7 +987,7 @@ update_stats (unsigned long *last, double *between, double *duration)
 void
 _gst_grow_memory_to (size_t spaceSize)
 {
-  _gst_compact (spaceSize);
+  compact (spaceSize);
 }
 
 void
@@ -992,7 +1001,7 @@ grow_memory_no_compact (size_t new_heap_limit)
 }
 
 void
-_gst_compact (size_t new_heap_limit)
+compact (size_t new_heap_limit)
 {
   OOP oop;
   heap_data *new_heap = init_old_space (
@@ -1047,7 +1056,7 @@ void
 _gst_global_compact ()
 {
   _gst_global_gc (0);
-  _gst_compact (0);
+  compact (0);
 }
 
 void
@@ -1122,7 +1131,7 @@ _gst_global_gc (int next_allocation)
 	  if (target_limit < old_limit)
             {
               s = "done, heap compacted";
-              _gst_compact (0);
+              compact (0);
               grow_memory_no_compact (target_limit);
             }
         }
