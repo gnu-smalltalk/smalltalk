@@ -169,11 +169,11 @@ static void reset_incremental_gc (OOP firstOOP);
 /* Compact the old objects.  Grow oldspace to NEWSIZE bytes.  */
 static void compact (size_t new_heap_limit);
 
-/* Allocate and return space for an oldspace object of SIZE bytes.
+/* Allocate and return space for a fixedspace object of SIZE bytes.
    The pointer to the object data is returned, the OOP is
    stored in P_OOP.  */
-static gst_object alloc_old_obj (size_t size,
-                                 OOP *p_oop);
+static gst_object alloc_fixed_obj (size_t size,
+                                   OOP *p_oop);
 
 /* Gather statistics.  */
 static void update_stats (unsigned long *last, double *between, double *duration);
@@ -774,7 +774,7 @@ _gst_alloc_obj (size_t size,
   newAllocPtr = _gst_mem.eden.allocPtr + BYTES_TO_SIZE (size);
 
   if UNCOMMON (size >= _gst_mem.big_object_threshold)
-    return alloc_old_obj (size, p_oop);
+    return alloc_fixed_obj (size, p_oop);
 
   if UNCOMMON (newAllocPtr >= _gst_mem.eden.maxPtr)
     {
@@ -791,8 +791,8 @@ _gst_alloc_obj (size_t size,
 }
 
 gst_object
-alloc_old_obj (size_t size,
-	       OOP *p_oop)
+alloc_fixed_obj (size_t size,
+	         OOP *p_oop)
 {
   gst_object p_instance;
 

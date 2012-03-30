@@ -1,3 +1,7 @@
+2012-03-30  Gwenael Casaccio  <mrgwen@gmail.com>
+
+	* libgst/oop.c: Allocate large objects from fixedspace.
+
 2012-03-30  Paolo Bonzini  <bonzini@gnu.org>
 
 	* libgst/oop.h: Remove _gst_compact and _gst_alloc_old_obj.
