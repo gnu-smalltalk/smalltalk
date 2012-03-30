@@ -995,7 +995,6 @@ void
 _gst_compact (size_t new_heap_limit)
 {
   OOP oop;
-  grey_area_node *node, **next, *last;
   heap_data *new_heap = init_old_space (
     new_heap_limit ? new_heap_limit : _gst_mem.old->heap_limit);
 
@@ -1015,26 +1014,6 @@ _gst_compact (size_t new_heap_limit)
       update_stats (&stats.timeOfLastCompaction, NULL, NULL);
     }
 
-  /* Leave only pages from the loaded image in the grey table.  */
-  for (last = NULL, next = &_gst_mem.grey_pages.head; (node = *next); )
-    if (node->base >= (OOP *)_gst_mem.loaded_base
-        && node->base < _gst_mem.loaded_end)
-      {
-#ifdef MMAN_DEBUG_OUTPUT
-        printf ("  Remembered table entry left for loaded image: %p..%p\n",
-                node->base, node->base+node->n);
-#endif
-        last = node;
-        next = &(node->next);
-      }
-    else
-      {
-        _gst_mem.rememberedTableEntries--;
-        *next = node->next;
-        xfree (node);
-      }
-
-  _gst_mem.grey_pages.tail = last;
   _gst_fixup_object_pointers ();
 
   /* Now do the copying loop which will compact oldspace.  */

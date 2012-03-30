@@ -1,3 +1,9 @@
+2012-03-30  Gwenael Casaccio  <mrgwen@gmail.com>
+
+	* libgst/alloc.c: Allocate heaps with xcalloc.
+	* libgst/oop.c: Let oldspace_before_freeing remove grey pages
+	when compacting.
+
 2012-03-29  Paolo Bonzini  <bonzini@gnu.org>
 
 	* libgst/gst-parse.c: Do not call _gst_free_tree in the presence

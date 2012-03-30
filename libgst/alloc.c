@@ -122,7 +122,7 @@ static size_t pagesize;
 heap_data *
 _gst_mem_new_heap (size_t heap_allocation_size, size_t heap_limit)
 {
-  heap_data *h = (heap_data *) malloc (sizeof (heap_data));
+  heap_data *h = (heap_data *) xcalloc (1, sizeof (*h));
   init_heap (h, heap_allocation_size, heap_limit);
   return h;
 }
