@@ -1,3 +1,19 @@
+2012-05-13  Stefano Lattarini  <stefano.lattarini@gmail.com> (tiny change)
+
+	build: don't use obsolescent AM_PROG_CC_STDC and AM_CONFIG_HEADER
+
+	The Automake-provided macros 'AM_PROG_CC_STDC' and 'AM_CONFIG_HEADER'
+	have been superseded respectively by the Autoconf-provided ones
+	'AC_PROG_CC' (since October 2002) and 'AC_CONFIG_HEADERS' (since July
+	2002).  Moreover, those obsolescent macros will be removed in the next
+	major Automake version (1.13).  Stop using them.
+
+	* configure.ac (AM_CONFIG_HEADER): Don't use this, ...
+	(AC_CONFIG_HEADERS): ... use this instead.  While we are at it,
+	properly quote the argument.
+	* snprintfv/configure.ac (AM_PROG_CC_STDC): Drop this, the invocation
+	to AC_PROG_CC is enough.
+
 2012-03-29  Paolo Bonzini  <bonzini@gnu.org>
 
 	* tests/compiler.st: Add testcase.
