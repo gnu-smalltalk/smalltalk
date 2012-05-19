@@ -350,11 +350,12 @@ Object subclass: ProcessorScheduler [
 	
     ]
 
-    signal: aSemaphore atMilliseconds: millis [
-	"Private - signal 'aSemaphore' after 'millis' milliseconds have elapsed"
+    signal: aSemaphore atNanosecondClockValue: ns [
+	"Private - signal 'aSemaphore' when the nanosecond clock reaches
+         'ns' nanoseconds."
 
 	<category: 'timed invocation'>
-	<primitive: VMpr_Processor_signalAtMilliseconds>
+	<primitive: VMpr_Processor_signalAtNanosecondClockValue>
 	^self primitiveFailed
     ]
 

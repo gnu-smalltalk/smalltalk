@@ -102,18 +102,21 @@ extern SigHandler _gst_set_signal_handler (int signum,
 					   SigHandler handlerFunc)
   ATTRIBUTE_HIDDEN;
 
-/* Given a KIND of timer (process timer, real-time timer, etc.,
-   establish FUNC to be called when DELTAMILLI milliseconds have
-   passed according to that counter.  */
-extern void _gst_signal_after (int deltaMilli,
-			       SigHandler func,
-			       int kind)
+/* Establish FUNC to be called when DELTAMILLI milliseconds of
+   process time have passed.  */
+extern void _gst_sigvtalrm_every (int deltaMilli,
+			       SigHandler func)
+  ATTRIBUTE_HIDDEN;
+
+/* Establish SIGALRM to be called when the nanosecond clock reaches NSTIME
+   nanoseconds.  */
+extern void _gst_sigalrm_at (int64_t nsTime)
   ATTRIBUTE_HIDDEN;
 
 /* Initialize system dependent stuff.  */
 extern void _gst_init_sysdep (void)
   ATTRIBUTE_HIDDEN;
-extern void _gst_init_sysdep_win32 (void)
+extern void _gst_init_sysdep_timer (void)
   ATTRIBUTE_HIDDEN;
 
 /* Arrange so that FUNC is called when I/O becomes possible on
@@ -133,8 +136,12 @@ extern void _gst_debug (void)
 extern void _gst_usleep (int us)
   ATTRIBUTE_HIDDEN;
 
-/* Returns the local time since midnight in milliseconds */
+/* Returns a (hopefully) monotonic time value in milliseconds */
 extern uint64_t _gst_get_milli_time (void)
+  ATTRIBUTE_HIDDEN;
+
+/* Returns a (hopefully) monotonic time value in nanoseconds */
+extern uint64_t _gst_get_ns_time (void)
   ATTRIBUTE_HIDDEN;
 
 /* Returns the time in seconds since midnight Jan 1, 1970 (standard UNIX

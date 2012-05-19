@@ -71,31 +71,28 @@
 # include <windows.h>
 #endif
 
-uint64_t
-_gst_get_milli_time (void)
+static inline uint64_t muldiv64(uint64_t a, uint32_t b, uint32_t c)
 {
-  static long frequency = 0, frequencyH;
-  long milli;
+  uint64_t tl = (a & 0xffffffff) * b;
+  uint64_t th = (a >> 32) * b + (tl >> 32);
+  uint64_t rem = ((th % c) << 32) + (tl & 0xffffffff);
+  return ((uint64_t) (th / c) << 32) | (rem / c);
+}
+
+uint64_t
+_gst_get_ns_time (void)
+{
+  static long frequency = 0;
   LARGE_INTEGER counter;
 
   if (!frequency)
     {
       QueryPerformanceFrequency (&counter);
-      /* frequencyH = 1000 * 2^32 / frequency */
       frequency = counter.LowPart;
-      frequencyH = MulDiv (1000 * (1 << 16), (1 << 16), counter.LowPart);
     }
 
   QueryPerformanceCounter (&counter);
-  /* milli = (high * 2^32 + low) * 1000 / freq =
-     high * (1000 * 2^32 / freq) + (low * 1000 / freq) =
-     (high * frequencyH) + (low / 4) * 4000 / freq)
-     
-     Dividing and multiplying counter.LowPart by 4 is needed because
-     MulDiv accepts signed integers but counter.LowPart is unsigned.  */
-  milli = counter.HighPart * frequencyH;
-  milli += MulDiv (counter.LowPart >> 2, 4000, frequency);
-  return milli;
+  return muldiv64(counter.QuadPart, 1000000000, frequency);
 }
 
 char *

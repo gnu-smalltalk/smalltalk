@@ -3085,6 +3085,18 @@ primitive VMpr_Time_secondClock [succeed]
   PRIM_SUCCEEDED;
 }
 
+/* Time class nanosecondClock.  */
+primitive VMpr_Time_nanosecondClock [succeed]
+{
+  OOP nsOOP;
+  uint64_t ns;
+  _gst_primitives_executed++;
+  ns = _gst_get_ns_time ();
+  nsOOP = from_c_int_64 (ns);
+  SET_STACKTOP (nsOOP);
+  PRIM_SUCCEEDED;
+}
+
 /* Time class millisecondClock.  */
 primitive VMpr_Time_millisecondClock [succeed]
 {
@@ -3097,9 +3109,12 @@ primitive VMpr_Time_millisecondClock [succeed]
   PRIM_SUCCEEDED;
 }
 
-/* Processor signal: semaphore
-             atMilliseconds: deltaMilliseconds */
-primitive VMpr_Processor_signalAtMilliseconds [succeed,fail,check_interrupt]
+/* Processor signal: semaphore atMilliseconds: deltaMilliseconds
+   Processor signal: semaphore atNanosecondClockValue: absNanoseconds
+ */
+primitive VMpr_Processor_signalAt :
+  prim_id VMpr_Processor_signalAtMilliseconds [succeed,fail,check_interrupt],
+  prim_id VMpr_Processor_signalAtNanosecondClockValue [succeed,fail,check_interrupt]
 {
   OOP oop1;
   OOP oop2;
@@ -3109,9 +3124,11 @@ primitive VMpr_Processor_signalAtMilliseconds [succeed,fail,check_interrupt]
   oop1 = POP_OOP ();
   if (IS_INT (oop2))
     {
-      intptr_t arg2;
-      arg2 = TO_INT (oop2);
-      if (arg2 <= 0)
+      intptr_t arg2 = to_c_int_64 (oop2);
+      uint64_t ns = _gst_get_ns_time ();
+      if (id == prim_id(VMpr_Processor_signalAtMilliseconds))
+        arg2 = (arg2 * 1000000) + ns;
+      if (arg2 <= ns)
 	_gst_sync_signal (oop1, true);
       else
 	_gst_async_timed_wait (oop1, arg2);

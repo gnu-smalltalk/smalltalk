@@ -435,10 +435,7 @@ _gst_write (int fd,
 void
 _gst_init_sysdep (void)
 {
-#ifdef WIN32
-  _gst_init_sysdep_win32 ();
-#endif /* WIN32 */
-
+  _gst_init_sysdep_timer ();
   tzset ();
 
 #ifdef SIGPIPE

@@ -429,13 +429,13 @@ _gst_init_async_events (void)
 
 void
 _gst_async_timed_wait (OOP semaphoreOOP,
-		       int delay)
+		       int64_t nsTime)
 {
   struct handle_events *ev = fhev_find (hAlarmEvent);
 
   ev->semaphoreOOP = NULL;
   EnterCriticalSection (&handle_events_cs);
-  sleepTime = delay;
+  sleepTime = (nsTime - _gst_get_ns_time()) / 1000000;
   SetEvent (hNewWaitEvent);
   ev->semaphoreOOP = semaphoreOOP;
   LeaveCriticalSection (&handle_events_cs);

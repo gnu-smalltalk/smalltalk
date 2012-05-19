@@ -122,18 +122,25 @@ time value, and a block execution timing facility.'>
 	^self primitiveFailed
     ]
 
+    Time class >> nanosecondClock [
+	"Answer the number of nanoseconds since startup."
+
+	<category: 'clocks'>
+	^self primNanosecondClock - ClockOnStartup
+    ]
+
     Time class >> millisecondClock [
 	"Answer the number of milliseconds since startup."
 
 	<category: 'clocks'>
-	^self primMillisecondClock - ClockOnStartup
+	^self nanosecondClock // 1000000
     ]
 
-    Time class >> primMillisecondClock [
+    Time class >> primNanosecondClock [
 	"Returns the number of milliseconds since midnight."
 
 	<category: 'builtins'>
-	<primitive: VMpr_Time_millisecondClock>
+	<primitive: VMpr_Time_nanosecondClock>
 	^self primitiveFailed
     ]
 
@@ -154,9 +161,9 @@ time value, and a block execution timing facility.'>
 	<category: 'initialization'>
         | time |
 	aspect == #returnFromSnapshot ifTrue: [
-            ClockOnStartup := Time primMillisecondClock - ClockOnImageSave].
+            ClockOnStartup := Time primNanosecondClock - ClockOnImageSave].
 	aspect == #aboutToSnapshot ifTrue: [
-            ClockOnImageSave := Time millisecondClock].
+            ClockOnImageSave := Time nanosecondClock].
     ]
 
     Time class >> now [
@@ -258,11 +265,18 @@ time value, and a block execution timing facility.'>
         ^self fromSeconds: (hms at: 1) * 3600 + ((hms at: 2) * 60) + (hms at: 3)
     ]
 
+    Time class >> nanosecondClockValue [
+	"Answer the number of milliseconds since startup"
+
+	<category: 'clocks'>
+	^self primNanosecondClock - ClockOnStartup
+    ]
+
     Time class >> millisecondClockValue [
 	"Answer the number of milliseconds since startup"
 
 	<category: 'clocks'>
-	^self primMillisecondClock - ClockOnStartup
+	^self nanosecondClockValue // 1000000
     ]
 
     Time class >> millisecondsPerDay [
@@ -280,6 +294,11 @@ time value, and a block execution timing facility.'>
 	startTime := self millisecondClock.
 	timedBlock value.
 	^self millisecondClock - startTime
+    ]
+
+    asNanoseconds [
+	<category: 'accessing (non ANSI & for Durations)'>
+	^seconds * 1000000000
     ]
 
     asMilliseconds [

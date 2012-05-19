@@ -1,3 +1,44 @@
+2012-05-19  Paolo Bonzini  <bonzini@gnu.org>
+
+	* kernel/Delay.st: Switch to nanosecond-precision.
+	* kernel/ProcSched.st: Rename #signal:atMillisecondClockValue:
+	to #signal:atNanosecondClockValue:.
+
+2012-05-19  Paolo Bonzini  <bonzini@gnu.org>
+
+	* libgst/sysdep.h: Rename _gst_init_sysdep_win32 to
+	_gst_init_sysdep_timer.
+	* libgst/sysdep/common/files.c: Likewise.
+	* libgst/sysdep/cygwin/timer.c: Likewise.
+	* libgst/sysdep/win32/timer.c: Likewise.
+	* libgst/sysdep/posix/timer.c: Support POSIX real-time timers.
+
+2012-05-19  Paolo Bonzini  <bonzini@gnu.org>
+
+	* kernel/Delay.st: Use #signal:atMillisecondClockValue:.
+	* kernel/ProcSched.st: Define #signal:atMillisecondClockValue:.
+
+2012-05-19  Paolo Bonzini  <bonzini@gnu.org>
+
+	* kernel/Random.st: Do not use #primMillisecondClock.
+	* kernel/Time.st: Base time on nanoseconds.
+
+2012-05-13  Stefano Lattarini  <stefano.lattarini@gmail.com> (tiny change)
+
+	build: don't use obsolescent AM_PROG_CC_STDC and AM_CONFIG_HEADER
+
+	The Automake-provided macros 'AM_PROG_CC_STDC' and 'AM_CONFIG_HEADER'
+	have been superseded respectively by the Autoconf-provided ones
+	'AC_PROG_CC' (since October 2002) and 'AC_CONFIG_HEADERS' (since July
+	2002).  Moreover, those obsolescent macros will be removed in the next
+	major Automake version (1.13).  Stop using them.
+
+	* configure.ac (AM_CONFIG_HEADER): Don't use this, ...
+	(AC_CONFIG_HEADERS): ... use this instead.  While we are at it,
+	properly quote the argument.
+	* snprintfv/configure.ac (AM_PROG_CC_STDC): Drop this, the invocation
+	to AC_PROG_CC is enough.
+
 2012-03-29  Paolo Bonzini  <bonzini@gnu.org>
 
 	* tests/compiler.st: Add testcase.

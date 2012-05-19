@@ -110,7 +110,6 @@ AM_WITH_DMALLOC
 # check for various programs used during the build.
 # ----------------------------------------------------------------------
 AC_PROG_CC
-AM_PROG_CC_STDC
 AC_C_CONST
 AC_C_INLINE
 AC_EXEEXT

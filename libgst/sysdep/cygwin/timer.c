@@ -96,7 +96,7 @@ alarm_thread (unused)
 }
 
 void
-_gst_init_sysdep_win32 (void)
+_gst_init_sysdep_timer (void)
 {
   HANDLE hthread;
   DWORD tid;
@@ -114,16 +114,25 @@ _gst_init_sysdep_win32 (void)
   CloseHandle (hthread);
 }
 
-/* Please feel free to make this more accurate for your operating system
- * and send me the changes.
- */
 void
-_gst_signal_after (int deltaMilli,
-		   SigHandler func,
-		   int kind)
+_gst_sigvtalrm_every (int deltaMilli,
+		      SigHandler func)
 {
-  if (func)
-    _gst_set_signal_handler (kind, func);
+#if defined ITIMER_VIRTUAL
+  struct itimerval value;
+  _gst_set_signal_handler (SIGVTALRM, func);
+
+  value.it_value.tv_sec = value.it_value.tv_usec = 0;
+  value.it_interval.tv_sec = deltaMilli / 1000;
+  value.it_interval.tv_usec = (deltaMilli % 1000) * 1000;
+  setitimer (ITIMER_VIRTUAL, &value, (struct itimerval *) 0);
+#endif
+}
+
+void
+_gst_sigalrm_at (int64_t nsTime)
+{
+  int64_t deltaMilli = (nsTime - _gst_get_ns_time()) / 1000000;
 
   if (deltaMilli <= 0)
     {
@@ -131,22 +140,6 @@ _gst_signal_after (int deltaMilli,
       return;
     }
 
-#ifdef SIGVTALRM
-  if (kind == SIGVTALRM)
-    {
-#if defined ITIMER_VIRTUAL
-      struct itimerval value;
-      value.it_interval.tv_sec = value.it_interval.tv_usec = 0;
-      value.it_value.tv_sec = deltaMilli / 1000;
-      value.it_value.tv_usec = (deltaMilli % 1000) * 1000;
-      setitimer (ITIMER_VIRTUAL, &value, (struct itimerval *) 0);
-#endif
-    }
-#endif
-
-  if (kind == SIGALRM)
-    {
-      alarms.sleepTime = deltaMilli;
-      SetEvent (alarms.hNewWaitEvent);
-    }
+  alarms.sleepTime = deltaMilli;
+  SetEvent (alarms.hNewWaitEvent);
 }

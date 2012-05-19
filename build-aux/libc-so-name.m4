@@ -33,18 +33,18 @@ if test "$gst_cv_libc_dlopen_works" = no; then
 fi
 
 AC_CACHE_CHECK([how to dlopen the C library], gst_cv_libc_so_name, [
+  gst_lib_path=
   if test $GCC = yes; then
     if $CC -print-multiarch >/dev/null 2>&1; then
       gst_lib_path=`$CC -print-multiarch $CFLAGS $CPPFLAGS`
-    else
+    fi
+    if test -z "$gst_lib_path"; then
       gst_lib_path=`$CC --print-multi-os-directory $CFLAGS $CPPFLAGS`
     fi
     case $gst_lib_path in
       .) gst_lib_path= ;;
       *) gst_lib_path=$gst_lib_path/ ;;
     esac
-  else
-    gst_lib_path=
   fi
   case $gst_lib_path in
     /*) gst_libc_search_path="${gst_lib_path}libc.so*

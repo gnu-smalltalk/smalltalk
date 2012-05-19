@@ -62,78 +62,62 @@
 # include <sys/times.h>
 #endif
 
-/* Please feel free to make this more accurate for your operating system
- * and send me the changes.
- */
 void
-_gst_signal_after (int deltaMilli,
-		   SigHandler func,
-		   int kind)
+_gst_sigvtalrm_every (int deltaMilli,
+   		      SigHandler func)
 {
-  if (func)
-    _gst_set_signal_handler (kind, func);
-
-  if (deltaMilli <= 0)
-    {
-      raise (kind);
-      return;
-    }
-
-#ifdef SIGVTALRM
-  if (kind == SIGVTALRM)
-    {
 #if defined ITIMER_VIRTUAL
-      struct itimerval value;
-      value.it_interval.tv_sec = value.it_interval.tv_usec = 0;
-      value.it_value.tv_sec = deltaMilli / 1000;
-      value.it_value.tv_usec = (deltaMilli % 1000) * 1000;
-      setitimer (ITIMER_VIRTUAL, &value, (struct itimerval *) 0);
+  struct itimerval value;
+  _gst_set_signal_handler (SIGVTALRM, func);
+
+  value.it_value.tv_sec = value.it_value.tv_usec = 0;
+  value.it_interval.tv_sec = deltaMilli / 1000;
+  value.it_interval.tv_usec = (deltaMilli % 1000) * 1000;
+  setitimer (ITIMER_VIRTUAL, &value, (struct itimerval *) 0);
 #endif
-    }
+}
+
+#ifdef HAVE_TIMER_CREATE
+static timer_t timer;
+static mst_Boolean have_timer;
 #endif
 
-  if (kind == SIGALRM)
+void
+_gst_sigalrm_at (int64_t nsTime)
+{
+#ifdef HAVE_TIMER_CREATE
+  if (have_timer)
     {
-#if defined ITIMER_REAL
+      struct itimerspec value;
+
+      value.it_interval.tv_sec = value.it_interval.tv_nsec = 0;
+      value.it_value.tv_sec = nsTime / 1000000000;
+      value.it_value.tv_nsec = nsTime % 1000000000;
+      timer_settime (timer, TIMER_ABSTIME, &value, NULL);
+    }
+  else
+#endif
+    {
+      int64_t deltaMilli = (nsTime - _gst_get_ns_time()) / 1000000;
       struct itimerval value;
+
       value.it_interval.tv_sec = value.it_interval.tv_usec = 0;
       value.it_value.tv_sec = deltaMilli / 1000;
       value.it_value.tv_usec = (deltaMilli % 1000) * 1000;
       setitimer (ITIMER_REAL, &value, (struct itimerval *) 0);
-
-#elif defined HAVE_FORK
-      static pid_t pid = -1;
-      long end, ticks;
-      if (pid != -1)
-	kill (pid, SIGTERM);
-
-      switch (pid = fork ())
-	{
-	case -1:
-	  /* Error, try to recover */
-	  raise (SIGALRM);
-	  break;
-
-	case 0:
-	  /* Child process */
-	  end = _gst_get_milli_time () + deltaMilli;
-	  do
-	    {
-	      ticks = end - _gst_get_milli_time ();
-	      if (ticks > 1100)	/* +100 is arbitrary */
-		sleep ((int) (ticks / 1000));
-	    }
-	  while (ticks > 0);
-	  kill (getppid (), SIGALRM);
-	  _exit (0);
-	}
-
-#elif defined HAVE_ALARM
-      alarm (deltaMilli / 1000);
-
-#else
-      /* Cannot do anything better than this */
-      raise (SIGALRM);
-#endif
     }
 }
+
+void
+_gst_init_sysdep_timer (void)
+{ 
+#if defined HAVE_TIMER_CREATE && defined _POSIX_MONOTONIC_CLOCK
+  struct sigevent sev;
+  memset(&sev, 0, sizeof(sev));
+  sev.sigev_notify = SIGEV_SIGNAL;
+  sev.sigev_signo = SIGALRM;
+  if (timer_create (CLOCK_MONOTONIC, &sev, &timer) != -1)
+    have_timer = true;
+#endif
+}
+

@@ -140,3 +140,10 @@ _gst_get_time (void)
 
   return (_gst_adjust_time_zone (now));
 }
+
+uint64_t
+_gst_get_milli_time (void)
+{
+  return _gst_get_ns_time() / 1000000;
+}
+

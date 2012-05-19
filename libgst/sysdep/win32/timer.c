@@ -64,14 +64,11 @@
 #endif
 
 void
-_gst_signal_after (int deltaMilli,
-		   SigHandler func,
-		   int kind)
+_gst_sigvtalrm_every (int deltaMilli)
 {
-  abort ();
 }
 
 void
-_gst_init_sysdep_win32 (void)
+_gst_init_sysdep_timer (void)
 {
 }

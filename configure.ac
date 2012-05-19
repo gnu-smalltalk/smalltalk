@@ -19,7 +19,7 @@ AC_CONFIG_AUX_DIR([build-aux])
 AC_CONFIG_MACRO_DIR([build-aux])
 AC_CONFIG_SRCDIR([main.c])
 AC_CONFIG_TESTDIR(tests)
-AM_CONFIG_HEADER(config.h)
+AC_CONFIG_HEADERS([config.h])
 GST_PROG_GAWK
 AM_INIT_AUTOMAKE
 AC_CANONICAL_HOST
@@ -379,6 +379,11 @@ if test "$ac_cv_search_clock_gettime" != no; then
     [Define if the system provides clock_gettime.])
 fi
 
+AC_SEARCH_LIBS([timer_create], [rt])
+if test "$ac_cv_search_timer_create" != no; then
+  AC_DEFINE(HAVE_TIMER_CREATE, 1, 
+    [Define if the system provides timer_create.])
+fi
 
 GST_FUNC_LRINT
 GST_FUNC_STRTOUL
