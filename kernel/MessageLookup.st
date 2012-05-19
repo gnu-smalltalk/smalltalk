@@ -57,7 +57,7 @@ but also the starting class for the search.'>
 	"Print a representation of the receiver on aStream"
 
 	<category: 'basic'>
-	super printOn: aStream
+	super printOn: aStream.
 	aStream
 	    space; nextPut: $(;
 	    print: startingClass;
