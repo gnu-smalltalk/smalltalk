@@ -77,14 +77,48 @@ _gst_sigvtalrm_every (int deltaMilli,
 #endif
 }
 
+#ifdef HAVE_TIMER_CREATE
+static timer_t timer;
+static mst_Boolean have_timer;
+#endif
+
 void
 _gst_sigalrm_at (int64_t milliTime)
 {
-  int64_t deltaMilli = milliTime - _gst_get_milli_time();
-  struct itimerval value;
+#ifdef HAVE_TIMER_CREATE
+  if (have_timer)
+    {
+      int64_t nsTime = milliTime * 1000000;
+      struct itimerspec value;
 
-  value.it_interval.tv_sec = value.it_interval.tv_usec = 0;
-  value.it_value.tv_sec = deltaMilli / 1000;
-  value.it_value.tv_usec = (deltaMilli % 1000) * 1000;
-  setitimer (ITIMER_REAL, &value, (struct itimerval *) 0);
+      value.it_interval.tv_sec = value.it_interval.tv_nsec = 0;
+      value.it_value.tv_sec = nsTime / 1000000000;
+      value.it_value.tv_nsec = nsTime % 1000000000;
+      timer_settime (timer, TIMER_ABSTIME, &value, NULL);
+    }
+  else
+#endif
+    {
+      int64_t deltaMilli = milliTime - _gst_get_milli_time();
+      struct itimerval value;
+
+      value.it_interval.tv_sec = value.it_interval.tv_usec = 0;
+      value.it_value.tv_sec = deltaMilli / 1000;
+      value.it_value.tv_usec = (deltaMilli % 1000) * 1000;
+      setitimer (ITIMER_REAL, &value, (struct itimerval *) 0);
+    }
 }
+
+void
+_gst_init_sysdep_timer (void)
+{ 
+#if defined HAVE_TIMER_CREATE && defined _POSIX_MONOTONIC_CLOCK
+  struct sigevent sev;
+  memset(&sev, 0, sizeof(sev));
+  sev.sigev_notify = SIGEV_SIGNAL;
+  sev.sigev_signo = SIGALRM;
+  if (timer_create (CLOCK_MONOTONIC, &sev, &timer) != -1)
+    have_timer = true;
+#endif
+}
+

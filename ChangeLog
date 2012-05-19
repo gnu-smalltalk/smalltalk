@@ -1,5 +1,14 @@
 2012-05-19  Paolo Bonzini  <bonzini@gnu.org>
 
+	* libgst/sysdep.h: Rename _gst_init_sysdep_win32 to
+	_gst_init_sysdep_timer.
+	* libgst/sysdep/common/files.c: Likewise.
+	* libgst/sysdep/cygwin/timer.c: Likewise.
+	* libgst/sysdep/win32/timer.c: Likewise.
+	* libgst/sysdep/posix/timer.c: Support POSIX real-time timers.
+
+2012-05-19  Paolo Bonzini  <bonzini@gnu.org>
+
 	* kernel/Delay.st: Use #signal:atMillisecondClockValue:.
 	* kernel/ProcSched.st: Define #signal:atMillisecondClockValue:.
 

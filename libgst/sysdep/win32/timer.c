@@ -69,6 +69,6 @@ _gst_sigvtalrm_every (int deltaMilli)
 }
 
 void
-_gst_init_sysdep_win32 (void)
+_gst_init_sysdep_timer (void)
 {
 }

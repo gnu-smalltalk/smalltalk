@@ -116,7 +116,7 @@ extern void _gst_sigalrm_at (int64_t milliTime)
 /* Initialize system dependent stuff.  */
 extern void _gst_init_sysdep (void)
   ATTRIBUTE_HIDDEN;
-extern void _gst_init_sysdep_win32 (void)
+extern void _gst_init_sysdep_timer (void)
   ATTRIBUTE_HIDDEN;
 
 /* Arrange so that FUNC is called when I/O becomes possible on

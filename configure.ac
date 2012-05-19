@@ -397,6 +397,11 @@ if test "$ac_cv_search_clock_gettime" != no; then
     [Define if the system provides clock_gettime.])
 fi
 
+AC_SEARCH_LIBS([timer_create], [rt])
+if test "$ac_cv_search_timer_create" != no; then
+  AC_DEFINE(HAVE_TIMER_CREATE, 1, 
+    [Define if the system provides timer_create.])
+fi
 
 GST_FUNC_LRINT
 GST_FUNC_STRTOUL
