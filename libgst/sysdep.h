@@ -108,9 +108,9 @@ extern void _gst_sigvtalrm_every (int deltaMilli,
 			       SigHandler func)
   ATTRIBUTE_HIDDEN;
 
-/* Establish SIGALRM to be called when the millisecond clock reaches MILLITIME
-   milliseconds.  */
-extern void _gst_sigalrm_at (int64_t milliTime)
+/* Establish SIGALRM to be called when the nanosecond clock reaches NSTIME
+   nanoseconds.  */
+extern void _gst_sigalrm_at (int64_t nsTime)
   ATTRIBUTE_HIDDEN;
 
 /* Initialize system dependent stuff.  */

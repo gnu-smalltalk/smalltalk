@@ -72,11 +72,11 @@ extern void _gst_async_interrupt_wait (OOP semaphoreOOP,
 
 /* These are defined in sysdep/.../events.c.  */
 
-/* Arrange so that when the millisecond clock reaches MILLITIME,
+/* Arrange so that when the nanosecond clock reaches NSTIME,
    SEMAPHOREOOP is signaled by the virtual machine. Previous waits
    are discarded.  */
 extern void _gst_async_timed_wait (OOP semaphoreOOP,
-				   int64_t milliTime) 
+				   int64_t nsTime) 
   ATTRIBUTE_HIDDEN;
 
 /* Answer whether a timeout has been scheduled and a semaphore was

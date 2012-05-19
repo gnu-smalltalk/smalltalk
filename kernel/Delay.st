@@ -49,25 +49,39 @@ created.'>
     IdleProcess := nil.
     TimeoutSem := nil.
 
+    Delay class >> forNanoseconds: nanosecondCount [
+        "Answer a Delay waiting for nanosecondCount nanoseconds"
+
+        <category: 'instance creation'>
+        ^self new initForNanoseconds: nanosecondCount
+    ]
+
     Delay class >> forMilliseconds: millisecondCount [
         "Answer a Delay waiting for millisecondCount milliseconds"
 
         <category: 'instance creation'>
-        ^self new initForMilliseconds: millisecondCount
+        ^self forNanoseconds: millisecondCount * 1000000
     ]
 
     Delay class >> forSeconds: secondCount [
         "Answer a Delay waiting for secondCount seconds"
 
         <category: 'instance creation'>
-        ^self forMilliseconds: secondCount * 1000
+        ^self forNanoseconds: secondCount * 1000000000
+    ]
+
+    Delay class >> untilNanoseconds: nanosecondCount [
+        "Answer a Delay waiting until nanosecondCount nanoseconds after startup"
+
+        <category: 'instance creation'>
+        ^self new initUntilNanoseconds: nanosecondCount
     ]
 
     Delay class >> untilMilliseconds: millisecondCount [
-        "Answer a Delay waiting for millisecondCount milliseconds after startup"
+        "Answer a Delay waiting until millisecondCount milliseconds after startup"
 
         <category: 'instance creation'>
-        ^self new initUntilMilliseconds: millisecondCount
+        ^self untilMilliseconds: millisecondCount * 1000000
     ]
 
     Delay class >> activeDelay [
@@ -101,7 +115,7 @@ created.'>
 
 	"Signal any expired delays"
 	[activeDelay := self activeDelay.
-        activeDelay notNil and: [Time millisecondClockValue >= activeDelay resumptionTime]] 
+        activeDelay notNil and: [Time nanosecondClockValue >= activeDelay resumptionTime]] 
 	    whileTrue: 
 		[activeDelay signal.
 		self unscheduleDelay: activeDelay].
@@ -113,8 +127,8 @@ created.'>
 
 	"And signal when the next request is due."
         activeDelay isNil ifFalse: [
-	    nextTick := activeDelay resumptionTime + (Time.ClockOnStartup // 1000000).
-	    Processor signal: TimeoutSem atMillisecondClockValue: nextTick].
+	    nextTick := activeDelay resumptionTime + Time.ClockOnStartup.
+	    Processor signal: TimeoutSem atNanosecondClockValue: nextTick].
     ]
 
     Delay class >> runDelayProcess [
@@ -312,7 +326,7 @@ created.'>
         "Prepare to wait on the delay."
 	<category: 'private'>
 	resumptionTime isNil
-	    ifTrue: [ resumptionTime := Time millisecondClockValue + delayDuration ].
+	    ifTrue: [ resumptionTime := Time nanosecondClockValue + delayDuration ].
     ]
 
     reset [
@@ -339,7 +353,7 @@ created.'>
          answer the receiver if it is already waiting until an absolute time."
 	<category: 'accessing'>
 	self isAbsolute ifTrue: [ ^self ].
-        ^Delay untilMilliseconds: Time millisecondClockValue + delayDuration.
+        ^Delay untilNanoseconds: Time nanosecondClockValue + delayDuration.
     ]
 
     postCopy [
@@ -356,7 +370,7 @@ created.'>
 	<category: 'accessing'>
 	^resumptionTime isNil
 	    ifTrue: [ delayDuration ]
-	    ifFalse: [ (resumptionTime - Time millisecondClockValue) max: 0 ]
+	    ifFalse: [ (resumptionTime - Time nanosecondClockValue) max: 0 ]
     ]
 
     basicDelayDuration [
@@ -364,14 +378,14 @@ created.'>
 	^delayDuration
     ]
 
-    initForMilliseconds: value [
+    initForNanoseconds: value [
         "Initialize a Delay waiting for millisecondCount milliseconds"
 
         <category: 'initialization'>
         delayDuration := value
     ]
 
-    initUntilMilliseconds: value [
+    initUntilNanoseconds: value [
         "Initialize a Delay waiting for millisecondCount milliseconds after startup"
 
         <category: 'instance creation'>

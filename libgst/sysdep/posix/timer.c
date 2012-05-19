@@ -83,12 +83,11 @@ static mst_Boolean have_timer;
 #endif
 
 void
-_gst_sigalrm_at (int64_t milliTime)
+_gst_sigalrm_at (int64_t nsTime)
 {
 #ifdef HAVE_TIMER_CREATE
   if (have_timer)
     {
-      int64_t nsTime = milliTime * 1000000;
       struct itimerspec value;
 
       value.it_interval.tv_sec = value.it_interval.tv_nsec = 0;
@@ -99,7 +98,7 @@ _gst_sigalrm_at (int64_t milliTime)
   else
 #endif
     {
-      int64_t deltaMilli = milliTime - _gst_get_milli_time();
+      int64_t deltaMilli = (nsTime - _gst_get_ns_time()) / 1000000;
       struct itimerval value;
 
       value.it_interval.tv_sec = value.it_interval.tv_usec = 0;

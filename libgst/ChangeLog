@@ -1,6 +1,19 @@
 2012-05-19  Paolo Bonzini  <bonzini@gnu.org>
 
 	* libgst/events.h: Adjust prototype for _gst_async_timed_wait.
+	* libgst/prims.def: Switch VMpr_Processor_signalAtMillisecondClockValue
+	to nanosecond precision, adjust call to _gst_async_timed_wait.
+	* libgst/sysdep.h: Adjust prototype for _gst_sigalrm_at.
+	* libgst/sysdep/cygwin/timer.c: Switch _gst_sigalrm_at to nanosecond
+	precision.
+	* libgst/sysdep/posix/timer.c: Switch _gst_sigalrm_at to nanosecond
+	precision.
+	* libgst/sysdep/win32/events.c: Switch _gst_async_timed_wait to nanosecond
+	precision.
+
+2012-05-19  Paolo Bonzini  <bonzini@gnu.org>
+
+	* libgst/events.h: Adjust prototype for _gst_async_timed_wait.
 	* libgst/interp.c: Use _gst_sigvtalrm_every.
 	* libgst/prims.def: Pass absolute time to _gst_async_timed_wait.
 	* libgst/sysdep.h: Remove _gst_signal_after, add _gst_sigvtalrm_every

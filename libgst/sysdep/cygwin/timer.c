@@ -130,9 +130,9 @@ _gst_sigvtalrm_every (int deltaMilli,
 }
 
 void
-_gst_sigalrm_at (int64_t milliTime)
+_gst_sigalrm_at (int64_t nsTime)
 {
-  int64_t deltaMilli = milliTime - _gst_get_milli_time();
+  int64_t deltaMilli = (nsTime - _gst_get_ns_time()) / 1000000;
 
   if (deltaMilli <= 0)
     {

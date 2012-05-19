@@ -1,5 +1,11 @@
 2012-05-19  Paolo Bonzini  <bonzini@gnu.org>
 
+	* kernel/Delay.st: Switch to nanosecond-precision.
+	* kernel/ProcSched.st: Rename #signal:atMillisecondClockValue:
+	to #signal:atNanosecondClockValue:.
+
+2012-05-19  Paolo Bonzini  <bonzini@gnu.org>
+
 	* libgst/sysdep.h: Rename _gst_init_sysdep_win32 to
 	_gst_init_sysdep_timer.
 	* libgst/sysdep/common/files.c: Likewise.
