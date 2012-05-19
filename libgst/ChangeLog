@@ -1,3 +1,12 @@
+2012-05-19  Paolo Bonzini  <bonzini@gnu.org>
+
+	* libgst/prims.def: Add VMpr_Time_nanosecondClock.
+	* libgst/sysdep.h: Add _gst_get_ns_time.
+	* libgst/sysdep/common/time.c: Add _gst_get_milli_time.
+	* libgst/sysdep/posix/time.c: Change _gst_get_milli_time to
+	_gst_get_ns_time.
+	* libgst/sysdep/win32/time.c: Likewise.
+
 2012-03-30  Paolo Bonzini  <bonzini@gnu.org>
 
 	* libgst/oop.h: Remove _gst_compact and _gst_alloc_old_obj.

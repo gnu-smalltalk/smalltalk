@@ -3045,6 +3045,18 @@ primitive VMpr_Time_secondClock [succeed]
   PRIM_SUCCEEDED;
 }
 
+/* Time class nanosecondClock.  */
+primitive VMpr_Time_nanosecondClock [succeed]
+{
+  OOP nsOOP;
+  uint64_t ns;
+  _gst_primitives_executed++;
+  ns = _gst_get_ns_time ();
+  nsOOP = from_c_int_64 (ns);
+  SET_STACKTOP (nsOOP);
+  PRIM_SUCCEEDED;
+}
+
 /* Time class millisecondClock.  */
 primitive VMpr_Time_millisecondClock [succeed]
 {
