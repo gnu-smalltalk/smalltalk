@@ -1,5 +1,9 @@
 2012-05-19  Paolo Bonzini  <bonzini@gnu.org>
 
+	* libgst/prims.def: Another fix for the new primitive.
+
+2012-05-19  Paolo Bonzini  <bonzini@gnu.org>
+
 	* libgst/prims.def: Fix class test for new primitive.
 
 2012-05-19  Paolo Bonzini  <bonzini@gnu.org>
