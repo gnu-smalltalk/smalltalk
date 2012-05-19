@@ -62,78 +62,29 @@
 # include <sys/times.h>
 #endif
 
-/* Please feel free to make this more accurate for your operating system
- * and send me the changes.
- */
 void
-_gst_signal_after (int deltaMilli,
-		   SigHandler func,
-		   int kind)
+_gst_sigvtalrm_every (int deltaMilli,
+   		      SigHandler func)
 {
-  if (func)
-    _gst_set_signal_handler (kind, func);
-
-  if (deltaMilli <= 0)
-    {
-      raise (kind);
-      return;
-    }
-
-#ifdef SIGVTALRM
-  if (kind == SIGVTALRM)
-    {
 #if defined ITIMER_VIRTUAL
-      struct itimerval value;
-      value.it_interval.tv_sec = value.it_interval.tv_usec = 0;
-      value.it_value.tv_sec = deltaMilli / 1000;
-      value.it_value.tv_usec = (deltaMilli % 1000) * 1000;
-      setitimer (ITIMER_VIRTUAL, &value, (struct itimerval *) 0);
+  struct itimerval value;
+  _gst_set_signal_handler (SIGVTALRM, func);
+
+  value.it_value.tv_sec = value.it_value.tv_usec = 0;
+  value.it_interval.tv_sec = deltaMilli / 1000;
+  value.it_interval.tv_usec = (deltaMilli % 1000) * 1000;
+  setitimer (ITIMER_VIRTUAL, &value, (struct itimerval *) 0);
 #endif
-    }
-#endif
+}
 
-  if (kind == SIGALRM)
-    {
-#if defined ITIMER_REAL
-      struct itimerval value;
-      value.it_interval.tv_sec = value.it_interval.tv_usec = 0;
-      value.it_value.tv_sec = deltaMilli / 1000;
-      value.it_value.tv_usec = (deltaMilli % 1000) * 1000;
-      setitimer (ITIMER_REAL, &value, (struct itimerval *) 0);
+void
+_gst_sigalrm_at (int64_t milliTime)
+{
+  int64_t deltaMilli = milliTime - _gst_get_milli_time();
+  struct itimerval value;
 
-#elif defined HAVE_FORK
-      static pid_t pid = -1;
-      long end, ticks;
-      if (pid != -1)
-	kill (pid, SIGTERM);
-
-      switch (pid = fork ())
-	{
-	case -1:
-	  /* Error, try to recover */
-	  raise (SIGALRM);
-	  break;
-
-	case 0:
-	  /* Child process */
-	  end = _gst_get_milli_time () + deltaMilli;
-	  do
-	    {
-	      ticks = end - _gst_get_milli_time ();
-	      if (ticks > 1100)	/* +100 is arbitrary */
-		sleep ((int) (ticks / 1000));
-	    }
-	  while (ticks > 0);
-	  kill (getppid (), SIGALRM);
-	  _exit (0);
-	}
-
-#elif defined HAVE_ALARM
-      alarm (deltaMilli / 1000);
-
-#else
-      /* Cannot do anything better than this */
-      raise (SIGALRM);
-#endif
-    }
+  value.it_interval.tv_sec = value.it_interval.tv_usec = 0;
+  value.it_value.tv_sec = deltaMilli / 1000;
+  value.it_value.tv_usec = (deltaMilli % 1000) * 1000;
+  setitimer (ITIMER_REAL, &value, (struct itimerval *) 0);
 }

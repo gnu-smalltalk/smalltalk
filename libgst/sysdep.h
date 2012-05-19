@@ -102,12 +102,15 @@ extern SigHandler _gst_set_signal_handler (int signum,
 					   SigHandler handlerFunc)
   ATTRIBUTE_HIDDEN;
 
-/* Given a KIND of timer (process timer, real-time timer, etc.,
-   establish FUNC to be called when DELTAMILLI milliseconds have
-   passed according to that counter.  */
-extern void _gst_signal_after (int deltaMilli,
-			       SigHandler func,
-			       int kind)
+/* Establish FUNC to be called when DELTAMILLI milliseconds of
+   process time have passed.  */
+extern void _gst_sigvtalrm_every (int deltaMilli,
+			       SigHandler func)
+  ATTRIBUTE_HIDDEN;
+
+/* Establish SIGALRM to be called when the millisecond clock reaches MILLITIME
+   milliseconds.  */
+extern void _gst_sigalrm_at (int64_t milliTime)
   ATTRIBUTE_HIDDEN;
 
 /* Initialize system dependent stuff.  */

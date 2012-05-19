@@ -1,5 +1,22 @@
 2012-05-19  Paolo Bonzini  <bonzini@gnu.org>
 
+	* libgst/events.h: Adjust prototype for _gst_async_timed_wait.
+	* libgst/interp.c: Use _gst_sigvtalrm_every.
+	* libgst/prims.def: Pass absolute time to _gst_async_timed_wait.
+	* libgst/sysdep.h: Remove _gst_signal_after, add _gst_sigvtalrm_every
+	and _gst_sigalrm_at.
+	* libgst/sysdep/cygwin/timer.c: Remove _gst_signal_after, add
+	_gst_sigvtalrm_every and _gst_sigalrm_at.
+	* libgst/sysdep/posix/events.c: Use _gst_sigalrm_at.
+	* libgst/sysdep/posix/timer.c: Remove _gst_signal_after, add
+	_gst_sigvtalrm_every and _gst_sigalrm_at.
+	* libgst/sysdep/win32/events.c: Get absolute time in
+	_gst_async_timed_wait.
+	* libgst/sysdep/win32/timer.c: Do not abort on _gst_sigvtalrm_every,
+	just do nothing.
+
+2012-05-19  Paolo Bonzini  <bonzini@gnu.org>
+
 	* libgst/prims.def: Support the new primitive
 	VMpr_Processor_signalAtMillisecondClockValue.
 

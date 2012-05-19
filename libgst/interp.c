@@ -2310,7 +2310,7 @@ set_preemption_timer (void)
 
   time_to_preempt = false;
   if (timeSlice > 0)
-    _gst_signal_after (timeSlice, preempt_smalltalk_process, SIGVTALRM);
+    _gst_sigvtalrm_every (timeSlice, preempt_smalltalk_process);
 #endif
 }
 

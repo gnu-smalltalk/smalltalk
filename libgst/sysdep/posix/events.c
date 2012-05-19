@@ -198,10 +198,10 @@ _gst_init_async_events (void)
 
 void
 _gst_async_timed_wait (OOP semaphoreOOP,
-		       int delay)
+		       int64_t milliTime)
 {
   _gst_async_interrupt_wait (semaphoreOOP, SIGALRM);
-  _gst_signal_after (delay, NULL, SIGALRM);
+  _gst_sigalrm_at (milliTime);
 }
 
 mst_Boolean
