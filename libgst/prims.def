@@ -3069,9 +3069,12 @@ primitive VMpr_Time_millisecondClock [succeed]
   PRIM_SUCCEEDED;
 }
 
-/* Processor signal: semaphore
-             atMilliseconds: deltaMilliseconds */
-primitive VMpr_Processor_signalAtMilliseconds [succeed,fail,check_interrupt]
+/* Processor signal: semaphore atMilliseconds: deltaMilliseconds
+   Processor signal: semaphore atMillisecondClockValue: absMilliseconds
+ */
+primitive VMpr_Processor_signalAt :
+  prim_id VMpr_Processor_signalAtMilliseconds [succeed,fail,check_interrupt],
+  prim_id VMpr_Processor_signalAtMillisecondClockValue [succeed,fail,check_interrupt]
 {
   OOP oop1;
   OOP oop2;
@@ -3083,6 +3086,8 @@ primitive VMpr_Processor_signalAtMilliseconds [succeed,fail,check_interrupt]
     {
       intptr_t arg2;
       arg2 = TO_INT (oop2);
+      if (id == prim_id(VMpr_Processor_signalAtMillisecondClockValue))
+        arg2 -= _gst_get_milli_time ();
       if (arg2 <= 0)
 	_gst_sync_signal (oop1, true);
       else

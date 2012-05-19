@@ -1,5 +1,10 @@
 2012-05-19  Paolo Bonzini  <bonzini@gnu.org>
 
+	* libgst/prims.def: Support the new primitive
+	VMpr_Processor_signalAtMillisecondClockValue.
+
+2012-05-19  Paolo Bonzini  <bonzini@gnu.org>
+
 	* libgst/prims.def: Add VMpr_Time_nanosecondClock.
 	* libgst/sysdep.h: Add _gst_get_ns_time.
 	* libgst/sysdep/common/time.c: Add _gst_get_milli_time.

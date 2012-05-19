@@ -112,9 +112,9 @@ created.'>
 	TimeoutSem initialize.
 
 	"And signal when the next request is due."
-	self activeDelay isNil ifFalse: [
-	    nextTick := activeDelay resumptionTime - Time millisecondClockValue.
-	    Processor signal: TimeoutSem atMilliseconds: nextTick].
+        activeDelay isNil ifFalse: [
+	    nextTick := activeDelay resumptionTime + (Time.ClockOnStartup // 1000000).
+	    Processor signal: TimeoutSem atMillisecondClockValue: nextTick].
     ]
 
     Delay class >> runDelayProcess [

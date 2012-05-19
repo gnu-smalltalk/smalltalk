@@ -1,5 +1,10 @@
 2012-05-19  Paolo Bonzini  <bonzini@gnu.org>
 
+	* kernel/Delay.st: Use #signal:atMillisecondClockValue:.
+	* kernel/ProcSched.st: Define #signal:atMillisecondClockValue:.
+
+2012-05-19  Paolo Bonzini  <bonzini@gnu.org>
+
 	* kernel/Random.st: Do not use #primMillisecondClock.
 	* kernel/Time.st: Base time on nanoseconds.
 
