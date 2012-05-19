@@ -3082,7 +3082,7 @@ primitive VMpr_Processor_signalAt :
 
   oop2 = POP_OOP ();
   oop1 = POP_OOP ();
-  if (IS_INT (oop2))
+  if (is_c_int_64 (oop2))
     {
       intptr_t arg2 = to_c_int_64 (oop2);
       uint64_t ns = _gst_get_ns_time ();

@@ -1,5 +1,9 @@
 2012-05-19  Paolo Bonzini  <bonzini@gnu.org>
 
+	* libgst/prims.def: Fix class test for new primitive.
+
+2012-05-19  Paolo Bonzini  <bonzini@gnu.org>
+
 	* libgst/events.h: Adjust prototype for _gst_async_timed_wait.
 	* libgst/prims.def: Switch VMpr_Processor_signalAtMillisecondClockValue
 	to nanosecond precision, adjust call to _gst_async_timed_wait.
