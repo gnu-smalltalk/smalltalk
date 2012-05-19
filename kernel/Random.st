@@ -154,7 +154,8 @@ floating point values between 0 and 1.'>
 	"Private - Set a random number seed."
 
 	<category: 'private'>
-	seed := Time primSecondClock - Time primMillisecondClock.
+	seed := Time primSecondClock bitXor: Time millisecondClock.
+	seed := seed + (Time primNanosecondClock \\ 1000000).
 	seed := (seed / 4194303.0) fractionPart.
 	self next.
 	self next
