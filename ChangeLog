@@ -1,3 +1,8 @@
+2012-06-04  Thomas Girard  <thomas.g.girard@free.fr>
+
+	* tests/cobjects.st: Adapt longLong test case, showing the issue#646.
+	* tests/cobjects.ok: Regenerate.
+
 2012-05-19  Ladislav Marek  <ladislav@marek.su>
 
 	* kernel/MessageLookup.st: Add missing dot.

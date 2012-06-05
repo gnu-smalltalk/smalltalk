@@ -254,6 +254,8 @@ static const char *c_type_name[] = {
   "wchar_t *",			/* CDATA_WSTRING */
   "wchar_t *",			/* CDATA_WSTRING_OUT */
   "char *",			/* CDATA_SYMBOL_OUT */
+  "long long",			/* CDATA_LONGLONG */
+  "unsigned long long", 	/* CDATA_ULONGLONG */
 };
 
 /* The errno on output from a callout */
@@ -440,10 +442,11 @@ my_opendir (const char *dir)
   return (result);
 }
 
-void 
+long long
 test_longlong (long long aVerylongInt)
 {
   printf ("Getting a long long 0x%llx\n", aVerylongInt);
+  return aVerylongInt;
 }
 
 void
@@ -1339,6 +1342,14 @@ c_to_smalltalk (cparam *result, OOP receiverOOP, OOP returnTypeOOP)
 
     case CDATA_ULONG:
       resultOOP = FROM_C_ULONG (result->u.longVal);
+      break;
+
+    case CDATA_LONGLONG:
+      resultOOP = FROM_C_LONGLONG (result->u.longLongVal);
+      break;
+
+    case CDATA_ULONGLONG:
+      resultOOP = FROM_C_ULONGLONG (result->u.longLongVal);
       break;
 
     case CDATA_STRING:

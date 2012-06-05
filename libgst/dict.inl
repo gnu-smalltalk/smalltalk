@@ -274,6 +274,8 @@ static inline uint64_t to_c_uint_64 (OOP oop);
 
 #define TO_C_INT(integer)	to_c_int_32(integer)
 #define IS_C_INT(oop)		is_c_int_32(oop)
+#define FROM_C_LONGLONG(integ)	from_c_int_64(integ)
+#define FROM_C_ULONGLONG(integ)	from_c_uint_64(integ)
 
 #if SIZEOF_OOP == 4
 #define FROM_C_INT(integer)	FROM_C_LONG((intptr_t) (signed) integer)
