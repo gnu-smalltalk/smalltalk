@@ -3794,9 +3794,9 @@ primitive VMpr_Memory_atPut [succeed,fail]
 	      PRIM_SUCCEEDED;
 	    }
 	  break;
-       case CDATA_LONGLONG:            /* long */
-       case CDATA_ULONGLONG:           /* unsigned long */
-         if (is_c_int_64 (oop4) || is_c_uint_64 (oop4))
+       case CDATA_LONGLONG:            /* long long */
+       case CDATA_ULONGLONG:           /* unsigned long long */
+         if (IS_C_LONGLONG (oop4) || IS_C_ULONGLONG (oop4))
            {
              *(long long *) arg2 = to_c_int_64 (oop4);
              PRIM_SUCCEEDED;
@@ -4851,16 +4851,16 @@ primitive VMpr_CObject_atPut [succeed,fail]
 
 	case CDATA_LONG:		/* long */
 	case CDATA_ULONG:		/* ulong */
-	  if (IS_C_LONG (oop3))
+          if (IS_C_LONG (oop3) || IS_C_ULONG (oop3))
 	    {
 	      *(long *) addr = (long) TO_C_LONG (oop3);
 	      PRIM_SUCCEEDED;
 	    }
 	  break;
 
-       case CDATA_LONGLONG:            /* long */
-       case CDATA_ULONGLONG:           /* ulong */
-         if (IS_C_LONG (oop3))
+       case CDATA_LONGLONG:            /* long long */
+       case CDATA_ULONGLONG:           /* unsigned long long */
+         if (IS_C_LONGLONG (oop3) || IS_C_ULONGLONG (oop3))
            {
              *(long long *) addr = (long long) to_c_int_64 (oop3);
              PRIM_SUCCEEDED;
