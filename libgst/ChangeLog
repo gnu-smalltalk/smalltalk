@@ -1,3 +1,11 @@
+2012-06-15  Thomas Girard  <thomas.g.girard@free.fr>
+
+	* libgst/dict.inl: Add IS_C_LONGLONG and IS_C_ULONGLONG macros.
+	* libgst/cint.c: Add missing long long and unsigned long long types
+	to _gst_c_type_size.  Use new macros.
+	* libgst/prims.def: Use IS_C_ULONG in VMpr_CObject_atPut.
+	Use new macros.
+
 2012-06-04  Thomas Girard  <thomas.g.girard@free.fr>
 
 	* libgst/dict.inl: Add FROM_C_LONGLONG and FROM_C_ULONGLONG macros.

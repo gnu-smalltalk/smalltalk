@@ -749,6 +749,11 @@ _gst_c_type_size (int type)
     case CDATA_ULONG:
       return sizeof (unsigned long);
 
+    case CDATA_LONGLONG:
+      return sizeof (long long);
+    case CDATA_ULONGLONG:
+      return sizeof (unsigned long long);
+
     case CDATA_FLOAT:
       return sizeof (float);
     case CDATA_DOUBLE:
