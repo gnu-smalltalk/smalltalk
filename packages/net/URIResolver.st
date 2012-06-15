@@ -899,7 +899,7 @@ Copyright (c) Kazuki Yasumatsu, 1995. All rights reserved.
 	host := url host.
 	host isNil 
 	    ifTrue: 
-		[host := UserProfileSettings default settingAt: 'nntpHost' ifAbsent: [nil]].
+		[host := UserProfileSettings default settingAt: #nntpHost ifAbsent: [nil]].
 	host isNil ifTrue: [^self invalidURL].
 	string := url path.
 	string isNil ifTrue: [^self invalidURL].
@@ -927,7 +927,7 @@ Copyright (c) Kazuki Yasumatsu, 1995. All rights reserved.
 	host := url host.
 	host isNil 
 	    ifTrue: 
-		[host := UserProfileSettings default settingAt: 'nntpHost' ifAbsent: [nil]].
+		[host := UserProfileSettings default settingAt: #nntpHost ifAbsent: [nil]].
 	host isNil ifTrue: [^self invalidURL].
 	string := url path.
 	string isNil ifTrue: [^self invalidURL].
@@ -1178,7 +1178,7 @@ Copyright (c) Kazuki Yasumatsu, 1995. All rights reserved.
 	group := url path.
 	group isNil 
 	    ifFalse: [message parseFieldFrom: ('Newsgroups: ' , group) readStream].
-	org := UserProfileSettings default settingAt: 'organization'
+	org := UserProfileSettings default settingAt: #organization
 		    ifAbsent: [nil].
 	org isNil 
 	    ifFalse: [message parseFieldFrom: ('Organization: ' , org) readStream].
@@ -1304,7 +1304,7 @@ Copyright (c) Kazuki Yasumatsu, 1995. All rights reserved.
     tmpFile [
 	<category: 'private'>
 	| dir |
-	dir := UserProfileSettings default settingAt: 'tmpDir'.
+	dir := UserProfileSettings default settingAt: #tmpDir.
 	dir = '' ifTrue: [dir := '/tmp/'] ifFalse: [dir := dir , '/'].
 	^FileStream openTemporaryFile: dir
     ]
@@ -1503,7 +1503,7 @@ Object subclass: UserProfileSettings [
     initialize [
 	<category: 'initialize-release'>
 	self settings: IdentityDictionary new.
-	self settings at: #tmpDir put: (Smalltalk getenv: 'TEMP').
+	self settings at: #tmpDir put: Directory temporary.
 	self settings at: #mailer put: 'SMTPClient'.
 	self settings at: #bufferSize put: '16'.
 	self settings at: #proxyList put: 'none'.
