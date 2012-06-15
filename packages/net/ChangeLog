@@ -1,3 +1,9 @@
+2012-06-15  Stefan Krecher <stefan.krecher@googlemail.com>
+            Paolo Bonzini  <bonzini@gnu.org>
+
+	* URIResolver.st: Consistently use symbols for #settingsAt:
+	arguments.
+
 2011-09-09  Paolo Bonzini  <bonzini@gnu.org>
 
 	* gnutls-wrapper.c: More Win32 fixes.  Reported by Gwenael Casaccio.
