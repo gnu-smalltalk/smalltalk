@@ -414,11 +414,16 @@ search_block (const PTR a, const PTR b)
 int
 compute_jump_length (int ofs)
 {
-  if (ofs > -256 && ofs < 256)
+  /* The offset is counted from the end of the bytecode and the result of
+     compute_jump_length is subtracted when computing the jump offset (the
+     the jump offset increases in absolute value when jumping back).  This
+     means the actual range for backwards jumps is a little less than 2^8k
+     bytes, while for forwards jumps it is a little more than 2^8k bytes.  */
+  if (ofs > -254 && ofs < 258)
     return 2;
-  else if (ofs > -65536 && ofs < 65536)
+  else if (ofs > -65532 && ofs < 65540)
     return 4;
-  else if (ofs > -16777216 && ofs < 16777216)
+  else if (ofs > -16777210 && ofs < 16777222)
     return 6;
   else
     return 8;

@@ -2036,6 +2036,11 @@ will execute in order to shut down the service implemented
 in the package.  Before executing the script, @code{%1} is replaced 
 with either @code{nil} or a String literal.
 
+@item dir
+Should include a @code{name} attribute.  The @code{file}, @code{filein}
+and @code{built-file} tags that are nested within a @code{dir} tag are
+prepended with the directory specified by the attribute.
+
 @item test
 Specifies a subpackage that is only loaded by @file{gst-sunit} in order
 to test the package.  The subpackage may include arbitrary tags (including
