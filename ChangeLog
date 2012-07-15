@@ -1,3 +1,7 @@
+2012-07-15  Paolo Bonzini  <bonzini@gnu.org>
+
+	* scripts/Package.st: Disable again backtraces.
+
 2012-06-04  Thomas Girard  <thomas.g.girard@free.fr>
 
 	* tests/cobjects.st: Adapt longLong test case, showing the issue#646.

@@ -1199,4 +1199,4 @@ The default target directory is ', Directory image name, '
     do: [ :ex |
 	('gst-package: ', ex messageText, '
 ') displayOn: stderr.
-	ex pass. ObjectMemory quit: 1 ].
+	"ex pass." ObjectMemory quit: 1 ].
