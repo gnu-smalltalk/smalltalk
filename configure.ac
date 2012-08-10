@@ -726,8 +726,8 @@ if test "$enable_shared" != no; then
       # For Windows, the shared library will be installed in bindir anyway
       ;;
 
-    *-linux*)
-      # For Linux, we can use a relative rpath via -Wl,-rpath,...
+    *-gnu*)
+      # For glibc, we can use a relative rpath via -Wl,-rpath,...
       case "$acl_final_libdir" in
         "${acl_final_exec_prefix}"/*) ;;
         /*) relocatable_reason='no, libdir outside exec-prefix' ;;
