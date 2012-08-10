@@ -63,10 +63,12 @@ invoked me no longer exist).  I am otherwise equivalent to a Process.'>
                 reason: 'process not active' ].
 
         p := Process basicNew.
-        Link instSize + 1 to: Process instSize do: [ :i |
+        "Skip suspendedContext, priority, myList"
+        Link instSize + 4 to: Process instSize do: [ :i |
             p instVarAt: i put: (self instVarAt: i) ].
 
         "Start executing the detached process from here."
+        p priority: self priority.
         p suspendedContext: thisContext copy.
 
         Processor activeProcess == self ifTrue: [
