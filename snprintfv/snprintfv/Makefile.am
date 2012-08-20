@@ -29,9 +29,7 @@
 AUTOMAKE_OPTIONS	= gnits
 
 DISTCLEANFILES          = compat.h compat.stamp
-MAINTAINERCLEANFILES	= Makefile.in
 
-AWK			= gawk
 GENPROTO		= $(top_srcdir)/genproto
 GENPROTO_FLAGS		= $(top_srcdir)/gendoc.awk
 GENPROTO_ENVIRONMENT	= FORMAT=SNV_GNUC_PRINTF

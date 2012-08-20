@@ -24,30 +24,11 @@
 ## uses the libopts library from AutoGen, you may include it under
 ## the same distribution terms used by the libopts library.
 
-## Code:
-
 ACLOCAL_AMFLAGS		= -I ../build-aux
 AUTOMAKE_OPTIONS	= gnits
 
-## BEGIN GNU SMALLTALK LOCAL
 dist-hook:
 	rm -rf $(distdir)/doc $(distdir)/tests
 
 SUBDIRS			= snprintfv
-## SUBDIRS              = snprintfv doc tests
-## END GNU SMALLTALK LOCAL
-
-DIST_SUBDIRS		= $(SUBDIRS)
-
-MAINTAINERCLEANFILES	= Makefile.in aclocal.m4 configure config.h.in \
-			  stamp-h.in
-
-nodist_noinst_HEADERS   = config.h
-
-aclocaldir              = $(datadir)/aclocal
-dist_noinst_DATA        = snprintfv.m4
-
 dist_noinst_SCRIPTS     = gendoc.awk genproto commit
-
-# Makefile.am ends here
-
