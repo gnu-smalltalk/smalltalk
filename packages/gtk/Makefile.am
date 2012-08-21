@@ -21,7 +21,6 @@ moduleexec_LTLIBRARIES = gst-gtk.la
 gst_gtk_la_LDFLAGS = $(gst_module_ldflags)
 gst_gtk_la_LIBADD = $(ALL_LIBS) ../glib/libgst-gobject.la
 dist_gst_gtk_la_SOURCES = gst-gtk.c placer.c
-nodist_gst_gtk_la_SOURCES = libs.def
 BUILT_SOURCES = libs.def
 dist_noinst_HEADERS = placer.h
 
@@ -29,8 +28,11 @@ EXTRA_PROGRAMS = testplacer sizeof enums
 testplacer_SOURCES = testplacer.c
 testplacer_LDADD = $(GLIB_LIBS) $(GTK_LIBS)
 
-
-INCLUDES = -I$(top_srcdir)/libgst -I$(top_srcdir)/lib-src -I$(top_srcdir)/libltdl -I$(top_srcdir)/packages/glib
+AM_CPPFLAGS = \
+  -I$(top_srcdir)/libgst \
+  -I$(top_srcdir)/lib-src \
+  -I$(top_srcdir)/libltdl \
+  -I$(top_srcdir)/packages/glib
 
 AM_CFLAGS = $(GLIB_CFLAGS) $(GTK_CFLAGS) $(PANGO_CFLAGS) $(ATK_CFLAGS)
 

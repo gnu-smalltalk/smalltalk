@@ -159,7 +159,7 @@ $(srcdir)/classes.texi: $(top_srcdir)/kernel/stamp-classes
 # In TeX output, having colons in index entries looks pretty, but
 # this is impossible in info output!!!  So we hack by replacing
 # colons with underscores in the info file.
-.texi.info:
+%.info: %.texi
 	@cd $(srcdir) && rm -f $@ $@-[0-9] $@-[0-9][0-9]
 	fixed=`pwd`/`echo $< | $(SED) 's/\.texi/-fixed&/' `; \
 	  cd $(srcdir) && \
