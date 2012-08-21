@@ -21,7 +21,6 @@ moduleexec_LTLIBRARIES = gst-gtk.la
 gst_gtk_la_LDFLAGS = $(gst_module_ldflags)
 gst_gtk_la_LIBADD = $(ALL_LIBS)
 dist_gst_gtk_la_SOURCES = gst-gtk.c placer.c
-nodist_gst_gtk_la_SOURCES = libs.def
 BUILT_SOURCES = libs.def
 dist_noinst_HEADERS = placer.h
 
