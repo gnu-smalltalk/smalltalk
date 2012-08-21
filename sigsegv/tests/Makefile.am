@@ -24,7 +24,7 @@ TESTS = sigsegv1 sigsegv2 stackoverflow1 stackoverflow2
 
 EXTRA_DIST = mmaputil.h
 
-INCLUDES = -I../src
+AM_CPPFLAGS = -I../src
 DEFS = @DEFS@
 LDADD = ../src/libsigsegv_convenience.la
 noinst_PROGRAMS = sigsegv1 sigsegv2 stackoverflow1 stackoverflow2

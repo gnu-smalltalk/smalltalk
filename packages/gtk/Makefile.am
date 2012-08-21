@@ -29,8 +29,10 @@ EXTRA_PROGRAMS = testplacer sizeof enums
 testplacer_SOURCES = testplacer.c
 testplacer_LDADD = $(GLIB_LIBS) $(GTK_LIBS)
 
-
-INCLUDES = -I$(top_srcdir)/libgst -I$(top_srcdir)/lib-src -I$(top_srcdir)/libltdl
+AM_CPPFLAGS = \
+  -I$(top_srcdir)/libgst \
+  -I$(top_srcdir)/lib-src \
+  -I$(top_srcdir)/libltdl
 
 AM_CFLAGS = $(GLIB_CFLAGS) $(GTK_CFLAGS) $(PANGO_CFLAGS) $(ATK_CFLAGS)
 

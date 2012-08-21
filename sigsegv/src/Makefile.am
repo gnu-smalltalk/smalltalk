@@ -54,7 +54,7 @@ EXTRA_DIST = \
   leave-none.c leave-nop.c leave-sigaltstack.c leave-setcontext.c \
   sigsegv.h.msvc
 
-INCLUDES = -I. -I$(srcdir)
+AM_CPPFLAGS = -I. -I$(srcdir)
 DEFS = @DEFS@
 
 libsigsegv_convenience_la_SOURCES = handler.c stackvma.c leave.c dispatcher.c version.c
