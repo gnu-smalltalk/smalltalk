@@ -90,3 +90,11 @@ asParser
 		    with: STInST.SqueakFileInParser.
 ]
 
+Eval [
+    | classes |
+
+    classes := STInST.STClassLoader new
+                  parseSmalltalkStream: 'Object subclass: Foo []' readStream
+                  with: STInST.GSTFileInParser.
+    classes first article
+]

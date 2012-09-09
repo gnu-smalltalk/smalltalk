@@ -1,5 +1,10 @@
 2012-09-09  Holger Freyther  <holger@freyther.de>
 
+	* tests/stcompiler.st: Add testcase for article.
+	* tests/stcompiler.ok: Update the test result.
+
+2012-09-09  Holger Freyther  <holger@freyther.de>
+
 	* kernel/Delay.st: Name the delay process.
 
 2012-09-09  Holger Freyther  <holger@freyther.de>
