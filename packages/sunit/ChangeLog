@@ -1,3 +1,9 @@
+2012-08-03  Holger Hans Peter Freyther  <holger@freyther.de>
+
+	* packages/sunit/SUnit.st: Use testSelector printString as
+	the testSelector may be an UndefinedObject.
+	* packages/sunit/SUnitTest.st: Add #testPrintString.
+
 2010-12-04  Paolo Bonzini  <bonzini@gnu.org>
 
 	* package.xml: Remove now superfluous <file> tags.
