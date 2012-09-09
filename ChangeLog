@@ -1,5 +1,9 @@
 2012-09-09  Holger Freyther  <holger@freyther.de>
 
+	* kernel/Delay.st: Name the delay process.
+
+2012-09-09  Holger Freyther  <holger@freyther.de>
+
 	* kernel/CallinProcess.st: Copy the priority directly.
 
 2012-10-08  Roman  <komputikisto@gmail.com>

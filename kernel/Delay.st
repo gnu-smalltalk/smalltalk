@@ -181,6 +181,7 @@ created.'>
 		    sortBlock: [:d1 :d2 | d1 resumptionTime >= d2 resumptionTime].
 	TimeoutSem := Semaphore new.
 	DelayProcess := [self runDelayProcess] forkAt: Processor timingPriority.
+        DelayProcess name: 'delay process'.
         ObjectMemory addDependent: self.
         self update: #returnFromSnapshot
     ]
