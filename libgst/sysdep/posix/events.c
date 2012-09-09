@@ -395,6 +395,10 @@ _gst_async_file_polling (int fd,
   polling_queue *new;
 
   index = num_used_pollfds++;
+
+  /* Enable async io on the fd before we poll as data could arrive after
+     the fd was polled and before the async io was enabled. */
+  set_file_interrupt (fd, file_polling_handler);
   result = _gst_sync_file_polling (fd, cond);
   if (result != 0)
     {
@@ -431,7 +435,6 @@ _gst_async_file_polling (int fd,
     }
   pollfds[index].revents = 0;
 
-  set_file_interrupt (fd, file_polling_handler);
 
   /* Even if I/O was made possible while setting up our machinery,
      the list will only be walked before the next bytecode, so there
