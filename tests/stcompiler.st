@@ -91,6 +91,17 @@ asParser
 ]
 
 Eval [
+    | squeak |
+    "Test literal parsing"
+    squeak := '!String methodsFor: ''*unit-test'' stamp: ''lr 11/7/2009 13:32''!
+literalValueFoo12345
+    ^ 16rabcdef! !'.
+
+    STInST.STClassLoader new parseSmalltalkStream: squeak readStream
+		    with: STInST.SqueakFileInParser.
+]
+
+Eval [
     | classes |
 
     classes := STInST.STClassLoader new
