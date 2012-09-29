@@ -1,5 +1,10 @@
 2012-09-29  Holger Freyther  <holger@freyther.de>
 
+	* scripts/Convert.st: Collect all rewrite expressions and parse
+	them with the selected parser.
+
+2012-09-29  Holger Freyther  <holger@freyther.de>
+
 	* tests/stcompiler.st: Add testcase for parsing 16rff.
 	* tests/stcompiler.ok: Update the test result.
 

@@ -263,9 +263,9 @@ STInST.STClassLoader subclass: SyntaxConverter [
         ^super evaluate: rewritten
     ]
     
-    addRule: searchString [
+    addRule: searchString parser: aParserClass [
 	| tree rule |
-	tree := RBParser parseRewriteExpression: searchString.
+	tree := aParserClass parseRewriteExpression: searchString.
 	tree isMessage ifFalse: [ self error: 'expected ->' ].
 	tree selector = #-> ifFalse: [ self error: 'expected ->' ].
 	rule := RBStringReplaceRule
@@ -404,7 +404,7 @@ String extend [
 
 Eval [ 
     | helpString inFile outFile quiet verbose converter filter parser
-	args inFormats outFormats |
+	args inFormats outFormats rules |
     args := OrderedCollection new.
     parser := STInST.STFileInParser.
     quiet := false.
@@ -424,6 +424,7 @@ Eval [
 	'squeak' -> STInST.SqueakFileInParser.
 	'sif' -> STInST.SIFFileInParser
     }.
+    rules := OrderedCollection new.
     
     helpString :=
 'Usage:
@@ -483,7 +484,7 @@ Options:
 		outFile := arg ]. 
 
 	    opt = 'rule' ifTrue: [
-		converter addRule: arg ].
+		rules add: arg].
 
 	    opt = 'class' ifTrue: [
 		[ 'a' ~ arg ] on: Error do: [ :ex |
@@ -521,6 +522,10 @@ Options:
         ifError: [
             helpString displayOn: stderr.
             ObjectMemory quit: 1 ].
+
+    "Post process the rules now we know the target."
+    rules do: [:rule |
+	converter addRule: rule parser: parser].
 
     [
         outFile isNil
