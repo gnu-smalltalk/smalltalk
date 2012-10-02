@@ -1,3 +1,8 @@
+2012-10-02  Holger Freyther  <holger@freyther.de>
+
+	* tests/stcompiler.st: Add testcase for pragma parsing.
+	* tests/stcompiler.ok: Update the test result.
+
 2012-09-29  Holger Freyther  <holger@freyther.de>
 
 	* scripts/Convert.st: Collect all rewrite expressions and parse

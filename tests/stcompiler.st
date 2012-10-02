@@ -104,6 +104,13 @@ literalValueFoo12345
 Eval [
     | classes |
 
+    "Attempt to parse a pragma with multiple parameters"
+    classes := STInST.STClassLoader new
+                  parseSmalltalkStream: 'Object subclass: Bla [
+                            <pragma: 1 withParam: 3> ]' readStream
+                  with: STInST.GSTFileInParser.
+
+    "Check if the proxy has a proper behavior"
     classes := STInST.STClassLoader new
                   parseSmalltalkStream: 'Object subclass: Foo []' readStream
                   with: STInST.GSTFileInParser.
