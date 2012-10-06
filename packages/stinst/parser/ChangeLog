@@ -1,3 +1,8 @@
+2012-10-06  Holger Freyther  <holger@freyther.de>
+
+	* SqueakExporter.st: Use 'as yet unclassified' as category string
+	if it is nil.
+
 2012-10-02  Holger Freyther  <holger@freyther.de>
 
 	* GSTParser.st: Change GSTFileInParser>>#parseClassTag to parse
