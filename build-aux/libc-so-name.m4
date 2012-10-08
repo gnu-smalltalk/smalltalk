@@ -14,12 +14,12 @@ AC_DEFUN([GST_LIBC_SO_NAME],
 save_LIBS=$LIBS
 CFLAGS="$CFLAGS $INCLTDL"
 LIBS="$CFLAGS $LIBLTDL"
-AC_RUN_IFELSE(AC_LANG_PROGRAM([[
+AC_RUN_IFELSE([AC_LANG_PROGRAM([[
 #include <ltdl.h>
 ]], [[
 lt_dlinit();
 return lt_dlopenext("libc") == NULL ? 1 : 0;
-]]), [gst_cv_libc_dlopen_works=yes],
+]])], [gst_cv_libc_dlopen_works=yes],
      [gst_cv_libc_dlopen_works=no],
      [gst_cv_libc_dlopen_works=no])
 CFLAGS=$save_CFLAGS

@@ -276,6 +276,15 @@ if the tests are hard to write, something is probably wrong with the design".'>
 	    assert: aResult errorCount = anErrorCount
     ]
 
+    testPrintString [
+        <category: 'Testing'>
+        "Make sure that a new test can be printed"
+
+        self
+            shouldnt: [TestCase new printString] raise: Exception;
+            assert: TestCase new printString = 'TestCase>>#nil'.
+    ]
+
     isLogging [
 	<category: 'Logging'>
 	^true

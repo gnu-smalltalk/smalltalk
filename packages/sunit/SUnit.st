@@ -1104,7 +1104,7 @@ When you are writing a test case method, send #assert: aBoolean when you want to
 	aStream
 	    nextPutAll: self class printString;
 	    nextPutAll: '>>#';
-	    nextPutAll: testSelector
+	    nextPutAll: testSelector printString.
     ]
 ]
 

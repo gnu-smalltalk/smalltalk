@@ -163,3 +163,7 @@ $2
 $3
 $<0>
 returned value is nil
+
+Execution begins...
+true
+returned value is nil

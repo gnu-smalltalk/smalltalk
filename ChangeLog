@@ -1,3 +1,46 @@
+2012-10-02  Holger Freyther  <holger@freyther.de>
+
+	* tests/stcompiler.st: Add testcase for pragma parsing.
+	* tests/stcompiler.ok: Update the test result.
+
+2012-09-29  Holger Freyther  <holger@freyther.de>
+
+	* scripts/Convert.st: Collect all rewrite expressions and parse
+	them with the selected parser.
+
+2012-09-29  Holger Freyther  <holger@freyther.de>
+
+	* tests/stcompiler.st: Add testcase for parsing 16rff.
+	* tests/stcompiler.ok: Update the test result.
+
+2012-09-14  Thomas Girard  <thomas.g.girard@free.fr>
+
+	* tests/cobjects.st: Add CBoolean test case for issue#659.
+	* tests/cobjects.ok: Regenerate.
+	* kernel/CObject.st: Add missing CBoolean class>>#type.
+
+2012-09-09  Holger Freyther  <holger@freyther.de>
+
+	* tests/stcompiler.st: Add testcase for article.
+	* tests/stcompiler.ok: Update the test result.
+
+2012-09-09  Holger Freyther  <holger@freyther.de>
+
+	* kernel/Delay.st: Name the delay process.
+
+2012-09-09  Holger Freyther  <holger@freyther.de>
+
+	* kernel/CallinProcess.st: Copy the priority directly.
+
+2012-10-08  Roman  <komputikisto@gmail.com>
+
+	* kernel/Iterable.st: Fix #fold: for objects that do not implement
+	#isEmpty.
+
+2012-10-08  Roman  <komputikisto@gmail.com>
+
+	* kernel/Link.st: Fail fast on zero or negative indices.
+
 2012-02-22  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/CallinProcess.st: Fix creation of cloned process, reported

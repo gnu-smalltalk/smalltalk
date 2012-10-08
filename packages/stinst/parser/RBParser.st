@@ -976,6 +976,11 @@ Stream subclass: RBScanner [
 	    ifFalse: [aChar isDigit]
     ]
 
+    digitValue: aChar [
+	<category: 'private-scanning numbers'>
+        ^ aChar digitValue
+    ]
+
     scanDigits: ch base: base [
 	<category: 'private-scanning numbers'>
 	| c num |
@@ -987,7 +992,7 @@ Stream subclass: RBScanner [
 		c := currentCharacter].
 	c notNil and: [self isDigit: c base: base]] 
 		whileTrue: 
-		    [num := num * base + c digitValue.
+		    [num := num * base + (self digitValue: c).
 		    self step.
 		    c := currentCharacter].
 	^num
@@ -1016,7 +1021,7 @@ Stream subclass: RBScanner [
 		c := currentCharacter].
 	c notNil and: [self isDigit: c base: base]] 
 		whileTrue: 
-		    [result := result * base + c digitValue.
+		    [result := result * base + (self digitValue: c).
 		    self step.
 		    c := currentCharacter.
 		    scale := scale - 1].

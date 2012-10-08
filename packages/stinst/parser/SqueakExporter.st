@@ -69,4 +69,11 @@ OldSyntaxExporter subclass: SqueakSyntaxExporter [
 
 	super fileOutClassDeclaration: aBlock
     ]
+
+    fileOutCategory: aString methods: methods class: aClass [
+        | cat |
+        "Pharo does not like 'nil' as category name pick something else."
+        cat := aString ifNil: ['as yet unclassified'].
+        ^super fileOutCategory: cat methods: methods class: aClass.
+    ]
 ]

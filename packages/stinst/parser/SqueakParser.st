@@ -76,6 +76,18 @@ STFileScanner subclass: SqueakFileInScanner [
     <comment: nil>
     <category: 'Refactory-Parser'>
 
+    isDigit: aChar base: aBase [
+        <category: 'private-scanning numbers'>
+        "Pharo/Squeak allows 16rff as literal."
+        ^ super isDigit: aChar asUppercase base: aBase.
+    ]
+
+    digitValue: aChar [
+        <category: 'private-scanning numbers'>
+        "Pharo/Squeak allows 16rff as literal."
+        ^ super digitValue: aChar asUppercase
+    ]
+
     on: aStream [
 	<category: 'accessing'>
 	super on: aStream.

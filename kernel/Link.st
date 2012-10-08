@@ -53,13 +53,13 @@ for each node, and I hold the glue that keeps them together.'>
 
 	<category: 'iteration'>
 	| i element |
-	i := 1.
-	element := self.
-	
-	[i = index ifTrue: [^element].
-	i := i + 1.
-	(element := element nextLink) isNil] 
-		whileFalse.
+        index >= 1 ifTrue: [
+	    i := 1.
+	    element := self.
+	    [i = index ifTrue: [^element].
+	    i := i + 1.
+	    (element := element nextLink) isNil] 
+		whileFalse].
 	SystemExceptions.IndexOutOfRange signalOn: self withIndex: index
     ]
 

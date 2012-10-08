@@ -68,7 +68,7 @@ invoked me no longer exist).  I am otherwise equivalent to a Process.'>
             p instVarAt: i put: (self instVarAt: i) ].
 
         "Start executing the detached process from here."
-        p priority: self priority.
+        p instVarNamed: #priority put: priority.
         p suspendedContext: thisContext copy.
 
         Processor activeProcess == self ifTrue: [

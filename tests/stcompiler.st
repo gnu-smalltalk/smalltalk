@@ -90,3 +90,29 @@ asParser
 		    with: STInST.SqueakFileInParser.
 ]
 
+Eval [
+    | squeak |
+    "Test literal parsing"
+    squeak := '!String methodsFor: ''*unit-test'' stamp: ''lr 11/7/2009 13:32''!
+literalValueFoo12345
+    ^ 16rabcdef! !'.
+
+    STInST.STClassLoader new parseSmalltalkStream: squeak readStream
+		    with: STInST.SqueakFileInParser.
+]
+
+Eval [
+    | classes |
+
+    "Attempt to parse a pragma with multiple parameters"
+    classes := STInST.STClassLoader new
+                  parseSmalltalkStream: 'Object subclass: Bla [
+                            <pragma: 1 withParam: 3> ]' readStream
+                  with: STInST.GSTFileInParser.
+
+    "Check if the proxy has a proper behavior"
+    classes := STInST.STClassLoader new
+                  parseSmalltalkStream: 'Object subclass: Foo []' readStream
+                  with: STInST.GSTFileInParser.
+    classes first article
+]

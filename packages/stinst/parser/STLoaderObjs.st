@@ -1001,6 +1001,10 @@ instanceVariableNames: ivn
 
 superclass
     ^superclass
+!
+
+article
+    ^superclass article
 ! !
 
 !LoadedMetaclass methodsFor: 'printing'!

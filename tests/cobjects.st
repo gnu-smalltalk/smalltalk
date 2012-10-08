@@ -238,5 +238,12 @@ Eval [
     c free.
 ]
 
+" Play with conversion for Boolean"
+Eval [
+    c := CBoolean value: true.
+    c value printNl.
+    c free.
+]
+
 " ### need a lot more!"
 
