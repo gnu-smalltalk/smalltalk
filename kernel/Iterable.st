@@ -208,13 +208,13 @@ all possible) are left to the subclasses.'>
 
 	<category: 'enumeration'>
 	| result marker |
-	self isEmpty ifTrue: [^SystemExceptions.EmptyCollection signalOn: self].
 	result := marker := Object new.
 	self do: 
 		[:element | 
 		result := result == marker 
 			    ifTrue: [element]
 			    ifFalse: [binaryBlock value: result value: element]].
+	result == marker ifTrue: [^SystemExceptions.EmptyCollection signalOn: self].
 	^result
     ]
 
