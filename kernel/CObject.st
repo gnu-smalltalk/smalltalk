@@ -1541,6 +1541,13 @@ CByte subclass: CBoolean [
     <category: 'Language-C interface'>
     <comment: 'I return true if a byte is not zero, false otherwise.'>
 
+    CBoolean class >> type [
+	"Answer a CType for the receiver"
+
+	<category: 'conversion'>
+	^CBooleanType
+    ]
+
     value [
 	"Get the receiver's value - answer true if it is != 0, false if it is 0."
 
