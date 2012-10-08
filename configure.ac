@@ -389,10 +389,6 @@ GST_FUNC_LRINT
 GST_FUNC_STRTOUL
 GST_FUNC_LOCALTIME
 
-{ echo; echo "${term_bold}Dynamic linking capabilities:${term_norm}"; } >& AS_MESSAGE_FD
-
-GST_LIB_LTDL
-
 dnl ------------------------- OTHER LIBRARIES -------------------
 
 { echo; echo "${term_bold}Auxiliary libraries:${term_norm}"; } >& AS_MESSAGE_FD

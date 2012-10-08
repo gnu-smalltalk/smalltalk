@@ -24,8 +24,7 @@ BUILT_SOURCES = libs.def
 
 AM_CPPFLAGS = \
   -I$(top_srcdir)/libgst \
-  -I$(top_srcdir)/lib-src \
-  -I$(top_srcdir)/libltdl
+  -I$(top_srcdir)/lib-src
 
 AM_CFLAGS = $(GLIB_CFLAGS) $(GTHREAD_CFLAGS)
 

@@ -31,7 +31,6 @@ testplacer_LDADD = $(GLIB_LIBS) $(GTK_LIBS)
 AM_CPPFLAGS = \
   -I$(top_srcdir)/libgst \
   -I$(top_srcdir)/lib-src \
-  -I$(top_srcdir)/libltdl \
   -I$(top_srcdir)/packages/glib
 
 AM_CFLAGS = $(GLIB_CFLAGS) $(GTK_CFLAGS) $(PANGO_CFLAGS) $(ATK_CFLAGS)
