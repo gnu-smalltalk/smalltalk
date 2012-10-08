@@ -1,3 +1,8 @@
+2012-10-08  Paolo Bonzini  <bonzini@gnu.org>
+
+	* kernel/StreamOps.st: Ensure "last" is up to date when a
+	stream has reached its end.  Reported by Holger Freyther.
+
 2012-10-02  Holger Freyther  <holger@freyther.de>
 
 	* tests/stcompiler.st: Add testcase for pragma parsing.
