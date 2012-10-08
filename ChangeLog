@@ -1,3 +1,7 @@
+2012-10-08  Roman  <komputikisto@gmail.com>
+
+	* kernel/Link.st: Fail fast on zero or negative indices.
+
 2012-02-22  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/CallinProcess.st: Fix creation of cloned process, reported
