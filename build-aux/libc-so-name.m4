@@ -15,8 +15,7 @@ save_LIBS=$LIBS
 CFLAGS="$CFLAGS $INCLTDL"
 LIBS="$CFLAGS $LIBLTDL"
 AC_RUN_IFELSE(AC_LANG_PROGRAM([[
-#include <ltdl`test $with_system_libltdl = no && echo _`.h>
-`test $with_system_libltdl = no && echo '#include "ltdl.c"' `
+#include <ltdl.h>
 ]], [[
 lt_dlinit();
 return lt_dlopenext("libc") == NULL ? 1 : 0;
