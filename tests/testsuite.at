@@ -52,6 +52,7 @@ AT_DIFF_TEST([getopt.st])
 AT_DIFF_TEST([quit.st])
 AT_DIFF_TEST([pools.st])
 AT_DIFF_TEST([shape.st])
+AT_DIFF_TEST([streams.st])
 
 AT_BANNER([Other simple tests.])
 AT_DIFF_TEST([ackermann.st])

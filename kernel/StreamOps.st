@@ -81,9 +81,10 @@ Stream subclass: ConcatenatedStream [
         "This is somewhat performance-sensitive, so avoid testing for an
          empty collection."
 	[(s := streams at: 1) atEnd] whileTrue: 
-		[lastStart := startPos.
-		startPos := startPos + curPos.
-		curPos := 0.
+		[curPos > 0 ifTrue: [
+                    lastStart := startPos.
+                    startPos := startPos + curPos.
+                    curPos := 0].
                 streams size = 1 ifTrue: [last := streams first. ^nil].
 		last := streams removeFirst].
 	^s
