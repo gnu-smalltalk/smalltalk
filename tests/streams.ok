@@ -1,0 +1,14 @@
+
+Execution begins...
+$1
+$2
+$3
+'123'
+$4
+$5
+'456'
+$6
+true
+'456'
+nil
+returned value is nil

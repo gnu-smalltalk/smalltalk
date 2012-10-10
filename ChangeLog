@@ -1,3 +1,15 @@
+2012-10-09  Paolo Bonzini  <bonzini@gnu.org>
+            Holger Freyther  <holger@freyther.de>
+
+	* kernel/StreamOps.st: Fix previous changeset.
+	* tests/streams.st: New.
+	* tests/streams.ok: New.
+
+2012-10-08  Paolo Bonzini  <bonzini@gnu.org>
+
+	* kernel/StreamOps.st: Ensure "last" is up to date when a
+	stream has reached its end.  Reported by Holger Freyther.
+
 2012-10-02  Holger Freyther  <holger@freyther.de>
 
 	* tests/stcompiler.st: Add testcase for pragma parsing.
