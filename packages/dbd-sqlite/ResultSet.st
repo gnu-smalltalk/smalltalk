@@ -8,7 +8,7 @@
 
 "======================================================================
 |
-| Copyright 2007, 2008 Free Software Foundation, Inc.
+| Copyright 2007, 2008, 2013 Free Software Foundation, Inc.
 | Written by Daniele Sciascia
 |
 | This file is part of the GNU Smalltalk class library.
@@ -31,9 +31,12 @@
  ======================================================================
 "
 
-
 ResultSet subclass: SQLiteResultSet [
-    | handle rows columns index |
+    | handle rows columns index lastRes |
+
+    <comment: 'This class is doing three things at once. It can handle
+    SELECT and DML. For the result of a select a legacy fetch all interface
+    is provided or a stream based one.'>
 		   
     SQLiteResultSet class >> on: aStatement [
         <category: 'instance creation'>
@@ -46,7 +49,7 @@ ResultSet subclass: SQLiteResultSet [
         self statement: aStatement.
         self handle: (aStatement handle).
         self isSelect
-	    ifTrue: [self populate]
+	    ifTrue: [lastRes := self handle exec.]
 	    ifFalse: [self exec]
     ]
     
@@ -58,17 +61,17 @@ ResultSet subclass: SQLiteResultSet [
 	rows := handle changes
     ]
 
-    populate [
+    populateAllRows [
         <category: 'initialization'>
-        | resCode |
         
         rows := OrderedCollection new.
-        [ resCode := self handle exec.
-          resCode = 100
-        ] whileTrue: [rows addLast: 
-                        (SQLiteRow forValues: self handle returnedRow copy in: self)].
+        [lastRes = 100]
+            whileTrue: [
+                rows addLast:
+                        (SQLiteRow forValues: self handle returnedRow copy in: self).
+                lastRes := self handle exec].
         
-        self handle checkError: resCode = 101.
+        self handle checkError: lastRes = 101.
     ]
     
     handle [
@@ -83,14 +86,28 @@ ResultSet subclass: SQLiteResultSet [
 
     next [
         <category: 'cursor access'>
+        | res |
+
+        "At the end?"
     	self atEnd ifTrue: [self error: 'No more rows'].
-    	index := index + 1.
-    	^self rows at: index
+
+        "Using cached results?"
+        rows isNil ifFalse: [index := index + 1. ^self rows at: index].
+
+        "first row handling.."
+        index := index + 1.
+        res := SQLiteRow forValues: self handle returnedRow copy in: self.
+        lastRes := self handle exec.
+        lastRes = 101 ifTrue: [self handle reset].
+
+        ^ res.
     ]
 
     atEnd [
         <category: 'cursor access'>
-        ^index >= self rowCount
+        ^ rows isNil
+            ifFalse: [index >= self rows size]
+            ifTrue:  [lastRes ~= 100].
     ]
     
     position [
@@ -100,7 +117,9 @@ ResultSet subclass: SQLiteResultSet [
 
     position: anInteger [
         <category: 'stream protocol'>
-        (anInteger between: 0 and: self size)
+        rows isNil ifTrue: [self error: 'Can not set the position on SQLite'].
+
+        (anInteger between: 0 and: self rows size)
             ifTrue: [ index := anInteger ] 
             ifFalse: [ SystemExceptions.IndexOutOfRange signalOn: self withIndex: anInteger ].
         ^index
@@ -142,11 +161,19 @@ ResultSet subclass: SQLiteResultSet [
     
     rows [
         <category: 'accessing'>
-        ^rows
+        rows isNil ifFalse: [^rows].
+        index = 0 ifFalse: [
+            ^ self error: 'Can only ask for the row set before the first fetch.'].
+
+        self populateAllRows.
+        ^ rows
     ]
 
     rowCount [
         <category: 'accessing'>
+        "I'm only available for SELECT statements and only when used together with
+        >>#rows. For streaming usage with >>#atEnd and >>#next I may not be used.
+        This is because SQLite3 does not indicate the size of the query set."
         self isSelect 
             ifTrue: [^self rows size]
             ifFalse: [^self error: 'Not a SELECT statement.']

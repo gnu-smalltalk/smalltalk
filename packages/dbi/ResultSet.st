@@ -8,7 +8,7 @@
 "======================================================================
 |
 | Copyright 2006 Mike Anderson
-| Copyright 2007, 2008, 2009 Free Software Foundation, Inc.
+| Copyright 2007, 2008, 2009, 2013 Free Software Foundation, Inc.
 |
 | Written by Mike Anderson
 |
@@ -123,14 +123,16 @@ case I only hold the number of rows affected.'>
     ]
 
     size [
-	"Returns the number of rows in the result set."
+	"Returns the number of rows in the result set. See >>#rowCount for
+	 details."
 	<category: 'stream protocol'>
 	^self rowCount
     ]
 
     rowCount [
 	"Returns the number of rows in the result set;
-	 error for DML statements."
+	 error for DML statements. Not all implementations allow to query
+	 the size of the ResultSet. In this case an Error will be raised."
 
 	<category: 'accessing'>
 	self error: 'Not a SELECT statement.'

@@ -1,3 +1,11 @@
+2013-04-15  Holger Hans Peter Freyther  <holger@freyther.de>
+
+	* ResultSet.st: Implement streaming usage to conserve memory.
+	* SQLiteTests.st: Add SQLiteStreamRowTestCase class. Modify
+	existing tests.
+	* Statement.st: Reset the handle before executing the query
+	and do not reset it after doing the query.
+
 2011-04-09  Paolo Bonzini  <bonzini@gnu.org>
 
 	* Statement.st: Move #resetAndClear inside an #ensure: block.

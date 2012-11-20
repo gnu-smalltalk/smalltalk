@@ -120,7 +120,13 @@ SQLiteBaseTest subclass: SQLiteResultSetTestCase [
     ]
     
     testRowCount [
-        self should: [rs rowCount = 3]
+        self should: [rs rowCount = 3].
+        self should: [rs rows size = 3].
+    ]
+
+    testMixRowCountAtEnd [
+        rs next.
+        self should: [rs rowCount] raise: Error description: 'May not mix next/rowCount'.
     ]
 ]
 
@@ -146,6 +152,34 @@ SQLiteBaseTest subclass: SQLiteRowTestCase [
     ]
 ]
 
+SQLiteBaseTest subclass: SQLiteStreamRowTestCase [
+    | rs |
+
+    setUp [
+        super setUp.
+        rs := self connection select: 'select * from test'.
+    ]
+
+    testRead [
+        | row |
+        self shouldnt: [rs atEnd].
+
+        "First row"
+        row := rs next.
+        self should: [(row at: 'string_field') = 'one'].
+        self shouldnt: [rs atEnd].
+
+        "Second row"
+        row := rs next.
+        self should: [(row at: 'string_field') = 'two'].
+        self shouldnt: [rs atEnd].
+
+        "Third row"
+        row := rs next.
+        self should: [(row at: 'string_field') = 'three'].
+        self should: [rs atEnd].
+    ]
+]
 
 SQLiteBaseTest subclass: SQLitePreparedStatementTestCase [
     | stmt stmt2 stmt3 |
@@ -204,9 +238,12 @@ TestSuite subclass: SQLiteTestSuite [
         self addTest: (SQLiteResultSetTestCase selector: #testAtEnd).
         self addTest: (SQLiteResultSetTestCase selector: #testColumnNames).
         self addTest: (SQLiteResultSetTestCase selector: #testRowCount).
+        self addTest: (SQLiteResultSetTestCase selector: #testMixRowCountAtEnd).
 
         self addTest: (SQLiteRowTestCase selector: #testAt).
         self addTest: (SQLiteRowTestCase selector: #testAtIndex).
+
+        self addTest: (SQLiteStreamRowTestCase selector: #testRead).
 
         self addTest: (SQLiteDMLResultSetTestCase selector: #testRowsAffected).
         

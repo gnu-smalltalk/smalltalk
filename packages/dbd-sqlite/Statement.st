@@ -71,23 +71,19 @@ Statement subclass: SQLiteStatement [
     
     execute [
         <category: 'querying'>
+        self handle reset.
         ^SQLiteResultSet on: self
     ]
     
     executeWithAll: aParams [
         <category: 'querying'>
         | resCode |
+        self handle reset.
         ^[aParams keysAndValuesDo: [:i :param | 
                 resCode := self handle bindingAt: i put: param.
                 self handle checkError: resCode = 0].
                                           
-        SQLiteResultSet on: self] ensure: [self resetAndClear]
-    ]
-    
-    resetAndClear [
-        <category: 'private'>
-        self handle reset.
-        self handle clearBindings.
+        SQLiteResultSet on: self] ensure: [self handle clearBindings]
     ]
     
     getCommand [

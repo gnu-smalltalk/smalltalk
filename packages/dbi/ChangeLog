@@ -1,3 +1,7 @@
+2013-04-15  Holger Hans Peter Freyther  <holger@freyther.de>
+
+	* ResultSet.st: Add documentation to >>#rowCount and >>#size.
+
 2011-04-08  Holger Hans Peter Freyther  <zecke@selfish.org>
 
 	* Statement.st: Add Statement class>>#getCommand:.

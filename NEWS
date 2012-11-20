@@ -1,5 +1,13 @@
 List of user-visible changes in GNU Smalltalk
 
+NEWS FROM 3.2.5 to 3.2.91
+
+o   Change the semantic of >>#rowCount for the SQLite backend. One can
+    either use the >>#next/#atEnd selectors to stream over the result or use
+    the #>>rows/#rowCount selectors.
+
+-----------------------------------------------------------------------------
+
 NEWS FROM 3.2.4 to 3.2.5
 
 o   Add Delay>>#value:onTimeoutDo: as an easy way to timeout an operation.
