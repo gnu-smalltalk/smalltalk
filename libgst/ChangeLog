@@ -1,3 +1,9 @@
+2012-12-29  Holger Hans Peter Freyther  <holger@freyther.de>
+
+	* libgst/alloc.c: _gst_heap_sbrk returns NULL and not MMAP_FAILED
+	on allocation failure.
+	* libgst/heap.c: Return NULL on allocation failure.
+
 2012-09-09  Paolo Bonzini  <bonzini@gnu.org>
 
 	* libgst/sysdep/posix/events.c: Register the fd with gst

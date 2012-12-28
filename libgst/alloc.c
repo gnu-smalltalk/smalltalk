@@ -671,6 +671,8 @@ heap_system_alloc (heap_data *h, size_t sz)
 #endif
 
   mem = (heap_block *) morecore (sz);
+  if (!mem)
+	nomemory(1);
   mem->mmap_block = 0;
   mem->size = sz;
 
@@ -700,7 +702,7 @@ morecore (size_t size)
     {
       char *ptr = _gst_heap_sbrk (current_heap, size);
 
-      if (ptr != (PTR) -1)
+      if (ptr != NULL)
 	{
           if (((intptr_t) ptr & (pagesize - 1)) > 0)
             {
@@ -710,7 +712,7 @@ morecore (size_t size)
 	      ptr = _gst_heap_sbrk (current_heap, size);
             }
 
-          if (ptr != (PTR) -1)
+          if (ptr != NULL)
 	    return (ptr);
 	}
 
