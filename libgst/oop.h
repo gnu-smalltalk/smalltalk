@@ -76,7 +76,7 @@
    True, False, and UndefinedObject (nil) oops, which are
    built-ins.  */
 #define INITIAL_OOP_TABLE_SIZE	(1024 * 128 + BUILTIN_OBJECT_BASE)
-#define MAX_OOP_TABLE_SIZE	(sizeof(struct oop_s) << 20)
+#define MAX_OOP_TABLE_SIZE	(1 << 23)
 
 /* The number of free OOPs under which we trigger GCs.  0 is not
    enough because _gst_scavenge might still need some oops in
