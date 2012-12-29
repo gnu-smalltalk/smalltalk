@@ -13,6 +13,20 @@ AC_ARG_ENABLE(warnings,
 [  --enable-warnings       enable compiler warnings (default=no)], ,
 enable_warnings=no)
 
+AC_CACHE_CHECK([whether $CFLAGS produces any warnings], ac_cv_prog_cc_warnings,
+  [ac_save_c_werror_flag=$ac_c_werror_flag
+   ac_c_werror_flag=yes
+   ac_cv_prog_cc_warnings=no
+   _AC_COMPILE_IFELSE([AC_LANG_PROGRAM()],
+     [ac_cv_prog_cc_warnings=no],
+     [ac_cv_prog_cc_warnings=yes])
+   ac_c_werror_flag=$ac_save_c_werror_flag])
+if test $ac_cv_prog_cc_warnings = yes; then
+  AC_MSG_WARN([$CC $CFLAGS produced warnings.  This usually means])
+  AC_MSG_WARN([that $CFLAGS is incorrect, and could cause problems])
+  AC_MSG_WARN([in the rest of the configure script.])
+fi
+
 if test "$GCC" = yes; then
 ifelse([$1$2$3$4$5], , , [dnl
   changequote(<<, >>)

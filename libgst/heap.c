@@ -220,14 +220,9 @@ heap_sbrk_internal (struct heap * hdp,
     {
       if (hdp->breakval - hdp->base + size > hdp->areasize)
         {
-          if (hdp->breakval - hdp->base == hdp->areasize);
-            {
-              /* FIXME: a library should never exit!  */
-              fprintf (stderr, "gst: out of memory allocating %d bytes\n",
-                       size);
-              exit (1);
-            }
-          size = hdp->areasize - (hdp->breakval - hdp->base);
+          /* this heap is full? */
+          errno = ENOMEM;
+          return NULL;
         }
 
       moveto = PAGE_ALIGN (hdp->breakval + size);

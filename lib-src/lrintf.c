@@ -58,7 +58,7 @@
    integer so that the precision of the floating point
    number is exactly 1.  */
 
-float
+long
 lrintf(float x)
 {
   float y;

@@ -726,7 +726,7 @@ if test "$enable_shared" != no; then
       # For glibc, we can use a relative rpath via -Wl,-rpath,...
       case "$acl_final_libdir" in
         "${acl_final_exec_prefix}"/*) ;;
-        /*) relocatable_reason='no, libdir outside exec-prefix' ;;
+        /*) relocatable_reason='no, libdir outside exec_prefix' ;;
         *) relocatable_reason='no, relative libdir' ;;
       esac
       ;;
@@ -745,7 +745,7 @@ if test "$relocatable_reason" = yes; then
   case "${acl_final_bindir}" in
     "${acl_final_exec_prefix}") ;;
     "${acl_final_exec_prefix}"/*) ;;
-    /*) relocatable_reason='no, bindir outside exec-prefix' ;;
+    /*) relocatable_reason='no, bindir outside exec_prefix' ;;
     *) relocatable_reason='no, relative bindir' ;;
   esac
   case "${acl_final_libexecdir}" in
@@ -832,7 +832,7 @@ case "$relocatable_reason" in
 		       [The relative path from the program to the prefix.
 		        Defined only for relocatable installs.])
     AC_DEFINE_UNQUOTED(EXEC_PREFIX, "$EXEC_PREFIX",
-		       [The relative path from the program to the exec-prefix.
+		       [The relative path from the program to the exec_prefix.
 			Defined only for relocatable installs.])
     ;;
 
