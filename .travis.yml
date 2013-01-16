@@ -1,0 +1,5 @@
+language: c
+compiler:
+  - gcc
+before_script: sudo apt-get install autotools-dev libreadline-dev libncurses-dev libsdl1.2-dev libsdl-image1.2-dev libsdl-mixer1.2-dev libsdl-sound1.2-dev libsdl-ttf2.0-dev libexpat1-dev freeglut3-dev libgmp3-dev libgdbm-dev libgtk2.0-dev libpq-dev libsigsegv-dev libffi-dev zip libsqlite3-dev unzip pkg-config libltdl-dev chrpath gawk libgnutls-dev automake autoconf libtool texinfo texlive
+script: autoreconf -vi && ./configure && make && make check && make distcheck

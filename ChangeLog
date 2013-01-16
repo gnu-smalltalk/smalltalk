@@ -1,5 +1,9 @@
 2013-03-16  Holger Freyther  <holger@freyther.de>
 
+	* .travis.yml: Add description for the travis-ci service.
+
+2013-03-16  Holger Freyther  <holger@freyther.de>
+
 	* tests/Makefile.am: Add streams.st and streams.ok to data
 
 2012-10-09  Paolo Bonzini  <bonzini@gnu.org>
