@@ -118,12 +118,12 @@ Eval [ Date test3 ]
 
 String extend [
     suffix: suffix testReading: aClass [
-        | stream result |
+        | stream end result |
         stream := (self, suffix) readStream.
-        result := aClass readFrom: (self, suffix) readStream.
-        (stream upToEnd endsWith: suffix trimSeparators) ifFalse: [^nil].
+        result := aClass readFrom: stream.
+        end := stream upToEnd.
         result = (aClass readFrom: self readStream) ifFalse: [^nil].
-        ^result->self
+        ^(result->self) -> (suffix->end)
     ]
 ]
 
