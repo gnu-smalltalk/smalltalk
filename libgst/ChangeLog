@@ -1,3 +1,7 @@
+2013-01-17  Gwenael Casaccio  <gwenael.casaccio@gmail.com>
+
+	* libgst/sysdep/win32/timer.c: Correct the function signature.
+
 2012-12-29  Paolo Bonzini  <bonzini@gnu.org>
 
 	* libgst/oop.h: MAX_OOP_TABLE_SIZE is expressed in OOPs, not bytes.
