@@ -64,7 +64,7 @@
 #endif
 
 void
-_gst_sigvtalrm_every (int deltaMilli)
+_gst_sigvtalrm_every (int deltaMilli, SigHandler func)
 {
 }
 
