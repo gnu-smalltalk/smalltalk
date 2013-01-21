@@ -245,12 +245,6 @@ intern_string_fast (const char *str, OOP *pTestOOP);
    found.  */
 static int instance_variable_index (OOP symbol);
 
-/* This checks if the INDEX-th instance variable among those that the
-   current class declares is read-only.  Read-only index variables are
-   those that are declared by a trusted super-class of an untrusted
-   subclass.  */
-static mst_Boolean is_instance_variable_read_only (int index);
-
 /* This looks for SYMBOL among the arguments and temporary variables
    that the current scope sees, and returns the entry in the symbol
    list for the variable if it is found.  */
@@ -1002,7 +996,7 @@ _gst_find_variable (symbol_entry * se,
   if (index >= 0)
     {
       fill_symbol_entry (se, SCOPE_RECEIVER, 
-			 is_instance_variable_read_only (index),
+			 false,
 			 symbol, index, 0);
       return (true);
     }
@@ -1015,28 +1009,9 @@ _gst_find_variable (symbol_entry * se,
   index = _gst_add_forced_object (varAssoc);
 
   fill_symbol_entry (se, SCOPE_GLOBAL, 
-		     (_gst_curr_method->v_method.untrusted
-		      && !IS_OOP_UNTRUSTED (varAssoc)),
+		     false,
 		     varAssoc, index, 0);
   return (true);
-}
-
-static mst_Boolean
-is_instance_variable_read_only (int index)
-{
-  int numVars;
-  OOP class_oop;
-
-  if (!_gst_curr_method->v_method.untrusted)
-    return (false);
-
-  for (class_oop = _gst_curr_method->v_method.currentClass;
-       IS_OOP_UNTRUSTED (class_oop);
-       class_oop = SUPERCLASS (class_oop))
-    ;
-
-  numVars = CLASS_FIXED_FIELDS (class_oop);
-  return index + 1 <= numVars;
 }
 
 static int

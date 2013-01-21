@@ -239,7 +239,6 @@ static const char standard_files[] = {
   "FileSegment.st\0"
   "FileDescr.st\0"
   "SymLink.st\0"
-  "Security.st\0"
   "WeakObjects.st\0"
   "ObjMemory.st\0"
 

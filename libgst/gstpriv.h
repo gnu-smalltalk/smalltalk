@@ -219,15 +219,6 @@
 #endif
 
 
-/* ENABLE_SECURITY enables security checks in the primitives as well as
-   special marking of untrusted objects.  Note that the code in the
-   class library to perform the security checks will be present
-   notwithstanding the setting of this flag, but they will be disabled
-   because the corresponding primitives will be made non-working.  We
-   define it here with no configure-time options because it causes
-   testsuite failures.  */
-#define ENABLE_SECURITY
-
 /* OPTIMIZE disables many checks, including consistency checks at GC
    time and bounds checking on instance variable accesses (not on #at:
    and #at:put: which would violate language semantics).  It can a)
@@ -366,22 +357,6 @@ enum {
 #define MAKE_OOP_READONLY(oop, ro) \
   (((oop)->flags &= ~F_READONLY), \
    ((oop)->flags |= (ro) ? F_READONLY : 0))
-
-#ifdef ENABLE_SECURITY
-
-/* Answer whether an object, OOP, is untrusted.  */
-#define IS_OOP_UNTRUSTED(oop) \
-  (!IS_INT ((oop)) && ((oop)->flags & F_UNTRUSTED))
-
-/* Set whether an object, OOP, is trusted or untrusted.  */
-#define MAKE_OOP_UNTRUSTED(oop, untr) \
-  (((oop)->flags &= ~F_UNTRUSTED), \
-   ((oop)->flags |= (untr) ? F_UNTRUSTED : 0))
-
-#else
-#define IS_OOP_UNTRUSTED(oop) (false)
-#define MAKE_OOP_UNTRUSTED(oop, untr) ((void)0)
-#endif
 
 /* Set whether an object, OOP, has ephemeron semantics.  */
 #define MAKE_OOP_EPHEMERON(oop) \
@@ -608,7 +583,6 @@ extern OOP _gst_nil_oop
 #include "xlat.h"
 #include "mpz.h"
 #include "print.h"
-#include "security.h"
 #include "real.h"
 #include "sockets.h"
 
