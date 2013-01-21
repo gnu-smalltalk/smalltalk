@@ -1,3 +1,221 @@
+2013-01-21  Gwenael Casaccio <gwenael.casaccio@gmail.com>
+
+        * kernel/AbstNamespc.st: rename as kernel/AbstractNamespace.st.
+        * kernel/ArrayColl.st: rename as kernel/ArrayedCollection.st.
+        * kernel/BindingDict.st: Renamed as kernel/BindingDictionary.st.
+        * kernel/BlkClosure.st: Renamed as kernel/BlockClosure.st.
+        * kernel/BlkContext.st: Renamed as kernel/BlockContext.st.
+        * kernel/CObject.st: Delete.
+        * kernel/CharArray.st: Renamed as kernel/CharacterArray.st.
+        * kernel/ClassDesc.st: Renamed as kernel/ClassDescription.st.
+        * kernel/CompiledBlk.st: Renamed as kernel/CompiledBlock.st.
+        * kernel/CompildCode.st: Renamed as kernel/CompiledCode.st.
+        * kernel/CompildMeth.st: Renamed as kernel/CompiledMethod.st.
+        * kernel/AnsiDates.st: Renamed as kernel/DateTime.st.
+        * kernel/DeferBinding.st: Renamed as kernel/DeferredVariableBinding.st.
+        * kernel/DirMessage.st: Renamed as kernel/DirectedMessage.st.
+        * kernel/Duration.st: New.
+        * kernel/DynVariable.st: Renamed as kernel/DynamicVariable.st.
+        * kernel/FileDescr.st: Renamed as kernel/FileDescriptor.st.
+        * kernel/Getopt.st: Modified.
+        * kernel/GetoptExtensions.st: New.
+        * kernel/HashedColl.st: Renamed as kernel/HashedCollection.st.
+        * kernel/HomedAssoc.st: Renamed as kernel/HomedAssociation.st.
+        * kernel/IdentDict.st: Renamed as kernel/IdentityDictionary.st.
+        * kernel/LargeArray.st: New.
+        * kernel/LargeArraySubpart.st: New.
+        * kernel/OtherArrays.st: Renamed as kernel/LargeArrayedCollection.st.
+        * kernel/LargeByteArray.st: New.
+        * kernel/LargeInt.st: Renamed as kernel/LargeInteger.st.
+        * kernel/LargeNegativeInteger.st: New.
+        * kernel/LargePositiveInteger.st: New.
+        * kernel/LargeWordArray.st: New.
+        * kernel/LargeZeroInteger.st: New.
+        * kernel/MappedColl.st: Renamed as kernel/MappedCollection.st.
+        * kernel/MthContext.st: Renamed as kernel/MethodContext.st.
+        * kernel/MethodDict.st: Renamed as kernel/MethodDictionary.st.
+        * kernel/ObjMemory.st: Renamed as kernel/ObjectMemory.st.
+        * kernel/OrderColl.st: Renamed as kernel/OrderedCollection.st.
+        * kernel/PkgLoader.st: Delete.
+        * kernel/PointExtensions.st: New
+        * kernel/PosStream.st: Renamed as kernel/PositionableStream.st.
+        * kernel/ProcEnv.st: Renamed as kernel/ProcessEnvironment.st.
+        * kernel/ProcessVariable.st: New
+        * kernel/ProcSched.st: Renamed as kernel/ProcessorScheduler.st.
+        * kernel/RWStream.st: Renamed as kernel/ReadWriteStream.st.
+        * kernel/Rectangle.st: Modified.
+        * kernel/RectangleExtensions.st: New.
+        * kernel/RootNamespc.st: Renamed as kernel/RootNamespace.st.
+        * kernel/RunArray.st: Modified.
+        * kernel/RunArrayExtensions.st: New.
+        * kernel/ScaledDec.st: Renamed as kernel/ScaledDecimal.st.
+        * kernel/SeqCollect.st: Renamed as kernel/SequenceableCollection.st.
+	* kernel/SmallInt.st: Renamed as kernel/SmallInteger.st.
+	* kernel/SortCollect.st: Renamed as kernel/SortedCollection.st.
+        * kernel/StreamOps.st: Delete.
+	* kernel/SysDict.st: Renamed as kernel/SystemDictionary.st.
+	* kernel/Transcript.st: Renamed as kernel/TextCollector.st.
+        * kernel/Transcript.st: Changed.
+	* kernel/UndefObject.st: Renamed as kernel/UndefinedObject.st.
+	* kernel/UniChar.st: Renamed as kernel/UnicodeCharacter.st.
+	* kernel/UniString.st: Renamed as kernel/UnicodeString.st.
+        * kernel/VFS.st: Delete.
+        * kernel/ValueAdapt.st: Delete.
+	* kernel/VarBinding.st: Renamed as kernel/VariableBinding.st.
+        * kernel/WeakObjects.st: Delete.
+	* kernel/WordArray.st: New.
+	* kernel/autoload/Autoload.st: New.
+	* kernel/Autoload.st: Renamed as kernel/autoload/AutoloadClass.st.
+	* kernel/autoload/Extensions.st: New.
+	* kernel/Builtins.st: Renamed as kernel/bootstrap/Behavior.st.
+	* kernel/bootstrap/Class.st: New.
+	* kernel/bootstrap/ClassDescription.st: New.
+	* kernel/bootstrap/Dictionary.st: New.
+	* kernel/bootstrap/Object.st: New.
+	* kernel/bootstrap/UndefinedObject.st: New.
+	* kernel/collection/weak/WeakArray.st: New.
+	* kernel/collection/weak/WeakIdentitySet.st: New.
+	* kernel/collection/weak/WeakKeyDictionary.st: New.
+	* kernel/collection/weak/WeakKeyIdentityDictionary.st: New.
+	* kernel/collection/weak/WeakSet.st: New.
+	* kernel/collection/weak/WeakValueIdentityDictionary.st: New.
+	* kernel/collection/weak/WeakValueLookupTable.st: New.
+	* kernel/DLD.st: Renamed as kernel/dld/DLD.st.
+	* kernel/dld/Extensions.st: New.
+	* kernel/dld/RoundRobinStream.st: New.
+	* kernel/exceptions/AlreadyDefined.st: New.
+	* kernel/exceptions/ArgumentOutOfRange.st: New.
+	* kernel/exceptions/ArithmeticError.st: New.
+	* kernel/exceptions/BadReturn.st: New.
+	* kernel/exceptions/CInterfaceError.st: New.
+	* kernel/exceptions/EmptyCollection.st: New.
+	* kernel/exceptions/EndOfStream.st: New.
+	* kernel/exceptions/Error.st: New.
+	* kernel/exceptions/Exception.st: New.
+	* kernel/exceptions/ExceptionSet.st: New.
+	* kernel/exceptions/Extensions.st: New.
+	* kernel/exceptions/FileError.st: New.
+	* kernel/exceptions/Halt.st: New.
+	* kernel/exceptions/IndexOutOfRange.st: New.
+	* kernel/exceptions/Initialization.st: New.
+	* kernel/exceptions/InvalidArgument.st: New.
+	* kernel/exceptions/InvalidProcessState.st: New.
+	* kernel/exceptions/InvalidSize.st: New.
+	* kernel/exceptions/InvalidState.st: New.
+	* kernel/exceptions/InvalidValue.st: New.
+	* kernel/exceptions/MessageNotUnderstood.st: New.
+	* kernel/exceptions/MustBeBoolean.st: New.
+	* kernel/exceptions/MutationError.st: New.
+	* kernel/exceptions/NoRunnableProcess.st: New.
+	* kernel/exceptions/NotEnoughElements.st: New.
+	* kernel/exceptions/NotFound.st: New.
+	* kernel/exceptions/NotImplemented.st: New.
+	* kernel/exceptions/NotIndexable.st: New.
+	* kernel/exceptions/NotYetImplemented.st: New.
+	* kernel/exceptions/Notification.st: New.
+	* kernel/exceptions/PrimitiveFailed.st: New.
+	* kernel/exceptions/ProcessBeingTerminated.st: New.
+	* kernel/exceptions/ProcessTerminated.st: New.
+	* kernel/exceptions/ReadOnlyObject.st: New.
+	* kernel/exceptions/ShouldNotImplement.st: New.
+	* kernel/exceptions/SubclassResponsibility.st: New.
+	* kernel/exceptions/SysExcept.st: New.
+	* kernel/exceptions/TimeoutNotification.st: New.
+	* kernel/exceptions/UnhandledException.st: New.
+	* kernel/exceptions/UserInterrupt.st: New.
+	* kernel/exceptions/VMError.st: New.
+	* kernel/exceptions/VerificationError.st: New.
+	* kernel/exceptions/Warning.st: New.
+	* kernel/exceptions/WrongArgumentCount.st: New.
+	* kernel/exceptions/WrongClass.st: New.
+	* kernel/exceptions/WrongMessageSent.st: New.
+	* kernel/exceptions/ZeroDivide.st: New.
+	* kernel/ffi/CAggregate.st: New.
+	* kernel/ffi/CArray.st: New.
+	* kernel/ffi/CArrayCType.st: New.
+	* kernel/ffi/CBoolean.st: New.
+	* kernel/ffi/CByte.st: New.
+	* kernel/CCallable.st: Renamed as kernel/ffi/CCallable.st.
+	* kernel/CCallback.st: Renamed as kernel/ffi/CCallbackDescriptor.st.
+	* kernel/ffi/CChar.st: New.
+	* kernel/CStruct.st: Renamed as kernel/ffi/CCompound.st.
+	* kernel/ffi/CDouble.st: New.
+	* kernel/ffi/CFloat.st: New.
+	* kernel/CFuncs.st: Renamed as kernel/ffi/CFunctionDescriptor.st.
+	* kernel/ffi/CInt.st: New.
+	* kernel/ffi/CLong.st: New.
+	* kernel/ffi/CLongDouble.st: New.
+	* kernel/ffi/CLongLong.st: New.
+	* kernel/ffi/CObject.st: New.
+	* kernel/ffi/CObjectExtensions.st: New.
+	* kernel/ffi/CPtr.st: New.
+	* kernel/ffi/CPtrCType.st: New.
+	* kernel/ffi/CScalar.st: New.
+	* kernel/ffi/CScalarCType.st: New.
+	* kernel/ffi/CShort.st: New.
+	* kernel/ffi/CSmalltalk.st: New.
+	* kernel/ffi/CString.st: New.
+	* kernel/ffi/CStringCType.st: New.
+	* kernel/ffi/CStruct.st: New.
+	* kernel/CType.st: Renamed as kernel/ffi/CType.st.
+	* kernel/ffi/CTypeInitialization.st: New.
+	* kernel/ffi/CUChar.st: New.
+	* kernel/ffi/CUInt.st: New.
+	* kernel/ffi/CULong.st: New.
+	* kernel/ffi/CULongLong.st: New.
+	* kernel/ffi/CUShort.st: New.
+	* kernel/ffi/CUnion.st: New.
+	* kernel/ffi/Extensions.st: New.
+	* kernel/file/Extensions.st: New.
+	* kernel/File.st: Renamed as kernel/file/File.st.
+	* kernel/file/Stat.st: New.
+	* kernel/file/vfs/ArchiveFile.st: New.
+	* kernel/file/vfs/ArchiveMember.st: New.
+	* kernel/file/vfs/Extensions.st: New.
+	* kernel/file/vfs/FileWrapper.st: New.
+	* kernel/VFSZip.st: Renamed as kernel/file/vfs/LimitedStream.st.
+	* kernel/file/vfs/RecursiveFileWrapper.st: New.
+	* kernel/file/vfs/StoredZipMember.st: New.
+	* kernel/file/vfs/TmpFileArchiveMember.st: New.
+	* kernel/file/vfs/ZipFile.st: New.
+	* kernel/package/DisabledPackage.st: New.
+	* kernel/package/Package.st: New.
+	* kernel/package/PackageContainer.st: New.
+	* kernel/package/PackageDirectories.st: New.
+	* kernel/package/PackageDirectory.st: New.
+	* kernel/package/PackageGroup.st: New.
+	* kernel/package/PackageInfo.st: New.
+	* kernel/package/PackageLoader.st: New.
+	* kernel/package/PackageNotAvailable.st: New.
+	* kernel/package/PackageSkip.st: New.
+	* kernel/package/StarPackage.st: New.
+	* kernel/package/TestPackage.st: New.
+	* kernel/Regex.st: Renamed as kernel/regex/Extensions.st.
+	* kernel/regex/FailedMatchRegexResults.st: New.
+	* kernel/regex/Initialization.st: New.
+	* kernel/regex/MatchingRegexResults.st: New.
+	* kernel/regex/Regex.st: New.
+	* kernel/regex/RegexResults.st: New.
+	* kernel/stream/CollectingStream.st: New.
+	* kernel/stream/ConcatenatedStream.st: New.
+	* kernel/stream/Extensions.st: New.
+	* kernel/stream/FilteringStream.st: New.
+	* kernel/stream/LineStream.st: New.
+	* kernel/stream/OneOfEachStream.st: New.
+	* kernel/stream/PeekableStream.st: New.
+	* kernel/url/Initialization.st: New.
+	* kernel/url/URIResolver.st: New.
+	* kernel/URL.st: Renamed as kernel/url/URL.st.
+	* kernel/value-adaptor/DelayedAdaptor.st: New.
+	* kernel/value-adaptor/NullValueHolder.st: New.
+	* kernel/value-adaptor/PluggableAdaptor.st: New.
+	* kernel/value-adaptor/Promise.st: New.
+	* kernel/value-adaptor/ValueAdaptor.st: New.
+	* kernel/value-adaptor/ValueHolder.st: New.
+	* kernel/value-adaptor/ValueHolderExtensions.st: New.
+        * libgst/files.c: Changed.
+        * packages.xml: Changed.
+
 2013-03-16  Holger Freyther  <holger@freyther.de>
 
 	* .travis.yml: Add description for the travis-ci service.

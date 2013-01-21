@@ -623,49 +623,3 @@ Object subclass: Rectangle [
     ]
 ]
 
-
-
-Number extend [
-
-    asRectangle [
-	"Answer an empty rectangle whose origin is (self asPoint)"
-
-	<category: 'converting'>
-	^Rectangle 
-	    left: self
-	    top: self
-	    right: self
-	    bottom: self
-    ]
-
-]
-
-
-
-Point extend [
-
-    asRectangle [
-	"Answer an empty rectangle whose origin is self"
-
-	<category: 'converting'>
-	^Rectangle origin: self corner: self copy
-    ]
-
-    corner: aPoint [
-	"Answer a Rectangle whose origin is the receiver and whose corner
-	 is aPoint"
-
-	<category: 'converting'>
-	^Rectangle origin: self corner: aPoint
-    ]
-
-    extent: aPoint [
-	"Answer a Rectangle whose origin is the receiver and whose extent
-	 is aPoint"
-
-	<category: 'converting'>
-	^Rectangle origin: self extent: aPoint
-    ]
-
-]
-

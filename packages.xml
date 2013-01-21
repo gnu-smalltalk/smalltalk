@@ -86,22 +86,27 @@
   <directory>kernel</directory>
 
   <file>Array.st</file>
-  <file>CompildMeth.st</file>
+  <file>CompiledMethod.st</file>
   <file>LookupTable.st</file>
   <file>RunArray.st</file>
+  <file>RunArrayExtensions.st</file>
   <file>Iterable.st</file>
-  <file>ArrayColl.st</file>
-  <file>CompiledBlk.st</file>
+  <file>ArrayedCollection.st</file>
+  <file>CompiledBlock.st</file>
   <file>Magnitude.st</file>
   <file>Semaphore.st</file>
-  <file>DeferBinding.st</file>
+  <file>DeferredVariableBinding.st</file>
   <file>Association.st</file>
-  <file>HomedAssoc.st</file>
+  <file>HomedAssociation.st</file>
   <file>ContextPart.st</file>
-  <file>MappedColl.st</file>
-  <file>SeqCollect.st</file>
-  <file>Autoload.st</file>
-  <file>DLD.st</file>
+  <file>MappedCollection.st</file>
+  <file>SequenceableCollection.st</file>
+  <file>autoload/Extensions.st</file>
+  <file>autoload/AutoloadClass.st</file>
+  <file>autoload/Autoload.st</file>
+  <file>dld/Extensions.st</file>
+  <file>dld/RoundRobinStream.st</file>
+  <file>dld/DLD.st</file>
   <file>Memory.st</file>
   <file>Set.st</file>
   <file>Bag.st</file>
@@ -112,101 +117,239 @@
   <file>Behavior.st</file>
   <file>Delay.st</file>
   <file>Metaclass.st</file>
-  <file>SmallInt.st</file>
-  <file>BlkClosure.st</file>
+  <file>SmallInteger.st</file>
+  <file>BlockClosure.st</file>
   <file>Continuation.st</file>
   <file>Generator.st</file>
   <file>Dictionary.st</file>
-  <file>MethodDict.st</file>
-  <file>SortCollect.st</file>
-  <file>BlkContext.st</file>
-  <file>DirMessage.st</file>
+  <file>MethodDictionary.st</file>
+  <file>SortedCollection.st</file>
+  <file>BlockContext.st</file>
+  <file>DirectedMessage.st</file>
   <file>MethodInfo.st</file>
   <file>Stream.st</file>
   <file>Boolean.st</file>
   <file>Directory.st</file>
-  <file>MthContext.st</file>
+  <file>MethodContext.st</file>
   <file>String.st</file>
-  <file>UniString.st</file>
-  <file>ExcHandling.st</file>
+  <file>UnicodeString.st</file>
+  <file>exceptions/ExceptionSet.st</file>
+  <file>exceptions/Exception.st</file>
   <file>Namespace.st</file>
   <file>SymLink.st</file>
-  <file>VFS.st</file>
-  <file>VFSZip.st</file>
-  <file>Builtins.st</file>
+  <file>file/vfs/FileWrapper.st</file>
+  <file>file/vfs/RecursiveFileWrapper.st</file>
+  <file>file/vfs/ArchiveFile.st</file>
+  <file>file/vfs/ArchiveMember.st</file>
+  <file>file/vfs/TmpFileArchiveMember.st</file>
+  <file>file/vfs/ZipFile.st</file>
+  <file>file/vfs/StoredZipMember.st</file>
+  <file>file/vfs/LimitedStream.st</file>
+  <file>file/vfs/Extensions.st</file>
+  <file>bootstrap/Behavior.st</file>
+  <file>bootstrap/Object.st</file>
+  <file>bootstrap/Dictionary.st</file>
+  <file>bootstrap/Class.st</file>
+  <file>bootstrap/ClassDescription.st</file>
+  <file>bootstrap/UndefinedObject.st</file>
   <file>False.st</file>
   <file>Number.st</file>
   <file>Symbol.st</file>
   <file>ByteArray.st</file>
   <file>FilePath.st</file>
-  <file>File.st</file>
-  <file>SysDict.st</file>
-  <file>ScaledDec.st</file>
+  <file>file/Extensions.st</file>
+  <file>file/Stat.st</file>
+  <file>file/File.st</file>
+  <file>SystemDictionary.st</file>
+  <file>ScaledDecimal.st</file>
   <file>FileSegment.st</file>
   <file>Object.st</file>
   <file>Time.st</file>
   <file>FileStream.st</file>
   <file>Security.st</file>
-  <file>OrderColl.st</file>
-  <file>CCallable.st</file>
-  <file>CCallback.st</file>
-  <file>CFuncs.st</file>
+  <file>OrderedCollection.st</file>
+  <file>ffi/CCallable.st</file>
+  <file>ffi/CCallbackDescriptor.st</file>
+  <file>ffi/CFunctionDescriptor.st</file>
+  <file>ffi/Extensions.st</file>
   <file>Float.st</file>
-  <file>PkgLoader.st</file>
+  <file>package/PackageSkip.st</file>
+  <file>package/PackageNotAvailable.st</file>
+  <file>package/PackageGroup.st</file>
+  <file>package/PackageDirectories.st</file>
+  <file>package/PackageContainer.st</file>
+  <file>package/PackageDirectory.st</file>
+  <file>package/PackageInfo.st</file>
+  <file>package/StarPackage.st</file>
+  <file>package/Package.st</file>
+  <file>package/DisabledPackage.st</file>
+  <file>package/TestPackage.st</file>
+  <file>package/PackageLoader.st</file>
+  <file>TextCollector.st</file>
   <file>Transcript.st</file>
-  <file>CObject.st</file>
+  <file>ffi/CObject.st</file>
+  <file>ffi/CScalar.st</file>
+  <file>ffi/CSmalltalk.st</file>
+  <file>ffi/CLongLong.st</file>
+  <file>ffi/CULongLong.st</file>
+  <file>ffi/CLong.st</file>
+  <file>ffi/CULong.st</file>
+  <file>ffi/CInt.st</file>
+  <file>ffi/CUInt.st</file>
+  <file>ffi/CShort.st</file>
+  <file>ffi/CUShort.st</file>
+  <file>ffi/CChar.st</file>
+  <file>ffi/CUChar.st</file>
+  <file>ffi/CFloat.st</file>
+  <file>ffi/CDouble.st</file>
+  <file>ffi/CLongDouble.st</file>
+  <file>ffi/CAggregate.st</file>
+  <file>ffi/CArray.st</file>
+  <file>ffi/CPtr.st</file>
+  <file>ffi/CString.st</file>
+  <file>ffi/CByte.st</file>
+  <file>ffi/CBoolean.st</file>
+  <file>ffi/CObjectExtensions.st</file>
   <file>Fraction.st</file>
   <file>Point.st</file>
+  <file>PointExtensions.st</file>
   <file>True.st</file>
-  <file>CStruct.st</file>
-  <file>IdentDict.st</file>
-  <file>PosStream.st</file>
-  <file>UndefObject.st</file>
-  <file>CType.st</file>
+  <file>ffi/CCompound.st</file>
+  <file>ffi/CStruct.st</file>
+  <file>ffi/CUnion.st</file>
+  <file>IdentityDictionary.st</file>
+  <file>PositionableStream.st</file>
+  <file>UndefinedObject.st</file>
+  <file>ffi/CType.st</file>
+  <file>ffi/CScalarCType.st</file>
+  <file>ffi/CStringCType.st</file>
+  <file>ffi/CPtrCType.st</file>
+  <file>ffi/CArrayCType.st</file>
+  <file>ffi/CTypeInitialization.st</file>
   <file>IdentitySet.st</file>
-  <file>ProcSched.st</file>
-  <file>ProcEnv.st</file>
-  <file>ValueAdapt.st</file>
-  <file>CharArray.st</file>
+  <file>ProcessorScheduler.st</file>
+  <file>ProcessEnvironment.st</file>
+  <file>ProcessVariable.st</file>
+  <file>value-adaptor/ValueAdaptor.st</file>
+  <file>value-adaptor/NullValueHolder.st</file>
+  <file>value-adaptor/ValueHolder.st</file>
+  <file>value-adaptor/ValueHolderExtensions.st</file>
+  <file>value-adaptor/Promise.st</file>
+  <file>value-adaptor/PluggableAdaptor.st</file>
+  <file>value-adaptor/DelayedAdaptor.st</file>
+  <file>CharacterArray.st</file>
   <file>Integer.st</file>
   <file>Process.st</file>
   <file>CallinProcess.st</file>
-  <file>WeakObjects.st</file>
+  <file>collection/weak/WeakArray.st</file>
+  <file>collection/weak/WeakSet.st</file>
+  <file>collection/weak/WeakKeyDictionary.st</file>
+  <file>collection/weak/WeakValueLookupTable.st</file>
+  <file>collection/weak/WeakIdentitySet.st</file>
+  <file>collection/weak/WeakKeyIdentityDictionary.st</file>
+  <file>collection/weak/WeakValueIdentityDictionary.st</file>
   <file>Character.st</file>
-  <file>UniChar.st</file>
+  <file>UnicodeCharacter.st</file>
   <file>Interval.st</file>
-  <file>RWStream.st</file>
-  <file>OtherArrays.st</file>
+  <file>ReadWriteStream.st</file>
+  <file>WordArray.st</file>
+  <file>LargeArraySubpart.st</file>
+  <file>LargeArrayedCollection.st</file>
+  <file>LargeArray.st</file>
+  <file>LargeByteArray.st</file>
+  <file>LargeWordArray.st</file>
   <file>Class.st</file>
-  <file>LargeInt.st</file>
+  <file>LargeIntegeger.st</file>
+  <file>LargeNegativeInteger.st</file>
+  <file>LargePositiveInteger.st</file>
+  <file>LargeZeroInteger.st</file>
   <file>Random.st</file>
   <file>WriteStream.st</file>
-  <file>ClassDesc.st</file>
+  <file>ClassDescription.st</file>
   <file>Link.st</file>
   <file>ReadStream.st</file>
-  <file>ObjMemory.st</file>
+  <file>ObjectMemory.st</file>
   <file>Collection.st</file>
   <file>LinkedList.st</file>
   <file>Rectangle.st</file>
-  <file>AnsiDates.st</file>
-  <file>CompildCode.st</file>
+  <file>RectangleExtensions.st</file>
+  <file>DateTime.st</file>
+  <file>Duration.st</file>
+  <file>CompiledCode.st</file>
   <file>LookupKey.st</file>
-  <file>BindingDict.st</file>
-  <file>AbstNamespc.st</file>
-  <file>RootNamespc.st</file>
-  <file>SysExcept.st</file>
-  <file>DynVariable.st</file>
-  <file>HashedColl.st</file>
-  <file>FileDescr.st</file>
+  <file>BindingDictionary.st</file>
+  <file>AbstractNamespace.st</file>
+  <file>RootNamespace.st</file>
+  <file>exceptions/Error.st</file>
+  <file>exceptions/Notification.st</file>
+  <file>exceptions/Warning.st</file>
+  <file>exceptions/Halt.st</file>
+  <file>exceptions/ArithmeticError.st</file>
+  <file>exceptions/MessageNotUnderstood.st</file>
+  <file>exceptions/ZeroDivide.st</file>
+  <file>exceptions/ProcessBeingTerminated.st</file>
+  <file>exceptions/EndOfStream.st</file>
+  <file>exceptions/NotEnoughElements.st</file>
+  <file>exceptions/InvalidValue.st</file>
+  <file>exceptions/InvalidState.st</file>
+  <file>exceptions/NotIndexable.st</file>
+  <file>exceptions/ReadOnlyObject.st</file>
+  <file>exceptions/EmptyCollection.st</file>
+  <file>exceptions/InvalidArgument.st</file>
+  <file>exceptions/AlreadyDefined.st</file>
+  <file>exceptions/ArgumentOutOfRange.st</file>
+  <file>exceptions/IndexOutOfRange.st</file>
+  <file>exceptions/InvalidSize.st</file>
+  <file>exceptions/NotFound.st</file>
+  <file>exceptions/WrongClass.st</file>
+  <file>exceptions/MustBeBoolean.st</file>
+  <file>exceptions/ProcessTerminated.st</file>
+  <file>exceptions/InvalidProcessState.st</file>
+  <file>exceptions/MutationError.st</file>
+  <file>exceptions/VMError.st</file>
+  <file>exceptions/VerificationError.st</file>
+  <file>exceptions/BadReturn.st</file>
+  <file>exceptions/UserInterrupt.st</file>
+  <file>exceptions/NoRunnableProcess.st</file>
+  <file>exceptions/PrimitiveFailed.st</file>
+  <file>exceptions/WrongArgumentCount.st</file>
+  <file>exceptions/CInterfaceError.st</file>
+  <file>exceptions/FileError.st</file>
+  <file>exceptions/NotImplemented.st</file>
+  <file>exceptions/NotYetImplemented.st</file>
+  <file>exceptions/ShouldNotImplement.st</file>
+  <file>exceptions/WrongMessageSent.st</file>
+  <file>exceptions/SubclassResponsibility.st</file>
+  <file>exceptions/UnhandledException.st</file>
+  <file>exceptions/TimeoutNotification.st</file>
+  <file>exceptions/Extensions.st</file>
+  <file>exceptions/Initialization.st</file>
+  <file>DynamicVariable.st</file>
+  <file>HashedCollection.st</file>
+  <file>FileDescriptor.st</file>
   <file>FloatD.st</file>
   <file>FloatE.st</file>
   <file>FloatQ.st</file>
-  <file>URL.st</file>
-  <file>VarBinding.st</file>
+  <file>url/URL.st</file>
+  <file>url/URIResolver.st</file>
+  <file>url/Initialization.st</file>
+  <file>VariableBinding.st</file>
   <file>RecursionLock.st</file>
   <file>Getopt.st</file>
-  <file>Regex.st</file>
-  <file>StreamOps.st</file>
+  <file>GetoptExtensions.st</file>
+  <file>regex/Regex.st</file>
+  <file>regex/RegexResults.st</file>
+  <file>regex/MatchingRegexResults.st</file>
+  <file>regex/FailedMatchRegexResults.st</file>
+  <file>regex/Extensions.st</file>
+  <file>regex/Initialization.st</file>
+  <file>stream/ConcatenatedStream.st</file>
+  <file>stream/FilteringStream.st</file>
+  <file>stream/CollectingStream.st</file>
+  <file>stream/PeekableStream.st</file>
+  <file>stream/LineStream.st</file>
+  <file>stream/OneOfEachStream.st</file>
+  <file>stream/Extensions.st</file>
 </disabled-package>
 
 <disabled-package>
