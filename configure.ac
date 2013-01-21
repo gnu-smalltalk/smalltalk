@@ -624,15 +624,6 @@ if test "$enable_jit" != no; then
     [Define to enable dynamic translation to machine code])
 fi
 
-AC_ARG_ENABLE(disassembler, 
-[  --enable-disassembler   include a disassembler in the gst executable], ,
-enable_disassembler=no)
-AM_CONDITIONAL(ENABLE_DISASSEMBLER, test "$enable_disassembler" != no)
-if test "$enable_disassembler" != no; then
-  AC_DEFINE(ENABLE_DISASSEMBLER, 1, 
-    [Define to include a disassembler in the gst executable])
-fi
-
 AC_ARG_ENABLE(dld,
 [  --disable-dld           disable loading of external modules at runtime], ,
 enable_dld=yes)
@@ -886,6 +877,6 @@ AC_CONFIG_FILES(Makefile)
 
 dnl VM makefiles
 AC_CONFIG_FILES(doc/Makefile lib-src/Makefile libgst/Makefile)
-AC_CONFIG_FILES(opcode/Makefile lightning/Makefile tests/Makefile)
+AC_CONFIG_FILES(lightning/Makefile tests/Makefile)
 
 AC_OUTPUT
