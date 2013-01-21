@@ -327,11 +327,7 @@ _gst_get_current_namespace (void)
 mst_Boolean
 _gst_untrusted_parse (void)
 {
-  if (!_gst_current_parser)
-    return false;
-
-  return (_gst_current_parser->untrustedContext
-          || IS_OOP_UNTRUSTED (_gst_current_parser->currentClass));
+  return false;
 }
 
 void
@@ -413,7 +409,7 @@ _gst_parse_method (OOP currentClass, OOP currentCategory)
   incPtr = INC_SAVE_POINTER ();
   parser_init (&p);
   p.state = PARSE_METHOD;
-  p.untrustedContext = IS_OOP_UNTRUSTED (_gst_this_context_oop);
+  p.untrustedContext = false;
   p.current_namespace = _gst_nil_oop;
   _gst_set_compilation_class (currentClass);
   _gst_set_compilation_category (currentCategory);
@@ -446,7 +442,7 @@ _gst_parse_chunks (OOP currentNamespace)
   _gst_current_parser = &p;
   incPtr = INC_SAVE_POINTER ();
   parser_init (&p);
-  p.untrustedContext = IS_OOP_UNTRUSTED (_gst_this_context_oop);
+  p.untrustedContext = false;
   if (currentNamespace)
     p.current_namespace = currentNamespace;
   p.state = PARSE_DOIT;

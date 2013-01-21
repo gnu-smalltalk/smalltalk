@@ -2473,11 +2473,6 @@ install_method (OOP methodOOP, OOP classOOP, mst_Boolean untrusted)
     {
       oldMethod = _gst_identity_dictionary_at (methodDictionaryOOP,
 					       selector);
-      if (!IS_NIL (oldMethod) && !IS_OOP_UNTRUSTED (oldMethod))
-	{
-	  _gst_errorf ("cannot redefine a trusted method as untrusted");
-	  EXIT_COMPILATION ();
-	}
     }
 
   MAKE_OOP_READONLY (methodOOP, true);
@@ -2666,13 +2661,6 @@ method_new (method_header header,
   method = (gst_compiled_method) instantiate_with (_gst_compiled_method_class,
 						   numByteCodes, &methodOOP);
 
-  if (_gst_curr_method)
-    MAKE_OOP_UNTRUSTED (methodOOP, _gst_curr_method->v_method.untrusted);
-  else
-    MAKE_OOP_UNTRUSTED (methodOOP,
-                        IS_OOP_UNTRUSTED (_gst_this_context_oop)
-                        || IS_OOP_UNTRUSTED (class));
-
   method->header = header;
   method->descriptor = methodDesc;
   method->literals = literals;
@@ -2695,7 +2683,6 @@ method_new (method_header header,
       block = (gst_compiled_block) OOP_TO_OBJ (blockOOP);
       if (IS_NIL (block->method))
 	{
-	  MAKE_OOP_UNTRUSTED (blockOOP, IS_OOP_UNTRUSTED (methodOOP));
 	  block->method = methodOOP;
 	  block->literals = literals;
 	}

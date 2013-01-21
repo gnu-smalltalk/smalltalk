@@ -303,7 +303,6 @@ typedef struct gst_class
   OOP environment;
   OOP classVariables;		/* dictionary of name->value pairs */
   OOP sharedPools;
-  OOP securityPolicy;
   OOP pragmaHandlers;
 }
  *gst_class;
