@@ -172,7 +172,6 @@ typedef struct method_node
   OOP currentClass;
   OOP currentCategory;
   int64_t endPos;
-  char untrusted;
   char isOldSyntax;
 }
 method_node;
@@ -232,7 +231,6 @@ extern tree_node _gst_make_method (YYLTYPE *startLocation,
                                    OOP currentEnvironment,
                                    OOP currentClass,
                                    OOP currentCategory,
-				   mst_Boolean untrusted,
 				   mst_Boolean isOldSyntax)
   ATTRIBUTE_HIDDEN;
 

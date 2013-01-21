@@ -5169,41 +5169,6 @@ primitive VMpr_SystemDictionary_debug [succeed]
 }
 
 
-/* Object isUntrusted */
-primitive VMpr_Object_isUntrusted [succeed]
-{
-  OOP oop1;
-  _gst_primitives_executed++;
-
-  oop1 = STACKTOP ();
-  SET_STACKTOP_BOOLEAN (IS_OOP_UNTRUSTED (oop1));
-  PRIM_SUCCEEDED;
-}
-
-/* Object makeUntrusted: */
-primitive VMpr_Object_makeUntrusted [succeed,fail]
-{
-  OOP oop1;
-  OOP oop2;
-  _gst_primitives_executed++;
-
-  oop2 = POP_OOP ();
-  oop1 = STACKTOP ();
-  if (oop2 == _gst_true_oop)
-    {
-      MAKE_OOP_UNTRUSTED (oop1, true);
-      PRIM_SUCCEEDED;
-    }
-  else if (oop2 == _gst_false_oop)
-    {
-      MAKE_OOP_UNTRUSTED (oop1, false);
-      PRIM_SUCCEEDED;
-    }
-
-  UNPOP (1);
-  PRIM_FAILED;
-}
-
 /* Object isReadOnly */
 primitive VMpr_Object_isReadOnly [succeed]
 {
