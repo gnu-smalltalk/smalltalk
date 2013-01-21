@@ -22,13 +22,10 @@ ACLOCAL_AMFLAGS = -I build-aux
 PACKAGE=smalltalk
 gstdatadir=$(pkgdatadir)
 
-DIST_SUBDIRS = lib-src snprintfv lightning opcode libgst \
+DIST_SUBDIRS = lib-src snprintfv lightning libgst \
 	. $(ALL_PACKAGES) tests doc
 
 SUBDIRS = lib-src lightning $(subdirs)
-if ENABLE_DISASSEMBLER
-SUBDIRS += opcode
-endif
 SUBDIRS += libgst . $(BUILT_PACKAGES) doc tests
 
 # Running gst inside the build directory...
@@ -114,12 +111,6 @@ gst_SOURCES = main.c
 gst_LDADD = libgst/libgst.la lib-src/library.la @ICON@
 gst_DEPENDENCIES = libgst/libgst.la lib-src/library.la @ICON@
 gst_LDFLAGS = -export-dynamic $(RELOC_LDFLAGS) $(LIBFFI_EXECUTABLE_LDFLAGS)
-
-if ENABLE_DISASSEMBLER
-gst_LDADD += opcode/libdisass.la
-gst_DEPENDENCIES += opcode/libdisass.la
-AM_CPPFLAGS += -I$(top_srcdir)/opcode
-endif
 
 # The single gst-tool executable is installed with multiple names, hence
 # we use noinst here.

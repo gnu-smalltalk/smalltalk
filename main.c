@@ -64,11 +64,6 @@
 #include <sys/stat.h>
 #include <errno.h>
 
-#ifdef ENABLE_DISASSEMBLER
-#define TRUE_FALSE_ALREADY_DEFINED
-#include "dis-asm.h"
-#endif
-
 static const char help_text[] =
   "GNU Smalltalk usage:"
   "\n"
@@ -424,33 +419,3 @@ main(int argc, const char **argv)
   exit (0);
 }
 
-#ifdef ENABLE_DISASSEMBLER
-void disassemble(stream, from, to)
-     FILE *stream;
-     char *from, *to;
-{
-  disassemble_info info;
-  bfd_vma pc = (bfd_vma) from;
-  bfd_vma end = (bfd_vma) to;
-
-  INIT_DISASSEMBLE_INFO(info, stream, fprintf);
-  info.buffer = NULL;
-  info.buffer_vma = 0;
-  info.buffer_length = end;
-
-  while (pc < end) {
-    fprintf_vma(stream, pc);
-    putc('\t', stream);
-#ifdef __i386__
-    pc += print_insn_i386(pc, &info);
-#endif
-#ifdef __ppc__
-    pc += print_insn_big_powerpc(pc, &info);
-#endif
-#ifdef __sparc__
-    pc += print_insn_sparc(pc, &info);
-#endif
-    putc('\n', stream);
-  }
-}
-#endif

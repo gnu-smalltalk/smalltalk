@@ -1,3 +1,14 @@
+2013-01-21  Gwenael Casaccio  <gwenael.casaccio@gmail.com>
+
+        * main.c: Remove ENABLE_DISASSEMBLER support
+        * opcode/dis-buf.c: Delete
+        * opcode/disass.c: Delete
+        * opcode/i386-dis.c: Delete
+        * opcode/ppc-dis.c: Delete
+        * opcode/ppc-opc.c: Delete
+        * opcode/sparc-dis.c: Delete
+        * opcode/sparc-opc.c: Delete
+
 2013-03-16  Holger Freyther  <holger@freyther.de>
 
 	* .travis.yml: Add description for the travis-ci service.
