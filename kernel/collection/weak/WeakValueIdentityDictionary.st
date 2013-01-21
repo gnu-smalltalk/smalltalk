@@ -1,0 +1,76 @@
+"=====================================================================
+|
+|   Weak collections
+|
+|
+ ======================================================================"
+
+"======================================================================
+|
+| Copyright 1999,2000,2001,2002,2007,2008,2009 Free Software Foundation, Inc.
+| Written by Paolo Bonzini.
+|
+| This file is part of the GNU Smalltalk class library.
+|
+| The GNU Smalltalk class library is free software; you can redistribute it
+| and/or modify it under the terms of the GNU Lesser General Public License
+| as published by the Free Software Foundation; either version 2.1, or (at
+| your option) any later version.
+| 
+| The GNU Smalltalk class library is distributed in the hope that it will be
+| useful, but WITHOUT ANY WARRANTY; without even the implied warranty of
+| MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser
+| General Public License for more details.
+| 
+| You should have received a copy of the GNU Lesser General Public License
+| along with the GNU Smalltalk class library; see the file COPYING.LIB.
+| If not, write to the Free Software Foundation, 59 Temple Place - Suite
+| 330, Boston, MA 02110-1301, USA.  
+|
+ ======================================================================"
+
+
+
+WeakValueLookupTable subclass: WeakValueIdentityDictionary [
+    
+    <shape: #pointer>
+    <category: 'Collections-Weak'>
+    <comment: '
+I am similar to a plain identity dictionary, but my values are stored
+in a weak array; I track which of the values are garbage collected and,
+as soon as one of them is accessed, I swiftly remove the associations
+for the garbage collected values'>
+
+    keysClass [
+	"Answer the class answered by #keys"
+
+	<category: 'private methods'>
+	^IdentitySet
+    ]
+
+    hashFor: anObject [
+	"Return an hash value for the item, anObject"
+
+	<category: 'private methods'>
+	^anObject identityHash
+    ]
+
+    findIndex: anObject [
+	"Tries to see if anObject exists as an indexed variable. As soon as nil
+	 or anObject is found, the index of that slot is answered"
+
+	<category: 'private methods'>
+	| index size element |
+	self beConsistent.
+
+	"Sorry for the lack of readability, but I want speed... :-)"
+	index := (anObject identityHash scramble 
+		    bitAnd: (size := self primSize) - 1) + 1.
+	
+	[((element := self primAt: index) isNil or: [element == anObject]) 
+	    ifTrue: [^index].
+	index == size ifTrue: [index := 1] ifFalse: [index := index + 1]] 
+		repeat
+    ]
+]
+
