@@ -379,8 +379,7 @@ static void realloc_literal_vec (void);
    dictionary for the current class.  If the current class does not
    contain a valid method dictionary, one is allocated for it.  */
 static void install_method (OOP methodOOP,
-			    OOP classOOP,
-			    mst_Boolean untrusted);
+			    OOP classOOP);
 
 /* This caches the OOP of the special UndefinedObject>>#__terminate
    method, which is executed by contexts created with
@@ -430,7 +429,7 @@ _gst_install_initial_methods (void)
   ((gst_compiled_method) OOP_TO_OBJ (termination_method))->header.headerFlag
     = MTH_ANNOTATED;
 
-  install_method (termination_method, _gst_undefined_object_class, false);
+  install_method (termination_method, _gst_undefined_object_class);
 }
 
 OOP
@@ -837,8 +836,7 @@ _gst_compile_method (tree_node method,
 
       if (install)
 	install_method (methodOOP,
-			_gst_curr_method->v_method.currentClass,
-			_gst_curr_method->v_method.untrusted);
+			_gst_curr_method->v_method.currentClass);
     }
   else
     {
@@ -2319,12 +2317,6 @@ get_attributes_array (tree_node attribute_list)
       OOP selectorOOP = message->selector;
 
       attributes->data[i] = messageOOP;
-      if (selectorOOP == _gst_primitive_symbol
-          && _gst_untrusted_parse ())
-        {
-          _gst_errorf ("an untrusted method cannot declare primitives");
-          EXIT_COMPILATION ();
-        }
     }
 
   return attributesOOP;
@@ -2423,7 +2415,7 @@ get_literals_array (void)
 
 
 void
-install_method (OOP methodOOP, OOP classOOP, mst_Boolean untrusted)
+install_method (OOP methodOOP, OOP classOOP)
 {
   OOP oldMethod, selector, methodDictionaryOOP;
   gst_compiled_method method;
@@ -2469,11 +2461,6 @@ install_method (OOP methodOOP, OOP classOOP, mst_Boolean untrusted)
      here.  */
   methodDictionaryOOP =
     _gst_valid_class_method_dictionary (classOOP);
-  if (untrusted)
-    {
-      oldMethod = _gst_identity_dictionary_at (methodDictionaryOOP,
-					       selector);
-    }
 
   MAKE_OOP_READONLY (methodOOP, true);
   if (_gst_kernel_initialized)
