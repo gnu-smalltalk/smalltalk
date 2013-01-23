@@ -1024,27 +1024,11 @@ All classes in the system are subclasses of me.'>
 	
     ]
 
-    isUntrusted [
-	"Answer whether the object is to be considered untrusted."
-
-	<category: 'built ins'>
-	<primitive: VMpr_Object_isUntrusted>
-	
-    ]
-
     makeReadOnly: aBoolean [
 	"Set whether the object's indexed instance variables can be written"
 
 	<category: 'built ins'>
 	<primitive: VMpr_Object_makeReadOnly>
-	SystemExceptions.WrongClass signalOn: aBoolean mustBe: Boolean
-    ]
-
-    makeUntrusted: aBoolean [
-	"Set whether the object is to be considered untrusted."
-
-	<category: 'built ins'>
-	<primitive: VMpr_Object_makeUntrusted>
 	SystemExceptions.WrongClass signalOn: aBoolean mustBe: Boolean
     ]
 

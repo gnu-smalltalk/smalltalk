@@ -674,10 +674,10 @@ static const class_definition class_info[] = {
    "ClassDescription", NULL, NULL, NULL },
 
   {&_gst_class_class, &_gst_class_description_class,
-   GST_ISP_FIXED, true, 8,
+   GST_ISP_FIXED, true, 7,
    "Class",
    "name comment category environment classVariables sharedPools "
-   "securityPolicy pragmaHandlers",
+   "pragmaHandlers",
    NULL, NULL },
 
   {&_gst_metaclass_class, &_gst_class_description_class,
@@ -956,7 +956,7 @@ init_metaclass (OOP metaclassOOP)
     _gst_make_instance_variable_array (_gst_nil_oop,
 				       "superClass methodDictionary instanceSpec subClasses "
 				       "instanceVariables name comment category environment "
-				       "classVariables sharedPools securityPolicy "
+				       "classVariables sharedPools "
 				       "pragmaHandlers");
 
   metaclass->instanceSpec = GST_ISP_INTMARK | GST_ISP_FIXED |
@@ -991,7 +991,6 @@ init_class (OOP class_oop, const class_definition *ci)
   class->methodDictionary = _gst_nil_oop;
   class->comment = _gst_nil_oop;
   class->category = _gst_nil_oop;
-  class->securityPolicy = _gst_nil_oop;
   class->pragmaHandlers = _gst_nil_oop;
 }
 
