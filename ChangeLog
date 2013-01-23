@@ -1,3 +1,7 @@
+2013-01-23  Holger Freyther  <holger@freyther.de>
+
+	* .travis.yml: Update before_install to update the apt repository.
+
 2013-03-16  Holger Freyther  <holger@freyther.de>
 
 	* .travis.yml: Add description for the travis-ci service.
