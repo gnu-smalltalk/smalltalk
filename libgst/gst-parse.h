@@ -101,7 +101,6 @@ typedef struct gst_parser {
   int la_size;
   int la_first;
   enum parser_state state;
-  mst_Boolean untrustedContext;
   pool_list linearized_pools;
   OOP current_namespace;
   OOP currentClass;
@@ -128,10 +127,6 @@ extern void _gst_set_compilation_category (OOP categoryOOP)
 
 /* Resets the parser's compilation information.  */
 extern void _gst_reset_compilation_category (void) 
-  ATTRIBUTE_HIDDEN;
-
-/* Returns whether methods should be created untrusted in the current parse.  */
-extern mst_Boolean _gst_untrusted_parse (void) 
   ATTRIBUTE_HIDDEN;
 
 /* Invoke the recursive descent parser.  */

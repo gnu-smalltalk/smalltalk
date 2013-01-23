@@ -946,51 +946,6 @@ Error subclass: VMError [
 
 Namespace current: SystemExceptions [
 
-VMError subclass: SecurityError [
-    | failedPermission |
-    
-    <category: 'Language-Exceptions'>
-    <comment: 'I am an error raised when an untrusted object tries to do an insecure
-operation.'>
-
-    SecurityError class >> signal: aPermission [
-	"Raise the exception, setting to aPermission the permission
-	 that was tested and failed."
-
-	<category: 'accessing'>
-	^(self new)
-	    failedPermission: aPermission;
-	    signal
-    ]
-
-    description [
-	"Answer a textual description of the exception."
-
-	<category: 'accessing'>
-	^'insecure operation in an untrusted context'
-    ]
-
-    failedPermission [
-	"Answer the permission that was tested and that failed."
-
-	<category: 'accessing'>
-	^failedPermission
-    ]
-
-    failedPermission: anObject [
-	"Set which permission was tested and failed."
-
-	<category: 'accessing'>
-	failedPermission := anObject
-    ]
-]
-
-]
-
-
-
-Namespace current: SystemExceptions [
-
 VMError subclass: VerificationError [
     
     <category: 'Language-Exceptions'>
