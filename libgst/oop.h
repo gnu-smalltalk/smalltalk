@@ -138,13 +138,6 @@ typedef unsigned long inc_ptr;
 
 /* Garbage collector data structures */
 
-typedef struct page_tree
-{
-  rb_node_t rb;
-  OOP *base;
-}
-page_tree;
-
 typedef struct weak_area_tree
 {
   rb_node_t rb;
