@@ -690,7 +690,6 @@ new_instance_with (OOP class_oop,
   INIT_UNALIGNED_OBJECT (*p_oop, alignedBytes - numBytes);
 
   p_instance->objClass = class_oop;
-  (*p_oop)->flags |= (class_oop->flags & F_UNTRUSTED);
 
   return p_instance;
 }
@@ -710,7 +709,6 @@ new_instance (OOP class_oop,
 
   p_instance = _gst_alloc_obj (numBytes, p_oop);
   p_instance->objClass = class_oop;
-  (*p_oop)->flags |= (class_oop->flags & F_UNTRUSTED);
 
   return p_instance;
 }
@@ -728,7 +726,6 @@ instantiate_numbytes (OOP class_oop,
 
   p_instance = _gst_alloc_obj (numBytes, p_oop);
   p_instance->objClass = class_oop;
-  (*p_oop)->flags |= (class_oop->flags & F_UNTRUSTED);
 
   n = instanceSpec >> ISP_NUMFIXEDFIELDS;
   if UNCOMMON (n == 0)
@@ -781,7 +778,6 @@ instantiate_with (OOP class_oop,
     {
       p_instance = _gst_alloc_obj (numBytes, p_oop);
       p_instance->objClass = class_oop;
-      (*p_oop)->flags |= (class_oop->flags & F_UNTRUSTED);
       nil_fill (p_instance->data,
 	        (instanceSpec >> ISP_NUMFIXEDFIELDS) + numIndexFields);
     }

@@ -324,16 +324,6 @@ _gst_get_current_namespace (void)
   return _gst_current_namespace;
 }
 
-mst_Boolean
-_gst_untrusted_parse (void)
-{
-  if (!_gst_current_parser)
-    return false;
-
-  return (_gst_current_parser->untrustedContext
-          || IS_OOP_UNTRUSTED (_gst_current_parser->currentClass));
-}
-
 void
 _gst_set_compilation_class (OOP class_oop)
 {
@@ -413,7 +403,6 @@ _gst_parse_method (OOP currentClass, OOP currentCategory)
   incPtr = INC_SAVE_POINTER ();
   parser_init (&p);
   p.state = PARSE_METHOD;
-  p.untrustedContext = IS_OOP_UNTRUSTED (_gst_this_context_oop);
   p.current_namespace = _gst_nil_oop;
   _gst_set_compilation_class (currentClass);
   _gst_set_compilation_category (currentCategory);
@@ -446,7 +435,6 @@ _gst_parse_chunks (OOP currentNamespace)
   _gst_current_parser = &p;
   incPtr = INC_SAVE_POINTER ();
   parser_init (&p);
-  p.untrustedContext = IS_OOP_UNTRUSTED (_gst_this_context_oop);
   if (currentNamespace)
     p.current_namespace = currentNamespace;
   p.state = PARSE_DOIT;
@@ -598,7 +586,6 @@ execute_doit (gst_parser *p, tree_node temps, tree_node stmts,
                       _gst_get_current_namespace (),
                       _gst_current_parser->currentClass,
                       _gst_nil_oop,
-                      _gst_untrusted_parse (),
                       false);
 
   resultOOP = _gst_execute_statements (receiverOOP, method, undeclared, quiet);
@@ -1363,7 +1350,6 @@ parse_method (gst_parser *p, int at_end)
 			     pat, temps, attrs, stmts, NULL,
 			     _gst_current_parser->currentClass,
 			     _gst_current_parser->currentCategory,
-			     _gst_untrusted_parse (),
 			     at_end != ']');
 
   if (!_gst_had_error && !_gst_skip_compilation)
@@ -1977,7 +1963,6 @@ parse_compile_time_constant (gst_parser *p)
                            NULL, temps, NULL, statements, NULL,
                            _gst_current_parser->currentClass,
                            _gst_nil_oop,
-                           _gst_untrusted_parse (),
                            false);
 }
 

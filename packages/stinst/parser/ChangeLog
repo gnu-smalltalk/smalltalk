@@ -1,3 +1,7 @@
+2013-01-23  Gwenael Casaccio  <gwenael.casaccio@gmail.com>
+
+	* STSymTable.st: Remove security checks.
+
 2012-10-06  Holger Freyther  <holger@freyther.de>
 
 	* SqueakExporter.st: Use 'as yet unclassified' as category string

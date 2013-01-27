@@ -1,3 +1,31 @@
+2013-01-23  Gwenael Casaccio  <gwenael.casaccio@gmail.com>
+
+	* kernel/Behavior.st: Remove security.
+	* kernel/BindingDict.st: Remove security.
+	* kernel/Class.st: Remove security.
+	* kernel/ContextPart.st: Remove security.
+	* kernel/Metaclass.st: Remove security.
+	* kernel/Object.st: Remove security.
+	* kernel/Security.st: Delete the file.
+	* kernel/SysExcept.st: Remove security exceptions.
+	* libgst/Makefile.am: Remove security files.
+	* libgst/comp.c: Remove security checks.
+	* libgst/dict.c: Update Class structure.
+	* libgst/dict.h: Update Class structure.
+	* libgst/files.c: Remove security file from bootstrap.
+	* libgst/gst-parse.c: Remove security checks.
+	* libgst/interp.c: Remove security checks.
+	* libgst/opt.c: Remove security checks.
+	* libgst/prims.def: Remove security primitives.
+	* libgst/security.c: Remove file.
+	* libgst/security.h: Remove file.
+	* libgst/sym.c: Remove security checks.
+	* packages.xml: Remove security file.
+	* tests/Makefile.am: Remove security tests.
+	* tests/testsuite.at: Remove security tests.
+	* tests/untrusted.ok: Remove security tests.
+	* tests/untrusted.st: Remove security tests.
+
 2013-01-27  Holger Hans Peter Freyther  <holger@freyther.de>
 
 	* configure.ac: Enable the silent rules.
