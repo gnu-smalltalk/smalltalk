@@ -1,3 +1,8 @@
+2013-01-27  Holger Hans Peter Freyther  <holger@freyther.de>
+
+	* configure.ac: Enable the silent rules.
+	* snprintfv/configure.ac: Enable the silent rules.
+
 2013-01-23  Holger Freyther  <holger@freyther.de>
 
 	* .travis.yml: Update before_install to update the apt repository.

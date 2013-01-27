@@ -11,6 +11,8 @@ AC_INIT([GNU Smalltalk], 3.2.90, help-smalltalk@gnu.org, smalltalk,
         [http://smalltalk.gnu.org/])
 MAINTAINER="bonzini@gnu.org"
 
+m4_ifdef([AM_SILENT_RULES], [AM_SILENT_RULES([yes])])
+
 dnl CURRENT:REVISION:AGE means this is the REVISION-th version of
 dnl the CURRENT-th interface; all the interface from CURRENT-AGE
 dnl to CURRENT are supported.
