@@ -264,8 +264,7 @@ more speed.'>
 			[assoc := VariableBinding 
 				    key: assoc key
 				    value: assoc value
-				    environment: self].
-		assoc makeUntrusted: environment isUntrusted].
+				    environment: self]].
 	^super primAt: index put: assoc
     ]
 

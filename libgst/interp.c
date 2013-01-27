@@ -582,21 +582,6 @@ static void * const *dispatch_vec;
 #define PARENT_CONTEXT(contextOOP) \
   ( ((gst_method_context) OOP_TO_OBJ (contextOOP)) ->parentContext)
 
-/* Set whether the old context was a trusted one.  Untrusted contexts
-   are those whose receiver or sender is untrusted.  */
-#define UPDATE_CONTEXT_TRUSTFULNESS(contextOOP, parentContextOOP) \
-  MAKE_OOP_UNTRUSTED (contextOOP, \
-    IS_OOP_UNTRUSTED (_gst_self) | \
-    IS_OOP_UNTRUSTED (parentContextOOP));
-
-/* Set whether the current context is an untrusted one.  Untrusted contexts
-   are those whose receiver or sender is untrusted.  */
-#define IS_THIS_CONTEXT_UNTRUSTED() \
-  (UPDATE_CONTEXT_TRUSTFULNESS(_gst_this_context_oop, \
-			       PARENT_CONTEXT (_gst_this_context_oop)) \
-     & F_UNTRUSTED)
-
-
 /* Context management
  
    The contexts make up a linked list.  Their structure is:
@@ -769,8 +754,6 @@ empty_context_stack (void)
   context->spOffset = FROM_INT (sp - context->contextStack);
   context->ipOffset = FROM_INT (ip - method_base);
 
-  UPDATE_CONTEXT_TRUSTFULNESS (_gst_this_context_oop, context->parentContext);
-
   /* Even if the JIT is active, the current context might have no
      attached native_ip -- in fact it has one only if we are being
      called from activate_new_context -- so we have to `invent'
@@ -863,7 +846,6 @@ activate_new_context (int size,
     FROM_INT ((sp - thisContext->contextStack) - sendArgs);
   thisContext->ipOffset = FROM_INT (ip - method_base);
 
-  UPDATE_CONTEXT_TRUSTFULNESS (_gst_this_context_oop, thisContext->parentContext);
   _gst_this_context_oop = oop;
 
   return (newContext);

@@ -146,7 +146,6 @@
   <file>Object.st</file>
   <file>Time.st</file>
   <file>FileStream.st</file>
-  <file>Security.st</file>
   <file>OrderColl.st</file>
   <file>CCallable.st</file>
   <file>CCallback.st</file>
