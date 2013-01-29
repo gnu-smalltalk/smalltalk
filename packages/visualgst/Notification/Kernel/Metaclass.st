@@ -55,10 +55,6 @@ Smalltalk.Metaclass extend [
 	    ifFalse: 
 	    [SystemExceptions.MutationError 
 	        signal: 'Cannot change shape of variable class']].
-    newSuperclass isUntrusted & self class isUntrusted not 
-        ifTrue: 
-	[SystemExceptions.MutationError 
-	    signal: 'Cannot move trusted class below untrusted superclass'].
     needToRecompileMetaclasses := false.
     oldClass := aClass copy.
     aClass classPool isNil 
