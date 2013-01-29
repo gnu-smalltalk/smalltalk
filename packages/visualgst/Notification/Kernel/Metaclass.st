@@ -19,7 +19,6 @@ Smalltalk.Metaclass extend [
 		    setInstanceSpec: shape instVars: arrayOfInstVarNames size;
 		    setClassVariables: classVarDict;
 		    setSharedPools: sharedPoolNames;
-		    makeUntrusted: theSuperclass isUntrusted;
 		    category: categoryName;
 		    yourself.
 	VisualGST.SystemChangeNotifier root classAdded: aClass.
