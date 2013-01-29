@@ -116,3 +116,20 @@ Eval [
                   with: STInST.GSTFileInParser.
     classes first article
 ]
+
+Eval [
+    | classes bla |
+    "Check class variable parsing.."
+
+    classes := STInST.STClassLoader new
+                parseSmalltalkStream: 'Object subclass: Bla [
+                        <import: STInST>
+                        ClassInst := nil ]' readStream
+                with: STInST.GSTFileInParser.
+
+    "Check that both end in the bucket"
+    bla := classes first.
+
+    (bla sharedPools = #('STInST') asOrderedCollection) printNl.
+    (bla classVarNames = #('ClassInst') asOrderedCollection) printNl.
+]
