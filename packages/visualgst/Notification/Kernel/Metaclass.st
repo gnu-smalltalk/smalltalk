@@ -19,7 +19,6 @@ Smalltalk.Metaclass extend [
 		    setInstanceSpec: shape instVars: arrayOfInstVarNames size;
 		    setClassVariables: classVarDict;
 		    setSharedPools: sharedPoolNames;
-		    makeUntrusted: theSuperclass isUntrusted;
 		    category: categoryName;
 		    yourself.
 	VisualGST.SystemChangeNotifier root classAdded: aClass.
@@ -55,10 +54,6 @@ Smalltalk.Metaclass extend [
 	    ifFalse: 
 	    [SystemExceptions.MutationError 
 	        signal: 'Cannot change shape of variable class']].
-    newSuperclass isUntrusted & self class isUntrusted not 
-        ifTrue: 
-	[SystemExceptions.MutationError 
-	    signal: 'Cannot move trusted class below untrusted superclass'].
     needToRecompileMetaclasses := false.
     oldClass := aClass copy.
     aClass classPool isNil 
