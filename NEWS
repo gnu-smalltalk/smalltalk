@@ -5,20 +5,40 @@ NEWS FROM 3.2.4 to 3.2.5
 o   Add Delay>>#value:onTimeoutDo: as an easy way to timeout an operation.
 
 o   Improve Delay and millisecondClock behavior across image save and restore.
+    millisecondClockValue is guaranteed to be monotonic across image save, and
+    delays are restarted when the image is restored.
 
 o   DateTime>>#today will return midnight of the current timezone.
 
+o   DateTime has a new method #asLocal.
+
+o   DateTime>>#readFrom: can read more time formats.
+
 o   Time resolution is now based on nanoseconds.
+
+o   Absolute-time delays (Delay>>#untilMilliseconds:) are precise and not
+    anymore converted to relative-time delays.
+
+o   package.xml files support a <dir> tag, like <dir name="Foo">.  It can
+    be used to make package.xml clearer for large packages.
+
+o   MethodDictionary is now thread-safe.
+
+o   String>>#% supports string keys, like %(string).  They can be used
+    when the argument of #% is a Dictionary or LookupTable.  Note that
+    the keys of the dictionary must be Strings, not Symbols.
 
 o   Socket fixes including reporting of EndOfStream on broken pipes and
     connection resets.
 
 o   Fix the FileDescriptor finalization code to close open descriptors.
 
-o   The system file descriptor of FileDescriptor is set to nil on close.
+o   The system file descriptor of FileDescriptor is set to nil on image
+    restore.
 
-o   The asynchronous event notification has been rewritten to use a lockless
-    stack.
+o   The asynchronous event notification has been rewritten.  The old
+    version could fail when many file descriptors became available at
+    the same time.
 
 o   DBD-Postgres gained support to bind parameters on queries and various
     fixes to allow to resume images that use Postgres.
@@ -28,7 +48,41 @@ o   Images created with gst-remote can now be resumed.
 o   Add #system:withArguments: to avoid using #system: with #% to add
     arguments.
 
+o   Added Integer>>#printPaddedWith:to:.
+
+o   Added CharacterArray>>#withShellEscapes
+
+o   Added Collection>>#includesAllOf:
+
+o   Stream>>#fold: works correctly.
+
+o   64-bit integer types are available using CLongLong and CULongLong.
+
+o   gst-blox and gst-browser understand the -i/--rebuild-image option.
+
+o   GObject errors show backtraces.
+
+o   Improvements to multiarch support.
+
+o   CType objects implement #= and #hash, so they can now be used as keys
+    in a dictionary.
+
+o   Floating-point numbers are printed more accurately in some rare cases.
+
+o   Some optimization of OrderedCollection and SortedCollection
+
+o   Selectors starting with an underscore are treated as keyword messages.
+
+o   A new function gst_uint_to_oop is in libgst, and uintToOOP is also
+    provided by the VMProxy.
+
 o   Growing the heap is working again.
+
+o   Various bugfixes.
+
+o   GNU Smalltalk does not run anymore on i386 hardware, an i486 is needed.
+
+o   Slightly faster garbage collection.
 
 -----------------------------------------------------------------------------
 
