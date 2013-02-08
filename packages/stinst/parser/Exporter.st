@@ -47,6 +47,10 @@ Object subclass: FileOutExporter [
         DefaultExporter := aClass
     ]
 
+    FileOutExporter class >> fileOutComment: aString to: aStream [
+        aStream nextPutAll: aString.
+    ]
+
     FileOutExporter class >> on: aClass to: aStream [    
         ^super new initializeWith: aClass and: aStream.
     ]

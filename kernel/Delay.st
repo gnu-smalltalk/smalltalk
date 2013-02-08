@@ -304,6 +304,8 @@ created.'>
 
             "Start a process to wait in and then signal"
             [
+                Processor activeProcess name: 'Delay>>#value:onTimeoutDo:'.
+
                 "Wait and see if it is timed out. If so send a signal."
                 (self timedWaitOn: sem) ifTrue: [
                    proc signalInterrupt: (Kernel.TimeoutNotification on: self).

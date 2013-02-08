@@ -78,7 +78,9 @@ EmittedEntity subclass: EmittedComments [
     ]
 
     emitTo: outStream filteredBy: aBlock [
-	comments do: [ :c | outStream nextPutAll: c; nl; nl ]
+	comments do: [ :c |
+		STInST.FileOutExporter defaultExporter fileOutComment: c to: outStream.
+		outStream nl; nl]
     ]
 
     comments: anArray [

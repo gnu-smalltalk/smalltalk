@@ -35,6 +35,10 @@ OldSyntaxExporter subclass: SqueakSyntaxExporter [
     <comment: 'This class is responsible for filing out 
                a given class on a given stream in Squeak format'>
 
+    SqueakSyntaxExporter class >> fileOutComment: aString to: aStream [
+        (self on: nil to: aStream)
+            fileOutChunk: aString.
+    ]
     
     fileOutDeclaration: aBlock [
         (completeFileOut and: [ outClass environment ~= self defaultNamespace ])

@@ -1,5 +1,37 @@
 List of user-visible changes in GNU Smalltalk
 
+NEWS FROM 3.2.4 to 3.2.5
+
+o   Add Delay>>#value:onTimeoutDo: as an easy way to timeout an operation.
+
+o   Improve Delay and millisecondClock behavior across image save and restore.
+
+o   DateTime>>#today will return midnight of the current timezone.
+
+o   Time resolution is now based on nanoseconds.
+
+o   Socket fixes including reporting of EndOfStream on broken pipes and
+    connection resets.
+
+o   Fix the FileDescriptor finalization code to close open descriptors.
+
+o   The system file descriptor of FileDescriptor is set to nil on close.
+
+o   The asynchronous event notification has been rewritten to use a lockless
+    stack.
+
+o   DBD-Postgres gained support to bind parameters on queries and various
+    fixes to allow to resume images that use Postgres.
+
+o   Images created with gst-remote can now be resumed.
+
+o   Add #system:withArguments: to avoid using #system: with #% to add
+    arguments.
+
+o   Growing the heap is working again.
+
+-----------------------------------------------------------------------------
+
 NEWS FROM 3.2.3 TO 3.2.4
 
 o   Autoload is extended to allow plugging in arbitrary loaders.

@@ -1185,13 +1185,13 @@ sharedPools
 addClassVarName: aString
     "Return the names of the shared pools defined by the class"
 
-    sharedPools := sharedPools copyWith: aString
+    classVars := classVars copyWith: aString
 !
 
 addClassVarName: aString value: aBlock
     "Return the names of the shared pools defined by the class"
 
-    sharedPools := sharedPools copyWith: aString
+    classVars := classVars copyWith: aString
 !
 
 import: aNamespace
