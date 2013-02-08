@@ -33,7 +33,7 @@
 
 
 ClassDescription subclass: Class [
-    | name comment category environment classVariables sharedPools securityPolicy pragmaHandlers |
+    | name comment category environment classVariables sharedPools pragmaHandlers |
     
     <category: 'Language-Implementation'>
     <comment: 'I am THE class object.  My instances are the classes of the system.
@@ -586,22 +586,6 @@ the class category.'>
 
 	<category: 'printing'>
 	aStream nextPutAll: (self nameIn: Smalltalk)
-    ]
-
-    securityPolicy [
-	<category: 'security'>
-	^securityPolicy
-    ]
-
-    securityPolicy: aSecurityPolicy [
-	<category: 'security'>
-	securityPolicy := aSecurityPolicy withOwner: self
-    ]
-
-    check: aPermission [
-	<category: 'security'>
-	self securityPolicy isNil ifTrue: [^self isUntrusted not].
-	^self securityPolicy check: aPermission
     ]
 
     registerHandler: aBlock forPragma: pragma [

@@ -144,7 +144,6 @@ _gst_make_method (YYLTYPE *location,
 		  OOP currentEnvironment,
 		  OOP currentClass,
 		  OOP currentCategory,
-		  mst_Boolean untrusted,
 		  mst_Boolean isOldSyntax)
 {
   tree_node result;
@@ -162,7 +161,6 @@ _gst_make_method (YYLTYPE *location,
   result->v_method.currentEnvironment = currentEnvironment;
   result->v_method.currentClass = currentClass;
   result->v_method.currentCategory = currentCategory;
-  result->v_method.untrusted = untrusted;
   result->v_method.isOldSyntax = isOldSyntax;
   return (result);
 }
@@ -732,10 +730,6 @@ print_method_node (tree_node node,
   printf ("statements: ");
   _gst_print_tree (node->v_method.statements, level + 12);
   indent (level);
-  if (node->v_method.untrusted)
-    printf ("untrusted\n");
-  else
-    printf ("trusted\n");
   if (node->v_method.isOldSyntax)
     printf ("old syntax\n");
   else

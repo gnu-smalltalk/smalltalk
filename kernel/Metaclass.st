@@ -264,10 +264,6 @@ it should be...the Smalltalk metaclass system is strange and complex.'>
 		    ifFalse: 
 			[SystemExceptions.MutationError 
 			    signal: 'Cannot change shape of variable class']].
-	newSuperclass isUntrusted & self class isUntrusted not 
-	    ifTrue: 
-		[SystemExceptions.MutationError 
-		    signal: 'Cannot move trusted class below untrusted superclass'].
 	needToRecompileMetaclasses := false.
 	aClass classPool isNil 
 	    ifTrue: [aClass setClassVariables: classVarDict]
@@ -368,7 +364,6 @@ it should be...the Smalltalk metaclass system is strange and complex.'>
 	    setInstanceSpec: shape instVars: arrayOfInstVarNames size;
 	    setClassVariables: classVarDict;
 	    setSharedPools: sharedPoolNames;
-	    makeUntrusted: theSuperclass isUntrusted;
 	    category: categoryName;
 	    yourself
     ]

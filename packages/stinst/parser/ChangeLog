@@ -1,3 +1,7 @@
+2013-01-23  Gwenael Casaccio  <gwenael.casaccio@gmail.com>
+
+	* STSymTable.st: Remove security checks.
+
 2013-01-29  Holger Hans Peter Freyther  <holger@freyther.de>
 
 	* STLoaderObjs.st: Put class variables into the classVars array.
