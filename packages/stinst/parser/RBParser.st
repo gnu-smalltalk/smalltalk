@@ -1320,11 +1320,22 @@ Stream subclass: RBScanner [
     ]
 
     scanNumber [
+        | start stop val string |
 	<category: 'private-scanning'>
-	^RBLiteralToken 
-	    value: self scanNumberValue
-	    start: tokenStart
-	    stop: self previousStepPosition
+        start := tokenStart.
+        val := self scanNumberValue.
+        stop := stream position.
+
+        "Get the parsed source"
+        stream position: tokenStart - 1.
+        string := (stream next: stop - start + 1) trimSeparators.
+        stream position: stop.
+
+	^RBNumberLiteralToken
+            value: val
+            start: tokenStart
+            stop: stop
+            source: string
     ]
 
     scanQualifier [

@@ -1,3 +1,11 @@
+2013-02-08  Holger Hans Peter Freyther  <holger@freyther.de>
+
+	* RBFormatter.st: Use the RBToken>>#storeOn: for writing.
+	* RBParser.st: Create a RBNumberLiteralToken for number literals.
+	* RBToken.st: Create the RBNumberLiteralToken class.
+	* RewriteTests.st: Add test for the number literal parsing
+	* package.xml: Add the new test to the testsuite.
+
 2013-01-23  Gwenael Casaccio  <gwenael.casaccio@gmail.com>
 
 	* STSymTable.st: Remove security checks.

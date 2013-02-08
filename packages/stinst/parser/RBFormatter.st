@@ -204,7 +204,7 @@ RBProgramNodeVisitor subclass: RBFormatter [
 		    nextPut: $$;
 		    nextPut: aValue.
 		^self].
-	aValue storeLiteralOn: codeStream
+	token storeOn: codeStream.
     ]
 
     formatMessage: aMessageNode cascade: cascadeBoolean [

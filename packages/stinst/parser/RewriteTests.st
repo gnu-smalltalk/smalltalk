@@ -249,5 +249,36 @@ behavior stayed the same, at least as much as I care it to stay so.'>
     ]
 ]
 
+TestCase subclass: TestFormat [
+    <comment: 'I test aspects of the RBFormatter class.'>
+
+    testNumberLiteralRewrite [
+	| inp res |
+	inp := RBParser parseExpression: '2r01'.
+	self assert: inp value = 1.
+
+	res := RBFormatter new formatAll: (Array with: inp).
+	self assert: res = '2r01'.
+    ]
+
+    testNumberLiteralHexRewrite [
+	| inp res |
+	inp := RBParser parseExpression: '16r01 '.
+	self assert: inp value = 1.
+
+	res := RBFormatter new formatAll: (Array with: inp).
+	self assert: res = '16r01'.
+    ]
+
+    testArrayRewrite [
+	| inp res |
+	inp := RBParser parseExpression: '#(16r01 2r01 16rFF )'.
+	self assert: inp value = (Array with: 1 with: 1 with: 255).
+
+	res := RBFormatter new formatAll: (Array with: inp).
+	self assert: res = '#(16r01 2r01 16rFF)'.
+    ]
+]
+
 ]
 

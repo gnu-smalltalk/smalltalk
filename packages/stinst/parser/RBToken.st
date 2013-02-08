@@ -249,6 +249,11 @@ RBValueToken subclass: RBLiteralToken [
 	<category: 'testing'>
 	^true
     ]
+
+    storeOn: aStream [
+	<category: 'printing'>
+	self value storeLiteralOn: aStream
+    ]
 ]
 
 
@@ -274,6 +279,37 @@ RBLiteralToken subclass: RBBindingToken [
 	association notNil ifTrue: [^association].
 	compiler isNil ifTrue: [^self value].
 	^association := compiler bindingOf: (self value substrings: $.)
+    ]
+]
+
+
+RBLiteralToken subclass: RBNumberLiteralToken [
+    | source |
+
+    <category: 'Refactory-Parser'>
+    <comment: 'I represent number literals and help to preserve
+    a 2r01 as such and not as a value'>
+
+    RBNumberLiteralToken class >> value: aVal start: aStart stop: anEnd source: aSource [
+	<category: 'creation'>
+	^ (self
+	    value: aVal start: aStart stop: anEnd)
+	    source: aSource; yourself
+    ]
+
+    source: aSource [
+	<category: 'creation'>
+	source := aSource
+    ]
+
+    source [
+	<category: 'accessing'>
+	^ source
+    ]
+
+    storeOn: aStream [
+	<category: 'printing'>
+	aStream nextPutAll: source
     ]
 ]
 
