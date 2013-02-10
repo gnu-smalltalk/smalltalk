@@ -1,3 +1,9 @@
+2013-02-17  Holger Hans Peter Freyther  <holger@freyther.de>
+
+	* RBParser.st: Fix RBScanner>>#scanNumber.
+	* RewriteTests.st: Add testcase for RBScanner>>#scanNumber.
+	* package.xml: Add the new test to the testsuite.
+
 2013-02-10  Holger Hans Peter Freyther  <holger@freyther.de>
 
 	* OldSyntaxExporter.st: Reformat the method node in

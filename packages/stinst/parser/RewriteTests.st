@@ -7,7 +7,7 @@
 
 "======================================================================
 |
-| Copyright (C) 2007 Free Software Foundation, Inc.
+| Copyright (C) 2007,2013 Free Software Foundation, Inc.
 | Written by Stephen Compall.
 |
 | This file is part of the GNU Smalltalk class library.
@@ -277,6 +277,61 @@ TestCase subclass: TestFormat [
 
 	res := RBFormatter new formatAll: (Array with: inp).
 	self assert: res = '#(16r01 2r01 16rFF)'.
+    ]
+
+    testParanthesis [
+        | inp |
+        inp := RBParser parseExpression: '(2r1)'.
+        self assert: inp formattedCode = '2r1'.
+    ]
+
+    testNumberLiteralFloatRewrite [
+        | inp |
+        inp := RBParser parseExpression: '2q'.
+        self
+            assert: inp value = 2.0;
+            assert: inp formattedCode = '2q'.
+
+        inp := RBParser parseExpression: '2d'.
+        self
+            assert: inp value = 2.0;
+            assert: inp formattedCode = '2d'.
+
+        inp := RBParser parseExpression: '2e'.
+        self
+            assert: inp value = 2.0;
+            assert: inp formattedCode = '2e'.
+
+        inp := RBParser parseExpression: '2q-'.
+        self
+            assert: inp value = 2.0;
+            assert: inp formattedCode = '2q-'.
+
+        inp := RBParser parseExpression: '20q-1'.
+        self
+            assert: inp value = 2.0;
+            assert: inp formattedCode = '20q-1'.
+    ]
+]
+
+TestCase subclass: TestScanner [
+    <comment: 'Test aspects of the RBScanner'>
+
+    testScanner [
+        | scanner num |
+        scanner := RBScanner on: '3' readStream.
+        num := scanner next.
+        self assert: num value = 3.
+    ]
+
+    testScannerConcatStream [
+        | scanner num |
+        "This is different to >>#testScanner by using a different kind of stream with
+        a different species."
+
+        scanner := RBScanner on: (Kernel.ConcatenatedStream with: '3' readStream).
+        num := scanner next.
+        self assert: num value = 3.
     ]
 ]
 
