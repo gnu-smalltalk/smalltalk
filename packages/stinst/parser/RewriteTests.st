@@ -249,5 +249,79 @@ behavior stayed the same, at least as much as I care it to stay so.'>
     ]
 ]
 
+TestCase subclass: TestRewrite [
+    <comment: 'I test that rewriting a method for the OldSyntaxExport and
+    SqueakExporter will pick up the new code.'>
+
+    testNamespaceRewrite [
+        | class tree rule rewriter res out|
+
+        tree := RBParser parseRewriteExpression: 'Osmo.LogManager -> LogManager'.
+        rule := RBStringReplaceRule
+                    searchForTree: tree receiver
+                    replaceWith: tree arguments first.
+        rewriter := ParseTreeRewriter new
+                        addRule: rule; yourself.
+
+        class := (STClassLoader new
+                    parseSmalltalkStream: 'Object subclass: TestData [
+                        logManager [
+                            ^Osmo.LogManager default
+                        ]
+                    ]' readStream with: GSTFileInParser) first.
+
+        "Rewrite the method. This will modify the code on inside the class"
+        res := rewriter executeTree: (class >> #logManager) node; tree.
+        self assert: (class >> #logManager) node == res.
+
+        "Now generate the code"
+        out := WriteStream on: (String new).
+        (SqueakSyntaxExporter on: class to: out)
+            completeFileOut: false;
+            fileOutSelectors: (Array with: #logManager) classSelectors: #().
+        self assert: (out contents indexOfSubCollection: 'Osmo.LogManager') = 0.
+    ]
+
+    testOldSyntaxNamespaceRewrite [
+        | class tree rule rewriter res out|
+
+        tree := RBParser parseRewriteExpression: 'Osmo.LogManager -> LogManager'.
+        rule := RBStringReplaceRule
+                    searchForTree: tree receiver
+                    replaceWith: tree arguments first.
+        rewriter := ParseTreeRewriter new
+                        addRule: rule; yourself.
+
+        "Load the old code"
+        class := (STClassLoader new
+                    parseSmalltalkStream:
+'SystemOrganization addCategory: #''osmo-logging-core''!
+Object subclass: #LogManager
+    instanceVariableNames: ''target filter areas''
+    classVariableNames: ''Log''
+    poolDictionaries: ''''
+    category: ''osmo-logging-core''!
+
+!LogManager methodsFor: ''as yet unclassified''!
+
+logManager
+    ^Osmo.LogManager default
+! !' readStream with: SqueakFileInParser) first.
+
+
+        "Rewrite the method. This will modify the code on inside the class"
+        res := rewriter executeTree: (class >> #logManager) node; tree.
+        self assert: (class >> #logManager) node == res.
+        self assert: (class >> #logManager) isOldSyntax.
+
+        "Now generate the code"
+        out := WriteStream on: (String new).
+        (SqueakSyntaxExporter on: class to: out)
+            completeFileOut: false;
+            fileOutSelectors: (Array with: #logManager) classSelectors: #().
+        self assert: (out contents indexOfSubCollection: 'Osmo.LogManager') = 0.
+    ]
+]
+
 ]
 

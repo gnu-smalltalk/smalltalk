@@ -1,3 +1,10 @@
+2013-02-10  Holger Hans Peter Freyther  <holger@freyther.de>
+
+	* OldSyntaxExporter.st: Reformat the method node in
+	OldSyntaxExporter>>#oldSyntaxSourceCodeFor:.
+	* RewriteTests.st: Add the TestRewrite class.
+	* package.xml: Add the TestRewrite test to the testsuite.
+
 2013-01-29  Holger Hans Peter Freyther  <holger@freyther.de>
 
 	* STLoaderObjs.st: Put class variables into the classVars array.
