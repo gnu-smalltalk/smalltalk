@@ -7,7 +7,7 @@
 
 "======================================================================
 |
-| Copyright 2001, 2002, 2007, 2008, 2009 Free Software Foundation, Inc.
+| Copyright 2001, 2002, 2007, 2008, 2009, 2013 Free Software Foundation, Inc.
 | Written by Paolo Bonzini.
 |
 | This file is part of GNU Smalltalk.
@@ -167,6 +167,11 @@ Stream subclass: ConcatenatedStream [
 	    ifTrue: [stream := last. lastStart]
 	    ifFalse: [startPos].
 	^stream copyFrom: (start - adjust max: 0) to: end - adjust
+    ]
+
+    species [
+        <category: 'all'>
+        ^ self stream species.
     ]
 
     addStream: stream [
