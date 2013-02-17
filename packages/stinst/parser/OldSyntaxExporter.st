@@ -171,8 +171,7 @@ FileOutExporter subclass: OldSyntaxExporter [
 
     oldSyntaxSourceCodeFor: aMethod [
 	| source cat |
-	aMethod isOldSyntax ifTrue: [ ^aMethod methodSourceString ].
-	source := aMethod methodSourceString.
+	source := aMethod methodFormattedSourceString.
 	source := source copyReplacingRegex: '\s*\[\s*(.*[\S\n])' with: '
 	%1'.
 	source := source copyReplacingRegex: '\s*]\s*$' with: '

@@ -1,3 +1,9 @@
+2013-02-14  Holger Hans Peter Freyther  <holger@freyther.de>
+
+	* kernel/StreamOps.st: Override the >>#species selector.
+	* tests/streams.st: Add testcase.
+	* tests/streams.ok: Update the result.
+
 2013-01-23  Gwenael Casaccio  <gwenael.casaccio@gmail.com>
 
 	* kernel/Behavior.st: Remove security.

@@ -12,3 +12,13 @@ true
 '456'
 nil
 returned value is nil
+
+Execution begins...
+Array
+UndefinedObject
+String
+String
+$1
+Array
+2
+returned value is 2

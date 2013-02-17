@@ -53,3 +53,25 @@ Eval [
 
     concat stream printNl.
 ]
+
+Eval [
+    | concat |
+    "Should print Array"
+    concat := Kernel.ConcatenatedStream new.
+    concat species printNl.
+
+    "Should print UndefinedObject"
+    concat := Kernel.ConcatenatedStream with: '' readStream.
+    concat species printNl.
+
+    "Should print String"
+    concat := Kernel.ConcatenatedStream with: ' ' readStream.
+    concat species printNl.
+
+    "Should print String and then Array"
+    concat := Kernel.ConcatenatedStream with: '1' readStream with: #(2) readStream.
+    concat species printNl.
+    concat next printNl.
+    concat species printNl.
+    concat next printNl.
+]
