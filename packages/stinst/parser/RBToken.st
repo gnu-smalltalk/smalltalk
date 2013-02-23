@@ -297,6 +297,15 @@ RBLiteralToken subclass: RBNumberLiteralToken [
 	    source: aSource; yourself
     ]
 
+    makeNegative [
+        <category: 'creation'>
+        "Help with RBParser>>#parseNegatedNumber to make the value and the
+        code match. The token start and stop is still wrong."
+        self
+            value: value negated;
+            source: '-', self source.
+    ]
+
     source: aSource [
 	<category: 'creation'>
 	source := aSource

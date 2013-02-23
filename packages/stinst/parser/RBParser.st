@@ -544,7 +544,7 @@ Object subclass: RBParser [
 	    ^self parserError: 'Number expected' ].
 	token value negative ifTrue: [
 	    ^self parserError: 'Positive number expected' ].
-	token value: token value negated.
+	token makeNegative.
 	self step.
 	^RBLiteralNode literalToken: token
     ]

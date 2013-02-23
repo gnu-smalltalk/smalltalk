@@ -1,3 +1,9 @@
+2013-02-23  Holger Hans Peter Freyther  <holger@freyther.de>
+
+	* RBParser.st: Fix RBParser>>#parsedNegatedNumber.
+	* RBToken.st: Add RBNumberLiteralToken>>#makeNegative.
+	* RewriteTests.st: Add testcase for RBParser>>#parseNegatedNumber.
+
 2013-02-17  Holger Hans Peter Freyther  <holger@freyther.de>
 
 	* RBParser.st: Fix RBScanner>>#scanNumber.

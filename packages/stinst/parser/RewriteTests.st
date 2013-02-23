@@ -312,6 +312,23 @@ TestCase subclass: TestFormat [
             assert: inp value = 2.0;
             assert: inp formattedCode = '20q-1'.
     ]
+
+    testNegativeNumbers [
+        | inp |
+        inp := RBParser parseExpression: '-3'.
+        self assert: inp value = -3.
+        self assert: inp token source = '-3'.
+        self assert: inp formattedCode = '-3'.
+    ]
+
+    testNumberExpressionParsing [
+        | inp |
+        inp := RBParser parseExpression: '2-2'.
+        self
+            assert: inp receiver value = 2;
+            assert: inp selector = #-;
+            assert: inp arguments first value = 2.
+    ]
 ]
 
 TestCase subclass: TestScanner [
