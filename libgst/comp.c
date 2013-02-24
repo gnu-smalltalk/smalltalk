@@ -2313,9 +2313,6 @@ get_attributes_array (tree_node attribute_list)
     {
       tree_node value = attribute_list->v_list.value;
       OOP messageOOP = value->v_const.val.oopVal;
-      gst_message message = (gst_message) OOP_TO_OBJ (messageOOP);
-      OOP selectorOOP = message->selector;
-
       attributes->data[i] = messageOOP;
     }
 

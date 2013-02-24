@@ -1,3 +1,9 @@
+2013-02-24  Holger Hans Peter Freyther  <holger@freyther.de>
+
+	* libgst/dict.c: Remove ATTRIBUTE_HIDDEN from static methods.
+	* libgst/comp.c: Remove unused variables in get_attributes_array.
+	* libgst/save.c: Remove unused variable in make_oop_table_to_be_saved.
+
 2013-01-17  Gwenael Casaccio  <gwenael.casaccio@gmail.com>
 
 	* libgst/sysdep/win32/timer.c: Correct the function signature.

@@ -182,15 +182,13 @@ OOP _gst_processor_oop = NULL;
    dictionary instance that DICTIONARYOOP is pointing to with a new,
    larger dictionary, and returns this new dictionary (the object
    pointer, not the OOP).  */
-static gst_object grow_dictionary (OOP dictionaryOOP) 
-  ATTRIBUTE_HIDDEN;
+static gst_object grow_dictionary (OOP dictionaryOOP);
 
 /* Called when an IdentityDictionary becomes full, this routine
    replaces the IdentityDictionary instance that IDENTITYDICTIONARYOOP
    is pointing to with a new, larger dictionary, and returns this new
    dictionary (the object pointer, not the OOP).  */
-static gst_object grow_identity_dictionary (OOP identityDictionaryOOP) 
-  ATTRIBUTE_HIDDEN;
+static gst_object grow_identity_dictionary (OOP identityDictionaryOOP);
 
 /* Answer the number of slots that are in a dictionary of
    OLDNUMFIELDS items after growing it.  */
