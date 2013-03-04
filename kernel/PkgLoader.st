@@ -1080,7 +1080,7 @@ PackageInfo subclass: StarPackage [
 
     loadedPackage [
 	<category: 'accessing'>
-	| file package |
+	| package |
 	loadedPackage isNil ifFalse: [^loadedPackage].
 	package := self file zip / 'package.xml'
 		withReadStreamDo: [ :fileStream | Package parse: fileStream].
