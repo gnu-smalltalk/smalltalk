@@ -1,4 +1,11 @@
-2013-03-31  Holger Hans Peter Freyther  <holger@freyther.de>
+2013-03-24  Holger Hans Peter Freyther  <holger@freyther.de>
+
+	* libgst/files.c: Add DirPackage.st to the bootstrap.
+	* kernel/DirPackage.st: Add new file with the DirPackage class and
+	extension to the PackageLoader.
+	* kernel/PkgLoader.st: Refactor and create ExternalPackage base class.
+
+2013-03-24  Holger Hans Peter Freyther  <holger@freyther.de>
 
 	* tests/stcompiler.ok: Update the test result.
 	* tests/stcompiler.st: Add a testcase for ProxyNamespace>>#printOn:.

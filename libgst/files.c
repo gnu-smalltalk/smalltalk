@@ -288,6 +288,7 @@ static const char standard_files[] = {
   "StreamOps.st\0"
   "Regex.st\0"
   "PkgLoader.st\0"
+  "DirPackage.st\0"
   "Autoload.st\0"
 };
 

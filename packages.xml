@@ -152,6 +152,7 @@
   <file>CFuncs.st</file>
   <file>Float.st</file>
   <file>PkgLoader.st</file>
+  <file>DirPackage.st</file>
   <file>Transcript.st</file>
   <file>CObject.st</file>
   <file>Fraction.st</file>

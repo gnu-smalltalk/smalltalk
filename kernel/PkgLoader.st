@@ -917,19 +917,11 @@ XML.'>
 
 Namespace current: Kernel [
 
-PackageInfo subclass: StarPackage [
+PackageInfo subclass: ExternalPackage [
     | file loadedPackage |
     
     <category: 'Language-Packaging'>
     <comment: nil>
-
-    StarPackage class >> file: file [
-	<category: 'accessing'>
-	^(self new)
-	    file: file;
-	    name: (File stripPathFrom: (File stripExtensionFrom: file name));
-	    yourself
-    ]
 
     fullPathOf: fileName [
 	"Try appending 'self directory' and fileName to each of the directory
@@ -1076,6 +1068,24 @@ PackageInfo subclass: StarPackage [
     primFileIn [
 	<category: 'accessing'>
 	self loadedPackage primFileIn
+    ]
+
+    loadedPackage [
+        ^ self subclassResponsibility
+    ]
+]
+
+ExternalPackage subclass: StarPackage [
+
+    <category: 'Language-Packaging'>
+    <comment: 'I represent an external package in the form of a .star package'>
+
+    StarPackage class >> file: file [
+	<category: 'accessing'>
+	^(self new)
+	    file: file;
+	    name: (File stripPathFrom: (File stripExtensionFrom: file name));
+	    yourself
     ]
 
     loadedPackage [

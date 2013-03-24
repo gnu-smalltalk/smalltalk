@@ -6,6 +6,9 @@ o   Change the semantic of >>#rowCount for the SQLite backend. One can
     either use the >>#next/#atEnd selectors to stream over the result or use
     the #>>rows/#rowCount selectors.
 
+o   Add PackageLoader>>#loadPackageFromFile: to load a package by using
+    a package.xml. This can make the development more effective.
+
 -----------------------------------------------------------------------------
 
 NEWS FROM 3.2.4 to 3.2.5
