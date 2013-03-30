@@ -1,0 +1,11 @@
+<package>
+    <name>STTools</name>
+    <namespace>STTools</namespace>
+    <prereq>Parser</prereq>
+
+    <filein>Parser/SourceEntity.st</filein>
+    <filein>Parser/SourceClass.st</filein>
+    <filein>Parser/SourceComments.st</filein>
+    <filein>Parser/SourceEval.st</filein>
+    <filein>Parser/Loader.st</filein>
+</package>

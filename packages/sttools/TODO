@@ -1,0 +1,4 @@
+* Make the Loader have a Converter subclass and use a Visitor instead
+  of the calls to emitTo:.
+
+* Remove "Emit" from variable names.

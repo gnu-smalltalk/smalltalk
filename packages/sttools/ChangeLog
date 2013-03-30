@@ -1,0 +1,11 @@
+2013-03-30  Holger Hans Peter Freyther  <holger@freyther.de>
+
+	* Makefile.frag: Added.
+	* Parser/SourceClass.st: Added from scripts/Convert.st.
+	* Parser/SourceComments.st: Added from scripts/Convert.st.
+	* Parser/SourceEntity.st: Added from scripts/Convert.st.
+	* Parser/SourceEval.st: Added from scripts/Convert.st.
+	* Parser/Loader.st: Added from scripts/Convert.st.
+	* README: Added.
+	* TODO: Added.
+	* package.xml: Added.
