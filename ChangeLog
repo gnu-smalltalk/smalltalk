@@ -1,3 +1,8 @@
+2013-03-31  Holger Hans Peter Freyther  <holger@freyther.de>
+
+	* tests/stcompiler.ok: Update the test result.
+	* tests/stcompiler.st: Add a testcase for ProxyNamespace>>#printOn:.
+
 2013-03-04  Holger Hans Peter Freyther  <holger@freyther.de>
 
 	* kernel/PkgLoader.st: Remove unused variable.

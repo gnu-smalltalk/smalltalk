@@ -118,6 +118,13 @@ Eval [
 ]
 
 Eval [
+    | proxy |
+    proxy := STInST.STClassLoaderObjects.ProxyNamespace
+                    on: Smalltalk for: STInST.STClassLoader new.
+    proxy printNl.
+]
+
+Eval [
     | classes bla |
     "Check class variable parsing.."
 

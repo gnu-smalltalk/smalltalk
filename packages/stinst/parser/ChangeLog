@@ -1,3 +1,8 @@
+2013-03-31  Holger Hans Peter Freyther  <holger@freyther.de>
+
+	* STLoaderObjs.st: Change ProxyNamespace>>#printOn to avoid
+	recursion into self.
+
 2013-02-23  Holger Hans Peter Freyther  <holger@freyther.de>
 
 	* RBParser.st: Fix RBParser>>#parsedNegatedNumber.
