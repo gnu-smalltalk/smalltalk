@@ -1,3 +1,7 @@
+2013-04-28  Holger Hans Peter Freyther  <holger@freyther.de>
+
+	* libgst/gstpriv.h: Allow to disable the DO_PREFETCH.
+
 2013-04-25  Holger Hans Peter Freyther  <holger@freyther.de>
 
 	* libgst/md-config.h: Add cases for the ARM architecture.

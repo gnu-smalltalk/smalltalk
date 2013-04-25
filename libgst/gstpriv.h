@@ -115,6 +115,7 @@
 #endif
 
 #include "gst.h"
+#include "md-config.h"
 
 /* Convenience macros to test the versions of GCC.  Note - they won't
    work for GCC1, since the _MINOR macros were not defined then, but
@@ -175,7 +176,8 @@
 #define PREF_T2 8
 #define PREF_NTA 12
 
-#if GNUC_PREREQ (3, 1)
+/* the prefetch is a loss on on a ARM9 (TI Davinci), hack it out */
+#if !defined(DISABLE_PREFETCH) && GNUC_PREREQ (3, 1)
 #define DO_PREFETCH(x, distance, k) \
   __builtin_prefetch (((char *) (x)) \
 		      + (((k) & PREF_BACKWARDS ? -(distance) : (distance)) \
@@ -556,7 +558,6 @@ extern OOP _gst_nil_oop
 #include "socketx.h"
 #include "strspell.h"
 #include "alloc.h"
-#include "md-config.h"
 #include "avltrees.h"
 #include "rbtrees.h"
 

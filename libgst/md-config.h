@@ -74,6 +74,7 @@
 # define __DECL_REG3 __asm("r6")
 # define BRANCH_REGISTER(name) register void *name __asm("r7")
 # define L1_CACHE_SHIFT 4
+# define DISABLE_PREFETCH
 #endif
 
 #if !defined(__DECL_REG1) && defined(__alpha__)
