@@ -59,6 +59,8 @@
 /* Where the compiled bytecodes go.  */
 bc_vector _gst_cur_bytecodes;
 
+mst_Boolean _gst_omit_line_numbers = 0;
+
 /* Reallocate an array of bytecodes, leaving space for DELTA more
    bytes.  */
 static void realloc_bytecodes (bc_vector bytecodes,
@@ -127,7 +129,8 @@ _gst_line_number (int n, int flags)
       assert (n > 0);
       if (flags & LN_ABSOLUTE)
 	{
-	  compile_byte (LINE_NUMBER_BYTECODE, n);
+          if (!_gst_omit_line_numbers)
+	    compile_byte (LINE_NUMBER_BYTECODE, n);
 	  _gst_compiler_state->prev_line = n;
 	}
       _gst_compiler_state->line_offset = n - 1;
@@ -158,7 +161,8 @@ _gst_compile_byte (gst_uchar byte, int arg)
 {
   if (next_line_number != -1)
     {
-      compile_byte (LINE_NUMBER_BYTECODE, next_line_number);
+      if (!_gst_omit_line_numbers)
+        compile_byte (LINE_NUMBER_BYTECODE, next_line_number);
       next_line_number = -1;
     }
 

@@ -138,7 +138,7 @@ const struct tool tools[] = {
     "gst-remote", "scripts/Remote.st",
     "-h|--help --version --daemon --server -p|--port: -f|--file: -e|--eval: \
  	-l|--login: --package: --start: --stop: --pid --kill --snapshot:: \
-	-I|--image-file: --kernel-directory: -v|-V|--verbose",
+	-I|--image-file: --kernel-directory: -v|-V|--verbose --no-line-numbers",
     NULL, true
   },
   {
@@ -292,6 +292,9 @@ parse_option (int short_opt, const char *long_opt, const char *arg)
       exit (77);
 #endif
     }
+
+  if (long_opt && !strcmp (long_opt, "no-line-numbers"))
+    gst_set_var(GST_NO_LINE_NUMBERS, true);
 
   if (long_opt && !strcmp (long_opt, "version"))
     usage = 1;

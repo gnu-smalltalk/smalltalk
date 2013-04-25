@@ -1,3 +1,8 @@
+2013-05-18  Holger Hans Peter Freyther  <holger@freyther.de>
+
+	* gst-tool.c: Add --no-line-numbers to the gst-remote command.
+	* main.c: Add --no-line-numbers to the gst command.
+
 2013-05-15  Stefano Lattarini  <stefano.lattarini@gmail.com>
 
 	* doc/tutorial.texi: Simply by substituting an instance of '@itemx'

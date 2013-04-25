@@ -222,7 +222,8 @@ enum gst_var_index {
   GST_GC_MESSAGE,
   GST_VERBOSITY,
   GST_MAKE_CORE_FILE,
-  GST_REGRESSION_TESTING
+  GST_REGRESSION_TESTING,
+  GST_NO_LINE_NUMBERS
 };
 
 enum gst_init_flags {

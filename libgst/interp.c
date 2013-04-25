@@ -2160,6 +2160,8 @@ _gst_get_var (enum gst_var_index index)
       return (_gst_make_core_file);
     case GST_REGRESSION_TESTING:
       return (_gst_regression_testing);
+    case GST_NO_LINE_NUMBERS:
+      return (_gst_omit_line_numbers);
     default:
       return (-1);
     }
@@ -2194,6 +2196,9 @@ _gst_set_var (enum gst_var_index index, int value)
       break;
     case GST_REGRESSION_TESTING:
       _gst_regression_testing = true;
+      break;
+    case GST_NO_LINE_NUMBERS:
+      _gst_omit_line_numbers = value;
       break;
     default:
       return (-1);

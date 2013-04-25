@@ -1,3 +1,11 @@
+2013-05-18  Holger Hans Peter Freyther  <holger@freyther.de>
+
+	* libgst/byte.c: Define _gst_omit_line_numbers, emit line
+	numbers depending on this variable.
+	* libgst/files.h: Declare the _gst_omit_line_numbers variable.
+	* libgst/gst.h: Introduce GST_NO_LINE_NUMBERS.
+	* libgst/interp.c: Implement get and set of GST_NO_LINE_NUMBERS.
+
 2013-04-28  Holger Hans Peter Freyther  <holger@freyther.de>
 
 	* libgst/gstpriv.h: Allow to disable the DO_PREFETCH.

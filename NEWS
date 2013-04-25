@@ -2,6 +2,12 @@ List of user-visible changes in GNU Smalltalk
 
 NEWS FROM 3.2.5 to 3.2.91
 
+o   gst and gst-remote now understand the --no-line-numbers option. The
+    line number is embedded in the bytecode of a CompiledMethod and is
+    executed as part of the normal execution. This option allows to not
+    emit the line number bytecode which can result in a noticable speed
+    up on embedded systems.
+
 o   Change the semantic of >>#rowCount for the SQLite backend. One can
     either use the >>#next/#atEnd selectors to stream over the result or use
     the #>>rows/#rowCount selectors.
