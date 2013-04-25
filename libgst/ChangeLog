@@ -1,3 +1,7 @@
+2013-04-25  Holger Hans Peter Freyther  <holger@freyther.de>
+
+	* libgst/md-config.h: Add cases for the ARM architecture.
+
 2013-02-24  Holger Hans Peter Freyther  <holger@freyther.de>
 
 	* libgst/dict.c: Remove ATTRIBUTE_HIDDEN from static methods.

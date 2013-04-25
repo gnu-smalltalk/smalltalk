@@ -66,6 +66,16 @@
 # define __DECL_REG3 __asm("%l2")
 #endif
 
+#if defined(__arm__)
+/* We have plenty of registers on ARM but do not enable pipeline */
+# define REG_AVAILABILITY 2
+# define __DECL_REG1 __asm("r4")
+# define __DECL_REG2 __asm("r5")
+# define __DECL_REG3 __asm("r6")
+# define BRANCH_REGISTER(name) register void *name __asm("r7")
+# define L1_CACHE_SHIFT 4
+#endif
+
 #if !defined(__DECL_REG1) && defined(__alpha__)
 # define REG_AVAILABILITY 2
 /* Note: REG3 causes compile problems when trying to fit 64-bit stuff in
