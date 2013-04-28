@@ -1,3 +1,8 @@
+2013-08-09  Holger Hans Peter Freyther  <holger@moiji-mobile.com>
+
+	* libgst/cint.c: Bind link, fsync, fdatasync and sync for
+	additional C level access.
+
 2013-08-10  Gwenael Casaccio <gwenael.casaccio@gmail.com>
 
 	* comp.c: Add arguments and temporaries name in DebugInformation.

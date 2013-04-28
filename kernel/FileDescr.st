@@ -1104,5 +1104,16 @@ do arbitrary processing on the files.'>
 	^true
     ]
 
+    fsync [
+        <category: 'primitive'>
+        (File primFsync: fd) < 0
+            ifTrue: [self checkError]
+    ]
+
+    fdatasync [
+        <category: 'primitive'>
+        (File primFdatasync: fd) < 0
+            ifTrue: [self checkError]
+    ]
 ]
 
