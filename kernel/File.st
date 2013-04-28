@@ -119,6 +119,20 @@ FilePath subclass: File [
 	(self path: fileName) touch
     ]
 
+    File class >> link: srcName as: destName [
+        "Create a hard link for the srcName file with the given path name"
+
+        <category: 'file operations'>
+        (self path: srcName) linkAs: destName
+    ]
+
+    File class >> link: destName from: srcName [
+        "Create a hard link named destName file from the given path"
+
+        <category: 'file operations'>
+        (self path: destName) linkFrom: srcName
+    ]
+
     File class >> symlink: srcName as: destName [
 	"Create a symlink for the srcName file with the given path name"
 
@@ -197,6 +211,24 @@ FilePath subclass: File [
 	^self path: ImageFileName
     ]
 
+    File class >> primFsync: aFd [
+        <category: 'private-C call-outs'>
+        <cCall: 'fsync' returning: #int args: #(#int)>
+    ]
+
+    File class >> primFdatasync: aFd [
+        <category: 'private-C call-outs'>
+        "Depending on the version of the libc this might fail with a primitive
+        error. In that case primFsync should be called."
+        <cCall: 'fdatasync' returning: #int args: #(#int)>
+    ]
+
+    File class >> sync [
+        <category: 'C call-outs'>
+        "Blocking call to the kernel to sync all files to storage"
+        <cCall: 'sync' returning: #int args: #()>
+    ]
+
     = aFile [
 	"Answer whether the receiver represents the same file as the receiver."
 
@@ -257,6 +289,11 @@ FilePath subclass: File [
 	<category: 'private-C call-outs'>
 	<cCall: 'fileIsExecutable' returning: #boolean args: #(#string)>
 	
+    ]
+
+    primLink: srcName as: destName [
+        <category: 'private-C call-outs'>
+        <cCall: 'link' returning: #int args: #(#string #string)>
     ]
 
     primSymlink: srcName as: destName [
@@ -526,6 +563,14 @@ FilePath subclass: File [
 	result < 0 ifTrue: [ File checkError ]
     ]
 
+    linkFrom: srcName [
+        "Create the receiver as hard link from path destName"
+
+        <category: 'file operations'>
+        (self primLink: srcName as: self asString) < 0
+            ifTrue: [ File checkError ]
+    ]
+
     symlinkFrom: srcName [
 	"Create the receiver as a symlink from path destName"
 
@@ -590,6 +635,13 @@ FilePath subclass: File [
 		    ensure: [self closeDir: dir].
 
 	File checkError.
+    ]
+
+    linkAs: destName [
+        "Create destName as a symbolic link of the receiver."
+
+        <category: 'file operations'>
+        (self class path: destName) linkFrom: self asString.
     ]
 
     symlinkAs: destName [
