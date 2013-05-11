@@ -847,6 +847,13 @@ When you are writing a test case method, send #assert: aBoolean when you want to
 		exception sunitSignalWith: aString]
     ]
 
+    assert: actual equals: expected [
+        <category: 'Accessing'>
+	^ self
+		assert: expected = actual
+		description: [self comparingStringBetween: actual and: expected]
+    ]
+
     deny: aBoolean [
 	<category: 'Accessing'>
 	self assert: aBoolean not
@@ -1083,6 +1090,17 @@ When you are writing a test case method, send #assert: aBoolean when you want to
     setTestSelector: aSymbol [
 	<category: 'Private'>
 	testSelector := aSymbol
+    ]
+
+    comparingStringBetween: actual and: expected [
+        <category: 'Private'>
+        ^ String streamContents: [:stream |
+                stream
+                    nextPutAll: 'Got ';
+                    nextPutAll: actual printString;
+                    nextPutAll: ' instead of ';
+                    nextPutAll: expected printString;
+                    nextPutAll: '.']
     ]
 
     addDependentToHierachy: anObject [

@@ -1,3 +1,8 @@
+2013-05-11  Holger Hans Peter Freyther  <holger@freyther.de>
+
+	* packages/sunit/SUnit.st: Add #assert:equals: and
+	#comparingStringBetween:and: from Pharo to the TestCase.
+
 2012-08-03  Holger Hans Peter Freyther  <holger@freyther.de>
 
 	* packages/sunit/SUnit.st: Use testSelector printString as
