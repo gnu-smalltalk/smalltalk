@@ -1,3 +1,9 @@
+2013-05-20  Holger Hans Peter Freyther  <holger@freyther.de>
+
+	* Sets.st: Add >>#isValid, >>#codecReplace: and >>#iconvInvalidHandle.
+	* iconv.c: Add iconvInvalid C-Function.
+	* iconvtests.st: Add test for 'utf8' replacement.
+
 2010-12-04  Paolo Bonzini  <bonzini@gnu.org>
 
 	* package.xml: Remove now superfluous <file> tags.

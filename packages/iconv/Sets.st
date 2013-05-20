@@ -7,7 +7,7 @@
 
 "======================================================================
 |
-| Copyright 2001, 2002, 2005, 2006, 2007, 2008 Free Software Foundation, Inc.
+| Copyright 2001, 2002, 2005, 2006, 2007, 2008, 2013 Free Software Foundation, Inc.
 | Written by Paolo Bonzini.
 |
 | This file is part of the GNU Smalltalk class library.
@@ -928,6 +928,19 @@ Iconv is skipped altogether and only Smalltalk converters are used.'>
 	    ifTrue: [self allInstancesDo: [:each | each release]]
     ]
 
+    codecReplace: aName [
+	"libiconv/glibc behave differently in terms of supporting
+	UTF-8/utf8. This routine is patching it up."
+	<category:'private'>
+	^aName = 'utf8'
+	    ifTrue: ['UTF-8'] ifFalse: [aName].
+    ]
+
+    iconvInvalidHandle [
+	<category: 'C call-outs'>
+	<cCall: 'iconv_invalid' returning: #cObject args: #()>
+    ]
+
     iconvOpen: to from: from [
 	<category: 'C call-outs'>
 	<cCall: 'iconv_open' returning: #cObject args: #(#string #string)>
@@ -1000,6 +1013,16 @@ Iconv is skipped altogether and only Smalltalk converters are used.'>
 	^n
     ]
 
+    isValid [
+	<category: 'accessing'>
+
+	iconvHandle isNil
+	    ifTrue: [^false].
+	iconvHandle address = self iconvInvalidHandle
+	    ifTrue: [^false].
+	^true.
+    ]
+
     release [
 	<category: 'private - living across snapshots'>
 	self
@@ -1009,17 +1032,25 @@ Iconv is skipped altogether and only Smalltalk converters are used.'>
 
     finalize [
 	<category: 'private - living across snapshots'>
-	iconvHandle isNil ifTrue: [^self].
+	self isValid ifFalse: [
+	    iconvHandle := nil.
+	    ^self].
 	self iconvClose: iconvHandle.
 	iconvHandle := nil
     ]
 
     iconvOpen [
+	| convTo convFrom |
 	<category: 'private - living across snapshots'>
+
+	"Replace utf8 to UTF-8 or such"
+	convTo := self codecReplace: to.
+	convFrom := self codecReplace: from.
+
 	iconvHandle isNil ifFalse: [self release].
-	iconvHandle := self iconvOpen: to from: from.
-	iconvHandle address = 4294967295 
-	    ifTrue: [^InvalidCharsetError signal: 
+	iconvHandle := self iconvOpen: convTo from: convFrom.
+	self isValid
+	    ifFalse: [^InvalidCharsetError signal:
 			{from.
 			to}].
 	self addToBeFinalized.

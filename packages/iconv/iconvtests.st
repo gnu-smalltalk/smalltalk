@@ -7,7 +7,7 @@
 
 "======================================================================
 |
-| Copyright 2007 Free Software Foundation, Inc.
+| Copyright 2007, 2013 Free Software Foundation, Inc.
 | Written by Paolo Bonzini and Stephen Compall
 |
 | This file is part of GNU Smalltalk.
@@ -242,6 +242,18 @@ TestCase subclass: IconvTest [
 
 	b := b copyFrom: 1 to: 1024.
 	self should: [ b asUnicodeString ] raise: IncompleteSequenceError.
+    ]
+
+    testCodecReplacement [
+        | str unicode |
+        "Grease and others use utf8 as codec name and GNU libiconv does not
+        have support for the lookup. Check that it is working in both
+        directions."
+
+        str := #[208 184].
+        unicode := str asUnicodeString: 'utf8'.
+        self assert: unicode first = $<16r0438>.
+        self assert: (unicode asString: 'utf8') = str asString.
     ]
 ]
 

@@ -7,7 +7,7 @@
 
 /***********************************************************************
  *
- * Copyright 2001, 2002, 2004, 2005, 2006 Free Software Foundation, Inc.
+ * Copyright 2001, 2002, 2004, 2005, 2006, 2013 Free Software Foundation, Inc.
  * Written by Paolo Bonzini.
  *
  * This file is part of GNU Smalltalk.
@@ -92,10 +92,16 @@ iconvWrapper (iconv_t handle, OOP readBufferOOP, int readPos,
   return (save_errno != EILSEQ);
 }
 
+iconv_t iconvInvalid(void)
+{
+  return (iconv_t) -1;
+}
+
 void
 gst_initModule (VMProxy * proxy)
 {
   vmProxy = proxy;
+  vmProxy->defineCFunc ("iconv_invalid", iconvInvalid);
   vmProxy->defineCFunc ("iconv_open", iconv_open);
   vmProxy->defineCFunc ("iconv_close", iconv_close);
   vmProxy->defineCFunc ("iconvWrapper", iconvWrapper);
