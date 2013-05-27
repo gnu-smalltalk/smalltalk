@@ -1,3 +1,10 @@
+2013-06-18  Gwenael Casaccio  <mrgwen@gmail.com>
+
+	* Debugger/Extensions.st: Added.
+	* Debugger/GtkDebugger.st: Skip exception handling frames.
+	* Extensions.st: Remove the debugger extension.
+	* package.xml: Update
+
 2013-06-17  Gwenael Casaccio  <gwenael.casaccio@gmail.com>
 
 	* Commands/System/AddClassCommand.st: New system command

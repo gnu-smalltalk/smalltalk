@@ -188,6 +188,7 @@
   <filein>GtkNotebookWidget.st</filein>
   <filein>Image/GtkImageModel.st</filein>
   <filein>Image/GtkImageWidget.st</filein>
+  <filein>Debugger/Extensions.st</filein>
   <filein>Debugger/GtkContextWidget.st</filein>
   <filein>Debugger/GtkDebugger.st</filein>
   <filein>State/BrowserState.st</filein>
@@ -414,6 +415,7 @@
   <file>GtkNotebookWidget.st</file>
   <file>Image/GtkImageModel.st</file>
   <file>Image/GtkImageWidget.st</file>
+  <file>Debugger/Extensions.st</file>
   <file>Debugger/GtkContextWidget.st</file>
   <file>Debugger/GtkDebugger.st</file>
   <file>State/BrowserState.st</file>

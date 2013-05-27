@@ -418,16 +418,6 @@ Debugger extend [
     ]
 ]
 
-Behavior extend [
-
-    debuggerClass [
-	<category: '*VisualGST'>
-
-	"^ nil"
-	^ VisualGST.GtkDebugger
-    ]
-]
-
 VariableBinding extend [
 
     hasLiterals [

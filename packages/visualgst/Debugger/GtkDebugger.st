@@ -81,6 +81,7 @@ GtkBrowsingTool subclass: GtkDebugger [
     postInitialize [
         <category: 'initialization'>
 
+
         super postInitialize.
 	codeWidget postInitialize.
 	inspectorWidget postInitialize.
@@ -169,6 +170,11 @@ GtkBrowsingTool subclass: GtkDebugger [
         <category: 'context'>
 
 	debugger := aDebugger.
+
+        "Show meaningful source code to the user."
+        [ debugger suspendedContext isInternalExceptionHandlingContext ]
+            whileTrue: [ debugger slowFinish ].
+
 	self 
 	    updateContextWidget
     ]
