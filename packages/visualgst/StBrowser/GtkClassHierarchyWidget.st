@@ -37,7 +37,7 @@ GtkConcreteWidget subclass: GtkClassHierarchyWidget [
     classOrMeta: aClass [
 	<category: 'accessing'>
 
-	classOrMeta := aClass.
+	classOrMeta := aClass asClass.
 	dic := Dictionary new.
 	self buildSuperclasses.
 	model 
@@ -56,7 +56,7 @@ GtkConcreteWidget subclass: GtkClassHierarchyWidget [
     buildSuperclasses [
 	| parent |
 
-	parent := self classOrMeta asClass.
+	parent := self classOrMeta.
 	[ parent isNil ] whileFalse: [
 	    dic at: (parent superclass ifNil: [ #root ]) put: {parent}.
 	    root := parent.
@@ -73,7 +73,7 @@ GtkConcreteWidget subclass: GtkClassHierarchyWidget [
                                         childrenBlock: [ :each |
 					    dic at: each ifAbsent: [ | col |
                                                         col := SortedCollection sortBlock: [ :a :b | a asClass name <= b asClass name ].
-							col addAll: each subclasses.
+							col addAll: (each subclasses select: [ :behavior | behavior isClass ]).
                                             col ] ];
                                         contentsBlock: [ :each | {each asClass name asString, ' '} ].
         ^ GTK.GtkScrolledWindow withChild: classesTree 
