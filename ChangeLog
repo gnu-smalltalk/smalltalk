@@ -1,3 +1,7 @@
+2013-06-06  Gwenael Casaccio <gwenael.casaccio@gmail.com>
+
+        * kernel/ContextPart.st: Remove useless optimizations.
+
 2013-05-18  Holger Hans Peter Freyther  <holger@freyther.de>
 
 	* gst-tool.c: Add --no-line-numbers to the gst-remote command.
