@@ -1,3 +1,8 @@
+2013-06-14  Gwenael Casaccio <gwenael.casaccio@gmail.com>
+
+	* libgst/dict.c: Remove useless code: gst_ordered_collection structure.
+	* libgst/dict.inl: Remove useless code: ordered_collection_begin and ordered_collection_end.
+
 2013-05-18  Holger Hans Peter Freyther  <holger@freyther.de>
 
 	* libgst/byte.c: Define _gst_omit_line_numbers, emit line

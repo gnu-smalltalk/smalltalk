@@ -54,14 +54,6 @@
 /* Scramble the bits of X.  */
 static inline uintptr_t scramble (uintptr_t x);
 
-/* Return a pointer to the first item in the OrderedCollection,
-   ORDEREDCOLLECTIONOOP.  */
-static inline OOP *ordered_collection_begin (OOP orderedCollectionOOP);
-
-/* Return a pointer just beyond the last item in the OrderedCollection,
-   ORDEREDCOLLECTIONOOP.  */
-static inline OOP *ordered_collection_end (OOP orderedCollectionOOP);
-
 /* Checks to see if TESTEDOOP is a subclass of CLASS_OOP, returning
    true if it is.  */
 static inline mst_Boolean is_a_kind_of (OOP testedOOP,
@@ -811,25 +803,6 @@ instantiate (OOP class_oop,
                                instanceSpec, numBytes);
 }
 
-
-OOP *
-ordered_collection_begin (OOP orderedCollectionOOP)
-{
-  gst_ordered_collection oc;
-
-  oc = (gst_ordered_collection) OOP_TO_OBJ (orderedCollectionOOP);
-  return &oc->data[TO_INT (oc->firstIndex) - 1];
-}
-
-OOP *
-ordered_collection_end (OOP orderedCollectionOOP)
-{
-  gst_ordered_collection oc;
-
-  oc = (gst_ordered_collection) OOP_TO_OBJ (orderedCollectionOOP);
-  return &oc->data[TO_INT (oc->lastIndex)];
-}
-
 
 OOP
 dictionary_association_at (OOP dictionaryOOP,

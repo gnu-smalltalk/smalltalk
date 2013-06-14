@@ -320,14 +320,6 @@ typedef struct gst_char
   OOP codePoint;
 } *gst_char;
 
-typedef struct gst_ordered_collection
-{
-  OBJ_HEADER;
-  OOP firstIndex;
-  OOP lastIndex;
-  OOP data[1];
-} *gst_ordered_collection;
-
 typedef struct gst_cobject
 {
   OBJ_HEADER;
