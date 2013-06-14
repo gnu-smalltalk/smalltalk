@@ -13,7 +13,9 @@
 
 (push '("\\.st\\'" . smalltalk-mode) auto-mode-alist)
 
-(push "\\.star\\'" inhibit-first-line-modes-regexps)
+(if (boundp 'inhibit-local-variables-regexps)
+    (push "\\.star\\'" inhibit-local-variables-regexps)
+    (push "\\.star\\'" inhibit-first-line-modes-regexp))
 
 (autoload 'smalltalk-mode "@lispdir@/smalltalk-mode.elc" "" t)
 @WITH_EMACS_COMINT_TRUE@(autoload 'gst "@lispdir@/gst-mode.elc" "" t)

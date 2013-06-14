@@ -1,3 +1,8 @@
+2013-06-14  Jochen Schmitt  <Jochen@herr-schmitt.de>
+
+	* smalltalk-mode-init.el.in: Use inhibit-local-variables-regexps
+	if it is available.
+
 2013-02-14  Holger Hans Peter Freyther  <holger@freyther.de>
 
 	* kernel/StreamOps.st: Override the >>#species selector.
