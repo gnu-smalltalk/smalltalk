@@ -1,3 +1,9 @@
+2013-06-17  Gwenael Casaccio  <gwenael.casaccio@gmail.com>
+
+	* Gtk/GtkEntry.st: GtkEntry support
+	* Gtk/GtkEntryBuffer.st: GtkEntry support
+	* package.xml: Update
+
 2013-06-17  Gwenael Casaccio  <mrgwen@gmail.com>
 
 	* AbstractFinder.st: Add copyright header.
