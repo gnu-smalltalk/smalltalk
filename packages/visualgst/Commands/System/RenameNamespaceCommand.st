@@ -1,6 +1,6 @@
 "======================================================================
 |
-| DeleteMethodUndoCommand class definition
+| SysRenameNamespaceCommand class definition
 |
 ======================================================================"
 
@@ -33,49 +33,47 @@
 |
 ======================================================================"
 
-UndoCommand subclass: DeleteMethodUndoCommand [
+Command subclass: SysRenameNamespaceCommand [
 
-    | selector classOrMeta compiledMethod |
+    | namespace oldName newName |
 
-    DeleteMethodUndoCommand class >> delete: aSymbol in: aClass [
+    SysRenameNamespaceCommand class >> rename: aNamespace as: aSymbol [
 	<category: 'instance creation'>
 
 	^ (self new)
-	    delete: aSymbol in: aClass;
+	    rename: aNamespace as: aSymbol;
 	    "precondition;"
 	    yourself
     ]
 
-    delete: aSymbol in: aClass [
+    rename: aNamespace as: aSymbol [
 	<category: 'initialize'>
 
-	selector := aSymbol.
-	classOrMeta := aClass.
+	namespace := aNamespace.
+	oldName := namespace name.
+	newName := aSymbol.
     ]
 
     description [
 	<category: 'accessing'>
 
-	^ 'Delete a method'
+	^ 'Rename a namespace'
     ]
 
-    precondition [
+    execute [
         <category: 'checking'>
 
+        newName = #Smalltalk ifTrue: [ ^ self preconditionFailed: 'Namespace name can''t be the same has a namespace name'  ].
+        namespace subspacesDo: [ :each | each name = newName ifTrue: [ ^ self preconditionFailed: 'Namespace name can''t be the same has a namespace name'  ] ].
 	^ true
     ]
 
-    undo [
+    valid [
 	<category: 'events'>
 
-	classOrMeta methodDictionary insertMethod: compiledMethod.
-    ]
-
-    redo [
-	<category: 'events'>
-
-	compiledMethod := classOrMeta >> selector.
-	classOrMeta methodDictionary removeMethod: compiledMethod.
+	namespace superspace removeSubspace: namespace name.
+        namespace name: newName.
+        namespace superspace insertSubspace: namespace
     ]
 ]
 

@@ -65,7 +65,7 @@ Object subclass: Command [
             yourself
     ]
 
-    | target |
+    | target error |
     
     target: anObject [
 	<category: 'accessing'>
@@ -83,6 +83,19 @@ Object subclass: Command [
 	<category: 'command'>
 
 	^ true
+    ]
+
+    preconditionFailed: aString [
+        <category: 'checking'>
+
+        error := aString.
+        ^ false
+    ]
+
+    error [
+        <category: 'checking'>
+
+        ^ error
     ]
 
     executeIfValid [

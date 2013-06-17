@@ -210,9 +210,9 @@
   <filein>HistoryStack.st</filein>
   <filein>Undo/UndoStack.st</filein>
   <filein>Undo/UndoCommand.st</filein>
-  <filein>Undo/AddNamespaceUndoCommand.st</filein>
-  <filein>Undo/RenameNamespaceUndoCommand.st</filein>
-  <filein>Undo/DeleteNamespaceUndoCommand.st</filein>
+  <filein>Commands/System/AddNamespaceCommand.st</filein>
+  <filein>Commands/System/RenameNamespaceCommand.st</filein>
+  <filein>Commands/System/DeleteNamespaceCommand.st</filein>
   <filein>Source/SourceFormatter.st</filein>
   <filein>Source/NamespaceHeaderSource.st</filein>
   <filein>Source/NamespaceSource.st</filein>
@@ -222,9 +222,9 @@
   <filein>Source/MethodSource.st</filein>
   <filein>Source/PackageSource.st</filein>
   <filein>Source/BrowserMethodSource.st</filein>
-  <filein>Undo/AddClassUndoCommand.st</filein>
-  <filein>Undo/RenameClassUndoCommand.st</filein>
-  <filein>Undo/DeleteClassUndoCommand.st</filein>
+  <filein>Commands/System/AddClassCommand.st</filein>
+  <filein>Commands/System/RenameClassCommand.st</filein>
+  <filein>Commands/System/DeleteClassCommand.st</filein>
   <filein>AbstractFinder.st</filein>
   <filein>NamespaceFinder.st</filein>
   <filein>ClassFinder.st</filein>
@@ -232,9 +232,9 @@
   <filein>GtkWebBrowser.st</filein>
   <filein>GtkWebView.st</filein>
   <filein>GtkAssistant.st</filein>
-  <filein>Undo/RenameCategoryUndoCommand.st</filein>
-  <filein>Undo/AddMethodUndoCommand.st</filein>
-  <filein>Undo/DeleteMethodUndoCommand.st</filein>
+  <filein>Commands/System/RenameCategoryCommand.st</filein>
+  <filein>Commands/System/AddMethodCommand.st</filein>
+  <filein>Commands/System/DeleteMethodCommand.st</filein>
   <filein>WorkspaceVariableTracker.st</filein>
   <filein>GtkVariableTrackerWidget.st</filein>
   <filein>SyntaxHighlighter.st</filein>
@@ -436,9 +436,9 @@
   <file>HistoryStack.st</file>
   <file>Undo/UndoStack.st</file>
   <file>Undo/UndoCommand.st</file>
-  <file>Undo/AddNamespaceUndoCommand.st</file>
-  <file>Undo/RenameNamespaceUndoCommand.st</file>
-  <file>Undo/DeleteNamespaceUndoCommand.st</file>
+  <file>Commands/System/AddNamespaceCommand.st</file>
+  <file>Commands/System/RenameNamespaceCommand.st</file>
+  <file>Commands/System/DeleteNamespaceCommand.st</file>
   <file>Source/SourceFormatter.st</file>
   <file>Source/NamespaceHeaderSource.st</file>
   <file>Source/NamespaceSource.st</file>
@@ -448,9 +448,9 @@
   <file>Source/MethodSource.st</file>
   <file>Source/PackageSource.st</file>
   <file>Source/BrowserMethodSource.st</file>
-  <file>Undo/AddClassUndoCommand.st</file>
-  <file>Undo/RenameClassUndoCommand.st</file>
-  <file>Undo/DeleteClassUndoCommand.st</file>
+  <file>Commands/System/AddClassCommand.st</file>
+  <file>Commands/System/RenameClassCommand.st</file>
+  <file>Commands/System/DeleteClassCommand.st</file>
   <file>AbstractFinder.st</file>
   <file>NamespaceFinder.st</file>
   <file>ClassFinder.st</file>
@@ -461,9 +461,9 @@
   <file>Gtk/GtkEntryBuffer.st</file>
   <file>Extensions.st</file>
   <file>GtkAssistant.st</file>
-  <file>Undo/RenameCategoryUndoCommand.st</file>
-  <file>Undo/AddMethodUndoCommand.st</file>
-  <file>Undo/DeleteMethodUndoCommand.st</file>
+  <file>Commands/System/RenameCategoryCommand.st</file>
+  <file>Commands/System/AddMethodCommand.st</file>
+  <file>Commands/System/DeleteMethodCommand.st</file>
   <file>WorkspaceVariableTracker.st</file>
   <file>GtkVariableTrackerWidget.st</file>
   <file>SyntaxHighlighter.st</file>

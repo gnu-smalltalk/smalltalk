@@ -1,6 +1,6 @@
 "======================================================================
 |
-| RenameClassUndoCommand class definition
+| SysRenameClassCommand class definition
 |
 ======================================================================"
 
@@ -33,11 +33,11 @@
 |
 ======================================================================"
 
-UndoCommand subclass: RenameClassUndoCommand [
+Command subclass: SysRenameClassCommand [
 
     | class newClassName oldClassName |
 
-    RenameClassUndoCommand class >> rename: aClass as: aSymbol [
+    SysRenameClassCommand class >> rename: aClass as: aSymbol [
 	<category: 'instance creation'>
 
 	^ (self new)
@@ -60,7 +60,7 @@ UndoCommand subclass: RenameClassUndoCommand [
 	^ 'Rename a class'
     ]
 
-    precondition [
+    execute [
         <category: 'checking'>
 
         newClassName = #Smalltalk ifTrue: [ ^ self preconditionFailed: 'class name can''t be the same has a namespace name'  ].
@@ -69,18 +69,11 @@ UndoCommand subclass: RenameClassUndoCommand [
 	^ true
     ]
 
-    undo [
-	<category: 'events'>
-	
-        class environment removeClass: newClassName.
-        class setName: oldClassName.
-	class environment insertClass: class
-    ]
 
-    redo [
+    valid [
 	<category: 'events'>
 
-        class environment removeClass: oldClassName.
+	class environment removeClass: oldClassName.
 	class setName: newClassName.
 	class environment insertClass: class
     ]

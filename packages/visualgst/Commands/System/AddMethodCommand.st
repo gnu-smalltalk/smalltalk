@@ -1,6 +1,6 @@
 "======================================================================
 |
-| AddMethodUndoCommand class definition
+| SysAddMethodCommand class definition
 |
 ======================================================================"
 
@@ -33,11 +33,11 @@
 |
 ======================================================================"
 
-UndoCommand subclass: AddMethodUndoCommand [
+Command subclass: SysAddMethodCommand [
 
     | selector method category classOrMeta oldCompiledMethod browserWidget compiledMethod |
 
-    AddMethodUndoCommand class >> add: aString classified: aCategory in: aClass [
+    SysAddMethodCommand class >> add: aString classified: aCategory in: aClass [
 	<category: 'instance creation'>
 
 	^ (self new)
@@ -45,7 +45,7 @@ UndoCommand subclass: AddMethodUndoCommand [
 	    yourself
     ]
 
-    AddMethodUndoCommand class >> add: aString classified: aCategory in: aClass browser: aGtkBrowserWidget [
+    SysAddMethodCommand class >> add: aString classified: aCategory in: aClass browser: aGtkBrowserWidget [
         <category: 'instance creation'>
 
         ^ (self new)
@@ -89,7 +89,7 @@ UndoCommand subclass: AddMethodUndoCommand [
 	^ 'Add a method'
     ]
 
-    precondition [
+    valid [
         <category: 'checking'>
 
 	| parser node |
@@ -109,21 +109,7 @@ UndoCommand subclass: AddMethodUndoCommand [
 	^ true
     ]
 
-    undo [
-	<category: 'events'>
-
-	| selector |
-        browserWidget ifNotNil: [ browserWidget codeSaved ].
-
-	classOrMeta methodDictionary removeMethod: compiledMethod.
-	oldCompiledMethod 
-	    ifNotNil: [
-		classOrMeta methodDictionary insertMethod: oldCompiledMethod.
-		selector := oldCompiledMethod selector ]
-	    ifNil: [ selector := nil ].
-    ]
-
-    redo [
+    execute [
 	<category: 'events'>
 
 	browserWidget ifNotNil: [ browserWidget codeSaved ].

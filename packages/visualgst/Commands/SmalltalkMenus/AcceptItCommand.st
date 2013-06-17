@@ -74,11 +74,11 @@ Command subclass: AcceptItCommand [
 	<category: 'command'>
 
         target state hasSelectedCategory ifFalse: [ ^ self acceptClassDefinition ].
-        (AddMethodUndoCommand
+        (SysAddMethodCommand
 	    add: target sourceCode
 	    classified: target state category 
 	    in: target state classOrMeta
-	    browser: target) push
+	    browser: target) executeIfValid
     ]
 ]
 

@@ -1,5 +1,37 @@
 2013-06-17  Gwenael Casaccio  <gwenael.casaccio@gmail.com>
 
+	* Commands/System/AddClassCommand.st: New system command
+	* Commands/System/AddMethodCommand.st: New system command
+	* Commands/System/AddNamespaceCommand.st: New system command
+	* Commands/System/DeleteClassCommand.st: New system command
+	* Commands/System/DeleteMethodCommand.st: New system command
+	* Commands/System/DeleteNamespaceCommand.st: New system command
+	* Commands/System/RenameCategoryCommand.st: New system command
+	* Commands/System/RenameClassCommand.st: New system command
+	* Commands/System/RenameNamespaceCommand.st: New system command
+	* Commands/CategoryMenus/RenameCategoryCommand.st: Updated to new system command
+	* Commands/ClassMenus/AddClassCommand.st: Updated to new system command
+	* Commands/ClassMenus/DeleteClassCommand.st: Updated to new system command
+	* Commands/ClassMenus/RenameClassCommand.st: Updated to new system command
+	* Commands/Command.st: Updated to new system command
+	* Commands/MethodMenus/DeleteMethodCommand.st: Updated to new system command
+	* Commands/NamespaceMenus/AddNamespaceCommand.st: Updated to new system command
+	* Commands/NamespaceMenus/DeleteNamespaceCommand.st: Updated to new system command
+	* Commands/NamespaceMenus/RenameNamespaceCommand.st: Updated to new system command
+	* Commands/SmalltalkMenus/AcceptItCommand.st: Updated to new system command
+	* Undo/AddClassUndoCommand.st: Deleted
+	* Undo/AddMethodUndoCommand.st: Deleted
+	* Undo/AddNamespaceUndoCommand.st: Deleted
+	* Undo/DeleteClassUndoCommand.st: Deleted
+	* Undo/DeleteMethodUndoCommand.st: Deleted
+	* Undo/DeleteNamespaceUndoCommand.st: Deleted
+	* Undo/RenameCategoryUndoCommand.st: Deleted
+	* Undo/RenameClassUndoCommand.st: Deleted
+	* Undo/RenameNamespaceUndoCommand.st: Deleted
+	* package.xml: Update
+
+2013-06-17  Gwenael Casaccio  <gwenael.casaccio@gmail.com>
+
 	* Gtk/GtkEntry.st: GtkEntry support
 	* Gtk/GtkEntryBuffer.st: GtkEntry support
 	* package.xml: Update

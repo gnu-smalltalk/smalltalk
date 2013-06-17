@@ -1,6 +1,6 @@
 "======================================================================
 |
-| DeleteClassUndoCommand class definition
+| SysRenameCategorycommand class definition
 |
 ======================================================================"
 
@@ -33,50 +33,51 @@
 |
 ======================================================================"
 
-UndoCommand subclass: DeleteClassUndoCommand [
+Command subclass: SysRenameCategoryCommand [
 
-    |  class |
+    | category class newCategory treeStore |
 
-    DeleteClassUndoCommand class >> delete: aClass [
+    SysRenameCategoryCommand class >> rename: aString in: aClass as: aNewName onModel: aGtkTreeStore [
 	<category: 'instance creation'>
 
 	^ (self new)
-	    delete: aClass;
+	    rename: aString in: aClass as: aNewName onModel: aGtkTreeStore;
 	    "precondition;"
 	    yourself
     ]
 
-    delete: aClass [
+    rename: aString in: aClass as: aNewName onModel: aGtkTreeStore [
 	<category: 'initialize'>
 
+	category := aString.
 	class := aClass.
+	newCategory := aNewName.
+	treeStore := aGtkTreeStore
     ]
 
     description [
 	<category: 'accessing'>
 
-	^ 'Delete a class'
+	^ 'Rename a category'
     ]
 
-    precondition [
-	<category: 'checking'>
+    valid [
+        <category: 'checking'>
 
-        class subclasses isEmpty ifFalse: [ ^ self preconditionFailed: 'class has subclasses' ].
+	newCategory = '*' ifTrue: [ ^ self preconditionFailed: 'Can''t create a * category' ].
+        (treeStore hasCategory: newCategory asString) ifTrue: [ ^ self preconditionFailed: 'Category is present' ].
 	^ true
     ]
 
-    undo [
+    execute [
 	<category: 'events'>
 
-	class superclass ifNotNil: [ class superclass addSubclass: class ].
-	class environment insertClass: class
-    ]
-
-    redo [
-	<category: 'events'>
-
-	class superclass ifNotNil: [ class superclass removeSubclass: class ].
-	class environment removeClass: class name
+	class methodDictionary do: [ :each |
+            each methodCategory = category
+                ifTrue: [ each methodCategory: newCategory ] ].
+	treeStore
+	    removeCategory: category;
+	    appendCategory: newCategory
     ]
 ]
 

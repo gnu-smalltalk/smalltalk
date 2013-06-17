@@ -46,7 +46,7 @@ NamespaceCommand subclass: RenameNamespaceCommand [
 	| dlg |
         dlg := GtkEntryDialog title: 'Rename a namespace' text: 'Name of the new namespace'.
         dlg hasPressedOk: [ 
-            (RenameNamespaceUndoCommand rename: target state namespace as: dlg result asSymbol) push ]
+            (SysRenameNamespaceCommand rename: target state namespace as: dlg result asSymbol) executeIfValid ]
     ]
 ]
 

@@ -1,6 +1,6 @@
 "======================================================================
 |
-| RenameCategoryUndoCommand class definition
+| SysDeleteNamespaceCommand class definition
 |
 ======================================================================"
 
@@ -33,62 +33,34 @@
 |
 ======================================================================"
 
-UndoCommand subclass: RenameCategoryUndoCommand [
+Command subclass: SysDeleteNamespaceCommand [
 
-    | category class newCategory treeStore |
+    |  namespace treeStore |
 
-    RenameCategoryUndoCommand class >> rename: aString in: aClass as: aNewName onModel: aGtkTreeStore [
+    SysDeleteNamespaceCommand class >> delete: aNamespace [
 	<category: 'instance creation'>
 
 	^ (self new)
-	    rename: aString in: aClass as: aNewName onModel: aGtkTreeStore;
-	    "precondition;"
+	    delete: aNamespace;
 	    yourself
     ]
 
-    rename: aString in: aClass as: aNewName onModel: aGtkTreeStore [
+    delete: aNamespace [
 	<category: 'initialize'>
 
-	category := aString.
-	class := aClass.
-	newCategory := aNewName.
-	treeStore := aGtkTreeStore
+	namespace := aNamespace
     ]
 
     description [
 	<category: 'accessing'>
 
-	^ 'Rename a category'
+	^ 'Delete a namespace'
     ]
 
-    precondition [
-        <category: 'checking'>
-
-	newCategory = '*' ifTrue: [ ^ self preconditionFailed: 'Can''t create a * category' ].
-        (treeStore hasCategory: newCategory asString) ifTrue: [ ^ self preconditionFailed: 'Category is present' ].
-	^ true
-    ]
-
-    undo [
+    execute [
 	<category: 'events'>
 
-	class methodDictionary do: [ :each |
-	    each methodCategory = newCategory
-		ifTrue: [ each methodCategory: category ] ].
-	treeStore
-	    removeCategory: newCategory;
-	    appendCategory: category
-    ]
-
-    redo [
-	<category: 'events'>
-
-	class methodDictionary do: [ :each |
-            each methodCategory = category
-                ifTrue: [ each methodCategory: newCategory ] ].
-	treeStore
-	    removeCategory: category;
-	    appendCategory: newCategory
+	namespace superspace removeSubspace: namespace name
     ]
 ]
 

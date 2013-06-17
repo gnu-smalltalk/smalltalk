@@ -1,6 +1,6 @@
 "======================================================================
 |
-| DeleteNamespaceUndoCommand class definition
+| SysDeleteClassCommand class definition
 |
 ======================================================================"
 
@@ -33,40 +33,43 @@
 |
 ======================================================================"
 
-UndoCommand subclass: DeleteNamespaceUndoCommand [
+Command subclass: SysDeleteClassCommand [
 
-    |  namespace treeStore |
+    |  class |
 
-    DeleteNamespaceUndoCommand class >> delete: aNamespace [
+    SysDeleteClassCommand class >> delete: aClass [
 	<category: 'instance creation'>
 
 	^ (self new)
-	    delete: aNamespace;
+	    delete: aClass;
+	    "precondition;"
 	    yourself
     ]
 
-    delete: aNamespace [
+    delete: aClass [
 	<category: 'initialize'>
 
-	namespace := aNamespace
+	class := aClass.
     ]
 
     description [
 	<category: 'accessing'>
 
-	^ 'Delete a namespace'
+	^ 'Delete a class'
     ]
 
-    undo [
-	<category: 'events'>
+    valid [
+	<category: 'checking'>
 
-	namespace superspace insertSubspace: namespace
+        class subclasses isEmpty ifFalse: [ ^ self preconditionFailed: 'class has subclasses' ].
+	^ true
     ]
 
-    redo [
+    execute [
 	<category: 'events'>
 
-	namespace superspace removeSubspace: namespace name
+	class superclass ifNotNil: [ class superclass removeSubclass: class ].
+	class environment removeClass: class name
     ]
 ]
 

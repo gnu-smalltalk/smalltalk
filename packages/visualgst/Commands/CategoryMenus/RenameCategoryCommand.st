@@ -46,7 +46,7 @@ CategoryCommand subclass: RenameCategoryCommand [
 	| dlg |
         dlg := GtkEntryDialog title: 'Rename a category' text: 'Name of the category'.
         dlg hasPressedOk: [
-            (RenameCategoryUndoCommand rename: target state category in: target state classOrMeta as: dlg result onModel: target viewedCategoryModel) push ]
+            (SysRenameCategoryCommand rename: target state category in: target state classOrMeta as: dlg result onModel: target viewedCategoryModel) executeIfValid ]
     ]
 ]
 

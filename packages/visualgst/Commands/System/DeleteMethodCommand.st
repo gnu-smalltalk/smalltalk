@@ -1,6 +1,6 @@
 "======================================================================
 |
-| AddNamespaceUndoCommand class definition
+| SysDeleteMethodCommand class definition
 |
 ======================================================================"
 
@@ -33,51 +33,37 @@
 |
 ======================================================================"
 
-UndoCommand subclass: AddNamespaceUndoCommand [
-    | parentNamespace namespaceName newNamespace |
+Command subclass: SysDeleteMethodCommand [
 
-    AddNamespaceUndoCommand class >> add: aSymbol to: aNamespace [
+    | selector classOrMeta compiledMethod |
+
+    SysDeleteMethodCommand class >> delete: aSymbol in: aClass [
 	<category: 'instance creation'>
 
 	^ (self new)
-	    add: aSymbol to: aNamespace;
+	    delete: aSymbol in: aClass;
+	    "precondition;"
 	    yourself
     ]
 
-    add: aSymbol to: aNamespace [
+    delete: aSymbol in: aClass [
 	<category: 'initialize'>
 
-	parentNamespace := aNamespace.
-	namespaceName := aSymbol.
+	selector := aSymbol.
+	classOrMeta := aClass.
     ]
 
     description [
 	<category: 'accessing'>
 
-	^ 'Add a namespace'
+	^ 'Delete a method'
     ]
 
-    precondition [
-        <category: 'checking'>
-
-        namespaceName = #Smalltalk ifTrue: [ ^ self preconditionFailed: 'class name can''t be the same has a namespace name' ].
-        parentNamespace subspacesDo: [ :each |
-	    each name = namespaceName ifTrue: [ ^ self preconditionFailed: 'class name can''t be the same has a namespace name' ] ].
-	(parentNamespace includesKey: namespaceName) ifTrue: [ ^ self preconditionFailed: 'parent namespace can''t be the same has a namespace name' ].
-	newNamespace := Namespace gstNew: parentNamespace name: namespaceName asSymbol.
-	^ true
-    ]
-
-    undo [
+    execte [
 	<category: 'events'>
 
-	parentNamespace removeSubspace: newNamespace name
-    ]
-
-    redo [
-	<category: 'events'>
-
-	parentNamespace insertSubspace: newNamespace
+	compiledMethod := classOrMeta >> selector.
+	classOrMeta methodDictionary removeMethod: compiledMethod.
     ]
 ]
 

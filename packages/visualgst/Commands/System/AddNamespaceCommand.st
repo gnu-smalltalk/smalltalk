@@ -1,6 +1,6 @@
 "======================================================================
 |
-| RenameNamespaceUndoCommand class definition
+| SysAddNamespace class definition
 |
 ======================================================================"
 
@@ -33,55 +33,45 @@
 |
 ======================================================================"
 
-UndoCommand subclass: RenameNamespaceUndoCommand [
+Command subclass: SysAddNamespaceCommand [
+    | parentNamespace namespaceName newNamespace |
 
-    | namespace oldName newName |
-
-    RenameNamespaceUndoCommand class >> rename: aNamespace as: aSymbol [
+    SysAddNamespaceCommand class >> add: aSymbol to: aNamespace [
 	<category: 'instance creation'>
 
 	^ (self new)
-	    rename: aNamespace as: aSymbol;
-	    "precondition;"
+	    add: aSymbol to: aNamespace;
 	    yourself
     ]
 
-    rename: aNamespace as: aSymbol [
+    add: aSymbol to: aNamespace [
 	<category: 'initialize'>
 
-	namespace := aNamespace.
-	oldName := namespace name.
-	newName := aSymbol.
+	parentNamespace := aNamespace.
+	namespaceName := aSymbol.
     ]
 
     description [
 	<category: 'accessing'>
 
-	^ 'Rename a namespace'
+	^ 'Add a namespace'
     ]
 
-    precondition [
+    valid [
         <category: 'checking'>
 
-        newName = #Smalltalk ifTrue: [ ^ self preconditionFailed: 'Namespace name can''t be the same has a namespace name'  ].
-        namespace subspacesDo: [ :each | each name = newName ifTrue: [ ^ self preconditionFailed: 'Namespace name can''t be the same has a namespace name'  ] ].
+        namespaceName = #Smalltalk ifTrue: [ ^ self preconditionFailed: 'class name can''t be the same has a namespace name' ].
+        parentNamespace subspacesDo: [ :each |
+	    each name = namespaceName ifTrue: [ ^ self preconditionFailed: 'class name can''t be the same has a namespace name' ] ].
+	(parentNamespace includesKey: namespaceName) ifTrue: [ ^ self preconditionFailed: 'parent namespace can''t be the same has a namespace name' ].
+	newNamespace := Namespace gstNew: parentNamespace name: namespaceName asSymbol.
 	^ true
     ]
 
-    undo [
+    execute [
 	<category: 'events'>
 
-	namespace superspace removeSubspace: namespace name.
-	namespace name: oldName.
-	namespace superspace insertSubspace: namespace
-    ]
-
-    redo [
-	<category: 'events'>
-
-	namespace superspace removeSubspace: namespace name.
-        namespace name: newName.
-        namespace superspace insertSubspace: namespace
+	parentNamespace insertSubspace: newNamespace
     ]
 ]
 
