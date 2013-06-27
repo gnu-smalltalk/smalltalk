@@ -1,5 +1,9 @@
 2013-06-03  Holger Hans Peter Freyther  <holger@moiji-mobile.com>
 
+	* files.c: Make BlockClosure available before the CharacterArray.
+
+2013-06-03  Holger Hans Peter Freyther  <holger@moiji-mobile.com>
+
 	* xlat.c: Use jit_flush_code for the runtime code.
 
 2013-06-14  Gwenael Casaccio <gwenael.casaccio@gmail.com>
