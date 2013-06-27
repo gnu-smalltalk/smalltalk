@@ -979,7 +979,7 @@ index_oop_spec (OOP oop,
 	        size_t index,
 		intptr_t instanceSpec)
 {
-  size_t maxIndex, maxByte;
+  size_t maxIndex, maxByte, base;
   char *src;
 
   if UNCOMMON (index < 1)
@@ -991,12 +991,12 @@ index_oop_spec (OOP oop,
     if (sizeof (type) <= sizeof (PTR))					\
       maxByte -= (oop->flags & EMPTY_BYTES);				\
 									\
-    index =								\
-      index * sizeof(type)						\
-      + (instanceSpec >> ISP_NUMFIXEDFIELDS) * sizeof (PTR);		\
+    base = (instanceSpec >> ISP_NUMFIXEDFIELDS) * sizeof (PTR);		\
+    index = base + index * sizeof(type);				\
 									\
     /* Check that we're on bounds.  */					\
-    if UNCOMMON (index > maxByte)					\
+    base += sizeof(type);						\
+    if UNCOMMON (index - base > maxByte - base)				\
       return (NULL);							\
 									\
     index -= sizeof(type);						\
@@ -1084,8 +1084,10 @@ index_oop_spec (OOP oop,
 
       case GST_ISP_POINTER:
         maxIndex = NUM_WORDS (object);
-        index += instanceSpec >> ISP_NUMFIXEDFIELDS;
-        if UNCOMMON (index > maxIndex)
+        base = instanceSpec >> ISP_NUMFIXEDFIELDS;
+        index += base;
+        base++;
+        if UNCOMMON (index - base > maxIndex - base)
 	  return (NULL);
 
         return (object->data[index - 1]);
@@ -1112,7 +1114,7 @@ index_oop_put_spec (OOP oop,
 		    OOP value,
 		    intptr_t instanceSpec)
 {
-  size_t maxIndex;
+  size_t maxIndex, base;
 
   if UNCOMMON (index < 1)
     return (false);
@@ -1125,12 +1127,12 @@ index_oop_put_spec (OOP oop,
         if (sizeof (type) <= sizeof (PTR))				\
           maxByte -= (oop->flags & EMPTY_BYTES);			\
 									\
-        index =								\
-          index * sizeof(type)						\
-          + (instanceSpec >> ISP_NUMFIXEDFIELDS) * sizeof (PTR);	\
+          base = (instanceSpec >> ISP_NUMFIXEDFIELDS) * sizeof (PTR);	\
+          index = base + index * sizeof(type);				\
 									\
         /* Check that we're on bounds.  */				\
-        if UNCOMMON (index > maxByte)					\
+        base += sizeof(type);						\
+        if UNCOMMON (index - base > maxByte - base)			\
           return (false);						\
 									\
         index -= sizeof(type);						\
@@ -1250,8 +1252,10 @@ index_oop_put_spec (OOP oop,
 
       case GST_ISP_POINTER:
         maxIndex = NUM_WORDS (object);
-        index += instanceSpec >> ISP_NUMFIXEDFIELDS;
-        if UNCOMMON (index > maxIndex)
+        base = instanceSpec >> ISP_NUMFIXEDFIELDS;
+        index += base;
+        base++;
+        if UNCOMMON (index - base > maxIndex - base)
 	  return (false);
 
         object->data[index - 1] = value;

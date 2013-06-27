@@ -1,5 +1,14 @@
 2013-10-07  Paolo Bonzini  <bonzini@gnu.org>
 
+	* libgst/dict.inl: Fix overflow check in index_oop_spec and
+	index_oop_put_spec.  This use the trick of converting
+	(a < x || a > y) to (a - x > y - x).  Adjusting "index" after
+	the check helps because we can compare with "> maxByte" instead
+	of ">= maxByte + sizeof(type) - 1".  On the other hand, we
+	have to do a somewhat ugly adjust to base.
+
+2013-10-07  Paolo Bonzini  <bonzini@gnu.org>
+
 	* libgst/dict.inl: In index_oop_spec and index_oop_put_spec,
 	move index decrement after the scaling by sizeof(type) and the
 	overflow test.	This prepares for fixing the overflow test.
