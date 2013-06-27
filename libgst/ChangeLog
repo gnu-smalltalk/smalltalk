@@ -1,5 +1,11 @@
 2013-10-07  Paolo Bonzini  <bonzini@gnu.org>
 
+	* libgst/dict.inl: In index_oop_spec and index_oop_put_spec,
+	move index decrement after the scaling by sizeof(type) and the
+	overflow test.	This prepares for fixing the overflow test.
+
+2013-10-07  Paolo Bonzini  <bonzini@gnu.org>
+
 	* libgst/genvm-parse.def: Emit definitions for UNDO_PREPARE_STACK.
 	* libgst/vm.def: Wrap calls to _gst_make_block_closure with
 	PREPARE_STACK and UNDO_PREPARE_STACK.  Otherwise, the sp

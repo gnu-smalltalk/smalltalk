@@ -985,8 +985,6 @@ index_oop_spec (OOP oop,
   if UNCOMMON (index < 1)
     return (NULL);
 
-  index--;
-
 #define DO_INDEX_OOP(type, dest)					\
     /* Find the number of bytes in the object.  */			\
     maxByte = NUM_WORDS (object) * sizeof (PTR);			\
@@ -998,8 +996,10 @@ index_oop_spec (OOP oop,
       + (instanceSpec >> ISP_NUMFIXEDFIELDS) * sizeof (PTR);		\
 									\
     /* Check that we're on bounds.  */					\
-    if UNCOMMON (index + sizeof(type) > maxByte)			\
+    if UNCOMMON (index > maxByte)					\
       return (NULL);							\
+									\
+    index -= sizeof(type);						\
 									\
     /* Use a cast if unaligned accesses are supported, else memcpy.  */	\
     src = ((char *) object->data) + index;				\
@@ -1085,10 +1085,10 @@ index_oop_spec (OOP oop,
       case GST_ISP_POINTER:
         maxIndex = NUM_WORDS (object);
         index += instanceSpec >> ISP_NUMFIXEDFIELDS;
-        if UNCOMMON (index >= maxIndex)
+        if UNCOMMON (index > maxIndex)
 	  return (NULL);
 
-        return (object->data[index]);
+        return (object->data[index - 1]);
     }
 #undef DO_INDEX_OOP
 
@@ -1117,8 +1117,6 @@ index_oop_put_spec (OOP oop,
   if UNCOMMON (index < 1)
     return (false);
 
-  index--;
-
 #define DO_INDEX_OOP_PUT(type, cond, src)				\
     if COMMON (cond)							\
       {									\
@@ -1132,8 +1130,10 @@ index_oop_put_spec (OOP oop,
           + (instanceSpec >> ISP_NUMFIXEDFIELDS) * sizeof (PTR);	\
 									\
         /* Check that we're on bounds.  */				\
-        if UNCOMMON (index + sizeof(type) > maxByte)			\
+        if UNCOMMON (index > maxByte)					\
           return (false);						\
+									\
+        index -= sizeof(type);						\
 									\
         /* Use a cast if unaligned accesses are ok, else memcpy.  */	\
         if (sizeof (type) <= sizeof (PTR))				\
@@ -1251,10 +1251,10 @@ index_oop_put_spec (OOP oop,
       case GST_ISP_POINTER:
         maxIndex = NUM_WORDS (object);
         index += instanceSpec >> ISP_NUMFIXEDFIELDS;
-        if UNCOMMON (index >= maxIndex)
+        if UNCOMMON (index > maxIndex)
 	  return (false);
 
-        object->data[index] = value;
+        object->data[index - 1] = value;
         return (true);
     }
 #undef DO_INDEX_OOP_PUT
