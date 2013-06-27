@@ -353,6 +353,10 @@ refresh_native_ips (OOP contextOOP)
 	  virtualIP = TO_INT (context->ipOffset);
 	  native_ip =
 	    _gst_map_virtual_ip (context->method, receiverClass, virtualIP);
+	  /* The above might have freshly translated the method for us
+	     and the F_XLAT_REACHABLE is not set yet. Set the flag right
+	     to assure we can safely return to this method. */
+	  context->method->flags |= F_XLAT_REACHABLE;
 
 #ifndef OPTIMIZE
 	  if (!native_ip)
