@@ -620,6 +620,8 @@ generate_run_time_code (void)
 
   jit_movi_i (JIT_RET, 0);
   jit_ret ();
+
+  jit_flush_code(_gst_run_native_code, jit_get_label() );
 }
 
 
