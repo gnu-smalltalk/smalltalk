@@ -1,3 +1,7 @@
+2013-06-27  Holger Hans Peter Freyther  <holger@moiji-mobile.com>
+
+	* kernel/ContextPart.st: Revert the previous change.
+
 2013-06-14  Jochen Schmitt  <Jochen@herr-schmitt.de>
 
 	* smalltalk-mode-init.el.in: Use inhibit-local-variables-regexps

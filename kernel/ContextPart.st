@@ -260,8 +260,10 @@ methods that can be used in inspection or debugging.'>
     ip [
 	"Answer the current instruction pointer into the receiver"
 
+	"This funny implementation thwarts the interpreter's optimizing effort"
+
 	<category: 'accessing'>
-	^ip
+	^ip yourself
     ]
 
     ip: newIP [
@@ -311,8 +313,10 @@ methods that can be used in inspection or debugging.'>
     sp [
 	"Answer the current stack pointer into the receiver"
 
+	"This funny implementation thwarts the interpreter's optimizing effort"
+
 	<category: 'accessing'>
-	^sp
+	^sp yourself
     ]
 
     validSize [
@@ -387,8 +391,10 @@ methods that can be used in inspection or debugging.'>
     receiver [
 	"Return the receiver (self) for the method being executed"
 
+	"This funny implementation thwarts the interpreter's optimizing effort"
+
 	<category: 'accessing'>
-	^receiver
+	^receiver yourself
     ]
 
     selector [
