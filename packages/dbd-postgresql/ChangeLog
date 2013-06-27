@@ -1,3 +1,11 @@
+2013-05-20  Holger Hans Peter Freyther  <holger@moiji-mobile.com>
+
+	* FieldConverter.st: Add conversion for Integer, fix
+	conversion for Boolean, Integer and DateTime.
+	* Statement.st: Modify >>#executeWithAll:
+	* Tests.st: Add the PostgresTestCase class.
+	* package.xml: Add Test.st and sunit section.
+
 2011-10-26  Holger Hans Peter Freyther  <holger@freyther.de>
 
 	* Connection.st: Put PQConnection into 'private'.

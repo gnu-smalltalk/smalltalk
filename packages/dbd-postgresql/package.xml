@@ -12,4 +12,9 @@
   <filein>Table.st</filein>
   <filein>TableColumnInfo.st</filein>
   <filein>FieldConverter.st</filein>
+
+  <test>
+    <sunit>DBI.PostgreSQL.PostgresTestCase</sunit>
+    <filein>Tests.st</filein>
+  </test>
 </package>

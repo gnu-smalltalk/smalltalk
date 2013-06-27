@@ -38,19 +38,12 @@ FieldConverter subclass: PGFieldConverter [
 
     writeBoolean: aBoolean on: aStream [
         <category: 'converting-smalltalk'>
-        aStream nextPut: $'.
         aStream nextPut: (aBoolean ifTrue: [ $t ] ifFalse: [ $f ])
-        aStream nextPut: $'.
     ]
 
     writeDateTime: aDateTime on: aStream [
         <category: 'converting-smalltalk'>
-        aStream nextPutAll: 'timestamp '.
-	aDateTime offset = 0
-	    ifFalse: [ aStream nextPutAll: 'with time zone ' ].
-        aStream nextPut: $'.
         aDateTime printOn: aStream.
-        aStream nextPut: $'.
     ]
 
     writeQuotedTime: aTime on: aStream [
@@ -59,5 +52,10 @@ FieldConverter subclass: PGFieldConverter [
 	(aTime respondsTo: #offset)
 	     ifTrue: [ self writeDateTime: aTime on: aStream ]
 	     ifFalse: [ super writeTime: aTime on: aStream ]
+    ]
+
+    writeInteger: anInteger on: aStream [
+        <category: 'converting-smalltalk'>
+        anInteger printOn: aStream.
     ]
 ]

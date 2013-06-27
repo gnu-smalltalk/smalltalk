@@ -133,7 +133,9 @@ Object subclass: FieldConverter [
         | aSelector |
 	aValue isNil ifTrue: [ aStream nextPutAll: 'NULL'. ^self ].
         aSelector := converterSelectors at: aValue class
-                    ifAbsent: [ #defaultConvert:on: ].
+                    ifAbsent: [ aValue isInteger
+                                    ifTrue: [#writeInteger:on:]
+                                    ifFalse: [#defaultConvert:on:]].
         self
             perform: aSelector
             with: aValue
@@ -163,12 +165,13 @@ Object subclass: FieldConverter [
         <category: 'private-initialize'>
         converterSelectors := IdentityDictionary new.
         converterSelectors
-            at: Boolean put: #writeBoolean:on:;
+            at: True put: #writeBoolean:on:;
+            at: False put: #writeBoolean:on:;
             at: FloatD put: #writeFloat:on:;
             at: FloatE put: #writeFloat:on:;
             at: FloatQ put: #writeFloat:on:;
             at: Fraction put: #writeFloat:on:;
-            at: Integer put: #writeInteger:on:;
+            "at: Integer put: #writeInteger:on:;"
             at: Date put: #writeQuotedDate:on:;
             at: DateTime put: #writeDateTime:on:;
             at: Time put: #writeQuotedTime:on:

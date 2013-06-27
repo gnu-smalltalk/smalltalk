@@ -1,3 +1,10 @@
+2013-05-20  Holger Hans Peter Freyther  <holger@moiji-mobile.com>
+
+	* configure.ac: Add --enable-postgres-tests.
+	* tests/atlocal.in: Add variables for PostgreSQL tests.
+	* tests/local.at: Ignore the output on stderr for AT_PACKAGE_TEST.
+	* tests/testsuite.at: Add the DBD-PostgreSQL package.
+
 2013-06-27  Holger Hans Peter Freyther  <holger@moiji-mobile.com>
 
 	* kernel/ContextPart.st: Revert the previous change.

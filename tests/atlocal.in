@@ -1,4 +1,5 @@
 enable_mysql_tests='@enable_mysql_tests@'
+enable_postgres_tests='@enable_postgres_tests@'
 host='@host@'
 TIMEOUT='@TIMEOUT@'
 mysqlvars=`echo $enable_mysql_tests | awk '
@@ -8,4 +9,10 @@ mysqlvars=`echo $enable_mysql_tests | awk '
   length($2) { printf "mysqlpassword='\''%s'\'' ", $2 }
   length($3) { printf "mysqldb='\''%s'\'' ", $3 }
 ' `
-
+postgresvars=`echo $enable_postgres_tests | awk '
+  BEGIN { FS=":" }
+  /^(yes|no)$/ { next }
+  length($1) { printf "postgresuser='\''%s'\'' ", $1 }
+  length($2) { printf "postgrespassword='\''%s'\'' ", $2 }
+  length($3) { printf "postgresdb='\''%s'\'' ", $3 }
+' `

@@ -427,6 +427,13 @@ AC_MSG_RESULT($enable_mysql_tests)
 GST_PACKAGE_ENABLE([DBD-PostgreSQL], [dbd-postgresql],
    [GST_HAVE_LIB(pq, PQconnectdb)],
    [ac_cv_lib_pq_PQconnectdb])
+AC_MSG_CHECKING([whether to run PostgreSQL tests])
+AC_ARG_ENABLE(postgres-tests,
+[  --enable-postgres-tests=USER:PWD:DATABASE
+                          test PostgreSQL bindings [default=root:root:test]], ,
+[enable_postgres_tests=no])
+AC_SUBST(enable_postgres_tests)
+AC_MSG_RESULT($enable_postgres_tests)
 
 GST_PACKAGE_ENABLE([DBD-SQLite], [dbd-sqlite],
    [AC_CHECK_HEADER([sqlite3.h])
