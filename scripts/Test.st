@@ -83,7 +83,9 @@ Smalltalk
     opt = 'package' ifTrue: [
 	[
 	    | pkg |
-	    pkg := PackageLoader packageAt: arg.
+	    pkg := (arg endsWith: '.xml')
+		ifTrue: [ PackageLoader loadPackageFromFile: Directory working / arg ]
+		ifFalse: [ PackageLoader packageAt: arg ].
 	    script := script, ' ', pkg sunitScript.
 	    pkg test notNil ifTrue: [
 		pkg := pkg test.

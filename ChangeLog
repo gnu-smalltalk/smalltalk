@@ -1,3 +1,8 @@
+2013-07-01  Gwenael Casaccio <gwenael.casaccio@gmail.com>
+
+        * kernel/DirPackage.st: Return the loaded package.
+        * scripts/Test.st: Load a package from the package.xml file.
+
 2013-05-20  Holger Hans Peter Freyther  <holger@moiji-mobile.com>
 
 	* configure.ac: Add --enable-postgres-tests.

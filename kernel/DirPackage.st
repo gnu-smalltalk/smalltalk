@@ -88,5 +88,7 @@ PackageLoader class extend [
         attempt to load the package by name."
         self fileInPackages: package prerequisites.
         package primFileIn.
+
+        ^ package
     ]
 ]
