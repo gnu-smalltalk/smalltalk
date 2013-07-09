@@ -1,3 +1,7 @@
+2013-07-09  Gwenael Casaccio <gwenael.casaccio@gmail.com>
+
+	* oop.c: Protect oop1 and oop2 in _gst_swap_objects.
+
 2013-07-16  Paolo Bonzini  <bonzini@gnu.org>
 
 	* libgst/oop.h: Add incubator depth.

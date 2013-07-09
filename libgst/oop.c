@@ -663,6 +663,12 @@ _gst_swap_objects (OOP oop1,
 		   OOP oop2)
 {
   struct oop_s tempOOP;
+  inc_ptr incPtr;
+
+  incPtr = INC_SAVE_POINTER ();
+  INC_ADD_OOP (oop1);
+  INC_ADD_OOP (oop2);
+
   if (oop2->flags & F_WEAK)
     _gst_make_oop_non_weak (oop2);
 
@@ -704,6 +710,8 @@ _gst_swap_objects (OOP oop1,
 
   if (oop1->flags & F_WEAK)
     _gst_make_oop_weak (oop1);
+
+  INC_RESTORE_POINTER (incPtr);
 }
 
 
