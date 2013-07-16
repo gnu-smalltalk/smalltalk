@@ -236,6 +236,7 @@ struct memory_space
 
   /* These hold onto the object incubator's state */
   OOP *inc_base, *inc_ptr, *inc_end;
+  int inc_depth;
 
   /* Objects that are at least this big (in bytes) are allocated outside
      the main heap, hoping to provide more locality of reference between

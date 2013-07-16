@@ -1,5 +1,12 @@
 2013-07-16  Paolo Bonzini  <bonzini@gnu.org>
 
+	* libgst/oop.h: Add incubator depth.
+	* libgst/oop.inl: Track incubator depth and add inc_current_depth().
+	* libgst/comp.c: Assert that add_literal is not called within an
+	incubator context (suggested by Gwen).
+
+2013-07-16  Paolo Bonzini  <bonzini@gnu.org>
+
 	* libgst/comp.c: Do not call add_literal within an incubator context.
 
 2013-06-10  Holger Hans Peter Freyther  <holger@moiji-mobile.com>

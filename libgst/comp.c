@@ -533,6 +533,7 @@ _gst_execute_statements (OOP receiverOOP,
       _gst_compiler_state = &s;
       memset (&s, 0, sizeof (s));
       _gst_compiler_state->undeclared_temporaries = undeclared;
+      _gst_compiler_state->inc_depth = inc_current_depth();
 
       if (setjmp (_gst_compiler_state->bad_method) == 0)
         {
@@ -714,6 +715,7 @@ _gst_compile_method (tree_node method,
     _gst_compiler_state->literal_vec + LITERAL_VEC_CHUNK_SIZE;
 
   incPtr = INC_SAVE_POINTER ();
+  _gst_compiler_state->inc_depth = inc_current_depth();
 
   _gst_alloc_bytecodes ();
   _gst_push_new_scope ();
@@ -2368,6 +2370,8 @@ add_literal (OOP oop)
 
   i =_gst_compiler_state->literal_vec_curr - _gst_compiler_state->literal_vec;
   *_gst_compiler_state->literal_vec_curr++ = oop;
+
+  assert(_gst_compiler_state->inc_depth == inc_current_depth());
   INC_ADD_OOP (oop);
   return i;
 }

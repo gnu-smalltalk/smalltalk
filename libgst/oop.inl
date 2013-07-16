@@ -139,11 +139,16 @@ static inline OOP alloc_oop (PTR obj, intptr_t flags);
     *_gst_mem.inc_ptr++ = (oop))
 
 #define INC_SAVE_POINTER()					\
-  (_gst_mem.inc_ptr - _gst_mem.inc_base)
+  (_gst_mem.inc_depth++, _gst_mem.inc_ptr - _gst_mem.inc_base)
 
 #define INC_RESTORE_POINTER(ptr)				\
-  _gst_mem.inc_ptr = (ptr) + _gst_mem.inc_base;
+  (_gst_mem.inc_depth--, _gst_mem.inc_ptr = (ptr) + _gst_mem.inc_base)
 
+static inline intptr_t
+inc_current_depth (void)
+{
+    return _gst_mem.inc_depth;
+}
 
 
 
