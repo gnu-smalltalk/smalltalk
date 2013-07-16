@@ -1,3 +1,7 @@
+2013-07-16  Paolo Bonzini  <bonzini@gnu.org>
+
+	* libgst/comp.c: Do not call add_literal within an incubator context.
+
 2013-06-10  Holger Hans Peter Freyther  <holger@moiji-mobile.com>
 
 	* interp-jit.inl: Set the F_XLAT_REACHABLE flag in refresh_native_ips.

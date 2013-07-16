@@ -1064,7 +1064,7 @@ compile_block (tree_node blockExpr)
   bc_vector current_bytecodes, blockByteCodes;
   int argCount, tempCount;
   int stack_depth;
-  OOP blockClosureOOP, blockOOP;
+  OOP litOOP, blockOOP;
   gst_compiled_block block;
   inc_ptr incPtr;
 
@@ -1114,17 +1114,15 @@ compile_block (tree_node blockExpr)
   INCR_STACK_DEPTH ();
   block = (gst_compiled_block) OOP_TO_OBJ (blockOOP);
   if (block->header.clean == 0)
-    {
-      blockClosureOOP = make_clean_block_closure (blockOOP);
-      _gst_compile_byte (PUSH_LIT_CONSTANT, add_literal (blockClosureOOP));
-    }
+    litOOP = make_clean_block_closure (blockOOP);
   else
-    {
-      _gst_compile_byte (PUSH_LIT_CONSTANT, add_literal (blockOOP));
-      _gst_compile_byte (MAKE_DIRTY_BLOCK, 0);
-    }
+    litOOP = blockOOP;
 
   INC_RESTORE_POINTER (incPtr);
+
+  _gst_compile_byte (PUSH_LIT_CONSTANT, add_literal (litOOP));
+  if (block->header.clean != 0)
+    _gst_compile_byte (MAKE_DIRTY_BLOCK, 0);
 }
 
 
