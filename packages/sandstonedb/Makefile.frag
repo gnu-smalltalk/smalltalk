@@ -1,5 +1,0 @@
-SandstoneDb_FILES = \
-packages/sandstonedb/Core/Extensions.st packages/sandstonedb/Core/SDRecordMarker.st packages/sandstonedb/Core/SDAbstractStore.st packages/sandstonedb/Core/SDCachedStore.st packages/sandstonedb/Store/SDFileStore.st packages/sandstonedb/Store/SDMemoryStore.st packages/sandstonedb/Core/SDConcurrentDictionary.st packages/sandstonedb/Core/UUID.st packages/sandstonedb/Core/SDCheckPointer.st packages/sandstonedb/Core/SDActiveRecord.st packages/sandstonedb/Core/SDError.st packages/sandstonedb/Core/SDLoadError.st packages/sandstonedb/Core/SDCommitError.st packages/sandstonedb/Tests/Extensions.st packages/sandstonedb/Tests/SDPersonMock.st packages/sandstonedb/Tests/SDManMock.st packages/sandstonedb/Tests/SDWomanMock.st packages/sandstonedb/Tests/SDChildMock.st packages/sandstonedb/Tests/SDGrandChildMock.st packages/sandstonedb/Tests/FooObject.st packages/sandstonedb/Tests/SDActiveRecordTest.st packages/sandstonedb/Tests/SDMemoryStoreTest.st packages/sandstonedb/Tests/SDFileStoreTest.st 
-$(SandstoneDb_FILES):
-$(srcdir)/packages/sandstonedb/stamp-classes: $(SandstoneDb_FILES)
-	touch $(srcdir)/packages/sandstonedb/stamp-classes

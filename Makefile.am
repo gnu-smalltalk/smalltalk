@@ -191,7 +191,7 @@ all-local: $(srcdir)/kernel/stamp-classes
 # could actually do without double-colon rules by using another stamp file
 # which depends on packages.xml and rebuilds all the stamp-classes files.
 
-$(srcdir)/kernel/Makefile.frag: $(srcdir)/packages.xml $(WINEWRAPPERDEP)
+$(srcdir)/kernel/Makefile.frag: $(srcdir)/packages.xml $(bin_PROGRAMS) $(noinst_PROGRAMS) $(WINEWRAPPERDEP)
 	(echo '$$(srcdir)/kernel/stamp-classes: \'; \
 	  $(GST_PACKAGE) --list-files Kernel --vpath --srcdir="$(srcdir)" $(srcdir)/packages.xml | \
 	    tr -d \\r | tr \\n ' '; \
