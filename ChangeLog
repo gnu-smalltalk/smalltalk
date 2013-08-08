@@ -1,3 +1,8 @@
+2013-08-10  Holger Hans Peter Freyther  <holger@moiji-mobile.com>
+
+	* scripts/Convert.st: Use the STTools tools instead of the
+	current code.
+
 2013-08-09  Holger Hans Peter Freyther  <holger@moiji-mobile.com>
 
 	* kernel/FilePath.st: Add FilePath>>#linkAs: and FilePath>>#linkFrom:
