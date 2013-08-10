@@ -250,11 +250,16 @@ Notification subclass: ProcessBeingTerminated [
     | semaphore |
 
     ProcessBeingTerminated class >> initialize [
+
+        | debugInfo |
+        debugInfo := IdentityDictionary new.
+        debugInfo at: (UndefinedObject>>#'__terminate') put: (DebugInformation variables: #()).
 	(UndefinedObject>>#'__terminate')
 	    makeReadOnly: false;
 	    descriptor: ((MethodInfo new: 1)
 		methodClass: UndefinedObject;
 		selector: #'__terminate';
+                setDebugInformation: debugInfo;
 		at: 1 put: (Message
 		    selector: #exceptionHandlerSearch:reset:
 		    arguments: {

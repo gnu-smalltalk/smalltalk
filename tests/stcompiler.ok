@@ -60,3 +60,10 @@ Execution begins...
 true
 true
 returned value is true
+
+Execution begins...
+true
+true
+true
+true
+returned value is nil

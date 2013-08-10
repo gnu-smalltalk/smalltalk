@@ -1,3 +1,11 @@
+2013-08-10  Gwenael Casaccio <gwenael.casaccio@gmail.com>
+
+	* comp.c: Add arguments and temporaries name in DebugInformation.
+	* comp.h: Add a debugInfo state in the compiler.
+	* dict.c: Add _gst_identity_dictionary_new.
+	* dict.h: Add _gst_identity_dictionary_new.
+	* files.c: Bootstrap information for DebugInformation.
+
 2013-07-09  Gwenael Casaccio <gwenael.casaccio@gmail.com>
 
 	* oop.c: Protect oop1 and oop2 in _gst_swap_objects.

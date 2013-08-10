@@ -280,5 +280,17 @@ CompiledCode subclass: CompiledBlock [
 			    receiver: self method]].
 	self error: 'object cannot be dumped'
     ]
+
+    arguments [
+        <category: 'accessing'>
+
+        ^ self method argumentsFor: self
+    ]
+
+    temporaries [
+        <category: 'accessing'>
+
+        ^ self method temporariesFor: self
+    ]
 ]
 

@@ -236,6 +236,7 @@ static const char standard_files[] = {
   "Continuation.st\0"
   "Memory.st\0"
   "MethodInfo.st\0"
+  "DebugInformation.st\0"
   "FileSegment.st\0"
   "FileDescr.st\0"
   "SymLink.st\0"

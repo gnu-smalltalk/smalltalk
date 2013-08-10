@@ -756,5 +756,29 @@ instances.'>
 	self become: newMethod.
 	^nil
     ]
+
+    arguments [
+        <category: 'accessing'>
+
+        ^ self argumentsFor: self
+    ]
+
+    temporaries [
+        <category: 'accessing'>
+
+        ^ self temporariesFor: self
+    ]
+
+    argumentsFor: anObject [
+        <category: 'accessing'>
+
+        ^ self descriptor argumentsFor: anObject
+    ]
+
+    temporariesFor: anObject [
+        <category: 'accessing'>
+
+        ^ self descriptor temporariesFor: anObject
+    ]
 ]
 

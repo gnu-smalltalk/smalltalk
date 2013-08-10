@@ -140,3 +140,22 @@ Eval [
     (bla sharedPools = #('STInST') asOrderedCollection) printNl.
     (bla classVarNames = #('ClassInst') asOrderedCollection) printNl.
 ]
+
+"Test debug informations are generated"
+Object subclass: Foo [
+    a_1: i_1 a_2: i_2 [
+        | i j k |
+
+        ^ [ :a :b :c | | d e f | ]
+    ]
+]
+
+Eval [
+    | mth |
+    mth := Foo>>#'a_1:a_2:'.
+    (mth arguments = #(#'i_1' #'i_2')) printNl.
+    (mth temporaries =  #(#'i' #'j' #'k')) printNl.
+    ((mth blockAt: 1) arguments = #(#'a' #'b' #'c')) printNl.
+    ((mth blockAt: 1) temporaries =  #(#'d' #'e' #'f')) printNl.
+    nil
+]

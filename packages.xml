@@ -189,6 +189,7 @@
   <file>LinkedList.st</file>
   <file>Rectangle.st</file>
   <file>AnsiDates.st</file>
+  <file>DebugInformation.st</file>
   <file>CompildCode.st</file>
   <file>LookupKey.st</file>
   <file>BindingDict.st</file>

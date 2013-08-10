@@ -1,3 +1,14 @@
+2013-08-10  Gwenael Casaccio <gwenael.casaccio@gmail.com>
+
+	* kernel/DebugInformation.st: Add DebugInformation.
+	* kernel/CompildMeth.st: Add DebugInformation support.
+	* kernel/CompiledBlk.st: Add DebugInformation support.
+	* kernel/MethodInfo.st: Add DebugInformation support.
+        * kernel/SysExcept.st: Generate DebugInformation for UndefinedObject>>#'__terminate'.
+	* packages.xml: Bootstrap information for DebugInformation.
+	* tests/stcompiler.ok: Tests for DebugInformations.
+	* tests/stcompiler.st: Tests for DebugInformations.
+
 2013-07-01  Gwenael Casaccio <gwenael.casaccio@gmail.com>
 
         * kernel/DirPackage.st: Return the loaded package.

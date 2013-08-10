@@ -177,6 +177,7 @@ OOP _gst_weak_key_identity_dictionary_class = NULL;
 OOP _gst_weak_value_identity_dictionary_class = NULL;
 OOP _gst_write_stream_class = NULL;
 OOP _gst_processor_oop = NULL;
+OOP _gst_debug_information_class = NULL;
 
 /* Called when a dictionary becomes full, this routine replaces the
    dictionary instance that DICTIONARYOOP is pointing to with a new,
@@ -215,11 +216,6 @@ static size_t identity_dictionary_find_key_or_nil (OOP identityDictionaryOOP,
 static int _gst_identity_dictionary_at_inc (OOP identityDictionaryOOP,
                                             OOP keyOOP,
                                             int inc);
-
-/* Create a new instance of CLASSOOP (an IdentityDictionary subclass)
-   and answer it.  */
-static OOP identity_dictionary_new (OOP classOOP,
-				    int size);
 
 /* Create a new instance of Namespace with the given SIZE, NAME and
    superspace (SUPERSPACEOOP).  */
@@ -742,12 +738,16 @@ static const class_definition class_info[] = {
    "Memory", NULL, NULL, NULL },
 
   {&_gst_method_info_class, &_gst_object_class,
-   GST_ISP_POINTER, true, 4,
-   "MethodInfo", "sourceCode category class selector", NULL, NULL },
+   GST_ISP_POINTER, true, 5,
+   "MethodInfo", "sourceCode category class selector debugInfo", NULL, NULL },
 
   {&_gst_file_segment_class, &_gst_object_class,
    GST_ISP_FIXED, true, 3,
-   "FileSegment", "file startPos size", NULL, NULL }
+   "FileSegment", "file startPos size", NULL, NULL },
+
+  {&_gst_debug_information_class, &_gst_object_class,
+    GST_ISP_FIXED, true, 1,
+    "DebugInformation", "variables", NULL, NULL }
 
 /* Classes not defined here (like Point/Rectangle/RunArray) are
    defined after the kernel has been fully initialized.  */
@@ -1405,7 +1405,7 @@ _gst_valid_class_method_dictionary (OOP class_oop)
     {
       OOP methodDictionaryOOP;
       methodDictionaryOOP =
-        identity_dictionary_new (_gst_method_dictionary_class, 32);
+        _gst_identity_dictionary_new (_gst_method_dictionary_class, 32);
       class = (gst_class) OOP_TO_OBJ (class_oop);
       class->methodDictionary = methodDictionaryOOP;
     }
@@ -1625,7 +1625,6 @@ grow_identity_dictionary (OOP oldIdentityDictionaryOOP)
   identityDictionary = 
     instantiate_with (OOP_CLASS (oldIdentityDictionaryOOP), numFields * 2,
                      &identityDictionaryOOP);
-
   oldIdentityDictionary = OOP_TO_OBJ (oldIdentityDictionaryOOP);
   oldIdentDict = (gst_identity_dictionary) oldIdentityDictionary;
   identDict = (gst_identity_dictionary) identityDictionary;
@@ -1721,7 +1720,7 @@ identity_dictionary_find_key_or_nil (OOP identityDictionaryOOP,
 }
 
 OOP
-identity_dictionary_new (OOP classOOP, int size)
+_gst_identity_dictionary_new (OOP classOOP, int size)
 {
   gst_identity_dictionary identityDictionary;
   OOP identityDictionaryOOP;
@@ -2206,7 +2205,7 @@ _gst_record_profile (OOP oldMethod, OOP newMethod, int ipOffset)
   profile = _gst_identity_dictionary_at (_gst_raw_profile, oldMethod);
   if UNCOMMON (IS_NIL (profile))
     {
-      profile = identity_dictionary_new (_gst_identity_dictionary_class, 6);
+      profile = _gst_identity_dictionary_new (_gst_identity_dictionary_class, 6);
       _gst_identity_dictionary_at_put (_gst_raw_profile, oldMethod, 
                                        profile);
     }
