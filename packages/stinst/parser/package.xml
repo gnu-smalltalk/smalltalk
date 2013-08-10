@@ -29,6 +29,7 @@
    <namespace>STInST.Tests</namespace>
    <sunit>STInST.Tests.TestStandardRewrites</sunit>
    <sunit>STInST.Tests.TestFormat</sunit>
+   <sunit>STInST.Tests.TestParser</sunit>
    <sunit>STInST.Tests.TestRewrite</sunit>
    <sunit>STInST.Tests.TestScanner</sunit>
    <sunit>STInST.Tests.TestDefaultPoolResolution</sunit>

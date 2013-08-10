@@ -1,3 +1,8 @@
+2013-08-10  Gwenael Casaccio <gwenael.casaccio@gmail.com>
+
+	* RBParser.st: Fix RBScanner>>#scanNumberValue.
+	* RewriteTests.st: Add testcase for number and array literal parsing.
+
 2013-07-16  Gwenael Casaccio <gwenael.casaccio@gmail.com>
 
 	* DebugInformationTests.st: Add a debug information test case.

@@ -352,6 +352,49 @@ TestCase subclass: TestScanner [
     ]
 ]
 
+TestCase subclass: TestParser [
+    <comment: 'Test aspects of the RBParser'>
+
+    testNumberParsing [
+
+        | node |
+        node := RBParser parseExpression: '3'.
+        self assert: node value = 3.
+        node := RBParser parseExpression: '-3'.
+        self assert: node value = -3.
+        node := RBParser parseExpression: '-16r3'.
+        self assert: node value = -3.
+        node := RBParser parseExpression: '16r-3'.
+        self assert: node value = -3.
+        node := RBParser parseExpression: '- 16r3'.
+        self assert: node value = -3.
+        node := RBParser parseExpression: '16r-3.23'.
+        self assert: node value = 16r-3.23.
+        node := RBParser parseExpression: '16r-3s23_0'.
+        self assert: node value = 16r-3s23_0.
+        node := RBParser parseExpression: '3_000_000'.
+        self assert: node value = 3_000_000.
+        node := RBParser parseExpression: '3_000_000e1233'.
+        self assert: node value = 3_000_000e1233.
+        node := RBParser parseExpression: '3_000_000d1233'.
+        self assert: node value = 3_000_000d1233.
+        node := RBParser parseExpression: '3_000_000q1233'.
+        self assert: node value = 3_000_000q1233.
+    ]
+
+    testLiteralArrayParsing [
+        | node |
+
+        node := RBParser parseExpression: '#(-3 -2 -16r1)'.
+        self assert: node value first = -3.
+        self assert: node value second = -2.
+        self assert: node value third = -1.
+
+        node := RBParser parseExpression: '#(16r-1)'.
+        self assert: node value first = -1.
+    ]
+]
+
 TestCase subclass: TestRewrite [
     <comment: 'I test that rewriting a method for the OldSyntaxExport and
     SqueakExporter will pick up the new code.'>

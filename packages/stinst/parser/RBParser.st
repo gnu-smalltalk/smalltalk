@@ -1034,6 +1034,10 @@ Stream subclass: RBScanner [
 	isNegative := false.
 	exponent := nil.
 
+	currentCharacter == $-  ifTrue:
+			[isNegative := true.
+			self step	"skip '-'"].
+
 	"could be radix or base-10 mantissa"
 	num := self scanDigits: currentCharacter base: 10.
 	currentCharacter == $r 
