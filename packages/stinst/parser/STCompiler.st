@@ -53,7 +53,7 @@ Actually, I am used when conditionally compiled code has to be skipped.'>
 
 
 STFakeCompiler subclass: STCompiler [
-    | node destClass symTable parser bytecodes depth maxDepth isInsideBlock |
+    | node destClass symTable parser bytecodes depth maxDepth isInsideBlock debugInfo |
     
     <comment: 'Unlike my brother STFakeCompiler, I am a real worker. Give me some nodes, and
 I will output a full-fledged CompiledMethod!!
@@ -170,6 +170,7 @@ indexed'' bytecode. The resulting stream is
 	parser := aParser.
 	bytecodes := WriteStream on: (ByteArray new: 240).
 	isInsideBlock := 0.
+        debugInfo := IdentityDictionary new.
 	symTable declareEnvironment: aBehavior
     ]
 
@@ -478,6 +479,7 @@ indexed'' bytecode. The resulting stream is
 		    depth: maxDepth + node body temporaries size + node arguments size.
 	(method descriptor)
 	    setSourceCode: node source asSourceCode;
+            setDebugInformation: debugInfo;
 	    methodClass: symTable environment;
 	    selector: node selector.
 	method attributesDo: 
@@ -488,6 +490,7 @@ indexed'' bytecode. The resulting stream is
 		    ifTrue: 
 			[error := handler value: method value: ann.
 			error notNil ifTrue: [self compileError: error]]].
+        self createDebugInformationFor: method from: node.
 	^method
     ]
 
@@ -543,6 +546,7 @@ indexed'' bytecode. The resulting stream is
 		    bytecodes: bc
 		    depth: self maxDepth
 		    literals: self literals.
+        self createDebugInformationFor: block from: aNode.
 	self depthSet: depth.
 	clean := block flags.
 	clean == 0 
@@ -993,6 +997,17 @@ indexed'' bytecode. The resulting stream is
 		currentToken := argParser currentToken].
 	selector := selectorBuilder contents asSymbol.
 	^Message selector: selector arguments: arguments contents
+    ]
+
+
+    createDebugInformationFor: aCompiledCode from: aNode [
+	<category: 'debug informations'>
+
+        debugInfo
+            at: aCompiledCode
+            put: (DebugInformation
+                    variables: ((aNode argumentNames collect: [ :each | each asSymbol]),
+                                (aNode body temporaryNames collect: [ :each | each asSymbol])) asArray).
     ]
 ]
 

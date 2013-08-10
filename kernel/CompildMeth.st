@@ -293,6 +293,7 @@ instances.'>
 	 to class"
 
 	<category: 'accessing'>
+        self methodClass == class ifTrue: [ ^ self ].
 	^self methodClass isNil 
 	    ifTrue: 
 		[self

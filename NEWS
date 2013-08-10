@@ -15,6 +15,10 @@ o   Change the semantic of >>#rowCount for the SQLite backend. One can
 o   Add PackageLoader>>#loadPackageFromFile: to load a package by using
     a package.xml. This can make the development more effective.
 
+o   The compiler now generates a DebugInformation providing access to the
+    argument and temporary names of methods and blocks. This can be used
+    by the debugger to provide additional information.
+
 -----------------------------------------------------------------------------
 
 NEWS FROM 3.2.4 to 3.2.5

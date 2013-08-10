@@ -33,8 +33,10 @@
    <sunit>STInST.Tests.TestScanner</sunit>
    <sunit>STInST.Tests.TestDefaultPoolResolution</sunit>
    <sunit>STInST.Tests.TestClassicPoolResolution</sunit>
+   <sunit>STInST.Tests.TestDebugInformation</sunit>
    <filein>RewriteTests.st</filein>
    <filein>PoolResolutionTests.st</filein>
+   <filein>DebugInformationTests.st</filein>
   </test>
 
   <file>ChangeLog</file>

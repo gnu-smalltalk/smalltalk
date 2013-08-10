@@ -1,3 +1,9 @@
+2013-07-16  Gwenael Casaccio <gwenael.casaccio@gmail.com>
+
+	* DebugInformationTests.st: Add a debug information test case.
+	* STCompiler.st: Add  DebugInformation support.
+	* package.xml: Add the new test case
+
 2013-03-31  Holger Hans Peter Freyther  <holger@freyther.de>
 
 	* STLoaderObjs.st: Change ProxyNamespace>>#printOn to avoid

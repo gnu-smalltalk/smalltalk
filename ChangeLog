@@ -1,5 +1,10 @@
 2013-08-10  Gwenael Casaccio <gwenael.casaccio@gmail.com>
 
+	* kernel/CompildMeth.st: Don't change the method class if it's the same.
+	* kernel/MethodInfo.st: Add a debug information setter.
+
+2013-08-10  Gwenael Casaccio <gwenael.casaccio@gmail.com>
+
 	* kernel/DebugInformation.st: Add DebugInformation.
 	* kernel/CompildMeth.st: Add DebugInformation support.
 	* kernel/CompiledBlk.st: Add DebugInformation support.
