@@ -81,17 +81,49 @@ String extend [
     ]
 ]
 
+
+STTools.Loader subclass: SyntaxConverter [
+    <category: 'Converter'>
+
+    SyntaxConverter class >> fixComment: aClass [
+        | comment result readStream |
+        "Fixes for carriage return in Pharo comments."
+        comment := aClass comment.
+        comment ifNil: [^self].
+
+        result := WriteStream on: String new.
+        readStream := comment readStream.
+
+        "Replace \r with \n but only if there is no \r\n"
+        [readStream atEnd] whileFalse: [
+            | char |
+            char := readStream next.
+            (char = Character cr and: [(readStream peek = Character nl) not])
+                ifTrue: [char := Character nl].
+            result nextPut: char].
+
+        "Update the comment"
+        aClass comment: result contents.
+    ]
+
+    doEmitStuff [
+        classesToEmit keysAndValuesDo: [:key :value |
+            self class fixComment: key].
+        super doEmitStuff.
+    ]
+]
 
 Eval [ 
     | helpString inFile outFile quiet verbose converter filter parser
 	args inFormats outFormats rules |
+
     args := OrderedCollection new.
     parser := STInST.STFileInParser.
     quiet := false.
     verbose := false.
     outFile := nil.
     filter := [ :class | true ].
-    converter := STTools.Loader new.
+    converter := SyntaxConverter new.
     STInST.FileOutExporter defaultExporter: STInST.FormattingExporter.
     outFormats := Dictionary from: {
 	'gst2' -> STInST.OldSyntaxExporter.
