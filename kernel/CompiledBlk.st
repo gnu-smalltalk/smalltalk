@@ -138,6 +138,12 @@ CompiledCode subclass: CompiledBlock [
 	^super = aMethod and: [method = aMethod method]
     ]
 
+    method: aCompiledMethod [
+	<category: 'accessing'>
+
+	method := aCompiledMethod
+    ]
+
     method [
 	"Answer the CompiledMethod in which the receiver lies"
 

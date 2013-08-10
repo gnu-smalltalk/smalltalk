@@ -1,5 +1,15 @@
 2013-08-10  Gwenael Casaccio <gwenael.casaccio@gmail.com>
 
+	* kernel/BlkClosure.st: Add >>#method: setter.
+	* kernel/CompildMeth.st: Implement >>#copy and >>#deepCopy.
+	* kernel/CompiledBlk.st: Add >>#method: setter.
+	* kernel/MethodInfo.st: Add >>#debugInformation, >>#postCopy
+	>>#fixDebugInformation:replaceWith: and >>#debugInfoReplace.
+	* configure.ac: Introduce the Kernel-Tests package.
+	* tests/testsuite.at: Add the Kernel-Tests package
+
+2013-08-10  Gwenael Casaccio <gwenael.casaccio@gmail.com>
+
 	* kernel/CompildMeth.st: Don't change the method class if it's the same.
 	* kernel/MethodInfo.st: Add a debug information setter.
 

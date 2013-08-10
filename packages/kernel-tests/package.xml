@@ -1,0 +1,10 @@
+<package>
+  <name>Kernel-Tests</name>
+
+  <test>
+   <sunit>TestCompiledMethod</sunit>
+   <filein>kernel/CompiledMethodTests.st</filein>
+  </test>
+
+  <file>ChangeLog</file>
+</package>

@@ -622,6 +622,12 @@ creation of Processes from blocks.'>
 	SystemExceptions.WrongArgumentCount signal
     ]
 
+    method: aCompiledCode [
+        <category: 'private'>
+
+        block method: aCompiledCode
+    ]
+
     valueAndResumeOnUnwind [
 	"Private - For use by #ensure:"
 

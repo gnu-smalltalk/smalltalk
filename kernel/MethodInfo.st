@@ -147,6 +147,12 @@ code of the method.'>
         debugInfo := aDictionary
     ]
 
+    debugInformation [
+        <category: 'private'>
+
+        ^ debugInfo
+    ]
+
     argumentsFor: anObject [
         <category: 'accessing'>
 
@@ -158,5 +164,34 @@ code of the method.'>
 
         ^ (debugInfo at: anObject) temporaries: anObject numArgs
     ]
+
+    postCopy [
+        <category: 'private-copying'>
+
+        super postCopy.
+        debugInfo := debugInfo copy
+    ]
+
+    fixDebugInformation: anOldCompiledMethod replaceWith: aNewCompiledMethod [
+        <category: 'private-copying'>
+
+        self debugInfoReplace: anOldCompiledMethod with: aNewCompiledMethod.
+        1 to: anOldCompiledMethod literals size do: [ :i |
+            (anOldCompiledMethod literals at: i) class == CompiledBlock ifTrue: [
+                        self debugInfoReplace: (anOldCompiledMethod literals at: i) with: (aNewCompiledMethod literals at: i) ].
+            (anOldCompiledMethod literals at: i) class == BlockClosure ifTrue: [
+                        self debugInfoReplace: (anOldCompiledMethod literals at: i) block with: (aNewCompiledMethod literals at: i) block ] ]
+    ]
+
+    debugInfoReplace: aKey with: aNewKey [
+        <category: 'private-copying'>
+
+        | assoc |
+        assoc := debugInfo associationAt: aKey.
+        debugInfo remove: assoc.
+        assoc key: aNewKey.
+        debugInfo add: assoc.
+    ]
+
 ]
 

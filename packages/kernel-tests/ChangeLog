@@ -1,0 +1,3 @@
+2013-06-11  Gwenael Casaccio <gwenael.casaccio@gmail.com>
+
+	 * kernel/CompiledMethodTests.st: Add tests for CompiledMethod

@@ -143,6 +143,36 @@ instances.'>
 	self allInstancesDo: [:each | each stripSourceCode]
     ]
 
+    copy [
+        <category: 'copying'>
+
+        | copy |
+        copy := super copy.
+        copy fixDebugInformation: self.
+        ^ copy
+    ]
+
+    deepCopy [
+        "Returns a deep copy of the receiver (the instance variables are
+         copies of the receiver's instance variables)"
+
+        <category: 'copying'>
+        | class aCopy num |
+        class := self class.
+        aCopy := self shallowCopy.
+        class isPointers
+            ifTrue: [num := class instSize + self basicSize]
+            ifFalse: [num := class instSize].
+
+        "copy the instance variables (if any)"
+        1 to: num do: [:i | aCopy instVarAt: i put: (self instVarAt: i) copy].
+        aCopy
+            fixBlockInformation;
+            fixDebugInformation: self;
+            makeLiteralsReadOnly.
+        ^aCopy
+    ]
+
     sourceCodeLinesDelta [
 	"Answer the delta from the numbers in LINE_NUMBER bytecodes
 	 to source code line numbers."
@@ -591,18 +621,6 @@ instances.'>
 	    nextPutAll: self selector
     ]
 
-    postCopy [
-	"Private - Make a deep copy of the descriptor and literals.
-	 Don't need to replace the method header and bytecodes, since they
-	 are integers."
-
-	<category: 'private'>
-	super postCopy.
-	descriptor := descriptor copy
-	"literals := literals deepCopy.
-	 self makeLiteralsReadOnly"
-    ]
-
     makeLiteralsReadOnly [
 	<category: 'private'>
 	literals isNil ifTrue: [^self].
@@ -780,6 +798,43 @@ instances.'>
         <category: 'accessing'>
 
         ^ self descriptor temporariesFor: anObject
+    ]
+
+    fixBlockInformation [
+        <category: 'private-copying'>
+
+        1 to: literals size do: [ :i |
+            (literals at: i) class == CompiledBlock ifTrue: [
+                | newBlock |
+                newBlock := (literals at: i) copy.
+                newBlock method: self.
+                literals at: i put: newBlock ].
+            (literals at: i) class == BlockClosure ifTrue: [
+                | newBlock |
+                newBlock := (literals at: i) deepCopy.
+                newBlock block: newBlock block copy.
+                newBlock method: self.
+                literals at: i put: newBlock ]. ]
+    ]
+
+    fixDebugInformation: aCompiledMethod [
+        <category: 'private-copying'>
+
+        descriptor fixDebugInformation: aCompiledMethod replaceWith: self
+    ]
+
+    postCopy [
+        "Private - Make a deep copy of the descriptor and literals.
+         Don't need to replace the method header and bytecodes, since they
+         are integers."
+
+        <category: 'private-copying'>
+
+        super postCopy.
+        descriptor := descriptor copy.
+        literals := literals copy.
+        self fixBlockInformation.
+        self makeLiteralsReadOnly.
     ]
 ]
 
