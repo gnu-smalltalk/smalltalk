@@ -81,17 +81,35 @@ String extend [
     ]
 ]
 
+
+STTools.Loader subclass: SyntaxConverter [
+    <category: 'Converter'>
+
+    doEmitStuff [
+        classesToEmit keysAndValuesDo: [:key :value |
+            | comment |
+            "Fixes for carriage return in Pharo"
+            comment := key comment.
+            comment ifNotNil: [
+                comment := comment replaceAll: Character cr with: Character nl.
+                key comment: comment.
+            ]].
+
+        super doEmitStuff.
+    ]
+]
 
 Eval [ 
     | helpString inFile outFile quiet verbose converter filter parser
 	args inFormats outFormats rules |
+
     args := OrderedCollection new.
     parser := STInST.STFileInParser.
     quiet := false.
     verbose := false.
     outFile := nil.
     filter := [ :class | true ].
-    converter := STTools.Loader new.
+    converter := SyntaxConverter new.
     STInST.FileOutExporter defaultExporter: STInST.FormattingExporter.
     outFormats := Dictionary from: {
 	'gst2' -> STInST.OldSyntaxExporter.
