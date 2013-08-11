@@ -1,3 +1,7 @@
+2013-08-18  Holger Hans Peter Freyther  <holger@moiji-mobile.com>
+
+	* STLoaderObjs.st: Add LoadedMethod>>#methodRecompilationSourceString.
+
 2013-09-11  Holger Hans Peter Freyther  <holger@freyther.de>
 
 	* STLoaderObjsTests.st: Fix the test method and test.
