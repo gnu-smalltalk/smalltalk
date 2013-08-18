@@ -428,6 +428,28 @@ TestCase subclass: TestRewrite [
         self assert: (out contents indexOfSubCollection: 'Osmo.LogManager') = 0.
     ]
 
+
+    testOldSyntaxSymbolParsing [
+        | res |
+        res := (STClassLoader new
+            parseSmalltalkStream:
+'Object subclass: #PhexMatcher
+	instanceVariableNames: ''value state''
+	classVariableNames: ''''
+	poolDictionaries: ''''
+	category: ''Phexample-Core''!
+
+!PhexMatcher methodsFor: ''expecting'' stamp: ''JoeExample 10/27/2009 18:35''!
+< expected
+	^self expect: expected using: #<! !' readStream with: SqueakFileInParser) first.
+
+	"Compare..."
+	self assert: (res >> #<) methodSourceString = '< expected
+	^self expect: expected using: #<'.
+
+	(res >> #<) methodFormattedSourceString printNl.
+    ]
+
     testOldSyntaxNamespaceRewrite [
         | class tree rule rewriter res out|
 
