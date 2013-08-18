@@ -152,6 +152,14 @@ STFileScanner subclass: SqueakFileInScanner [
 		self step].
 
         val := buffer contents.
+
+        "Skip a trailing ! as it might come from a #<! !"
+        val last = $!
+            ifTrue: [
+                stream skip: -1.
+                currentCharacter := $!.
+                characterType := #binary.
+                val := val allButLast].
         val := val asSymbol.
         ^aClass value: val start: tokenStart
     ]

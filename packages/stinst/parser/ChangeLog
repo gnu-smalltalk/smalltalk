@@ -1,3 +1,8 @@
+2013-08-19  Holger Hans Peter Freyther  <holger@freyther.de>
+
+	* RewriteTests.st: Add TestRewrite>>#testOldSyntaxSymbolParsing.
+	* SqueakParser.st: Add SqueakFileInScanner>>#scanBinary:.
+
 2013-08-18  Holger Hans Peter Freyther  <holger@moiji-mobile.com>
 
 	* STLoaderObjs.st: Add LoadedMethod>>#methodRecompilationSourceString.
