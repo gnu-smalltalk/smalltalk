@@ -1,5 +1,10 @@
 2013-08-19  Holger Hans Peter Freyther  <holger@freyther.de>
 
+	* Commands/MethodMenus/DebugTestCommand.st: Rename class from RunTestCommand
+	to DebugTestCommand.
+
+2013-08-19  Holger Hans Peter Freyther  <holger@freyther.de>
+
 	* Extensions.st: Add >>#methodViewIcon extension to 
 	STInST.STClassLoaderObjects.LoadedMethod.
 

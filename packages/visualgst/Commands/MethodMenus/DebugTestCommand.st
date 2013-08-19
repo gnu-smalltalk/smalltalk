@@ -1,6 +1,6 @@
 "======================================================================
 |
-| RunTestCommand class definition
+| DebugTestCommand class definition
 |
 ======================================================================"
 
@@ -33,12 +33,16 @@
 |
 ======================================================================"
 
-MethodCommand subclass: RunTestCommand [
+MethodCommand subclass: DebugTestCommand [
+
+    <comment: 'Still broken for SUNit... >>#valid is run on a target
+    that is not actually a method....'>
 
     execute [
 	<category: 'command'>
 
         target state classOrMeta debug: target state selector
     ]
+
 ]
 
