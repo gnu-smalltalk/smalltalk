@@ -141,6 +141,7 @@ GtkConcreteWidget subclass: GtkCategorizedNamespaceWidget [
 	(anEvent item category isNil or: [ anEvent item category size = 0 ]) ifTrue: [ ^ self ].
         root := ClassCategory named: anEvent item category into: namespace.
 	(model hasItem: root) ifTrue: [ ^ self ].
+	toAdd := root.
 	[ root parent isNil or: [ (model hasItem: root) ] ] whileFalse: [ 
 					toAdd := root.
 					root := root parent ].

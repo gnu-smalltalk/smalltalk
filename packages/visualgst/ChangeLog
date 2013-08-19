@@ -1,5 +1,9 @@
 2013-08-19  Holger Hans Peter Freyther  <holger@freyther.de>
 
+	* StBrowser/GtkCategorizedNamespaceWidget.st: Intialize toAdd to fix DNU.
+
+2013-08-19  Holger Hans Peter Freyther  <holger@freyther.de>
+
 	* Commands/MethodMenus/DebugTestCommand.st: Rename class from RunTestCommand
 	to DebugTestCommand.
 
