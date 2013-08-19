@@ -1,3 +1,8 @@
+2013-08-19  Holger Hans Peter Freyther  <holger@freyther.de>
+
+	* Extensions.st: Add >>#methodViewIcon extension to 
+	STInST.STClassLoaderObjects.LoadedMethod.
+
 2013-06-18  Gwenael Casaccio  <gwenael.casaccio@gmail.com>
 
 	* Debugger/GtkDebugger.st: Don't use previous debugger extensions.

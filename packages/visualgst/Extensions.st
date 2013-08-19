@@ -768,3 +768,11 @@ Smalltalk.PackageLoader class extend [
 	^ root
     ]
 ]
+
+STInST.STClassLoaderObjects.LoadedMethod extend [
+    methodViewIcon [
+        <category: '*VisualGST'>
+        ^ nil
+    ]
+]
+
