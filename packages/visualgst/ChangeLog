@@ -1,3 +1,8 @@
+2013-06-18  Gwenael Casaccio  <mrgwen@gmail.com>
+
+	* Debugger/GtkDebugger.st: Center the view and select one line.
+	* Text/GtkTextWidget.st: Center the view.
+
 2013-08-19  Holger Hans Peter Freyther  <holger@freyther.de>
 
 	* StBrowser/GtkCategorizedNamespaceWidget.st: Intialize toAdd to fix DNU.

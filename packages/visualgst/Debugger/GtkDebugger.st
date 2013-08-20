@@ -264,11 +264,16 @@ GtkBrowsingTool subclass: GtkDebugger [
     contextChanged [
 	<category: 'context events'>
 
-	| iter |
 	self checkCodeWidgetAndUpdate: [
+            | line |
 	    contextWidget hasSelectedContext ifFalse: [ ^ self ].
 	    codeWidget source: (BrowserMethodSource on: contextWidget selectedContext method).
-	    codeWidget applyTag: #debug forLine: contextWidget selectedContext currentLine.
+            contextWidget selectedContext currentLine ~= 0
+                ifTrue: [ line := contextWidget selectedContext currentLine ]
+                ifFalse: [ line := 1 ].
+            codeWidget
+                applyTag: #debug forLine: line;
+                centerViewAtLine: line.
 	    self updateInspectorWidget: contextWidget selectedContext ]
     ]
 

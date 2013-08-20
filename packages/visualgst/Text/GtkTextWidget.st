@@ -363,6 +363,16 @@ GtkConcreteWidget subclass: GtkTextWidget [
 	self buffer selectRange: start bound: end
     ]
 
+    centerViewAtLine: anInteger [
+        <category: 'view'>
+
+        | mark iter |
+        iter := self buffer getIterAtLine: anInteger.
+        mark := GTK.GtkTextMark new: nil leftGravity: false.
+        self buffer addMark: mark where: iter.
+        textWidget scrollMarkOnscreen: mark.
+    ]
+
     beforeEvaluation [
         <category: 'smalltalk event'>
     ]

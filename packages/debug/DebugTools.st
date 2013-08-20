@@ -309,5 +309,10 @@ pointer bytecodes to line numbers.'>
 	process := aProcess.
 	stepSemaphore := Semaphore new
     ]
+
+    receiver [
+        <category: 'private'>
+        ^ self suspendedContext receiver
+    ]
 ]
 
