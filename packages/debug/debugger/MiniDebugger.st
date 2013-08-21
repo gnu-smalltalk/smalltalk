@@ -213,7 +213,7 @@ graphical debugger).  The interface is vaguely similar to GDB.'>
     ].
 
     activeContext isNil ifFalse: [
-        activeContext == context ifFalse: [ activeContext printNl; printContextState ].
+        activeContext == context ifFalse: [ activeContext printNl ].
         self printCurrentLine ].
 
     ^true
@@ -267,7 +267,7 @@ graphical debugger).  The interface is vaguely similar to GDB.'>
     self doStepCommand ifTrue: [ ^true ].
     self doProcessCommand ifTrue: [ ^true ].
 
-    ('PriIelwgxX' includes: command) ifFalse: [ ^false ].
+    ('PriIJelwgxX' includes: command) ifFalse: [ ^false ].
 
     (command == $h) ifTrue: [ ^true ].
 
@@ -278,6 +278,7 @@ graphical debugger).  The interface is vaguely similar to GDB.'>
     (command == $r) ifTrue: [ activeContext receiver printNl ].
     (command == $i) ifTrue: [ MiniInspector openOn: activeContext receiver ].
     (command == $I) ifTrue: [ MiniInspector openOn: activeContext ].
+    (command == $J) ifTrue: [ self printContextState ].
     (command == $e) ifTrue: [ self interpreterLoopWith: activeContext receiver ].
     (command == $l) ifTrue: [ self printCurrentMethod ].
     (command == $w) ifTrue: [ activeContext printNl. self printCurrentLine ].
@@ -318,6 +319,7 @@ Examining state:
     r          print receiver on stdout
     i          inspect (enter MiniInspector on current receiver)
     I          inspect context (enter MiniInspector on current context)
+    J          print context state on stdout
     e          eval (enter read-eval-print loop on current receiver)
 
 Examining the call stack:
@@ -330,6 +332,13 @@ Other commands:
     g          collect all garbage
     X          exit Smalltalk, and dump core
     x          exit Smalltalk'
+    ]
+
+    printContextState [
+        <category: 'private'>
+
+        activeContext ifNil: [ ^ self ].
+        activeContext printContextState
     ]
 
     currentMethodSource [
