@@ -121,4 +121,9 @@ Connection subclass: SQLiteConnection [
 	table isNil ifTrue: [ ^aBlock value ].
 	^table
     ]
+
+    beginTransaction [
+        <category: 'implementations'>
+        ^self do: 'BEGIN TRANSACTION'
+    ]
 ]

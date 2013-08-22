@@ -1,3 +1,9 @@
+2013-08-25  Holger Hans Peter Freyther  <holger@freyther.de>
+
+	* Connection.st: Add >>#beginTransaction.
+	* SQLiteTests.st: Use >>#beginTransaction and
+	>>#commitTransaction in the testcase.
+
 2013-04-15  Holger Hans Peter Freyther  <holger@freyther.de>
 
 	* ResultSet.st: Implement streaming usage to conserve memory.
