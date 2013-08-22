@@ -44,8 +44,7 @@ TestCase subclass: SQLiteBaseTest [
                         connect: 'dbi:SQLite:dbname=testdb'
                         user: nil
                         password: nil.
-	connection do: '
-	    BEGIN TRANSACTION'.
+	connection beginTransaction.
 	connection do: '
 	    CREATE TABLE test(int_field integer, string_field text,
 			      double_field double)'.
@@ -55,8 +54,7 @@ TestCase subclass: SQLiteBaseTest [
 	    INSERT INTO "test" VALUES(2, "two", 2.0)'.
 	connection do: '
 	    INSERT INTO "test" VALUES(3, "three", 3.0)'.
-	connection do: '
-	    COMMIT'.
+	connection commitTransaction.
     ]
     
     tearDown [

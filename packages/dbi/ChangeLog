@@ -1,3 +1,9 @@
+2013-08-25  Holger Hans Peter Freyther  <holger@freyther.de>
+
+	* Connection.st: Add >>#beginTransaction,
+	>>#commitTransaction and >>#rollbackTransaction in the
+	base class.
+
 2013-04-15  Holger Hans Peter Freyther  <holger@freyther.de>
 
 	* ResultSet.st: Add documentation to >>#rowCount and >>#size.

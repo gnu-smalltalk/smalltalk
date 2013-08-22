@@ -530,16 +530,6 @@ Connection subclass: MySQLConnection [
 	^self do: 'START TRANSACTION'
     ]
 
-    commitTransaction [
-	<category: 'querying'>
-	^self do: 'COMMIT'
-    ]
-
-    rollbackTransaction [
-	<category: 'querying'>
-	^self do: 'ROLLBACK'
-    ]
-
     database [
 	<category: 'querying'>
 	^database

@@ -137,21 +137,6 @@ Connection subclass: PGConnection [
 	    handle := nil].
     ]
 
-    beginTransaction [
-	<category: 'implementations'>
-	^self do: 'BEGIN'
-    ]
-
-    commitTransaction [
-	<category: 'implementations'>
-	^self do: 'COMMIT'
-    ]
-
-    rollbackTransaction [
-	<category: 'implementations'>
-	^self do: 'ROLLBACK'
-    ]
-
     database [
 	<category: 'accessing'>
 	^handle database

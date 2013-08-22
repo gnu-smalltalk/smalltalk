@@ -176,6 +176,21 @@ Object subclass: Connection [
 	<category: 'accessing'>
 	self subclassResponsibility
     ]
+
+    beginTransaction [
+	<category: 'implementations'>
+	^self do: 'BEGIN'
+    ]
+
+    commitTransaction [
+	<category: 'implementations'>
+	^self do: 'COMMIT'
+    ]
+
+    rollbackTransaction [
+	<category: 'implementations'>
+	^self do: 'ROLLBACK'
+    ]
 ]
 
 
