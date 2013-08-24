@@ -1,3 +1,7 @@
+2013-08-24  Holger Hans Peter Freyther  <holger@freyther.de>
+
+	* mk_enums.awk: Use #ifdef/#endif around key definition.
+
 2013-08-18  Gwenael Casaccio  <gwenael.casaccio@gmail.com>
 
 	* mk_enums.awk: Import GDK old Key symbols in <gdkkeysyms-compat.h>.
