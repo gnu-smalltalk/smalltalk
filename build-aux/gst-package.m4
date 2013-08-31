@@ -50,25 +50,6 @@ EOF
 	       [m4_if(GST_File, Makefile,
 		      [BUILT_PACKAGES="$BUILT_PACKAGES _GST_PKG_DIR"])])])
 
-m4_define([_GST_PKG_DISABLE], [
-  cat >> pkgrules.tmp << \EOF
-all-local: $(srcdir)/_GST_PKG_STAMP
-
-$(srcdir)/_GST_PKG_MK: $(srcdir)/_GST_PKG_XML_IN _GST_PKG_DEPENDENCIES
-        (echo '$1_FILES = \'; \
-          $(GST_[]PACKAGE) --srcdir=$(srcdir) --vpath --list-files $1 $< | \
-            tr -d \\r | tr \\n " "; \
-        echo; \
-        echo '$$($1_FILES):'; \
-        echo '$$(srcdir)/_GST_PKG_STAMP: $$($1_FILES)'; \
-        echo '  touch $$(srcdir)/_GST_PKG_STAMP') > $(srcdir)/_GST_PKG_MK
-
--include $(srcdir)/_GST_PKG_MK
-EOF
-  m4_foreach_w(GST_File, [$2],
-	       [m4_if(GST_File, Makefile,
-		      [BUILT_PACKAGES="$BUILT_PACKAGES _GST_PKG_DIR"])])])
-
 m4_define([_GST_PKG_IF_FILE], [dnl
 m4_define([_GST_COND], [$4])dnl
 m4_foreach_w(GST_File, [$1],
@@ -99,12 +80,14 @@ $1.star: _GST_PKG_XML $(srcdir)/_GST_PKG_STAMP _GST_PKG_DEPENDENCIES
 clean-local::
 	-rm -f $1.star
 
-dist-hook::
-	$(GST_[]PACKAGE) --srcdir=$(srcdir) --target-directory=_GST_PKG_DISTDIR --dist $(srcdir)/_GST_PKG_XML_IN
+dist-hook:: _GST_PKG_XML
+	$(GST_[]PACKAGE) --srcdir=$(srcdir) --target-directory=_GST_PKG_DISTDIR --dist $<
+
+dist-hook:: $(srcdir)/_GST_PKG_STAMP $(srcdir)/_GST_PKG_MK
 	cp -p $(srcdir)/_GST_PKG_STAMP _GST_PKG_DISTDIR/stamp-classes
 	cp -p $(srcdir)/_GST_PKG_MK _GST_PKG_DISTDIR/Makefile.frag
 
-$(srcdir)/_GST_PKG_MK: $(srcdir)/_GST_PKG_XML_IN _GST_PKG_DEPENDENCIES
+$(srcdir)/_GST_PKG_MK: _GST_PKG_XML_IN
 	(echo '$1_FILES = \'; \
 	  $(GST_[]PACKAGE) --srcdir=$(srcdir) --vpath --list-files $1 $< | \
 	    tr -d \\r | tr \\n " "; \
@@ -132,7 +115,6 @@ EOF
         _GST_PKG_ENABLE([$1], [$5], [$6])
 	AC_MSG_RESULT([yes])
       else
-        _GST_PKG_DISABLE([$1], [], [])
 	AC_MSG_RESULT([no])
       fi
       ],

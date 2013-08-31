@@ -5,7 +5,6 @@
 *.la
 *.lo
 *.o
-*.frag
 *.star
 *.sw?
 .svn
