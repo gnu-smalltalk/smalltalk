@@ -89,7 +89,7 @@ dist-hook:: $(srcdir)/_GST_PKG_STAMP $(srcdir)/_GST_PKG_MK
 
 $(srcdir)/_GST_PKG_MK: _GST_PKG_XML_IN
 	(echo '$1_FILES = \'; \
-	  $(GST_[]PACKAGE) --srcdir=$(srcdir) --vpath --list-files $1 $< | \
+	  $(GST_[]PACKAGE) --srcdir=$(srcdir) --vpath --list-files $1 $< | sort | \
 	    tr -d \\r | tr \\n " "; \
 	echo; \
 	echo '$$($1_FILES):'; \
