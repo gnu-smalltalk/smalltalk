@@ -77,6 +77,130 @@ methods that can be used in inspection or debugging.'>
 	
     ]
 
+
+    printContextState [
+        <category: 'printing'>
+
+        self printContextStateOn: Transcript spaces: 4
+    ]
+
+
+    printVariableKind: aString on: aStream spaces: anInteger [
+        <category: 'printing'>
+
+        aStream
+            space: anInteger;
+            nextPutAll: aString;
+            nextPutAll: ':';
+            nl.
+    ]
+
+    printVariable: anArray at: anIndex do: aBlock on: aStream spaces: anInteger [
+        <category: 'printing'>
+
+            aStream space: anInteger * 2.
+            anArray ifNil: [ aStream print: anIndex ] ifNotNil: [ aStream nextPutAll: (anArray at: anIndex) ].
+            aStream
+                nextPutAll: ' -> ';
+                print: aBlock value;
+                nl
+    ]
+
+    printArgumentsOn: aStream spaces: anInteger [
+        <category: 'printing'>
+
+        | variables |
+
+        self printVariableKind: 'args' on: aStream spaces: 2.
+
+        variables := self method arguments.
+        1 to: self numArgs do: [ :i |
+            self printVariable: variables at: i do: [ self at: i ] on: aStream spaces: anInteger ].
+    ]
+
+    printTemporariesOn: aStream spaces: anInteger [
+        <category: 'printing'>
+
+        | variables |
+
+        self printVariableKind: 'temps' on: aStream spaces: 2.
+
+        variables := self method temporaries.
+        1 to: variables size do: [ :i |
+            self printVariable: variables at: i do: [ self at: self numArgs + i ] on: aStream spaces: anInteger ].
+    ]
+
+    printOptimizedTemporariesOn: aStream spaces: anInteger [
+        <category: 'printing'>
+
+        | variables |
+
+        self printVariableKind: 'optimized temps' on: aStream spaces: 2.
+
+        variables := self method temporaries.
+        self numArgs + variables size + 1 to: self numArgs + self numTemps do: [ :i |
+            self printVariable: nil at: i do: [ self at: i ] on: aStream spaces: anInteger ].
+    ]
+
+    printContextStateOn: aStream spaces: anInteger [
+        <category: 'printing'>
+
+        self
+            printArgumentsOn: aStream spaces: 2;
+            printTemporariesOn: aStream spaces: 2;
+            printOptimizedTemporariesOn: aStream spaces: 2.
+    ]
+
+    examineOn: aStream [
+	<category: 'printing'>
+
+	| instVars output object |
+	aStream
+	    nextPutAll: 'An instance of ';
+	    print: self class;
+	    nl.
+        instVars := self class allInstVarNames.
+        1 to: instVars size
+            do:
+                [:i |
+                object := self instVarAt: i.
+                output := [object printString] on: Error
+                            do:
+                                [:ex |
+                                ex
+                                    return: '%1 %2' %
+                                                {object class article.
+                                                object class name asString}].
+                aStream
+                    nextPutAll: '  ';
+                    nextPutAll: (instVars at: i);
+                    nextPutAll: ': ';
+                    nextPutAll: output;
+                    nl].
+        self printContextStateOn: aStream spaces: 2.
+        aStream
+            space: 2;
+            nextPutAll: 'stack: ';
+            nl.
+        self numArgs + self numTemps + 1 to: self validSize do: [ :i |
+                object := self at: i.
+                output := [object printString] on: Error
+                            do:
+                                [:ex |
+                                ex
+                                    return: '%1 %2' %
+                                                {object class article.
+                                                object class name asString}].
+                aStream
+                    space: 4;
+                    nextPutAll: '[';
+                    print: i;
+                    nextPutAll: ']: ';
+                    nextPutAll: output;
+                    nl].
+            
+    ]
+
     backtrace [
 	"Print a backtrace from the receiver to the bottom of the stack on the
 	 Transcript."

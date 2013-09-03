@@ -3,7 +3,9 @@
 
   <test>
    <sunit>TestCompiledMethod</sunit>
+   <sunit>TestContextPart</sunit>
    <filein>kernel/CompiledMethodTests.st</filein>
+   <filein>kernel/ContextPartTests.st</filein>
   </test>
 
   <file>ChangeLog</file>
