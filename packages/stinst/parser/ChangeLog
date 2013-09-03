@@ -1,5 +1,10 @@
 2013-08-10  Gwenael Casaccio <gwenael.casaccio@gmail.com>
 
+	* STLoaderObjs.st: Fix ProxyNamespace>>#printOn: and add ProxyNamespace>>#examineOn:.
+	* STLoaderObjsTests.st: Add testcase for ProxyNamespace>>#printOn:.
+
+2013-08-10  Gwenael Casaccio <gwenael.casaccio@gmail.com>
+
 	* RBParser.st: Fix RBScanner>>#scanNumberValue.
 	* RewriteTests.st: Add testcase for number and array literal parsing.
 

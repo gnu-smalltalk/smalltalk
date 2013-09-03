@@ -35,9 +35,11 @@
    <sunit>STInST.Tests.TestDefaultPoolResolution</sunit>
    <sunit>STInST.Tests.TestClassicPoolResolution</sunit>
    <sunit>STInST.Tests.TestDebugInformation</sunit>
+   <sunit>STInST.Tests.TestSTLoaderObjects</sunit>
    <filein>RewriteTests.st</filein>
    <filein>PoolResolutionTests.st</filein>
    <filein>DebugInformationTests.st</filein>
+   <filein>STLoaderObjsTests.st</filein>
   </test>
 
   <file>ChangeLog</file>

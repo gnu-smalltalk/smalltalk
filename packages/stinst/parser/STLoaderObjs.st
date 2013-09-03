@@ -1507,19 +1507,22 @@ name
 
 printOn: aStream
     "Print a representation of the receiver on aStream"
-    aStream nextPutAll: self class storeString , '[', proxy name, '] (' ; nl.
+    aStream nextPutAll: self class storeString , '[', proxy name, ']'.
+!
+
+examineOn: aStream
+    "Print a representation of the receiver on aStream"
+    aStream
+        print: self;
+        nextPutAll: ' ('.
     self myKeysAndValuesDo:
         [ :key :value |
-            "The ProxyNamespace is linked to itself in
-             ProxyNamespace class>>#on:for: so we need to skip ourself
-             here or we will loop forever."
-            value == self ifFalse: [
-                aStream tab;
-                    print: key;
-                    nextPutAll: '->';
-                    print: value;
-                    nl ].
-        ].
+            aStream
+                tab;
+                print: key;
+                nextPutAll: '->';
+                print: value;
+                nl ].
     aStream nextPut: $)
 !
 
