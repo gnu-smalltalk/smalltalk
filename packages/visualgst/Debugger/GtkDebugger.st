@@ -225,8 +225,7 @@ GtkBrowsingTool subclass: GtkDebugger [
 	<category: 'context'>
 
 	self initializeProcess: aProcess.
-	3 timesRepeat: [ debugger step ].
-	debugger myStepInto.
+	4 timesRepeat: [ debugger step ].
 	self updateContextWidget
     ]
 
@@ -276,25 +275,21 @@ GtkBrowsingTool subclass: GtkDebugger [
     step [
 	<category: 'execute events'>
 
-	contextWidget isLastContextSelected
-	    ifTrue: [ debugger myStep ]
-	    ifFalse: [ debugger finish: contextWidget selectedContext ].
+	debugger step.
 	self updateContextWidget
     ]
 
     stepInto [
 	<category: 'execute events'>
 
-	contextWidget isLastContextSelected
-	    ifTrue: [ debugger myStepInto ]
-	    ifFalse: [ debugger finish: contextWidget selectedContext ].
+	debugger step.
 	self updateContextWidget
     ]
 
     stepOver [
 	<category: 'execute events'>
 
-	debugger step.
+	debugger finish.
 	self updateContextWidget
     ]
 
