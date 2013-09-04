@@ -6,6 +6,8 @@
     <filein>debugtests.st</filein>
   </test>
 
+  <filein>Extensions.st</filein>
+  <filein>DebuggerReentered.st</filein>
   <filein>DebugTools.st</filein>
   <file>ChangeLog</file>
 </package>
