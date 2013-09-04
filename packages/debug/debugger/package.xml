@@ -1,0 +1,11 @@
+<package>
+  <name>Debugger</name>
+
+  <prereq>DebugTools</prereq>
+
+  <filein>MiniTool.st</filein>
+  <filein>MiniInspector.st</filein>
+  <filein>MiniDebugger.st</filein>
+  <filein>Extensions.st</filein>
+  <file>ChangeLog</file>
+</package>

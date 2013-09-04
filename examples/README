@@ -56,10 +56,6 @@ Methods.st      Examples of subclassing CompiledMethod...  'nuff said!
 by Ian Piumarta
 and me
 
-MiniDebugger.st A simplified debugger which shows how to use the single step
-by me           primitives to implement an interface that vaguely resembles
-                gdb.
-
 PackageBuilder.st   A simple script to make package.xml file from a Smalltalk
 by Stefan Schmiedl  description.  You may find it useful!
 
