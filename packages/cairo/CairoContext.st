@@ -803,7 +803,7 @@ CairoContextProvider subclass: CairoContext [
 	Cairo textExtents: context utf8: aString extents: ext.
 	^TextExtents from: ext
     ]
-].
+]
 
 Object subclass: TextExtents [
 
@@ -845,4 +845,4 @@ glyphs in user-space coordinates.'>
 	extent := aCairoTextExtents width value @ aCairoTextExtents height value.
 	advance := aCairoTextExtents xAdvance value @ aCairoTextExtents yAdvance value.
     ]
-].
+]

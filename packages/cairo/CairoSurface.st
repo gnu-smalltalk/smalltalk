@@ -237,14 +237,14 @@ CairoFileSurface subclass: CairoPdfSurface [
 	<category: 'accessing'>
 	^Cairo pdfSurfaceSetSize: self cairoSurface width: extent x height: extent y
     ]
-].
+]
 
 CairoFileSurface subclass: CairoSvgSurface [
     buildSurface [
 	<category: 'C interface'>
 	^Cairo svgSurfaceCreate: self filename width: extent x height: extent y
     ]
-].
+]
 
 CairoFileSurface subclass: CairoLoadableFileSurface [
     CairoFileSurface class >> on: aFile [
@@ -326,5 +326,5 @@ CairoLoadableFileSurface subclass: CairoPngSurface [
 	<category: 'private-file'>
 	self save
     ]
-].
+]
 
