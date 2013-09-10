@@ -1,3 +1,9 @@
+2013-09-10  Gwenael Casaccio <gwenael.casaccio@gmail.com>
+
+	* GSTParser.st: Make STInST and gst-parse.c consistent about '.'
+	at the end of the class definition.
+	* GSTParserTests.st: Add testcase for trailing consistency.
+
 2013-08-10  Gwenael Casaccio <gwenael.casaccio@gmail.com>
 
 	* STLoaderObjs.st: Fix ProxyNamespace>>#printOn: and add ProxyNamespace>>#examineOn:.

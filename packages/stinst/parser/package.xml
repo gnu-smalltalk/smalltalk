@@ -36,10 +36,12 @@
    <sunit>STInST.Tests.TestClassicPoolResolution</sunit>
    <sunit>STInST.Tests.TestDebugInformation</sunit>
    <sunit>STInST.Tests.TestSTLoaderObjects</sunit>
+   <sunit>STInST.Tests.TestGSTParser</sunit>
    <filein>RewriteTests.st</filein>
    <filein>PoolResolutionTests.st</filein>
    <filein>DebugInformationTests.st</filein>
    <filein>STLoaderObjsTests.st</filein>
+   <filein>GSTParserTests.st</filein>
   </test>
 
   <file>ChangeLog</file>

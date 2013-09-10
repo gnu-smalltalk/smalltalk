@@ -168,6 +168,7 @@ STInST.STFileInParser subclass: GSTFileInParser [
 	    addInstVars := self
 		parseClassBodyElement: addInstVars
 		withinExtend: extend ].
+        currentToken isSpecial ifTrue: [ self skipToken: $. ].
 	taggee := oldTaggee.
     ]
     
