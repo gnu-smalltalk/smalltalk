@@ -38,7 +38,7 @@ Namespace current: STInST.Tests [
         testProxyNamespacePrinting [
 	    <category: 'testing'>
 
-            | stream |
+            | stream class |
 
             stream := WriteStream on: String new.
             class := (STClassLoader new
@@ -49,7 +49,7 @@ Namespace current: STInST.Tests [
                     ]' readStream with: GSTFileInParser) first.
 
             class environment printOn: stream.
-            self assert: stream contents = 'STInST.STClassLoaderObjects.ProxyNamespace[Bar]'.
+            self assert: stream contents = 'STInST.STClassLoaderObjects.ProxyNamespace[Smalltalk]'.
         ]
     ]
 ]

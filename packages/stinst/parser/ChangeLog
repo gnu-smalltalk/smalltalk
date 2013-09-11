@@ -1,3 +1,7 @@
+2013-09-11  Holger Hans Peter Freyther  <holger@freyther.de>
+
+	* STLoaderObjsTests.st: Fix the test method and test.
+
 2013-09-10  Gwenael Casaccio <gwenael.casaccio@gmail.com>
 
 	* GSTParser.st: Make STInST and gst-parse.c consistent about '.'
