@@ -1,3 +1,8 @@
+2013-06-18  Gwenael Casaccio  <gwenael.casaccio@gmail.com>
+
+	* Inspector/Extensions.st: New.
+	* Extensions.st: Move inspector extensions to Inspector/Extensions.st file.
+
 2013-06-18  Gwenael Casaccio  <mrgwen@gmail.com>
 
 	* Debugger/GtkDebugger.st: Center the view and select one line.

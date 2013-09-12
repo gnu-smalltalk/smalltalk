@@ -45,19 +45,6 @@ Eval [
 
 Object extend [
 
-    gtkInspect [
-	"Open a GtkInspector on self"
-	<category: '*VisualGST'>
-
-	VisualGST.GtkInspector openOn: self
-    ]
-
-    inspectorView [
-	<category: '*VisualGST'>
-
-	^ VisualGST.GtkObjectInspectorView
-    ]
-
     hasLiterals [
 	<category: '*VisualGST'>
 
@@ -134,73 +121,14 @@ CompiledMethod extend [
         self override ifTrue: [ ^ self class overrideIcon ].
         ^ nil
     ]
-
-    inspectorView [
-        <category: '*VisualGST'>
-
-        ^ VisualGST.GtkCompiledMethodInspectorView
-    ]
 ]
 
 CompiledBlock extend [
-    inspectorView [
-        <category: '*VisualGST'>
-
-        ^ VisualGST.GtkCompiledBlockInspectorView
-    ]
 
     methodRecompilationSourceString [
 	<category: '*VisualGST'>
 
 	^ self method methodRecompilationSourceString
-    ]
-]
-
-SequenceableCollection extend [
-    inspectorView [
-        <category: '*VisualGST'>
-
-        ^ VisualGST.GtkSequenceableCollectionInspectorView
-    ]
-]
-
-Set extend [
-    inspectorView [
-        <category: '*VisualGST'>
-
-        ^ VisualGST.GtkSetInspectorView
-    ]
-]
-
-Dictionary extend [
-    inspectorView [
-        <category: '*VisualGST'>
-
-        ^ VisualGST.GtkDictionaryInspectorView
-    ]
-]
-
-Character extend [
-    inspectorView [
-        <category: '*VisualGST'>
-
-        ^ VisualGST.GtkCharacterInspectorView
-    ]
-]
-
-Integer extend [
-    inspectorView [
-        <category: '*VisualGST'>
-
-        ^ VisualGST.GtkIntegerInspectorView
-    ]
-]
-
-Float extend [
-    inspectorView [
-        <category: '*VisualGST'>
-
-        ^ VisualGST.GtkFloatInspectorView
     ]
 ]
 

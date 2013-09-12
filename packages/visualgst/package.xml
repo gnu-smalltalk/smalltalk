@@ -205,6 +205,7 @@
   <filein>Text/GtkSourceCodeWidget.st</filein>
   <filein>StBrowser/GtkClassHierarchyWidget.st</filein>
   <filein>GtkHistoryWidget.st</filein>
+  <filein>Inspector/Extensions.st</filein>
   <filein>Inspector/GtkInspector.st</filein>
   <filein>StBrowser/GtkClassBrowserWidget.st</filein>
   <filein>GtkEntryDialog.st</filein>
@@ -473,6 +474,7 @@
   <file>Undo/Text/DeleteTextCommand.st</file>
   <file>Undo/Text/ReplaceTextCommand.st</file>
   <file>Clock/GtkClock.st</file>
+  <file>Inspector/Extensions.st</file>
   <file>Inspector/GtkInspectorSourceWidget.st</file>
   <file>Inspector/GtkInspectorBrowserWidget.st</file>
   <file>Inspector/GtkInspectorWidget.st</file>
