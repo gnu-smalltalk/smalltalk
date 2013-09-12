@@ -254,6 +254,7 @@
   <filein>Inspector/GtkSetInspectorView.st</filein>
   <filein>Inspector/GtkDictionaryInspectorView.st</filein>
   <filein>Inspector/GtkCharacterInspectorView.st</filein>
+  <filein>Inspector/GtkContextInspectorView.st</filein>
   <filein>Inspector/GtkIntegerInspectorView.st</filein>
   <filein>Inspector/GtkFloatInspectorView.st</filein>
   <filein>Implementors/GtkImageResultsWidget.st</filein>

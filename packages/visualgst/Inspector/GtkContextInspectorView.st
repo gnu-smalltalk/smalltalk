@@ -1,6 +1,6 @@
 "======================================================================
 |
-| Extensions
+| GtkContextInspectorView class definition
 |
 ======================================================================"
 
@@ -33,105 +33,26 @@
 |
 ======================================================================"
 
-Object extend [
+GtkObjectInspectorView subclass: GtkContextInspectorView [
 
-    gtkInspect [
-	<category: '*VisualGST'>
+    | args temps |
 
-	VisualGST.GtkInspector openOn: self
+    do: aBlock [
+        <category: 'iterating'>
+
+        args := IdentitySet new.
+        temps := IdentitySet new.
+        super do: aBlock.
+        self object method arguments do: [ :each | aBlock value: (args add: each asString) ].
+        self object method temporaries do: [ :each | aBlock value: (temps add: each asString) ].
     ]
 
-    inspectorView [
-	<category: '*VisualGST'>
+    selectedValue: aString [
+        <category: 'events'>
 
-	^ VisualGST.GtkObjectInspectorView
-    ]
-]
-
-CompiledMethod extend [
-
-    inspectorView [
-        <category: '*VisualGST'>
-
-        ^ VisualGST.GtkCompiledMethodInspectorView
-    ]
-]
-
-CompiledBlock extend [
-
-    inspectorView [
-        <category: '*VisualGST'>
-
-        ^ VisualGST.GtkCompiledBlockInspectorView
-    ]
-]
-
-SequenceableCollection extend [
-
-    inspectorView [
-        <category: '*VisualGST'>
-
-        ^ VisualGST.GtkSequenceableCollectionInspectorView
-    ]
-]
-
-Set extend [
-
-    inspectorView [
-        <category: '*VisualGST'>
-
-        ^ VisualGST.GtkSetInspectorView
-    ]
-]
-
-Dictionary extend [
-
-    inspectorView [
-        <category: '*VisualGST'>
-
-        ^ VisualGST.GtkDictionaryInspectorView
-    ]
-]
-
-Character extend [
-
-    inspectorView [
-        <category: '*VisualGST'>
-
-        ^ VisualGST.GtkCharacterInspectorView
-    ]
-]
-
-Integer extend [
-
-    inspectorView [
-        <category: '*VisualGST'>
-
-        ^ VisualGST.GtkIntegerInspectorView
-    ]
-]
-
-Float extend [
-
-    inspectorView [
-        <category: '*VisualGST'>
-
-        ^ VisualGST.GtkFloatInspectorView
-    ]
-]
-
-ContextPart extend [
-
-    inspectorView [
-        <category: '*VisualGST'>
-
-        ^ VisualGST.GtkContextInspectorView
-    ]
-
-    stackInspectorView [
-        <category: '*VisualGST'>
-
-        ^ VisualGST.GtkStackInspectorView
+        ((args includes: aString) not and: [ (temps includes: aString) not ]) ifTrue: [ ^ super selectedValue: aString ].
+        (args includes: aString) ifTrue: [ ^ (self object at: (self object method arguments indexOf: aString asSymbol)) displayString ].
+        ^ (self object at: self object numArgs + (self object method temporaries indexOf: aString asSymbol)) displayString.
     ]
 ]
 
