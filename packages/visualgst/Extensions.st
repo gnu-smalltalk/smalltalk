@@ -286,25 +286,6 @@ ContextPart extend [
 	    ifTrue: [ ctxt ]
 	    ifFalse: [ self error: 'Error indice too high' ]
     ]
-
-    variables [
-	<category: '*VisualGST'>
-
-	^ 1 to: self numArgs + self numTemps collect: [ :each |
-	    each displayString ]
-    ]
-
-    variablesDo: aBlock [
-	<category: '*VisualGST'>
-
-	^ self variables do: aBlock
-    ]
-
-    stackInspectorView [
-        <category: '*VisualGST'>
-
-        ^ GtkStackInspectorView
-    ]
 ]
 
 VariableBinding extend [

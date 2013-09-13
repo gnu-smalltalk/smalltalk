@@ -34,7 +34,7 @@
 ======================================================================"
 
 GtkConcreteWidget subclass: GtkStackInspectorView [
-    | object variables |
+    | object args temps |
 
     GtkStackInspectorView class >> openOn: aContext [
 	<category: 'instance creation'>
@@ -59,22 +59,21 @@ GtkConcreteWidget subclass: GtkStackInspectorView [
     do: aBlock [
 	<category: 'iterating'>
 
-	| i |
-        variables := Dictionary new.
-        i := 1.
 	aBlock value: 'thisContext'.
-        self object variablesDo: [ :each |
-                variables at: each displayString put: i.
-		aBlock value: each displayString.
-                i := i + 1 ].
+        args := IdentitySet new.
+        self object method arguments do: [ :each |
+		aBlock value: (args add: each asString) ].
+        temps := IdentitySet new.
+        self object method temporaries do: [ :each |
+		aBlock value: (temps add: each asString) ].
     ]
 
     selectedValue: aString [
 	<category: 'item selection'>
 
-        ^ aString = 'thisContext'
-            ifTrue: [ self object ]
-            ifFalse: [ self object at: (variables at: aString) ]
+        aString = 'thisContext' ifTrue: [ ^ self object ].
+        (args includes: aString) ifTrue: [ ^ (self object at: (self object method arguments indexOf: aString asSymbol)) displayString ].
+        ^ (self object at: self object numArgs + (self object method temporaries indexOf: aString asSymbol)) displayString
     ]
 
     canDive [

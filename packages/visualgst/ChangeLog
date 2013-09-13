@@ -1,5 +1,11 @@
 2013-08-20  Gwenael Casaccio  <gwenael.casaccio@gmail.com>
 
+	* Extensions.st: Move some extensions to Debugger/Extensions.
+	* Debugger/Extensions.st: Moved extensions.
+	* Debugger/GtkStackInspectorView.st: Support debug information.
+
+2013-08-20  Gwenael Casaccio  <gwenael.casaccio@gmail.com>
+
 	* Inspector/Extensions.st: Add ContextPart view support.
 	* Inspector/GtkContextInspectorView.st: Dedicated view for ContextPart.
 
