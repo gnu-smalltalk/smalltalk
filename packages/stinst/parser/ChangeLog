@@ -1,3 +1,8 @@
+2013-09-26  Holger Hans Peter Freyther  <holger@freyther.de>
+
+	* GSTParser.st: Move the emptySeq variable into the block it is
+	used.
+
 2013-08-19  Holger Hans Peter Freyther  <holger@freyther.de>
 
 	* RewriteTests.st: Add TestRewrite>>#testOldSyntaxSymbolParsing.
