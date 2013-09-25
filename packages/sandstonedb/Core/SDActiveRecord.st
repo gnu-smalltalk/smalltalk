@@ -54,9 +54,9 @@ Object subclass: SDActiveRecord [
 
     SDActiveRecord class [
 	| locks |
-	
-    Store := nil.
     ]
+
+    Store := nil.
 
     SDActiveRecord class >> new [
 	<category: 'instance creation'>
