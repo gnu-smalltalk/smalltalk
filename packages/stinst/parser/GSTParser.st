@@ -367,7 +367,6 @@ STInST.STFileInParser subclass: GSTFileInParser [
     ]
     
     evaluate: seq [
-	| emptySeq |
 	(currentDeclaration notNil and: [ currentDeclaration comments notEmpty ])
 	    ifTrue: [
 		seq parent isNil
@@ -375,6 +374,7 @@ STInST.STFileInParser subclass: GSTFileInParser [
 			seq comments: currentDeclaration comments.
 			seq parent: currentDeclaration parent ]
 		    ifFalse: [
+			| emptySeq |
 			emptySeq := self makeSequenceNode.
 			emptySeq comments: currentDeclaration comments.
 			emptySeq parent: currentDeclaration parent.
