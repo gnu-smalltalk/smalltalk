@@ -659,6 +659,18 @@ file object, such as /dev/rmt0 on UNIX or MTA0: on VMS).'>
 			    into: collection
 			    startingAt: endPtr + 1)
     ]
+
+    fsync [
+        <category: 'primitive'>
+        self flush.
+        ^super fsync
+    ]
+
+    fdatasync [
+        <category: 'primitive'>
+        self flush.
+        ^super fdatasync
+    ]
 ]
 
 

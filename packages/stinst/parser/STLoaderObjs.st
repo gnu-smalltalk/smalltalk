@@ -1280,6 +1280,12 @@ methodSourceCode
     ^node source asSourceCode
 !
 
+methodRecompilationSourceString
+    ^self isOldSyntax
+        ifTrue: [ self methodFormattedSourceString ]
+        ifFalse: [ self methodSourceString trimSeparators ].
+!
+
 selector
     ^node selector asSymbol
 !

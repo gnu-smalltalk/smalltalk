@@ -1,3 +1,8 @@
+2013-08-25  Holger Hans Peter Freyther  <holger@freyther.de>
+
+	* Connection.st: Remove >>#beginTransaction,
+	>>#commitTransaction and >>#rollbackTransaction.
+
 2013-05-20  Holger Hans Peter Freyther  <holger@moiji-mobile.com>
 
 	* FieldConverter.st: Add conversion for Integer, fix

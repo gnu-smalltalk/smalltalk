@@ -688,6 +688,12 @@ size and timestamps.'>
 	^self open: FileStream write
     ]
 
+    linkAs: destName [
+        "Create destName as a hard link of the receiver."
+        <category: 'file operations'>
+        self subclassResponsibility
+    ]
+
     symlinkAs: destName [
 	"Create destName as a symbolic link of the receiver.  The appropriate
 	 relative path is computed automatically."
@@ -701,6 +707,13 @@ size and timestamps.'>
 
 	<category: 'file operations'>
 	self subclassResponsibility
+    ]
+
+    linkFrom: srcName [
+        "Create the receiver as a hard link from srcName."
+
+        <category: 'file operations'>
+        self subclassResponsibility
     ]
 
     symlinkFrom: srcName [

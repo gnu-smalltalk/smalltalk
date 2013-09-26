@@ -30,7 +30,7 @@
 |
  ======================================================================"
 
-PackageLoader fileInPackage: #Parser.
+PackageLoader fileInPackage: #STTools.
 
 STInST.OldSyntaxExporter class extend [
     emitEval: aBlock to: aStream for: namespace [
@@ -63,328 +63,6 @@ STInST.NewSyntaxExporter class extend [
     ]
 ]
 
-
-Object subclass: EmittedEntity [  
-    emitTo: aStream filteredBy: aBlock [
-        self subclassResponsibility
-    ]
-]
-
-EmittedEntity subclass: EmittedComments [
-    | comments |
-    EmittedComments class >> comments: aCollection source: aString [
-	^self new comments: (aCollection collect: [ :c |
-	    aString copyFrom: c first to: c last ])
-    ]
-
-    emitTo: outStream filteredBy: aBlock [
-	comments do: [ :c |
-		STInST.FileOutExporter defaultExporter fileOutComment: c to: outStream.
-		outStream nl; nl]
-    ]
-
-    comments: anArray [
-	comments := anArray
-   ]
-]
-
-EmittedEntity subclass: EmittedClass [
-    | class methodsToEmit classMethodsToEmit isComplete |
-    
-    <comment: 'This class is responsible for emitting a class 
-    by using a FormattingExporter.'>
-    
-    EmittedClass class >> forClass: aClass [        
-	(aClass superclass notNil and: [
-	    aClass superclass isDefined not ]) ifTrue: [
-	        Warning signal:
-		    ('superclass %1 is undefined' % {aClass superclass}) ].
-        ^super new initializeWithClass: aClass complete: true
-    ]
-    
-    EmittedClass class >> forExtension: aClass [
-	aClass isDefined ifFalse: [
-	    Warning signal:
-		('extensions for undefined class %1' % {aClass}) ].
-        ^super new initializeWithClass: aClass complete: false
-    ]
-    
-    initializeWithClass: aClass complete: aBoolean [
-        class := aClass.
-        methodsToEmit := STInST.OrderedSet new.
-	classMethodsToEmit := STInST.OrderedSet new.
-	isComplete := aBoolean
-    ]
-
-    forClass [ 
-        ^class
-    ]
-    
-    addMethod: aMethod [
-        methodsToEmit add: aMethod selector asSymbol.
-    ]
-
-    addClassMethod: aMethod [
-	classMethodsToEmit add: aMethod selector asSymbol.
-    ]
-	
-    emitTo: aStream filteredBy: aBlock [ 
-	(aBlock value: class)
-	    ifFalse: [
-	        Notification signal: ('Skipping %1' % {class}).
-		^self ].
-
-        Notification signal: ('Converting %1...' % {class}).
-        (STInST.FileOutExporter defaultExporter on: class to: aStream)
-            completeFileOut: isComplete;
-            fileOutSelectors: methodsToEmit classSelectors: classMethodsToEmit.
-    ]
-]
-
-EmittedEntity subclass: EmittedEval [
-    | statements comments namespace |
-    
-    <comment: 'This class is responsible for emitting a set of 
-    statements that should be inside an Eval declaration.'>
-    
-    EmittedEval class >> new [
-        ^super new initialize
-    ]
-    
-    initialize [
-        statements := OrderedCollection new
-    ]
-    
-    namespace [ 
-	^namespace
-    ]
-
-    namespace: aNamespace [ 
-	namespace := aNamespace
-    ]
-
-    addStatement: aStatement [
-        statements add: aStatement
-    ] 
-    
-    emitTo: aStream filteredBy: aBlock [
-	statements isEmpty ifTrue: [ ^self ].
-	STInST.FileOutExporter defaultExporter
-	    emitEval: [
-		| formatter |
-		formatter := STInST.RBFormatter new.
-		formatter indent: 1 while: [
-		    formatter indent.
-	            aStream nextPutAll: (formatter formatAll: statements) ]]
-	    to: aStream
-	    for: namespace.
-    ]
-]
-
-
-
-STInST.STClassLoader subclass: SyntaxConverter [
-    | stuffToEmit classesToEmit createdNamespaces filter outStream rewriter |
-    
-    <comment: 'A class loader that creates a set of "EmittedEntity"
-    based on the contents of the given file being loaded.
-    When the contents of the file are loaded, the responsibilty of 
-    emitting code using the new syntax belongs to those various 
-    entities that have been constructed.'>
-    
-    
-    SyntaxConverter class >> convertSqueakStream: in to: out [
-        <category: 'instance creation'>
-        ^self convertStream: in with: STInST.SqueakFileInParser to: out
-    ]
-    
-    SyntaxConverter class >> convertSIFStream: in to: out [
-        <category: 'instance creation'>
-        ^self convertStream: in with: STInST.SIFFileInParser to: out
-    ]
-    
-    SyntaxConverter class >> convertStream: in to: out [
-        <category: 'instance creation'>
-        ^self convertStream: in with: STInST.STFileInParser to: out
-    ]
-    
-    SyntaxConverter class >> convertStream: in with: aParserClass to: out [
-        <category: 'instance creation'>
-        ^self new convertStream: in with: aParserClass to: out
-    ]
-
-    initialize [
-        <category: 'initialization'>
-	super initialize.
-	filter := [ :class | [true] ].
-        stuffToEmit := OrderedSet new.
-        classesToEmit := Dictionary new.
-        createdNamespaces := OrderedSet new.
-    ]
-
-    convertStream: in with: aParserClass to: out onError: aBlock [
-        <category: 'operation'>
-        self
-	    outStream: out;
-	    parseSmalltalkStream: in with: aParserClass onError: aBlock;
-	    doEmitStuff.        
-    ]
-
-    convertStream: in with: aParserClass to: out [
-        <category: 'operation'>
-        self
-	    outStream: out;
-	    parseSmalltalkStream: in with: aParserClass;
-	    doEmitStuff.        
-    ]
-
-    filter: aBlock [
-        <category: 'accessing'>
-        filter := aBlock.
-    ]
-    
-    outStream: out [
-        <category: 'accessing'>
-        outStream := out.
-    ]
-    
-    rewrite: node [
-	^rewriter isNil
-	    ifTrue: [ node ]
-	    ifFalse: [ rewriter executeTree: node; tree ].
-    ]
-
-    evaluate: node [
-        <category: 'overrides'>
-
-	| rewritten |
-	rewritten := self rewrite: node.
-	node comments isEmpty ifFalse: [
-	    stuffToEmit add: (EmittedComments comments: node comments source: node source) ].
-
-        ^super evaluate: rewritten
-    ]
-    
-    addRule: searchString parser: aParserClass [
-	| tree rule |
-	tree := aParserClass parseRewriteExpression: searchString.
-	tree isMessage ifFalse: [ self error: 'expected ->' ].
-	tree selector = #-> ifFalse: [ self error: 'expected ->' ].
-	rule := RBStringReplaceRule
-	    searchForTree: tree receiver
-	    replaceWith: tree arguments first.
-
-	rewriter isNil ifTrue: [ rewriter := ParseTreeRewriter new ].
-	rewriter addRule: rule
-    ]
-
-    compile: node [
-        <category: 'collecting entities'>
-        
-        | rewritten method |
-
-	rewritten := self rewrite: node.
-        method := self defineMethod: rewritten.                
-        (classesToEmit includesKey: currentClass asClass)
-            ifTrue: [ self addMethod: method toLoadedClass: currentClass ]
-            ifFalse: [ self addMethod: method toExtensionClass: currentClass ].
-	^method
-    ]
-    
-    lastEval [
-        <category: 'collecting entities'>
-
-	| lastIsEval evalNamespace |
-
-        evalNamespace := currentNamespace = self defaultNamespace
-	    ifTrue: [ nil ]
-	    ifFalse: [ currentNamespace ].
-
-        lastIsEval := stuffToEmit notEmpty
-	    and: [ (stuffToEmit last isKindOf: EmittedEval)
-	    and: [ stuffToEmit last namespace = evalNamespace ]].
-
-	^lastIsEval
-	    ifTrue: [ stuffToEmit last ]
-	    ifFalse: [ stuffToEmit add: (EmittedEval new namespace: evalNamespace) ]
-    ]
-
-    createNamespaces [
-	createdNamespaces do: [ :each || stmt |
-	    stmt := RBMessageNode
-                receiver: (RBVariableNode named: (each superspace nameIn: self currentNamespace))
-                selector: #addSubspace:
-                arguments: { RBLiteralNode value: each name asSymbol }.
-	    self lastEval addStatement: stmt
-	].
-	createdNamespaces := OrderedSet new
-    ]
-
-    unknown: node [
-        <category: 'collecting entities'>
-        
-	self createNamespaces.
-	self lastEval addStatement: node.
-        ^false
-    ]
-    
-    doSubclass: receiver selector: selector arguments: argumentNodes [
-        <category: 'evaluating statements'>
-        
-        | class emittedClass |
-        
-	createdNamespaces remove: self currentNamespace ifAbsent: [ ].
-	self createNamespaces.
-
-        class := super defineSubclass: receiver 
-                       selector: selector 
-                       arguments: argumentNodes.        
-                            
-        Notification signal: ('Parsing %1' % {class}).
-        emittedClass := EmittedClass forClass: class.
-    
-        classesToEmit at: class put: emittedClass.
-        stuffToEmit add: emittedClass.
-        
-        ^false
-    ]
-    
-    doAddNamespace: receiver selector: selector arguments: argumentNodes [
-	| ns |
-	super doAddNamespace: receiver selector: selector arguments: argumentNodes.
-
-        ns := (self resolveNamespace: receiver) at: argumentNodes first value.
-	createdNamespaces add: ns.
-	^false
-    ]
-
-    doEmitStuff [
-        <category: 'emitting'>
-
-        stuffToEmit
-	    do: [ :each | each emitTo: outStream filteredBy: filter ]
-	    separatedBy: [ outStream nl; nextPut: 12 asCharacter; nl ].
-    ]
-    
-    addMethod: aMethod toLoadedClass: aClass [
-        <category: 'collecting entities'>
-
-        (aClass isMetaclass)
-            ifTrue: [ (classesToEmit at: currentClass asClass) addClassMethod: aMethod ]
-            ifFalse: [ (classesToEmit at: currentClass) addMethod: aMethod ]
-    ]
-    
-    addMethod: aMethod toExtensionClass: aClass [
-        <category: 'collecting entities'>
-
-        ((stuffToEmit size > 0)
-            and: [ (stuffToEmit last isKindOf: EmittedClass) and: [ stuffToEmit last forClass = aClass ] ])                
-                ifTrue: [ stuffToEmit last addMethod: aMethod ]
-                ifFalse: [ stuffToEmit add: ((EmittedClass forExtension: currentClass) addMethod: aMethod) ]            
-    ]
-]
-
-
 String extend [
    asFilterOn: aBlock through: valueBlock [
 	| regex |
@@ -403,10 +81,28 @@ String extend [
     ]
 ]
 
+
+STTools.Loader subclass: SyntaxConverter [
+    <category: 'Converter'>
+
+    doEmitStuff [
+        classesToEmit keysAndValuesDo: [:key :value |
+            | comment |
+            "Fixes for carriage return in Pharo"
+            comment := key comment.
+            comment ifNotNil: [
+                comment := comment replaceAll: Character cr with: Character nl.
+                key comment: comment.
+            ]].
+
+        super doEmitStuff.
+    ]
+]
 
 Eval [ 
     | helpString inFile outFile quiet verbose converter filter parser
 	args inFormats outFormats rules |
+
     args := OrderedCollection new.
     parser := STInST.STFileInParser.
     quiet := false.

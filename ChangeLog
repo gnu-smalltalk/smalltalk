@@ -1,3 +1,22 @@
+2013-08-10  Holger Hans Peter Freyther  <holger@moiji-mobile.com>
+
+	* scripts/Convert.st: Replace \r with \n in class comments.
+
+2013-08-10  Holger Hans Peter Freyther  <holger@moiji-mobile.com>
+
+	* scripts/Convert.st: Use the STTools tools instead of the
+	current code.
+
+2013-08-09  Holger Hans Peter Freyther  <holger@moiji-mobile.com>
+
+	* kernel/FilePath.st: Add FilePath>>#linkAs: and FilePath>>#linkFrom:
+	selectors.
+	* kernel/File.st: Add File class>>#sync, File class>>#primFsync:,
+	File class>>#primFdatasync, File class>>#link:as:, File class>>#link:from:,
+	File>>#primLink:as:, File>>#linkFrom:, File>>#linkAs: selectors.
+	* kernel/FileDescr.st: Add >>#fsync and >>#fdatasync selectors.
+	* kernel/FileStream.st: Override >>#fsync and >>#fdatasync selectors.
+
 2013-08-20  Gwenael Casaccio <gwenael.casaccio@gmail.com>
 
 	* examples/MiniDebugger.st: Moved to packages/debug/debugger/.

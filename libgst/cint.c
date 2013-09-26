@@ -641,6 +641,7 @@ _gst_init_cfuncs (void)
   _gst_define_cfunc ("rewinddir", rewinddir);
   _gst_define_cfunc ("extractDirentName", extract_dirent_name);
 
+  _gst_define_cfunc ("link", link);
   _gst_define_cfunc ("symlink", my_symlink);
   _gst_define_cfunc ("unlink", unlink);
   _gst_define_cfunc ("rename", rename);
@@ -649,6 +650,13 @@ _gst_init_cfuncs (void)
   _gst_define_cfunc ("mkdir", my_mkdir);
   _gst_define_cfunc ("mkdtemp", my_mkdtemp);
   _gst_define_cfunc ("getCurDirName", _gst_get_cur_dir_name);
+  _gst_define_cfunc ("fsync", fsync);
+#ifdef HAVE_FDATASYNC
+  _gst_define_cfunc ("fdatasync", fdatasync);
+#else
+  _gst_define_cfunc ("fdatasync", fsync);
+#endif
+  _gst_define_cfunc ("sync", sync);
 
   _gst_define_cfunc ("fileIsReadable", _gst_file_is_readable);
   _gst_define_cfunc ("fileIsWriteable", _gst_file_is_writeable);
