@@ -70,9 +70,56 @@ ExternalPackage subclass: DirPackage [
     ]
 ]
 
+PackageGroup subclass: DirPackageGroup [
+    | package |
+    <category: 'Language-Packaging'>
+
+    DirPackageGroup class >> initWith: aPackage [
+        ^self new
+            package: aPackage
+    ]
+
+    package: aPackage [
+        package := aPackage
+    ]
+
+    refresh: aDate [
+        "Nothing to do"
+    ]
+
+    keys [
+        ^OrderedCollection new
+            add: package name;
+            yourself
+    ]
+
+    at: aString ifAbsent: aBlock [
+        aString = package name
+            ifTrue: [^package].
+        ^aBlock value
+    ]
+]
+
+PackageDirectories extend [
+    addFirst: aDirectory [
+        <category: '*Language-Kernel'>
+
+        "Used by insertPackage to add the directory first"
+        ^dirs addFirst: aDirectory
+    ]
+]
+
 ]
 
 PackageLoader class extend [
+
+    insertPackage: aPackage [
+        <category: '*Language-Kernel'>
+        "Internal for tools like gst-sunit. Allow to set the package
+        so tests using >>#packageAt: will use the right test."
+        self refresh.
+        root addFirst: (Kernel.DirPackageGroup initWith: aPackage).
+    ]
 
     loadPackageFromFile: aFileName [
         | package |
