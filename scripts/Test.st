@@ -84,7 +84,9 @@ Smalltalk
 	[
 	    | pkg |
 	    pkg := (arg endsWith: '.xml')
-		ifTrue: [ PackageLoader loadPackageFromFile: Directory working / arg ]
+		ifTrue: [ | tmp |
+                    tmp := PackageLoader loadPackageFromFile: Directory working / arg.
+                    PackageLoader insertPackage: tmp. tmp ]
 		ifFalse: [ PackageLoader packageAt: arg ].
 	    script := script, ' ', pkg sunitScript.
 	    pkg test notNil ifTrue: [

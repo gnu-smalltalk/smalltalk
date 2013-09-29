@@ -1,3 +1,9 @@
+2013-09-28  Holger Hans Peter Freyther  <holger@freyther.de>
+
+	* kernel/DirPackage.st: Add PackageLoader>>#insertPackage:
+	PackageDirectories>>#addFirst: and DirPackageGroup.
+	* scripts/Test.st: Use PackageLoader>>#insertPackage:
+
 2013-08-10  Holger Hans Peter Freyther  <holger@moiji-mobile.com>
 
 	* scripts/Convert.st: Replace \r with \n in class comments.
