@@ -435,7 +435,8 @@ methods that can be used in inspection or debugging.'>
     ]
 
     sp [
-	"Answer the current stack pointer into the receiver"
+	"Answer the current stack pointer into the receiver.  Note that the
+	 sp value is zero-based."
 
 	"This funny implementation thwarts the interpreter's optimizing effort"
 
@@ -471,9 +472,9 @@ methods that can be used in inspection or debugging.'>
 	 makes them valid *before* they become accessible."
 
 	<category: 'accessing'>
-	self at: sp + 1 put: nil.
+	self at: self size + 1 put: nil.
 	sp := sp + 1.
-	self at: sp put: anObject.
+	self at: self size put: anObject.
     ]
 
     sp: newSP [
@@ -487,7 +488,8 @@ methods that can be used in inspection or debugging.'>
 	<category: 'accessing'>
 	newSP isSmallInteger 
 	    ifFalse: [^SystemExceptions.WrongClass signalOn: newSP mustBe: SmallInteger].
-	newSP > sp ifTrue: [sp + 1 to: newSP do: [:i | self at: i put: nil]].
+	newSP > sp ifTrue: [
+	    self size + 1 to: newSP + 1 do: [:i | self at: i put: nil]].
 	sp := newSP
     ]
 

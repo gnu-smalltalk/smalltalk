@@ -173,9 +173,12 @@ creation of Processes from blocks.'>
 	        top := parent isNil
 		    ifTrue: [nil]
 		    ifFalse: [
-			parent sp == 0 
-			    ifTrue: [parent receiver]
-			    ifFalse: [parent at: parent sp]].
+                        "This is really ugly.  The right solution would be
+                         to move the receiver into the first stack slot,
+                         so that sp is guaranteed to be non-negative."
+			parent sp == -1
+			    ifTrue: [parent instVarAt: parent class instSize]
+			    ifFalse: [parent at: parent sp + 1]].
 	        self value. top]
 	    parent: parent.
     ]

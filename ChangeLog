@@ -1,3 +1,9 @@
+2013-10-07  Paolo Bonzini  <bonzini@redhat.com>
+
+	* kernel/BlkClosure.st: Fix off-by-one using the sp variable
+	of contexts.
+	* kernel/ContextPart.st: Likewise.
+
 2013-09-28  Holger Hans Peter Freyther  <holger@freyther.de>
 
 	* kernel/DirPackage.st: Add PackageLoader>>#insertPackage:
