@@ -1,3 +1,10 @@
+2013-10-07  Paolo Bonzini  <bonzini@gnu.org>
+
+	* libgst/genvm-parse.def: Emit definitions for UNDO_PREPARE_STACK.
+	* libgst/vm.def: Wrap calls to _gst_make_block_closure with
+	PREPARE_STACK and UNDO_PREPARE_STACK.  Otherwise, the sp
+	that empty_context_stack saves in the context is off by one.
+
 2013-08-09  Holger Hans Peter Freyther  <holger@moiji-mobile.com>
 
 	* libgst/cint.c: Bind link, fsync, fdatasync and sync for

@@ -625,6 +625,12 @@ emit_operation_invocation (operation_info *op, struct id_list *args, int sp, int
       filprintf (out_fil, "#define PREPARE_STACK() do { \\\n");
       emit_stack_update (sp, deepest_write, "    ", "; \\");
       filprintf (out_fil, "  } while (0)\n");
+      if (sp >= 0)
+        {
+          filprintf (out_fil, "#define UNDO_PREPARE_STACK() do { \\\n");
+          emit_stack_update (-sp, 0, "    ", "; \\");
+          filprintf (out_fil, "  } while (0)\n");
+        }
     }
 
   if (op->needs_branch_label)
@@ -644,8 +650,10 @@ emit_operation_invocation (operation_info *op, struct id_list *args, int sp, int
     filprintf (out_fil, "#undef BRANCH_LABEL\n\n");
 
   if (op->needs_prepare_stack)
-    filprintf (out_fil, "#undef PREPARE_STACK\n");
-
+    {
+      filprintf (out_fil, "#undef PREPARE_STACK\n");
+      filprintf (out_fil, "#undef UNDO_PREPARE_STACK\n");
+    }
   emit_id_list (op->read, "\n#undef ", "#undef ", "\n");
   emit_id_list (op->in, "\n#undef ", "#undef ", "\n");
   emit_id_list (op->out, "\n#undef ", "#undef ", "\n");

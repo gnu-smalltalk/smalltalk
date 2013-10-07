@@ -828,12 +828,15 @@ operation POP_STACK_TOP ( tos -- ) {
 }
 
 operation MAKE_DIRTY_BLOCK ( block -- closure ) {
+  PREPARE_STACK ();
   EXPORT_REGS ();
   closure = _gst_make_block_closure (block);
   IMPORT_REGS();
+  UNDO_PREPARE_STACK ();
 }
 
 operation RETURN_METHOD_STACK_TOP ( val -- val ) {
+  /* The current context dies here, so the stack need not be prepared.  */
   EXPORT_REGS ();
   if UNCOMMON (!unwind_method ())
     {
@@ -849,6 +852,7 @@ operation RETURN_METHOD_STACK_TOP ( val -- val ) {
 }
 
 operation RETURN_CONTEXT_STACK_TOP ( val -- val ) {
+  /* The current context dies here, so the stack need not be prepared.  */
   EXPORT_REGS ();
   unwind_context ();
   IMPORT_REGS ();
