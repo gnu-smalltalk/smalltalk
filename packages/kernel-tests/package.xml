@@ -4,8 +4,10 @@
   <test>
    <sunit>TestCompiledMethod</sunit>
    <sunit>TestContextPart</sunit>
+   <sunit>TestObject</sunit>
    <filein>kernel/CompiledMethodTests.st</filein>
    <filein>kernel/ContextPartTests.st</filein>
+   <filein>kernel/ObjectTests.st</filein>
   </test>
 
   <file>ChangeLog</file>
