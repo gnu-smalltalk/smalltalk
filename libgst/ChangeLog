@@ -1,3 +1,8 @@
+2013-10-13  Holger Hans Peter Freyther  <holger@moiji-mobile.com>
+
+	* interp.c: Address address sanitizer warning when the
+	parentContext is already nil.
+
 2013-10-07  Paolo Bonzini  <bonzini@gnu.org>
 
 	* libgst/dict.inl: Fix overflow check in index_oop_spec and

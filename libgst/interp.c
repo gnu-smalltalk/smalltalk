@@ -1239,6 +1239,12 @@ disable_non_unwind_contexts (OOP returnContextOOP)
 
       /* Descend in the chain...  */
       newContextOOP = oldContext->parentContext;
+      if (IS_NIL(newContextOOP))
+        {
+            *chain = _gst_nil_oop;
+            return false;
+        }
+
       newContext = (gst_method_context) OOP_TO_OBJ (newContextOOP);
 
       /* This context cannot be deallocated in a LIFO way.  We must
