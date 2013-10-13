@@ -1,3 +1,11 @@
+2013-10-13  Holger Hans Peter Freyther  <holger@freyther.de>
+
+	* packages/sunit/SUnit.st: Remove extra $# from the
+	>>#nextPutAll:
+	* packages/sunit/SUnitTest.st: Update the test result
+	for testSelector being an UndefinedObject and add an
+	extra testcase.
+
 2013-05-11  Holger Hans Peter Freyther  <holger@freyther.de>
 
 	* packages/sunit/SUnit.st: Add #assert:equals: and

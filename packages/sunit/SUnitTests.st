@@ -278,11 +278,19 @@ if the tests are hard to write, something is probably wrong with the design".'>
 
     testPrintString [
         <category: 'Testing'>
-        "Make sure that a new test can be printed"
+	| suite result |
+        "Make sure that a new test can be printed and that for
+        a ran test it shows only one hash."
 
         self
             shouldnt: [TestCase new printString] raise: Exception;
-            assert: TestCase new printString = 'TestCase>>#nil'.
+            assert: TestCase new printString = 'TestCase>>nil'.
+
+	suite := TestSuite new.
+	suite addTest: (SUnitClientTest selector: #noop).
+	result := suite run.
+
+	self assert: suite tests first printString = 'SUnitClientTest>>#noop'.
     ]
 
     isLogging [

@@ -1121,7 +1121,7 @@ When you are writing a test case method, send #assert: aBoolean when you want to
 	<category: 'Printing'>
 	aStream
 	    nextPutAll: self class printString;
-	    nextPutAll: '>>#';
+	    nextPutAll: '>>';
 	    nextPutAll: testSelector printString.
     ]
 ]
