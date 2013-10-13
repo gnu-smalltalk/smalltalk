@@ -522,7 +522,7 @@ emit_var_declarations (const char *base, const char *type, int first, int n)
     return;
 
   for (i = first; n--; i++)
-    filprintf (out_fil, "%s %s%d", i == first ? type : ",", base, i);
+    filprintf (out_fil, "%s %s%d ATTRIBUTE_UNUSED", i == first ? type : ",", base, i);
 
   filprintf (out_fil, ";\n");
 }
