@@ -458,24 +458,27 @@ superclass for blocks and methods'>
     ]
 
     sourceCodeMap [
-	"Answer an array which maps bytecode indices to source code
-	 line numbers.  0 values represent invalid instruction
-	 pointer indices."
+        "Answer an array which maps bytecode indices to source code
+         line numbers.  0 values represent invalid instruction
+         pointer indices."
 
-	<category: 'testing accesses'>
-	| map line first |
-	map := ByteArray new: self size.
-	line := 1.
-	first := true.
-	self allByteCodeIndicesDo: 
-		[:each :byte :operand | 
-		(self class bytecodeInfoTable at: byte * 4 + 4) >= 128 
-		    ifTrue: 
-			[first ifFalse: [line := operand].
-			first := false.
-			operand > 255 ifTrue: [map := map asArray]].
-		map at: each put: line].
-	^map
+        <category: 'testing accesses'>
+        | map line first next |
+        map := ByteArray new: self size.
+        next := -1.
+        line := 1.
+        first := true.
+        self allByteCodeIndicesDo:
+            [ :each :byte :operand |
+                (self class bytecodeInfoTable at: byte * 4 + 4) >= 128
+                    ifTrue:
+                        [ first ifFalse: [ next := operand ].
+                          first := false.
+                          operand > 255 ifTrue: [ map := map asArray ] ].
+                map at: each put: line.
+                next = -1 ifFalse: [ line := next.
+                                     next := -1. ] ].
+        ^ map
     ]
 
     jumpDestinationAt: anIndex forward: aBoolean [

@@ -1,3 +1,13 @@
+2013-10-15  Gwenael Casaccio <gwenael.casaccio@gmail.com>
+
+	* kernel/ContextPart.st: Fix >>#currentLine, the previous
+	implementation had a bad ip index and didn't raise an exception
+	if the instruction pointer was incorrect.
+	* kernel/CompildCode.st: Fix >>#sourceCodeMap, since ip points to
+	the next bytecode which could be a line number, there could be a off
+	by one error. Thus when the line number bytecode is met it's stored on
+	the next bytecode.
+
 2013-10-07  Paolo Bonzini  <bonzini@redhat.com>
 
 	* kernel/BlkClosure.st: Fix off-by-one using the sp variable

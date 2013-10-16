@@ -244,12 +244,15 @@ methods that can be used in inspection or debugging.'>
     ]
 
     currentLine [
-	"Answer the 1-based number of the line that is pointed to by the receiver's
-	 instruction pointer.  The DebugTools package caches information,
-	 thus making the implementation faster."
+        "Answer the 1-based number of the line that is pointed to by the receiver's
+         instruction pointer.  The DebugTools package caches information,
+         thus making the implementation faster."
 
-	<category: 'debugging'>
-	^self method sourceCodeMap at: (self ip - 1 max: 1) ifAbsent: [1]
+        <category: 'debugging'>
+        | res |
+        res := self method sourceCodeMap at: self ip + 1.
+        ^ res = 0 ifTrue: [ self error: 'IP is not correct' ]
+                  ifFalse: [ res ]
     ]
 
     debugger [

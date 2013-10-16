@@ -29,6 +29,38 @@
 
 
 
+SmallInteger extend [
+
+    dbgPrintNl [
+        <category: '*DebugTools'>
+        ^ self dbgPrintString
+    ]
+
+    dbgPrintString [
+        "Return the base 10 representation of the receiver"
+
+        <category: '*DebugTools'>
+        ^self dbgPrintString: 10
+    ]
+
+    dbgPrintString: baseInteger [
+        "Return the base baseInteger representation of the receiver"
+
+        <category: '*DebugTools'>
+        | num string |
+        ^self < self zero
+            ifFalse:
+                [string := String new: (self floorLog: baseInteger) + 1.
+                self replace: string withStringBase: baseInteger]
+            ifTrue:
+                [num := self negated.
+                string := String new: (num floorLog: baseInteger) + 2.
+                string at: 1 put: $-.
+                num replace: string withStringBase: baseInteger]
+    ]
+]
+
+^L
 TestCase subclass: DebuggerTest [
     
     <comment: nil>
@@ -262,6 +294,19 @@ TestCase subclass: DebuggerTest [
 	debugger finish.
 	self assert: debugger isActive.
 	self deny: notReached
+    ]
+
+    testRegressionCurrentLine [
+        <category: 'testing'>
+
+        | debugger |
+        debugger := self debuggerOn: [ 1 dbgPrintNl ].
+        debugger step.
+
+        #(34 36 39 43 46 51 53) doWithIndex: [ :each :i |
+            self assert: debugger suspendedContext currentLineInFile == each.
+            debugger step.
+        ]
     ]
 
     w [
