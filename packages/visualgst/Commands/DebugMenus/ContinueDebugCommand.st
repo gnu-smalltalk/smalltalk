@@ -49,7 +49,7 @@ DebugCommand subclass: ContinueDebugCommand [
     execute [
         <category: 'command'>
 
-        target run
+        target continue
     ]
 
 ]

@@ -1,6 +1,6 @@
 "======================================================================
 |
-| StepToDebugCommand class definition
+| StepOverDebugCommand class definition
 |
 ======================================================================"
 
@@ -33,12 +33,12 @@
 |
 ======================================================================"
 
-DebugCommand subclass: StepToDebugCommand [
+DebugCommand subclass: StepOverDebugCommand [
 
     item [
         <category: 'menu item'>
 
-        ^ 'Step To Here'
+        ^ 'Step over next message send'
     ]
 
     stockIcon [
@@ -49,8 +49,7 @@ DebugCommand subclass: StepToDebugCommand [
     execute [
         <category: 'command'>
 
-        target step
+        target stepOver
     ]
 
 ]
-

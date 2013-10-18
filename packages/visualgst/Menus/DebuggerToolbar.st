@@ -38,6 +38,6 @@ MenuBuilder subclass: DebuggerToolbar [
 
         ^ {ContinueDebugCommand.
         StepIntoDebugCommand.
-        StepToDebugCommand}
+        StepOverDebugCommand}
     ]
 ]

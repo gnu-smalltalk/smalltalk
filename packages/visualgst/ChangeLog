@@ -1,3 +1,11 @@
+2013-10-18  Gwenael Casaccio  <gwenael.casaccio@gmail.com>
+
+	* Commands/DebugMenus/ContinueDebugCommand.st : Update command title and target.
+	* Commands/DebugMenus/StepIntoDebugCommand.st : Update command title and target.
+	* Commands/DebugMenus/StepOverDebugCommand.st : Support step over command.
+	* Debugger/GtkDebugger.st : Rename the commands and add shortcuts to them.
+	* Menus/DebuggerToolbar.st : Update command.
+
 2013-08-20  Gwenael Casaccio  <gwenael.casaccio@gmail.com>
 
 	* Extensions.st: Move some extensions to Debugger/Extensions.

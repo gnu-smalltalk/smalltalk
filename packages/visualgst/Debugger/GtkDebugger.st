@@ -67,7 +67,7 @@ GtkBrowsingTool subclass: GtkDebugger [
     accelPath [
         <category: 'accelerator path'>
 
-        ^ '<VisualGST>'
+        ^ '<Debugger>'
     ]
 
     windowTitle [
@@ -141,11 +141,16 @@ GtkBrowsingTool subclass: GtkDebugger [
     createExecuteMenus [
 	<category: 'user interface'>
 
-        ^{GTK.GtkMenuItem menuItem: 'Step' connectTo: self selector: #step.
-            GTK.GtkMenuItem menuItem: 'Step into' connectTo: self selector: #stepInto.
-            GTK.GtkMenuItem menuItem: 'Step over' connectTo: self selector: #stepOver.
-            GTK.GtkMenuItem new.
-            GTK.GtkMenuItem menuItem: 'Run' connectTo: self selector: #run}
+        self accelGroup append: {{'F7'. '<Debugger>/StepInto'}}.
+        self accelGroup append: {{'F8'. '<Debugger>/StepOver'}}.
+        self accelGroup append: {{'<shift>F8'. '<Debugger>/StepOut'}}.
+        self accelGroup append: {{'F5'. '<Debugger>/Continue'}}.
+
+        ^{GTK.GtkMenuItem menuItem: 'Step into next message send' accelPath: '<Debugger>/StepInto' connectTo: self selector: #stepInto.
+          GTK.GtkMenuItem menuItem: 'Step over next message send' accelPath: '<Debugger>/StepOver' connectTo: self selector: #stepOver.
+          GTK.GtkMenuItem menuItem: 'Step out current message' accelPath: '<Debugger>/StepOut' connectTo: self selector: #stepOut.
+          GTK.GtkMenuItem new.
+          GTK.GtkMenuItem menuItem: 'Continue' accelPath: '<Debugger>/Continue' connectTo: self selector: #continue}
     ]
 
     createMenus [
@@ -277,32 +282,32 @@ GtkBrowsingTool subclass: GtkDebugger [
 	    self updateInspectorWidget: contextWidget selectedContext ]
     ]
 
-    step [
-	<category: 'execute events'>
-
-	debugger step.
-	self updateContextWidget
-    ]
-
     stepInto [
-	<category: 'execute events'>
+        <category: 'execute events'>
 
-	debugger step.
-	self updateContextWidget
+        debugger step.
+        self updateContextWidget
     ]
 
     stepOver [
-	<category: 'execute events'>
+        <category: 'execute events'>
 
-	debugger finish.
-	self updateContextWidget
+        debugger next.
+        self updateContextWidget
     ]
 
-    run [
-	<category: 'execute events'>
+    stepOut [
+        <category: 'execute events'>
 
-	self close.
-	debugger continue
+        debugger finish.
+        self updateContextWidget
+    ]
+
+    continue [
+        <category: 'execute events'>
+
+        self close.
+        debugger continue
     ]
 
     codeSaved [

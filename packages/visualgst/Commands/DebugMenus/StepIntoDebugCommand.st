@@ -38,7 +38,7 @@ DebugCommand subclass: StepIntoDebugCommand [
     item [
         <category: 'menu item'>
 
-        ^ 'Step Into'
+        ^ 'Step into next message send'
     ]
 
     stockIcon [
