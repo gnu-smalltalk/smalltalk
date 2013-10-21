@@ -251,7 +251,7 @@ methods that can be used in inspection or debugging.'>
         <category: 'debugging'>
         | res |
         res := self method sourceCodeMap at: self ip + 1.
-        ^ res = 0 ifTrue: [ self error: 'IP is not correct' ]
+        ^ res = 0 ifTrue: [ self error: 'IP(%1) is not correct' % {(self ip + 1) displayString} ]
                   ifFalse: [ res ]
     ]
 

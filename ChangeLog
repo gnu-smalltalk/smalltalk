@@ -1,3 +1,8 @@
+2013-10-21  Gwenael Casaccio  <gwenael.casaccio@gmail.com>
+
+	* kernel/ContextPart.st: Print the instruction pointer value in the
+	exception message.
+
 2013-10-15  Gwenael Casaccio <gwenael.casaccio@gmail.com>
 
 	* kernel/ContextPart.st: Fix >>#currentLine, the previous
