@@ -519,5 +519,18 @@ GtkBrowsingTool subclass: GtkDebugger [
         self onFocusPerform: #showReplace
     ]
 
+    selectAnInstanceMethod: aMethod [
+        <category: 'debugging events'>
+
+        debugger restart: contextWidget selectedContext.
+	self updateContextWidget
+    ]
+
+    selectAClassMethod: aMethod [
+        <category: 'debugging events'>
+
+        debugger restart: contextWidget selectedContext.
+	self updateContextWidget
+    ]
 ]
 
