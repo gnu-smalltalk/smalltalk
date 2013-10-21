@@ -132,6 +132,41 @@ pointer bytecodes to line numbers.'>
 	exception isNil ifFalse: [exception signal]
     ]
 
+    restart [
+        <category: 'stepping commands'>
+
+        self restart: self suspendedContext.
+    ]
+
+    restart: aContext [
+        <category: 'stepping commands'>
+
+        | context method newContext |
+
+        context := self suspendedContext.
+
+        [ context = aContext ] whileFalse: [ context := context parentContext ].
+
+        context isBlock ifTrue: [ context outerContext isNil ifTrue: [ ^ self ].
+                                  context := context outerContext ].
+
+        method := context receiver class lookupSelector: context method selector.
+
+        newContext := MethodContext new: method stackDepth.
+
+        newContext parentContext: context parentContext.
+        newContext ip: 0.
+        newContext instVarAt: 4 put: -1 + method numArgs + method numTemps. " stack pointer "
+        newContext instVarAt: 5 put: context receiver.                      " receiver "
+        newContext instVarAt: 6 put: method.                                " method "
+        newContext instVarAt: 7 put: (context instVarAt: 7).                " flags "
+
+        1 to: method numArgs do: [ :i |
+            newContext at: i put: (context at: i) ].
+
+        process suspendedContext: newContext
+    ]
+
     stepBytecode [
 	"Run a single bytecode in the inferior process."
 

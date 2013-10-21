@@ -336,6 +336,51 @@ TestCase subclass: DebuggerTest [
         self assert: (debugger eval: '^ z') = 4.
     ]
 
+    testRestart [
+        " Test that #restart "
+
+        <category: 'test'>
+
+        | debugger i j |
+
+        debugger := self debuggerOn: [ 
+                            i := self restart ].
+        debugger step.
+        self assert: debugger suspendedContext method == (self class >> #restart).
+
+        self class compile: 'restart [ | i | i := 234. ^ i * 2 ]'.
+
+        debugger restart.
+        self assert: debugger suspendedContext method == (self class >> #restart).
+        self assert: debugger suspendedContext receiver == self.
+        self assert: debugger suspendedContext ip == 0.
+        self assert: debugger suspendedContext sp == 0.
+
+        debugger next; next.
+
+        self assert: i = 468.
+
+        j := OrderedCollection new.
+        j add: 123.
+        debugger := self debuggerOn: [
+                            i := self restart_1: j ].
+        debugger step; step.
+        self assert: debugger suspendedContext method == (self class >> #restart_1:).
+
+        self class compile: 'restart_1: anObject [ ^ anObject first ]'.
+
+        j addFirst: 234.
+        debugger restart.
+        self assert: debugger suspendedContext method == (self class >> #restart_1:).
+        self assert: debugger suspendedContext receiver == self.
+        self assert: debugger suspendedContext ip == 0.
+        self assert: debugger suspendedContext sp == 0.
+
+        debugger next; next.
+
+        self assert: i = 234.
+    ]
+
     w [
 	<category: 'support'>
 	self x: [:foo | ^foo]
@@ -354,6 +399,18 @@ TestCase subclass: DebuggerTest [
     z: anObject [
 	<category: 'support'>
 	^anObject
+    ]
+
+    restart [
+        <category: 'support'>
+
+        ^ 123 * 2
+    ]
+
+    restart_1: anObject [
+        <category: 'support'>
+
+        ^ anObject first * 2
     ]
 ]
 
