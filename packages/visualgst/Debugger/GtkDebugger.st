@@ -285,22 +285,28 @@ GtkBrowsingTool subclass: GtkDebugger [
     stepInto [
         <category: 'execute events'>
 
-        debugger step.
-        self updateContextWidget
+        self debugWith: [ debugger step ]
     ]
 
     stepOver [
         <category: 'execute events'>
 
-        debugger next.
-        self updateContextWidget
+        self debugWith: [ debugger next ]
     ]
 
     stepOut [
         <category: 'execute events'>
 
-        debugger finish.
-        self updateContextWidget
+        self debugWith: [ debugger finish ]
+    ]
+
+    debugWith: aBlock [
+        <category: 'execute events'>
+
+        TaskQueue uniqueInstance add: [
+            self isLastContextSelected ifFalse: [ self stepToSelectedContext ].
+            aBlock value.
+            self updateContextWidget ]
     ]
 
     continue [
@@ -375,7 +381,7 @@ GtkBrowsingTool subclass: GtkDebugger [
 
         codeWidget hasFocus ifFalse: [ ^ self focusedWidget doIt: object ].
         codeWidget hasSelection ifFalse: [ ^ self ].
-        debugger eval: codeWidget selectedText.
+        TaskQueue uniqueInstance add: [ debugger eval: codeWidget selectedText ].
     ]
 
     debugIt: object [
@@ -391,7 +397,7 @@ GtkBrowsingTool subclass: GtkDebugger [
 
         codeWidget hasFocus ifFalse: [ ^ self focusedWidget inspectIt: object ].
         codeWidget hasSelection ifFalse: [ ^ self ].
-        (debugger eval: codeWidget selectedText) gtkInspect.
+        TaskQueue uniqueInstance add: [ (debugger eval: codeWidget selectedText) gtkInspect ].
     ]
 
     printIt: object [
@@ -399,7 +405,7 @@ GtkBrowsingTool subclass: GtkDebugger [
 
         codeWidget hasFocus ifFalse: [ ^ self focusedWidget printIt: object ].
         codeWidget hasSelection ifFalse: [ ^ self ].
-        codeWidget printString: (debugger eval: codeWidget selectedText).
+        TaskQueue uniqueInstance add: [ codeWidget printString: (debugger eval: codeWidget selectedText) ].
     ]
 
     state [
@@ -436,6 +442,12 @@ GtkBrowsingTool subclass: GtkDebugger [
         <category: 'smalltalk event'>
 
         PrintItCommand executeOn: self
+    ]
+
+    isLastContextSelected [
+        <category: 'testing'>
+
+        ^ contextWidget selectedContext == debugger suspendedContext
     ]
 
     hasChanged [

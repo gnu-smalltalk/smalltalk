@@ -71,6 +71,7 @@
   <filein>Gtk/GtkEntry.st</filein>
   <filein>Gtk/GtkEntryBuffer.st</filein>
   <filein>Extensions.st</filein>
+  <filein>Misc/TaskQueue.st</filein>
   <filein>Notification/AbstractEvent.st</filein>
   <filein>Notification/AddedEvent.st</filein>
   <filein>Notification/CommentedEvent.st</filein>
@@ -556,5 +557,6 @@
   <file>Icons/override.png</file>
   <file>Icons/visualgst.png</file>
   <start>VisualGST.GtkLauncher open.
-    GTK.Gtk main</start>
+         VisualGST.TaskQueue uniqueInstance run.
+         GTK.Gtk main.</start>
 </package>

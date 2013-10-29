@@ -381,17 +381,24 @@ GtkConcreteWidget subclass: GtkTextWidget [
         <category: 'smalltalk event'>
     ]
 
+    doWithoutForkIt: object [
+        <category: 'smalltalk event'>
+
+        | result method |
+        self beforeEvaluation.
+        method := object class 
+                    compile: 'Doit [ ^ [ ', self selectedText , ' ] value ]'
+                    ifError:  [ :fname :lineNo :errorString | self error: errorString ].
+        object class removeSelector: #Doit ifAbsent: [].
+        result := object perform: method.
+        self afterEvaluation.
+        ^ result
+    ]
+
     doIt: object [
         <category: 'smalltalk event'>
 
-	| result |
-        self beforeEvaluation.
-        result := Behavior
-		    evaluate: self buffer selectedText
-		    to: object
-		    ifError: [ :fname :lineNo :errorString | self error: errorString ].
-	self afterEvaluation.
-	^ result
+	TaskQueue uniqueInstance add: [ self doWithoutForkIt: object ]
     ]
 
     debugIt: object [
@@ -409,19 +416,20 @@ GtkConcreteWidget subclass: GtkTextWidget [
     inspectIt: object [
         <category: 'smalltalk event'>
 
-        GtkInspector openOn: (self doIt: object)
+        TaskQueue uniqueInstance add: [ GtkInspector openOn: (self doWithoutForkIt: object) ]
     ]
 
     printIt: object [
         <category: 'smalltalk event'>
 
-        | iter start end result |
-        iter := self buffer iterOfSelectedText second.
-        result := ' ', ((self doIt: object) displayString), ' '.
-        self buffer insertInteractive: iter text: result len: result size defaultEditable: true.
-        start := self buffer getIterAtOffset: (iter getOffset - result size).
-        end := self buffer getIterAtOffset: (iter getOffset).
-        self buffer selectRange: start bound: end
+        TaskQueue uniqueInstance add:
+            [ | iter start end result |
+              iter := self buffer iterOfSelectedText second.
+              result := ' ', ((self doWithoutForkIt: object) displayString), ' '.
+              self buffer insertInteractive: iter text: result len: result size defaultEditable: true.
+              start := self buffer getIterAtOffset: (iter getOffset - result size).
+              end := self buffer getIterAtOffset: (iter getOffset).
+              self buffer selectRange: start bound: end ]
     ]
-
 ]
+

@@ -1,5 +1,11 @@
 2013-10-21  Gwenael Casaccio  <gwenael.casaccio@gmail.com>
 
+	* Debugger/GtkDebugger.st: Makes the debugger non-blocking and fix the continue back into GTK/Event-Loop/C-code.
+	* Debugger/GtkTextWidget.st: Makes the debugger non-blocking and fix the continue back into GTK/Event-Loop/C-code.
+	* Misc/TaskQueue.st : Add a queue of tasks.
+
+2013-10-21  Gwenael Casaccio  <gwenael.casaccio@gmail.com>
+
 	* Debugger/GtkDebugger.st: Eval code in the debugger.
 
 2013-10-18  Gwenael Casaccio  <gwenael.casaccio@gmail.com>
