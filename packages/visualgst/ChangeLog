@@ -1,3 +1,7 @@
+2013-10-21  Gwenael Casaccio  <gwenael.casaccio@gmail.com>
+
+	* Debugger/GtkDebugger.st: Eval code in the debugger.
+
 2013-10-18  Gwenael Casaccio  <gwenael.casaccio@gmail.com>
 
 	* Commands/DebugMenus/ContinueDebugCommand.st : Update command title and target.

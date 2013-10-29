@@ -373,25 +373,33 @@ GtkBrowsingTool subclass: GtkDebugger [
     doIt: object [
         <category: 'smalltalk event'>
 
-        self focusedWidget doIt: object
+        codeWidget hasFocus ifFalse: [ ^ self focusedWidget doIt: object ].
+        codeWidget hasSelection ifFalse: [ ^ self ].
+        debugger eval: codeWidget selectedText.
     ]
 
     debugIt: object [
         <category: 'smalltalk event'>
 
-        self focusedWidget debugIt: object
+        codeWidget hasFocus ifFalse: [ ^ self focusedWidget debugIt: object ].
+        codeWidget hasSelection ifFalse: [ ^ self ].
+        debugger eval: 'VisualGST.GtkDebugger open doItProcess: [ ', codeWidget selectedText, ' ] newProcess'
     ]
 
     inspectIt: object [
         <category: 'smalltalk event'>
 
-        self focusedWidget inspectIt: object
+        codeWidget hasFocus ifFalse: [ ^ self focusedWidget inspectIt: object ].
+        codeWidget hasSelection ifFalse: [ ^ self ].
+        (debugger eval: codeWidget selectedText) gtkInspect.
     ]
 
     printIt: object [
         <category: 'smalltalk event'>
 
-        self focusedWidget printIt: object
+        codeWidget hasFocus ifFalse: [ ^ self focusedWidget printIt: object ].
+        codeWidget hasSelection ifFalse: [ ^ self ].
+        codeWidget printString: (debugger eval: codeWidget selectedText).
     ]
 
     state [

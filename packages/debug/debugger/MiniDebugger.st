@@ -374,5 +374,10 @@ Other commands:
                 ' ' display.
                 each printNl ] ]
     ]
+
+    eval: line to: anObject [
+
+        (debugger eval: line) displayNl
+    ]
 ]
 

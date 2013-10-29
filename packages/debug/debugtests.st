@@ -60,7 +60,7 @@ SmallInteger extend [
     ]
 ]
 
-^L
+
 TestCase subclass: DebuggerTest [
     
     <comment: nil>
@@ -307,6 +307,33 @@ TestCase subclass: DebuggerTest [
             self assert: debugger suspendedContext currentLineInFile == each.
             debugger step.
         ]
+    ]
+
+    testEvaluation [
+        " Test that #eval gives the good states "
+
+        <category: 'test'>
+
+        | debugger i j k |
+        i := 312.
+        j := 412.
+        k := 512.
+
+        debugger := self debuggerOn: [ | x y z |
+                                        x := 1.
+                                        y := x * 2.
+                                        z := y * 2.
+                                        i yourself ].
+
+        debugger step; step; step.
+
+        self assert: (debugger eval: '^ i') = 312.
+        self assert: (debugger eval: '^ j') = 412.
+        self assert: (debugger eval: '^ k') = 512.
+
+        self assert: (debugger eval: '^ x') = 1.
+        self assert: (debugger eval: '^ y') = 2.
+        self assert: (debugger eval: '^ z') = 4.
     ]
 
     w [

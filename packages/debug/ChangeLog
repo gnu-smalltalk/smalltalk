@@ -1,3 +1,12 @@
+2013-10-21  Gwenael Casaccio  <gwenael.casaccio@gmail.com>
+
+	* DebugTools.st: Add >>#eval: allowing evaluation of code with the
+	current context temps and args names.
+	* maybe/Maybe.st: Maybe monad pattern.
+	* maybe/Just.st: Maybe monad pattern.
+	* maybe/Nothing.st: Maybe monad pattern.
+	* debugtests.st: Add test for >>#eval:.
+
 2013-10-15  Gwenael Casaccio  <gwenael.casaccio@gmail.com>
 
 	* debugtests.st: Add test for currentLineInFile.

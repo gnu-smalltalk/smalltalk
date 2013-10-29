@@ -280,6 +280,127 @@ pointer bytecodes to line numbers.'>
 	theDebugProcess primTerminate
     ]
 
+    eval: aString [
+        <category: 'evaluation'>
+
+        | context selectorAndArguments stream method result |
+        context := self suspendedContext.
+
+        selectorAndArguments := Dictionary new.
+        stream := WriteStream on: String new.
+
+        (context isBlock and: [ context outerContext isNil not ]) ifTrue: [ self extractSelectorAndArgumentsFrom: context outerContext to: selectorAndArguments ].
+        self extractSelectorAndArgumentsFrom: context to: selectorAndArguments.
+        self buildSelectorAndArgs: selectorAndArguments to: stream.
+        self buildCode: aString withArgs: selectorAndArguments keys to: stream.
+        ^ (self compile: stream contents to: self receiver)
+                    ifError: [ :fname :lineNo :errorString | stream contents printNl. (' error : ', errorString) displayNl ]
+                    ifSucceed: [ :method | self perform: method selector to: self receiver with: (self extractArgsFrom: selectorAndArguments) ].
+    ]
+
+    extractArgsFrom: aDictionary [
+        <category: 'private'>
+
+        | array i |
+        i := 1.
+        array := Array new: aDictionary size.
+
+        aDictionary keys do: [ :each |
+            array at: i put: (aDictionary at: each).
+            i := i + 1 ].
+
+        ^ array
+    ]
+
+    extractSelectorAndArgumentsFrom: aContext to: aDictionary [
+        <category: 'private'>
+
+        | i |
+        i := 1.
+
+        aContext method arguments do: [ :each |
+            aDictionary at: each put: (aContext at: i).
+            i := i + 1 ].
+        aContext method temporaries do: [ :each |
+            aDictionary at: each put: (aContext at: i).
+            i := i + 1 ]
+    ]
+
+    buildSelectorAndArgs: aDictionary to: aStream [
+        <category: 'private'>
+
+        | i |
+        i := 1.
+        aDictionary isEmpty ifTrue: [ ^ aStream nextPutAll: 'DoIt'; space ].
+        aDictionary keys do: [ :each |
+            aStream
+                nextPutAll: 'arg_';
+                nextPutAll: i asString;
+                nextPutAll: ': ';
+                nextPutAll: #xxx_;
+                nextPutAll: each;
+                space.
+            i := i + 1 ].
+    ]
+
+    buildCode: aString withArgs: anArray to: aStream [
+        <category: 'private'>
+
+        aStream
+            nextPutAll: '[';
+            nl;
+            nextPutAll: '| '.
+        anArray do: [ :each |
+            aStream
+                nextPutAll: each;
+                space ].
+        aStream
+            nextPutAll: '|';
+            nl.
+        anArray do: [ :each |
+            aStream
+                nextPutAll: each;
+                nextPutAll: ' := ';
+                nextPutAll: #xxx_;
+                nextPutAll: each;
+                nextPutAll: '.';
+                nl ].
+        aStream
+            nextPutAll: ' ^ [ ';
+            nl;
+            nextPutAll: aString;
+            nl;
+            nextPutAll: ' ] value';
+            nl;
+            nextPutAll: ']'.
+    ]
+
+    compile: aString to: anObject [
+        <category: 'private'>
+
+        ^ Just value:
+                    (anObject class
+                        compile: aString
+                        ifError: [ :fname :lineNo :errorString | ^ Nothing value: fname value: lineNo value: errorString ])
+    ]
+
+    perform: aSelector to: anObject with: anArray [
+        <category: 'private'>
+
+        | sem result |
+        sem := Semaphore new.
+        [ [ result := anObject perform: aSelector withArguments: anArray.
+             sem signal ]
+                receiver: nil;
+                on: Exception do: [ :ex | [ sem signal ] fork.
+                                          ex pass ] ]
+            receiver: nil;
+            fork.
+        sem wait.
+        anObject class removeSelector: aSelector ifAbsent: [].
+        ^ result
+    ]
+
     disableBreakpointContext [
 	"Remove the context inserted set by #finish:."
 
