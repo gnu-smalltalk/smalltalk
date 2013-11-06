@@ -316,6 +316,15 @@ GtkBrowsingTool subclass: GtkDebugger [
         debugger continue
     ]
 
+    stepToSelectedContext [
+       <category: 'execute events'>
+
+        | ctxt |
+        ctxt := debugger suspendedContext.
+        [ ctxt parentContext == contextWidget selectedContext ] whileFalse: [ ctxt := ctxt parentContext ].
+        debugger finish: ctxt
+    ]
+
     codeSaved [
 	<category: 'method events'>
 
