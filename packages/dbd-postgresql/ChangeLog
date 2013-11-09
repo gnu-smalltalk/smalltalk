@@ -1,3 +1,8 @@
+2013-11-09  Holger Hans Peter Freyther  <holger@freyther.de>
+
+	* ColumnInfo.st: Truncate microseconds before passing
+	it to DateTime>>#readFrom:.
+
 2013-08-25  Holger Hans Peter Freyther  <holger@freyther.de>
 
 	* Connection.st: Remove >>#beginTransaction,

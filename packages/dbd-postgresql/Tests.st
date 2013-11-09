@@ -133,6 +133,13 @@ TestCase subclass: PostgresTestCase [
         self assert: (res next at: 'integer')  = 100.
     ]
 
+    testDateTimeParse [
+        | res |
+        "Manually test if we can parse dates with ms"
+        res := PGColumnInfo convertDateTime: '2013-11-08 16:53:03.11825'.
+        self assert: res = (DateTime year: 2013 month: 11 day: 8 hour: 16 minute: 53 second: 3)
+    ]
+
     testDateTime [
         | statement res now now_utc row |
 
