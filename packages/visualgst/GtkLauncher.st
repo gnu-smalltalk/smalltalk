@@ -299,6 +299,7 @@ GtkVisualGSTTool subclass: GtkLauncher [
 	imageName := File image asString.
         systemChangeNotifier := SystemChangeNotifier new.
         SystemChangeNotifier root add: systemChangeNotifier.
+        KeySnooper uniqueInstance.
 	self clearGlobalState.
 	super initialize.
 	window maximize.

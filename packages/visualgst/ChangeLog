@@ -1,3 +1,9 @@
+2013-11-13  Gwenael Casaccio  <gwenael.casaccio@gmail.com>
+
+	* GtkLauncher.st: Initialize KeySnooper.
+	* Misc/TaskQueue.st: Flush task queue.
+	* Misc/KeySnooper.st: Add key snooper and handle the ctrl + . shortcut
+
 2013-10-21  Gwenael Casaccio  <gwenael.casaccio@gmail.com>
 
 	* Debugger/GtkDebugger.st: If stepping while the last context is not

@@ -72,6 +72,7 @@
   <filein>Gtk/GtkEntryBuffer.st</filein>
   <filein>Extensions.st</filein>
   <filein>Misc/TaskQueue.st</filein>
+  <filein>Misc/KeySnooper.st</filein>
   <filein>Notification/AbstractEvent.st</filein>
   <filein>Notification/AddedEvent.st</filein>
   <filein>Notification/CommentedEvent.st</filein>

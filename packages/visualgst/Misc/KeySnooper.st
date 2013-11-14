@@ -1,17 +1,17 @@
 "======================================================================
-| 
-| TaskQueue class definition
-| 
+|
+| KeySnooper class definition
+|
 ======================================================================"
-  
+
 "======================================================================
-| 
+|
 | Copyright (c) 2013
 | Gwenael Casaccio <gwenael.casaccio@gmail.com>,
-| 
-| 
+|
+|
 | This file is part of VisualGST.
-| 
+|
 | Permission is hereby granted, free of charge, to any person obtaining
 | a copy of this software and associated documentation files (the
 | 'Software'), to deal in the Software without restriction, including
@@ -19,10 +19,10 @@
 | distribute, sublicense, and/or sell copies of the Software, and to
 | permit persons to whom the Software is furnished to do so, subject to
 | the following conditions:
-| 
+|
 | The above copyright notice and this permission notice shall be
 | included in all copies or substantial portions of the Software.
-| 
+|
 | THE SOFTWARE IS PROVIDED 'AS IS', WITHOUT WARRANTY OF ANY KIND,
 | EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
 | MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
@@ -30,16 +30,26 @@
 | CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
 | TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 | SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-| 
+|
 ======================================================================"
 
-Object subclass: TaskQueue [
+Object subclass: KeySnooper [
 
-    TaskQueue class [ | uniqueInstance | ]
+    KeySnooper class [ | uniqueInstance | ]
 
-    | queue queueHandler currentProcess |
+    KeySnooper class >> initialize [
+        <category: 'initialization'>
 
-    TaskQueue class >> new [
+        ObjectMemory addDependent: self.
+    ]
+
+    KeySnooper class >> uniqueInstance [
+        <category: 'instance creation'>
+
+        ^ uniqueInstance ifNil: [ uniqueInstance := self new ]
+    ]
+
+    KeySnooper class >> new [
         <category: 'instance creation'>
 
         ^ super new
@@ -47,45 +57,35 @@ Object subclass: TaskQueue [
             yourself
     ]
 
-    TaskQueue class >> uniqueInstance [
-        <category: 'accessing'>
+    KeySnooper class >> update: aSymbol [
+        <category: 'initialize'>
 
-        ^ uniqueInstance ifNil: [ uniqueInstance := self new ]
+        aSymbol == #returnFromSnapshot ifTrue: [ uniqueInstance := nil ].
     ]
+
+    | callback |
 
     initialize [
         <category: 'initialization'>
 
-        queue := SharedQueue new
+        callback := CCallbackDescriptor
+                            for: [ :aWidget :aGdkEventKey :aPointer |
+                                    [  self keyHandling: (GTK.GdkEventKey address: aGdkEventKey) ]
+                                            on: Exception do: [ :ex | ex context backtrace. false]]
+                            returning: #boolean
+                            withArgs: #(#long #long #long).
+        GTK.Gtk keySnooperInstall: callback funcData: nil.
     ]
 
-    add: aBlock [
-        <category: 'accessing'>
+    keyHandling: aGdkEventKey [
 
-        queue nextPut: aBlock
-    ]
-
-    run [
-        <category: 'accessing'>
-
-        queueHandler := [ | task sem |
-          sem := Semaphore new.
-          [ task := queue next.
-            currentProcess := [ [ task value.
-                                  sem signal ] on: Exception do: [ :ex | [ sem signal ] fork.
-                                                                         ex pass ] ] fork.
-            sem wait.
-            currentProcess := nil ] repeat ] fork
-    ]
-
-    flush [
-        <category: 'accessing'>
-
-        queueHandler ifNotNil: [:p | p terminate].
-        currentProcess ifNotNil: [:p | p terminate].
-        self
-            initialize;
-            run.
+        ^ ((aGdkEventKey state value bitAnd: 4) = 4 and: [ aGdkEventKey keyval value = GTK.Gdk gdkPeriod ])
+                                                            ifTrue: [ VisualGST.TaskQueue uniqueInstance flush.
+                                                                      true ]
+                                                            ifFalse: [ false ]
     ]
 ]
 
+Eval [
+    KeySnooper initialize.
+]
