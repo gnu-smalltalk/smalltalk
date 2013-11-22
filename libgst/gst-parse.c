@@ -463,6 +463,7 @@ parse_chunks (gst_parser *p)
     {
       OOP oldTemporaries = _gst_push_temporaries_dictionary ();
       jmp_buf old_recover;
+      memcpy (old_recover, p->recover, sizeof (p->recover));
       setjmp (p->recover);
       while (token (p, 0) != EOF && token (p, 0) != '!')
         {

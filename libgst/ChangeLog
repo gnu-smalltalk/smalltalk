@@ -1,3 +1,7 @@
+2013-11-22  Holger Hans Peter Freyther  <holger@moiji-mobile.com>
+
+	* gst-parse.c: Initialize the old_recover.
+
 2013-10-13  Holger Hans Peter Freyther  <holger@moiji-mobile.com>
 
 	* interp.c: Address address sanitizer warning when the
