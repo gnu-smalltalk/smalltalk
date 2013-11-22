@@ -1,3 +1,7 @@
+2013-11-22  Holger Hans Peter Freyther  <holger@freyther.de>
+
+	* gstGluTess.c: Address coverity issue.
+
 2012-02-08  Paolo Bonzini  <bonzini@gnu.org>
 
 	* gstGlu.c: Fix warnings.

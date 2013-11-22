@@ -147,9 +147,6 @@ struct gst_glu_callback {
   GLUfuncptr func;
 };
 
-/* Number of known callbacks */
-#define N_GLU_CALLBACKS 6
-
 static struct gst_glu_callback gst_glu_tessCallbackFuncs[] = {
   { GLU_TESS_BEGIN, GLU_TESS_BEGIN_DATA,
     (GLUfuncptr) gst_glu_tessCallback_Tess_Begin_Data },
@@ -163,12 +160,14 @@ static struct gst_glu_callback gst_glu_tessCallbackFuncs[] = {
     (GLUfuncptr) gst_glu_tessCallback_Tess_End_Data }
 };
 
+#define ARRAY_SIZE(x) (sizeof(x)/sizeof((x)[0]))
+
 /* Retreive the callback index from the Callback contant definition */
 static struct gst_glu_callback *
 gst_glu_tess_getCallbackIndex(GLenum which)
 {
   int i;
-  for (i = 0; i < N_GLU_CALLBACKS; ++i)
+  for (i = 0; i < ARRAY_SIZE(gst_glu_tessCallbackFuncs); ++i)
 	/* If function is found, return index */
 	if (gst_glu_tessCallbackFuncs[i].which == which)
 	  return &gst_glu_tessCallbackFuncs[i];
