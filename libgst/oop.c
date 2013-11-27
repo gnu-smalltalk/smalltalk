@@ -1630,6 +1630,7 @@ tenure_one_object ()
 void
 _gst_grey_oop_range (PTR from, size_t size)
 {
+#ifndef NO_SIGSEGV_HANDLING
   volatile char *last, *page;
 
   for (last = ((char *)from) + size,
@@ -1637,6 +1638,7 @@ _gst_grey_oop_range (PTR from, size_t size)
        page < last;
        page += getpagesize())
     *page = *page;
+#endif
 }
 
 

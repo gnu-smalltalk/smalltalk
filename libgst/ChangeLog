@@ -1,3 +1,8 @@
+2013-11-27  Holger Hans Peter Freyther  <holger@freyther.de>
+
+	*  oop.c: Guard _gst_grey_oop_range when not using
+	libsigsegv.
+
 2013-11-22  Holger Hans Peter Freyther  <holger@moiji-mobile.com>
 
 	* gst-parse.c: Initialize the old_recover.
