@@ -1,3 +1,8 @@
+2013-11-30  Holger Hans Peter Freyther  <holger@freyther.de>
+
+	* gst-parse.c: Check if currentClass is nil before calling
+	_gst_make_method.
+
 2013-11-27  Holger Hans Peter Freyther  <holger@freyther.de>
 
 	*  oop.c: Guard _gst_grey_oop_range when not using
