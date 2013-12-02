@@ -52,12 +52,6 @@ TestCase subclass: GtkConcreteWidgetTest [
 	^ false
     ]
 
-    testAbstractWidget [
-	<category: 'testing'>
-
-	self should: [ GtkAbstractConcreteWidget new hideAll. true ]
-    ]
-
     testConcreteWidget [
 	<category: 'testing'>
 

@@ -45,7 +45,6 @@ GtkConcreteWidget subclass: GtkSidebarWidget [
 				yourself.
 	self mainWidget: paned.
 	widgetEvents := Dictionary new.
-	activeWidget := GtkAbstractConcreteWidget new.
 	widgets := OrderedCollection new
     ]
 
@@ -72,7 +71,7 @@ GtkConcreteWidget subclass: GtkSidebarWidget [
     show: anIndex [
 	<category: 'notebook'>
 
-	activeWidget hideAll.
+	activeWidget ifNotNil: [ :aWidget | aWidget hideAll ].
 	self mainWidget showAll.
 	self mainWidget setCurrentPage: anIndex - 1.
 	activeWidget := (widgets at: anIndex)

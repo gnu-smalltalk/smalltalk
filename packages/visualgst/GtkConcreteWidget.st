@@ -33,7 +33,7 @@
 |
 ======================================================================"
 
-GtkAbstractConcreteWidget subclass: GtkConcreteWidget [
+Object subclass: GtkConcreteWidget [
     | child parentWindow popupMenu |
 
     GtkConcreteWidget class >> parentWindow: aGtkWindow [

@@ -163,7 +163,6 @@
   <filein>Category/ClassCategory.st</filein>
   <filein>Category/AbstractNamespace.st</filein>
   <filein>Category/Class.st</filein>
-  <filein>GtkAbstractConcreteWidget.st</filein>
   <filein>GtkConcreteWidget.st</filein>
   <filein>GtkScrollTreeWidget.st</filein>
   <filein>GtkSimpleListWidget.st</filein>
@@ -392,7 +391,6 @@
   <file>Category/ClassCategory.st</file>
   <file>Category/AbstractNamespace.st</file>
   <file>Category/Class.st</file>
-  <file>GtkAbstractConcreteWidget.st</file>
   <file>GtkConcreteWidget.st</file>
   <file>GtkScrollTreeWidget.st</file>
   <file>GtkSimpleListWidget.st</file>

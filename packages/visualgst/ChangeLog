@@ -1,3 +1,10 @@
+2013-12-02  Gwenael Casaccio  <gwenael.casaccio@gmail.com>
+
+	* GtkConcreteWidget.st: Object is the superclass.
+	* GtkAbstractConcreteWidget.st: Remove it.
+	* GtkSidebarWidget.st: Doesn't rely on GtkAbstractConcreteWidget.
+	* Tests/GtkConcreteWidgetTest.st: Remove GtkAbstractConcreteWidget test.
+
 2013-11-13  Gwenael Casaccio  <gwenael.casaccio@gmail.com>
 
 	* GtkLauncher.st: Initialize KeySnooper.
