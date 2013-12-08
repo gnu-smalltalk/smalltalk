@@ -1,3 +1,8 @@
+2013-12-08  Holger Hans Peter Freyther  <holger@freyther.de>
+
+	* kernel/Regex.st: Check for isEmpty of the Interval before
+	trying to use it.
+
 2013-12-11  Lee Duhem  <lee.duhem@gmail.com>
 
 	* kernel/MappedColl.st:  Fix variable name typos in reject: and

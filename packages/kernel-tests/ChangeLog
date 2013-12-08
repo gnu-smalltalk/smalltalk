@@ -1,3 +1,7 @@
+2013-12-08  Holger Hans Peter Freyther  <holger@freyther.de>
+
+	* kernel/RegexpTests.st: Add tests for Regexp.
+
 2013-12-13  Holger Hans Peter Freyther  <holger@freyther.de>
 
 	* kernel/MappedCollectionTests.st: Add tests for MappedCollection.

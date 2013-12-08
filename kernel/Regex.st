@@ -377,9 +377,12 @@ RegexResults subclass: MatchingRegexResults [
 	(cache at: anIndex) isNil 
 	    ifTrue: 
 		[reg := registers at: anIndex.
-		text := reg isNil 
+		text := reg isNil
 			    ifTrue: [nil]
-			    ifFalse: [self subject copyFrom: reg first to: reg last].
+			    ifFalse: [
+				reg isEmpty
+					ifTrue: ['']
+					ifFalse: [self subject copyFrom: reg first to: reg last]].
 		cache at: anIndex put: text].
 	^cache at: anIndex
     ]

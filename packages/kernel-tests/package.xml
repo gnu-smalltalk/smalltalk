@@ -6,10 +6,12 @@
    <sunit>TestContextPart</sunit>
    <sunit>TestMappedCollection</sunit>
    <sunit>TestObject</sunit>
+   <sunit>TestRegexp</sunit>
    <filein>kernel/CompiledMethodTests.st</filein>
    <filein>kernel/ContextPartTests.st</filein>
    <filein>kernel/MappedCollectionTests.st</filein>
    <filein>kernel/ObjectTests.st</filein>
+   <filein>kernel/RegexpTests.st</filein>
   </test>
 
   <file>ChangeLog</file>
