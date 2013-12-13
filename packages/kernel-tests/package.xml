@@ -4,9 +4,11 @@
   <test>
    <sunit>TestCompiledMethod</sunit>
    <sunit>TestContextPart</sunit>
+   <sunit>TestMappedCollection</sunit>
    <sunit>TestObject</sunit>
    <filein>kernel/CompiledMethodTests.st</filein>
    <filein>kernel/ContextPartTests.st</filein>
+   <filein>kernel/MappedCollectionTests.st</filein>
    <filein>kernel/ObjectTests.st</filein>
   </test>
 

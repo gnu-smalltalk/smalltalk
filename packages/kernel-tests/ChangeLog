@@ -1,3 +1,7 @@
+2013-12-13  Holger Hans Peter Freyther  <holger@freyther.de>
+
+	* kernel/MappedCollectionTests.st: Add tests for MappedCollection.
+
 2013-10-12  Gwenael Casaccio <gwenael.casaccio@gmail.com>
             Paolo Bonzini <bonzini@gnu.org>
 
