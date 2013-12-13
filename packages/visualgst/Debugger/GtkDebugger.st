@@ -390,7 +390,7 @@ GtkBrowsingTool subclass: GtkDebugger [
 
         codeWidget hasFocus ifFalse: [ ^ self focusedWidget doIt: object ].
         codeWidget hasSelection ifFalse: [ ^ self ].
-        TaskQueue uniqueInstance add: [ debugger eval: codeWidget selectedText ].
+        [ debugger eval: codeWidget selectedText ] fork.
     ]
 
     debugIt: object [
@@ -406,7 +406,7 @@ GtkBrowsingTool subclass: GtkDebugger [
 
         codeWidget hasFocus ifFalse: [ ^ self focusedWidget inspectIt: object ].
         codeWidget hasSelection ifFalse: [ ^ self ].
-        TaskQueue uniqueInstance add: [ (debugger eval: codeWidget selectedText) gtkInspect ].
+        [ (debugger eval: codeWidget selectedText) gtkInspect ] fork.
     ]
 
     printIt: object [
@@ -414,7 +414,7 @@ GtkBrowsingTool subclass: GtkDebugger [
 
         codeWidget hasFocus ifFalse: [ ^ self focusedWidget printIt: object ].
         codeWidget hasSelection ifFalse: [ ^ self ].
-        TaskQueue uniqueInstance add: [ codeWidget printString: (debugger eval: codeWidget selectedText) ].
+        [ codeWidget printString: (debugger eval: codeWidget selectedText) ] fork.
     ]
 
     state [

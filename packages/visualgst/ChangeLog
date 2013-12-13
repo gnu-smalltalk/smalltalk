@@ -1,3 +1,8 @@
+2013-12-13  Holger Hans Peter Freyther  <holger@moiji-mobile.com>
+
+	* GtkDebugger.st: Do not use the TaskQueue.
+	* GtkTextWidget.st: Do not use the TaskQueue.
+
 2013-12-02  Gwenael Casaccio  <gwenael.casaccio@gmail.com>
 
 	* GtkConcreteWidget.st: Object is the superclass.

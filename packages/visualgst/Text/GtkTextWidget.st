@@ -398,7 +398,7 @@ GtkConcreteWidget subclass: GtkTextWidget [
     doIt: object [
         <category: 'smalltalk event'>
 
-	TaskQueue uniqueInstance add: [ self doWithoutForkIt: object ]
+	[ self doWithoutForkIt: object ] fork
     ]
 
     debugIt: object [
@@ -416,20 +416,19 @@ GtkConcreteWidget subclass: GtkTextWidget [
     inspectIt: object [
         <category: 'smalltalk event'>
 
-        TaskQueue uniqueInstance add: [ GtkInspector openOn: (self doWithoutForkIt: object) ]
+        [ GtkInspector openOn: (self doWithoutForkIt: object) ] fork
     ]
 
     printIt: object [
         <category: 'smalltalk event'>
 
-        TaskQueue uniqueInstance add:
             [ | iter start end result |
               iter := self buffer iterOfSelectedText second.
               result := ' ', ((self doWithoutForkIt: object) displayString), ' '.
               self buffer insertInteractive: iter text: result len: result size defaultEditable: true.
               start := self buffer getIterAtOffset: (iter getOffset - result size).
               end := self buffer getIterAtOffset: (iter getOffset).
-              self buffer selectRange: start bound: end ]
+              self buffer selectRange: start bound: end ] fork.
     ]
 ]
 
