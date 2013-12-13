@@ -1,3 +1,8 @@
+2013-12-11  Lee Duhem  <lee.duhem@gmail.com>
+
+	* kernel/MappedColl.st:  Fix variable name typos in reject: and
+	select:.
+
 2013-10-21  Gwenael Casaccio  <gwenael.casaccio@gmail.com>
 
 	* kernel/ContextPart.st: Print the instruction pointer value in the

@@ -187,7 +187,7 @@ map would be an Interval.
 
 	<category: 'basic'>
 	| newMap |
-	newMap := newMap reject: [:key | aBlock value: (self at: key)].
+	newMap := map reject: [:key | aBlock value: (self at: key)].
 	^self class collection: domain map: newMap
     ]
 
@@ -196,7 +196,7 @@ map would be an Interval.
 
 	<category: 'basic'>
 	| newMap |
-	newMap := newMap select: [:key | aBlock value: (self at: key)].
+	newMap := map select: [:key | aBlock value: (self at: key)].
 	^self class collection: domain map: newMap
     ]
 
