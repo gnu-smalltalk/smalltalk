@@ -1,3 +1,7 @@
+2013-12-14  Holger Hans Peter Freyther  <holger@freyther.de>
+
+	* configure.ac: Check for environ with AC_CHECK_DECLS.
+
 2013-12-08  Holger Hans Peter Freyther  <holger@freyther.de>
 
 	* kernel/Regex.st: Check for isEmpty of the Interval before

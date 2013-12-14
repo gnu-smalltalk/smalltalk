@@ -1,3 +1,7 @@
+2013-12-14  Holger Hans Peter Freyther  <holger@freyther.de>
+
+	* cint.c: Fix the compilation on FreeBSD.
+
 2013-12-16  Lee Duhem  <lee.duhem@gmail.com>
 
 	* dict.c: Make VMPrimitives a BindingDictionary.

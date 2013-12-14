@@ -396,6 +396,14 @@ my_putenv (const char *str)
   return (putenv (clone));
 }
 
+/*
+ * On FreeBSD and other BSDs there is the environ but it is not
+ * declared in header. Import it like this.
+ */
+#if !HAVE_DECL_ENVIRON
+extern char **environ;
+#endif
+
 static char **
 get_environ (void)
 {

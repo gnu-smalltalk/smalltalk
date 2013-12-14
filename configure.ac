@@ -369,6 +369,9 @@ if test "$ac_cv_func__NSGetEnviron" = yes; then
      environ variable.])
 fi
 
+dnl FreeBSD does provide an environ but it is not declared in the headers
+AC_CHECK_DECLS([environ])
+
 AC_SEARCH_LIBS([nanosleep], [rt])
 if test "$ac_cv_search_nanosleep" != no; then
   AC_DEFINE(HAVE_NANOSLEEP, 1, 
