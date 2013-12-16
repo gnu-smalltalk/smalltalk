@@ -1225,7 +1225,7 @@ init_c_symbols ()
 void
 init_primitives_dictionary ()
 {
-  OOP primDictionaryOOP = _gst_dictionary_new (512);
+  OOP primDictionaryOOP = _gst_binding_dictionary_new (512, _gst_smalltalk_dictionary);
   int i;
 
   add_smalltalk ("VMPrimitives", primDictionaryOOP);

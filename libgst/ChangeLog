@@ -1,3 +1,7 @@
+2013-12-16  Lee Duhem  <lee.duhem@gmail.com>
+
+	* dict.c: Make VMPrimitives a BindingDictionary.
+
 2013-11-30  Holger Hans Peter Freyther  <holger@freyther.de>
 
 	* gst-parse.c: Check if currentClass is nil before calling
