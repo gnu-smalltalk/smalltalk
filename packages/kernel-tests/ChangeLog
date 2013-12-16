@@ -1,3 +1,7 @@
+2013-12-16  Holger Hans Peter Freyther  <holger@moiji-mobile.com>
+
+	* kernel/BehaviorTests.st: Add tests for Behavior.
+
 2013-12-08  Holger Hans Peter Freyther  <holger@freyther.de>
 
 	* kernel/RegexpTests.st: Add tests for Regexp.
