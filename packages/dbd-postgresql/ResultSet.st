@@ -36,7 +36,7 @@ ResultSet subclass: PGResultSet [
     | handle index rowCount columns columnsArray |
     
     <comment: nil>
-    <category: 'DBI-Drivers'>
+    <category: 'DBD-PostgreSQL'>
 
     PGResultSet class >> new: aCObject [
 	<category: 'private'>
@@ -267,7 +267,7 @@ ResultSet subclass: PGResultSet [
 
 
 CObject subclass: PQResultSet [
-    <category: 'private'>
+    <category: 'DBD-PostgreSQL-Private'>
 
     "Results"
     status [

@@ -38,7 +38,7 @@ Row subclass: PGRow [
     | index |
     
     <comment: nil>
-    <category: 'DBI-Drivers'>
+    <category: 'DBD-PostgreSQL'>
 
     PGRow class >> in: aPGResultSet at: aIndex [
 	<category: 'instance creation'>

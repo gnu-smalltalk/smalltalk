@@ -36,7 +36,7 @@ Connection subclass: PGConnection [
     | handle |
     
     <comment: nil>
-    <category: 'DBI-Drivers'>
+    <category: 'DBD-PostgreSQL'>
 
     PGConnection class >> driverName [
 	<category: 'initialization'>
@@ -152,7 +152,7 @@ Connection subclass: PGConnection [
 
 
 CObject subclass: PQConnection [
-    <category: 'private'>
+    <category: 'DBD-PostgreSQL-Private'>
 
     "Connections"
     PQConnection class >> connect: aString [

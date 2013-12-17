@@ -35,7 +35,7 @@
 Statement subclass: PGStatement [
     | dbHandle queryString isSelect |
 
-    <category: 'DBI-Drivers'>
+    <category: 'DBD-PostgreSQL'>
     <comment: 'I represent a Postgres prepared statement. Or actually right
 now the ability to execute commands with binding.'>
 

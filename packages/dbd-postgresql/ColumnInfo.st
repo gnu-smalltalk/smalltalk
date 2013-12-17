@@ -38,7 +38,7 @@ ColumnInfo subclass: PGColumnInfo [
     | resultSet index cname ctype csize |
     
     <comment: nil>
-    <category: 'DBI-Framework'>
+    <category: 'DBD-PostgreSQL'>
 
     TypeNames := nil.
     TypeConversions := nil.
