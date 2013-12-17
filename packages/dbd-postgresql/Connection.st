@@ -154,7 +154,6 @@ Connection subclass: PGConnection [
 CObject subclass: PQConnection [
     <category: 'DBD-PostgreSQL-Private'>
 
-    "Connections"
     PQConnection class >> connect: aString [
         <cCall: 'PQconnectdb' returning: #{PQConnection} args: #(#string)>
     ]
@@ -174,12 +173,10 @@ CObject subclass: PQConnection [
         <cCall: 'PQfinish' returning: #void args: #(#self)>
     ]
 
-    "Executing SQL"
     exec: aSqlStatement [
         <cCall: 'PQexec' returning: #{PQResultSet} args: #(#self #string)>
     ]
 
-    "Executing SQL with params"
     exec: aSqlStatement with: params [
         | par |
 

@@ -1,5 +1,10 @@
 2013-12-17  Holger Hans Peter Freyther  <holger@moiji-mobile.com>
 
+	* Connection.st: Remove comments between selectors.
+	* ResultSet.st: Remove comments between selectors.
+
+2013-12-17  Holger Hans Peter Freyther  <holger@moiji-mobile.com>
+
 	* ColumnInfo.st: Change class category.
 	* Connection.st: Change class category.
 	* ResultSet.st: Change class category.

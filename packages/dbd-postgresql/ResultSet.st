@@ -269,7 +269,6 @@ ResultSet subclass: PGResultSet [
 CObject subclass: PQResultSet [
     <category: 'DBD-PostgreSQL-Private'>
 
-    "Results"
     status [
         <cCall: 'PQresultStatus' returning: #int args: #( #self)>
     ]
@@ -282,7 +281,6 @@ CObject subclass: PQResultSet [
         <cCall: 'PQclear' returning: #void args: #( #self)>
     ]
 
-    "Result sets"
     numTuples [
         <cCall: 'PQntuples' returning: #int args: #( #self)>
     ]
@@ -295,7 +293,6 @@ CObject subclass: PQResultSet [
         <cCall: 'PQgetisnull' returning: #int args: #( #self #int #int)>
     ]
 
-    "DML results"
     rowsAffected [
         <cCall: 'PQcmdTuples' returning: #string args: #( #self)>
     ]
@@ -304,7 +301,6 @@ CObject subclass: PQResultSet [
         <cCall: 'PQoidValue' returning: #uInt args: #( #self)>
     ]
 
-    "Column info"
     numFields [
         <cCall: 'PQnfields' returning: #int args: #( #self)>
     ]
