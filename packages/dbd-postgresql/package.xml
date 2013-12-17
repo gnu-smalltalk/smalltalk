@@ -4,8 +4,8 @@
   <namespace>DBI.PostgreSQL</namespace>
   <library>libpq</library>
 
-  <filein>Connection.st</filein>
   <filein>ResultSet.st</filein>
+  <filein>Connection.st</filein>
   <filein>Row.st</filein>
   <filein>ColumnInfo.st</filein>
   <filein>Statement.st</filein>

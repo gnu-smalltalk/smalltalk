@@ -1,3 +1,7 @@
+2013-12-17  Holger Hans Peter Freyther  <holger@moiji-mobile.com>
+
+	* package.xml: Re-order Connection.st and ResultSet.st
+
 2013-11-09  Holger Hans Peter Freyther  <holger@freyther.de>
 
 	* ColumnInfo.st: Truncate microseconds before passing
