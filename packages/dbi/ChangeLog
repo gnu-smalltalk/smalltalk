@@ -1,3 +1,7 @@
+2013-12-17  Holger Hans Peter Freyther  <holger@freyther.de>
+
+	* Connection.st: Initialize Drivers from >>#initialize.
+
 2013-08-25  Holger Hans Peter Freyther  <holger@freyther.de>
 
 	* Connection.st: Add >>#beginTransaction,

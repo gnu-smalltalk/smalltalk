@@ -41,7 +41,12 @@ Object subclass: Connection [
 
     | tables |
 
-    Drivers := LookupTable new.
+    Drivers := nil.
+
+    Connection class >> initialize [
+	<category: 'initialization'>
+        Drivers := LookupTable new.
+    ]
 
     Connection class >> updateDriverList [
 	"Private - Look for new subclasses of Connection."
