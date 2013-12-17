@@ -43,6 +43,11 @@ ColumnInfo subclass: PGColumnInfo [
     TypeNames := nil.
     TypeConversions := nil.
 
+    PGColumnInfo class >> initialize [
+        <category: 'initialization'>
+        self initTypes
+    ]
+
     PGColumnInfo class >> in: aResultSet at: aIndex [
 	<category: 'instance creation'>
 	^self new in: aResultSet at: aIndex
@@ -254,5 +259,5 @@ ColumnInfo subclass: PGColumnInfo [
 
 
 Eval [
-    PGColumnInfo initTypes
+    PGColumnInfo initialize
 ]

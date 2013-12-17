@@ -39,7 +39,13 @@ Statement subclass: PGStatement [
     <comment: 'I represent a Postgres prepared statement. Or actually right
 now the ability to execute commands with binding.'>
 
-    SelectQueries := #('EXPLAIN' 'SELECT') asSet.
+    SelectQueries := nil.
+
+    PGStatement class >> initialize [
+        <category: 'initialization'>
+
+        SelectQueries := #('EXPLAIN' 'SELECT') asSet.
+    ]
 
     dbHandle: aHandle [
         <category: 'private'>
@@ -91,4 +97,8 @@ now the ability to execute commands with binding.'>
         res := PGResultSet new: (dbHandle exec: queryString with: strings).
         ^ self checkResult: res.
     ]
+]
+
+Eval [
+    PGStatement initialize
 ]

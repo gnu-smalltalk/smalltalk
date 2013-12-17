@@ -1,5 +1,12 @@
 2013-12-17  Holger Hans Peter Freyther  <holger@moiji-mobile.com>
 
+	* ColumnInfo.st: Create PGColumnInfo class>>#initialize.
+	* Connection.st: Create PGConnection class>>#initialize.
+	* ResultSet.st: Create PGResultSet class>>#initialize.
+	* Statement.st: Create PGStatement class>>#initialize.
+
+2013-12-17  Holger Hans Peter Freyther  <holger@moiji-mobile.com>
+
 	* Connection.st: Remove comments between selectors.
 	* ResultSet.st: Remove comments between selectors.
 

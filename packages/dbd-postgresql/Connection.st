@@ -48,15 +48,20 @@ Connection subclass: PGConnection [
 	^PGFieldConverter
     ]
 
-    ConnectionStatus := #(#CONNECTION_OK
-	#CONNECTION_BAD
-	#CONNECTION_STARTED
-	#CONNECTION_MADE
-	#CONNECTION_AWAITING_RESPONSE
-	#CONNECTION_AUTH_OK
-	#CONNECTION_SETENV
-	#CONNECTION_SSL_STARTUP
-	#CONNECTION_NEEDED).
+    ConnectionStatus := nil.
+
+
+    PGConnection class >> initialize [
+        ConnectionStatus := #(#CONNECTION_OK
+            #CONNECTION_BAD
+            #CONNECTION_STARTED
+            #CONNECTION_MADE
+            #CONNECTION_AWAITING_RESPONSE
+            #CONNECTION_AUTH_OK
+            #CONNECTION_SETENV
+            #CONNECTION_SSL_STARTUP
+            #CONNECTION_NEEDED).
+    ]
 
     PGConnection class >> connectionStatus: aCode [
 	<category: 'constants'>
@@ -210,3 +215,6 @@ CObject subclass: PQConnection [
 ]
 
 
+Eval [
+    PGConnection initialize
+]
