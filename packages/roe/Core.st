@@ -1956,6 +1956,7 @@ String extend [
     ]
 
     resolveAttributeIn: aCollection [
+	<category: '*Roe'>
 	| attribute string |
 	string := self asString asUppercase.
 	aCollection do: 
