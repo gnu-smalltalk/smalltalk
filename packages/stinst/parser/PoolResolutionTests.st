@@ -7,7 +7,7 @@
 
 "======================================================================
 |
-| Copyright (C) 2008 Free Software Foundation, Inc.
+| Copyright (C) 2008,2013 Free Software Foundation, Inc.
 | Written by Stephen Compall.
 |
 | This file is part of the GNU Smalltalk class library.
@@ -37,6 +37,17 @@ superclass only' namespace-walk-stop rule"
 
 MyLibrary at: #PkgVersion put: 'MyLibrary 1.0'.
 MyProject at: #PkgVersion put: 'MyProject 0.3141'.
+
+
+
+Namespace current: Smalltalk [
+    Namespace current: DoubleName [
+        Object subclass: DoubleName [
+            <comment: 'My name is the name of the namespace. This happens
+            with GNUPlot, Cairo and other packages.'>
+        ]
+    ]
+]
 
 Namespace current: STInST.Tests.MyLibrary [
 
@@ -99,7 +110,7 @@ MyProject.MyLibWrapper.Baz subclass: BackForMore [
 Namespace current: STInST.Tests [
 
 TestCase subclass: TestDefaultPoolResolution [
-    | foo bar baz blah backformore |
+    | foo bar baz blah backformore doubleNameFirst doubleNameLast |
 
     assertVariable: symbol of: pools is: value description: str [
 	| binding |
@@ -114,6 +125,11 @@ TestCase subclass: TestDefaultPoolResolution [
 	blah := DefaultPoolResolution of: MyLibrary.Blah.
 	baz := DefaultPoolResolution of: MyProject.MyLibWrapper.Baz.
 	backformore := DefaultPoolResolution of: MyLibrary.BackForMore.
+
+        doubleNameFirst := DefaultPoolResolution of: UndefinedObject.
+        doubleNameFirst addPoolFirst: DoubleName.
+        doubleNameLast := DefaultPoolResolution of: UndefinedObject.
+        doubleNameLast addPoolLast: DoubleName.
     ]
 
     testClassPoolFirst [
@@ -149,6 +165,13 @@ TestCase subclass: TestDefaultPoolResolution [
 	     description: 'here-namespace searched first'.
 	self assertVariable: #Scoobs of: backformore is: 785
 	     description: 'superclass ns pools inherited'.
+    ]
+
+    testDoubleName [
+        self assertVariable: #DoubleName of: doubleNameFirst
+            is: Smalltalk.DoubleName.DoubleName description: 'the class is found'.
+        self assertVariable: #DoubleName of: doubleNameLast 
+            is: Smalltalk.DoubleName description: 'the name is found'.
     ]
 ]
 

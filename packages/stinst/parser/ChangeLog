@@ -1,3 +1,9 @@
+2013-12-19  Holger Hans Peter Freyther  <holger@moiji-mobile.com>
+
+	* PoolResolutionTests.st: Add TestDefaultPoolResolution>>#testDoubleName
+	* STSymTable.st: Add PoolResolution>>#addPoolFirst: and override it
+	in ClassicPoolResolution and DefaultPoolResolution.
+
 2013-09-26  Holger Hans Peter Freyther  <holger@freyther.de>
 
 	* GSTParser.st: Move the emptySeq variable into the block it is

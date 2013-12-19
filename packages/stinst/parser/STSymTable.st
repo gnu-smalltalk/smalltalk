@@ -7,7 +7,7 @@
 
 "======================================================================
 |
-| Copyright 1995,1999,2000,2001,2002,2006,2007,2008 Free Software Foundation, Inc.
+| Copyright 1995,1999,2000,2001,2002,2006,2007,2008,2013 Free Software Foundation, Inc.
 | Written by Steve Byrne.
 |
 | This file is part of GNU Smalltalk.
@@ -518,6 +518,13 @@ use compiling methods for that class.'>
 	^addedPool
     ]
 
+    addPoolFirst: poolDictionary [
+	 "My implementation does nothing; you must override it if you
+	 want it. Look at addPoolLast:"
+	<category: 'overriding'>
+	^false
+    ]
+
     addPoolLast: poolDictionary [
 	"If it is sensible, add poolDictionary to the end of my pool
 	 search order, setting aside whatever standards I usually use
@@ -569,6 +576,14 @@ PoolResolution subclass: ClassicPoolResolution [
 before the PoolResolution hierarchy was added, and TwistedPools became
 default.'>
 
+    addPoolFirst: poolDictionary [
+	"Add poolDictionary and all superspaces to the end of the
+	 search order.	Always succeed."
+	<category: 'accessing'>
+	pools addAllFirst: poolDictionary withAllSuperspaces.
+	^true
+    ]
+
     addPoolLast: poolDictionary [
 	"Add poolDictionary and all superspaces to the end of the
 	 search order.	Always succeed."
@@ -610,6 +625,14 @@ of shared pool searching, intended to be more intuitive for those who
 expect things to be found in their own namespace first.	 This is more
 fully explained by my implementation, or at GNU Smalltalk wiki page
 PoolResolution.'>
+
+    addPoolFirst: poolDictionary [
+	"Add poolDictionary and all superspaces to the end of the
+	 search order.	Always succeed."
+	<category: 'accessing'>
+	pools addAllFirst: poolDictionary withAllSuperspaces.
+	^true
+    ]
 
     addPoolLast: poolDictionary [
 	"Add poolDictionary and all superspaces to the end of the
