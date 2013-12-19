@@ -1,5 +1,11 @@
 2013-12-19  Holger Hans Peter Freyther  <holger@moiji-mobile.com>
 
+	* STCompiler.st: Rename STCompiler>>#addPool: to
+	STCompiler>>#addPoolFirst:.
+	* STCompilerTests.st: Add new file.
+
+2013-12-19  Holger Hans Peter Freyther  <holger@moiji-mobile.com>
+
 	* PoolResolutionTests.st: Add TestDefaultPoolResolution>>#testDoubleName
 	* STSymTable.st: Add PoolResolution>>#addPoolFirst: and override it
 	in ClassicPoolResolution and DefaultPoolResolution.

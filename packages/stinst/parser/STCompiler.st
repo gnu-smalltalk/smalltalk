@@ -7,7 +7,7 @@
 
 "======================================================================
 |
-| Copyright 1999,2000,2001,2002,2003,2006,2007,2009 Free Software Foundation, Inc.
+| Copyright 1999,2000,2001,2002,2003,2006,2007,2009,2013 Free Software Foundation, Inc.
 | Written by Paolo Bonzini.
 |
 | This file is part of GNU Smalltalk.
@@ -157,7 +157,7 @@ indexed'' bytecode. The resulting stream is
 	| compiler method |
 	compiler := self new.
 	compiler class: aBehavior parser: aParser.
-	aNamespace isNil ifFalse: [compiler addPool: aNamespace].
+	aNamespace isNil ifFalse: [compiler addPoolFirst: aNamespace].
 	method := compiler visitNode: methodNode.
 	aString isNil ifFalse: [ method methodCategory: aString ].
 	^method
@@ -179,9 +179,9 @@ indexed'' bytecode. The resulting stream is
 	^(symTable addLiteral: literal)
     ]
 
-    addPool: aNamespace [
+    addPoolFirst: aNamespace [
 	<category: 'accessing'>
-	^symTable addPool: aNamespace
+	^symTable addPoolFirst: aNamespace
     ]
 
     bytecodesFor: aBlockNode [

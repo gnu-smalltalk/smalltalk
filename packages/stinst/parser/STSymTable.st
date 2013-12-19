@@ -264,9 +264,14 @@ Object subclass: STSymbolTable [
 	^super new init
     ]
 
-    addPool: poolDictionary [
+    addPoolLast: poolDictionary [
 	<category: 'declaring'>
 	pools addPoolLast: poolDictionary
+    ]
+
+    addPoolFirst: poolDictionary [
+        <category: 'declaring'>
+        pools addPoolFirst: poolDictionary.
     ]
 
     declareEnvironment: aBehavior [
