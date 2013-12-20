@@ -72,8 +72,8 @@ GtkConcreteWidget subclass: GtkStackInspectorView [
 	<category: 'item selection'>
 
         aString = 'thisContext' ifTrue: [ ^ self object ].
-        (args includes: aString) ifTrue: [ ^ (self object at: (self object method arguments indexOf: aString asSymbol)) displayString ].
-        ^ (self object at: self object numArgs + (self object method temporaries indexOf: aString asSymbol)) displayString
+        (args includes: aString) ifTrue: [ ^ self object at: (self object method arguments indexOf: aString asSymbol) ].
+        ^ self object at: self object numArgs + (self object method temporaries indexOf: aString asSymbol)
     ]
 
     canDive [

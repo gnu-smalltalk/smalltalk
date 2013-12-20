@@ -51,8 +51,8 @@ GtkObjectInspectorView subclass: GtkContextInspectorView [
         <category: 'events'>
 
         ((args includes: aString) not and: [ (temps includes: aString) not ]) ifTrue: [ ^ super selectedValue: aString ].
-        (args includes: aString) ifTrue: [ ^ (self object at: (self object method arguments indexOf: aString asSymbol)) displayString ].
-        ^ (self object at: self object numArgs + (self object method temporaries indexOf: aString asSymbol)) displayString.
+        (args includes: aString) ifTrue: [ ^ self object at: (self object method arguments indexOf: aString asSymbol) ].
+        ^ self object at: self object numArgs + (self object method temporaries indexOf: aString asSymbol).
     ]
 ]
 

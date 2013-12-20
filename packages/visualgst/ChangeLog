@@ -1,3 +1,8 @@
+2013-12-20  Holger Hans Peter Freyther  <holger@moiji-mobile.com>
+
+	* Debugger/GtkStackInspectorView.st: Return the object and not a string.
+	* Inspector/GtkContextInspectorView.st: Return the object and not a string.
+
 2013-12-13  Holger Hans Peter Freyther  <holger@moiji-mobile.com>
 
 	* GtkDebugger.st: Do not use the TaskQueue.
