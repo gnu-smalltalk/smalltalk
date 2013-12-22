@@ -1,5 +1,10 @@
 2013-12-22  Holger Hans Peter Freyther  <holger@moiji-mobile.com>
 
+	* comp.c: Only flush the cache once when adding a new
+	CompiledMethod.
+
+2013-12-22  Holger Hans Peter Freyther  <holger@moiji-mobile.com>
+
 	* interp.c: Do not flush the cache when creating a new
 	process.
 

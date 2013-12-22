@@ -2553,7 +2553,8 @@ install_method (OOP methodOOP, OOP classOOP)
 #ifdef VERIFY_COMPILED_METHODS
   _gst_verify_sent_method (methodOOP);
 #endif
-  _gst_invalidate_method_cache ();
+  if (!_gst_kernel_initialized)
+    _gst_invalidate_method_cache ();
 }
 
 OOP
