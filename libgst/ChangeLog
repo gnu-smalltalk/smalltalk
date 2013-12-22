@@ -1,3 +1,8 @@
+2013-12-22  Holger Hans Peter Freyther  <holger@moiji-mobile.com>
+
+	* interp.c: Do not flush the cache when creating a new
+	process.
+
 2013-12-14  Holger Hans Peter Freyther  <holger@freyther.de>
 
 	* cint.c: Fix the compilation on FreeBSD.

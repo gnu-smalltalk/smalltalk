@@ -2143,7 +2143,6 @@ create_callin_process (OOP contextOOP)
   /* Put initialProcessOOP in the root set */
   add_first_link (initialProcessListOOP, initialProcessOOP);
 
-  _gst_invalidate_method_cache ();
   return (initialProcessOOP);
 }
 
