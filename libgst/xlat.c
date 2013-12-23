@@ -332,7 +332,7 @@ static inline mst_Boolean emit_block_prolog (OOP blockOOP, gst_compiled_block bl
 static inline mst_Boolean emit_inlined_primitive (int primitive, int numArgs, int attr);
 static inline mst_Boolean emit_primitive (int primitive, int numArgs);
 
-static inline void emit_interrupt_check (int restartReg);
+static inline void emit_interrupt_check (int restartReg, int ipOffset);
 static inline void generate_run_time_code (void);
 static inline void translate_method (OOP methodOOP, OOP receiverClass, int size);
 static void emit_basic_size_in_r0 (OOP classOOP, mst_Boolean tagged, int objectReg);
@@ -2498,7 +2498,7 @@ emit_deferred_sends (deferred_send *ds)
 }
 
 void
-emit_interrupt_check (int restartReg)
+emit_interrupt_check (int restartReg, int ipOffset)
 {
   jit_insn *jmp, *begin;
 
@@ -2507,9 +2507,17 @@ emit_interrupt_check (int restartReg)
 
   jit_ldi_i (JIT_R2, &_gst_except_flag);
   jmp = jit_beqi_i (jit_forward (), JIT_R2, 0);
+
+  /* Save the global ip pointer */
+  if (ipOffset != -1)
+    {
+      jit_movi_ul (JIT_R2, ipOffset);
+      jit_sti_ul (&ip, JIT_R2);
+    }
+
+  /* Where to restart?*/
   if (restartReg == JIT_NOREG)
     jit_movi_p (JIT_RET, begin);
-
   else
     jit_movr_p (JIT_RET, restartReg);
 
@@ -2975,7 +2983,7 @@ emit_primitive (int primitive, int numArgs)
   if (attr & (PRIM_SUCCEED | PRIM_RELOAD_IP))
     {
       if (attr & PRIM_CHECK_INTERRUPT)
-	emit_interrupt_check (JIT_V2);
+	emit_interrupt_check (JIT_V2, -1);
 
       jit_jmpr (JIT_V2);
     }
@@ -3218,7 +3226,7 @@ emit_method_prolog (OOP methodOOP,
   emit_context_setup (header.numArgs, header.numTemps);
 
   define_ip_map_entry (0);
-  emit_interrupt_check (JIT_NOREG);
+  emit_interrupt_check (JIT_NOREG, 0);
 
   /* For simplicity, we emit user-defined methods by creating a code_tree
      for the acrual send of #valueWithReceiver:withArguments: that they do.
@@ -3326,7 +3334,7 @@ emit_block_prolog (OOP blockOOP,
   emit_context_setup (header.numArgs, header.numTemps);
 
   define_ip_map_entry (0);
-  emit_interrupt_check (JIT_NOREG);
+  emit_interrupt_check (JIT_NOREG, 0);
 
   return (false);
 }
@@ -3675,9 +3683,7 @@ translate_method (OOP methodOOP, OOP receiverClass, int size)
 	  if (!lbl_define (*this_label))
 	    {
 	      define_ip_map_entry (bp - bc);
-	      jit_movi_ul (JIT_V0, bp - bc);
-	      jit_sti_ul (&ip, JIT_V0);
-	      emit_interrupt_check (JIT_NOREG);
+	      emit_interrupt_check (JIT_NOREG, bp - bc);
 	    }
 	}
 

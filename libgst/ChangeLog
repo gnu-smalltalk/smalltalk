@@ -1,3 +1,7 @@
+2013-12-23  Holger Hans Peter Freyther  <holger@moiji-mobile.com>
+
+	* xlat.c: Add ipOffset parameter to emit_interrupt_check.
+
 2014-01-09  Holger Hans Peter Freyther  <holger@moiji-mobile.com>
 
 	* prims.def: Mark VMpr_Process_singleStepWaitingOn as
