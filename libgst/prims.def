@@ -2890,7 +2890,7 @@ primitive VMpr_Process_resume [succeed,fail,check_interrupt]
 }
 
 /* Process singleStepWaitingOn: */
-primitive VMpr_Process_singleStepWaitingOn [succeed]
+primitive VMpr_Process_singleStepWaitingOn [succeed,fail]
 {
   OOP oop1;
   OOP oop2;

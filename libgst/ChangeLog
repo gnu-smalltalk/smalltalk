@@ -1,5 +1,10 @@
 2014-01-09  Holger Hans Peter Freyther  <holger@moiji-mobile.com>
 
+	* prims.def: Mark VMpr_Process_singleStepWaitingOn as
+	potentially failing.
+
+2014-01-09  Holger Hans Peter Freyther  <holger@moiji-mobile.com>
+
 	* interp.c: Check if the process is already suspended.
 
 2013-12-22  Holger Hans Peter Freyther  <holger@moiji-mobile.com>
