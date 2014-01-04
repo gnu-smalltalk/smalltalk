@@ -1,3 +1,7 @@
+2014-01-09  Holger Hans Peter Freyther  <holger@moiji-mobile.com>
+
+	* interp.c: Check if the process is already suspended.
+
 2013-12-22  Holger Hans Peter Freyther  <holger@moiji-mobile.com>
 
 	* comp.c: Only flush the cache once when adding a new

@@ -1794,7 +1794,8 @@ resume_process (OOP processOOP,
     {
       /* We're resuming a process with a *equal or higher* priority, so sleep
          the current one and activate the new one */
-      sleep_process (activeOOP);
+      if (active->myList != _gst_nil_oop)
+        sleep_process (activeOOP);
       activate_process (processOOP);
     }
   else
