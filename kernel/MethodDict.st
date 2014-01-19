@@ -7,7 +7,7 @@
 
 "======================================================================
 |
-| Copyright 1999, 2000, 2001, 2002 Free Software Foundation, Inc.
+| Copyright 1999, 2000, 2001, 2002, 2014 Free Software Foundation, Inc.
 | Written by Paolo Bonzini.
 |
 | This file is part of the GNU Smalltalk class library.
@@ -117,6 +117,34 @@ interpreter.'>
 
        <category: 'rehashing'>
        self mutex critical: [ self growBy: 0 ]
+    ]
+
+    select: aBlock [
+        "Answer a new dictionary containing the key/value pairs for which aBlock
+        returns true. aBlock only receives the value part of the pairs."
+
+        <category: 'dictionary enumerating'>
+        | newDict |
+        newDict := self copyEmpty: self capacity.
+        self
+            associationsDo: [:assoc |
+                (aBlock value: assoc value)
+                    ifTrue: [newDict dangerouslyAt: assoc key put: assoc value]].
+        ^newDict
+    ]
+
+    dangerouslyAt: aKey put: aValue [
+        <category: 'private methods'>
+
+        | index |
+        index := self findIndex: aKey.
+        (self primAt: index) isNil
+            ifTrue: [
+                self incrementTally
+                    ifTrue: [ index := self findIndex: aKey ].
+                self primAt: index put: aKey].
+        self valueAt: index put: aValue.
+       ^ aValue
     ]
 
     dangerouslyRemove: anAssociation [

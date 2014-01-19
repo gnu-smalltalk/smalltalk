@@ -1,3 +1,8 @@
+2014-01-19  Gwenael Casaccio  <gwenael.casaccio@gmail.com>
+
+	* kernel/MethodDict.st: Introduce >>#select: and
+	>>#dangerouslyAt:put:.
+
 2014-02-04  Gwenael Casaccio <gwenael.casaccio@gmail.com>
 
 	* scripts/Test.st: Show test result in GtkSUnit.
