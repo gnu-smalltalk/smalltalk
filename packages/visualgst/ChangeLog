@@ -1,3 +1,7 @@
+2014-01-20  Holger Hans Peter Freyther  <holger@moiji-mobile.com>
+
+	* SUnit/GtkSUnit.st: Change parameter from Symbol to String.
+
 2014-01-28  Holger Hans Peter Freyther  <holger@moiji-mobile.com>
 
 	* Debugger/GtkDebugger.st: Allow to re-start a selected context.
