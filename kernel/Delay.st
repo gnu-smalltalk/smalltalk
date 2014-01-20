@@ -295,7 +295,7 @@ created.'>
          evaluate aTimeoutBlock."
         <category: 'timeout'>
         | value timeout |
-        timeout := false.
+        timeout := 0.
         value := [ | sem proc |
             "Use the semaphore to signal that we executed everything"
             sem := Semaphore new.
@@ -308,19 +308,20 @@ created.'>
 
                 "Wait and see if it is timed out. If so send a signal."
                 (self timedWaitOn: sem) ifTrue: [
-                   proc signalInterrupt: (Kernel.TimeoutNotification on: self).
+                   timeout = 0 ifTrue: [
+                       proc signalInterrupt: (Kernel.TimeoutNotification on: self)].
                 ].
             ] fork.
 
-            aBlock ensure: [sem signal].
+            aBlock ensure: [timeout := timeout bitOr: 1. sem signal].
         ] on: Kernel.TimeoutNotification do: [:e |
             e delay = self
-                ifTrue:  [timeout := true]
+                ifTrue:  [timeout := timeout bitOr: 2]
                 ifFalse: [e pass].
         ].
 
         "Make sure we call the #ensure:/#ifCurtailed: blocks first."
-        ^ timeout
+        ^ (timeout bitAnd: 2) = 2
             ifTrue:  [aTimeoutBlock value]
             ifFalse: [value].
     ]

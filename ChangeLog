@@ -1,3 +1,8 @@
+2014-01-24  Paolo Bonzini  <bonzini@redhat.com>
+
+	* kernel/Delay.st: Check the Semaphore before queuing the
+	interrupt for the target process.
+
 2013-12-14  Holger Hans Peter Freyther  <holger@freyther.de>
 
 	* configure.ac: Check for environ with AC_CHECK_DECLS.
