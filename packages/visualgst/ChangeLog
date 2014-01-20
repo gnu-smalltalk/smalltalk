@@ -1,3 +1,7 @@
+2014-01-20  Holger Hans Peter Freyther  <holger@moiji-mobile.com>
+
+	* SUnit/GtkSUnit.st: Change parameter from Symbol to String.
+
 2013-12-20  Holger Hans Peter Freyther  <holger@moiji-mobile.com>
 
 	* Debugger/GtkStackInspectorView.st: Return the object and not a string.

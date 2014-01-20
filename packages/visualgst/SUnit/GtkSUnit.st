@@ -259,7 +259,7 @@ GtkBrowsingTool subclass: GtkSUnit [
 	<category: 'browser methods'>
 
 	(methodWidget hasSelectedMethod and: [aSymbol = methodWidget selectedMethodSymbol]) ifFalse: [
-            methodWidget selectAMethod: aSymbol asString ].
+            methodWidget selectAMethod: aSymbol ].
 	sourceCodeWidget source: (BrowserMethodSource on: methodWidget selectedMethod).
 	state := MethodState on: self with: methodWidget selectedMethod
     ]
