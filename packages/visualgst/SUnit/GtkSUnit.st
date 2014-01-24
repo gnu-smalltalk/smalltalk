@@ -307,9 +307,8 @@ GtkBrowsingTool subclass: GtkSUnit [
 	classWidget hasSelectedClass ifFalse: [ ^ self ].
 	suite := TestSuite named: classWidget allClassNames.
 	classWidget selectedClasses do: [ :elem |
-	    elem selectors do: [ :each |
-		(each matchRegex: 'test' from: 1 to: 4)
-		    ifTrue: [ suite addTest: (elem selector: each) ] ] ].
+	    elem allTestSelectors do: [:each |
+		suite addTest: (elem selector: each)]].
 	suite logPolicy: TestBacktraceLog new.
 	results := suite run.
 
@@ -326,9 +325,8 @@ GtkBrowsingTool subclass: GtkSUnit [
 	classWidget hasSelectedClass ifFalse: [ ^ self ].
 	classWidget selectedClasses do: [ :elem | | test |
 	    test := elem new.
-	    elem selectors do: [ :each |
-		(each matchRegex: 'test' from: 1 to: 4)
-		    ifTrue: [ test setTestSelector: each. test debug ] ] ].
+	    elem allTestSelectors do: [:each |
+		test setTestSelector: each. test debug ] ].
     ]
 
     compileError: aString line: line [
