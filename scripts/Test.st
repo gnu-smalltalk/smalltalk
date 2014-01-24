@@ -29,11 +29,58 @@
  ======================================================================"
 
 Smalltalk arguments isEmpty ifTrue: [ ObjectMemory quit ]!
+
+Object subclass: SUnitUnhandledDebugger [
+    <comment: 'I can be set as the debugger for un-handled exceptions
+    and then pop-up a visual debugger'>
+
+    LoadedDebugger := nil.
+
+    SUnitUnhandledDebugger class >> open: aString [
+        Transcript nextPutAll: 'Unhandled exception. Loading debugger.'; nl.
+        self loadVisualGST.
+        ((Smalltalk at: #VisualGST) at: #GtkDebugger) open: aString.
+    ]
+
+    SUnitUnhandledDebugger class >> debuggerClass [
+        ^nil
+    ]
+
+    SUnitUnhandledDebugger class >> debuggingPriority [
+        ^0
+    ]
+
+    SUnitUnhandledDebugger class >> loadVisualGST [
+        LoadedDebugger ifNotNil: [^self].
+
+        LoadedDebugger := true.
+        PackageLoader fileInPackage: 'VisualGST'.
+
+        "Start the event-loop and avoid scope look-ups. This is why
+        we look-up the class by hand."
+        [
+            ((Smalltalk at: #VisualGST) at: #TaskQueue) uniqueInstance run.
+            ((Smalltalk at: #GTK) at: #Gtk) main
+        ] fork.
+    ]
+
+    SUnitUnhandledDebugger class >> keepRunningOnFailure [
+        "Check if we have loaded the debugger and then just keep running."
+        LoadedDebugger ifNotNil: [self keepRunning]
+    ]
+
+    SUnitUnhandledDebugger class >> keepRunning [
+        Semaphore new wait
+    ]
+]
+
+
 PackageLoader fileInPackage: 'SUnit'!
 
-| helpString verbose script suite result quiet |
+| helpString verbose script suite result quiet debug |
 quiet := false.
 verbose := false.
+debug := false.
 FileStream verbose: false.
 script := ''.
 
@@ -50,13 +97,14 @@ Options:
        --kernel-dir=PATH  use the specified kernel directory
     -h --help             show this message and exit
        --version          print version information and exit
+    -d --debug            debug failing tests using VisualGST
 
 '.
 
 "Parse the command-line arguments."
 Smalltalk
     arguments: '-h|--help -q|--quiet -v|-V|--verbose -f|--file: -p|--package:
-		-I|--image-file: --kernel-directory: --version'
+		-I|--image-file: --kernel-directory: --version -d|--debug'
     do: [ :opt :arg |
 
     opt = 'help' ifTrue: [
@@ -79,6 +127,11 @@ Smalltalk
 	quiet := true.
 	verbose := false.
 	FileStream verbose: false ].
+
+    opt = 'debug' ifTrue: [
+        debug := true.
+        Behavior compile: 'debuggerClass [ ^SUnitUnhandledDebugger]'
+    ].
 
     opt = 'package' ifTrue: [
 	[
@@ -115,6 +168,13 @@ FileStream verbose: false.
 	ObjectMemory quit: 1 ].
 
 result := TestSuitesScripter run: script quiet: quiet verbose: verbose.
+SUnitUnhandledDebugger keepRunningOnFailure.
 
-result runCount = result passedCount
-    ifFalse: [ ObjectMemory quit: 1 ]!
+result runCount = result passedCount ifFalse: [
+    debug ifTrue: [
+        Transcript nextPutAll: 'Tests failed. Loading graphicsl environment.'; nl.
+        SUnitUnhandledDebugger loadVisualGST.
+        result gtkInspect.
+        script gtkInspect.
+        SUnitUnhandledDebugger keepRunning].
+    ObjectMemory quit: 1 ]!

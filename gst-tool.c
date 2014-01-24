@@ -115,7 +115,7 @@ const struct tool tools[] = {
   {
     "gst-sunit", "scripts/Test.st",
     "-h|--help --version -q|--quiet -v|-V|--verbose -f|--file: -p|--package: \
-	-I|--image-file: --kernel-directory:",
+	-I|--image-file: --kernel-directory: -d|--debug",
     NULL, true
   },
   {
