@@ -146,7 +146,9 @@ GtkBrowsingTool subclass: GtkDebugger [
         self accelGroup append: {{'<shift>F8'. '<Debugger>/StepOut'}}.
         self accelGroup append: {{'F5'. '<Debugger>/Continue'}}.
 
-        ^{GTK.GtkMenuItem menuItem: 'Step into next message send' accelPath: '<Debugger>/StepInto' connectTo: self selector: #stepInto.
+        ^{GTK.GtkMenuItem menuItem: 'Restart selected frame' connectTo: self selector: #restartSelectedFrame.
+          GTK.GtkMenuItem new.
+          GTK.GtkMenuItem menuItem: 'Step into next message send' accelPath: '<Debugger>/StepInto' connectTo: self selector: #stepInto.
           GTK.GtkMenuItem menuItem: 'Step over next message send' accelPath: '<Debugger>/StepOver' connectTo: self selector: #stepOver.
           GTK.GtkMenuItem menuItem: 'Step out current message' accelPath: '<Debugger>/StepOut' connectTo: self selector: #stepOut.
           GTK.GtkMenuItem new.
@@ -531,6 +533,14 @@ GtkBrowsingTool subclass: GtkDebugger [
 
         debugger restart: contextWidget selectedContext.
 	self updateContextWidget
+    ]
+
+    restartSelectedFrame [
+        <category: 'debugging events'>
+
+        debugger restart: contextWidget selectedContext.
+        debugger suspendedContext inspect.
+        self updateContextWidget
     ]
 ]
 
