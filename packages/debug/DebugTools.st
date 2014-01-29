@@ -191,6 +191,23 @@ pointer bytecodes to line numbers.'>
 		whileTrue
     ]
 
+    slowNext [
+	"Run to the end of the current line in the inferior process, skipping
+	 over message sends."
+
+	<category: 'stepping commands'>
+	| context line |
+	context := self suspendedContext.
+	line := self currentLine.
+
+	[self stepBytecode.
+	(self suspendedContext notNil
+	    and: [self suspendedContext parentContext == context])
+		ifTrue: [self slowFinish: self suspendedContext].
+	self suspendedContext == context and: [line = self currentLine]]
+		whileTrue
+    ]
+
     next [
 	"Run to the end of the current line in the inferior process, skipping
 	 over message sends."

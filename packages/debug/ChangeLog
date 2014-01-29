@@ -1,5 +1,9 @@
 2013-10-21  Gwenael Casaccio  <gwenael.casaccio@gmail.com>
- 
+
+	* DebugTools.st: Add slowNext stepping command.
+
+2013-10-21  Gwenael Casaccio  <gwenael.casaccio@gmail.com>
+
 	* debugtests.st: Add test for >>#restart.
 	* DebugTools.st: Restart a execution of a context (useful it the method is updated).
 

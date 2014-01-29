@@ -221,6 +221,7 @@ GtkBrowsingTool subclass: GtkDebugger [
     updateContextWidget [
 	<category: 'context'>
 
+	debugger suspendedContext ifNil: [ ^ self close ].
 	contextWidget
             context: debugger suspendedContext;
             selectFirstContext.
@@ -293,7 +294,7 @@ GtkBrowsingTool subclass: GtkDebugger [
     stepOver [
         <category: 'execute events'>
 
-        self debugWith: [ debugger next ]
+        self debugWith: [ debugger slowNext ]
     ]
 
     stepOut [
@@ -315,6 +316,7 @@ GtkBrowsingTool subclass: GtkDebugger [
         <category: 'execute events'>
 
         self close.
+        debugger suspendedContext ifNil: [ ^ self ].
         debugger continue
     ]
 

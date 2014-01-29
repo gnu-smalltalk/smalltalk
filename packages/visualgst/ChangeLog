@@ -1,3 +1,7 @@
+2014-01-29  Gwenael Casaccio  <gwenael.casaccio@gmail.com>
+
+	* Debugger/GtkDebugger.st: Handle process termination.
+
 2014-01-24  Holger Hans Peter Freyther  <holger@moiji-mobile.com>
 
 	* SUnit/GtkSUnit.st: Ask TestCase for testcases.
