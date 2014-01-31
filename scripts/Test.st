@@ -172,7 +172,7 @@ SUnitUnhandledDebugger keepRunningOnFailure.
 
 result runCount = result passedCount ifFalse: [
     debug ifTrue: [
-        Transcript nextPutAll: 'Tests failed. Loading graphicsl environment.'; nl.
+        Transcript nextPutAll: 'Tests failed. Loading graphical environment.'; nl.
         SUnitUnhandledDebugger loadVisualGST.
         result gtkInspect.
         script gtkInspect.
