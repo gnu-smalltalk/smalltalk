@@ -122,7 +122,7 @@ GtkConcreteWidget subclass: GtkSUnitResult [
     state [
         <category: 'state'>
         resultTree hasSelectedItem ifTrue: [
-            ^MethodState on: self selectedResult class >> self selectedResult selector ].
+            ^MethodState on: self selectedResult with: (self selectedResult class lookupSelector: self selectedResult selector) ].
         ^BrowserState new
     ]
 	

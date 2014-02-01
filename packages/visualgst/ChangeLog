@@ -1,3 +1,8 @@
+2014-02-01  Holger Hans Peter Freyther  <holger@moiji-mobile.com>
+
+	* SUnit/GtkSUnitResultWidget.st: Use the right MethodState
+	call in GtkSUnitResult.
+
 2014-01-29  Gwenael Casaccio  <gwenael.casaccio@gmail.com>
 
 	* Debugger/GtkDebugger.st: Handle process termination.
