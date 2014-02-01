@@ -1,3 +1,8 @@
+2014-02-01  Holger Hans Peter Freyther  <holger@moiji-mobile.com>
+
+	* StBrowser/GtkClassBrowserWidget.st: Use >>#classOrMeta
+	of GtkCategoryWidget for the class.
+
 2014-02-04  Gwenael Casaccio  <gwenael.casaccio@gmail.com>
 
 	* SUnit/GtkSUnit.st: Add GtkSUnit class>>#results:.

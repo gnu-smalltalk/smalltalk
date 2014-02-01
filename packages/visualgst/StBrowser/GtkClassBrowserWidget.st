@@ -474,13 +474,13 @@ GtkConcreteWidget subclass: GtkClassBrowserWidget [
     updateInstanceSideMethodCategory: aString [
 	<category: 'private-selection'>
 
-        iMethodWidget class: classWidget selectedClass withCategory: aString
+        iMethodWidget class: iCategoryWidget classOrMeta withCategory: aString
     ]
 
     updateClassSideMethodCategory: aString [
         <category: 'private-selection'>
 
-        cMethodWidget class: classWidget selectedClass class withCategory: aString
+        cMethodWidget class: cCategoryWidget classOrMeta withCategory: aString
     ]
 
     selectANamespace: aNamespace [
