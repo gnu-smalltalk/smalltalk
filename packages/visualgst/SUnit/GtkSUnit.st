@@ -145,7 +145,7 @@ GtkBrowsingTool subclass: GtkSUnit [
     buildNamespaceWidget [
 	<category: 'user interface'>
 
-	namespaceWidget := GtkCategorizedNamespaceWidget showAll 
+	namespaceWidget := GtkNamespaceSUnitWidget showAll
 				whenSelectionChangedSend: #onNamespaceChanged to: self;
 				yourself.
 	^ namespaceWidget mainWidget

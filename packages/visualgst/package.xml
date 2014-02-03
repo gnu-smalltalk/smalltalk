@@ -284,6 +284,7 @@
   <filein>SUnit/TestBacktraceLog.st</filein>
   <filein>SUnit/GtkSUnitResultWidget.st</filein>
   <filein>GtkClassSUnitWidget.st</filein>
+  <filein>GtkNamespaceSUnitWidget.st</filein>
   <filein>GtkMethodSUnitWidget.st</filein>
   <filein>SUnit/GtkSUnit.st</filein>
   <filein>Commands/OpenBrowserCommand.st</filein>

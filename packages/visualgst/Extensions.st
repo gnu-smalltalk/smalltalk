@@ -43,6 +43,32 @@ Eval [
     ]
 ]
 
+AbstractNamespace extend [
+
+    hasTestCase [
+        <category: '*VisualGST'>
+
+        | test |
+        test := (Smalltalk associationAt: #TestCase ifAbsent: [ ^ false ]) value.
+        self allClassesDo: [ :each | each superclass == test ifTrue: [ ^ true ] ].
+        ^ false
+    ]
+
+    allSubspaces [
+        <category: '*VisualGST'>
+
+        | subspaces |
+        subspaces := IdentitySet new.
+        self subspaces do: [ :each |
+                                subspaces
+                                    add: each;
+                                    addAll: each allSubspaces.
+                           ].
+        ^ subspaces
+    ]
+
+]
+
 Object extend [
 
     hasLiterals [

@@ -52,6 +52,12 @@ GtkConcreteWidget subclass: GtkCategorizedNamespaceWidget [
 	    notify: self ofSystemChangesOfItem: #class change: #Recategorized using: #'classRecategorizedEvent:'
     ]
 
+    addToModel: namespace [
+        <category: 'model'>
+
+        ^ (namespace subspaces asArray sort: [ :a :b | a name <= b name ]), (namespace categories values sort: [ :a :b | a name <= b name ])
+    ]
+
     buildTreeView [
         <category: 'user interface'>
 
@@ -60,7 +66,7 @@ GtkConcreteWidget subclass: GtkCategorizedNamespaceWidget [
 	namespaceTree treeView getSelection setMode: GTK.Gtk gtkSelectionBrowse.
 	(model := GtkTreeModel on: namespaceTree treeView getModel)
                                         item: FakeNamespace;
-                                        childrenBlock: [ :each | (each subspaces asArray sort: [ :a :b | a name <= b name ]), (each categories values sort: [ :a :b | a name <= b name ]) ];
+                                        childrenBlock: [ :each | self addToModel: each ];
                                         contentsBlock: [ :each | {each icon. each name asString} ];
                                         connectSignal: 'row-has-child-toggled' to: self selector: #'childToggled:path:iter:';
                                         refresh.
