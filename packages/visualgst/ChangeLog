@@ -1,3 +1,7 @@
+2014-02-04  Gwenael Casaccio  <gwenael.casaccio@gmail.com>
+
+	* SUnit/GtkSUnit.st: Add GtkSUnit class>>#results:.
+	
 2014-02-03  Gwenael Casaccio  <gwenael.casaccio@gmail.com>
 
 	* Extensions.st: Add AbstractNamespace>>hasTestCase, AbstractNamespace>>allSubspaces.

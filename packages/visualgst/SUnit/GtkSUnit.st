@@ -36,6 +36,22 @@
 GtkBrowsingTool subclass: GtkSUnit [
     | namespaceWidget classWidget methodWidget sourceCodeWidget successfullWidget failedWidget errorWidget namespace class state |
 
+    GtkSUnit class >> results: results [
+        <category: 'instance creation'>
+
+        ^ self open
+                results: results;
+                yourself
+    ]
+
+    results: results [
+        <category: 'results ui'>
+
+	successfullWidget results: results passed.
+	failedWidget results: results failures.
+	errorWidget results: results errors.
+    ]
+
     accelPath [
         <category: 'accelerator path'>
 
@@ -312,9 +328,7 @@ GtkBrowsingTool subclass: GtkSUnit [
 	suite logPolicy: TestBacktraceLog new.
 	results := suite run.
 
-	successfullWidget results: results passed.
-	failedWidget results: results failures.
-	errorWidget results: results errors.
+	self results: results.
 
 	results failures do: [ :each | each "logPolicy logStatus inspect" printNl ].
     ]

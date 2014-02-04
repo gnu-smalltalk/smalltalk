@@ -174,7 +174,6 @@ result runCount = result passedCount ifFalse: [
     debug ifTrue: [
         Transcript nextPutAll: 'Tests failed. Loading graphical environment.'; nl.
         SUnitUnhandledDebugger loadVisualGST.
-        result gtkInspect.
-        script gtkInspect.
+        Smalltalk VisualGST GtkSUnit results: result.
         SUnitUnhandledDebugger keepRunning].
     ObjectMemory quit: 1 ]!
