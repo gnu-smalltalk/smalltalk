@@ -1,0 +1,41 @@
+
+Execution begins...
+An instance of CompiledMethod
+  header: 96
+  Header Flags: 
+    flags: 0
+    primitive index: 0
+    number of arguments: 0
+    number of temporaries: 0
+    number of literals: 2
+    needed stack slots: 12
+  descriptor: a MethodInfo
+  literals: [
+    [1]	#bytecodeIndex
+    [2]	#dispatchByte:with:at:to:with:
+  ]
+  byte codes: [
+    [1]	source code line number 36
+    [3]	source code line number 27
+	push self
+    [5]	dup stack top
+    [7]	send 0 args message #bytecodeIndex
+    [9]	source code line number 29
+	pop stack top
+   [11]	push 0
+   [13]	source code line number 30
+   [15]	push 0
+   [17]	source code line number 31
+   [19]	push 0
+   [21]	source code line number 32
+   [23]	push 0
+   [25]	source code line number 33
+   [27]	push 0
+   [29]	send 5 args message #dispatchByte:with:at:to:with:
+   [33]	push self
+	return stack top
+  ]
+ByteCodeHoles
+ByteCodeHoles>>dispatchTo
+33
+returned value is 33

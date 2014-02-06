@@ -125,6 +125,7 @@ typedef struct code_tree
   PTR data;
   label *jumpDest;
   gst_uchar *bp;
+  unsigned char bc_len;		/* only used for sends */
 } code_tree, *code_stack_element, **code_stack_pointer;
 
 /* This structure represents a message send.  A sequence of
@@ -318,7 +319,7 @@ static inline method_entry *finish_method_entry (void);
 static inline code_tree *push_tree_node (gst_uchar *bp, code_tree *firstChild, int operation, PTR data);
 static inline code_tree *push_tree_node_oop (gst_uchar *bp, code_tree *firstChild, int operation, OOP literal);
 static inline code_tree *pop_tree_node (code_tree *linkedChild);
-static inline code_tree *push_send_node (gst_uchar *bp, OOP selector, int numArgs, mst_Boolean super, int operation, int imm);
+static inline code_tree *push_send_node (gst_uchar *bp, unsigned char bc_len, OOP selector, int numArgs, mst_Boolean super, int operation, int imm);
 static inline void set_top_node_extra (int extra, int jumpOffset);
 static inline gst_uchar *decode_bytecode (gst_uchar *bp);
 
@@ -795,7 +796,7 @@ set_inline_cache (OOP selector, int numArgs, mst_Boolean super, int operation, i
 }
 
 code_tree *
-push_send_node (gst_uchar *bp, OOP selector, int numArgs, mst_Boolean super, int operation, int imm)
+push_send_node (gst_uchar *bp, unsigned char bc_len, OOP selector, int numArgs, mst_Boolean super, int operation, int imm)
 {
   code_tree *args, *node;
   int tot_args;
@@ -807,6 +808,7 @@ push_send_node (gst_uchar *bp, OOP selector, int numArgs, mst_Boolean super, int
     args = pop_tree_node (args);
 
   node = push_tree_node (bp, args, operation, (PTR) ic);
+  node->bc_len = bc_len;
   return (node);
 }
 
@@ -1419,7 +1421,7 @@ gen_send (code_tree *tree)
   else
     EXPORT_SP (JIT_V0);
 
-  jit_movi_ul (JIT_R0, tree->bp - bc + BYTECODE_SIZE);
+  jit_movi_ul (JIT_R0, tree->bp - bc + tree->bc_len);
   jit_ldxi_p (JIT_R1, JIT_V1, jit_field (inline_cache, cachedIP));
   jit_sti_ul (&ip, JIT_R0);
 
@@ -1427,7 +1429,7 @@ gen_send (code_tree *tree)
   jit_align (2);
 
   ic->native_ip = jit_get_label ();
-  define_ip_map_entry (tree->bp - bc + BYTECODE_SIZE);
+  define_ip_map_entry (tree->bp - bc + tree->bc_len);
 
   IMPORT_SP;
   CACHE_NOTHING;
@@ -3102,7 +3104,7 @@ emit_user_defined_method_call (OOP methodOOP, int numArgs,
   /* TODO: use instantiate_oop_with instead.  */
   push_tree_node_oop (bp, NULL, TREE_PUSH | TREE_LIT_VAR, arrayAssociation);
   push_tree_node_oop (bp, NULL, TREE_PUSH | TREE_LIT_CONST, FROM_INT (numArgs));
-  push_send_node (bp, _gst_intern_string ("new:"), 1, false,
+  push_send_node (bp, BYTECODE_SIZE, _gst_intern_string ("new:"), 1, false,
 		  TREE_SEND | TREE_NORMAL, NEW_COLON_SPECIAL);
 
   for (i = 0; i < numArgs; i++)
@@ -3113,7 +3115,7 @@ emit_user_defined_method_call (OOP methodOOP, int numArgs,
 		      (PTR) (uintptr_t) i);
     }
 
-  push_send_node (bp, _gst_value_with_rec_with_args_symbol, 2,
+  push_send_node (bp, BYTECODE_SIZE, _gst_value_with_rec_with_args_symbol, 2,
 		  false, TREE_SEND | TREE_NORMAL, 0);
 
   set_top_node_extra (TREE_EXTRA_RETURN, 0);
@@ -3374,7 +3376,7 @@ decode_bytecode (gst_uchar *bp)
 	{
           push_tree_node_oop (IP0, NULL, TREE_PUSH | TREE_LIT_CONST,
                               literals[n]);
-          push_send_node (IP0, _gst_builtin_selectors[VALUE_SPECIAL].symbol,
+          push_send_node (IP0, IP - IP0, _gst_builtin_selectors[VALUE_SPECIAL].symbol,
 			  0, false, TREE_SEND, 0);
 	}
     }
@@ -3435,7 +3437,7 @@ decode_bytecode (gst_uchar *bp)
     }
 
     SEND {
-      push_send_node (IP0, literals[n], num_args, super, TREE_SEND, 0);
+      push_send_node (IP0, IP - IP0, literals[n], num_args, super, TREE_SEND, 0);
     }
 
     POP_INTO_NEW_STACKTOP {
@@ -3487,16 +3489,16 @@ decode_bytecode (gst_uchar *bp)
     SEND_ARITH {
       int op = special_send_bytecodes[n];
       const struct builtin_selector *bs = &_gst_builtin_selectors[n];
-      push_send_node (IP0, bs->symbol, bs->numArgs, false, op, n);
+      push_send_node (IP0, IP - IP0, bs->symbol, bs->numArgs, false, op, n);
     }
     SEND_SPECIAL {
       int op = special_send_bytecodes[n + 16];
       const struct builtin_selector *bs = &_gst_builtin_selectors[n + 16];
-      push_send_node (IP0, bs->symbol, bs->numArgs, false, op, n + 16);
+      push_send_node (IP0, IP - IP0, bs->symbol, bs->numArgs, false, op, n + 16);
     }
     SEND_IMMEDIATE {
       const struct builtin_selector *bs = &_gst_builtin_selectors[n];
-      push_send_node (IP0, bs->symbol, bs->numArgs, super,
+      push_send_node (IP0, IP - IP0, bs->symbol, bs->numArgs, super,
                       TREE_SEND | TREE_NORMAL, n);
     }
 
