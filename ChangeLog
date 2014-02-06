@@ -1,3 +1,8 @@
+2014-02-06  Paolo Bonzini  <bonzini@redhat.com>
+
+	* kernel/CCallable.st: Add CCallable class>>#returnTypeMap
+	and use it.
+
 2014-01-19  Gwenael Casaccio  <gwenael.casaccio@gmail.com>
 
 	* kernel/MethodDict.st: Introduce >>#select: and

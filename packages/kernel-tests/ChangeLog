@@ -1,3 +1,7 @@
+2014-02-06  Holger Hans Peter Freyther  <holger@moiji-mobile.com>
+
+	* kernel/CCallableTest.st: Add new file.
+
 2013-12-16  Holger Hans Peter Freyther  <holger@moiji-mobile.com>
 
 	* kernel/BehaviorTests.st: Add tests for Behavior.

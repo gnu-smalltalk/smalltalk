@@ -3,12 +3,14 @@
 
   <test>
    <sunit>TestBehavior</sunit>
+   <sunit>TestCCallable</sunit>
    <sunit>TestCompiledMethod</sunit>
    <sunit>TestContextPart</sunit>
    <sunit>TestMappedCollection</sunit>
    <sunit>TestObject</sunit>
    <sunit>TestRegexp</sunit>
    <filein>kernel/BehaviorTests.st</filein>
+   <filein>kernel/CCallableTest.st</filein>
    <filein>kernel/CompiledMethodTests.st</filein>
    <filein>kernel/ContextPartTests.st</filein>
    <filein>kernel/MappedCollectionTests.st</filein>

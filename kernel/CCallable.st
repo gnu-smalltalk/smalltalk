@@ -42,20 +42,25 @@ about C functions that can be called from within Smalltalk, such as number
 and type of parameters.  This information is used by the C callout mechanism
 to perform the actual call-out to C routines.'>
 
+    CCallable class >> returnTypeMap [
+	"Private - Return the map from integers stored in #returnType to the
+	 corresponding Smalltalk symbols."
+
+        ^#(#char #uChar #short #uShort #long #uLong #float #double
+           #string #smalltalk #int #uInt #longDouble #unknown #stringOut
+           #symbol #byteArray #byteArrayOut #boolean #void #variadic
+           #variadicSmalltalk #cObject #cObjectPtr #self #selfSmalltalk
+           #wchar #wstring #wstringOut #symbolOut #longLong #uLongLong)
+    ]
+
     CCallable class >> typeMap [
 	"Private - Return the map from Smalltalk symbols representing a C type,
 	 to an integer."
 
 	<category: 'private - accessing'>
-	^##(| reverse dict |
-	    reverse := #(#char #uChar #short #uShort #long #uLong #float #double
-               #string #smalltalk #int #uInt #longDouble #unknown #stringOut
-               #symbol #byteArray #byteArrayOut #boolean #void #variadic
-               #variadicSmalltalk #cObject #cObjectPtr #self #selfSmalltalk
-               #wchar #wstring #wstringOut #symbolOut #longLong #uLongLong).
-
+	^##(| dict |
            dict := LookupTable new.
-           reverse keysAndValuesDo: [ :k :v |
+           CCallable returnTypeMap keysAndValuesDo: [ :k :v |
 		dict
 		    at: v put: k - 1;
 		    at: v asLowercase asSymbol put: k - 1 ].
@@ -98,7 +103,7 @@ to perform the actual call-out to C routines.'>
     returnType [
 	<category: 'accessing'>
         returnType isInteger ifFalse: [ ^returnType ].
-        ^self class typeMap at: returnType + 1 ifAbsent: [ returnType ]
+        ^self class returnTypeMap at: returnType + 1 ifAbsent: [ returnType ]
     ]
 
     returnType: aSymbol [
