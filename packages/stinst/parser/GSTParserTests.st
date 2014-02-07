@@ -50,6 +50,10 @@ TestCase subclass: TestGSTParser [
 
         self assert: (Smalltalk includesGlobalNamed: #Xork1).
         self assert: (Smalltalk includesGlobalNamed: #Xork2).
+
+        "manual clean-up"
+        Smalltalk removeKey: #Xork1.
+        Smalltalk removeKey: #Xork2.
     ]
 ]
 
