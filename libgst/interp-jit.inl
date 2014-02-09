@@ -407,14 +407,6 @@ _gst_interpret (OOP processOOP)
 
 	SET_EXCEPT_FLAG (false);
 
-        if UNCOMMON (_gst_abort_execution)
-	  {
-	    OOP selectorOOP;
-	    selectorOOP = _gst_intern_string ((char *)_gst_abort_execution);
-	    _gst_abort_execution = NULL;
-	    SEND_MESSAGE (selectorOOP, 0);
-	  }
-
         /* First, deal with any async signals.  */
         if (async_queue_enabled)
           empty_async_queue ();
@@ -452,6 +444,15 @@ _gst_interpret (OOP processOOP)
 	    refresh_native_ips (_gst_this_context_oop);
 	    native_ip = GET_CONTEXT_IP (thisContext);
 	  }
+
+        if UNCOMMON (_gst_abort_execution)
+	  {
+	    OOP selectorOOP;
+	    selectorOOP = _gst_intern_string ((char *)_gst_abort_execution);
+	    _gst_abort_execution = NULL;
+	    SEND_MESSAGE (selectorOOP, 0);
+	  }
+
 
         if UNCOMMON (time_to_preempt)
 	  set_preemption_timer ();

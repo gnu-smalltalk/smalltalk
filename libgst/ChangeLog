@@ -1,5 +1,10 @@
 2014-02-10  Holger Hans Peter Freyther  <holger@moiji-mobile.com>
 
+	* interp-jit.inl: Change the time the abort handling
+	is executed.
+
+2014-02-10  Holger Hans Peter Freyther  <holger@moiji-mobile.com>
+
 	* xlat.c: Keep track of the bytecode length for sends.
 
 2013-12-23  Holger Hans Peter Freyther  <holger@moiji-mobile.com>
