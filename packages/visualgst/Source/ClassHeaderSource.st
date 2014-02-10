@@ -130,19 +130,27 @@ SourceFormatter subclass: ClassHeaderSource [
         stream nl
     ]
 
-    outputPragmas [
+    outputPragmas: class [
 	<category: 'printing'>
 
-        printClass classPragmas do: [ :selector |
+        class classPragmas do: [ :selector |
 	    stream
 		space: 4;
 		nextPut: $<;
 		nextPutAll: selector;
 		nextPutAll: ': '.
-	    (printClass perform: selector) storeLiteralOn: stream.
+	    (class perform: selector) storeLiteralOn: stream.
 	    stream
 		nextPut: $>;
 		nl ]
+    ]
+
+    outputPragmas [
+	<category: 'printing'>
+
+        self
+            outputPragmas: printClass;
+            outputPragmas: printClass class
     ]
 
     outputClassInstanceVariablesArray [

@@ -1,3 +1,7 @@
+2014-02-10  Gwenael Casaccio  <gwenael.casaccio@gmail.com>
+
+	* Source/ClassHeaderSource.st: Display instance side and class side pragmas.
+
 2014-02-01  Holger Hans Peter Freyther  <holger@moiji-mobile.com>
 
 	* StBrowser/GtkClassBrowserWidget.st: Use >>#classOrMeta

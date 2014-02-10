@@ -1,3 +1,7 @@
+2014-02-06  Gwenael Casaccio  <gwenael.casaccio@gmail.com>
+
+	* kernel/Metaclass.st: Add #classPragmas.
+
 2014-02-06  Paolo Bonzini  <bonzini@redhat.com>
 
 	* kernel/CCallable.st: Add CCallable class>>#returnTypeMap

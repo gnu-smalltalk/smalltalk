@@ -469,6 +469,13 @@ it should be...the Smalltalk metaclass system is strange and complex.'>
 	^true
     ]
 
+    classPragmas [
+	"Return the pragmas that are written in the file-out of this class."
+
+	<category: 'accessing instances and variables'>
+	^#()
+    ]
+
     fileOutOn: aFileStream [
 	"File out complete class description:  class definition, class and
 	 instance methods"
