@@ -106,6 +106,7 @@ typedef struct input_stream
   const char *prompt;
 
   OOP fileOOP;			/* the object stored in FileSegments */
+  mst_Boolean freeFileName;
   const char *fileName;
   off_t fileOffset;
 
@@ -240,6 +241,8 @@ _gst_pop_stream (mst_Boolean closeIt)
       break;
     }
 
+  if (stream->freeFileName)
+   xfree ((char *) stream->fileName);
   xfree (stream);
 }
 
@@ -335,6 +338,7 @@ push_new_stream (stream_type type)
   newStream->column = 0;
   newStream->fileOffset = -1;
   newStream->type = type;
+  newStream->freeFileName = false;
   newStream->fileName = NULL;
   newStream->prompt = NULL;
   newStream->fileOOP = _gst_nil_oop;
@@ -358,7 +362,10 @@ _gst_set_stream_info (int line,
   in_stream->fileOffset = fileOffset;
 
   if (!IS_NIL (fileNameOOP))
-    in_stream->fileName = _gst_to_cstring (fileNameOOP);
+    {
+      in_stream->fileName = _gst_to_cstring (fileNameOOP);
+      in_stream->freeFileName = true;
+    }
 }
  
 void
@@ -407,7 +414,10 @@ my_getc (input_stream stream)
 	  char *buf;
 	  _gst_msg_sendf(&buf, "%s %o nextAvailable: %i", stream->st_oop.oop, 1024);
 	  if (!buf || !*buf)
-	    return EOF;
+            {
+              xfree (buf);
+	      return EOF;
+            }
 
 	  refill_stream (stream, buf, false);
 	}
@@ -558,7 +568,7 @@ _gst_get_source_string (off_t startPos, off_t endPos)
 OOP
 get_cur_file (void)
 {
-  const char *fullFileName;
+  char *fullFileName;
 
   if (!in_stream)
     return _gst_nil_oop;
@@ -576,6 +586,7 @@ get_cur_file (void)
       _gst_get_full_file_name (in_stream->fileName);
 
   in_stream->fileOOP = _gst_string_new (fullFileName);
+  xfree (fullFileName);
   _gst_register_oop (in_stream->fileOOP);
   return (in_stream->fileOOP);
 }

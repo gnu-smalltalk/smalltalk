@@ -5326,6 +5326,7 @@ primitive VMpr_CFuncDescriptor_addressOf [succeed,fail]
     {
       char *funcName = (char *) _gst_to_cstring (oop1);
       void *funcAddr = _gst_lookup_function (funcName);
+      xfree (funcName);
       if (funcAddr)
 	{
 	  POP_N_OOPS (1);
