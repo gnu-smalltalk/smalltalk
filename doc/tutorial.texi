@@ -1339,7 +1339,7 @@ Checking extend [
        num := checknum.
        checknum := checknum + 1.
        checksleft := checksleft - 1.
-       self spend: amount
+       self spend: amount.
        ^ num
    ]
 ]
@@ -1680,7 +1680,7 @@ amount.
 
 @example
    Checking extend [
-       checksOver: amount do: aBlock
+       checksOver: amount do: aBlock [
            history keysAndValuesDo: [:key :value |
                (value > amount)
                       ifTrue: [aBlock value: key]
