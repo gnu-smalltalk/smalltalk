@@ -1685,6 +1685,7 @@ amount.
                (value > amount)
                       ifTrue: [aBlock value: key]
            ]
+       ]
    ]
 @end example
 
