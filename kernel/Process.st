@@ -254,12 +254,12 @@ can suspend themselves and resume themselves however they wish.'>
 			and: Processor highestPriority].
 
 	[
-	    | activePriority |
-            activePriority := Processor activePriority.
+	    | oldPriority |
+            oldPriority := priority.
 	    priority := anInteger.
 	    "Atomically move the process to the right list, preempting
              the current process if necessary."
-            self isReady ifTrue: [self resume].
+            myList == (Processor processesAt: oldPriority) ifTrue: [self resume].
 	] valueWithoutPreemption
     ]
 
