@@ -1,5 +1,10 @@
 2014-03-24  Gwenael Casaccio  <gwenael.casaccio@gmail.com>
 
+	* kernel/Process.st: Use the correct namespace in
+	Process>>evaluate:ifNotTerminated:.
+
+2014-03-24  Gwenael Casaccio  <gwenael.casaccio@gmail.com>
+
 	* kernel/Process.st: Fix the implementation of Process>>priority:.
 	It checks in the old priority queue if the process was ready
 	and resume it if so.

@@ -329,7 +329,7 @@ can suspend themselves and resume themselves however they wish.'>
 	| terminated |
 	terminated := false.
 	
-	[aBlock on: ProcessBeingTerminated
+	[aBlock on: SystemExceptions.ProcessBeingTerminated
 	    do: 
 		[:sig | 
 		terminated := true.
