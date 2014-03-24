@@ -366,17 +366,6 @@ can suspend themselves and resume themselves however they wish.'>
 		valueWithoutPreemption
     ]
 
-    startExecution: aDirectedMessage [
-	"It is important to retrieve this before we start the
-	 process, because we want to choose whether to continue
-	 running the new process based on the *old* activePriority,
-	 not the one of the new process which is the maximum one."
-
-	<category: 'private'>
-	[aDirectedMessage send] on: SystemExceptions.ProcessBeingTerminated
-	    do: [:sig | sig return]
-    ]
-
     onBlock: aBlockClosure at: aPriority suspend: aBoolean [
 	<category: 'private'>
 	"It is important to retrieve this before we start the
