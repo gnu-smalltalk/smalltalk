@@ -1,3 +1,7 @@
+2014-03-24  Gwenael Casaccio  <gwenael.casaccio@gmail.com>
+
+	* kernel/Process.st: Remove Process>>#makeUntrusted:
+
 2014-03-15  Holger Hans Peter Freyther  <holger@freyther.de>
 
 	* doc/tutorial.texi: Add mising $[, $] and $. to the examples.

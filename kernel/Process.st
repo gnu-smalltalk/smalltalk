@@ -69,17 +69,6 @@ can suspend themselves and resume themselves however they wish.'>
 	    ifFalse: [suspendedContext]
     ]
 
-    makeUntrusted: aBoolean [
-	"Set whether the receiver is trusted or not."
-
-	<category: 'basic'>
-	| ctx |
-	ctx := self context.
-	[ctx isNil] whileFalse: 
-		[ctx makeUntrusted: aBoolean.
-		ctx := ctx parentContext]
-    ]
-
     lowerPriority [
 	"Lower a bit the priority of the receiver. A #lowerPriority will
 	 cancel a previous #raisePriority, and vice versa."
