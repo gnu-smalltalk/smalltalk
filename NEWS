@@ -26,6 +26,8 @@ o   VisualGST now understands the CTRL + . shortcut. This will flush the
 o   gst-sunit now understands the -d/--debug parameter. In case of an
     unhandled exception or a test failure VisualGST will be spawned.
 
+o   The Netlink module has been added for Linux.
+
 -----------------------------------------------------------------------------
 
 NEWS FROM 3.2.4 to 3.2.5

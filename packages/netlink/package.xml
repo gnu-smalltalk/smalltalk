@@ -1,0 +1,14 @@
+<package>
+    <name>Netlink</name>
+    <namespace>Sockets</namespace>
+    <prereq>Sockets</prereq>
+    <module>netlink</module>
+
+    <filein>Extensions.st</filein>
+    <filein>Netlink.st</filein>
+
+    <test>
+        <sunit>Sockets.NetlinkTest</sunit>
+        <filein>NetlinkTest.st</filein>
+    </test>
+</package>

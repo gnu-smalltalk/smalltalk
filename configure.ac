@@ -585,6 +585,10 @@ GST_PACKAGE_ENABLE([LibSDL_ttf], [sdl/libsdl_ttf],
   [ac_cv_lib_SDL_ttf_TTF_Init])
 
 GST_PACKAGE_ENABLE([Compiler], [stinst/compiler])
+GST_PACKAGE_ENABLE([Netlink], [netlink],
+   [AC_CHECK_HEADERS([linux/netlink.h linux/rtnetlink.h])],
+   [ac_cv_header_linux_netlink_h ac_cv_header_linux_rtnetlink_h],
+   [Makefile], [netlink.la])
 GST_PACKAGE_ENABLE([Parser], [stinst/parser])
 GST_PACKAGE_ENABLE([ClassPublisher], [stinst/doc])
 GST_PACKAGE_ENABLE([ProfileTools], [profile])
