@@ -140,7 +140,6 @@ OOP _gst_self_symbol = NULL;
 OOP _gst_short_symbol = NULL;
 OOP _gst_smalltalk_symbol = NULL;
 OOP _gst_smalltalk_namespace_symbol = NULL;
-OOP _gst_start_execution_symbol = NULL;
 OOP _gst_string_out_symbol = NULL;
 OOP _gst_string_symbol = NULL;
 OOP _gst_super_symbol = NULL;
@@ -294,7 +293,6 @@ static const symbol_info sym_info[] = {
   {&_gst_ushort_symbol, "uShort"},
   {&_gst_smalltalk_symbol, "smalltalk"},
   {&_gst_smalltalk_namespace_symbol, "Smalltalk"},
-  {&_gst_start_execution_symbol, "startExecution:"},
   {&_gst_string_out_symbol, "stringOut"},
   {&_gst_string_symbol, "string"},
   {&_gst_super_symbol, "super"},

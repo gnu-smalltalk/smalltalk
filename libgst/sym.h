@@ -130,7 +130,6 @@ extern OOP _gst_short_symbol ATTRIBUTE_HIDDEN;
 extern OOP _gst_ushort_symbol ATTRIBUTE_HIDDEN;
 extern OOP _gst_smalltalk_symbol ATTRIBUTE_HIDDEN;
 extern OOP _gst_smalltalk_namespace_symbol ATTRIBUTE_HIDDEN;
-extern OOP _gst_start_execution_symbol ATTRIBUTE_HIDDEN;
 extern OOP _gst_string_out_symbol ATTRIBUTE_HIDDEN;
 extern OOP _gst_string_symbol ATTRIBUTE_HIDDEN;
 extern OOP _gst_super_symbol ATTRIBUTE_HIDDEN;

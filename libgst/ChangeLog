@@ -1,3 +1,8 @@
+2014-03-25  Holger Hans Peter Freyther  <holger@moiji-mobile.com>
+
+	* sym.c: Remove _gst_start_execution_symbol.
+	* sym.h: Remove _gst_start_execution_symbol.
+
 2014-02-10  Holger Hans Peter Freyther  <holger@moiji-mobile.com>
 
 	* input.c: Free memory that has been dynamically allocated.
