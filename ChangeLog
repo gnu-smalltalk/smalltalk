@@ -1,3 +1,7 @@
+2014-03-30  Gwenael Casaccio  <gwenael.casaccio@gmail.com>
+
+	* kernel/Process.st: Make Process>>queueInterrupt: atomic.
+
 2014-03-24  Gwenael Casaccio  <gwenael.casaccio@gmail.com>
 
 	* kernel/Process.st: Use the correct namespace in

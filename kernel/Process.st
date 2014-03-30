@@ -310,18 +310,22 @@ can suspend themselves and resume themselves however they wish.'>
 			^self].
 		self isTerminated 
 		    ifTrue: [^SystemExceptions.ProcessTerminated signalOn: self].
-		semaphore := myList.
-		suspended := self isReady not.
-		block := suspended
-			    ifFalse: 
-				[self suspend.
-				aBlock]
+		[
+		    semaphore := myList.
+		    suspended := self isReady not.
+		    block := suspended
+			    ifFalse:
+				    [self suspend.
+				    aBlock]
 			    ifTrue: 
-				[semaphore isNil 
-				    ifTrue: [[self evaluate: aBlock ifNotTerminated: [self suspend]]]
-				    ifFalse: [[self evaluate: aBlock ifNotTerminated: [semaphore wait]]]].
-		suspendedContext := block asContext: suspendedContext.
-		self resume]
+				    [
+                                      semaphore isNil
+				            ifTrue: [ [ self evaluate: aBlock ifNotTerminated: [ self suspend ] ] ]
+				            ifFalse: [ [ self evaluate: aBlock ifNotTerminated: [ semaphore wait ] ] ]
+                                    ].
+		    suspendedContext := block asContext: suspendedContext.
+		    self resume
+		] valueWithoutPreemption ]
     ]
 
     evaluate: aBlock ifNotTerminated: unwindBlock [
