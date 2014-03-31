@@ -40,6 +40,7 @@ All classes in the system are subclasses of me.'>
 
     Dependencies := nil.
     FinalizableObjects := nil.
+    FinalSemaphore := nil.
 
     Object class >> update: aspect [
 	"Do any global tasks for the ObjectMemory events."
@@ -62,6 +63,16 @@ All classes in the system are subclasses of me.'>
 
 	<category: 'initialization'>
 	Dependencies := anObject
+    ]
+
+    Object class >> finalSemaphore [
+	<category: 'initialization'>
+
+	FinalSemaphore isNil ifFalse: [ ^FinalSemaphore ].
+	^ [
+            FinalSemaphore isNil ifTrue: [ FinalSemaphore := Semaphore forMutualExclusion ].
+            FinalSemaphore
+          ] valueWithoutPreemption
     ]
 
     Object class >> finalizableObjects [
@@ -346,12 +357,12 @@ All classes in the system are subclasses of me.'>
 	 collector finds out there are only weak references to it."
 
 	<category: 'finalization'>
-	self class finalizableObjects add: ((HomedAssociation 
+	self class finalSemaphore critical: [ self class finalizableObjects add: ((HomedAssociation 
 		    key: self
 		    value: nil
 		    environment: FinalizableObjects)
 		    makeEphemeron;
-		    yourself)
+		    yourself) ]
     ]
 
     removeToBeFinalized [
@@ -359,11 +370,11 @@ All classes in the system are subclasses of me.'>
 	 when the garbage collector finds out there are only weak references to it."
 
 	<category: 'finalization'>
-	self class finalizableObjects remove: (HomedAssociation 
+	self class finalSemaphore critical: [ self class finalizableObjects remove: (HomedAssociation 
 		    key: self
 		    value: nil
 		    environment: self class finalizableObjects)
-	    ifAbsent: []
+	    ifAbsent: [] ]
     ]
 
     mourn [

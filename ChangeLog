@@ -1,3 +1,7 @@
+2014-03-31  Gwenael Casaccio  <gwenael.casaccio@gmail.com>
+
+	* kernel/Object.st: Make Object>>FinalizableObjects thread safe.
+
 2014-03-30  Gwenael Casaccio  <gwenael.casaccio@gmail.com>
 
 	* kernel/Process.st: Make Process>>queueInterrupt: atomic.
