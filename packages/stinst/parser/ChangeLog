@@ -1,3 +1,8 @@
+2014-04-02  Gwenael Casaccio  <gwenael.casaccio@gmail.com>
+
+	* STCompiler.st: Support keyword attributes.
+	* STCompilerTests.st: Test for method attributes.
+
 2014-02-07  Holger Hans Peter Freyther  <holger@moiji-mobile.com>
 
 	* GSTParserTests.st: Remove installed classes at the end.

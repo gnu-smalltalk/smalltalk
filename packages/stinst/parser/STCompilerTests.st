@@ -38,7 +38,32 @@ Object subclass: CompilerDoubleName [
     | one two three |
     <category: ''bla''>
 ]'
-        
+
+    ]
+
+    attributes [
+        ^ '
+Namespace current: (Smalltalk addSubspace: #CompilerAttributes).
+Object subclass: CAttributes [
+    foo1 [
+        <xork>
+    ]
+
+    foo2 [
+        <bar: 123 foo: 234>
+    ]
+
+    foo3 [
+       | bla two |
+       <bar: 123 foo: 234>
+    ]
+
+    foo4 [
+       <bar: 123 foo: 234>
+       | bla two |
+    |
+]'
+
     ]
 
     testPoolResolution [
@@ -53,5 +78,37 @@ Object subclass: CompilerDoubleName [
         self assert: (Smalltalk includesGlobalNamed: #CompilerDoubleName).
         self assert: (CompilerDoubleName includesGlobalNamed: #CompilerDoubleName).
         self assert: ((Smalltalk at: #CompilerDoubleName) at: #CompilerDoubleName) instVarNames size = 3.
+    ]
+
+    testAttributes [
+        <category: 'testing'>
+
+        self deny: (Smalltalk includesGlobalNamed: #CompilerAttributes).
+
+        STEvaluationDriver new
+            parseSmalltalkStream: self attributes readStream
+            with: GSTFileInParser.
+
+        self assert: ((Smalltalk CompilerAttributes CAttributes) >> #foo1) attributes size = 1.
+        self assert: ((Smalltalk CompilerAttributes CAttributes) >> #foo1) attributes first selector = #xork.
+        self assert: ((Smalltalk CompilerAttributes CAttributes) >> #foo1) attributes first numArgs = 0.
+
+        self assert: ((Smalltalk CompilerAttributes CAttributes) >> #foo2) attributes size = 1.
+        self assert: ((Smalltalk CompilerAttributes CAttributes) >> #foo2) attributes first selector = #'bar:foo:'.
+        self assert: ((Smalltalk CompilerAttributes CAttributes) >> #foo2) attributes first numArgs = 2.
+        self assert: ((Smalltalk CompilerAttributes CAttributes) >> #foo2) attributes first arguments first = 123.
+        self assert: ((Smalltalk CompilerAttributes CAttributes) >> #foo2) attributes first arguments second = 234.
+
+        self assert: ((Smalltalk CompilerAttributes CAttributes) >> #foo3) attributes size = 1.
+        self assert: ((Smalltalk CompilerAttributes CAttributes) >> #foo3) attributes first selector = #'bar:foo:'.
+        self assert: ((Smalltalk CompilerAttributes CAttributes) >> #foo3) attributes first numArgs = 2.
+        self assert: ((Smalltalk CompilerAttributes CAttributes) >> #foo3) attributes first arguments first = 123.
+        self assert: ((Smalltalk CompilerAttributes CAttributes) >> #foo3) attributes first arguments second = 234.
+
+        self assert: ((Smalltalk CompilerAttributes CAttributes) >> #foo4) attributes size = 1.
+        self assert: ((Smalltalk CompilerAttributes CAttributes) >> #foo4) attributes first selector = #'bar:foo:'.
+        self assert: ((Smalltalk CompilerAttributes CAttributes) >> #foo4) attributes first numArgs = 2.
+        self assert: ((Smalltalk CompilerAttributes CAttributes) >> #foo4) attributes first arguments first = 123.
+        self assert: ((Smalltalk CompilerAttributes CAttributes) >> #foo4) attributes first arguments second = 234.
     ]
 ]

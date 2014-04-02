@@ -984,17 +984,21 @@ indexed'' bytecode. The resulting stream is
 	selectorBuilder := WriteStream on: String new.
 	arguments := WriteStream on: Array new.
 	currentToken := self scanTokenFrom: scanner.
-	[currentToken isBinary and: [currentToken value == #>]] whileFalse: 
-		[currentToken isKeyword 
-		    ifFalse: [^self compileError: 'keyword expected in method attribute'].
-		selectorBuilder nextPutAll: currentToken value.
-		argParser := RBParser new.
-		argParser errorBlock: parser errorBlock.
-		argParser scanner: scanner.
-		node := argParser parseBinaryMessageNoGreater.
-		node := RBSequenceNode statements: {node}.
-		arguments nextPut: (self class evaluate: node parser: argParser).
-		currentToken := argParser currentToken].
+	currentToken isIdentifier
+	    ifTrue: [ (self scanTokenFrom: scanner) value == #> ifFalse: [^self compileError: 'method attributes must end with ''>'''].
+		selectorBuilder nextPutAll: currentToken value. ]
+	    ifFalse: [
+		[currentToken isBinary and: [currentToken value == #>]] whileFalse: [
+		    currentToken isKeyword
+			ifFalse: [^self compileError: 'keyword expected in method attribute'].
+		    selectorBuilder nextPutAll: currentToken value.
+		    argParser := RBParser new.
+		    argParser errorBlock: parser errorBlock.
+		    argParser scanner: scanner.
+		    node := argParser parseBinaryMessageNoGreater.
+		    node := RBSequenceNode statements: {node}.
+		    arguments nextPut: (self class evaluate: node parser: argParser).
+		    currentToken := argParser currentToken]].
 	selector := selectorBuilder contents asSymbol.
 	^Message selector: selector arguments: arguments contents
     ]
