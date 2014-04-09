@@ -61,6 +61,7 @@
 #ifdef WIN32
 # define WIN32_LEAN_AND_MEAN /* avoid including junk */
 # include <windows.h>
+# include <sys/cygwin.h>
 #endif
 
 /* The path to the executable, derived from argv[0].  */
@@ -83,7 +84,7 @@ _gst_set_executable_path (const char *argv0)
      See cygwin-api/func-cygwin-conv-to-posix-path.html.
      Does it overflow the buffer of expected size MAX_PATH or does it
      truncate the path?  I don't know.  Let's catch both.  */
-  cygwin_conv_to_posix_path (location, location_as_posix_path);
+  cygwin_conv_path (CCP_WIN_A_TO_POSIX, location, location_as_posix_path, 2 * MAX_PATH);
   location_as_posix_path[MAX_PATH - 1] = '\0';
   if (strlen (location_as_posix_path) >= MAX_PATH - 1)
     /* A sign of buffer overflow or path truncation.  */

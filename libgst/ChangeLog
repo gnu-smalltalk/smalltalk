@@ -1,3 +1,8 @@
+2014-04-09  In-Ho Yi  <chajath@gmail.com>
+
+	* sysdep/cygwin/findexec.c: Use cygwin_conv_path instead
+	of cygwin_conv_to_posix_path for path conversion.
+
 2014-03-25  Holger Hans Peter Freyther  <holger@moiji-mobile.com>
 
 	* sym.c: Remove _gst_start_execution_symbol.
