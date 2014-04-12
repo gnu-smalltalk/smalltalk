@@ -80,13 +80,9 @@ _gst_set_executable_path (const char *argv0)
   /* On Cygwin, we need to convert paths coming from Win32 system calls
      to the Unix-like slashified notation.
 
-     There's no error return defined for cygwin_conv_to_posix_path.
-     See cygwin-api/func-cygwin-conv-to-posix-path.html.
-     Does it overflow the buffer of expected size MAX_PATH or does it
-     truncate the path?  I don't know.  Let's catch both.  */
-  cygwin_conv_path (CCP_WIN_A_TO_POSIX, location, location_as_posix_path, 2 * MAX_PATH);
-  location_as_posix_path[MAX_PATH - 1] = '\0';
-  if (strlen (location_as_posix_path) >= MAX_PATH - 1)
+     cygwin_conv_path returns error code including size is less than required
+     See cygwin-api/func-cygwin-conv-path.html.  */
+  if (cygwin_conv_path (CCP_WIN_A_TO_POSIX, location, location_as_posix_path, 2 * MAX_PATH))
     /* A sign of buffer overflow or path truncation.  */
     _gst_executable_path = NULL;
   else

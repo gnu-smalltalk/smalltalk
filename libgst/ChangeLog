@@ -1,3 +1,8 @@
+2014-04-16  In-Ho Yi  <chajath@gmail.com>
+
+	* sysdep/cygwin/findexec.c: Update comment and change
+	the error handling.
+
 2014-04-09  In-Ho Yi  <chajath@gmail.com>
 
 	* sysdep/cygwin/findexec.c: Use cygwin_conv_path instead
