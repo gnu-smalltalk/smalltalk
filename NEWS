@@ -28,6 +28,9 @@ o   gst-sunit now understands the -d/--debug parameter. In case of an
 
 o   The Netlink module has been added for Linux.
 
+o   gst-sunit -p package.xml TestClass will execute only the tests of
+    the TestClass now.
+
 -----------------------------------------------------------------------------
 
 NEWS FROM 3.2.4 to 3.2.5

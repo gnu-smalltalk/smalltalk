@@ -77,12 +77,13 @@ Object subclass: SUnitUnhandledDebugger [
 
 PackageLoader fileInPackage: 'SUnit'!
 
-| helpString verbose script suite result quiet debug |
+| helpString verbose pkgScript script suite result quiet debug |
 quiet := false.
 verbose := false.
 debug := false.
 FileStream verbose: false.
 script := ''.
+pkgScript := ''.
 
 helpString :=
 'Usage:
@@ -141,10 +142,10 @@ Smalltalk
                     tmp := PackageLoader loadPackageFromFile: Directory working / arg.
                     PackageLoader insertPackage: tmp. tmp ]
 		ifFalse: [ PackageLoader packageAt: arg ].
-	    script := script, ' ', pkg sunitScript.
+	    pkgScript := pkgScript, ' ', pkg sunitScript.
 	    pkg test notNil ifTrue: [
 		pkg := pkg test.
-	        script := script, ' ', pkg sunitScript ].
+	        pkgScript := pkgScript, ' ', pkg sunitScript ].
 	    pkg fileIn ]
 	    ifCurtailed: [ ObjectMemory quit: 2 ] ].
 
@@ -159,7 +160,8 @@ Smalltalk
 	helpString displayOn: stderr.
 	ObjectMemory quit: 1 ].
 
-script isEmpty ifTrue: [ ObjectMemory quit ].
+(script isEmpty and: [pkgScript isEmpty]) ifTrue: [ ObjectMemory quit ].
+script isEmpty ifTrue: [script := pkgScript].
 
 FileStream verbose: false.
 (PackageLoader packageAt: #SUnit) loaded
