@@ -303,12 +303,30 @@ GtkBrowsingTool subclass: GtkDebugger [
         self debugWith: [ debugger finish ]
     ]
 
+    finishDangerousContexts [
+        | methods |
+        "VisualGST is running in the same image as the to be de-bugged
+        processed. If the process is suspended in a critical section
+        VisualGST might end up in a live-lock. As long as VisualGST is
+        running in the same image there is no way we can avoid this."
+
+        "Nothing is suspended."
+        debugger suspendedContext ifNil: [^self].
+
+        "Methods we need to finish or bad things will happen."
+        methods := {Object>>#removeToBeFinalized. Object>>#addToBeFinalized}.
+
+        (methods includes: debugger suspendedContext method)
+            ifTrue: [debugger finish].
+    ]
+
     debugWith: aBlock [
         <category: 'execute events'>
 
         TaskQueue uniqueInstance add: [
             self isLastContextSelected ifFalse: [ self stepToSelectedContext ].
             aBlock value.
+            self finishDangerousContexts.
             self updateContextWidget ]
     ]
 

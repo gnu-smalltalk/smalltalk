@@ -1,3 +1,8 @@
+2014-05-05  Holger Hans Peter Freyther  <holger@freyther.de>
+
+	* Debugger/GtkDebugger.st: Introduce >>#finishDangerousContexts
+	and call it from >>#debugWith:.
+
 2014-02-10  Gwenael Casaccio  <gwenael.casaccio@gmail.com>
 
 	* Source/ClassHeaderSource.st: Display instance side and class side pragmas.
