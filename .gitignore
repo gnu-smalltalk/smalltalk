@@ -65,7 +65,6 @@ packages/gtk/structs
 packages/i18n/ref-add.sed
 packages/i18n/ref-del.sed
 packages/net/gnutls-wrapper
-packages/netlink/stamp-classes
 packages/object-dumper/stamp-classes
 packages/sttools/stamp-classes
 snprintfv/snprintfv/compat.stamp
