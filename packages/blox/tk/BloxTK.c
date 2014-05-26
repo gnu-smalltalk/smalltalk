@@ -173,12 +173,12 @@ tclInit (void)
 
   if (Tcl_Init (interp) == TCL_ERROR)
     {
-      fprintf (stderr, "Tcl_Init failed: %s\n", interp->result);
+      fprintf (stderr, "Tcl_Init failed: %s\n",  Tcl_GetStringResult(interp));
       exit (1);
     }
   if (Tk_Init (interp) == TCL_ERROR)
     {
-      fprintf (stderr, "Tk_Init failed: %s\n", interp->result);
+      fprintf (stderr, "Tk_Init failed: %s\n", Tcl_GetStringResult(interp));
       exit (1);
     }
   Tcl_CreateCommand (interp, "callback", doCallback, NULL, NULL);
