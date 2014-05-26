@@ -31,7 +31,7 @@ main()
 {
   rl_bind_key ('\t', rl_insert);
   /* This is missing in BSD libedit!  */
-  rl_filename_quoting_function = (CPFunction *) readline_quote_filename;
+  rl_filename_quoting_function = (rl_quote_func_t *) readline_quote_filename;
   exit(0);
 }
 EOF

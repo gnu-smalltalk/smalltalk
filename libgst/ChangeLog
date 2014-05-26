@@ -1,3 +1,8 @@
+2014-05-26  Holger Hans Peter Freyther  <holger@moiji-mobile.com>
+
+	* input.c: Use rl_quote_func_t, rl_dequote_func_t and
+	rl_completion_func_t instead of the deprecated CPPFunction
+
 2014-04-16  In-Ho Yi  <chajath@gmail.com>
 
 	* sysdep/cygwin/findexec.c: Update comment and change
