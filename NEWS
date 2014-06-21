@@ -31,6 +31,9 @@ o   The Netlink module has been added for Linux.
 o   gst-sunit -p package.xml TestClass will execute only the tests of
     the TestClass now.
 
+o   RecursionLock>>#critical: returns the result of the block like it
+    is done for Semaphore>>#critical:
+
 -----------------------------------------------------------------------------
 
 NEWS FROM 3.2.4 to 3.2.5

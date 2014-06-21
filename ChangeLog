@@ -1,3 +1,7 @@
+2014-06-21  Holger Hans Peter Freyther  <holger@freyther.de>
+
+	* kernel/RecursionLock.st: Return the result of >>#critical:
+
 2014-05-01  Holger Hans Peter Freyther  <holger@freyther.de>
 
 	* scripts/Test.st: Introduce pkgScript variable and

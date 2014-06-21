@@ -101,7 +101,7 @@ Object subclass: RecursionLock [
 	self isOwnerProcess ifTrue: [^aBlock value].
 
 	"Look out for race conditions!"
-	sema critical: [
+	^sema critical: [
 	    [owner := Processor activeProcess.
 	    aBlock value]
 		ensure: [owner := nil]].

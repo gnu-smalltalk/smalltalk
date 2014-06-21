@@ -9,6 +9,7 @@
    <sunit>TestMappedCollection</sunit>
    <sunit>TestObject</sunit>
    <sunit>TestRegexp</sunit>
+   <sunit>TestRecursionLock</sunit>
    <filein>kernel/BehaviorTests.st</filein>
    <filein>kernel/CCallableTest.st</filein>
    <filein>kernel/CompiledMethodTests.st</filein>
@@ -16,6 +17,7 @@
    <filein>kernel/MappedCollectionTests.st</filein>
    <filein>kernel/ObjectTests.st</filein>
    <filein>kernel/RegexpTests.st</filein>
+   <filein>kernel/RecursionLockTests.st</filein>
   </test>
 
   <file>ChangeLog</file>
