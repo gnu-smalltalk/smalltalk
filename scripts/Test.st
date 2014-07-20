@@ -56,12 +56,8 @@ Object subclass: SUnitUnhandledDebugger [
         LoadedDebugger := true.
         PackageLoader fileInPackage: 'VisualGST'.
 
-        "Start the event-loop and avoid scope look-ups. This is why
-        we look-up the class by hand."
-        [
-            ((Smalltalk at: #VisualGST) at: #TaskQueue) uniqueInstance run.
-            ((Smalltalk at: #GTK) at: #Gtk) main
-        ] fork.
+        "Start to run the VisualGST task queue"
+        ((Smalltalk at: #VisualGST) at: #TaskQueue) uniqueInstance run.
     ]
 
     SUnitUnhandledDebugger class >> keepRunningOnFailure [
@@ -70,7 +66,8 @@ Object subclass: SUnitUnhandledDebugger [
     ]
 
     SUnitUnhandledDebugger class >> keepRunning [
-        Semaphore new wait
+        Processor activeProcess name: 'Main-loop for SUnit'.
+        ((Smalltalk at: #GTK) at: #Gtk) main
     ]
 ]
 

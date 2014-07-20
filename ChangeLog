@@ -1,3 +1,7 @@
+2014-07-20  Holger Hans Peter Freyther  <holger@freyther.de>
+
+	* scripts/Test.st: Spawn the event loop last.
+
 2014-06-21  Holger Hans Peter Freyther  <holger@freyther.de>
 
 	* kernel/RecursionLock.st: Return the result of >>#critical:
