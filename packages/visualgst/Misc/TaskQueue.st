@@ -77,15 +77,5 @@ Object subclass: TaskQueue [
             sem wait.
             currentProcess := nil ] repeat ] fork
     ]
-
-    flush [
-        <category: 'accessing'>
-
-        queueHandler ifNotNil: [:p | p terminate].
-        currentProcess ifNotNil: [:p | p terminate].
-        self
-            initialize;
-            run.
-    ]
 ]
 

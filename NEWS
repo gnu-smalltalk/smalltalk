@@ -19,10 +19,6 @@ o   The compiler now generates a DebugInformation providing access to the
     argument and temporary names of methods and blocks. This can be used
     by the debugger to provide additional information.
 
-o   VisualGST now understands the CTRL + . shortcut. This will flush the
-    internal TaskQueue. This might be handy when the debugger is getting
-    stuck.
-
 o   gst-sunit now understands the -d/--debug parameter. In case of an
     unhandled exception or a test failure VisualGST will be spawned.
 

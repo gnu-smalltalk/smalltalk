@@ -1,3 +1,9 @@
+2014-07-20  Holger Hand Peter Freyther  <holger@freyther.de>
+
+	* Misc/KeySnooper.st: Remove the file.
+	* Misc/TaskQueue.st: Remove the >>#flush selector.
+	* GtkLauncher.st: Remove invocation of KeySnooper.
+
 2014-05-05  Holger Hans Peter Freyther  <holger@freyther.de>
 
 	* Debugger/GtkDebugger.st: Introduce >>#finishDangerousContexts
