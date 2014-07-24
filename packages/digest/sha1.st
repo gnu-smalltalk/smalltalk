@@ -36,11 +36,6 @@ MessageDigest subclass: SHA1 [
     <comment: nil>
     <category: 'Examples-Modules'>
 
-    SHA1 class >> new [
-	<category: 'C call-outs'>
-	^self basicNew initialize
-    ]
-
     newState [
 	<category: 'C call-outs'>
 	<cCall: 'SHA1AllocOOP' returning: #smalltalk args: #()>

@@ -51,11 +51,6 @@ Instance Variables:
     		Stack showing the nesting of XML elements within the document at the current stage of parsing.
     tags			<Dictionary>		Currently not used. A map to make sure that within a document, tag identifiers are unique instances in order to save space.'>
 
-    XMLNodeBuilder class >> new [
-	<category: 'instance creation'>
-	^super new initialize
-    ]
-
     initialize [
 	<category: 'initialize'>
 	tagStack := OrderedCollection new.

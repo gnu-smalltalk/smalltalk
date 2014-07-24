@@ -367,13 +367,6 @@ Time extend [
 ]
 
 Object subclass: MAVisitor [
-    MAVisitor class >> new [
-	<category: 'instance creation'>
-	^super new initialize
-    ]
-    initialize [
-	<category: 'initialization'>
-    ]
 ]
 
 

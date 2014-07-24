@@ -1,3 +1,7 @@
+2014-07-26  Holger Hans Peter Freyther  <holger@freyther.de>
+
+	* magritte-seaside.st: Remove MAColumn class >> #new.
+
 2011-02-24  Dmitry Matveev  <dmm1989@gmail.com>
 
 	* magritte-seaside.st: Fix printing of validation errors in

@@ -1470,11 +1470,6 @@ Object subclass: UserProfileSettings [
 	default := aSettingsObject
     ]
 
-    UserProfileSettings class >> new [
-	<category: 'instance creation'>
-	^self basicNew initialize
-    ]
-
     UserProfileSettings class >> postLoad: aParcel [
 	<category: 'parcel load/unload'>
 	self initialize

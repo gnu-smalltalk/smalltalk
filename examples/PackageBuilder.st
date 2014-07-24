@@ -197,10 +197,6 @@ Object subclass: TestBuilder [
 Object subclass: PackageBuilder [
   |name url namespace prereqs provides testBuilder start fileins resources|
 
-  PackageBuilder class >> new [
-    ^ self basicNew initialize
-  ]
-
   initialize [
     prereqs := OrderedCollection new.
     provides := OrderedCollection new.

@@ -47,13 +47,6 @@ Object subclass: SDAbstractStore [
     loading, before returning the version from the store, it should resolve
     the references.'''>
 
-    SDAbstractStore class >> new [
-	<category: 'initialize-release'>
-	^self basicNew initialize
-    ]
-
-    initialize []
-
     abortChanges: anObject [
 	<category: 'actions'>
 	self subclassResponsibility

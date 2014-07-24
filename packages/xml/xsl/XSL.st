@@ -752,11 +752,6 @@ E. Acknowledgements (Non-Normative)
 	^test process: doc
     ]
 
-    RuleDatabase class >> new [
-	<category: 'instance creation'>
-	^super new initialize
-    ]
-
     importance [
 	<category: 'importance'>
 	^currentImportance

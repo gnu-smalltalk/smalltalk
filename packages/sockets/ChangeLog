@@ -1,3 +1,7 @@
+2014-07-26  Holger Hans Peter Freyther  <holger@freyther.de>
+
+	* Tests.st: Remove DummyStream class >> #new.
+
 2011-08-13  Paolo Bonzini <bonzini@gnu.org>
 
 	* AbstractSocketImpl.st: Recheck file descriptor state between

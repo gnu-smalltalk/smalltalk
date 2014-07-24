@@ -37,13 +37,6 @@ Object subclass: RecursionLock [
     <category: 'Language-Processes'>
     <comment: nil>
 
-    RecursionLock class >> new [
-	"Answer a new semaphore"
-
-	<category: 'instance creation'>
-	^self basicNew initialize
-    ]
-
     printOn: aStream [
 	"Print a human-readable represention of the receiver on aStream."
 

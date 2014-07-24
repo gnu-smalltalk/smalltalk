@@ -838,11 +838,6 @@ Object subclass: GlorpWorker [
     <category: 'Glorp-TestModels'>
     <comment: nil>
 
-    GlorpWorker class >> new [
-	<category: 'instance creation'>
-	^super new initialize
-    ]
-
     GlorpWorker class >> LICENSE [
 	<category: 'LICENSE'>
 	^'Copyright 2000-2003 Alan Knight.
@@ -1401,11 +1396,6 @@ Object subclass: GlorpBankAccount [
 	    accountNumber: GlorpBankAccountNumber example12345
     ]
 
-    GlorpBankAccount class >> new [
-	<category: 'instance creation'>
-	^super new initialize
-    ]
-
     GlorpBankAccount class >> LICENSE [
 	<category: 'LICENSE'>
 	^'Copyright 2000-2003 Alan Knight.
@@ -1483,11 +1473,6 @@ Object subclass: GlorpBankTransaction [
     GlorpBankTransaction class >> example2 [
 	<category: 'examples'>
 	^self new
-    ]
-
-    GlorpBankTransaction class >> new [
-	<category: 'instance creation'>
-	^super new initialize
     ]
 
     GlorpBankTransaction class >> LICENSE [
@@ -2666,13 +2651,6 @@ Object subclass: GlorpThingWithLotsOfDifferentCollections [
     <category: 'GlorpCollectionTypeModels'>
     <comment: nil>
 
-    GlorpThingWithLotsOfDifferentCollections class >> new [
-	"Answer a newly created and initialized instance."
-
-	<category: 'instance creation'>
-	^super new initialize
-    ]
-
     GlorpThingWithLotsOfDifferentCollections class >> example1 [
 	<category: 'examples'>
 	| example array |
@@ -2860,11 +2838,6 @@ Object subclass: GlorpEncyclopedia [
     <category: 'Glorp-TestModels'>
     <comment: nil>
 
-    GlorpEncyclopedia class >> new [
-	<category: 'instance creation'>
-	^super new initialize
-    ]
-
     GlorpEncyclopedia class >> example1 [
 	<category: 'examples'>
 	| result |
@@ -2993,11 +2966,6 @@ Object subclass: GlorpCustomer [
 	    name: 'Fred Flintstone';
 	    addTransaction: GlorpBankTransaction example1;
 	    addTransaction: GlorpBankTransaction example2
-    ]
-
-    GlorpCustomer class >> new [
-	<category: 'instance creation'>
-	^super new initialize
     ]
 
     GlorpCustomer class >> LICENSE [
@@ -7733,11 +7701,6 @@ Object subclass: GlorpReservation [
 	    passenger: GlorpPassenger example2
     ]
 
-    GlorpReservation class >> new [
-	<category: 'instance creation'>
-	^super new initialize
-    ]
-
     GlorpReservation class >> LICENSE [
 	<category: 'LICENSE'>
 	^'Copyright 2000-2003 Alan Knight.
@@ -8142,13 +8105,6 @@ GlorpDatabaseTypeIndividualDBTests subclass: GlorpInt4Test [
     
     <comment: nil>
     <category: 'Glorp-DBTests'>
-
-    GlorpInt4Test class >> new [
-	"Answer a newly created and initialized instance."
-
-	<category: 'instance creation'>
-	^super new initialize
-    ]
 
     GlorpInt4Test class >> LICENSE [
 	<category: 'LICENSE'>
@@ -9439,11 +9395,6 @@ GlorpExampleSystem subclass: GlorpBankExampleSystem [
     <category: 'Glorp-Tests'>
     <comment: nil>
 
-    GlorpBankExampleSystem class >> new [
-	<category: 'instance creation'>
-	^super new initialize
-    ]
-
     GlorpBankExampleSystem class >> LICENSE [
 	<category: 'LICENSE'>
 	^'Copyright 2000-2003 Alan Knight.
@@ -10372,11 +10323,6 @@ Object subclass: GlorpServiceCharge [
 	    description: 'additional overcharge'
     ]
 
-    GlorpServiceCharge class >> new [
-	<category: 'instance creation'>
-	^super new initialize
-    ]
-
     GlorpServiceCharge class >> LICENSE [
 	<category: 'LICENSE'>
 	^'Copyright 2000-2003 Alan Knight.
@@ -10571,13 +10517,6 @@ GlorpCacheTest subclass: GlorpWeakCacheTest [
 	<category: 'LICENSE'>
 	^'Copyright 2000-2003 Alan Knight.
 This class is part of the GLORP system (see http://www.glorp.org), licensed under the GNU Lesser General Public License, with clarifications with respect to Smalltalk library usage (LGPL(S)). This code is distributed WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE . See the package comment, or the COPYING.TXT file that should accompany this distribution, or the GNU Lesser General Public License.'
-    ]
-
-    GlorpWeakCacheTest class >> new [
-	"Answer a newly created and initialized instance."
-
-	<category: 'instance creation'>
-	^super new initialize
     ]
 
     checkCacheExhaustivelyFor: aBlock [
@@ -11484,11 +11423,6 @@ Instance Variables:
 
 '>
 
-    GlorpTransformedTime class >> new [
-	<category: 'instance creation'>
-	^super new initialize
-    ]
-
     GlorpTransformedTime class >> LICENSE [
 	<category: 'LICENSE'>
 	^'Copyright 2000-2003 Alan Knight.
@@ -11864,11 +11798,6 @@ GlorpSession subclass: GlorpMockSession [
     
     <comment: nil>
     <category: 'Glorp-Tests'>
-
-    GlorpMockSession class >> new [
-	<category: 'instance creation'>
-	^super new initialize
-    ]
 
     GlorpMockSession class >> LICENSE [
 	<category: 'LICENSE'>

@@ -89,11 +89,6 @@ Stream subclass: XMLPullParser [
 
     | needComments needPrefixMappingEvents needCdataDelimiters needDTDEvents |
 
-    XMLPullParser class >> new [
-        <category: 'instance creation'>
-        ^super new initialize
-    ]
-
     XMLPullParser class >> onFile: aFilename [
         <category: 'instance creation'>
         ^self on: (FileStream open: aFilename mode: FileStream read)

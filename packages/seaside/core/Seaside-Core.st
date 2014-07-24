@@ -431,11 +431,6 @@ Instance Variables
 	parent:		The parent brush I am used within.
 	closed:		Wether I have been closed/flushed yet.'>
 
-    WABrush class >> new [
-	<category: 'instance-creation'>
-	^self basicNew initialize
-    ]
-
     close [
 	"Close and flush the receiver onto the canvas and its associated document."
 
@@ -5319,11 +5314,6 @@ Subclasses must implement the following messages:
 	localValueAt:ifAbsent:
 		return the value of the attribute given as first argument'>
 
-    WAConfiguration class >> new [
-	<category: 'instance creation'>
-	^self basicNew initialize
-    ]
-
     addAncestorsTo: tempCollection linearization: linearCollection [
 	<category: 'ancestry'>
 	(linearCollection includes: self) 
@@ -6566,11 +6556,6 @@ rootBlock
 	- a one argement block to customize the document root. The argument of the block is the root
 '>
 
-    WAHtmlBuilder class >> new [
-	<category: 'instance creation'>
-	^self basicNew initialize
-    ]
-
     WAHtmlBuilder class >> on: aCanvasClass [
 	<category: 'instance creation'>
 	^(self new)
@@ -6687,11 +6672,6 @@ Object subclass: WAHtmlDocument [
     
     <category: 'Seaside-Core-Document'>
     <comment: nil>
-
-    WAHtmlDocument class >> new [
-	<category: 'instance-creation'>
-	^self basicNew initialize
-    ]
 
     closeTag: aString [
 	<category: 'writing-xhtml'>
@@ -7469,11 +7449,6 @@ Instance Variables:
 WALRUCache is used to store the last n continutations of a session.
 
 '>
-
-    WALRUCache class >> new [
-	<category: 'instance creation'>
-	^self basicNew initialize
-    ]
 
     WALRUCache class >> new: max [
 	<category: 'instance creation'>
@@ -9687,11 +9662,6 @@ Object subclass: WAPresenter [
     
     <category: 'Seaside-Core-Component'>
     <comment: nil>
-
-    WAPresenter class >> new [
-	<category: 'instance creation'>
-	^self basicNew initialize
-    ]
 
     application [
 	<category: 'convenience'>
@@ -13472,11 +13442,6 @@ Instance Variables:
 
 '>
 
-    WAProcessMonitor class >> new [
-	<category: 'instance creation'>
-	^self basicNew initialize
-    ]
-
     critical: aBlock ifError: anErrorBlock [
 	"Evaluate aBlock as a mutual exclusive block within a new processes and wait for the process to finish. Evaluate anErrorBlock in case of a problem. Answer the result of evaluating the blocks. Note, that the semaphore needs to be an instance-variable, otherwise continuations might screw up the debugger."
 
@@ -13727,11 +13692,6 @@ Object subclass: WARenderingContext [
     <category: 'Seaside-Core-Callbacks'>
     <comment: nil>
 
-    WARenderingContext class >> new [
-	<category: 'instance creation'>
-	^self basicNew initialize
-    ]
-
     absoluteUrlForResource: aString [
 	<category: 'accessing'>
 	| url |
@@ -13920,11 +13880,6 @@ Instance Variables:
 		[:rowObject :aWARenderCanvas |] this form is to render the value for a column cell from rowObject directly on aWRenderCanvas
 
 '>
-
-    WAReportColumn class >> new [
-	<category: 'instance creation'>
-	^self basicNew initialize
-    ]
 
     WAReportColumn class >> renderBlock: aBlock title: aString [
 	<category: 'instance creation'>
@@ -14308,11 +14263,6 @@ Instance Variables:
 	parent	<WADispatcher | WAApplication | nil> What owns or manages the handler. WADispatchers manage WADispatchers & WAApplications, WAApplications own WASessions
 
 '>
-
-    WARequestHandler class >> new [
-	<category: 'instance-creation'>
-	^self basicNew initialize
-    ]
 
     description [
 	"Answer a descriptive text of the receiver."
@@ -15837,11 +15787,6 @@ Object subclass: WAResponse [
 	^response
     ]
 
-    WAResponse class >> new [
-	<category: 'instance creation'>
-	^self basicNew initialize
-    ]
-
     WAResponse class >> notFound: locationString [
 	<category: 'instance creation'>
 	| response content |
@@ -16165,11 +16110,6 @@ Object subclass: WARoot [
     
     <category: 'Seaside-Core-Document'>
     <comment: nil>
-
-    WARoot class >> new [
-	<category: 'instance creation'>
-	^self basicNew initialize
-    ]
 
     close: aDocument [
 	<category: 'writing'>
@@ -17005,11 +16945,6 @@ Instance Variables
 	path:			<OrderedCollection> or nil
 	parameters:		<Dictionary>
 	fragment:		<String> or nil'>
-
-    WAUrl class >> new [
-	<category: 'instance creation'>
-	^self basicNew initialize
-    ]
 
     = anUrl [
 	<category: 'comparing'>

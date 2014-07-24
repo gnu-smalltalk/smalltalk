@@ -2,7 +2,6 @@ Stream subclass: DummyStream [
     <category: 'Sockets-Tests'>
 
     | n |
-    DummyStream class >> new [ ^super new initialize ]
     initialize [ n := 0 ]
     nextPut: anObject [ n := n + 1 ]
     next: anInteger putAll: aCollection startingAt: pos [ n := n + anInteger ]

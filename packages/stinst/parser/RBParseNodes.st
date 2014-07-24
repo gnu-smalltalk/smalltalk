@@ -22,16 +22,6 @@ Object subclass: RBProgramNodeVisitor [
 
 '>
 
-    RBProgramNodeVisitor class >> new [
-	<category: 'instance creation'>
-	^super new initialize
-    ]
-
-    initialize [
-	<category: 'initialize-release'>
-	
-    ]
-
     visitArgument: each [
 	"Here to allow subclasses to detect arguments or temporaries."
 

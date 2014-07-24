@@ -52,11 +52,6 @@ Instance Variables:
     parent	<XML.Node | nil> 			All nodes except for Documents are contained by other nodes--this provides a pointer from the node to the node that contains it.
     flags	<SmallInteger> 			Provides a compact representation for any boolean attributes that the node might have. Likely to be removed in the near future.'>
 
-    Node class >> new [
-	<category: 'instance creation'>
-	^super new initialize
-    ]
-
     initialize [
 	<category: 'initialize'>
 	flags := 0
@@ -1592,11 +1587,6 @@ Instance Variables:
     parameterEntities	<Dictionary>		Definitions for the parameter entities that can be used in the DTD of the document.
     notations			<Dictionary>		Notations defined in the DTD.
     declaredRoot 		<XML.NodeTag>		The NodeTag which the DTD declares will be the root element of the document--a document cannot be valid if this does not match the tag of the root element.'>
-
-    DocumentType class >> new [
-	<category: 'instance creation'>
-	^super new initialize
-    ]
 
     initialize [
 	<category: 'initialize'>

@@ -1053,13 +1053,6 @@ superclass for blocks and methods'>
 	oldHeader isNil ifFalse: [Behavior flushCache]
     ]
 
-    initialize [
-	"Do nothing"
-
-	<category: 'private'>
-	
-    ]
-
     getHeader [
 	<category: 'private'>
 	^header

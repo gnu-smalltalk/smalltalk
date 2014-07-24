@@ -1,3 +1,7 @@
+2014-07-26  Holger Hans Peter Freyther  <holger@freyther.de>
+
+	* debugtests.st: Use basicNew instead of the modified new.
+
 2013-10-21  Gwenael Casaccio  <gwenael.casaccio@gmail.com>
 
 	* DebugTools.st: Add slowNext stepping command.

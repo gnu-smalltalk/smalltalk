@@ -1,3 +1,13 @@
+2014-07-26  Holger Hans Peter Freyther  <holger@freyther.de>
+
+	* Seaside-Core.st: Remove WABrush class >> #new,
+	WAConfiguration class >> #new, WAHtmlBuilder class >> #new,
+	WAHtmlDocument class >> #new, WALRUCache class >> #new,
+	WAPresenter class >> #new, WAProcessMonitor class >> #new,
+	WARenderingContext class >> #new, WAReportColumn class >>
+	#new, WARequestHandler class >> #new, WAResponse class
+	>> #new, WARoot class >> #new, WAUrl class >> #new.
+
 2011-05-26  Paolo Bonzini  <bonzini@gnu.org>
 
 	* core/Seaside-Core.st: Convert output of #selectors to an Array

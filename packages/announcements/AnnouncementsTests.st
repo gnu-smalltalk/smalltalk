@@ -1501,11 +1501,6 @@ Object subclass: TestSubscriber [
     <category: 'Announcements-Tests'>
     <comment: nil>
 
-    TestSubscriber class >> new [
-        <category: 'instance creation'>
-        ^self basicNew initialize
-    ]
-
     announcements [
 	<category: 'accessing'>
 	^announcements

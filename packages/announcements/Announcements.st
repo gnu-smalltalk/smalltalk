@@ -41,11 +41,6 @@ Object subclass: Announcer [
     <category: 'Announcements'>
     <comment: nil>
 
-    Announcer class >> new [
-        <category: 'instance creation'>
-        ^self basicNew initialize
-    ]
-
     announce: anObject [
 	"Deliver anObject to the registered subscribers. anObject should respond to #asAnnouncement and return with an instance of announcementBaseClass. The return value is the announcement which can be modified by the subscribers."
 
@@ -499,11 +494,6 @@ Object subclass: SubscriptionRegistry [
     
     <category: 'Announcements'>
     <comment: nil>
-
-    SubscriptionRegistry class >> new [
-        <category: 'instance creation'>
-        ^self basicNew initialize
-    ]
 
     allSubscriptions [
 	<category: 'accessing'>

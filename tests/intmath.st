@@ -188,9 +188,6 @@ Eval [
 "Another fraction torture test"
 Stream subclass: PiSeries [
     | i s tot |
-    PiSeries class >> new [
-	^super new initialize
-    ]
 
     initialize [
 	i := 1.

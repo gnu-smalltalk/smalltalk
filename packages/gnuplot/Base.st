@@ -33,11 +33,6 @@ Object subclass: GPObject [
     <category: 'GNUPlot'>
     <comment: 'My instances are used to define aspects of a plot.'>
 
-    GPObject class >> new [
-	<category: 'instance creation'>
-        ^super new initialize
-    ]
-
     asString [
 	<category: 'printing'>
 	^self displayString

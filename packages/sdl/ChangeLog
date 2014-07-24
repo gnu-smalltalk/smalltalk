@@ -1,3 +1,7 @@
+2014-07-26  Holger Hans Peter Freyther  <holger@freyther.de>
+
+	* libsdl/EventSource.st: Remmove SdlEventSource class >> #new.
+
 2010-12-04  Paolo Bonzini  <bonzini@gnu.org>
 
 	* cairo/package.xml: Remove now superfluous <file> tags.

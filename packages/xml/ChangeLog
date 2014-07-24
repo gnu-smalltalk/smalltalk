@@ -1,3 +1,16 @@
+2014-07-26  Holger Hans Peter Freyther  <holger@freyther.de>
+
+	* builder/NodeBuilder.st: Remove XMLNodeBuilder class >> #new.
+	* dom/DOM.st: Remove Node class >> #new, DocuemntType class >> #new.
+	* expat/ExpatPullParser.st: Remove SAXEventSequence class >> #new.
+	* parser/XML.st: Remove Pattern class >> #new.
+	* pullparser/XMLPullParser.st: Remove XMLPullParser class >> #new.
+	* saxdriver/SAX.st: Remove SAXDispatcher class >> #new.
+	* saxparser/Parser.st: Remove SAXParser class >> #new.
+	* xpath/XPath.st: Remove XPathNodeContext class >> #new,
+	XPathExpression class >> #new.
+	* xsl/XSL.st: Remove RuleDatabase class >> #new.
+
 2011-03-12  Paolo Bonzini  <bonzini@gnu.org>
 
 	* expat/expat.c: Remove dead code signaled by clang analyzer.

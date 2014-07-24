@@ -63,11 +63,6 @@ Instance Variables:
 	DefaultParserClass := aClass.
     ]
 
-    SAXParser class >> new [
-	<category: 'instance creation'>
-	^super new initialize
-    ]
-
     SAXParser class >> on: aDataSource [
 	"The dataSource may be a URI, a Filename (or a String
 	 which will be treated as a Filename), or an InputSource."

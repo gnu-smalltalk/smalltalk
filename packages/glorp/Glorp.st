@@ -132,11 +132,6 @@ This class is part of the GLORP system (see http://www.glorp.org), licensed unde
 	^Dialect isVisualWorks ifTrue: [WeakVWCachePolicy new] ifFalse: [self new]
     ]
 
-    CachePolicy class >> new [
-	<category: 'instance creation'>
-	^super new initialize
-    ]
-
     dictionaryClass [
 	<category: 'accessing'>
 	^Dictionary
@@ -326,11 +321,6 @@ Object subclass: GlorpExpression [
 	<category: 'LICENSE'>
 	^'Copyright 2000-2003 Alan Knight.
 This class is part of the GLORP system (see http://www.glorp.org), licensed under the GNU Lesser General Public License, with clarifications with respect to Smalltalk library usage (LGPL(S)). This code is distributed WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE . See the package comment, or the COPYING.TXT file that should accompany this distribution, or the GNU Lesser General Public License.'
-    ]
-
-    GlorpExpression class >> new [
-	<category: 'instance creation'>
-	^super new initialize
     ]
 
     className [
@@ -983,11 +973,6 @@ Instance Variables:
 
 '>
 
-    ObjectTransaction class >> new [
-	<category: 'instance creation'>
-	^super new initialize
-    ]
-
     ObjectTransaction class >> LICENSE [
 	<category: 'LICENSE'>
 	^'Copyright 2000-2003 Alan Knight.
@@ -1144,11 +1129,6 @@ Object subclass: Mapping [
     
     <category: 'Glorp-Mappings'>
     <comment: nil>
-
-    Mapping class >> new [
-	<category: 'instance creation'>
-	^super new initialize
-    ]
 
     Mapping class >> LICENSE [
 	<category: 'LICENSE'>
@@ -1497,11 +1477,6 @@ Object subclass: DatabaseConverter [
 This class is part of the GLORP system (see http://www.glorp.org), licensed under the GNU Lesser General Public License, with clarifications with respect to Smalltalk library usage (LGPL(S)). This code is distributed WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE . See the package comment, or the COPYING.TXT file that should accompany this distribution, or the GNU Lesser General Public License.'
     ]
 
-    DatabaseConverter class >> new [
-	<category: 'instance creation'>
-	^super new initialize
-    ]
-
     name [
 	<category: 'accessing'>
 	^name
@@ -1544,11 +1519,6 @@ Object subclass: DatabaseTable [
     DatabaseTable class >> named: aString [
 	<category: 'instance creation'>
 	^self new name: aString
-    ]
-
-    DatabaseTable class >> new [
-	<category: 'instance creation'>
-	^super new initialize
     ]
 
     DatabaseTable class >> LICENSE [
@@ -2487,11 +2457,6 @@ This class is part of the GLORP system (see http://www.glorp.org), licensed unde
 	    query: aQuery
     ]
 
-    ElementBuilder class >> new [
-	<category: 'instance creation'>
-	^super new initialize
-    ]
-
     canCauseDuplicateRows [
 	<category: 'accessing'>
 	^false
@@ -2655,11 +2620,6 @@ This class is part of the GLORP system (see http://www.glorp.org), licensed unde
     GlorpSession class >> forSystem: aSystem [
 	<category: 'instance creation'>
 	^self new system: aSystem
-    ]
-
-    GlorpSession class >> new [
-	<category: 'instance creation'>
-	^super new initialize
     ]
 
     expiredInstanceOf: aClass key: key [
@@ -3156,11 +3116,6 @@ Object subclass: TableSorter [
 	^sorter
     ]
 
-    TableSorter class >> new [
-	<category: 'instance creation'>
-	^super new initialize
-    ]
-
     TableSorter class >> LICENSE [
 	<category: 'LICENSE'>
 	^'Copyright 2000-2003 Alan Knight.
@@ -3287,11 +3242,6 @@ This class is part of the GLORP system (see http://www.glorp.org), licensed unde
 	^self new base: aQuery criteria ultimateBaseExpression
     ]
 
-    Tracing class >> new [
-	<category: 'instance creation'>
-	^super new initialize
-    ]
-
     addExpression: anExpression [
 	<category: 'accessing'>
 	self addExpression: anExpression andDo: [:ignore | ]
@@ -3409,11 +3359,6 @@ Object subclass: RowMap [
     
     <category: 'Glorp-UnitOfWork'>
     <comment: nil>
-
-    RowMap class >> new [
-	<category: 'instance creation'>
-	^super new initialize
-    ]
 
     RowMap class >> LICENSE [
 	<category: 'LICENSE'>
@@ -3628,11 +3573,6 @@ Object subclass: DatabaseType [
     DatabaseType class >> instance [
 	<category: 'instance creation'>
 	^super new
-    ]
-
-    DatabaseType class >> new [
-	<category: 'instance creation'>
-	^super new initialize
     ]
 
     DatabaseType class >> padToTwoDigits: anInteger [
@@ -3952,11 +3892,6 @@ Instance Variables:
     DatabaseRow class [
 	| missingFieldIndicator |
 	
-    ]
-
-    DatabaseRow class >> new [
-	<category: 'instance creation'>
-	^super new initialize
     ]
 
     DatabaseRow class >> newForTable: aTable [
@@ -4427,11 +4362,6 @@ Object subclass: Query [
 This class is part of the GLORP system (see http://www.glorp.org), licensed under the GNU Lesser General Public License, with clarifications with respect to Smalltalk library usage (LGPL(S)). This code is distributed WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE . See the package comment, or the COPYING.TXT file that should accompany this distribution, or the GNU Lesser General Public License.'
     ]
 
-    Query class >> new [
-	<category: 'instance creation'>
-	^super new initialize
-    ]
-
     Query class >> readManyOf: aClass [
 	"readManyOf: and returningManyOf: are synonyms. This now seems more natural to me, to be consistent with session API"
 
@@ -4721,11 +4651,6 @@ Object subclass: Descriptor [
     
     <category: 'Glorp-Mappings'>
     <comment: nil>
-
-    Descriptor class >> new [
-	<category: 'instance creation'>
-	^super new initialize
-    ]
 
     Descriptor class >> LICENSE [
 	<category: 'LICENSE'>
@@ -5593,11 +5518,6 @@ This class is part of the GLORP system (see http://www.glorp.org), licensed unde
 	^(self new)
 	    addSource: from1Field target: to1Field;
 	    addSource: from2Field target: to2Field
-    ]
-
-    Join class >> new [
-	<category: 'instance creation'>
-	^super new initialize
     ]
 
     additionalExpressions [
@@ -7007,13 +6927,6 @@ Object subclass: MultipleRowMapKey [
     <comment: '
 This is a special (and rarely needed) form of row map key that allows an arbitrary number of objects to participate in it.'>
 
-    MultipleRowMapKey class >> new [
-	"Answer a newly created and initialized instance."
-
-	<category: 'instance creation'>
-	^super new initialize
-    ]
-
     MultipleRowMapKey class >> with: key1 with: key2 with: key3 [
 	<category: 'instance creation'>
 	^(self new)
@@ -8275,11 +8188,6 @@ Object subclass: DescriptorSystem [
 	    platform: dbPlatform
     ]
 
-    DescriptorSystem class >> new [
-	<category: 'instance creation'>
-	^super new initialize
-    ]
-
     DescriptorSystem class >> LICENSE [
 	<category: 'LICENSE'>
 	^'Copyright 2000-2003 Alan Knight.
@@ -8738,11 +8646,6 @@ Object subclass: DatabaseAccessor [
     DatabaseAccessor class >> forLogin: aLogin [
 	<category: 'instance creation'>
 	^self classForThisPlatform new currentLogin: aLogin
-    ]
-
-    DatabaseAccessor class >> new [
-	<category: 'instance creation'>
-	^super new initialize
     ]
 
     DatabaseAccessor class >> loggingEnabled [
@@ -10598,11 +10501,6 @@ Object subclass: FieldValueWrapper [
     <category: 'Glorp-UnitOfWork'>
     <comment: nil>
 
-    FieldValueWrapper class >> new [
-	<category: 'public'>
-	^super new initialize
-    ]
-
     FieldValueWrapper class >> LICENSE [
 	<category: 'LICENSE'>
 	^'Copyright 2000-2003 Alan Knight.
@@ -10942,11 +10840,6 @@ This class is part of the GLORP system (see http://www.glorp.org), licensed unde
 	^self new session: aSession
     ]
 
-    CacheManager class >> new [
-	<category: 'instance creation'>
-	^super new initialize
-    ]
-
     cacheForClass: aClass [
 	<category: 'initialize/release'>
 	^subCaches at: aClass ifAbsentPut: [self makeCacheFor: aClass]
@@ -11274,11 +11167,6 @@ Instance Variables:
     commitPlan	<(OrderedCollection of: DatabaseRow)>	The list of rows to be written, in order. Constructed by topological sorting the contents of the row map.
 
 '>
-
-    UnitOfWork class >> new [
-	<category: 'instance creation'>
-	^super new initialize
-    ]
 
     UnitOfWork class >> LICENSE [
 	<category: 'LICENSE'>
@@ -12120,11 +12008,6 @@ ProtoObject subclass: Proxy [
 This class is part of the GLORP system (see http://www.glorp.org), licensed under the GNU Lesser General Public License, with clarifications with respect to Smalltalk library usage (LGPL(S)). This code is distributed WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE . See the package comment, or the COPYING.TXT file that should accompany this distribution, or the GNU Lesser General Public License.'
     ]
 
-    Proxy class >> new [
-	<category: 'instance creation'>
-	^super new initialize
-    ]
-
     Proxy class >> returningManyOf: aClass where: aBlock [
 	<category: 'instance creation'>
 	^self new query: (Query returningManyOf: aClass where: aBlock)
@@ -12782,11 +12665,6 @@ Object subclass: DatabaseCommand [
 This class is part of the GLORP system (see http://www.glorp.org), licensed under the GNU Lesser General Public License, with clarifications with respect to Smalltalk library usage (LGPL(S)). This code is distributed WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE . See the package comment, or the COPYING.TXT file that should accompany this distribution, or the GNU Lesser General Public License.'
     ]
 
-    DatabaseCommand class >> new [
-	<category: 'instance creation'>
-	^super new initialize
-    ]
-
     bindings [
 	<category: 'accessing'>
 	self subclassResponsibility
@@ -13163,11 +13041,6 @@ Object subclass: DatabaseSequence [
 	^self new name: aString
     ]
 
-    DatabaseSequence class >> new [
-	<category: 'instance creation'>
-	^super new initialize
-    ]
-
     DatabaseSequence class >> LICENSE [
 	<category: 'LICENSE'>
 	^'Copyright 2000-2003 Alan Knight.
@@ -13441,11 +13314,6 @@ Instance Variables:
 This class is part of the GLORP system (see http://www.glorp.org), licensed under the GNU Lesser General Public License, with clarifications with respect to Smalltalk library usage (LGPL(S)). This code is distributed WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE . See the package comment, or the COPYING.TXT file that should accompany this distribution, or the GNU Lesser General Public License.'
     ]
 
-    Cache class >> new [
-	<category: 'instance creation'>
-	^super new initialize
-    ]
-
     Cache class >> newFor: aClass in: aCacheManager [
 	<category: 'instance creation'>
 	| newCache descriptor |
@@ -13656,13 +13524,6 @@ Object subclass: GlorpPreparedStatement [
 	<category: 'LICENSE'>
 	^'Copyright 2000-2003 Alan Knight.
 This class is part of the GLORP system (see http://www.glorp.org), licensed under the GNU Lesser General Public License, with clarifications with respect to Smalltalk library usage (LGPL(S)). This code is distributed WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE . See the package comment, or the COPYING.TXT file that should accompany this distribution, or the GNU Lesser General Public License.'
-    ]
-
-    GlorpPreparedStatement class >> new [
-	"Answer a newly created and initialized instance."
-
-	<category: 'instance creation'>
-	^super new initialize
     ]
 
     signature [

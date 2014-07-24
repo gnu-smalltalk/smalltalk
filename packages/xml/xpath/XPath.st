@@ -37,11 +37,6 @@ Object subclass: XPathNodeContext [
     <category: 'XML-XPath'>
     <comment: nil>
 
-    XPathNodeContext class >> new [
-	<category: 'instance creation'>
-	^super new initialize
-    ]
-
     add: aNode [
 	<category: 'adding'>
 	nodes add: aNode
@@ -350,11 +345,6 @@ Object subclass: XPathExpression [
     
     <category: 'XML-XPath'>
     <comment: nil>
-
-    XPathExpression class >> new [
-	<category: 'instance creation'>
-	^super new initialize
-    ]
 
     XPathExpression class >> notANumber [
 	<category: 'coercing'>

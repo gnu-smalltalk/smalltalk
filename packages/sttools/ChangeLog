@@ -1,3 +1,7 @@
+2014-07-26  Holger Hans Peter Freyther  <holger@freyther.de>
+
+	* Parser/SourceEval.st: Remove SourceEval class >> #new.
+
 2013-03-30  Holger Hans Peter Freyther  <holger@freyther.de>
 
 	* Makefile.frag: Added.

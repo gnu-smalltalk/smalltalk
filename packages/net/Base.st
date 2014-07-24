@@ -583,11 +583,6 @@ Object subclass: NetProtocolInterpreter [
 	^self new client: aNetClient
     ]
 
-    NetProtocolInterpreter class >> new [
-	<category: 'instance creation'>
-	^self basicNew initialize
-    ]
-
     NetProtocolInterpreter class >> defaultResponseClass [
 	<category: 'private-attributes'>
 	^NetResponse

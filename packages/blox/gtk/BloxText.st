@@ -1015,13 +1015,6 @@ text in a BText widget.  To use it, you simply have to add event handlers
 to it, and then create a BTextAttributes object that refers to it.'>
     <category: 'Graphics-Windows'>
 
-    BTextBindings class >> new [
-	"Create a new instance of the receiver."
-
-	<category: 'instance creation'>
-	^self basicNew initialize
-    ]
-
     defineTagFor: aBText [
 	<category: 'private - BTextTags protocol'>
 	list do: [:each | each sendTo: aBText]

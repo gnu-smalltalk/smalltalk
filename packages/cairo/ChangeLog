@@ -1,3 +1,7 @@
+2014-07-26  Holger Hans Peter Freyther  <holger@freyther.de>
+
+	* CairoPattern.st: Remove GradientPattern class >> #new.
+
 2011-01-09  Paolo Bonzini  <bonzini@gnu.org>
 
 	* CairoSurfaces.st: Further cleanup of #buildSurface vs.

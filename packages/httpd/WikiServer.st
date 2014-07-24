@@ -44,11 +44,6 @@ Object subclass: WikiPage [
 	    yourself
     ]
 
-    WikiPage class >> new [
-	<category: 'instance creation'>
-	^super new initialize
-    ]
-
     allTitles [
 	<category: 'accessing'>
 	| oc |
@@ -424,11 +419,6 @@ Object subclass: WikiSettings [
 	^self new fromCookieString: aString
     ]
 
-    WikiSettings class >> new [
-	<category: 'instance creation'>
-	^super new initialize
-    ]
-
     loadFromFile: aFileStream [
 	<category: 'flat file'>
 	| line |
@@ -548,11 +538,6 @@ can have a custom contents or can be renamed.'>
     Wiki class >> named: aString [
 	<category: 'instance creation'>
 	^self new name: aString
-    ]
-
-    Wiki class >> new [
-	<category: 'instance creation'>
-	^super new initialize
     ]
 
     initialize [
@@ -976,11 +961,6 @@ such as when it is edited or renamed.
 
 All subclasses must implement sendBody.'>
     <category: 'Web-WikiRendering'>
-
-    WikiHTML class >> new [
-	<category: 'instance creation'>
-	^super new initialize
-    ]
 
     WikiHTML class >> respondTo: aRequest in: aWiki [
 	<category: 'instance creation'>

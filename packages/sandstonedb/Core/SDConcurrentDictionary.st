@@ -53,11 +53,6 @@ Object subclass: SDConcurrentDictionary [
 	    yourself
     ]
 
-   SDConcurrentDictionary class >> new [
-	<category: 'instance creation'>
-	^self basicNew initialize
-   ]
-
     , aCollection [
 	<category: 'copying'>
 	^lock critical: [self class on: dictionary , aCollection]

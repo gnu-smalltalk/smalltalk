@@ -737,13 +737,6 @@ and DirectoryResponses.'>
 	    yourself
     ]
 
-    FileWebServer class >> new [
-	<category: 'instance creation'>
-	^(super new)
-	    initialize;
-	    yourself
-    ]
-
     fileResponse: file request: aRequest [
 	<category: 'interaction'>
 	| range |

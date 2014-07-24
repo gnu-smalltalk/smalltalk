@@ -35,11 +35,6 @@ Object subclass: SwazooResource [
     <category: 'Swazoo-Core'>
     <comment: 'Resource is an abstract class for all so called web resources. Such resource has its url address and can serve with responding to web requests. Every resource need to #answerTo: aHTTPRequest with aHTTPResponse. Site is a subclass of a Resource. You can subclass it with your own implementation. There is also a CompositeResource, which can hold many subresources. Site is also aCopmpositeResource and therefore you can add your own resources to your site.'>
 
-    SwazooResource class >> new [
-	<category: 'instance creation'>
-	^super new initialize
-    ]
-
     SwazooResource class >> uriPattern: aString [
 	<category: 'instance creation'>
 	^self new uriPattern: aString

@@ -21,11 +21,6 @@ Object subclass: RBReadBeforeWrittenTester [
     <category: 'Refactory-Parser'>
     <comment: nil>
 
-    RBReadBeforeWrittenTester class >> new [
-	<category: 'instance creation'>
-	^super new initialize
-    ]
-
     RBReadBeforeWrittenTester class >> isVariable: aString readBeforeWrittenIn: aBRProgramNode [
 	<category: 'accessing'>
 	^(self isVariable: aString writtenBeforeReadIn: aBRProgramNode) not
@@ -235,23 +230,11 @@ Object subclass: RBParseTreeRule [
 	    yourself
     ]
 
-    RBParseTreeRule class >> new [
-	<category: 'instance creation'>
-	^(super new)
-	    initialize;
-	    yourself
-    ]
-
     RBParseTreeRule class >> search: aString [
 	<category: 'instance creation'>
 	^(self new)
 	    searchString: aString;
 	    yourself
-    ]
-
-    initialize [
-	<category: 'initialize-release'>
-	
     ]
 
     methodSearchString: aString [

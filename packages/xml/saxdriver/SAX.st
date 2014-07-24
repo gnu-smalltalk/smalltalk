@@ -358,11 +358,6 @@ Instance Variables:
     errorHandler		<XML.SAXDriver>		handles all errors
 '>
 
-    SAXDispatcher class >> new [
-	<category: 'instance creation'>
-	^super new initialize
-    ]
-
     contentHandler [
 	<category: 'accessing'>
 	^contentHandler

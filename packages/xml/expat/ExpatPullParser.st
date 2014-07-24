@@ -39,11 +39,6 @@ Object subclass: SAXEventSequence [
 communicates more than one event between its resumption and when it
 is stopped again.'>
 
-    SAXEventSequence class >> new [
-	<category: 'instance creation'>
-	^super new initialize
-    ]
-
     event [
 	<category: 'accessing'>
 	^event

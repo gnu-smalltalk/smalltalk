@@ -58,11 +58,6 @@ Object subclass: SDActiveRecord [
 
     Store := nil.
 
-    SDActiveRecord class >> new [
-	<category: 'instance creation'>
-	^self basicNew initialize
-    ]
-
     SDActiveRecord class >> atId: anId [
 	"hitting this in a tight loop for a class with subclasses can be very
 	expensive because allCaches has to concatenate all the subclasses

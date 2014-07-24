@@ -30,6 +30,15 @@ o   gst-sunit -p package.xml TestClass will execute only the tests of
 o   RecursionLock>>#critical: returns the result of the block like it
     is done for Semaphore>>#critical:
 
+o   Object>>#initialize has been added as am empty selector and
+    Behavior>>#new/Behavior>>#new: has been modified to call basicNew
+    followed by a call to initialize. This has been done to ease porting
+    from and to the Pharo Smalltalk Environment. The >>#initialize
+    selector needs to return self (or have no explicit return statement).
+    Classes that provide a custom >>#new implementation and call
+    "super new initialize" should either remove the custom >>#new
+    implementation or use "self basicNew initialize".
+
 -----------------------------------------------------------------------------
 
 NEWS FROM 3.2.4 to 3.2.5

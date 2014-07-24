@@ -1,3 +1,7 @@
+2014-07-26  Holger Hans Peter Freyther  <holger@freyther.de>
+
+	* Tetris/TetrisField.st: Remove TetrisField class >> #new.
+
 2014-07-20  Holger Hand Peter Freyther  <holger@freyther.de>
 
 	* Misc/KeySnooper.st: Remove the file.

@@ -54,11 +54,6 @@ SDCachedStore subclass: SDMemoryStore [
 	Cache := Dictionary new.
     ]
 
-     SDMemoryStore class >> new [
-	<category: 'instance creation'>
-	^self basicNew initialize
-    ]
-
     abortChanges: anObject [
 	<category: 'actions'>
 	| diskVersion |

@@ -40,13 +40,6 @@ LinkedList subclass: Semaphore [
 the semaphore''s availability, and methods for waiting for its availability.
 I also provide some methods for implementing critical sections.'>
 
-    Semaphore class >> new [
-	"Answer a new semaphore"
-
-	<category: 'instance creation'>
-	^self basicNew initialize
-    ]
-
     Semaphore class >> forMutualExclusion [
 	"Answer a new semaphore with a signal on it. These semaphores are a useful
 	 shortcut when you use semaphores as critical sections."

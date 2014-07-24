@@ -38,11 +38,6 @@ Object subclass: NetThread [
     <category: 'Sockets-Serving framework'>
     <comment: 'A NetThread runs a process attached to a specified socket.'>
 
-    NetThread class >> new [
-	<category: 'instance creation'>
-	^self basicNew initialize
-    ]
-
     defaultPriority [
 	<category: 'initialize-release'>
 	^Processor userSchedulingPriority

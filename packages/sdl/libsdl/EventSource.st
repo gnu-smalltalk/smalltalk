@@ -296,12 +296,6 @@ Object subclass: SdlEventSource [
 
     | handler pollDelay eventMask |
 
-    SdlEventSource class >> new [
-	"Create a new event source.  This is private, because an event source
-	 is only created from an SdlDisplay."
-	^ super new initialize
-    ]
-
     handler [
 	"Return the SdlEventHandler that will manage events for the display."
 

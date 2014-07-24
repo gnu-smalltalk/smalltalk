@@ -1,3 +1,9 @@
+2014-07-26  Holger Hans Peter Freyther  <holger@freyther.de>
+
+	* Announcements.st: Remove Announcer class >> #new,
+	SubscriptionRegistry class >> #new.
+	* AnnouncementsTests.st:  Remove TestSubscriber class >> #new.
+
 2010-12-04  Paolo Bonzini  <bonzini@gnu.org>
 
 	* package.xml: Remove now superfluous <file> tags.

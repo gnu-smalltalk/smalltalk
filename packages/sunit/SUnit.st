@@ -114,11 +114,6 @@ Object subclass: TestResource [
 	
     ]
 
-    TestResource class >> new [
-	<category: 'Creation'>
-	^super new initialize
-    ]
-
     TestResource class >> reset [
 	<category: 'Creation'>
 	current notNil ifTrue: [[current tearDown] ensure: [current := nil]]
@@ -271,11 +266,6 @@ This is a Collecting Parameter for the running of a bunch of tests. TestResult i
     TestResult class >> signalFailureWith: aString [
 	<category: 'Exceptions'>
 	self failure sunitSignalWith: aString
-    ]
-
-    TestResult class >> new [
-	<category: 'Init / Release'>
-	^super new initialize
     ]
 
     correctCount [

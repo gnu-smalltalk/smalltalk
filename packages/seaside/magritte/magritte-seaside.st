@@ -3677,11 +3677,6 @@ Object subclass: MAColumn [
 	    yourself
     ]
 
-    MAColumn class >> new [
-	<category: 'instance creation'>
-	^self basicNew initialize
-    ]
-
     cascade [
 	<category: 'accessing-settings'>
 	^self propertyAt: #cascade ifAbsent: [self defaultCascade]

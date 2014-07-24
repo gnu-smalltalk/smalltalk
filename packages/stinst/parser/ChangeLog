@@ -1,3 +1,11 @@
+2014-07-26  Holger Hans Peter Freyther  <holger@freyther.de>
+
+	* ParseTreeSearcher.st: Remove RBReadBeforeWrittenTester
+	class >> #new, RBParseTreeRule class >> #new, RBParseTreeRule
+	>> #initialize.
+	* RBParseNodes.st: Remove RBProgramNodeVisitor class >> #new,
+	RBProgramNodeVisitor >> #initialize.
+
 2014-04-02  Gwenael Casaccio  <gwenael.casaccio@gmail.com>
 
 	* STCompiler.st: Support keyword attributes.

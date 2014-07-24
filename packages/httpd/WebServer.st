@@ -731,11 +731,6 @@ requests).'>
 	^self new initConnection: aClientConnection
     ]
 
-    WebRequest class >> new [
-	<category: 'instance creation'>
-	^super new initialize
-    ]
-
     action [
 	<category: 'accessing'>
 	^action

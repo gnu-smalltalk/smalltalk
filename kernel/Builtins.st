@@ -43,6 +43,11 @@ Behavior extend [
 ]
 
 Object extend [
+    initialize [
+        "Subclasses should redefine this method to perform initializations on
+        instance creation"
+    ]
+
     class [
         "Answer the class to which the receiver belongs"
         <primitive: VMpr_Object_class>
@@ -53,15 +58,19 @@ Object extend [
         
 
 Behavior extend [
-    
+
     new [
         "Create a new instance of a class with no indexed instance variables"
-        <primitive: VMpr_Behavior_basicNew>
-        <category: 'builtin'>
-        self isFixed ifFalse: [ ^self new: 0 ].
-        ^self primitiveFailed
+        ^self basicNew initialize
     ]
-    
+
+    new: numInstanceVariables [
+        "Create a new instance of a class with indexed instance variables. The
+         instance has numInstanceVariables indexed instance variables."
+        ^(self basicNew: numInstanceVariables) initialize
+    ]
+
+
     basicNew [
         "Create a new instance of a class with no indexed instance variables;
          this method must not be overridden."
@@ -69,19 +78,6 @@ Behavior extend [
         <category: 'builtin'>
         self isFixed ifFalse: [ ^self basicNew: 0 ].
         ^self primitiveFailed
-    ]
-    
-    new: numInstanceVariables [
-        "Create a new instance of a class with indexed instance variables. The
-         instance has numInstanceVariables indexed instance variables."
-        <primitive: VMpr_Behavior_basicNewColon>
-        <category: 'builtin'>
-        self isFixed ifTrue: [
-    	SystemExceptions.WrongMessageSent signalOn: #new: useInstead: #new
-        ].
-        numInstanceVariables isSmallInteger ifTrue: [ ^self primitiveFailed ].
-    
-        ^SystemExceptions.WrongClass signalOn: numInstanceVariables mustBe: SmallInteger
     ]
     
     basicNew: numInstanceVariables [

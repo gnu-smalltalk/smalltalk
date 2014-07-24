@@ -36,11 +36,6 @@ Object subclass: Amb [
     <category: 'Seaside-Seaside-Continuations'>
     <comment: nil>
 
-    Amb class >> new [
-	<category: 'new'>
-	^super new initialize
-    ]
-
     Amb class >> allValues: aBlock [
 	<category: 'new'>
 	| amb |

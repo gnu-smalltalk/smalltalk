@@ -256,7 +256,7 @@ TestCase subclass: DebuggerTest [
 
 	<category: 'test'>
 	| debugger reached notReached |
-	debugger := self debuggerOn: [reached := Object new].
+	debugger := self debuggerOn: [reached := Object basicNew].
 	debugger step.
 	self assert: reached notNil
     ]

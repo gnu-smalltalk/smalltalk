@@ -211,11 +211,6 @@ PackageGroup subclass: PackageDirectories [
 information on a Smalltalk package, and can output my description in
 XML.'>
 
-    PackageDirectories class >> new [
-	<category: 'instance creation'>
-	^super new initialize
-    ]
-
     postCopy [
 	<category: 'copying'>
 	dirs := dirs copy

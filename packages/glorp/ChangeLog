@@ -1,3 +1,28 @@
+2014-07-26  Holger Hans Peter Freyther  <holger@freyther.de>
+
+	* Glorp.st: Remove CachePolicy class >> #new,
+	GlorpExpression class >> #new, ObjectTransaction class >> #new,
+	Mapping class >> #new, DatabaseConverter class >> #new,
+	DatabaseTable class >> #new, ElementBuilder class >> #new,
+	GlorpSession class >> #new, TableSorter class >> #new,
+	Tracing class >> #new, RowMap class >> #new,
+	DatabaseType class >> #new, DatabaseRow class >> #new,
+	Query class >> #new, Descriptor class >> #new, Join class >> #new,
+	MultiRowMapKey class >> #new, DescriptorSystem class >> #new,
+	DatabaseAccessor class >> #new, FieldValueWrapper class >> #new,
+	CacheManager class >> #new, UnitOfWork class >> #new,
+	Proxy class >> #new, DatabaseCommand class >> #new,
+	DatabaseSequence class >> #new, Cache class >> #new,
+	GlorpPreparedStatement class >> #new.
+	* GlorpTest.st: Remove GlorpWorker class >> #new,
+	GlorpBankAccount class >> #new, GlorpBankTransaction class
+	>> #new, GlorpThingWithLotsOfDifferentCollections class >> #new,
+	GlorpEncylopedia class >> #new, GlorpCustomer class >> #new,
+	GlorpReservation class >> #new, GlorpInt4Test class >> #new,
+	GlorpBankExampleSystem class >> #new, GlorpServiceCharge class
+	>> #new, GlorpWeakCacheTest class >> #new, GlorTransformedTime
+	class >> #new, GlorpMockSession class >> #new.
+
 2011-03-07  Paolo Bonzini <bonzini@gnu.org>
 
 	* GlorpPort.st: Fix declaration of ProtoObject primitives.

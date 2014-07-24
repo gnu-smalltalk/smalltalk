@@ -38,11 +38,6 @@ Object subclass: MessageElement [
     <category: 'NetClients-MIME'>
     <comment: nil>
 
-    MessageElement class >> new [
-	<category: 'instance creation'>
-	^self basicNew initialize
-    ]
-
     MessageElement class >> fromLine: aString [
 	"For compatibility with Swazoo"
 
@@ -261,11 +256,6 @@ Object subclass: SimpleScanner [
 	Cr := Character cr.
 	Lf := Character nl.
 	CRLF := Array with: Character cr with: Character nl
-    ]
-
-    SimpleScanner class >> new [
-	<category: 'instance creation'>
-	^self basicNew initialize
     ]
 
     SimpleScanner class >> on: stream [

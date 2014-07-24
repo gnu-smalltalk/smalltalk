@@ -1,3 +1,8 @@
+2014-07-26  Holger Hans Peter Freyther  <holger@freyther.de>
+
+	* Core.st: Remove SwazooResource class >> #new.
+	* HTTP.st: Remove AbstractHTTPServer class >> #new.
+
 2011-08-05  Holger Freyther  <holger@freyther.de>
 
 	* HTTP.st: The SiteIdentifier>>#ip should return a String, the

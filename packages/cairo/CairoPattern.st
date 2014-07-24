@@ -297,11 +297,6 @@ CairoPattern subclass: SurfacePattern [
 CairoPattern subclass: GradientPattern [
     | colorStops |
 
-    GradientPattern class >> new [
-	<category: 'instance creation'>
-	^super new initialize
-    ]
-
     colorStops [
 	<category: 'accessing'>
 	^colorStops

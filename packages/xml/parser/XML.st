@@ -57,11 +57,6 @@ Subclasses must implement the following protocol:
 Instance Variables:
     followSet	<OrderedCollection>  A list of the Patterns which may follow this one in an element''s content.'>
 
-    Pattern class >> new [
-	<category: 'instance creation'>
-	^super new initialize
-    ]
-
     followSet: aCollection [
 	<category: 'initialize'>
 	followSet := aCollection

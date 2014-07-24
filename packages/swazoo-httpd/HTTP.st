@@ -266,11 +266,6 @@ Object subclass: AbstractHTTPServer [
 	SpEnvironment addImageShutdownTask: [self shutDown] for: self
     ]
 
-    AbstractHTTPServer class >> new [
-	<category: 'instance creation'>
-	^super new initialize
-    ]
-
     AbstractHTTPServer class >> shutDown [
 	"HTTPServer shutDown"
 

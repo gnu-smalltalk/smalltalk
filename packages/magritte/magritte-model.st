@@ -426,11 +426,6 @@ Object subclass: MAAdaptiveModel [
 	    yourself
     ]
 
-    MAAdaptiveModel class >> new [
-	<category: 'instance creation'>
-	^self basicNew initialize
-    ]
-
     defaultDescription [
 	<category: 'accessing-configuration'>
 	^MAContainer new
@@ -514,11 +509,6 @@ Object subclass: MADescriptionBuilder [
     MADescriptionBuilder class >> initialize [
 	<category: 'initialization'>
 	self default: MANamedBuilder new
-    ]
-
-    MADescriptionBuilder class >> new [
-	<category: 'instance creation'>
-	^self basicNew initialize
     ]
 
     build: anObject [
@@ -636,11 +626,6 @@ There are different file-models that you can use with Magritte. The idea is that
     MAFileModel class >> mimetypes [
 	<category: 'accessing'>
 	^MimeTypes
-    ]
-
-    MAFileModel class >> new [
-	<category: 'instance-creation'>
-	^self basicNew initialize
     ]
 
     = anObject [

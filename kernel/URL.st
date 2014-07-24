@@ -144,13 +144,6 @@ Copyright (c) Kazuki Yasumatsu, 1995. All rights reserved.
 	^url
     ]
 
-    URL class >> new [
-	"Answer a 'blank' URL."
-
-	<category: 'instance creation'>
-	^self basicNew initialize
-    ]
-
     URL class >> scheme: schemeString username: userString password: passwordString host: hostString port: portNumber path: pathString [
 	"Answer an URL object made from all the parts passed as arguments."
 

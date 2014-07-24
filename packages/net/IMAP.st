@@ -102,11 +102,6 @@ Object subclass: IMAPCommand [
 	    arguments: (Array with: #string -> aNameString with: #string -> aPassString)
     ]
 
-    IMAPCommand class >> new [
-	<category: 'instance creation'>
-	^self basicNew initialize
-    ]
-
     IMAPCommand class >> parse: scanner [
 	"Read and parse next command from a stream. This is mainly useful for testing previously stored
 	 exchange logs"
@@ -951,11 +946,6 @@ Object subclass: IMAPCommandSequencer [
     
     <category: 'NetClients-IMAP'>
     <comment: nil>
-
-    IMAPCommandSequencer class >> new [
-	<category: 'instance creation'>
-	^self basicNew initialize
-    ]
 
     IMAPCommandSequencer class >> newPrefix: prefix [
 	<category: 'instance creation'>

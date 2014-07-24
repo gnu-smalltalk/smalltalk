@@ -36,11 +36,6 @@ MessageDigest subclass: MD5 [
     <comment: nil>
     <category: 'Examples-Modules'>
 
-    MD5 class >> new [
-	<category: 'C call-outs'>
-	^self basicNew initialize
-    ]
-
     newState [
 	<category: 'C call-outs'>
 	<cCall: 'MD5AllocOOP' returning: #smalltalk args: #()>

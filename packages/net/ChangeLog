@@ -1,3 +1,13 @@
+2014-07-26  Holger Hans Peter Freyther  <holger@freyther.de>
+
+	* Base.st: Remove NetProtocolInterpreter class >> #new.
+	* IMAP.st: Remove IMAPCommand class >> #new, IMAPCommandSequencer
+	class >> #new.
+	* MIME.st:  Remove MessageElement class >> #new, SimpleScanner
+	class >> #new.
+	* NetServer.st: Remove NetThread class >> #new.
+	* URIResolver.st: Remove UserProfileSettings class >> #new.
+
 2012-06-15  Stefan Krecher <stefan.krecher@googlemail.com>
             Paolo Bonzini  <bonzini@gnu.org>
 

@@ -1,3 +1,8 @@
+2014-07-26  Holger Hans Peter Freyther  <holger@freyther.de>
+
+	* SUnit.st: Remove TestResource class >> #new,
+	TestResult class >> #new.
+
 2013-10-13  Holger Hans Peter Freyther  <holger@freyther.de>
 
 	* packages/sunit/SUnit.st: Remove extra $# from the

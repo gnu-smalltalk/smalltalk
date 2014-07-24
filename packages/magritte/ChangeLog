@@ -1,3 +1,10 @@
+2014-07-26  Holger Hans Peter Freyther  <holger@freyther.de>
+
+	* magritte-gst.st: Remove MAVisitor class >> #new,
+	MAVisitor >> #initialize.
+	* magritte-model.st: Remove MAAdaptiveModel class >> #new,
+	MADescriptionBuilder class >> #new, MAFileModel class >> #new.
+
 2010-12-04  Paolo Bonzini  <bonzini@gnu.org>
 
 	* package.xml: Remove now superfluous <file> tags.

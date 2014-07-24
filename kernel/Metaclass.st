@@ -55,6 +55,11 @@ it should be...the Smalltalk metaclass system is strange and complex.'>
 	^newMeta
     ]
 
+    new [
+        "Do not call >>#initialize on the classes"
+        ^self basicNew
+    ]
+
     addClassVarName: aString [
 	"Add a class variable with the given name to the class pool dictionary"
 

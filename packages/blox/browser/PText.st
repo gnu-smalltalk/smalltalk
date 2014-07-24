@@ -422,11 +422,6 @@ PText subclass: PWorksheetText [
     <comment: nil>
     <category: 'Graphics-Windows'>
 
-    PWorksheetText class >> new [
-	<category: 'instance creation'>
-	^super new initialize
-    ]
-
     initialize [
 	"Use a lightweight class to evaluate the workspace expressions,
 	 so that variables are kept across evaluations."

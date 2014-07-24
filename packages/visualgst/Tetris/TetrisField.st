@@ -34,12 +34,6 @@ Object subclass: TetrisField [
     <category: 'Graphics-Tetris'>
     <comment: nil>
 
-    TetrisField class >> new [
-	<category: 'instance creation'>
-
-	^ self basicNew initialize
-    ]
-
     at: point [
 	<category: 'accessing'>
 

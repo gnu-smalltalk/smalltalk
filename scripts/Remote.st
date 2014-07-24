@@ -41,13 +41,6 @@ DLD addLibrary: 'libc'.
 
 Object subclass: RemoteServer [
 
-    RemoteServer class >> new [
-
-	^ super new
-		initialize;
-		yourself
-    ]
-
     | remoteProcess queue |
 
     initialize [

@@ -1,3 +1,17 @@
+2014-07-26  Holger Hans Peter Freyther  <holger@freyther.de>
+
+	* examples/PackageBuilder.st: Remove PackageBuilder class >>#new.
+	* kernel/Builtins.st: Add Object>>#initialize, change Behavior>>#new
+	and Behavior>>#new:.
+	* kernel/CompildCode.st: Remove CompildCode>>#initialize.
+	* kernel/Metaclass.st: Add Metaclass>>#new.
+	* kernel/PkgLoader.st: Remove PackageDirectories class >> #new.
+	* kernel/RecursionLock.st: Remove RecursionLock class >> #new.
+	* kernel/Semaphore.st: Remove Semaphore class >> #new.
+	* kernel/URL.st: Remove URL class >> #new.
+	* scripts/Remote.st: Remove RemoteServer class >> #new.
+	* tests/intmath.st: Remove PiSeries class >> #new.
+
 2014-07-20  Holger Hans Peter Freyther  <holger@freyther.de>
 
 	* scripts/Test.st: Spawn the event loop last.

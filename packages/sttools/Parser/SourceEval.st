@@ -37,10 +37,6 @@ SourceEntity subclass: SourceEval [
     <comment: 'This class is responsible for emitting a set of
     statements that should be inside an Eval declaration.'>
 
-    SourceEval class >> new [
-        ^super new initialize
-    ]
-
     initialize [
         statements := OrderedCollection new
     ]
