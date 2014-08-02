@@ -61,13 +61,23 @@ Behavior extend [
 
     new [
         "Create a new instance of a class with no indexed instance variables"
-        ^self basicNew initialize
+        <primitive: VMpr_Behavior_newInitialize>
+        <category: 'builtin'>
+        self isFixed ifFalse: [ ^(self new: 0) ].
+        ^self primitiveFailed
     ]
 
     new: numInstanceVariables [
         "Create a new instance of a class with indexed instance variables. The
-         instance has numInstanceVariables indexed instance variables."
-        ^(self basicNew: numInstanceVariables) initialize
+        instance has numInstanceVariables indexed instance variables."
+        <primitive: VMpr_Behavior_newColonInitialize>
+        <category: 'builtin'>
+        self isFixed ifTrue: [
+            SystemExceptions.WrongMessageSent signalOn: #new: useInstead: #new
+        ].
+        numInstanceVariables isSmallInteger ifTrue: [ ^self primitiveFailed ].
+
+        ^SystemExceptions.WrongClass signalOn: numInstanceVariables mustBe: SmallInteger
     ]
 
 

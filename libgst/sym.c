@@ -171,6 +171,9 @@ OOP _gst_while_true_colon_symbol = NULL;
 OOP _gst_while_true_symbol = NULL;
 OOP _gst_current_namespace = NULL;
 
+/* Symbols inside the builtin selectors */
+OOP _gst_initialize_symbol = NULL;
+
 OOP temporaries_dictionary = NULL;
 
 /* The list of selectors for the send immediate bytecode.  */
@@ -1571,6 +1574,8 @@ _gst_init_symbols_pass1 (void)
       {
 	const char *name = bs->offset + _gst_builtin_selectors_names;
 	bs->symbol = alloc_symbol_oop (name, strlen (name));
+        if (strcmp(name, "initialize") == 0)
+          _gst_initialize_symbol = bs->symbol;
         _gst_builtin_selectors[bs->bytecode] = *bs;
       }
 }
@@ -1634,6 +1639,8 @@ _gst_restore_symbols (void)
       {
 	const char *name = bs->offset + _gst_builtin_selectors_names;
 	bs->symbol = intern_string_fast (name, &currentOOP);
+        if (strcmp(name, "initialize") == 0)
+          _gst_initialize_symbol = bs->symbol;
         _gst_builtin_selectors[bs->bytecode] = *bs;
       }
 }

@@ -2261,7 +2261,7 @@ primitive VMpr_Object_shallowCopy [succeed]
   PRIM_SUCCEEDED;
 }
 
-/* Behavior basicNew; Behavior new; */
+/* Behavior basicNew */
 primitive VMpr_Behavior_basicNew = 70 [succeed,fail,inlined]
 {
   OOP oop1;
@@ -2283,7 +2283,30 @@ primitive VMpr_Behavior_basicNew = 70 [succeed,fail,inlined]
   PRIM_FAILED;
 }
 
-/* Behavior new:; Behavior basicNew: */
+/* Behavior Behavior new; */
+primitive VMpr_Behavior_newInitialize [succeed,fail,reload_ip]
+{
+  OOP oop1;
+  _gst_primitives_executed++;
+
+  oop1 = STACKTOP ();
+  if COMMON (RECEIVER_IS_OOP (oop1))
+    {
+      if COMMON (!CLASS_IS_INDEXABLE (oop1))
+	{
+	  /* Note: you cannot pass &STACKTOP() because if the stack
+	     moves it ain't valid anymore by the time it is set!!! */
+	  OOP result;
+	  instantiate (oop1, &result);
+	  SET_STACKTOP (result);
+	  _gst_send_message_internal(_gst_initialize_symbol, 0, result, oop1);
+	  PRIM_SUCCEEDED_RELOAD_IP;
+	}
+    }
+  PRIM_FAILED;
+}
+
+/* Behavior basicNew: */
 primitive VMpr_Behavior_basicNewColon = 71 [succeed,fail,inlined]
 {
   OOP oop1;
@@ -2304,6 +2327,36 @@ primitive VMpr_Behavior_basicNewColon = 71 [succeed,fail,inlined]
 	      instantiate_with (oop1, arg2, &result);
 	      SET_STACKTOP (result);
 	      PRIM_SUCCEEDED;
+	    }
+	}
+    }
+
+  UNPOP (1);
+  PRIM_FAILED;
+}
+
+/* Behavior new:; */
+primitive VMpr_Behavior_newColonInitialize [succeed,fail,reload_ip]
+{
+  OOP oop1;
+  OOP oop2;
+  _gst_primitives_executed++;
+
+  oop2 = POP_OOP ();
+  oop1 = STACKTOP ();
+  if COMMON (RECEIVER_IS_OOP (oop1) && IS_INT (oop2))
+    {
+      if COMMON (CLASS_IS_INDEXABLE (oop1))
+	{
+	  intptr_t arg2;
+	  arg2 = TO_INT (oop2);
+	  if (arg2 >= 0)
+	    {
+	      OOP result;
+	      instantiate_with (oop1, arg2, &result);
+	      SET_STACKTOP (result);
+	      _gst_send_message_internal(_gst_initialize_symbol, 0, result, oop1);
+	      PRIM_SUCCEEDED_RELOAD_IP;
 	    }
 	}
     }

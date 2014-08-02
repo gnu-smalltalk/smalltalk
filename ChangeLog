@@ -1,3 +1,8 @@
+2014-08-02  Holger Hans Peter Freyther  <holger@freyther.de>
+
+	* kernel/Builtins.st: Use the new built-in for >>#new
+	and >>#new:.
+
 2014-08-16  Holger Hans Peter Freyther  <holger@freyther.de>
 
 	* kernel/URL.st: Use keyValue instead of value.

@@ -115,6 +115,7 @@ extern OOP _gst_if_false_if_true_symbol ATTRIBUTE_HIDDEN;
 extern OOP _gst_if_false_symbol ATTRIBUTE_HIDDEN;
 extern OOP _gst_if_true_if_false_symbol ATTRIBUTE_HIDDEN;
 extern OOP _gst_if_true_symbol ATTRIBUTE_HIDDEN;
+extern OOP _gst_initialize_symbol ATTRIBUTE_HIDDEN;
 extern OOP _gst_int_symbol ATTRIBUTE_HIDDEN;
 extern OOP _gst_long_double_symbol ATTRIBUTE_HIDDEN;
 extern OOP _gst_long_symbol ATTRIBUTE_HIDDEN;

@@ -1,3 +1,11 @@
+2014-08-02  Holger Hans Peter Freyther  <holger@freyther.de>
+
+	* prims.def: Introduce VMpr_Behavior_newInitialize and
+	VMpr_Behavior_newColonInitialize,
+	* sym.h: Declare _gst_initialize_symbol.
+	* sym.c: Define _gst_initialize_symbol during init and
+	restore.
+
 2014-05-26  Holger Hans Peter Freyther  <holger@moiji-mobile.com>
 
 	* input.c: Use rl_quote_func_t, rl_dequote_func_t and
