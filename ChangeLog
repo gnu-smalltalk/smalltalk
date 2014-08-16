@@ -1,3 +1,7 @@
+2014-08-16  Holger Hans Peter Freyther  <holger@freyther.de>
+
+	* kernel/URL.st: Use keyValue instead of value.
+
 2014-07-26  Holger Hans Peter Freyther  <holger@freyther.de>
 
 	* examples/PackageBuilder.st: Remove PackageBuilder class >>#new.

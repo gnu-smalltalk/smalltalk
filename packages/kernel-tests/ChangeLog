@@ -1,3 +1,7 @@
+2014-08-16  Holger Hans Peter Freyther  <holger@freyther.de>
+
+	* kernel/URLTest.st: Add test for URL>>#decodedFields.
+
 2014-06-21  Holger Hans Peter Freyther  <holger@freyther.de>
 
 	* kernel/RecursionLockTests.st: Add test for RecursionLock
