@@ -5535,13 +5535,7 @@ primitive VMpr_FileDescriptor_fileOp [succeed,fail]
       /* open: fileName[1] mode: mode[2] or popen: command[1] dir:
          direction[2] */
       fileName = _gst_to_cstring (oopVec[1]);
-      if (IS_INT (oopVec[2]) && arg1 == PRIM_OPEN_FILE)
-        {
-          fd = open ((char *) fileName, TO_INT (oopVec[2]));
-	  access = TO_INT (oopVec[2]) && (O_RDONLY | O_WRONLY | O_RDWR);
-	}
-
-      else if (!is_a_kind_of (OOP_CLASS (oopVec[1]), _gst_string_class))
+      if (!is_a_kind_of (OOP_CLASS (oopVec[1]), _gst_string_class))
         fd = -1;
 
       else if (arg1 == PRIM_OPEN_FILE)

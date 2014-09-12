@@ -1,3 +1,7 @@
+2014-09-13  Holger Hans Peter Freyther  <holger@freyther.de>
+
+	* prims.def: Remove opening with second argument as integer.
+
 2014-08-02  Holger Hans Peter Freyther  <holger@freyther.de>
 
 	* prims.def: Introduce VMpr_Behavior_newInitialize and
