@@ -200,6 +200,7 @@ void
 _gst_async_timed_wait (OOP semaphoreOOP,
 		       int64_t milliTime)
 {
+  _gst_sigalrm_cancel ();
   _gst_async_interrupt_wait (semaphoreOOP, SIGALRM);
   _gst_sigalrm_at (milliTime);
 }

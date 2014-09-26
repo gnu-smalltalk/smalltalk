@@ -108,6 +108,10 @@ extern void _gst_sigvtalrm_every (int deltaMilli,
 			       SigHandler func)
   ATTRIBUTE_HIDDEN;
 
+/* Cancel an established SIGALRM */
+extern void _gst_sigalrm_cancel (void)
+  ATTRIBUTE_HIDDEN;
+
 /* Establish SIGALRM to be called when the nanosecond clock reaches NSTIME
    nanoseconds.  */
 extern void _gst_sigalrm_at (int64_t nsTime)

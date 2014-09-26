@@ -1,3 +1,9 @@
+2014-09-26  Holger Hans Peter Freyther  <holger@freyther.de>
+
+	* sysdep.h: Declare _gst_sigalrm_cancel.
+	* sysdep/posix/events.c: Call _gst_sigalrm_cancel.
+	* sysdep/posix/timer.c: Implement _gst_sigalrm_cancel.
+
 2014-09-13  Holger Hans Peter Freyther  <holger@freyther.de>
 
 	* prims.def: Remove opening with second argument as integer.

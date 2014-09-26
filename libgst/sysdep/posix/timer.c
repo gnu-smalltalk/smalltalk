@@ -83,6 +83,25 @@ static mst_Boolean have_timer;
 #endif
 
 void
+_gst_sigalrm_cancel ()
+{
+#ifdef HAVE_TIMER_CREATE
+  if (have_timer)
+    {
+      struct itimerspec value;
+      memset(&value, 0, sizeof(value));
+      timer_settime (timer, TIMER_ABSTIME, &value, NULL);
+    }
+  else
+#endif
+    {
+      struct itimerval value;
+      memset(&value, 0, sizeof(value));
+      setitimer (ITIMER_REAL, &value, (struct itimerval *) 0);
+    }
+}
+
+void
 _gst_sigalrm_at (int64_t nsTime)
 {
 #ifdef HAVE_TIMER_CREATE
