@@ -8,7 +8,7 @@
 
 "======================================================================
 |
-| Copyright 2008, 2009 Free Software Foundation, Inc.
+| Copyright 2008, 2009, 2015 Free Software Foundation, Inc.
 | Written by Paolo Bonzini and Mike Anderson.
 |
 | This file is part of GNU Smalltalk.
@@ -151,6 +151,7 @@ helpString :=
 Options:
        --daemon               start background server
        --server               start daemon
+    -I --image-file=FILE      load into the specified image
     -p --port=PORT            connect/listen on given port (default 12345)
     -f --file=FILE            file in FILE
     -e --eval=CODE            evaluate CODE
@@ -161,6 +162,7 @@ Options:
        --start=PACKAGE[:DATA] load package and start it (defined in package.xml)
        --stop=PACKAGE[:DATA]  load package and stop it (defined in package.xml)
        --pid                  print daemon pid
+       --no-line-numbers      Do not generate line numbers in the bytecode.
     -h --help                 show this message
     -v --verbose              print extra information while processing
        --version              print version information and exit
