@@ -117,12 +117,15 @@ _gst_sigalrm_at (int64_t nsTime)
   else
 #endif
     {
-      int64_t deltaMilli = (nsTime - _gst_get_ns_time()) / 1000000;
+      uint64_t now = _gst_get_ns_time();
+      int64_t deltaNano = nsTime - now;
+      int64_t deltaMicro = deltaNano <= 1000 ? 1 : deltaNano / 1000;
       struct itimerval value;
 
       value.it_interval.tv_sec = value.it_interval.tv_usec = 0;
-      value.it_value.tv_sec = deltaMilli / 1000;
-      value.it_value.tv_usec = (deltaMilli % 1000) * 1000;
+      value.it_value.tv_sec = deltaMicro / 1000000;
+      value.it_value.tv_usec = deltaMicro % 1000000;
+
       setitimer (ITIMER_REAL, &value, (struct itimerval *) 0);
     }
 }

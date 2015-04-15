@@ -1,3 +1,8 @@
+2015-04-17  Holger Hans Peter Freyther  <holger@freyther.de>
+
+	* sysdep/posix/timer.c: Fix handling small sleeping
+	intervals.
+
 2015-02-03  Holger Hans Peter Freyther  <holger@freyther.de>
 
 	* files.c: Include SmallInt.st before Float.st.
