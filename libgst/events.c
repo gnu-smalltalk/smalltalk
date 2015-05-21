@@ -215,7 +215,7 @@ poll_timer_thread (void *unused)
           cur_time = _gst_get_milli_time ();
           if (cur_time < next_poll_ms)
             ms = MIN(0, next_poll_ms - cur_time);
-          else if (cur_time >= next_poll_ms)
+          else
             {
               ms = EVENT_LOOP_POLL_INTERVAL;
               next_poll_ms = cur_time + ms;
