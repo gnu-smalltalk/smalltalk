@@ -1,3 +1,8 @@
+2015-05-21  Holger Hans Peter Freyther  <holger@freyther.de>
+
+	* cint.c: Change to use #if instead of #ifdef and update
+	the macro to change for.
+
 2015-04-17  Holger Hans Peter Freyther  <holger@freyther.de>
 
 	* sysdep/posix/timer.c: Fix handling small sleeping

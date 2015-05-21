@@ -1,3 +1,8 @@
+2015-05-21  Holger Hans Peter Freyther  <holger@freyther.de>
+
+	* configure.ac: Move from AC_CHECK_FUNCS_ONCE to AC_CHECK_DECLS
+	for fdatasync.
+
 2015-01-25  Holger Hans Peter Freyther  <holger@freyther.de>
 
 	* scripts/Remote.st: Document -I and --no-line-numbers.

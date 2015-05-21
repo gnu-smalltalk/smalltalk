@@ -659,7 +659,7 @@ _gst_init_cfuncs (void)
   _gst_define_cfunc ("mkdtemp", my_mkdtemp);
   _gst_define_cfunc ("getCurDirName", _gst_get_cur_dir_name);
   _gst_define_cfunc ("fsync", fsync);
-#ifdef HAVE_FDATASYNC
+#if HAVE_DECL_FDATASYNC
   _gst_define_cfunc ("fdatasync", fdatasync);
 #else
   _gst_define_cfunc ("fdatasync", fsync);

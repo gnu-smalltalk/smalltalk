@@ -359,7 +359,7 @@ AC_REPLACE_FUNCS(putenv strdup strerror strsignal mkstemp getpagesize \
         lrint trunc strsep strpbrk symlink mkdtemp)
 AC_CHECK_FUNCS_ONCE(gethostname memcpy memmove sighold uname usleep lstat \
 	grantpt popen getrusage gettimeofday fork strchr utimes utime readlink \
-	sigsetmask alarm select mprotect madvise waitpid accept4 fdatasync \
+	sigsetmask alarm select mprotect madvise waitpid accept4 \
 	setsid spawnl pread pwrite _NSGetExecutablePath _NSGetEnviron \
 	chown getgrnam getpwnam endgrent endpwent setgroupent setpassent)
 
@@ -371,6 +371,7 @@ fi
 
 dnl FreeBSD does provide an environ but it is not declared in the headers
 AC_CHECK_DECLS([environ])
+AC_CHECK_DECLS([fdatasync], [], [], [[#include <unistd.h>]])
 
 AC_SEARCH_LIBS([nanosleep], [rt])
 if test "$ac_cv_search_nanosleep" != no; then
