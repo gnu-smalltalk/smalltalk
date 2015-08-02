@@ -69,7 +69,7 @@ ROE.RASQLRelation subclass: Table [
 	"Answer an array of column names in order (abstract)."
 
 	<category: 'accessing'>
-	^self columnsArray collect: [:each | self name]
+	^self columnsArray collect: [:each | each name]
     ]
 
     columnAt: aIndex [

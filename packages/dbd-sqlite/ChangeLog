@@ -1,3 +1,9 @@
+2015-08-01  Holger Hans Peter Freyther  <holger@freyther.de>
+
+	* SQLiteTests.st: Add SQLiteTableTestCase class and
+	>>#testTableColumns. Add the testTableColumns to the
+	SQLiteTestSuite class >> #suite selector.
+
 2013-08-25  Holger Hans Peter Freyther  <holger@freyther.de>
 
 	* Connection.st: Add >>#beginTransaction.

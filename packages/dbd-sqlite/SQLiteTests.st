@@ -225,6 +225,16 @@ SQLiteBaseTest subclass: SQLitePreparedStatementTestCase [
     ]
 ]
 
+SQLiteBaseTest subclass: SQLiteTableTestCase [
+
+    testTableColumns [
+        | columnNames |
+        "columnNames returning wrong value"
+        columnNames := (connection tableAt: 'test') columnNames.
+        self assert: columnNames asArray equals: #('int_field' 'string_field' 'double_field').
+    ]
+]
+
 TestSuite subclass: SQLiteTestSuite [
     SQLiteTestSuite class >> suite [
         ^super new initialize
@@ -248,5 +258,7 @@ TestSuite subclass: SQLiteTestSuite [
         self addTest: (SQLitePreparedStatementTestCase selector: #testExecute).
         self addTest: (SQLitePreparedStatementTestCase selector: #testExecuteWithAll).
         self addTest: (SQLitePreparedStatementTestCase selector: #testExecuteWithAllNamed).
+
+        self addTest: (SQLiteTableTestCase selector: #testTableColumns).
     ]
 ]

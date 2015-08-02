@@ -1,3 +1,8 @@
+2015-08-01  Holger Hans Peter Freyther  <holger@freyther.de>
+
+	* Table.st: Fix >>#columnNames to return the column
+	names and not the table name.
+
 2013-12-17  Holger Hans Peter Freyther  <holger@freyther.de>
 
 	* Connection.st: Initialize Drivers from >>#initialize.
