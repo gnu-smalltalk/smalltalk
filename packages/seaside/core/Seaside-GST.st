@@ -550,7 +550,7 @@ Object subclass: WAGNUSmalltalkPlatform [
 	| directory |
 	directory := File name: aPathString.
 	^(directory files
-		reject: [ :each | each first = $. ])
+		reject: [ :each | each stripPath first = $. ])
 		collect: [ :each | each asString ]
     ]
 

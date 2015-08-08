@@ -1,3 +1,7 @@
+2015-08-08  Holger Hans Peter Freyther  <holger@freyther.de>
+
+	* Seaside-GST.st: Correct >>#filesIn:.
+
 2014-07-26  Holger Hans Peter Freyther  <holger@freyther.de>
 
 	* Seaside-Core.st: Remove WABrush class >> #new,
