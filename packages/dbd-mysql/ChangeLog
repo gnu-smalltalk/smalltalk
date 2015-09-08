@@ -1,3 +1,7 @@
+2015-09-08  Holger Hans Peter Freyther  <holger@freyther.de>
+
+	* Connection.st: Use >>#basicNew in MySQLPacket class >> #on:.
+
 2013-08-25  Holger Hans Peter Freyther  <holger@freyther.de>
 
 	* Connection.st: Remove >>#commitTransaction and

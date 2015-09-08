@@ -237,7 +237,7 @@ Object subclass: MySQLPacket [
 
     MySQLPacket class >> on: aStream [
 	<category: 'instance creation'>
-	^(self new)
+	^(self basicNew)
 	    stream: aStream;
 	    initialize
     ]
