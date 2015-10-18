@@ -11,4 +11,9 @@
 
   <module>i18n</module>
   <file>ChangeLog</file>
+
+  <test>
+    <sunit>I18N.LcNumericTest</sunit>
+    <filein>LcNumericTest.st</filein>
+  </test>
 </package>

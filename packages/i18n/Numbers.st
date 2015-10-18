@@ -65,7 +65,7 @@ a String according to the rules that are used in the given locale.'>
 	decimal := nonLocalized indexOf: $. ifAbsent: [nonLocalized size + 1].
 	stream := ReadWriteStream on: nonLocalized.
 	stream
-	    position: decimal;
+	    position: decimal - 1;
 	    truncate;
 	    reset.
 	self 
@@ -119,18 +119,41 @@ a String according to the rules that are used in the given locale.'>
 
     computeNumberOfGroups: size [
 	<category: 'private'>
-	| left last n |
+	| left last n multiple |
 	left := size.
 	n := 0.
 	grouping isEmpty ifTrue: [^0].
 	grouping do: 
 		[:each | 
-		n := n + 1.
+
+                "CHAR_MAX is an indicator for no more grouping
+                to be enabled. Stop here"
+                "No more grouping and repeating disabled"
 		each >= 255 ifTrue: [^n].
-		left < each ifTrue: [^n].
+
+                "We have filled one more group"
+                n := n + 1.
+
+                "We consume the remaining characters and can
+                exit the loop now."
+                left <= each ifTrue: [^n].
+
+                "And consume it for the next iteration and
+                remember the last group size for repeating
+                it."
 		left := left - each.
 		last := each].
-	^n + (left // last)
+
+        "We need to repeat grouping with the last size. This
+        is left / last and then adding one if there is a rest.
+        To avoid doing left // last twice and an extra addition
+        we remember the multiple and do parts of the modulo
+        operation here."
+        multiple := left // last.
+        n := n + multiple.
+        ^ (multiple * last) = left
+            ifTrue: [n]
+            ifFalse: [n + 1].
     ]
 
     printFractionalPart: string startingAt: decimal on: aStream [

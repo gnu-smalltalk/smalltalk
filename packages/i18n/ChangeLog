@@ -1,3 +1,11 @@
+2015-10-18  Holger Hans Peter Freyther  <holger@freyther.de>
+
+	* package.xml: Add LcNumericTest.st and testcase.
+	* Number.st: Fix calculation in
+	>>#computeNumberOfGroups. Support integer
+	printing in >>#basicPrint:on:.
+	* LcNumericTest.st: Add new testcase.
+
 2010-12-04  Paolo Bonzini  <bonzini@gnu.org>
 
 	* package.xml: Remove now superfluous <file> tags.
