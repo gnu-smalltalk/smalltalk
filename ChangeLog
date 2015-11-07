@@ -1,5 +1,10 @@
 2015-11-07  Holger Hans Peter Freyther  <holger@freyther.de>
 
+	* build-aux/overflow-builtins.m4: Add new macro.
+	* configure.ac: Use GST_C_OVERFLOW_BUILTINS macro.
+
+2015-11-07  Holger Hans Peter Freyther  <holger@freyther.de>
+
 	* configure.ac: Increase the version number after the
 	release.
 

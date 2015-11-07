@@ -243,6 +243,7 @@ GST_C_SYNC_BUILTINS
 if test $gst_cv_have_sync_fetch_and_add = no; then
   AC_MSG_ERROR([Synchronization primitives not found, please use a newer compiler.])
 fi
+GST_C_OVERFLOW_BUILTINS
 
 GST_LOCK
 AC_SYS_LARGEFILE

@@ -1,3 +1,7 @@
+2015-11-07  Holger Hans Peter Freyther  <holger@freyther.de>
+
+	* interp.inl: Add alternative mul_with_check implementation.
+
 2015-08-02  Holger Hans Peter Freyther  <holger@freyther.de>
 
 	* events.c: Use else instead of else if in

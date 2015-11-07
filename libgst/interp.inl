@@ -159,6 +159,27 @@ sub_with_check (OOP op1, OOP op2, mst_Boolean *overflow)
 OOP
 mul_with_check (OOP op1, OOP op2, mst_Boolean *overflow)
 {
+#ifdef HAVE_OVERFLOW_BUILTINS
+  intptr_t a = TO_INT (op1);
+  intptr_t b = TO_INT (op2);
+  intptr_t result;
+
+  if (__builtin_mul_overflow(a, b, &result))
+    {
+       *overflow = true;
+       return FROM_INT(0);
+    }
+
+
+  if (result < MIN_ST_INT || result > MAX_ST_INT)
+    {
+       *overflow = true;
+       return FROM_INT(0);
+    }
+
+  *overflow = false;
+  return FROM_INT(result);
+#else
   intptr_t a = TO_INT (op1);
   intptr_t b = TO_INT (op2);
   intmax_t result = (intmax_t)a * b;
@@ -188,6 +209,7 @@ mul_with_check (OOP op1, OOP op2, mst_Boolean *overflow)
     }
 
   return FROM_INT (0);
+#endif
 }
 
 /* State of the random generator.
