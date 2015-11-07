@@ -1,3 +1,8 @@
+2015-11-07  Holger Hans Peter Freyther  <holger@freyther.de>
+
+	* configure.ac: Increase the version number after the
+	release.
+
 2015-10-18  Holger Hans Peter Freyther  <holger@freyther.de>
 
 	* tests/testsuite.at: Add I18N test to the testsuite.

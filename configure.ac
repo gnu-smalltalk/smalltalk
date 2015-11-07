@@ -7,7 +7,7 @@ dnl Process this file with autoconf to produce a configure script.
 
 dnl 2.63 needed by testsuite, actually
 AC_PREREQ(2.63)
-AC_INIT([GNU Smalltalk], 3.2.91, help-smalltalk@gnu.org, smalltalk,
+AC_INIT([GNU Smalltalk], 3.2.92, help-smalltalk@gnu.org, smalltalk,
         [http://smalltalk.gnu.org/])
 MAINTAINER="bonzini@gnu.org"
 
