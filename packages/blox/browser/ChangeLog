@@ -1,3 +1,9 @@
+2016-01-23  Holger Hans Peter Freyther  <holger@freyther.de>
+
+	* BrowShell.st: Call >>#initialize.
+	* DebugSupport.st: Do not call >>#initialize.
+	* View.st: Use >>#basicNew to instantiate.
+
 2014-07-26  Holger Hans Peter Freyther  <holger@freyther.de>
 
 	* PText.st: Remove PWorksheetText class >> #new.

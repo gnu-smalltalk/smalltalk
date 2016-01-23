@@ -39,7 +39,7 @@ BLOX.Gui subclass: View [
     View class >> new: aString in: view [
 	<category: 'instance creation'>
 	| aView |
-	aView := self new.
+	aView := self basicNew.
 	aView parentView: view.
 	^aView
     ]

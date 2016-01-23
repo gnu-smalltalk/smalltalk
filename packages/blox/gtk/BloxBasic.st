@@ -39,6 +39,10 @@ Object subclass: Gui [
 expose an individual protocol but internally use a Blox widget for
 creating their user interface.'>
 
+    Gui class >> new [
+        ^self basicNew
+    ]
+
     blox [
 	"Return instance of blox subclass which implements window"
 

@@ -84,6 +84,7 @@ TopLevelShell subclass: BrowserShell [
 	| worksheet textView |
 	worksheet := self new: label.
 	worksheet addChildView: ((textView := PWorksheetText new: worksheet)
+		    initialize;
 		    menuInit: ((PopupMenu new: textView label: 'Edit') 
 				selectors: #(#('Cut' #gstCut) #('Copy' #gstCopy) #('Paste' #gstPaste) #() #('Clear' #gstClear) #() #('Line...' #line) #('Find...' #find) #() #('Do it' #eval) #('Print it' #evalAndPrintResult) #('Inspect' #evalAndInspectResult) #() #('Senders' #senders) #('Implementors' #implementors))
 				receiver: textView

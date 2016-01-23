@@ -1,3 +1,7 @@
+2016-01-23  Holger Hans Peter Freyther  <holger@freyther.de>
+
+	* BloxBasic.st: Use >>#basicNew to create Gui items.
+
 2014-05-26  Holger Hans Peter Freyther  <holger@moiji-mobile.com>
 
 	* BloxTK.c: Use Tcl_GetStringResult to access the result.

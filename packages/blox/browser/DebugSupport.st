@@ -46,7 +46,6 @@ STInST.STInST.RBProgramNodeVisitor subclass: VariableNames [
 
 	<category: 'visiting RBSequenceNodes'>
 	^(self new)
-	    initialize;
 	    visitNode: (method parserClass parseMethod: method methodSourceString);
 	    varNames
     ]
