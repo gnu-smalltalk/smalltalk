@@ -212,11 +212,11 @@ GuiData subclass: ClassHierarchyBrowser [
 	"Return add method template"
 
 	<category: 'accessing'>
-	^'method: selectors and: arguments
+	^'method: selectors and: arguments [
     "Comment describing purpose and answered value."
     | temporary variables |
     statements
-'
+]'
     ]
 
     text [

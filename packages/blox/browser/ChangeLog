@@ -1,3 +1,8 @@
+2016-01-25  Thomas Weir Worthington  <thomas@2worthingtons.net>
+
+	* ClassHierBrow.st: updated method template to new
+	syntax
+
 2016-01-23  Holger Hans Peter Freyther  <holger@freyther.de>
 
 	* BrowShell.st: Call >>#initialize.
