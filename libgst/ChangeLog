@@ -1,3 +1,9 @@
+2016-09-18  Holger Hans Peter Freyther  <holger@freyther.de>
+
+	* genbc-scan.l: Compile with flex 2.6.0.
+	* genpr-scan.l: Compile with flex 2.6.0.
+	* genvm-scan.l: Compile with flex 2.6.0.
+
 2015-11-07  Holger Hans Peter Freyther  <holger@freyther.de>
 
 	* interp.inl: Add alternative mul_with_check implementation.

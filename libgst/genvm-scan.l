@@ -65,7 +65,7 @@
 #include "genvm-parse.h"
 
 static int from = 0, depth = 0;
-#if !defined YY_FLEX_SUBMINOR_VERSION || YY_FLEX_SUBMINOR_VERSION < 31
+#if !defined YY_FLEX_SUBMINOR_VERSION || (YY_FLEX_MAJORY_VERSION <= 2 && YY_FLEX_MINOR_VERSION <= 5 && YY_FLEX_SUBMINOR_VERSION < 31)
 int yylineno = 1;
 #endif
 %}
