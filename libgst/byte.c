@@ -450,9 +450,6 @@ _gst_compile_bytecodes (gst_uchar * from,
 
   if (free < (to - from))
     {
-      memcpy (_gst_cur_bytecodes->ptr, from, free);
-      _gst_cur_bytecodes->ptr += free;
-      from += free;
       realloc_bytecodes (_gst_cur_bytecodes,
 		         BYTECODE_CHUNK_SIZE + (to - from));
     }

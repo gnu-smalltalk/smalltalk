@@ -509,6 +509,7 @@ expected (gst_parser *p, int token, ...)
 	named_tokens |= 1 << (token - FIRST_TOKEN);
       token = va_arg (ap, int);
     }
+  va_end (ap);
 
 #define TOKEN_DEF(name, val, str, subsume)				\
   if ((named_tokens & (1 << (val - FIRST_TOKEN))) != 0			\

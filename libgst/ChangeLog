@@ -1,3 +1,10 @@
+2016-12-30  Lee Duhem  <lee.duhem@gmail.com>
+
+	* byte.c (_gst_compile_bytecodes): Remove unnecessary copy.
+	* comp.c (_gst_compile_method): Protect new created `selector' from GC
+	properly.
+	* gst-parse.c (expected): Call va_end.
+
 2016-09-18  Holger Hans Peter Freyther  <holger@freyther.de>
 
 	* genbc-scan.l: Compile with flex 2.6.0.
