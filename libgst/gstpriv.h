@@ -176,7 +176,7 @@
 #define PREF_T2 8
 #define PREF_NTA 12
 
-/* the prefetch is a loss on on a ARM9 (TI Davinci), hack it out */
+/* the prefetch is a loss on a ARM9 (TI Davinci), hack it out */
 #if !defined(DISABLE_PREFETCH) && GNUC_PREREQ (3, 1)
 #define DO_PREFETCH(x, distance, k) \
   __builtin_prefetch (((char *) (x)) \

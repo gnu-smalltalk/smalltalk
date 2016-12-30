@@ -614,7 +614,7 @@ _gst_get_class_object (OOP classOOP)
 }
 
 
-/* Add poolOOP after the node whose next pointer is in P_END.  Return
+/* Add POOLOOP after the node whose next pointer is in P_END.  Return
    the new next node (actually its next pointer).  */
 
 static pool_list *

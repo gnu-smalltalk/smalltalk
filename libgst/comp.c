@@ -777,14 +777,8 @@ _gst_compile_method (tree_node method,
 	    continue;
 
 	  if (!statement && returnLast)
-	    /* compile a return of the last evaluated value.  Note that in
-	       theory the pop above is not necessary in this case 
-	       (and in fact older versions did not put it),
-	       but having it simplifies the optimizer's task
-	       because it reduces the number of patterns it has
-	       to look for.  If necessary, the optimizer itself
-	       will remove the pop.  */
 	    {
+	      /* compile a return of the last evaluated value. */
 	      _gst_compile_byte (RETURN_CONTEXT_STACK_TOP, 0);
 	      break;
 	    }

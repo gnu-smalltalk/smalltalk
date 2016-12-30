@@ -1,5 +1,14 @@
 2016-12-30  Lee Duhem  <lee.duhem@gmail.com>
 
+	* comp.h: Improve comments.
+	* comp.c: Ditto.
+	* files.c: Fix typos in comments.
+	* gstpriv.h: Ditto.
+	* tree.h: Ditto.
+	* tree.c: Remove inappropriate comment.
+
+2016-12-30  Lee Duhem  <lee.duhem@gmail.com>
+
 	* byte.c (_gst_compile_bytecodes): Remove unnecessary copy.
 	* comp.c (_gst_compile_method): Protect new created `selector' from GC
 	properly.

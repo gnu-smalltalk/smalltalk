@@ -260,9 +260,6 @@ tree_node
 _gst_make_assignment_list (YYLTYPE *location,
 		     tree_node variable)
 {
-  /* Actually, we rely on the fact that a variable is represented as a
-     tree node of type list_node, so all we do is change the node tag
-     to TREE_VAR_DECL_LIST.  */
   return (make_list_node (location, TREE_VAR_ASSIGN_LIST, NULL, variable));
 }
 

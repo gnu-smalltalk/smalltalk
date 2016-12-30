@@ -123,7 +123,7 @@ mst_Boolean _gst_regression_testing = false;
  ***********************************************************************/
 
 /* Answer whether it is ok to load the binary image pointed to by
-   _gst_binary_image_name.  This is good is the image file is local
+   _gst_binary_image_name.  This is good if the image file is local
    and newer than all of the kernel files, or if the image file is
    global, newer than all of the global kernel files, and no local
    kernel file is found.  */
@@ -335,7 +335,7 @@ _gst_initialize (const char *kernel_dir,
   if (!_gst_executable_path)
     _gst_executable_path = DEFAULT_EXECUTABLE;
 
-  /* By default, apply this kludge fpr OSes such as Windows and MS-DOS
+  /* By default, apply this kludge for OSes such as Windows and MS-DOS
      which have no concept of home directories.  */
   if (home == NULL)
     home = xstrdup (currentDirectory);

@@ -381,7 +381,7 @@ extern tree_node _gst_make_binding_constant (YYLTYPE *location,
   ATTRIBUTE_HIDDEN;
 
 /* Create a TREE_SYMBOL_NODE describing an identifier (variable,
-   unary/binary selector or symbol constant, it doesn't patter) pointed
+   unary/binary selector or symbol constant, it doesn't matter) pointed
    to by IDENT.  */
 extern tree_node _gst_intern_ident (YYLTYPE *location,
 				    const char *ident)
