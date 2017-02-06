@@ -1,5 +1,9 @@
 2016-12-30  Lee Duhem  <lee.duhem@gmail.com>
 
+	* byte.c (_gst_compile_bytecodes): Subtract the free space.
+
+2016-12-30  Lee Duhem  <lee.duhem@gmail.com>
+
 	* comp.h: Improve comments.
 	* comp.c: Ditto.
 	* files.c: Fix typos in comments.

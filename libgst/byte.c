@@ -449,10 +449,8 @@ _gst_compile_bytecodes (gst_uchar * from,
     (_gst_cur_bytecodes->ptr - _gst_cur_bytecodes->base);
 
   if (free < (to - from))
-    {
       realloc_bytecodes (_gst_cur_bytecodes,
-		         BYTECODE_CHUNK_SIZE + (to - from));
-    }
+		         BYTECODE_CHUNK_SIZE + (to - from) - free);
 
   memcpy (_gst_cur_bytecodes->ptr, from, to - from);
   _gst_cur_bytecodes->ptr += to - from;
