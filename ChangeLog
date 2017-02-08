@@ -1,3 +1,7 @@
+2017-02-08  Holger Hans Peter Freyther  <holger@freyther.de>
+
+	* gst-tool.c: Use strncmp instead of memcmp.
+
 2017-08-13  Wilfred Hughes  <me@wilfred.me.uk>
 
 	* smalltalk-mode.el: Add autoload list.

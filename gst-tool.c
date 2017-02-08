@@ -381,7 +381,7 @@ parse_long_option (const char *name, const char *arg)
     len = p++ - name;
 
   for (all_opts = long_opts; all_opts; all_opts = all_opts->next)
-    if (!memcmp (name, all_opts->name, len))
+    if (!strncmp (name, all_opts->name, len))
       {
 	opt = all_opts;
 	if (opt->name[len] == '\0')
