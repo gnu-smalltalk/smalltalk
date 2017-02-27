@@ -1,3 +1,7 @@
+2017-02-27  Lee Duhem  <lee.duhem@gmail.com>
+
+	* build-aux/tcltk.m4: Simplify tclConfig.sh searching
+
 2015-11-07  Holger Hans Peter Freyther  <holger@freyther.de>
 
 	* build-aux/overflow-builtins.m4: Add new macro.

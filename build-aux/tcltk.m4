@@ -13,36 +13,13 @@ if test "x$with_tcl" = x || test "$with_tcl" = yes; then
   exec AS_MESSAGE_FD([])>/dev/null
   AC_PATH_PROG(TCLSH, tclsh)
 
-  case $libdir in
-    $bindir | $prefix | '${prefix}') libpath=lib ;;
-    *) libpath=`echo ${libdir} | sed s:.*/::` ;;
-  esac
-
-  dataroot2lib='s,\(.*\)/'`echo ${datarootdir} | sed s:.*/::`,'\1'/$libpath,
   test "$silent" != yes && exec AS_MESSAGE_FD([])>&1
   if test -n "$TCLSH"; then
     for i in ${TCLSH}*; do
       if test -x $i; then
-        with_tcl=`echo 'puts $tcl_library' | $i 2> /dev/null`
+        with_tcl=`echo 'puts [[::tcl::pkgconfig get libdir,install]]' | $i 2> /dev/null`
         if test "x$with_tcl" != x; then
-          # Assign the name we found to the TCLSH variable, and try
-	  # to remove the last component from the path and to change
-	  # /usr/share to /usr/lib
 	  TCLSH=$i
-          test -f "$with_tcl/../../tclConfig.sh" && with_tcl="$with_tcl/../.." && break
-          test -f "$with_tcl/../tclConfig.sh" && with_tcl="$with_tcl/.." && break
-          test -f "$with_tcl/tclConfig.sh" && break
-          with_tcl=`echo "$with_tcl" | sed $dataroot2lib`
-	  # Do not bother testing /usr/lib/tcl8.5/tclConfig.sh if there is one
-	  # in /usr/lib.
-          if test -f "$with_tcl/../tclConfig.sh"; then :; else
-            test -f "$with_tcl/tclConfig.sh" && break
-          fi
-          with_tcl=`echo "$with_tcl" | sed 's:/[[^/]]*/\{0,1\}$::'`
-          if test -f "$with_tcl/../tclConfig.sh"; then :; else
-            test -f "$with_tcl/tclConfig.sh" && break
-          fi
-          with_tcl=`echo "$with_tcl" | sed 's:/[[^/]]*/\{0,1\}$::'`
           test -f "$with_tcl/tclConfig.sh" && break
         fi
 	with_tcl=no
