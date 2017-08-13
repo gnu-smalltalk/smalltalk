@@ -1,3 +1,7 @@
+2017-08-13  Wilfred Hughes  <me@wilfred.me.uk>
+
+	* smalltalk-mode.el: Make header/footer match emacs convention.
+
 2017-02-27  Lee Duhem  <lee.duhem@gmail.com>
 
 	* build-aux/tcltk.m4: Simplify tclConfig.sh searching

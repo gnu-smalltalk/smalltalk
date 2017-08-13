@@ -1,30 +1,31 @@
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;;
-;;; Copyright 1988-92, 1994-95, 1999, 2000, 2003, 2007, 2008, 2009
-;;; Free Software Foundation, Inc.
-;;; Written by Steve Byrne.
-;;;
-;;; This file is part of GNU Smalltalk.
-;;;
-;;; GNU Smalltalk is free software; you can redistribute it and/or modify it
-;;; under the terms of the GNU General Public License as published by the Free
-;;; Software Foundation; either version 2, or (at your option) any later 
-;;; version.
-;;;
-;;; GNU Smalltalk is distributed in the hope that it will be useful, but
-;;; WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
-;;; or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
-;;; for more details.
-;;;
-;;; You should have received a copy of the GNU General Public License along
-;;; with GNU Smalltalk; see the file COPYING.  If not, write to the Free
-;;; Software Foundation, 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
-;;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; smalltalk-mode.el --- Major mode for the Smalltalk programming language
 
-;;; Incorporates Frank Caggiano's changes for Emacs 19.
-;;; Updates and changes for Emacs 20 and 21 by David Forster
+;; Copyright 1988-92, 1994-95, 1999, 2000, 2003, 2007, 2008, 2009
+;; Free Software Foundation, Inc.
+;; Written by Steve Byrne.
 
+;; This file is part of GNU Smalltalk.
+
+;; GNU Smalltalk is free software; you can redistribute it and/or modify it
+;; under the terms of the GNU General Public License as published by the Free
+;; Software Foundation; either version 2, or (at your option) any later
+;; version.
+
+;; GNU Smalltalk is distributed in the hope that it will be useful, but
+;; WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+;; or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+;; for more details.
+
+;; You should have received a copy of the GNU General Public License along
+;; with GNU Smalltalk; see the file COPYING.  If not, write to the Free
+;; Software Foundation, 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
+
+;;; Commentary:
+
+;; Incorporates Frank Caggiano's changes for Emacs 19.
+;; Updates and changes for Emacs 20 and 21 by David Forster
+
+;;; Code:
 
 ;; ===[ Variables and constants ]=====================================
 
@@ -1200,3 +1201,4 @@ Whitespace is defined as spaces, tabs, and comments."
 
 (provide 'smalltalk-mode)
 
+;;; smalltalk-mode.el ends here
