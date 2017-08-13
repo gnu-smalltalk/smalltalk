@@ -1,5 +1,10 @@
 2017-08-13  Wilfred Hughes  <me@wilfred.me.uk>
 
+	* smalltalk-mode.el: Add autoload list.
+	* smalltalk-mode-init.el.in: Remove autoload handling.
+
+2017-08-13  Wilfred Hughes  <me@wilfred.me.uk>
+
 	* smalltalk-mode.el: Highlight ^ as a keyword.
 
 2017-08-13  Wilfred Hughes  <me@wilfred.me.uk>

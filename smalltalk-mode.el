@@ -179,6 +179,7 @@
 
 ;; ---[ Interactive functions ]---------------------------------------
 
+;;;###autoload
 (defun smalltalk-mode ()
   "Major mode for editing Smalltalk code.
 
@@ -226,6 +227,9 @@ Commands:
 	   'smalltalk-find-message)
   ;; Run hooks, must be last
   (run-hooks 'smalltalk-mode-hook))
+
+;;;###autoload
+(add-to-list 'auto-mode-alist '("\\.st\\'" . smalltalk-mode))
 
 (defun smalltalk-tab ()
   (interactive)
