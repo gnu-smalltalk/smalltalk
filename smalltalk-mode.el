@@ -154,7 +154,7 @@
    '("#[A-z][A-z0-9_]*" . font-lock-constant-face)
    '("\\<[A-z][A-z0-9_]*:" . font-lock-function-name-face)
    (cons smalltalk-binsel 'font-lock-function-name-face)
-;   '("\\^" . font-lock-keyword-face)
+   '("\\^" . font-lock-keyword-face)
    '("\\$." . font-lock-string-face) ;; Chars
    '("\\<[A-Z]\\sw*\\>" . font-lock-type-face))  
   "Basic Smalltalk keywords font-locking")
