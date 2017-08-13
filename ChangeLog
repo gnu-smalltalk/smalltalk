@@ -1,5 +1,9 @@
 2017-08-13  Wilfred Hughes  <me@wilfred.me.uk>
 
+	* smalltalk-mode.el: Silence byte-compiler warnings.
+
+2017-08-13  Wilfred Hughes  <me@wilfred.me.uk>
+
 	* smalltalk-mode.el: Make header/footer match emacs convention.
 
 2017-02-27  Lee Duhem  <lee.duhem@gmail.com>

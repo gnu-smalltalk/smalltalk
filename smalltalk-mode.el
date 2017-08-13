@@ -418,7 +418,7 @@ expressions."
  
 (defun smalltalk-maybe-insert-spacing-line (n)
   (if (not (save-excursion
-	     (previous-line n)
+	     (forward-line (- n))
 	     (looking-at "^[ \t]*$")))
       (insert "\n")))
 
@@ -614,7 +614,7 @@ expressions."
 	(and (= (preceding-char) ?|)
 	     (progn
 	       (backward-char 1)
-	       (while (and (not (bobp)) (looking-back "[ \t\na-zA-Z]"))
+	       (while (and (not (bobp)) (looking-back "[ \t\na-zA-Z]" nil))
 		 (skip-chars-backward " \t\n")
 		 (skip-chars-backward "a-zA-Z"))
 	       (if (= (preceding-char) ?|) 
@@ -1027,22 +1027,23 @@ Whitespace is defined as spaces, tabs, and comments."
 	(progn (setq curr-hit-point new-hit-point)
 	       (setq curr-hit new-hit)))
     (cons curr-hit curr-hit-point)))
-  
+
+(defun smalltalk-update-hit-point (current search)
+  (save-excursion
+    (let ((new-hit-point (funcall search)))
+      (if (and new-hit-point
+               (or (not current) (> new-hit-point current)))
+          new-hit-point
+        current))))
+
 (defun smalltalk-current-scope-point ()
-  (defun smalltalk-update-hit-point (current search)
-    (save-excursion
-      (let ((new-hit-point (funcall search)))
-	(if (and new-hit-point
-		 (or (not current) (> new-hit-point current)))
-	    new-hit-point
-	  current))))
   (let ((curr-hit-point (smalltalk-current-class-point)))
     (setq curr-hit-point 
 	  (smalltalk-update-hit-point curr-hit-point 
-				      #'(lambda ()(search-backward-regexp "^[ \t]*Eval[ \t]+\\[" nil t))))
+				      (lambda () (search-backward-regexp "^[ \t]*Eval[ \t]+\\[" nil t))))
     (setq curr-hit-point 
 	  (smalltalk-update-hit-point curr-hit-point 
-				      #'(lambda ()(search-backward-regexp "^[ \t]*Namespace[ \t]+current:[ \t]+[A-Za-z0-9_.]+[ \t]+\\[" nil t))))
+				      (lambda () (search-backward-regexp "^[ \t]*Namespace[ \t]+current:[ \t]+[A-Za-z0-9_.]+[ \t]+\\[" nil t))))
     curr-hit-point))
 
 (defun smalltalk-current-class-point ()
@@ -1116,13 +1117,13 @@ Whitespace is defined as spaces, tabs, and comments."
       (error (goto-char prev-point)))))
 
 (defun smalltalk-goto-beginning-of-statement ()
-  (if (not (looking-back "[ \t\n]"))
+  (if (not (looking-back "[ \t\n]" nil nil))
       (smalltalk-safe-backward-sexp)))
 
 (defun smalltalk-has-sender ()
   (save-excursion
     (smalltalk-backward-whitespace)
-    (looking-back "[]})A-Za-z0-9']")))
+    (looking-back "[]})A-Za-z0-9']" nil)))
 
 (defun smalltalk-looking-at-binary-send ()
   (looking-at "[^]A-Za-z0-9:_(){}[;.\'\"]+[ \t\n]"))
@@ -1134,7 +1135,7 @@ Whitespace is defined as spaces, tabs, and comments."
   (looking-at "[A-Za-z][A-Za-z0-9_]*:"))
 
 (defun smalltalk-looking-back-keyword-send ()
-  (looking-back "[A-z][A-z0-9_]*:"))
+  (looking-back "[A-z][A-z0-9_]*:" nil))
 
 (defun smalltalk-find-end-of-keyword-send ()
   (save-excursion
@@ -1151,8 +1152,8 @@ Whitespace is defined as spaces, tabs, and comments."
     (let ((begin-of-defun (smalltalk-at-begin-of-defun)))
       (smalltalk-backward-whitespace)
       (if (or (if begin-of-defun
-		  (looking-back "[].;]")
-		(looking-back "[.;]"))
+		  (looking-back "[].;]" nil)
+		(looking-back "[.;]" nil))
 	      (= (smalltalk-previous-keyword) (point)))
 	  ""
 	(progn
@@ -1170,7 +1171,7 @@ Whitespace is defined as spaces, tabs, and comments."
 
 (defun smalltalk-previous-keyword-1 ()
   (smalltalk-backward-whitespace)
-  (if (looking-back "[>[({.^]") ;; not really ok when > is sent in a keyword arg
+  (if (looking-back "[>[({.^]" nil) ;; not really ok when > is sent in a keyword arg
       nil
     (if (= (point) (save-excursion (smalltalk-safe-backward-sexp) (point)))
 	nil
