@@ -1,3 +1,7 @@
+2018-01-07  Mathias Laurin <Mathias.Laurin+github.com@gmail.com>
+
+	* doc/tutorial.texi: Fix typo in tutorial.
+
 2017-09-11  Wilfred Hughes  <me@wilfred.me.uk>
 
 	* smalltalk-mode.el: Fix version and author in header.
