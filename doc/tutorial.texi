@@ -957,7 +957,7 @@ the value of void functions.  After all, at
 the time Smalltalk was being designed, C didn't
 even have a void data type.}
 
-Before going on, ere is how you could have written this code in a
+Before going on, here is how you could have written this code in a
 single declaration (i.e.@: without using @code{extend}):
 
 @example
