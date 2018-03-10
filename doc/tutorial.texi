@@ -280,8 +280,8 @@ which then prints out:
 @end example
 
 These examples show how to manipulate an array.  They also
-show the standard way in which messages are passed arguments
-ments.  In most cases, if a message takes an argument, its
+show the standard way in which messages are passed arguments.
+In most cases, if a message takes an argument, its
 name will end with `:'.@footnote{Alert readers will remember that the math
 examples of the previous chapter deviated from this.}
 
@@ -1433,7 +1433,7 @@ class.
 
 @example
 Checking extend [
-    | history |
+   | history |
 @end example
 
 This is the same syntax as the last time we defined a checking account,
@@ -1448,12 +1448,12 @@ With our new Checking instance variable, we are all set to start recording
 our checking history.  Our first change will be in the handling of the
 @code{init} message:
 @example
-       init [
-           <category: 'initialization'>
-           checksleft := 0.
-           history := Dictionary new.
-           ^ super init
-       ]
+   init [
+       <category: 'initialization'>
+       checksleft := 0.
+       history := Dictionary new.
+       ^ super init
+   ]
 @end example
 
 This provides us with a Dictionary, and hooks it to our new
@@ -1612,7 +1612,7 @@ iterate across all entries in a collection.@footnote{The
 We built our own code blocks, and handed them off for use by system
 objects.  But there is nothing magic about invoking code
 blocks; your own code will often need to do so.  This chapter
-will shows some examples of loop construction in
+will show some examples of loop construction in
 Smalltalk, and then demonstrate how you invoke code blocks
 for yourself.
 
@@ -1663,8 +1663,8 @@ As with the integer loops, the Interval class can also
 represent steps greater than 1.  It is done much like it was
 for our numeric loop above:
 @example
-   i := (Interval from: 5 to: 10 by: 2)
-   i do: [:x| x printNl]
+   i := Interval from: 5 to: 10 by: 2
+   i do: [:x | x printNl]
 @end example
 
 @node Invoking code blocks
@@ -1674,9 +1674,8 @@ Let us revisit the checking example and add a method
 for scanning only checks over a certain amount.  This would
 allow our user to find ``big'' checks, by passing in a value
 below which we will not invoke their function.  We will
-invoke their code block with the check number as an argument
-ment; they can use our existing check: message to get the
-amount.
+invoke their code block with the check number as an argument;
+they can use our existing @code{check:} message to get the amount.
 
 @example
    Checking extend [
@@ -1689,8 +1688,8 @@ amount.
    ]
 @end example
 
-The structure of this loop is much like our printChecks message
-sage from chapter 6.  However, in this case we consider each
+The structure of this loop is much like our @code{printChecks}
+message from chapter 6.  However, in this case we consider each
 entry, and only invoke the supplied block if the check's
 value is greater than the specified amount.  The line:
 
