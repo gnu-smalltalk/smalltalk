@@ -1,3 +1,8 @@
+2023-10-29  Holger Hans Peter Freyther  <holger@freyther.de>
+
+	* sysdep/common/files.c: Add NULL checks to _gst_file_is_readable,
+	_gst_file_is_writable and _gst_file_is_executable.
+
 2016-12-30  Lee Duhem  <lee.duhem@gmail.com>
 
 	* byte.c (_gst_compile_bytecodes): Subtract the free space.
