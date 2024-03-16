@@ -1,3 +1,9 @@
+2024-03-16  Holger Hans Peter Freyther  <holger@freyther.de>
+
+	* genbc-impl.y: Map yynerrs, yychar to local state. Map yylval to the shared state.
+	* genbc.h: Add genbc_yylval to provide authorize
+	* genbc.c: Add genbc_yylval to work on single yylval.
+
 2023-10-29  Holger Hans Peter Freyther  <holger@freyther.de>
 
 	* sysdep/common/files.c: Add NULL checks to _gst_file_is_readable,

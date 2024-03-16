@@ -56,6 +56,9 @@
 #include "genbc.h"
 #include "avltrees.h"
 
+#define yynerrs decl_yynerrs
+#define yychar decl_yychar
+#define yylval (*genbc_yylval())
 #define yyparse decl_yyparse
 #define yydebug decl_yydebug
 #define YYERROR_VERBOSE

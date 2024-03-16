@@ -54,6 +54,12 @@
 int errors = 0;
 const char *current_file;
 
+YYSTYPE*
+genbc_yylval ()
+{
+  return &yylval;
+}
+
 void
 yyprint (FILE *file, int type, YYSTYPE yylval)
 {

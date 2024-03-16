@@ -78,6 +78,7 @@ extern int impl_yyparse ();
 extern int impl_yydebug;
 
 /* genbc.c declarations */
+extern YYSTYPE *genbc_yylval ();
 extern const char *current_file;
 extern void yyprint (FILE *file, int type, YYSTYPE yylval);
 extern void yyerror (const char *s);
