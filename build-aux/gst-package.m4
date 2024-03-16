@@ -107,7 +107,7 @@ EOF
 	  no* )
 	    exit 1 ;;
 	  bad )
-	    AC_MSG_WARN([variable $i not set, proceeding as if \"no\"])
+	    AC_MSG_WARN([variable $i not set, proceeding as if "no"])
 	    exit 1 ;;
 	esac
       done)

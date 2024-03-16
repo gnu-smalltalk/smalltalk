@@ -1,3 +1,7 @@
+2024-03-17  Holger Hans Peter Freyther  <holger@freyther.de>
+
+	* build-aux/gst-package.m4: Do not escape quotes in the macro.
+
 2024-03-16  Holger Hans Peter Freyther  <holger@freyther.de>
 
 	* configure.ac: Drop executable stacks on macos.
