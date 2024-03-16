@@ -160,13 +160,9 @@ case $with_system_libffi in
     INCFFI="-I$with_system_libffi/../include"
     LIBFFI="-L$with_system_libffi -lffi"
 esac
-case $host in
-  *-*-darwin[[912]]* ) LIBFFI_EXECUTABLE_LDFLAGS=-Wl,-allow_stack_execute ;;
-  *) LIBFFI_EXECUTABLE_LDFLAGS= ;;
-esac
 AC_SUBST(INCFFI)
 AC_SUBST(LIBFFI)
-AC_SUBST(LIBFFI_EXECUTABLE_LDFLAGS)
+
 
 case $ac_configure_args in
   *--enable-subdir) ;;

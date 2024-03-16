@@ -1,3 +1,8 @@
+2024-03-16  Holger Hans Peter Freyther  <holger@freyther.de>
+
+	* configure.ac: Drop executable stacks on macos.
+	* Makefile.am: Drop executable stacks on macos.
+
 2018-01-23  Mathias Laurin <Mathias.Laurin+github.com@gmail.com>
 
 	* doc/tutorial.texi: Fix typo in tutorial.
