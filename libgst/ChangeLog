@@ -1,3 +1,7 @@
+2024-03-17  Holger Hans Peter Freyther  <holger@freyther.de>
+
+	* sysdep/posix/mem.c (anon_mmap_commit): Enable W^X for our allocated memory.
+
 2024-03-16  Holger Hans Peter Freyther  <holger@freyther.de>
 
 	* genbc-impl.y: Map yynerrs, yychar to local state. Map yylval to the shared state.
