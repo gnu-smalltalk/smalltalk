@@ -1,3 +1,7 @@
+2026-01-21  Reece Hutchison <hutchisora@icloud.com>
+
+	* doc/tutorial.texi: Fix typo in explanation of code inheritance
+
 2024-03-17  Holger Hans Peter Freyther  <holger@freyther.de>
 
 	* build-aux/gst-package.m4: Do not escape quotes in the macro.

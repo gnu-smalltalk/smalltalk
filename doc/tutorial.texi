@@ -676,7 +676,7 @@ have identified an effective organization of types, you
 should find that a particular technique need only be implemented
 once, then inherited by the children below.  This
 keeps your code smaller, and allows you to fix a bug in a
-particular algorithm in only once place---then have all users
+particular algorithm in only one place---then have all users
 of it just inherit the fix.
 
 You will find your decisions for adding objects change
