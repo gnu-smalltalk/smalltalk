@@ -56,6 +56,7 @@
 %x C_CODE
 
 %option nounput
+%option noinput
 %option noyywrap
 %option never-interactive
 

@@ -139,14 +139,14 @@ typedef struct basic_block_item {
      the flag is cleared.  Suspended basic blocks are processed
      FIFO, not LIFO like the normal worklist.  */
   mst_Boolean suspended;
-  OOP stack[1];
+  OOP stack[];
 } basic_block_item;
 
 #define ALLOCA_BASIC_BLOCK(dest, depth, bp_, sp_) \
   do \
     { \
       *(dest) = alloca (sizeof (basic_block_item) + \
-		        sizeof (OOP) * ((depth) - 1)); \
+		        sizeof (OOP) * (depth)); \
       (*(dest))->bb = (dest); \
       (*(dest))->bp = (bp_); \
       (*(dest))->sp = (sp_); \

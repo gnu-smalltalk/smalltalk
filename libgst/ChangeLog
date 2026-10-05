@@ -1,5 +1,18 @@
 2026-10-05  Blake McBride  <blake@mcbridemail.com>
 
+	* interp.c: Make CHUNK an index, to avoid pointing before the start
+	of CHUNKS.  Remove unused variable ints_enabled.  Declare
+	unwind_context inline.
+	* opt.c: Make the stack of basic_block_item a flexible array member,
+	since blocks with empty stacks were allocated too small.
+	* sockets.c: Use strdup for host names, which could be left without
+	a terminating null.  Use _Static_assert for the sa_family check.
+	* prims.def: Remove unused variables.
+	* genbc-scan.l: Add %option noinput.
+	* genpr-scan.l: Likewise.
+
+2026-10-05  Blake McBride  <blake@mcbridemail.com>
+
 	* Makefile.am: Declare the bison-generated headers as outputs of the
 	parsers, to fix parallel builds.
 

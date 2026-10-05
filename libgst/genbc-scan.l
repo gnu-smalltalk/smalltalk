@@ -61,6 +61,7 @@
 %x C_CHAR
 
 %option nounput
+%option noinput
 %option noyywrap
 %option never-interactive
 

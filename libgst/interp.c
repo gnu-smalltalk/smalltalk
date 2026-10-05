@@ -470,7 +470,7 @@ static inline void prepare_context (gst_context_part context,
 
 /* Return from the current context and restore the virtual machine's
    status (ip, sp, _gst_this_method, _gst_self, ...).  */
-static void __attribute__ ((__always_inline__)) unwind_context (void);
+static inline void __attribute__ ((__always_inline__)) unwind_context (void);
 
 /* Check whether it is true that sending SENDSELECTOR to RECEIVER
    accepts NUMARGS arguments.  Note that the RECEIVER is only used to
@@ -639,12 +639,13 @@ static void * const *dispatch_vec;
 #define MAX_CHUNKS_IN_MEMORY		48
 #define MAX_LIFO_DEPTH			(CHUNK_SIZE / CTX_SIZE(0))
 
-/* CHUNK points to an item of CHUNKS.  CUR_CHUNK_BEGIN is equal
-   to *CHUNK (i.e. points to the base of the current chunk) and
+/* CHUNK is the index of the current item of CHUNKS, or -1 if none
+   is in use.  CUR_CHUNK_BEGIN is equal to CHUNKS[CHUNK] (i.e. points
+   to the base of the current chunk) and
    CUR_CHUNK_END is equal to CUR_CHUNK_BEGIN + CHUNK_SIZE.  */
 static gst_context_part cur_chunk_begin = NULL, cur_chunk_end = NULL;
 static gst_context_part chunks[MAX_CHUNKS_IN_MEMORY] CACHELINE_ALIGNED;
-static gst_context_part *chunk = chunks - 1;
+static int chunk = -1;
 
 /* These are used for OOP's allocated in a LIFO manner.  A context is
    kept on this stack as long as it generates only clean blocks, as
@@ -685,14 +686,14 @@ _gst_empty_context_pool (void)
 {
   if (*chunks)
     {
-      chunk = chunks;
-      cur_chunk_begin = *chunk;
+      chunk = 0;
+      cur_chunk_begin = chunks[chunk];
       cur_chunk_end = (gst_context_part) (
         ((char *) cur_chunk_begin) + SIZE_TO_BYTES(CHUNK_SIZE));
     }
   else
     {
-      chunk = chunks - 1;
+      chunk = -1;
       cur_chunk_begin = cur_chunk_end = NULL;
     }
 }
@@ -767,7 +768,7 @@ empty_context_stack (void)
 void
 alloc_new_chunk (void)
 {
-  if UNCOMMON (++chunk >= &chunks[MAX_CHUNKS_IN_MEMORY])
+  if UNCOMMON (++chunk >= MAX_CHUNKS_IN_MEMORY)
     {
       /* No more chunks available - GC */
       _gst_scavenge ();
@@ -779,10 +780,10 @@ alloc_new_chunk (void)
   /* Allocate memory only the first time we're using the chunk.
      _gst_empty_context_pool resets the status but doesn't free
      the memory.  */
-  if UNCOMMON (!*chunk)
-    *chunk = (gst_context_part) xcalloc (1, SIZE_TO_BYTES (CHUNK_SIZE));
+  if UNCOMMON (!chunks[chunk])
+    chunks[chunk] = (gst_context_part) xcalloc (1, SIZE_TO_BYTES (CHUNK_SIZE));
 
-  cur_chunk_begin = *chunk;
+  cur_chunk_begin = chunks[chunk];
   cur_chunk_end = (gst_context_part) (
     ((char *) cur_chunk_begin) + SIZE_TO_BYTES(CHUNK_SIZE));
 }
@@ -1753,7 +1754,6 @@ resume_process (OOP processOOP,
   OOP processLists;
   OOP processList;
   gst_process process, active;
-  mst_Boolean ints_enabled;
 
   /* 2002-19-12: tried get_active_process instead of get_scheduled_process.  */
   activeOOP = get_active_process ();
@@ -1762,9 +1762,8 @@ resume_process (OOP processOOP,
   priority = TO_INT (process->priority);
 
   /* As a special exception, don't preempt a process that has disabled
-     interrupts. ### this behavior is currently disabled.  */
-  ints_enabled = IS_NIL (active->interrupts)
-	         || TO_INT(active->interrupts) <= 0;
+     interrupts (i.e. whose interrupts field is a positive integer).
+     ### this behavior is currently disabled.  */
 
   /* resume_process is also used when changing the priority of a ready/active
      process.  In this case, first remove the process from its current list.  */
@@ -1773,7 +1772,7 @@ resume_process (OOP processOOP,
       assert (!alwaysPreempt);
       remove_process_from_list (processOOP);
     }
-  else if (priority >= TO_INT (active->priority) /* && ints_enabled */ )
+  else if (priority >= TO_INT (active->priority))
     alwaysPreempt = true;
 
   if (IS_NIL (processOOP) || is_process_terminating (processOOP))
