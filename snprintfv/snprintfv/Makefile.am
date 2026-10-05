@@ -100,10 +100,14 @@ SUFFIXES		= .stamp .in .h .c
 # Create these in the source directory because that is where
 # they are when the distribution tarball is unpacked.
 
-$(srcdir)/%.h: %.stamp
+$(srcdir)/printf.h: printf.stamp
+	@:
+$(srcdir)/filament.h: filament.stamp
+	@:
+$(srcdir)/stream.h: stream.stamp
 	@:
 
-%.stamp: %.in
+.in.stamp:
 	@file=`echo $@ | $(SED) 's,\.stamp$$,.h,'`; \
 	$(GENPROTO_ENVIRONMENT) $(GENPROTO) $(GENPROTO_FLAGS) $^ > \
 	  $${file}T; \

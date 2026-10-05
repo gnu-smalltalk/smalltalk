@@ -92,7 +92,7 @@ BEGIN {
     #
     # ignore preprocessor directives
     #
-    if ($0 ~ /^[ \t]*\#/) next;
+    if ($0 ~ /^[ \t]*#/) next;
 
     #
     # function name in comment header
@@ -348,7 +348,7 @@ funcdecl>0 {
 	    decl[fname] = fname;
 	}
 	# Macro function
-	else if ($0 ~ /^\#[ \t]*define[ \t]+[_A-Za-z0-9]+\(/) {
+	else if ($0 ~ /^#[ \t]*define[ \t]+[_A-Za-z0-9]+\(/) {
 	    keywords[fname] = keywords[fname] " macro";
 
 	    if (debug == 1 || index(debug, fname) != 0) {
@@ -383,7 +383,7 @@ funcdecl>0 {
 
 	}
 	# Macro alias
-	else if ($0 ~ /^\#[ \t]*define[ \t]+[_A-Za-z0-9]+[ \t]+/) {
+	else if ($0 ~ /^#[ \t]*define[ \t]+[_A-Za-z0-9]+[ \t]+/) {
 	    keywords[fname] = keywords[fname] " alias";
 
 	    if (debug == 1 || index(debug, fname) != 0) {
@@ -435,7 +435,7 @@ funcdecl>0 {
 	    }
 	}
 	# ignore other preprocessor directives
-	else if ($0 ~ /^[ \t]*\#/)
+	else if ($0 ~ /^[ \t]*#/)
 	{
 	    next;
 	}
@@ -470,7 +470,7 @@ funcdecl>0 {
 	funcdecl = 0;
 	next;
     }
-    if ($0 ~ /^[ \t]*\#/)	# skip any preprocessor when funcdecl > 1
+    if ($0 ~ /^[ \t]*#/)	# skip any preprocessor when funcdecl > 1
     {
 	next;
     }
@@ -797,7 +797,7 @@ END {
 	        # %word becoming @code{}
     	        source = lines[i];
 	        dest = "";
-	        while (match(source, /%[-+*\/%<>!=()A-Za-z0-9_\\\'\"]+/)) {
+	        while (match(source, /%[-+*\/%<>!=()A-Za-z0-9_\\'"]+/)) {
 		    postchar="$"; # dummy for end of string
 		    if (RSTART + RLENGTH < length (source)) {
 		        postchar = substr(source, RSTART + RLENGTH, 1);
@@ -858,7 +858,7 @@ END {
 	        # %word becoming @code{}
     	        source = lines[i];
 	        dest = "";
-	        while (match(source, /%[-+*\/%<>!=()A-Za-z0-9_\\\"\']+/)) {
+	        while (match(source, /%[-+*\/%<>!=()A-Za-z0-9_\\"']+/)) {
 		    postchar="$"; # dummy for end of string
 		    if (RSTART + RLENGTH < length (source)) {
 		        postchar = substr(source, RSTART + RLENGTH, 1);

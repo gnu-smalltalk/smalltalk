@@ -1232,9 +1232,7 @@ snv_fprintfv (FILE *file, const char *format, snv_constpointer const args[])
  * The value of @ch that has been put in @stream.
  **/
 int
-snv_bufputc (ch, stream)
-     int ch;
-     STREAM *stream;
+snv_bufputc (int ch, STREAM *stream)
 {
   char **ppbuffer = (char **) stream_details (stream);
   **ppbuffer = (char) ch;
@@ -1417,9 +1415,7 @@ snv_snprintfv (char buffer[], unsigned long limit, const char *format, snv_const
  * The value of @ch that has been put in @stream.
  **/
 int
-snv_filputc (ch, stream)
-     int ch;
-     STREAM *stream;
+snv_filputc (int ch, STREAM *stream)
 {
   return filccat ((Filament *) stream_details (stream), ch), ch;
 }
