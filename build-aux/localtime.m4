@@ -3,20 +3,17 @@ dnl
 AC_DEFUN([GST_FUNC_LOCALTIME], [
 
 AC_CACHE_CHECK(whether localtime caches the timezone, emacs_cv_localtime_cache,
-[AC_REQUIRE([AC_HEADER_TIME])
-AC_TRY_RUN(
-    [#if defined(HAVE_SYS_TIME_H) || defined(TIME_WITH_SYS_TIME)
+[AC_CHECK_HEADERS_ONCE([sys/time.h])
+AC_RUN_IFELSE([AC_LANG_SOURCE(
+    [[#ifdef HAVE_SYS_TIME_H
     # include <sys/time.h>
     #endif
-    #if !defined(HAVE_SYS_TIME_H) || defined(TIME_WITH_SYS_TIME)
-    # include <time.h>
-    #endif
-    #if STDC_HEADERS
-    # include <stdlib.h>
-    #endif
+    #include <time.h>
+    #include <stdlib.h>
 
     extern char **environ;
-    unset_TZ ()
+    static void
+    unset_TZ (void)
     {
       char **from, **to;
       for (to = from = environ; (*to = *from); from++)
@@ -25,7 +22,8 @@ AC_TRY_RUN(
     }
     char TZ_GMT0[] = "TZ=GMT0";
     char TZ_PST8[] = "TZ=PST8";
-    main()
+    int
+    main (void)
     {
       time_t now = time ((time_t *) 0);
       int hour_GMT0, hour_unset;
@@ -42,8 +40,8 @@ AC_TRY_RUN(
       if (localtime (&now)->tm_hour != hour_unset)
         exit (1);
       exit (0);
-    }],
-    emacs_cv_localtime_cache=no, emacs_cv_localtime_cache=yes,
+    }]])],
+    [emacs_cv_localtime_cache=no], [emacs_cv_localtime_cache=yes],
 
     [# Assume the worst when cross-compiling.
     emacs_cv_localtime_cache=yes])

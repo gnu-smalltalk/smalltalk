@@ -89,7 +89,7 @@ install-data-local: install-man
 PUBLISHED_CLASSES = Smalltalk.* SystemExceptions.* NetClients.* VFS.*
 
 $(srcdir)/blox.texi: $(top_srcdir)/packages/blox/tk/stamp-classes
-	files=`$(GST_PACKAGE) $(patsubst %, %/package.xml, $(^D)) \
+	files=`$(GST_PACKAGE) $(top_srcdir)/packages/blox/tk/package.xml \
 	  --load --list-files=BloxTK | \
 	  sed s,^,-f,`; \
 	IFS=`printf '\n\t'`; \
@@ -98,7 +98,7 @@ $(srcdir)/blox.texi: $(top_srcdir)/packages/blox/tk/stamp-classes
 	test -f $(srcdir)/blox.texi && touch $(srcdir)/gst-libs.texi 
 
 $(srcdir)/sockets.texi: $(top_srcdir)/packages/sockets/stamp-classes
-	files=`$(GST_PACKAGE) $(patsubst %, %/package.xml, $(^D)) \
+	files=`$(GST_PACKAGE) $(top_srcdir)/packages/sockets/package.xml \
 	  --load --list-files=Sockets | \
 	  sed s,^,-f,`; \
 	IFS=`printf '\n\t'`; \
@@ -107,7 +107,7 @@ $(srcdir)/sockets.texi: $(top_srcdir)/packages/sockets/stamp-classes
 	test -f $(srcdir)/sockets.texi && touch $(srcdir)/gst-libs.texi 
 
 $(srcdir)/complex.texi: $(top_srcdir)/packages/complex/stamp-classes
-	files=`$(GST_PACKAGE) $(patsubst %, %/package.xml, $(^D)) \
+	files=`$(GST_PACKAGE) $(top_srcdir)/packages/complex/package.xml \
 	  --load --list-files=Complex | \
 	  sed s,^,-f,`; \
 	IFS=`printf '\n\t'`; \
@@ -116,7 +116,7 @@ $(srcdir)/complex.texi: $(top_srcdir)/packages/complex/stamp-classes
 	test -f $(srcdir)/complex.texi && touch $(srcdir)/gst-libs.texi 
 
 $(srcdir)/debug.texi: $(top_srcdir)/packages/debug/stamp-classes
-	files=`$(GST_PACKAGE) $(patsubst %, %/package.xml, $(^D)) \
+	files=`$(GST_PACKAGE) $(top_srcdir)/packages/debug/package.xml \
 	  --load --list-files=DebugTools | \
 	  sed s,^,-f,`; \
 	IFS=`printf '\n\t'`; \
@@ -125,7 +125,7 @@ $(srcdir)/debug.texi: $(top_srcdir)/packages/debug/stamp-classes
 	test -f $(srcdir)/debug.texi && touch $(srcdir)/gst-libs.texi 
 
 $(srcdir)/zlib.texi: $(top_srcdir)/packages/zlib/stamp-classes
-	files=`$(GST_PACKAGE) $(patsubst %, %/package.xml, $(^D)) \
+	files=`$(GST_PACKAGE) $(top_srcdir)/packages/zlib/package.xml \
 	  --load --list-files=ZLib | \
 	  sed s,^,-f,`; \
 	IFS=`printf '\n\t'`; \
@@ -134,7 +134,7 @@ $(srcdir)/zlib.texi: $(top_srcdir)/packages/zlib/stamp-classes
 	test -f $(srcdir)/zlib.texi && touch $(srcdir)/gst-libs.texi 
 
 $(srcdir)/dbi.texi: $(top_srcdir)/packages/dbi/stamp-classes
-	files=`$(GST_PACKAGE) $(patsubst %, %/package.xml, $(^D)) \
+	files=`$(GST_PACKAGE) $(top_srcdir)/packages/dbi/package.xml \
 	  --load --list-files=DBI | \
 	  sed s,^,-f,`; \
 	IFS=`printf '\n\t'`; \
@@ -143,7 +143,7 @@ $(srcdir)/dbi.texi: $(top_srcdir)/packages/dbi/stamp-classes
 	test -f $(srcdir)/dbi.texi && touch $(srcdir)/gst-libs.texi 
 
 $(srcdir)/i18n.texi: $(top_srcdir)/packages/iconv/stamp-classes $(top_srcdir)/packages/i18n/stamp-classes
-	files=`$(GST_PACKAGE) $(patsubst %, %/package.xml, $(^D)) \
+	files=`$(GST_PACKAGE) $(top_srcdir)/packages/iconv/package.xml $(top_srcdir)/packages/i18n/package.xml \
 	  --load --list-files=Iconv --list-files=I18N | \
 	  sed s,^,-f,`; \
 	IFS=`printf '\n\t'`; \
@@ -159,7 +159,7 @@ $(srcdir)/classes.texi: $(top_srcdir)/kernel/stamp-classes
 # In TeX output, having colons in index entries looks pretty, but
 # this is impossible in info output!!!  So we hack by replacing
 # colons with underscores in the info file.
-%.info: %.texi
+.texi.info:
 	@cd $(srcdir) && rm -f $@ $@-[0-9] $@-[0-9][0-9]
 	fixed=`pwd`/`echo $< | $(SED) 's/\.texi/-fixed&/' `; \
 	  cd $(srcdir) && \

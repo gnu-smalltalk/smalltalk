@@ -56,7 +56,8 @@ BUILT_SOURCES += enums.c sizeof.c
 
 # Rules to build the bindings from the GTK+ header files follow...
 
-%: %.awk
+SUFFIXES = .awk
+.awk:
 	@case "$(AWK)" in \
 	  */*) AWK="$(AWK)" ;; \
 	  *) \

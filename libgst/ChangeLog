@@ -1,5 +1,9 @@
 2026-10-05  Blake McBride  <blake@mcbridemail.com>
 
+	* Makefile.am: Use a suffix rule for gperf.
+
+2026-10-05  Blake McBride  <blake@mcbridemail.com>
+
 	* interp.c: Make CHUNK an index, to avoid pointing before the start
 	of CHUNKS.  Remove unused variable ints_enabled.  Declare
 	unwind_context inline.

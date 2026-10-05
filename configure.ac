@@ -307,9 +307,7 @@ AC_CHECK_SIZEOF(wchar_t, , [[
 AC_CHECK_SIZEOF(OOP, , [[
 typedef void *OOP;]])
 
-AC_LIBTOOL_DLOPEN
-AC_LIBTOOL_WIN32_DLL
-AC_PROG_LIBTOOL
+LT_INIT([dlopen win32-dll])
 
 LIBGST_CFLAGS="$SYNC_CFLAGS"
 case '$host_cpu: $CFLAGS ' in
@@ -331,7 +329,8 @@ dnl ------------------------------- C LIBRARY -----------------
 
 { echo; echo "${term_bold}C library features:${term_norm}"; } >& AS_MESSAGE_FD
 
-AC_TYPE_SIGNAL
+AC_DEFINE([RETSIGTYPE], [void],
+  [Define as the return type of signal handlers ('int' or 'void').])
 AC_TYPE_PID_T
 AC_TYPE_SIZE_T
 

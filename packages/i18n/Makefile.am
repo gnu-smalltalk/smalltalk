@@ -15,7 +15,8 @@ EXTRA_DIST = ref-add.sin ref-del.sin config.charset
 noinst_SCRIPTS = ref-add.sed ref-del.sed
 CLEANFILES = ref-add.sed ref-del.sed charset.alias
 
-%.sed: %.sin
+SUFFIXES = .sin .sed
+.sin.sed:
 	$(SED) -e '/^#/d' -e 's/@''PACKAGE''@/@PACKAGE@/g' $< > t-$@
 	mv t-$@ $@
 

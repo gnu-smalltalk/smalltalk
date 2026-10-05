@@ -17,7 +17,7 @@ AC_DEFUN([GST_SOCKET_FAMILIES],
 
   AC_MSG_CHECKING(for IPv4 sockets)
   AC_CACHE_VAL(gst_cv_socket_ipv4,
-    [AC_TRY_COMPILE([#include <sys/types.h>
+    [AC_COMPILE_IFELSE([AC_LANG_PROGRAM([#include <sys/types.h>
 #ifdef HAVE_SYS_SOCKET_H
 #include <sys/socket.h>
 #endif
@@ -31,8 +31,8 @@ AC_DEFUN([GST_SOCKET_FAMILIES],
 #include <ws2tcpip.h>
 #endif],
 [int x = AF_INET; struct in_addr y; struct sockaddr_in z;
- if (&x && &y && &z) return 0;],
-       gst_cv_socket_ipv4=yes, gst_cv_socket_ipv4=no)])
+ if (&x && &y && &z) return 0;])],
+       [gst_cv_socket_ipv4=yes], [gst_cv_socket_ipv4=no])])
   AC_MSG_RESULT($gst_cv_socket_ipv4)
   if test $gst_cv_socket_ipv4 = yes; then
     AC_DEFINE(HAVE_IPV4, 1, [Define to 1 if <sys/socket.h> defines AF_INET.])
@@ -40,7 +40,7 @@ AC_DEFUN([GST_SOCKET_FAMILIES],
 
   AC_MSG_CHECKING(for IPv6 sockets)
   AC_CACHE_VAL(gst_cv_socket_ipv6,
-    [AC_TRY_COMPILE([#include <sys/types.h>
+    [AC_COMPILE_IFELSE([AC_LANG_PROGRAM([#include <sys/types.h>
 #ifdef HAVE_SYS_SOCKET_H
 #include <sys/socket.h>
 #endif
@@ -54,8 +54,8 @@ AC_DEFUN([GST_SOCKET_FAMILIES],
 #include <ws2tcpip.h>
 #endif],
 [int x = AF_INET6; struct in6_addr y; struct sockaddr_in6 z;
- if (&x && &y && &z) return 0;],
-       gst_cv_socket_ipv6=yes, gst_cv_socket_ipv6=no)])
+ if (&x && &y && &z) return 0;])],
+       [gst_cv_socket_ipv6=yes], [gst_cv_socket_ipv6=no])])
   AC_MSG_RESULT($gst_cv_socket_ipv6)
   if test $gst_cv_socket_ipv6 = yes; then
     AC_DEFINE(HAVE_IPV6, 1, [Define to 1 if <sys/socket.h> defines AF_INET6.])

@@ -1,5 +1,18 @@
 2026-10-05  Blake McBride  <blake@mcbridemail.com>
 
+	* configure.ac: Use LT_INIT, and define RETSIGTYPE directly instead
+	of using AC_TYPE_SIGNAL.
+	* build-aux/emacs-site-start.m4: Use AS_HELP_STRING.
+	* build-aux/localtime.m4: Use AC_RUN_IFELSE and prototypes, and do
+	not require AC_HEADER_TIME.
+	* build-aux/lock.m4: Use AC_COMPILE_IFELSE.
+	* build-aux/poll.m4: Use AC_RUN_IFELSE.
+	* build-aux/setenv.m4: Use AC_COMPILE_IFELSE.
+	* build-aux/sockpfaf.m4: Likewise.
+	* doc/Makefile.am: Avoid GNU make functions and pattern rules.
+
+2026-10-05  Blake McBride  <blake@mcbridemail.com>
+
 	* configure.ac: Add -std=gnu17 and -Wno-error flags needed by GCC 14
 	and later.  Disable the Emacs modes if Emacs cannot run in batch mode.
 	* BUILD.md: New file.

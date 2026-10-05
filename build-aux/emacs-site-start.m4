@@ -1,5 +1,5 @@
 AC_DEFUN([GST_PATH_LISPSTARTDIR], [
-AC_ARG_WITH([lispstartdir], [AC_HELP_STRING([--with-lispstartdir], [directory for Emacs startup files])])
+AC_ARG_WITH([lispstartdir], [AS_HELP_STRING([--with-lispstartdir], [directory for Emacs startup files])])
 AC_REQUIRE([AM_PATH_LISPDIR])
   gst_save_prefix=$prefix
   if test "${prefix}" = NONE; then

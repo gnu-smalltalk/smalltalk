@@ -173,7 +173,8 @@ $(srcdir)/vm.stamp: vm.def
 # rules for invoking gperf
 # not fully idiot-proof but only to be run by maintainers
 
-%.inl: %.gperf
+SUFFIXES = .gperf .inl
+.gperf.inl:
 	@opts="$< `$(SED) -ne /.*gperf/!d -e s///p -e q $< | \
 	    $(SED) 's,$$(srcdir),$(srcdir),g'`"; \
 	  echo $(GPERF) $$opts " > $@"; \
