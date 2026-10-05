@@ -1,5 +1,10 @@
 2026-10-05  Blake McBride  <blake@mcbridemail.com>
 
+	* kernel/Makefile.frag: Regenerate.
+	* tests/package.m4: Regenerate.
+
+2026-10-05  Blake McBride  <blake@mcbridemail.com>
+
 	* configure.ac: Use LT_INIT, and define RETSIGTYPE directly instead
 	of using AC_TYPE_SIGNAL.
 	* build-aux/emacs-site-start.m4: Use AS_HELP_STRING.
