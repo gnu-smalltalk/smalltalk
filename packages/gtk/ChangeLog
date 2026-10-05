@@ -1,3 +1,7 @@
+2026-10-05  Blake McBride  <blake@mcbridemail.com>
+
+	* mkorder.awk: Do not report missing platform-specific glib headers.
+
 2013-08-24  Holger Hans Peter Freyther  <holger@freyther.de>
 
 	* mk_enums.awk: Use #ifdef/#endif around key definition.

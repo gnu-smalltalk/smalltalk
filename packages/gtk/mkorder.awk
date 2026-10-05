@@ -63,8 +63,12 @@ function process_file(name, file) {
     if (file in processed)
 	return
     processed[file] = 1
-    if (file == "")
-	print "error: cannot find " name
+    if (file == "") {
+	# glib.h includes platform-specific headers (e.g. glib/gwin32.h)
+	# under #ifdef; glib headers are dropped from the output anyway.
+	if (name !~ /^glib\//)
+	    print "error: cannot find " name
+    }
     else {
 	scan(file)
         print file

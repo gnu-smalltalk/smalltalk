@@ -1,3 +1,8 @@
+2026-10-05  Blake McBride  <blake@mcbridemail.com>
+
+	* Makefile.am: Declare the bison-generated headers as outputs of the
+	parsers, to fix parallel builds.
+
 2024-03-17  Holger Hans Peter Freyther  <holger@freyther.de>
 
 	* sysdep/posix/mem.c (anon_mmap_commit): Enable W^X for our allocated memory.

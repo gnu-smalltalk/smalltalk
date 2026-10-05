@@ -68,6 +68,13 @@ genbc-impl.stamp: genbc-impl.c genbc-impl.y; echo stamp > $@
 genpr-parse.stamp: genpr-parse.c genpr-parse.y; echo stamp > $@
 genvm-parse.stamp: genvm-parse.c genvm-parse.y; echo stamp > $@
 
+# bison writes the headers as a side effect; tell make where they come
+# from so that parallel builds do not ask for them too early.
+genbc-decl.h: genbc-decl.c ; @:
+genbc-impl.h: genbc-impl.c ; @:
+genpr-parse.h: genpr-parse.c ; @:
+genvm-parse.h: genvm-parse.c ; @:
+
 genbc.o: genbc-decl.stamp genbc-impl.stamp
 genbc-scan.o: genbc-decl.stamp genbc-impl.stamp
 genbc-decl.o: genbc-decl.stamp genbc-impl.stamp

@@ -51,6 +51,19 @@ if test "$GCC" != yes; then
   AC_MSG_ERROR([Please use GCC to compile GNU Smalltalk.])
 fi
 
+# The sources use K&R-style declarations, which C23 (the default since
+# GCC 15) rejects, and GCC 14 turned several old warnings into errors.
+for gst_flag in -std=gnu17 -Wno-error=incompatible-pointer-types \
+    -Wno-error=int-conversion -Wno-error=implicit-function-declaration \
+    -Wno-error=implicit-int; do
+  AC_MSG_CHECKING([whether $CC accepts $gst_flag])
+  gst_save_CFLAGS=$CFLAGS
+  CFLAGS="$CFLAGS $gst_flag"
+  AC_COMPILE_IFELSE([AC_LANG_PROGRAM()],
+    [AC_MSG_RESULT(yes)],
+    [AC_MSG_RESULT(no); CFLAGS=$gst_save_CFLAGS])
+done
+
 case "$host" in
   alpha*-*-*) CFLAGS="$CFLAGS -mieee" ;;
 esac
@@ -94,6 +107,11 @@ with_emacs=yes)
 test "$with_emacs" = no && EMACS=no
 
 AM_PATH_LISPDIR
+if test "$EMACS" != no && \
+   ! $EMACS -batch -q -no-site-file -eval t >/dev/null 2>&1; then
+  AC_MSG_WARN([$EMACS does not run in batch mode; disabling Emacs modes])
+  EMACS=no
+fi
 GST_PATH_LISPSTARTDIR
 GST_EMACS_PACKAGE(comint)
 
