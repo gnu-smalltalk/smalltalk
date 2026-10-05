@@ -1,3 +1,8 @@
+2026-10-05  Blake McBride  <blake@mcbridemail.com>
+
+	* expat/expat.c (gst_SkippedEntityHandler): Add missing
+	is_parameter_entity argument.
+
 2014-07-26  Holger Hans Peter Freyther  <holger@freyther.de>
 
 	* builder/NodeBuilder.st: Remove XMLNodeBuilder class >> #new.

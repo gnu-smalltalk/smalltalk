@@ -1,3 +1,10 @@
+2026-10-05  Blake McBride  <blake@mcbridemail.com>
+
+	* gst-glib.c (gst_initModule): Only call g_thread_init with GLib
+	older than 2.32.
+	* gst-gobject.c (gst_gobject_init): Only call g_type_init with GLib
+	older than 2.36.  Replace deprecated g_value accessors.
+
 2011-08-13  Paolo Bonzini  <bonzini@gnu.org>
 
 	* GLib.st: Change main loop-related callouts to support the

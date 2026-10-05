@@ -84,13 +84,13 @@ AC_DEFUN([GST_LOCK],
         [],
         [#include <pthread.h>])
       # glibc defines PTHREAD_MUTEX_RECURSIVE as enum, not as a macro.
-      AC_TRY_COMPILE([#include <pthread.h>],
+      AC_COMPILE_IFELSE([AC_LANG_PROGRAM([#include <pthread.h>],
         [#if __FreeBSD__ == 4
 error "No, in FreeBSD 4.0 recursive mutexes actually don't work."
 #else
 int x = (int)PTHREAD_MUTEX_RECURSIVE;
 return !x;
-#endif],
+#endif])],
         [AC_DEFINE([HAVE_PTHREAD_MUTEX_RECURSIVE], 1,
            [Define if the <pthread.h> defines PTHREAD_MUTEX_RECURSIVE.])])
     fi

@@ -1,3 +1,7 @@
+2026-10-05  Blake McBride  <blake@mcbridemail.com>
+
+	* iconv.c (iconvWrapper): Use ICONV_CONST for the input buffer.
+
 2013-05-20  Holger Hans Peter Freyther  <holger@freyther.de>
 
 	* Sets.st: Add >>#isValid, >>#codecReplace: and >>#iconvInvalidHandle.

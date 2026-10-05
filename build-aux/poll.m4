@@ -13,7 +13,7 @@ AC_CACHE_CHECK(for working poll, gst_cv_func_poll, [
   AC_CHECK_FUNC(poll, [
     # Check whether poll() works on special files (like /dev/null) and
     # and ttys (like /dev/tty). On MacOS X 10.4.0, it doesn't.
-    AC_TRY_RUN([
+    AC_RUN_IFELSE([AC_LANG_SOURCE([
 #include <fcntl.h>
 #include <poll.h>
       int main()
@@ -37,7 +37,7 @@ AC_CACHE_CHECK(for working poll, gst_cv_func_poll, [
 	  return 1;
 	/* Trying /dev/tty may be too environment dependent.  */
 	return 0;
-      }], [gst_cv_func_poll=yes], [gst_cv_func_poll=no], [
+      }])], [gst_cv_func_poll=yes], [gst_cv_func_poll=no], [
       # When cross-compiling, assume that poll() works everywhere except on
       # MacOS X, regardless of its version.
       AC_EGREP_CPP([MacOSX], [

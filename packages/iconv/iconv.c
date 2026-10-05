@@ -66,7 +66,7 @@ iconvWrapper (iconv_t handle, OOP readBufferOOP, int readPos,
 	      int readCount, OOP writeBufferOOP, int writeCount,
 	      OOP bytesLeftOOP)
 {
-  const char *inbuf;
+  ICONV_CONST char *inbuf;
   size_t inbytesleft;
   char *outbuf;
   size_t outbytesleft;

@@ -1,3 +1,12 @@
+2026-10-05  Blake McBride  <blake@mcbridemail.com>
+
+	* configure.ac: Fix the static inline test, which used implicit int
+	and failed with recent compilers, causing SNV_INLINE to be plain
+	static.  Replace obsolete macros.
+	* gendoc.awk: Remove unnecessary escapes in regular expressions.
+	* snprintfv/printf.c (snv_bufputc, snv_filputc): Use prototypes.
+	* snprintfv/Makefile.am: Replace GNU make pattern rules.
+
 2010-09-13  Paolo Bonzini  <bonzini@gnu.org>
 
 	* configure.ac: Fix cut-and-paste mistake.

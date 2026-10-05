@@ -1,3 +1,7 @@
+2026-10-05  Blake McBride  <blake@mcbridemail.com>
+
+	* Makefile.am: Use a suffix rule instead of a pattern rule.
+
 2015-10-18  Holger Hans Peter Freyther  <holger@freyther.de>
 
 	* package.xml: Add LcNumericTest.st and testcase.

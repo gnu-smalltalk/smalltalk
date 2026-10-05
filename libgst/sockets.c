@@ -110,8 +110,7 @@ myGetHostByAddr (char *addr, int len, int type)
 
   if (hostEnt)
     {
-      result = malloc (128);	/* out of a hat */
-      strncpy (result, hostEnt->h_name, 128);
+      result = strdup (hostEnt->h_name);
 #if HAVE_GETIPNODEBYADDR
       freehostent (hostEnt);
 #endif
@@ -296,8 +295,8 @@ static inline void
 fix_sockaddr (struct sockaddr *sockaddr, socklen_t len)
 {
 #ifndef HAVE_STRUCT_SOCKADDR_SA_LEN
-  /* Make sure sa_family is a short.  */
-  char verify[sizeof (sockaddr->sa_family) == 2 ? 1 : -1];
+  _Static_assert (sizeof (sockaddr->sa_family) == 2,
+		  "sa_family must be a short");
 
   if (len >= 2)
     sockaddr->sa_family = ((unsigned char *) sockaddr)[1];

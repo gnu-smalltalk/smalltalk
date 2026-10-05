@@ -1,3 +1,7 @@
+2026-10-05  Blake McBride  <blake@mcbridemail.com>
+
+	* Makefile.frag: Regenerate.
+
 2014-03-25  Holger Hans Peter Freyther  <holger@moiji-mobile.com>
 
 	* Extensions.st: Add file.

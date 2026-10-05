@@ -17,11 +17,11 @@ AC_DEFUN([gt_CHECK_VAR_DECL],
   define([gt_cv_var], [gt_cv_var_]$2[_declaration])
   AC_MSG_CHECKING([if $2 is properly declared])
   AC_CACHE_VAL(gt_cv_var, [
-    AC_TRY_COMPILE([$1
+    AC_COMPILE_IFELSE([AC_LANG_PROGRAM([$1
       extern struct { int foo; } $2;],
-      [$2.foo = 1;],
-      gt_cv_var=no,
-      gt_cv_var=yes)])
+      [$2.foo = 1;])],
+      [gt_cv_var=no],
+      [gt_cv_var=yes])])
   AC_MSG_RESULT($gt_cv_var)
   if test $gt_cv_var = yes; then
     AC_DEFINE([HAVE_]translit($2, [a-z], [A-Z])[_DECL], 1,

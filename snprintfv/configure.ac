@@ -44,8 +44,7 @@ SNV_CURRENT=3;	AC_SUBST(SNV_CURRENT)
 SNV_REVISION=0; AC_SUBST(SNV_REVISION)
 SNV_AGE=0;	AC_SUBST(SNV_AGE)
 
-AC_LIBTOOL_WIN32_DLL
-AC_PROG_LIBTOOL
+LT_INIT([win32-dll])
 
 AC_PROG_SED
 
@@ -121,12 +120,11 @@ AC_PROG_AWK
 # ----------------------------------------------------------------------
 # check for standard headers.
 # ----------------------------------------------------------------------
-AC_HEADER_STDC
 AC_CHECK_HEADERS(sys/types.h)
 
 AC_CACHE_CHECK([for static inline], [snv_cv_static_inline], [
-AC_TRY_COMPILE([static inline foo(bar) int bar; { return bar; }],
-  [return foo(0);],
+AC_COMPILE_IFELSE([AC_LANG_PROGRAM([static inline int foo (int bar) { return bar; }],
+  [return foo(0);])],
   [snv_cv_static_inline=yes],
   [snv_cv_static_inline=no])
 ])
@@ -150,7 +148,7 @@ AC_CHECK_SIZEOF(wint_t)
 # ----------------------------------------------------------------------
 # Checks for floating-point features
 # ----------------------------------------------------------------------
-AC_C_LONG_DOUBLE
+AC_TYPE_LONG_DOUBLE
 AC_CHECK_LIB(m, log)
 AC_CHECK_FUNCS(copysign copysignl isinf isinfl isnan isnanl modfl)
 
@@ -229,7 +227,7 @@ _EOF_
       echo 'typedef wint_t snv_wint_t;' >> $tmpfile
     fi
 
-    if test x$ac_cv_c_long_double = xno; then
+    if test x$ac_cv_type_long_double = xno; then
       echo 'typedef double snv_long_double;' >> $tmpfile
     else
       echo 'typedef long double snv_long_double;' >> $tmpfile
@@ -345,7 +343,6 @@ LTLIBOBJS=`echo "$LIB@&t@OBJS"|sed 's,\.o ,.lo,g;s,\.o$,.lo,'`
 AC_SUBST(LTLIBOBJS)
 
 AC_SUBST(LIBS)
-AC_SUBST(INCLUDES)
 AC_SUBST(ac_aux_dir)
 
 AC_CONFIG_FILES(Makefile snprintfv/Makefile)

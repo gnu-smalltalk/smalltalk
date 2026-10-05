@@ -33,6 +33,11 @@ AM_CPPFLAGS = \
   -I$(top_srcdir)/lib-src \
   -I$(top_srcdir)/packages/glib
 
+# The bindings deliberately wrap every symbol in the GTK+ 2 headers,
+# deprecated ones included, and those headers themselves use types
+# that newer GLib versions deprecate.
+AM_CPPFLAGS += -DGLIB_DISABLE_DEPRECATION_WARNINGS
+
 AM_CFLAGS = $(GLIB_CFLAGS) $(GTK_CFLAGS) $(PANGO_CFLAGS) $(ATK_CFLAGS)
 
 GTK_FILES = \
@@ -51,7 +56,8 @@ BUILT_SOURCES += enums.c sizeof.c
 
 # Rules to build the bindings from the GTK+ header files follow...
 
-%: %.awk
+SUFFIXES = .awk
+.awk:
 	@case "$(AWK)" in \
 	  */*) AWK="$(AWK)" ;; \
 	  *) \

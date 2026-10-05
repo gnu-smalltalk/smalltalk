@@ -308,8 +308,10 @@ void
 gst_initModule (proxy)
      VMProxy *proxy;
 {
+#if !GLIB_CHECK_VERSION (2, 32, 0)
   if (initialized && !g_thread_supported ())
     g_thread_init (NULL);
+#endif
 
   gst_gobject_init ();
   gst_log_set_handler (NULL);

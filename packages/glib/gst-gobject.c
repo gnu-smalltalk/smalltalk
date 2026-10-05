@@ -104,7 +104,9 @@ static const GTypeValueTable gtype_oop_value_table = {
 void
 gst_gobject_init (void)
 {
+#if !GLIB_CHECK_VERSION (2, 36, 0)
   g_type_init ();
+#endif
   q_gst_object = g_quark_from_string ("gst_object");
   gtype_oop_info.value_table = &gtype_oop_value_table;
   G_TYPE_OOP = g_type_register_static (G_TYPE_BOXED, "OOP", &gtype_oop_info, 0);
@@ -198,7 +200,7 @@ g_value_convert_to_oop (const GValue *val)
   switch (fundamental)
     {
     case G_TYPE_CHAR:
-      v_char = g_value_get_char (val);
+      v_char = g_value_get_schar (val);
       return gst_char_to_oop(v_char);
 
     case G_TYPE_BOOLEAN:
@@ -297,7 +299,7 @@ g_value_fill_from_oop (GValue *return_value, OOP oop)
 
     case G_TYPE_CHAR:
       v_char = gst_oop_to_char (oop);
-      g_value_set_char (return_value, v_char);
+      g_value_set_schar (return_value, v_char);
       break;
 
     case G_TYPE_BOOLEAN:
@@ -352,7 +354,7 @@ g_value_fill_from_oop (GValue *return_value, OOP oop)
 
     case G_TYPE_STRING:
       v_ptr = gst_oop_to_string (oop);
-      g_value_set_string_take_ownership (return_value, v_ptr);
+      g_value_take_string (return_value, v_ptr);
       break;
 
     case G_TYPE_POINTER:
